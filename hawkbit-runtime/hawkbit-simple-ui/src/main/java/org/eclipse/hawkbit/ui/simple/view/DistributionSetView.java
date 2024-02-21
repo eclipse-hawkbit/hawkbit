@@ -10,7 +10,7 @@
 package org.eclipse.hawkbit.ui.simple.view;
 
 import org.eclipse.hawkbit.ui.simple.MainLayout;
-import org.eclipse.hawkbit.ui.simple.HawkbitClient;
+import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
 import org.eclipse.hawkbit.ui.simple.view.util.Filter;
 import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.simple.view.util.TableView;
@@ -56,7 +56,7 @@ import java.util.stream.Stream;
 @Uses(Icon.class)
 public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
-    public DistributionSetView(final HawkbitClient hawkbitClient) {
+    public DistributionSetView(final HawkbitMgmtClient hawkbitClient) {
         super(
                 new DistributionSetFilter(hawkbitClient),
                 new SelectionGrid.EntityRepresentation<>(MgmtDistributionSet.class, MgmtDistributionSet::getDsId) {
@@ -110,7 +110,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
         private final CheckboxGroup<MgmtDistributionSetType> type = new CheckboxGroup<>("Type");
         private final CheckboxGroup<MgmtTag> tag = new CheckboxGroup<>("Tag");
 
-        private DistributionSetFilter(final HawkbitClient hawkbitClient) {
+        private DistributionSetFilter(final HawkbitMgmtClient hawkbitClient) {
             name.setPlaceholder("<name filter>");
             type.setItemLabelGenerator(MgmtDistributionSetType::getName);
             type.setItems(
@@ -144,7 +144,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
     private static class DistributionSetDetails extends FormLayout {
 
-        private final transient HawkbitClient hawkbitClient;
+        private final transient HawkbitMgmtClient hawkbitClient;
 
         private final TextArea description = new TextArea("Description");
         private final TextField createdBy = Utils.textField("Created by");
@@ -153,7 +153,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
         private final TextField lastModifiedAt = Utils.textField("Last modified at");
         private final SelectionGrid<MgmtSoftwareModule, Long> softwareModulesGrid = selectSoftwareModuleGrid();
 
-        private DistributionSetDetails(final HawkbitClient hawkbitClient) {
+        private DistributionSetDetails(final HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
 
             description.setMinLength(2);
@@ -193,7 +193,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
     private static class CreateDialog extends Utils.BaseDialog<Void> {
 
-        private final transient HawkbitClient hawkbitClient;
+        private final transient HawkbitMgmtClient hawkbitClient;
 
         private final Select<MgmtDistributionSetType> type;
         private final TextField name;
@@ -202,7 +202,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
         private final Checkbox requiredMigrationStep;
         private final Button create;
 
-        private CreateDialog(final HawkbitClient hawkbitClient) {
+        private CreateDialog(final HawkbitMgmtClient hawkbitClient) {
             super("Create Distribution Set");
             this.hawkbitClient = hawkbitClient;
 
@@ -278,7 +278,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
         private final transient Set<MgmtSoftwareModule> softwareModules = Collections.synchronizedSet(new HashSet<>());
 
-        private AddSoftwareModulesDialog(final long distributionSetId, final HawkbitClient hawkbitClient) {
+        private AddSoftwareModulesDialog(final long distributionSetId, final HawkbitMgmtClient hawkbitClient) {
             super("Add Software Modules");
 
             final SelectionGrid<MgmtSoftwareModule, Long> softwareModulesGrid = selectSoftwareModuleGrid();

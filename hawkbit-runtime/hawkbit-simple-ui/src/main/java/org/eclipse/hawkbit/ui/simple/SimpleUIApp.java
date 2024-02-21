@@ -15,9 +15,14 @@ import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 import feign.Client;
 import feign.Contract;
+import feign.RequestInterceptor;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
-import org.springframework.beans.factory.annotation.Value;
+import feign.codec.ErrorDecoder;
+import org.eclipse.hawkbit.sdk.HawkbitClient;
+import org.eclipse.hawkbit.sdk.HawkbitServer;
+import org.eclipse.hawkbit.sdk.Tenant;
+import org.eclipse.hawkbit.ui.simple.view.util.Utils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.FeignClientsConfiguration;
@@ -25,12 +30,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+
+import static feign.Util.ISO_8859_1;
 
 @Theme(themeClass = Lumo.class)
 @PWA(name="hawkBit UI", shortName="hawkBit UI")
@@ -38,21 +48,44 @@ import java.util.List;
 @Import(FeignClientsConfiguration.class)
 public class SimpleUIApp implements AppShellConfigurator {
 
+    private static final RequestInterceptor AUTHORIZATION = requestTemplate -> {
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        requestTemplate.header("Authorization", "Basic " + Base64.getEncoder().encodeToString(
+                (Objects.requireNonNull(authentication.getPrincipal(), "User is null!") + ":" + Objects.requireNonNull(
+                        authentication.getCredentials(), "Password is not available!")).getBytes(ISO_8859_1)));
+    };
+
+    private static final ErrorDecoder DEFAULT_ERROR_DECODER = new ErrorDecoder.Default();
+    private static final ErrorDecoder ERROR_DECODER = (methodKey, response) -> {
+        final Exception e = DEFAULT_ERROR_DECODER.decode(methodKey, response);
+        Utils.errorNotification(e);
+        return e;
+    };
+
     public static void main(String[] args) {
         SpringApplication.run(SimpleUIApp.class, args);
     }
 
     @Bean
     HawkbitClient hawkbitClient(
-            @Value("${hawkbit.url:http://localhost:8080}")
-            final String hawkbitUrl,
+            final HawkbitServer hawkBitServer,
             final Client client, final Encoder encoder, final Decoder decoder, final Contract contract) {
-        return new HawkbitClient(hawkbitUrl, client, encoder, decoder, contract);
+        return new HawkbitClient(
+                hawkBitServer, client, encoder, decoder, contract,
+                ERROR_DECODER,
+                (tenant, controller) ->
+                    controller == null ?
+                            AUTHORIZATION : HawkbitClient.DEFAULT_REQUEST_INTERCEPTOR_FN.apply(tenant, controller));
+    }
+
+    @Bean
+    HawkbitMgmtClient hawkbitMgmtClient(final Tenant tenant, final HawkbitClient hawkbitClient) {
+        return new HawkbitMgmtClient(tenant, hawkbitClient);
     }
 
     // accepts all user / pass, just delegating them to the feign client
     @Bean
-    AuthenticationManager authenticationManager(final HawkbitClient hawkbitClient) {
+    AuthenticationManager authenticationManager(final HawkbitMgmtClient hawkbitClient) {
         return authentication-> {
                 final String username = authentication.getName();
                 final String password = authentication.getCredentials().toString();

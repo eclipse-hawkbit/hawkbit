@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.ui.simple.view;
 
-import org.eclipse.hawkbit.ui.simple.HawkbitClient;
+import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
 import org.eclipse.hawkbit.ui.simple.view.util.Filter;
 import org.eclipse.hawkbit.ui.simple.MainLayout;
 import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
@@ -60,7 +60,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
     public static final String CONTROLLER_ID = "Controller Id";
     public static final String TAG = "Tag";
 
-    public TargetView(final HawkbitClient hawkbitClient) {
+    public TargetView(final HawkbitMgmtClient hawkbitClient) {
         super(
                 new RawFilter(hawkbitClient), new SimpleFilter(hawkbitClient),
                 new SelectionGrid.EntityRepresentation<>(MgmtTarget.class, MgmtTarget::getControllerId) {
@@ -92,13 +92,13 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
     private static class SimpleFilter implements Filter.Rsql {
 
-        private final HawkbitClient hawkbitClient;
+        private final HawkbitMgmtClient hawkbitClient;
 
         private final TextField controllerId;
         private final CheckboxGroup<MgmtTargetType> type;
         private final CheckboxGroup<MgmtTag> tag;
 
-        private SimpleFilter(final HawkbitClient hawkbitClient) {
+        private SimpleFilter(final HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
 
             controllerId = Utils.textField(CONTROLLER_ID);
@@ -140,7 +140,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private final TextField textFilter = new TextField("Raw Filter");
         private final VerticalLayout layout = new VerticalLayout();
 
-        private RawFilter(final HawkbitClient hawkbitClient) {
+        private RawFilter(final HawkbitMgmtClient hawkbitClient) {
             textFilter.setPlaceholder("<raw filter>");
             final Select<MgmtTargetFilterQuery> savedFilters = new Select<>(
                     "Saved Filters",
@@ -246,7 +246,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private final TextField name;
         private final TextArea description;
 
-        private RegisterDialog(final HawkbitClient hawkbitClient) {
+        private RegisterDialog(final HawkbitMgmtClient hawkbitClient) {
             super("Register Target");
 
             final Button register = Utils.tooltip(new Button("Register"), "Register (Enter)");
@@ -290,7 +290,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
             open();
         }
 
-        private void addCreateClickListener(final Button register, final HawkbitClient hawkbitClient) {
+        private void addCreateClickListener(final Button register, final HawkbitMgmtClient hawkbitClient) {
             register.addClickListener(e -> {
                 final MgmtTargetRequestBody request = new MgmtTargetRequestBody()
                         .setControllerId(controllerId.getValue())

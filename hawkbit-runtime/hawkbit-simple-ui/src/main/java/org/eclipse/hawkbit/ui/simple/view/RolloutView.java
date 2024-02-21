@@ -10,7 +10,7 @@
 package org.eclipse.hawkbit.ui.simple.view;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
-import org.eclipse.hawkbit.ui.simple.HawkbitClient;
+import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
 import org.eclipse.hawkbit.ui.simple.MainLayout;
 import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.simple.view.util.TableView;
@@ -61,7 +61,7 @@ import java.util.stream.Stream;
 @Uses(Icon.class)
 public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
-    public RolloutView(final HawkbitClient hawkbitClient) {
+    public RolloutView(final HawkbitMgmtClient hawkbitClient) {
         super(
                 new RolloutFilter(),
                 new SelectionGrid.EntityRepresentation<>(
@@ -118,9 +118,9 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
         private final long rolloutId;
         private final Grid<MgmtRolloutResponseBody> grid;
-        private final transient HawkbitClient hawkbitClient;
+        private final transient HawkbitMgmtClient hawkbitClient;
 
-        private Actions(final MgmtRolloutResponseBody rollout, final Grid<MgmtRolloutResponseBody> grid, final HawkbitClient hawkbitClient) {
+        private Actions(final MgmtRolloutResponseBody rollout, final Grid<MgmtRolloutResponseBody> grid, final HawkbitMgmtClient hawkbitClient) {
             this.rolloutId = rollout.getRolloutId();
             this.grid = grid;
             this.hawkbitClient = hawkbitClient;
@@ -185,7 +185,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
     private static class RolloutDetails extends FormLayout {
 
-        private final transient HawkbitClient hawkbitClient;
+        private final transient HawkbitMgmtClient hawkbitClient;
 
         private final TextArea description = new TextArea(Constants.DESCRIPTION);
         private final TextField createdBy = Utils.textField(Constants.CREATED_BY);
@@ -199,7 +199,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         private final Checkbox dynamic  = new Checkbox(Constants.DYNAMIC);
         private final SelectionGrid<MgmtRolloutGroupResponseBody, Long> groupGrid;
 
-        private RolloutDetails(final HawkbitClient hawkbitClient) {
+        private RolloutDetails(final HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
 
             description.setMinLength(2);
@@ -277,7 +277,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
         private final Button create = new Button("Create");
 
-        private CreateDialog(final HawkbitClient hawkbitClient) {
+        private CreateDialog(final HawkbitMgmtClient hawkbitClient) {
             super("Create Rollout");
 
             name = Utils.textField("Name", this::readyToCreate);
@@ -400,7 +400,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             }
         }
 
-        private void addCreateClickListener(final HawkbitClient hawkbitClient) {
+        private void addCreateClickListener(final HawkbitMgmtClient hawkbitClient) {
             create.addClickListener(e -> {
                 close();
                 final MgmtRolloutRestRequestBody request = new MgmtRolloutRestRequestBody();

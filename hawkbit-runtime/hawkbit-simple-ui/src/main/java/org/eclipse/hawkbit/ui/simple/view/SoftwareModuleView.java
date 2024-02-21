@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.ui.simple.view;
 
-import org.eclipse.hawkbit.ui.simple.HawkbitClient;
+import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
 import org.eclipse.hawkbit.ui.simple.MainLayout;
 import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.simple.view.util.TableView;
@@ -63,11 +63,11 @@ import java.util.stream.Stream;
 public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
     @Autowired
-    public SoftwareModuleView(final HawkbitClient hawkbitClient) {
+    public SoftwareModuleView(final HawkbitMgmtClient hawkbitClient) {
         this(true, hawkbitClient);
     }
 
-    public SoftwareModuleView(final boolean isParent, final HawkbitClient hawkbitClient) {
+    public SoftwareModuleView(final boolean isParent, final HawkbitMgmtClient hawkbitClient) {
         super(
                 new SoftwareModuleFilter(hawkbitClient),
                 new SelectionGrid.EntityRepresentation<>(MgmtSoftwareModule.class, MgmtSoftwareModule::getModuleId) {
@@ -122,7 +122,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
         private final TextField name = Utils.textField(Constants.NAME);
         private final CheckboxGroup<MgmtSoftwareModuleType> type = new CheckboxGroup<>(Constants.TYPE);
 
-        private SoftwareModuleFilter(final HawkbitClient hawkbitClient) {
+        private SoftwareModuleFilter(final HawkbitMgmtClient hawkbitClient) {
             name.setPlaceholder("<name filter>");
             type.setItemLabelGenerator(MgmtSoftwareModuleType::getName);
             type.setItems(
@@ -150,7 +150,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
     private static class SoftwareModuleDetails extends FormLayout {
 
-        private final transient HawkbitClient hawkbitClient;
+        private final transient HawkbitMgmtClient hawkbitClient;
 
         private final TextArea description = new TextArea(Constants.DESCRIPTION);
         private final TextField createdBy = Utils.textField(Constants.CREATED_BY);
@@ -159,7 +159,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
         private final TextField lastModifiedAt = Utils.textField(Constants.LAST_MODIFIED_AT);
         private final SelectionGrid<MgmtArtifact, Long> artifactGrid;
 
-        private SoftwareModuleDetails(final HawkbitClient hawkbitClient) {
+        private SoftwareModuleDetails(final HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
 
             description.setMinLength(2);
@@ -207,7 +207,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
         private final Checkbox enableArtifactEncryption;
         private final Button create;
 
-        private CreateDialog(final HawkbitClient hawkbitClient) {
+        private CreateDialog(final HawkbitMgmtClient hawkbitClient) {
             super("Create Software Module");
 
             type = new Select<>(
@@ -256,7 +256,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             }
         }
 
-        private void addCreateClickListener(final HawkbitClient hawkbitClient) {
+        private void addCreateClickListener(final HawkbitMgmtClient hawkbitClient) {
             create.addClickListener(e -> {
                 close();
                 final long softwareModuleId = hawkbitClient.getSoftwareModuleRestApi().createSoftwareModules(
@@ -283,7 +283,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
         private AddArtifactsDialog(
                 final long softwareModuleId,
-                final HawkbitClient hawkbitClient) {
+                final HawkbitMgmtClient hawkbitClient) {
             super("Add Artifacts");
 
             final SelectionGrid<MgmtArtifact, Long> artifactGrid = createArtifactGrid();
