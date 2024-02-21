@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Sort & search fields for actions.
+ * Sort and search fields for actions.
  */
 public enum ActionFields implements FieldNameProvider, FieldValueConverter<ActionFields> {
 
