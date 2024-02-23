@@ -98,18 +98,15 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.ASPECTJ, proxyTargetClass = true, securedEnabled = true)
-@Order(value = Ordered.HIGHEST_PRECEDENCE)
-@PropertySource("classpath:/hawkbit-security-defaults.properties")
+@Order(Ordered.HIGHEST_PRECEDENCE)
+@PropertySource("classpath:hawkbit-security-defaults.properties")
 public class SecurityManagedConfiguration {
 
     private static final int DOS_FILTER_ORDER = -200;
 
     /**
-     * @return the {@link UserAuthenticationFilter} to include into the hawkBit
-     *         security configuration.
-     * @throws Exception
-     *             lazy bean exception maybe if the authentication manager
-     *             cannot be instantiated
+     * @return the {@link UserAuthenticationFilter} to include into the hawkBit security configuration.
+     * @throws Exception lazy bean exception maybe if the authentication manager cannot be instantiated
      */
     @Bean
     @ConditionalOnMissingBean
