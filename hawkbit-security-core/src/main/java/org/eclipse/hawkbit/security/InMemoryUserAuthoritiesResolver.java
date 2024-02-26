@@ -27,8 +27,7 @@ public class InMemoryUserAuthoritiesResolver implements UserAuthoritiesResolver 
     /**
      * Constructs the resolver based on the given authority lookup map.
      * 
-     * @param usernamesToAuthorities
-     *            The authority map to read from. Must not be <code>null</code>.
+     * @param usernamesToAuthorities The authority map to read from. Must not be <code>null</code>.
      */
     public InMemoryUserAuthoritiesResolver(final Map<String, List<String>> usernamesToAuthorities) {
         this.usernamesToAuthorities = usernamesToAuthorities;

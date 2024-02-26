@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })
-@WithSecurityContext(factory = WithUser.WithUserPrincipalSecurityContextFactory.class)
+@WithSecurityContext(factory = WithUser.WithTenantAwareUserSecurityContextFactory.class)
 @Inherited
 public @interface WithUser {
 
@@ -80,10 +80,10 @@ public @interface WithUser {
 
     boolean controller() default false;
 
-    class WithUserPrincipalSecurityContextFactory implements WithSecurityContextFactory<WithUser> {
+    class WithTenantAwareUserSecurityContextFactory implements WithSecurityContextFactory<WithUser> {
         @Override
-        public SecurityContext createSecurityContext(final WithUser withUserPrincipal) {
-            return new SecurityContextSwitch.WithUserSecurityContext(withUserPrincipal);
+        public SecurityContext createSecurityContext(final WithUser withTenantAwareUser) {
+            return new SecurityContextSwitch.WithUserSecurityContext(withTenantAwareUser);
         }
     }
 }

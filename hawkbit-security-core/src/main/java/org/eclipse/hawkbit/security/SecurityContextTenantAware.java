@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.im.authentication.UserPrincipal;
+import org.eclipse.hawkbit.im.authentication.UserTenantAware;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.springframework.lang.Nullable;
@@ -30,6 +30,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 /**
@@ -84,8 +85,8 @@ public class SecurityContextTenantAware implements ContextAware {
             final Object principal = context.getAuthentication().getPrincipal();
             if (context.getAuthentication().getDetails() instanceof TenantAwareAuthenticationDetails) {
                 return ((TenantAwareAuthenticationDetails) context.getAuthentication().getDetails()).getTenant();
-            } else if (principal instanceof UserPrincipal) {
-                return ((UserPrincipal) principal).getTenant();
+            } else if (principal instanceof UserTenantAware) {
+                return ((UserTenantAware) principal).getTenant();
             }
         }
         return null;
@@ -96,11 +97,11 @@ public class SecurityContextTenantAware implements ContextAware {
         final SecurityContext context = SecurityContextHolder.getContext();
         if (context.getAuthentication() != null) {
             final Object principal = context.getAuthentication().getPrincipal();
-            if (principal instanceof UserPrincipal) {
-                return ((UserPrincipal) principal).getUsername();
-            }
             if (principal instanceof OidcUser) {
                 return ((OidcUser) principal).getPreferredUsername();
+            }
+            if (principal instanceof User) {
+                return ((User) principal).getUsername();
             }
         }
         return null;
@@ -184,19 +185,20 @@ public class SecurityContextTenantAware implements ContextAware {
      * a specific tenant and user.
      */
     private static final class AuthenticationDelegate implements Authentication {
+
         @Serial
         private static final long serialVersionUID = 1L;
 
         private final Authentication delegate;
 
-        private final UserPrincipal principal;
+        private final UserTenantAware principal;
 
         private final TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails;
 
         private AuthenticationDelegate(final Authentication delegate, final String tenant, final String username,
                 final Collection<? extends GrantedAuthority> authorities) {
             this.delegate = delegate;
-            this.principal = new UserPrincipal(username, username, null, null, username, null, tenant, authorities);
+            this.principal = new UserTenantAware(username, username, authorities, tenant);
             tenantAwareAuthenticationDetails = new TenantAwareAuthenticationDetails(tenant, false);
         }
 
