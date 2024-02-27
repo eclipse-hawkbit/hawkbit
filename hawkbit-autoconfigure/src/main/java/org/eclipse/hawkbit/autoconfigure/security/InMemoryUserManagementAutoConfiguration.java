@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.PermissionUtils;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.im.authentication.UserTenantAware;
+import org.eclipse.hawkbit.im.authentication.TenantAwareUser;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -57,10 +57,10 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
 
     InMemoryUserManagementAutoConfiguration(
             final SecurityProperties securityProperties,
-            final TenantAwareUserProperties userTenantAwareProperties,
+            final TenantAwareUserProperties tenantAwareUserProperties,
             final Optional<PasswordEncoder> passwordEncoder) {
         userDetailsService = userDetailsService(
-                securityProperties, userTenantAwareProperties, passwordEncoder.orElse(null));
+                securityProperties, tenantAwareUserProperties, passwordEncoder.orElse(null));
     }
 
     @Override
@@ -72,11 +72,11 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
 
     private static UserDetailsService userDetailsService(
             final SecurityProperties securityProperties,
-            final TenantAwareUserProperties userTenantAwareProperties,
+            final TenantAwareUserProperties tenantAwareUserProperties,
             final PasswordEncoder passwordEncoder) {
         final List<User> userPrincipals = new ArrayList<>();
-        userTenantAwareProperties.getUsers().forEach((username, user) -> {
-            final UserTenantAware userPrincipal = new UserTenantAware(
+        tenantAwareUserProperties.getUsers().forEach((username, user) -> {
+            final TenantAwareUser userPrincipal = new TenantAwareUser(
                     username, password(user.getPassword(), passwordEncoder),
                     createAuthorities(user.getRoles(), Collections::emptyList),
                     ObjectUtils.isEmpty(user.getTenant()) ? DEFAULT_TENANT : user.getTenant());
@@ -87,7 +87,7 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
         // the default user from spring security properties as super DEFAULT tenant user
         if (userPrincipals.isEmpty()) {
             userPrincipals
-                    .add(new UserTenantAware(
+                    .add(new TenantAwareUser(
                             securityProperties.getUser().getName(),
                             password(securityProperties.getUser().getPassword(), passwordEncoder),
                             createAuthorities(
@@ -153,9 +153,9 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
         }
 
         private static User clone(final User user) {
-            if (user instanceof UserTenantAware) {
-                return new UserTenantAware(user.getUsername(), user.getPassword(), user.getAuthorities(),
-                        ((UserTenantAware)user).getTenant());
+            if (user instanceof TenantAwareUser) {
+                return new TenantAwareUser(user.getUsername(), user.getPassword(), user.getAuthorities(),
+                        ((TenantAwareUser)user).getTenant());
             } else {
                 return new User(user.getUsername(), user.getPassword(), user.getAuthorities());
             }

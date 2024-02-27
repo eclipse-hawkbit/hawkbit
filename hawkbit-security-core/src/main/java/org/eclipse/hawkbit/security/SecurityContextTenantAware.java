@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.im.authentication.UserTenantAware;
+import org.eclipse.hawkbit.im.authentication.TenantAwareUser;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.springframework.lang.Nullable;
@@ -39,7 +39,6 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
  * from the {@link SecurityContext#getAuthentication()}
  * {@link Authentication#getDetails()} which holds the
  * {@link TenantAwareAuthenticationDetails} object.
- *
  */
 public class SecurityContextTenantAware implements ContextAware {
 
@@ -85,8 +84,8 @@ public class SecurityContextTenantAware implements ContextAware {
             final Object principal = context.getAuthentication().getPrincipal();
             if (context.getAuthentication().getDetails() instanceof TenantAwareAuthenticationDetails) {
                 return ((TenantAwareAuthenticationDetails) context.getAuthentication().getDetails()).getTenant();
-            } else if (principal instanceof UserTenantAware) {
-                return ((UserTenantAware) principal).getTenant();
+            } else if (principal instanceof TenantAwareUser) {
+                return ((TenantAwareUser) principal).getTenant();
             }
         }
         return null;
@@ -191,14 +190,14 @@ public class SecurityContextTenantAware implements ContextAware {
 
         private final Authentication delegate;
 
-        private final UserTenantAware principal;
+        private final TenantAwareUser principal;
 
         private final TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails;
 
         private AuthenticationDelegate(final Authentication delegate, final String tenant, final String username,
                 final Collection<? extends GrantedAuthority> authorities) {
             this.delegate = delegate;
-            this.principal = new UserTenantAware(username, username, authorities, tenant);
+            this.principal = new TenantAwareUser(username, username, authorities, tenant);
             tenantAwareAuthenticationDetails = new TenantAwareAuthenticationDetails(tenant, false);
         }
 

@@ -74,17 +74,17 @@ public class SecurityAutoConfiguration {
      * resolving user authorities/roles.
      *
      * @param securityProperties The Spring {@link SecurityProperties} for the security user
-     * @param userTenantAwareProperties The {@link TenantAwareUserProperties} for the managed users
+     * @param tenantAwareUserProperties The {@link TenantAwareUserProperties} for the managed users
      * @return an {@link InMemoryUserAuthoritiesResolver} bean
      */
     @Bean
     @ConditionalOnMissingBean
     public UserAuthoritiesResolver inMemoryAuthoritiesResolver(final SecurityProperties securityProperties,
-            final TenantAwareUserProperties userTenantAwareProperties) {
-        final Map<String, User> userTenantAwares = userTenantAwareProperties.getUsers();
+            final TenantAwareUserProperties tenantAwareUserProperties) {
+        final Map<String, User> tenantAwareUsers = tenantAwareUserProperties.getUsers();
         final Map<String, List<String>> usersToPermissions;
-        if (!CollectionUtils.isEmpty(userTenantAwares)) {
-            usersToPermissions = userTenantAwares.entrySet().stream().collect(
+        if (!CollectionUtils.isEmpty(tenantAwareUsers)) {
+            usersToPermissions = tenantAwareUsers.entrySet().stream().collect(
                     Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getRoles()));
         } else {
             usersToPermissions = Collections.singletonMap(securityProperties.getUser().getName(),

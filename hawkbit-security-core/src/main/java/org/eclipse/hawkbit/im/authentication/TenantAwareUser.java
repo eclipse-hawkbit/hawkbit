@@ -27,7 +27,7 @@ import org.springframework.security.core.userdetails.User;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class UserTenantAware extends User {
+public class TenantAwareUser extends User {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -40,7 +40,7 @@ public class UserTenantAware extends User {
      * @param authorities the authorities which the user has
      * @param tenant the tenant of the user
      */
-    public UserTenantAware(final String username, final String password,
+    public TenantAwareUser(final String username, final String password,
             final Collection<? extends GrantedAuthority> authorities, final String tenant) {
         super(username, password, authorities == null ? Collections.emptyList() : authorities);
         this.tenant = tenant;
@@ -52,7 +52,7 @@ public class UserTenantAware extends User {
      * @param username the username of the user
      * @param tenant the tenant of the user
      */
-    public UserTenantAware(final String username, String tenant) {
+    public TenantAwareUser(final String username, String tenant) {
         this(username, "***", null, tenant);
     }
 
