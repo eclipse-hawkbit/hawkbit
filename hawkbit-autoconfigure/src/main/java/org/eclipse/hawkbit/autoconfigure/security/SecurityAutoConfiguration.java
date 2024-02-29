@@ -15,7 +15,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.ContextAware;
-import org.eclipse.hawkbit.autoconfigure.security.TenantAwareUserProperties.User;
+import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties;
+import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties.User;
 import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.InMemoryUserAuthoritiesResolver;

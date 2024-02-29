@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.autoconfigure.security;
+package org.eclipse.hawkbit.im.authentication;
 
 import java.util.ArrayList;
 import java.util.HashMap;
