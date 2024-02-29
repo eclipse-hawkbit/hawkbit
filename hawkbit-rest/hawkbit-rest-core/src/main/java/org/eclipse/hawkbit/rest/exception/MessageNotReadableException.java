@@ -12,19 +12,15 @@ package org.eclipse.hawkbit.rest.exception;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
+import java.io.Serial;
+
 /**
- * Exception which is thrown in case an request body is not well formaned and
+ * Exception which is thrown in case an request body is not well formatted and
  * cannot be parsed.
- * 
- *
- *
- *
  */
 public class MessageNotReadableException extends AbstractServerRtException {
 
-    /**
-    * 
-    */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
