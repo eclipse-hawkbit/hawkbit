@@ -82,7 +82,7 @@ public class SecurityAutoConfiguration {
     @ConditionalOnMissingBean
     public UserAuthoritiesResolver inMemoryAuthoritiesResolver(final SecurityProperties securityProperties,
             final TenantAwareUserProperties tenantAwareUserProperties) {
-        final Map<String, User> tenantAwareUsers = tenantAwareUserProperties.getUsers();
+        final Map<String, User> tenantAwareUsers = tenantAwareUserProperties.getUser();
         final Map<String, List<String>> usersToPermissions;
         if (!CollectionUtils.isEmpty(tenantAwareUsers)) {
             usersToPermissions = tenantAwareUsers.entrySet().stream().collect(
