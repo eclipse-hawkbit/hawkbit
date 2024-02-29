@@ -23,10 +23,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @Data
 @ToString
-@ConfigurationProperties("hawkbit.security.user")
+@ConfigurationProperties("hawkbit.security")
 public class TenantAwareUserProperties {
 
-    private Map<String, User> users = new HashMap<>();
+    private Map<String, User> user = new HashMap<>();
 
     @Data
     @ToString

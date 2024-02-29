@@ -59,7 +59,7 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
             final TenantAwareUserProperties tenantAwareUserProperties,
             final PasswordEncoder passwordEncoder) {
         final List<User> userPrincipals = new ArrayList<>();
-        tenantAwareUserProperties.getUsers().forEach((username, user) -> {
+        tenantAwareUserProperties.getUser().forEach((username, user) -> {
             final String password = password(user.getPassword(), passwordEncoder);
             final List<GrantedAuthority> credentials =
                     createAuthorities(user.getRoles(), user.getPermissions(), Collections::emptyList);
