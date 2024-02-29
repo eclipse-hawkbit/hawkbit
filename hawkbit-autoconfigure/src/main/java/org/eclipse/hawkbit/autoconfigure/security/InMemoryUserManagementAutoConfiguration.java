@@ -78,7 +78,7 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
         tenantAwareUserProperties.getUsers().forEach((username, user) -> {
             final TenantAwareUser userPrincipal = new TenantAwareUser(
                     username, password(user.getPassword(), passwordEncoder),
-                    createAuthorities(user.getRoles(), Collections::emptyList),
+                    createAuthorities(user.getRoles(), user.getPermissions(), Collections::emptyList),
                     ObjectUtils.isEmpty(user.getTenant()) ? DEFAULT_TENANT : user.getTenant());
             userPrincipals.add(userPrincipal);
         });
@@ -91,7 +91,8 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
                             securityProperties.getUser().getName(),
                             password(securityProperties.getUser().getPassword(), passwordEncoder),
                             createAuthorities(
-                                    securityProperties.getUser().getRoles(), PermissionUtils::createAllAuthorityList),
+                                    securityProperties.getUser().getRoles(), Collections.emptyList(),
+                                    PermissionUtils::createAllAuthorityList),
                             DEFAULT_TENANT));
         } else if (securityProperties != null && securityProperties.getUser() != null &&
                 !securityProperties.getUser().isPasswordGenerated()) {
@@ -102,7 +103,8 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
                             securityProperties.getUser().getName(),
                             password(securityProperties.getUser().getPassword(), passwordEncoder),
                             createAuthorities(
-                                    securityProperties.getUser().getRoles(), PermissionUtils::createAllAuthorityList)));
+                                    securityProperties.getUser().getRoles(), Collections.emptyList(),
+                                    PermissionUtils::createAllAuthorityList)));
         }
 
         return new FixedInMemoryTenantAwareUserDetailsService(userPrincipals);
@@ -114,21 +116,27 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
     }
 
     private static List<GrantedAuthority> createAuthorities(
-            final List<String> userPermissions, final Supplier<List<GrantedAuthority>> defaultRolesSupplier) {
-        if (ObjectUtils.isEmpty(userPermissions)) {
+            final List<String> userRoles, final List<String> userPermissions,
+            final Supplier<List<GrantedAuthority>> defaultRolesSupplier) {
+        if (ObjectUtils.isEmpty(userRoles) && ObjectUtils.isEmpty(userPermissions)) {
             return defaultRolesSupplier.get();
         }
 
+        final List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
+        if (userRoles != null) {
+            for (final String role : userRoles) {
+                grantedAuthorityList.add(new SimpleGrantedAuthority("ROLE_" + role));
+            }
+        }
         // Allows ALL as a shorthand for all permissions
         if (userPermissions.size() == 1 && "ALL".equals(userPermissions.get(0))) {
-            return PermissionUtils.createAllAuthorityList();
+            grantedAuthorityList.addAll(PermissionUtils.createAllAuthorityList());
+        } else {
+            for (final String permission : userPermissions) {
+                grantedAuthorityList.add(new SimpleGrantedAuthority(permission));
+            }
         }
 
-        final List<GrantedAuthority> grantedAuthorityList = new ArrayList<>(userPermissions.size());
-        for (final String permission : userPermissions) {
-            grantedAuthorityList.add(new SimpleGrantedAuthority(permission));
-            grantedAuthorityList.add(new SimpleGrantedAuthority("ROLE_" + permission));
-        }
         return grantedAuthorityList;
     }
 

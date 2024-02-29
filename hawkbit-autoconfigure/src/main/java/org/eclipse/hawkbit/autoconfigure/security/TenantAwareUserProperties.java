@@ -35,6 +35,7 @@ public class TenantAwareUserProperties {
         @ToString.Exclude
         private String password;
         private List<String> roles = new ArrayList<>();
+        private List<String> permissions = new ArrayList<>();
         private String tenant;
     }
 }
