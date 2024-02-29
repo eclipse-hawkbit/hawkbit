@@ -1,0 +1,146 @@
+/**
+ * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.eclipse.hawkbit.im.authentication;
+
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.ObjectUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+
+/**
+ * Authentication provider for configured via spring application properties users.
+ * The users could be tenant scoped or global.
+ */
+public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
+
+    public StaticAuthenticationProvider(
+            final TenantAwareUserProperties tenantAwareUserProperties, final SecurityProperties securityProperties,
+            final PasswordEncoder passwordEncoder) {
+        setUserDetailsService(userDetailsService(securityProperties, tenantAwareUserProperties, passwordEncoder));
+    }
+
+    @Override
+    protected Authentication createSuccessAuthentication(final Object principal,
+            final Authentication authentication, final UserDetails user) {
+        final UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(
+                principal, authentication.getCredentials(), user.getAuthorities());
+        result.setDetails(
+                user instanceof TenantAwareUser tenantAwareUser ?
+                        new TenantAwareAuthenticationDetails(tenantAwareUser.getTenant(), false) :
+                        user);
+        return result;
+    }
+
+    private static UserDetailsService userDetailsService(
+            final SecurityProperties securityProperties,
+            final TenantAwareUserProperties tenantAwareUserProperties,
+            final PasswordEncoder passwordEncoder) {
+        final List<User> userPrincipals = new ArrayList<>();
+        tenantAwareUserProperties.getUsers().forEach((username, user) -> {
+            final String password = password(user.getPassword(), passwordEncoder);
+            final List<GrantedAuthority> credentials =
+                    createAuthorities(user.getRoles(), user.getPermissions(), Collections::emptyList);
+            if (ObjectUtils.isEmpty(user.getTenant())) {
+                userPrincipals.add(new User(username, password, credentials));
+            } else {
+                userPrincipals.add(new TenantAwareUser(username, password, credentials, user.getTenant()));
+            }
+        });
+
+        if (securityProperties != null && securityProperties.getUser() != null &&
+                !securityProperties.getUser().isPasswordGenerated()) {
+            // explicitly setup system user - add is as a regular (non-tenant scoped) user
+            userPrincipals.add(new User(
+                    securityProperties.getUser().getName(),
+                    password(securityProperties.getUser().getPassword(), passwordEncoder),
+                    createAuthorities(
+                            securityProperties.getUser().getRoles(), Collections.emptyList(),
+                            PermissionUtils::createAllAuthorityList)));
+        }
+
+        return new FixedInMemoryTenantAwareUserDetailsService(userPrincipals);
+    }
+
+    private static String password(final String password, final PasswordEncoder passwordEncoder) {
+        return passwordEncoder == null && !Pattern.compile("^\\{.+}.*$").matcher(password).matches() ?
+                "{noop}" + password : password;
+    }
+
+    private static List<GrantedAuthority> createAuthorities(
+            final List<String> userRoles, final List<String> userPermissions,
+            final Supplier<List<GrantedAuthority>> defaultRolesSupplier) {
+        if (ObjectUtils.isEmpty(userRoles) && ObjectUtils.isEmpty(userPermissions)) {
+            return defaultRolesSupplier.get();
+        }
+
+        final List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
+        if (userRoles != null) {
+            for (final String role : userRoles) {
+                grantedAuthorityList.add(new SimpleGrantedAuthority("ROLE_" + role));
+            }
+        }
+        // Allows ALL as a shorthand for all permissions
+        if (userPermissions.size() == 1 && "ALL".equals(userPermissions.get(0))) {
+            grantedAuthorityList.addAll(PermissionUtils.createAllAuthorityList());
+        } else {
+            for (final String permission : userPermissions) {
+                grantedAuthorityList.add(new SimpleGrantedAuthority(permission));
+            }
+        }
+
+        return grantedAuthorityList;
+    }
+
+    private static class FixedInMemoryTenantAwareUserDetailsService implements UserDetailsService {
+
+        private final HashMap<String, User> userMap = new HashMap<>();
+
+        private FixedInMemoryTenantAwareUserDetailsService(final Collection<User> userPrincipals) {
+            for (final User user : userPrincipals) {
+                userMap.put(user.getUsername(), user);
+            }
+        }
+
+        @Override
+        public UserDetails loadUserByUsername(final String username) {
+            final User user = userMap.get(username);
+            if (user == null) {
+                throw new UsernameNotFoundException("No such user");
+            }
+            // Spring mutates the data, so we must return a copy here
+            return clone(user);
+        }
+
+        private static User clone(final User user) {
+            if (user instanceof TenantAwareUser) {
+                return new TenantAwareUser(user.getUsername(), user.getPassword(), user.getAuthorities(),
+                        ((TenantAwareUser)user).getTenant());
+            } else {
+                return new User(user.getUsername(), user.getPassword(), user.getAuthorities());
+            }
+        }
+    }
+}
