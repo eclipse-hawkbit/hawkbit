@@ -35,26 +35,17 @@
          <artifactId>jackson-dataformat-cbor</artifactId>
       </dependency>
       <dependency>
-         <groupId>javax.validation</groupId>
-         <artifactId>validation-api</artifactId>
+         <groupId>jakarta.validation</groupId>
+         <artifactId>jakarta.validation-api</artifactId>
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-rest-core</artifactId>
          <version>${project.version}</version>
       </dependency>
-      <!-- Swagger Support -->
       <dependency>
          <groupId>org.springdoc</groupId>
-         <artifactId>springdoc-openapi-ui</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springdoc</groupId>
-         <artifactId>springdoc-openapi-hateoas</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springdoc</groupId>
-         <artifactId>springdoc-openapi-security</artifactId>
+         <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
       </dependency>
 
       <!-- TEST -->
@@ -71,11 +62,6 @@
       <dependency>
          <groupId>io.qameta.allure</groupId>
          <artifactId>allure-junit5</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>com.google.guava</groupId>
-         <artifactId>guava</artifactId>
          <scope>test</scope>
       </dependency>
    </dependencies>

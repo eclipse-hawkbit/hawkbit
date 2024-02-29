@@ -13,18 +13,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
 
+@Slf4j
 public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldNameProvider> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFieldNameRSQLVisitor.class);
 
     private final Class<A> fieldNameProvider;
 
@@ -38,7 +36,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
         if (graph.length != 0) {
             enumName = graph[0];
         }
-        LOGGER.debug("get field identifier by name {} of enum type {}", enumName, fieldNameProvider);
+        log.debug("get field identifier by name {} of enum type {}", enumName, fieldNameProvider);
         try {
             return Enum.valueOf(fieldNameProvider, enumName.toUpperCase());
         } catch (final IllegalArgumentException e) {

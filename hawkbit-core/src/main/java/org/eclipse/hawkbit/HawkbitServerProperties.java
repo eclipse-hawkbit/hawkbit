@@ -9,12 +9,16 @@
  */
 package org.eclipse.hawkbit;
 
+import lombok.Data;
+import lombok.Getter;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Properties for the server e.g. the server's URL which must be configured.
  * 
  */
+@Getter
 @ConfigurationProperties("hawkbit.server")
 public class HawkbitServerProperties {
     /**
@@ -27,45 +31,26 @@ public class HawkbitServerProperties {
 
     private final Build build = new Build();
 
-    public Anonymous getAnonymous() {
-        return anonymous;
-    }
-
-    public Build getBuild() {
-        return build;
-    }
-
     /**
      * Properties for anonymous API access by Devices/Controllers.
-     *
      */
+    @Getter
     public static class Anonymous {
-        private final Download download = new Download();
 
-        public Download getDownload() {
-            return download;
-        }
+        private final Download download = new Download();
 
         /**
          * Properties for artifact download under anonymous API access by
          * Devices/Controllers.
          *
          */
+        @Data
         public static class Download {
 
             /**
              * Unauthenticated artifact download possible if true.
              */
             private boolean enabled;
-
-            public boolean isEnabled() {
-                return enabled;
-            }
-
-            public void setEnabled(final boolean enabled) {
-                this.enabled = enabled;
-            }
-
         }
     }
 
@@ -88,10 +73,6 @@ public class HawkbitServerProperties {
             this.version = version;
         }
 
-    }
-
-    public String getUrl() {
-        return url;
     }
 
     public void setUrl(final String url) {

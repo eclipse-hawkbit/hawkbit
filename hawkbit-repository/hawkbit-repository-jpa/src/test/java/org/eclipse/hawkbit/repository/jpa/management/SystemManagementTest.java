@@ -69,9 +69,15 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         // per tenant data
         final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
         assertThat(tenants).hasSize(3);
+        final TenantUsage tenantUsage0 = new TenantUsage("tenant0");
+        tenantUsage0.setArtifacts(1);
+        tenantUsage0.setOverallArtifactVolumeInBytes(1234);
+        final TenantUsage tenantUsage1 = new TenantUsage("tenant1");
+        tenantUsage1.setArtifacts(1);
+        tenantUsage1.setOverallArtifactVolumeInBytes(1234);
         assertThat(tenants).containsOnly(new TenantUsage("default"),
-                new TenantUsage("tenant0").setArtifacts(1).setOverallArtifactVolumeInBytes(1234),
-                new TenantUsage("tenant1").setArtifacts(1).setOverallArtifactVolumeInBytes(1234));
+                tenantUsage0,
+                tenantUsage1);
     }
 
     @Test
@@ -87,9 +93,13 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         // per tenant data
         final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
         assertThat(tenants).hasSize(3);
-        assertThat(tenants).containsOnly(new TenantUsage("default"), new TenantUsage("tenant0").setTargets(100),
-                new TenantUsage("tenant1").setTargets(100));
-
+        final TenantUsage tenantUsage0 = new TenantUsage("tenant0");
+        tenantUsage0.setTargets(100);
+        final TenantUsage tenantUsage1 = new TenantUsage("tenant1");
+        tenantUsage1.setTargets(100);
+        assertThat(tenants).containsOnly(new TenantUsage("default"),
+                tenantUsage0,
+                tenantUsage1);
     }
 
     @Test
@@ -104,9 +114,15 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         // per tenant data
         final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
         assertThat(tenants).hasSize(3);
+        final TenantUsage tenantUsage0 = new TenantUsage("tenant0");
+        tenantUsage0.setTargets(20);
+        tenantUsage0.setActions(40);
+        final TenantUsage tenantUsage1 = new TenantUsage("tenant1");
+        tenantUsage1.setTargets(20);
+        tenantUsage1.setActions(40);
         assertThat(tenants).containsOnly(new TenantUsage("default"),
-                new TenantUsage("tenant0").setTargets(20).setActions(40),
-                new TenantUsage("tenant1").setTargets(20).setActions(40));
+                tenantUsage0,
+                tenantUsage1);
     }
 
     private byte[] createTestTenantsForSystemStatistics(final int tenants, final int artifactSize, final int targets,
@@ -119,7 +135,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
             final String tenantname = "tenant" + i;
             SecurityContextSwitch.runAs(SecurityContextSwitch.withUserAndTenant("bumlux", tenantname, true, true, false,
                     SpringEvalExpressions.SYSTEM_ROLE), () -> {
-                        systemManagement.getTenantMetadata(tenantname);
+                        systemManagement.getTenantMetadata();
                         if (artifactSize > 0) {
                             createTestArtifact(random);
                             createDeletedTestArtifact(random);
@@ -162,5 +178,4 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
             softwareModuleManagement.delete(module.getId());
         });
     }
-
 }

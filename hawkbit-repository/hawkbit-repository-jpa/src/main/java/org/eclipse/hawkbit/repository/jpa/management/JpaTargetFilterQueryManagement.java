@@ -9,12 +9,14 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -49,8 +51,6 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -63,19 +63,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.collect.Lists;
-
 import cz.jirutka.rsql.parser.RSQLParserException;
 
 /**
  * JPA implementation of {@link TargetFilterQueryManagement}.
- *
  */
+@Slf4j
 @Transactional(readOnly = true)
 @Validated
 public class JpaTargetFilterQueryManagement implements TargetFilterQueryManagement {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaTargetFilterQueryManagement.class);
 
     private final TargetFilterQueryRepository targetFilterQueryRepository;
     private final TargetManagement targetManagement;
@@ -212,7 +208,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final String rsqlFilter) {
         final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
 
-        final List<Specification<JpaTargetFilterQuery>> specList = Lists.newArrayListWithExpectedSize(2);
+        final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>(2);
         specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
         if (!ObjectUtils.isEmpty(rsqlFilter)) {
             specList.add(RSQLUtility.buildRsqlSpecification(rsqlFilter, TargetFilterQueryFields.class,
@@ -280,19 +276,22 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         } else {
             WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(update);
             assertMaxTargetsQuota(targetFilterQuery.getQuery(), targetFilterQuery.getName(), update.getDsId());
-            final JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement
+            final JpaDistributionSet distributionSet = (JpaDistributionSet) distributionSetManagement
                     .getValidAndComplete(update.getDsId());
-            verifyDistributionSetAndThrowExceptionIfDeleted(ds);
+            // implicit lock
+            if (!distributionSet.isLocked()) {
+                distributionSetManagement.lock(distributionSet.getId());
+            }
 
-            targetFilterQuery.setAutoAssignDistributionSet(ds);
+            targetFilterQuery.setAutoAssignDistributionSet(distributionSet);
             contextAware.getCurrentContext().ifPresent(targetFilterQuery::setAccessControlContext);
             targetFilterQuery.setAutoAssignInitiatedBy(contextAware.getCurrentUsername());
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
             targetFilterQuery.setAutoAssignWeight(
                     update.getWeight() == null ? repositoryProperties.getActionWeightIfAbsent() : update.getWeight());
             final boolean confirmationRequired =
-                    update.isConfirmationRequired() == null ?
-                            isConfirmationFlowEnabled() : update.isConfirmationRequired();
+                    update.getConfirmationRequired() == null ?
+                            isConfirmationFlowEnabled() : update.getConfirmationRequired();
             targetFilterQuery.setConfirmationRequired(confirmationRequired);
         }
         return targetFilterQueryRepository.save(targetFilterQuery);
@@ -301,12 +300,6 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private boolean isConfirmationFlowEnabled() {
         return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
                 .isConfirmationFlowEnabled();
-    }
-
-    private static void verifyDistributionSetAndThrowExceptionIfDeleted(final DistributionSet distributionSet) {
-        if (distributionSet.isDeleted()) {
-            throw new EntityNotFoundException(DistributionSet.class, distributionSet.getId());
-        }
     }
 
     private static ActionType sanitizeAutoAssignActionType(final ActionType actionType) {
@@ -332,7 +325,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             RSQLUtility.validateRsqlFor(query, TargetFields.class);
             return true;
         } catch (final RSQLParserException | RSQLParameterUnsupportedFieldException e) {
-            LOGGER.debug("The RSQL query '" + query + "' is invalid.", e);
+            log.debug("The RSQL query '" + query + "' is invalid.", e);
             return false;
         }
     }
@@ -347,6 +340,6 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Transactional
     public void cancelAutoAssignmentForDistributionSet(final long distributionSetId) {
         targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(distributionSetId);
-        LOGGER.debug("Auto assignments for distribution sets {} deactivated", distributionSetId);
+        log.debug("Auto assignments for distribution sets {} deactivated", distributionSetId);
     }
 }

@@ -9,18 +9,27 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 
 import com.cronutils.utils.StringUtils;
 
+import java.io.Serial;
+
 /**
  * A distributed tenant aware event. It's the base class of the other
  * distributed events. All the necessary information of distributing events to
  * other nodes.
- *
  */
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements TenantAwareEvent {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private String tenant;
@@ -47,10 +56,4 @@ public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements Te
         super(source, applicationId != null ? applicationId : StringUtils.EMPTY);
         this.tenant = tenant;
     }
-
-    @Override
-    public String getTenant() {
-        return tenant;
-    }
-
 }

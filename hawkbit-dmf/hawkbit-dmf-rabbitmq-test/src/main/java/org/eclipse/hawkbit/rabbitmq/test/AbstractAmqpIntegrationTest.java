@@ -13,14 +13,13 @@ import java.time.Duration;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import lombok.extern.slf4j.Slf4j;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionFactory;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -29,21 +28,22 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.junit.RabbitAvailable;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 
+@Slf4j
 @RabbitAvailable
 @ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class,
-        TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+        TestConfiguration.class})
+@Import(TestChannelBinderConfiguration.class)
 // Dirty context is necessary to create a new vhost and recreate all necessary
 // beans after every test class.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTest {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractAmqpIntegrationTest.class);
-
+    
     private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
     @Autowired
@@ -83,7 +83,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
             return Integer.parseInt(queueProps.get(RabbitAdmin.QUEUE_MESSAGE_COUNT).toString());
         }
         final int fallbackCount = 0;
-        LOG.warn(
+        log.warn(
                 "Cannot determine the queue message count for queue '{}' (queue properties {}). Returning queue message count {}.",
                 queueName, queueProps, fallbackCount);
         return fallbackCount;

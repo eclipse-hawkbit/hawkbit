@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.builder;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetType;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 /**
  * Builder to update an existing {@link TargetType} entry. Defines all

@@ -9,19 +9,25 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
@@ -44,6 +50,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
@@ -55,20 +62,19 @@ import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Lists;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ContextConfiguration(classes = {
-        RepositoryApplicationConfiguration.class, TestConfiguration.class,
-        TestSupportBinderAutoConfiguration.class })
+        RepositoryApplicationConfiguration.class, TestConfiguration.class })
+@Import(TestChannelBinderConfiguration.class)
 @TestPropertySource(locations = "classpath:/jpa-test.properties")
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
 
@@ -142,7 +148,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     @Transactional(readOnly = true)
     protected List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {
-        return Lists.newArrayList(actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), actionStatus));
+        return toList(actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), actionStatus));
     }
 
     protected static void verifyThrownExceptionBy(final ThrowingCallable tc, final String objectType) {
@@ -203,5 +209,26 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     protected JpaRolloutGroup refresh(final RolloutGroup group) {
         return rolloutGroupRepository.findById(group.getId()).get();
+    }
+
+    protected static <T> List<T> toList(final Iterable<? extends T> it) {
+        return StreamSupport.stream(it.spliterator(), false).map(e -> (T)e).toList();
+    }
+
+    protected static <T> T[] toArray(final Iterable<? extends T> it, final Class<T> type) {
+        final List<T> list = toList(it);
+        final T[] array = (T[])Array.newInstance(type, list.size());
+        for (int i = 0; i < array.length; i++) {
+            array[i] = list.get(i);
+        }
+        return array;
+    }
+
+    protected static void implicitLock(final DistributionSet set) {
+        ((JpaDistributionSet) set).setOptLockRevision(set.getOptLockRevision() + 1);
+    }
+
+    protected static void implicitLock(final SoftwareModule module) {
+        ((JpaSoftwareModule) module).setOptLockRevision(module.getOptLockRevision() + 1);
     }
 }

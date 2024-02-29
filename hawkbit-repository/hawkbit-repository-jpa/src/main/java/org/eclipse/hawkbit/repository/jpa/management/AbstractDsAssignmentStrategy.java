@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -44,21 +45,17 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.JoinType;
 
 /**
  * {@link DistributionSet} to {@link Target} assignment strategy as utility for
  * {@link JpaDeploymentManagement}.
- *
  */
+@Slf4j
 public abstract class AbstractDsAssignmentStrategy {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractDsAssignmentStrategy.class);
 
     protected final TargetRepository targetRepository;
     protected final AfterTransactionCommitExecutor afterCommit;
@@ -267,7 +264,7 @@ public abstract class AbstractDsAssignmentStrategy {
             actionForTarget.setInitiatedBy(initiatedBy);
             return actionForTarget;
         }).orElseGet(() -> {
-            LOG.warn("Cannot find target for targetWithActionType '{}'.", targetWithActionType.getControllerId());
+            log.warn("Cannot find target for targetWithActionType '{}'.", targetWithActionType.getControllerId());
             return null;
         });
     }

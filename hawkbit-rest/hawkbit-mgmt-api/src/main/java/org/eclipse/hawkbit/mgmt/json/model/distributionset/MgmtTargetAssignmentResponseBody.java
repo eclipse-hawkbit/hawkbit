@@ -10,9 +10,11 @@
 package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
 import java.util.List;
-import java.util.Objects;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -22,15 +24,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Response Body of Target for assignment operations.
- *
- *
- *
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtTargetAssignmentResponseBody extends RepresentationModel<MgmtTargetAssignmentResponseBody> {
 
+    @Schema(description = """
+            Targets that had this distribution set already assigned (in "offline" case this includes
+            targets that have arbitrary updates running)""")
     private int alreadyAssigned;
+    @Schema(description = "The newly created actions as a result of this assignment")
     private List<MgmtActionId> assignedActions;
 
     /**
@@ -42,52 +48,10 @@ public class MgmtTargetAssignmentResponseBody extends RepresentationModel<MgmtTa
     }
 
     /**
-     * @return the alreadyAssigned
-     */
-    public int getAlreadyAssigned() {
-        return alreadyAssigned;
-    }
-
-    /**
-     * @param alreadyAssigned
-     *            the alreadyAssigned to set
-     */
-    public void setAlreadyAssigned(final int alreadyAssigned) {
-        this.alreadyAssigned = alreadyAssigned;
-    }
-
-    /**
      * @return the total
      */
     @JsonProperty("total")
     public int getTotal() {
         return getAssigned() + alreadyAssigned;
-    }
-
-    /**
-     * @return the assignedActions
-     */
-    public List<MgmtActionId> getAssignedActions() {
-        return assignedActions;
-    }
-
-    /**
-     * @param assignedActions
-     *            the assigned actions to set
-     */
-    public void setAssignedActions(final List<MgmtActionId> assignedActions) {
-        this.assignedActions = assignedActions;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return super.equals(obj) && this.getClass().isInstance(obj)
-                && ((MgmtTargetAssignmentResponseBody) obj).getAlreadyAssigned() == alreadyAssigned
-                && Objects.equals(((MgmtTargetAssignmentResponseBody) obj).getAssignedActions(), assignedActions);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), alreadyAssigned, assignedActions);
     }
 }

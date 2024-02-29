@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +44,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
+import org.springframework.test.web.servlet.ResultActions;
 
 /**
  * Integration test for the {@link MgmtActionRestApi}.
@@ -124,6 +126,48 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content[0].detailStatus", equalTo("running")))
                 .andExpect(jsonPath("content[0].status", equalTo("pending")));
 
+    }
+
+    @Test
+    @Description("Verifies that actions can be filtered based on extRef.")
+    void filterActionsByExternalRef() throws Exception {
+        // prepare test
+        final String knownTargetId = "targetId";
+        final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
+
+        final Action action0 = actions.get(0);
+        final Action action1 = actions.get(1);
+
+        final List<String> externalRefs = new ArrayList<>(2);
+        externalRefs.add("extRef");
+        externalRefs.add("extRef#123_1");
+        controllerManagement.updateActionExternalRef(action0.getId(), externalRefs.get(0));
+        controllerManagement.updateActionExternalRef(action1.getId(), externalRefs.get(1));
+
+        final String rsqlExtRef = "externalref==extRef";
+        final String rsqlExtRefWildcard = "externalref==extRef*";
+        final String rsqlExtRefNoMatch = "externalref==234extRef";
+
+        // pending status one result
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlExtRef))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
+                .andExpect(jsonPath("size", equalTo(1)))
+                .andExpect(jsonPath("content[0].externalRef", equalTo(externalRefs.get(0))));
+
+        // finished status none result
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlExtRefWildcard))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(2)))
+                .andExpect(jsonPath("size", equalTo(2)));
+
+        // pending or finished status one result
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlExtRefNoMatch))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(0)))
+                .andExpect(jsonPath("size", equalTo(0)));
     }
 
     @Test
@@ -263,34 +307,62 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     @Description("Verifies that all available actions are returned if the complete collection is requested.")
     void getActions() throws Exception {
+        getActions(false);
+    }
+
+    @Test
+    @Description("Verifies that all available actions (whit ext refs) are returned if the complete collection is requested.")
+    void getActionsExtRef() throws Exception {
+        getActions(true);
+    }
+
+    private void getActions(final boolean withExternalRef ) throws Exception {
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
 
         final Action action0 = actions.get(0);
         final Action action1 = actions.get(1);
-        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING,
-                "ID:ASC")).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
 
-                // verify action 1
-                .andExpect(jsonPath("content.[1].id", equalTo(action1.getId().intValue())))
-                .andExpect(jsonPath("content.[1].type", equalTo("update")))
-                .andExpect(jsonPath("content.[1].status", equalTo("pending")))
-                .andExpect(jsonPath("content.[1].detailStatus", equalTo("running")))
-                .andExpect(jsonPath("content.[1]._links.self.href",
-                        equalTo(generateActionLink(knownTargetId, action1.getId()))))
+        final List<String> externalRefs = new ArrayList<>(2);
+        if (withExternalRef) {
+            externalRefs.add("extRef#123_0");
+            externalRefs.add("extRef#123_1");
+            controllerManagement.updateActionExternalRef(action0.getId(), externalRefs.get(0));
+            controllerManagement.updateActionExternalRef(action1.getId(), externalRefs.get(1));
+        }
 
-                // verify action 0
-                .andExpect(jsonPath("content.[0].id", equalTo(action0.getId().intValue())))
-                .andExpect(jsonPath("content.[0].type", equalTo("cancel")))
-                .andExpect(jsonPath("content.[0].status", equalTo("pending")))
-                .andExpect(jsonPath("content.[1].detailStatus", equalTo("running")))
-                .andExpect(jsonPath("content.[0]._links.self.href",
-                        equalTo(generateActionLink(knownTargetId, action0.getId()))))
+        final ResultActions resultActions =
+                mvc.perform(
+                        get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
+                                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING,"ID:ASC"))
+                        .andDo(MockMvcResultPrinter.print())
+                        .andExpect(status().isOk())
+                        // verify action 1
+                        .andExpect(jsonPath("content.[1].id", equalTo(action1.getId().intValue())))
+                        .andExpect(jsonPath("content.[1].type", equalTo("update")))
+                        .andExpect(jsonPath("content.[1].status", equalTo("pending")))
+                        .andExpect(jsonPath("content.[1].detailStatus", equalTo("running")))
+                        .andExpect(jsonPath("content.[1]._links.self.href",
+                                equalTo(generateActionLink(knownTargetId, action1.getId()))))
 
-                // verify collection properties
-                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
-                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
-                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
+                        // verify action 0
+                        .andExpect(jsonPath("content.[0].id", equalTo(action0.getId().intValue())))
+                        .andExpect(jsonPath("content.[0].type", equalTo("cancel")))
+                        .andExpect(jsonPath("content.[0].status", equalTo("pending")))
+                        .andExpect(jsonPath("content.[1].detailStatus", equalTo("running")))
+                        .andExpect(jsonPath("content.[0]._links.self.href",
+                                equalTo(generateActionLink(knownTargetId, action0.getId()))))
+
+                        // verify collection properties
+                        .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
+                        .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
+                        .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
+
+        if (withExternalRef) {
+            resultActions
+                    .andExpect(jsonPath("content.[1].externalRef", equalTo(externalRefs.get(1))))
+                    .andExpect(jsonPath("content.[0].externalRef", equalTo(externalRefs.get(0))));
+        }
     }
 
     @Test
@@ -345,6 +417,16 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     @Description("Handles the GET request of retrieving a specific action.")
     public void getAction() throws Exception {
+        getAction(false);
+    }
+
+    @Test
+    @Description("Handles the GET request of retrieving a specific action with external reference.")
+    public void getActionExtRef() throws Exception {
+        getAction(true);
+    }
+
+    private void getAction(final boolean withExternalRef) throws Exception {
         final String knownTargetId = "targetId";
         // prepare ds
         final DistributionSet ds = testdataFactory.createDistributionSet();
@@ -358,10 +440,19 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Action> actions = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE)
                 .getContent();
         assertThat(actions).hasSize(1);
+        final String externalRef = "externalRef#123";
+        if (withExternalRef) {
+            controllerManagement.updateActionExternalRef(actions.get(0).getId(), externalRef);
+        }
 
-        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/{actionId}", actions.get(0).getId()))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+        final ResultActions resultActions =
+                mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/{actionId}", actions.get(0).getId()))
+                    .andDo(MockMvcResultPrinter.print())
+                    .andExpect(status().isOk());
+
+        if (withExternalRef) {
+            resultActions.andExpect(jsonPath("externalRef", equalTo(externalRef)));
+        }
     }
 
     @Test

@@ -17,16 +17,15 @@ import com.fasterxml.jackson.annotation.JsonValue;
  *
  */
 public enum MgmtCancelationType {
+
     /**
      * Actions will be soft canceled.
      */
     SOFT("soft"),
-
     /**
      * Actions will be force quit.
      */
     FORCE("force"),
-
     /**
      * No actions will be canceled.
      */
@@ -34,7 +33,7 @@ public enum MgmtCancelationType {
 
     private final String name;
 
-    private MgmtCancelationType(final String name) {
+    MgmtCancelationType(final String name) {
         this.name = name;
     }
 

@@ -11,74 +11,25 @@ package org.eclipse.hawkbit.mgmt.json.model.targettype;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * Request Body for TargetType PUT.
- *
  */
+@Data
+@Accessors(chain = true)
 public class MgmtTargetTypeRequestBodyPut {
 
     @JsonProperty(required = true)
-    @Schema(example = "updatedTypeName")
+    @Schema(description = "The name of the entity", example = "updatedTypeName")
     private String name;
 
     @JsonProperty
-    @Schema(example = "an updated description")
+    @Schema(description = "The description of the entity", example = "an updated description")
     private String description;
 
     @JsonProperty
-    @Schema(example = "#aaafff")
+    @Schema(description = "The colour of the entity", example = "#aaafff")
     private String colour;
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param name
-     *            the name to set
-     *
-     * @return updated body
-     */
-    public MgmtTargetTypeRequestBodyPut setName(final String name) {
-        this.name = name;
-        return this;
-    }
-
-    /**
-     * @return description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *          Description
-     * @return Updated body
-     */
-    public MgmtTargetTypeRequestBodyPut setDescription(final String description) {
-        this.description = description;
-        return this;
-    }
-
-    /**
-     * @return Colour
-     */
-    public String getColour() {
-        return colour;
-    }
-
-    /**
-     * @param colour
-     *          Colour
-     * @return Updated body
-     */
-    public MgmtTargetTypeRequestBodyPut setColour(final String colour) {
-        this.colour = colour;
-        return this;
-    }
 }

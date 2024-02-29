@@ -5,143 +5,43 @@ package org.eclipse.hawkbit.mgmt.json.model.target;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * Request body for target PUT/POST commands.
- *
  */
+@Data
+@Accessors(chain = true)
 public class MgmtTargetRequestBody {
+
     @JsonProperty(required = true)
-    @Schema(example = "controllerName")
+    @Schema(description = "The name of the entity", example = "controllerName")
     private String name;
 
-    @Schema(example = "Example description of a target")
+    @Schema(description = "The description of the entity", example = "Example description of a target")
     private String description;
 
     @JsonProperty(required = true)
-    @Schema(example = "12345")
+    @Schema(description = "Controller ID", example = "123")
     private String controllerId;
 
     @JsonProperty
-    @Schema(example = "https://192.168.0.1")
+    @Schema(description = "The last known address URI of the target. Includes information of the target is " +
+            "connected either directly (DDI) through HTTP or indirectly (DMF) through amqp",
+            example = "https://192.168.0.1")
     private String address;
 
     @JsonProperty
-    @Schema(example = "2345678DGGDGFTDzztgf")
+    @Schema(description = "Pre-Shared key that allows targets to authenticate at Direct Device Integration API if " +
+            "enabled in the tenant settings", example = "2345678DGGDGFTDzztgf")
     private String securityToken;
 
     @JsonProperty
-    @Schema(example = "false")
+    @Schema(description = "Request re-transmission of target attributes", example = "true")
     private Boolean requestAttributes;
 
     @JsonProperty
-    @Schema(example = "10")
+    @Schema(description = "ID of the target type", example = "10")
     private Long targetType;
-
-    /**
-     * @return Target type ID
-     */
-    public Long getTargetType() {
-        return targetType;
-    }
-
-    /**
-     * @param targetType
-     *          Target type ID
-     */
-    public void setTargetType(Long targetType) {
-        this.targetType = targetType;
-    }
-
-    /**
-     * @return token
-     */
-    public String getSecurityToken() {
-        return securityToken;
-    }
-
-    /**
-     * @param securityToken Token
-     */
-    public void setSecurityToken(final String securityToken) {
-        this.securityToken = securityToken;
-    }
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @return the controllerId
-     */
-    public String getControllerId() {
-        return controllerId;
-    }
-
-    /**
-     * @param name
-     *            the name to set
-     */
-    public MgmtTargetRequestBody setName(final String name) {
-        this.name = name;
-        return this;
-    }
-
-    /**
-     * @param description
-     *            the description to set
-     */
-    public MgmtTargetRequestBody setDescription(final String description) {
-        this.description = description;
-        return this;
-    }
-
-    /**
-     * @param controllerId
-     *            the controllerId to set
-     */
-    public MgmtTargetRequestBody setControllerId(final String controllerId) {
-        this.controllerId = controllerId;
-        return this;
-    }
-
-    /**
-     * @return address
-     */
-    public String getAddress() {
-        return address;
-    }
-
-    /**
-     * @param address
-     *          Address
-     */
-    public void setAddress(final String address) {
-        this.address = address;
-    }
-
-    /**
-     * @return boolean true or false
-     */
-    public Boolean isRequestAttributes() {
-        return requestAttributes;
-    }
-
-    /**
-     * @param requestAttributes
-     *          Attributes
-     */
-    public void setRequestAttributes(final Boolean requestAttributes) {
-        this.requestAttributes = requestAttributes;
-    }
 }

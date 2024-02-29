@@ -9,12 +9,14 @@
  */
 package org.eclipse.hawkbit.artifact.repository;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Configuration properties for the file-system repository, e.g. the base-path
  * to store the files.
  */
+@Data
 @ConfigurationProperties("org.eclipse.hawkbit.repository.file")
 public class ArtifactFilesystemProperties {
 
@@ -22,12 +24,4 @@ public class ArtifactFilesystemProperties {
      * The base-path of the directory to store the artifacts.
      */
     private String path = "./artifactrepo";
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(final String path) {
-        this.path = path;
-    }
 }

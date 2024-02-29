@@ -9,14 +9,14 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import java.util.Collections;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
@@ -49,15 +49,12 @@ import org.eclipse.hawkbit.repository.report.model.SystemUsageReportWithTenants;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.orm.jpa.vendor.Database;
@@ -70,13 +67,11 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * JPA implementation of {@link SystemManagement}.
- *
  */
+@Slf4j
 @Transactional(readOnly = true)
 @Validated
 public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaSystemManagement.class);
 
     private static final int MAX_TENANTS_QUERY = 1000;
 
@@ -142,6 +137,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Autowired
     private ArtifactRepository artifactRepository;
+
+    @Autowired
+    private RepositoryProperties repositoryProperties;
 
     private final String countArtifactQuery;
     private final String countSoftwareModulesQuery;
@@ -210,51 +208,18 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    public TenantMetaData getTenantMetadata(final String tenant) {
+    public TenantMetaData createTenantMetadata(final String tenant) {
         final TenantMetaData result = tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
         // Create if it does not exist
         if (result == null) {
-            try {
-                currentTenantCacheKeyGenerator.setTenantInCreation(tenant);
-                return createInitialTenantMetaData(tenant);
-
-            } finally {
-                currentTenantCacheKeyGenerator.removeTenantInCreation();
-            }
+            return createTenantMetadata0(tenant);
         }
         return result;
     }
 
-    /**
-     * Creating the initial tenant meta-data in a new transaction. Due the
-     * {@link MultiTenantJpaTransactionManager} is using the current tenant to
-     * set the necessary tenant discriminator to the query. This is not working
-     * if we don't have a current tenant set. Due the
-     * {@link #getTenantMetadata(String)} is maybe called without having a
-     * current tenant we need to re-open a new transaction so the
-     * {@link MultiTenantJpaTransactionManager} is called again and set the
-     * tenant for this transaction.
-     * 
-     * @param tenant
-     *            the tenant to be created
-     * @return the initial created {@link TenantMetaData}
-     */
-    private TenantMetaData createInitialTenantMetaData(final String tenant) {
-        return systemSecurityContext.runAsSystemAsTenant(
-                () -> DeploymentHelper.runInNewTransaction(txManager, "initial-tenant-creation", status -> {
-                    final DistributionSetType defaultDsType = createStandardSoftwareDataSetup();
-                    return tenantMetaDataRepository.save(new JpaTenantMetaData(defaultDsType, tenant));
-                }), tenant);
-    }
-
     @Override
     public Page<String> findTenants(final Pageable pageable) {
-        final Page<JpaTenantMetaData> result = tenantMetaDataRepository.findAll(pageable);
-
-        return new PageImpl<>(
-                Collections.unmodifiableList(
-                        result.getContent().stream().map(TenantMetaData::getTenant).collect(Collectors.toList())),
-                pageable, result.getTotalElements());
+        return tenantMetaDataRepository.findTenants(pageable);
     }
 
     @Override
@@ -286,10 +251,22 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     public TenantMetaData getTenantMetadata() {
-        if (tenantAware.getCurrentTenant() == null) {
+        final String tenant = tenantAware.getCurrentTenant();
+        if (tenant == null) {
             throw new IllegalStateException("Tenant not set");
         }
-        return getTenantMetadata(tenantAware.getCurrentTenant());
+
+        final TenantMetaData metaData = tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
+        if (metaData == null) {
+            if (repositoryProperties.isImplicitTenantCreateAllowed()) {
+                log.info("Tenant {} doesn't exist create metadata", tenant, new Exception("Thread dump"));
+                return createTenantMetadata0(tenant);
+            } else {
+                throw new EntityNotFoundException(TenantMetaData.class, tenant);
+            }
+        } else {
+            return metaData;
+        }
     }
 
     @Override
@@ -356,7 +333,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     // intended in this case
     @SuppressWarnings("squid:S2229")
     public void forEachTenant(final Consumer<String> consumer) {
-
         Page<String> tenants;
         Pageable query = PageRequest.of(0, MAX_TENANTS_QUERY);
         do {
@@ -365,14 +341,45 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                 try {
                     consumer.accept(tenant);
                 } catch (final RuntimeException ex) {
-                    LOGGER.debug("Exception on forEachTenant execution for tenant {}. Continue with next tenant.",
+                    log.debug("Exception on forEachTenant execution for tenant {}. Continue with next tenant.",
                             tenant, ex);
-                    LOGGER.error("Exception on forEachTenant execution for tenant {} with error message [{}]. "
+                    log.error("Exception on forEachTenant execution for tenant {} with error message [{}]. "
                             + "Continue with next tenant.", tenant, ex.getMessage());
                 }
                 return null;
             }));
         } while ((query = tenants.nextPageable()) != Pageable.unpaged());
 
+    }
+
+    private TenantMetaData createTenantMetadata0(final String tenant) {
+        try {
+            currentTenantCacheKeyGenerator.setTenantInCreation(tenant);
+            return createInitialTenantMetaData(tenant);
+        } finally {
+            currentTenantCacheKeyGenerator.removeTenantInCreation();
+        }
+    }
+
+    /**
+     * Creating the initial tenant meta-data in a new transaction. Due the
+     * {@link MultiTenantJpaTransactionManager} is using the current tenant to
+     * set the necessary tenant discriminator to the query. This is not working
+     * if we don't have a current tenant set. Due the
+     * {@link #createTenantMetadata(String)} is maybe called without having a
+     * current tenant we need to re-open a new transaction so the
+     * {@link MultiTenantJpaTransactionManager} is called again and set the
+     * tenant for this transaction.
+     *
+     * @param tenant
+     *            the tenant to be created
+     * @return the initial created {@link TenantMetaData}
+     */
+    private TenantMetaData createInitialTenantMetaData(final String tenant) {
+        return systemSecurityContext.runAsSystemAsTenant(
+                () -> DeploymentHelper.runInNewTransaction(txManager, "initial-tenant-creation", status -> {
+                    final DistributionSetType defaultDsType = createStandardSoftwareDataSetup();
+                    return tenantMetaDataRepository.save(new JpaTenantMetaData(defaultDsType, tenant));
+                }), tenant);
     }
 }

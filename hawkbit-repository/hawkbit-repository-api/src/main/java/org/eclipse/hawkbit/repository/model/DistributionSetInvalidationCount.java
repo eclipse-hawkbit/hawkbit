@@ -9,11 +9,14 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import lombok.Data;
+
 /**
  * object that holds information about the count of affected rollouts,
  * auto-assignments and actions, when a list of distribution sets gets
  * invalidated
  */
+@Data
 public class DistributionSetInvalidationCount {
 
     private final long rolloutsCount;
@@ -26,17 +29,4 @@ public class DistributionSetInvalidationCount {
         this.autoAssignmentCount = autoAssignmentCount;
         this.actionCount = actionCount;
     }
-
-    public long getRolloutsCount() {
-        return rolloutsCount;
-    }
-
-    public long getAutoAssignmentCount() {
-        return autoAssignmentCount;
-    }
-
-    public long getActionCount() {
-        return actionCount;
-    }
-
 }

@@ -15,8 +15,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -24,51 +28,12 @@ import java.util.List;
  * New update actions require confirmation when confirmation flow is switched on. This is the feedback channel for
  * confirmation messages for DDI API. The confirmation message has a mandatory field confirmation with possible values:
  * "confirmed" and "denied".
- *
  */
+@Getter
+@EqualsAndHashCode
+@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiConfirmationFeedback {
-
-    @NotNull
-    @Valid
-    private final Confirmation confirmation;
-
-    @Schema(example = "200")
-    private final Integer code;
-
-    private final List<String> details;
-
-
-    /**
-     * Constructs an confirmation-feedback
-     *
-     * @param confirmation  confirmation value for the action. Valid values are "Confirmed" and "Denied
-     * @param code  code for confirmation
-     * @param details messages
-     */
-    @JsonCreator public DdiConfirmationFeedback(
-            @JsonProperty(value = "confirmation", required = true) final Confirmation confirmation,
-            @JsonProperty(value = "code") final Integer code,
-            @JsonProperty(value = "details") final List<String> details) {
-        this.confirmation = confirmation;
-        this.code = code;
-        this.details = details;
-    }
-
-    public Confirmation getConfirmation() {
-        return confirmation;
-    }
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public List<String> getDetails() {
-        if (details == null) {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(details);
-    }
 
     public enum Confirmation {
         /**
@@ -94,8 +59,37 @@ public class DdiConfirmationFeedback {
         }
     }
 
-    @Override
-    public String toString() {
-        return "DdiConfirmationFeedback [confirmation=" + confirmation + ", code=" + code + ", details=" + details +"]";
+    @NotNull
+    @Valid
+    @Schema(description = "Action confirmation state")
+    private final Confirmation confirmation;
+
+    @Schema(description = "(Optional) Individual status code", example = "200")
+    private final Integer code;
+
+    @Schema(description = "List of detailed message information", example = "[ \"Feedback message\" ]")
+    private final List<String> details;
+
+    /**
+     * Constructs an confirmation-feedback
+     *
+     * @param confirmation  confirmation value for the action. Valid values are "Confirmed" and "Denied
+     * @param code  code for confirmation
+     * @param details messages
+     */
+    @JsonCreator public DdiConfirmationFeedback(
+            @JsonProperty(value = "confirmation", required = true) final Confirmation confirmation,
+            @JsonProperty(value = "code") final Integer code,
+            @JsonProperty(value = "details") final List<String> details) {
+        this.confirmation = confirmation;
+        this.code = code;
+        this.details = details;
+    }
+
+    public List<String> getDetails() {
+        if (details == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(details);
     }
 }

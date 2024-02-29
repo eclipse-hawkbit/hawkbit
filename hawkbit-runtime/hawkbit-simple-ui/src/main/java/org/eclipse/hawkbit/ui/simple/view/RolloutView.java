@@ -9,7 +9,8 @@
  */
 package org.eclipse.hawkbit.ui.simple.view;
 
-import org.eclipse.hawkbit.ui.simple.HawkbitClient;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
 import org.eclipse.hawkbit.ui.simple.MainLayout;
 import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.simple.view.util.TableView;
@@ -60,13 +61,14 @@ import java.util.stream.Stream;
 @Uses(Icon.class)
 public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
-    public RolloutView(final HawkbitClient hawkbitClient) {
+    public RolloutView(final HawkbitMgmtClient hawkbitClient) {
         super(
                 new RolloutFilter(),
                 new SelectionGrid.EntityRepresentation<>(
                         MgmtRolloutResponseBody.class, MgmtRolloutResponseBody::getRolloutId) {
 
                     private final RolloutDetails details = new RolloutDetails(hawkbitClient);
+
                     @Override
                     protected void addColumns(final Grid<MgmtRolloutResponseBody> grid) {
                         grid.addColumn(MgmtRolloutResponseBody::getRolloutId).setHeader(Constants.ID).setAutoWidth(true);
@@ -85,7 +87,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 },
                 (query, rsqlFilter) -> hawkbitClient.getRolloutRestApi()
                         .getRollouts(
-                                query.getOffset(), query.getPageSize(), Constants.NAME_ASC, rsqlFilter, null)
+                                query.getOffset(), query.getPageSize(), Constants.NAME_ASC, rsqlFilter, "full")
                         .getBody()
                         .getContent()
                         .stream(),
@@ -116,9 +118,9 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
         private final long rolloutId;
         private final Grid<MgmtRolloutResponseBody> grid;
-        private final transient HawkbitClient hawkbitClient;
+        private final transient HawkbitMgmtClient hawkbitClient;
 
-        private Actions(final MgmtRolloutResponseBody rollout, final Grid<MgmtRolloutResponseBody> grid, final HawkbitClient hawkbitClient) {
+        private Actions(final MgmtRolloutResponseBody rollout, final Grid<MgmtRolloutResponseBody> grid, final HawkbitMgmtClient hawkbitClient) {
             this.rolloutId = rollout.getRolloutId();
             this.grid = grid;
             this.hawkbitClient = hawkbitClient;
@@ -183,7 +185,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
     private static class RolloutDetails extends FormLayout {
 
-        private final transient HawkbitClient hawkbitClient;
+        private final transient HawkbitMgmtClient hawkbitClient;
 
         private final TextArea description = new TextArea(Constants.DESCRIPTION);
         private final TextField createdBy = Utils.textField(Constants.CREATED_BY);
@@ -194,9 +196,10 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         private final TextField distributionSet = Utils.textField(Constants.DISTRIBUTION_SET);
         private final TextField actonType = Utils.textField(Constants.ACTION_TYPE);
         private final TextField startAt = Utils.textField(Constants.START_AT);
+        private final Checkbox dynamic  = new Checkbox(Constants.DYNAMIC);
         private final SelectionGrid<MgmtRolloutGroupResponseBody, Long> groupGrid;
 
-        private RolloutDetails(final HawkbitClient hawkbitClient) {
+        private RolloutDetails(final HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
 
             description.setMinLength(2);
@@ -211,6 +214,9 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                         field.setReadOnly(true);
                         add(field);
                     });
+            dynamic.setReadOnly(true);
+            dynamic.setEnabled(false);
+            add(dynamic);
             add(groupGrid);
 
             setResponsiveSteps(new ResponsiveStep("0", 2));
@@ -235,13 +241,14 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 case TIMEFORCED -> "Scheduled at " + new Date(rollout.getForcetime());
             });
             startAt.setValue(ObjectUtils.isEmpty(rollout.getStartAt()) ? "" : new Date(rollout.getStartAt()).toString());
+            dynamic.setValue(rollout.isDynamic());
 
             groupGrid.setItems(query ->
                     hawkbitClient.getRolloutRestApi()
                             .getRolloutGroups(
                                     rollout.getRolloutId(),
                                     query.getOffset(), query.getPageSize(),
-                                    null, null, null)
+                                    null, null, "full")
                             .getBody().getContent().stream()
                             .skip(query.getOffset())
                             .limit(query.getPageSize()));
@@ -266,10 +273,11 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         private final NumberField groupNumber;
         private final NumberField triggerThreshold;
         private final NumberField errorThreshold;
+        private final Checkbox dynamic = new Checkbox(Constants.DYNAMIC);
 
         private final Button create = new Button("Create");
 
-        private CreateDialog(final HawkbitClient hawkbitClient) {
+        private CreateDialog(final HawkbitMgmtClient hawkbitClient) {
             super("Create Rollout");
 
             name = Utils.textField("Name", this::readyToCreate);
@@ -374,6 +382,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                     name, distributionSet, targetFilter, description,
                     actionType, startType,
                     groupNumber, triggerThreshold, errorThreshold,
+                    dynamic,
                     actions);
             add(layout);
             open();
@@ -391,7 +400,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             }
         }
 
-        private void addCreateClickListener(final HawkbitClient hawkbitClient) {
+        private void addCreateClickListener(final HawkbitMgmtClient hawkbitClient) {
             create.addClickListener(e -> {
                 close();
                 final MgmtRolloutRestRequestBody request = new MgmtRolloutRestRequestBody();
@@ -422,14 +431,15 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 request.setSuccessCondition(
                         new MgmtRolloutCondition(
                                 MgmtRolloutCondition.Condition.THRESHOLD,
-                                triggerThreshold.getValue().intValue() + "%"));
+                                triggerThreshold.getValue().intValue() + ""));
                 request.setErrorCondition(
                         new MgmtRolloutCondition(
                                 MgmtRolloutCondition.Condition.THRESHOLD,
-                                errorThreshold.getValue().intValue() + "%"));
+                                errorThreshold.getValue().intValue() + ""));
                 request.setErrorAction(
                         new MgmtRolloutErrorAction(
                                 MgmtRolloutErrorAction.ErrorAction.PAUSE, ""));
+                request.setDynamic(dynamic.getValue());
                 hawkbitClient.getRolloutRestApi().create(request).getBody();
             });
         }

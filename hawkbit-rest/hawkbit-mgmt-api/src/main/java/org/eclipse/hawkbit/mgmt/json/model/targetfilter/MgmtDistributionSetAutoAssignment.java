@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.targetfilter;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
@@ -18,38 +21,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Request Body of DistributionSet Id and Action Type for target filter auto
  * assignment operation.
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class MgmtDistributionSetAutoAssignment extends MgmtId {
 
-    @JsonProperty(required = false)
+    @JsonProperty
     private MgmtActionType type;
-
-    @JsonProperty(required = false)
+    @JsonProperty
     private Integer weight;
-
-    @JsonProperty(required = false)
+    @JsonProperty
     private Boolean confirmationRequired;
-
-    public MgmtActionType getType() {
-        return type;
-    }
-
-    public void setType(final MgmtActionType type) {
-        this.type = type;
-    }
-
-    public Integer getWeight() {
-        return weight;
-    }
-
-    public void setWeight(final Integer weight) {
-        this.weight = weight;
-    }
-
-    public Boolean isConfirmationRequired() {
-        return confirmationRequired;
-    }
-
-    public void setConfirmationRequired(final Boolean confirmationRequired) {
-        this.confirmationRequired = confirmationRequired;
-    }
 }

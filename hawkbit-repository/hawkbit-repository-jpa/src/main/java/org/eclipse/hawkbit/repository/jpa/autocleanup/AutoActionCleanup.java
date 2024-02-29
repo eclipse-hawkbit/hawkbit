@@ -20,13 +20,12 @@ import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A cleanup task for {@link Action} entities which can be used to delete
@@ -37,9 +36,8 @@ import org.slf4j.LoggerFactory;
  * The cleanup task can be enabled /disabled and configured on a per tenant
  * basis.
  */
+@Slf4j
 public class AutoActionCleanup implements CleanupTask {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AutoActionCleanup.class);
 
     private static final String ID = "action-cleanup";
     private static final boolean ACTION_CLEANUP_ENABLED_DEFAULT = false;
@@ -67,7 +65,7 @@ public class AutoActionCleanup implements CleanupTask {
     public void run() {
 
         if (!isEnabled()) {
-            LOGGER.debug("Action cleanup is disabled for this tenant...");
+            log.debug("Action cleanup is disabled for this tenant...");
             return;
         }
 
@@ -75,7 +73,7 @@ public class AutoActionCleanup implements CleanupTask {
         if (!status.isEmpty()) {
             final long lastModified = System.currentTimeMillis() - getExpiry();
             final int actionsCount = deploymentMgmt.deleteActionsByStatusAndLastModifiedBefore(status, lastModified);
-            LOGGER.debug("Deleted {} actions in status {} which have not been modified since {} ({})", actionsCount,
+            log.debug("Deleted {} actions in status {} which have not been modified since {} ({})", actionsCount,
                     status, Instant.ofEpochMilli(lastModified), lastModified);
         }
     }

@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Optional;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;

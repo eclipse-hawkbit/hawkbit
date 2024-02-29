@@ -9,20 +9,15 @@
  */
 package org.eclipse.hawkbit.dmf.amqp.api;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * Global constants for RabbitMQ settings.
- * 
- *
- *
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AmqpSettings {
 
     public static final String DMF_EXCHANGE = "dmf.exchange";
-
     public static final String AUTHENTICATION_EXCHANGE = "authentication.exchange";
-
-    private AmqpSettings() {
-
-    }
-
 }

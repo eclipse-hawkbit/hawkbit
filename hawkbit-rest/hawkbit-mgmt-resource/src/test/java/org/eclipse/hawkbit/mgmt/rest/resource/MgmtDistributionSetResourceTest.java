@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +41,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -72,8 +74,6 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.jayway.jsonpath.JsonPath;
 
 import io.qameta.allure.Description;
@@ -218,7 +218,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         // verify quota enforcement
         final int maxSoftwareModules = quotaManagement.getMaxSoftwareModulesPerDistributionSet();
-        final List<Long> moduleIDs = Lists.newArrayList();
+        final List<Long> moduleIDs = new ArrayList<>();
         for (int i = 0; i < maxSoftwareModules + 1; ++i) {
             moduleIDs.add(testdataFactory.createSoftwareModuleApp("sm" + i).getId());
         }
@@ -350,14 +350,14 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final DistributionSet generated = testdataFactory.generateDistributionSet(
             "stanTest", "2", reloaded, Collections.singletonList(softwareModule));
         final MvcResult mvcResult = mvc
-            .perform(post("/rest/v1/distributionsets/")
+            .perform(post("/rest/v1/distributionsets")
                 .content(JsonBuilder.distributionSets(Arrays.asList(generated)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest()).andReturn();
 
         final ExceptionInfo exceptionInfo = ResourceUtility.convertException(mvcResult.getResponse().getContentAsString());
-        assertEquals("javax.validation.ValidationException", exceptionInfo.getExceptionClass());
+        assertEquals("jakarta.validation.ValidationException", exceptionInfo.getExceptionClass());
         assertTrue(exceptionInfo.getMessage().contains("Distribution Set Type already deleted"));
     }
 
@@ -936,7 +936,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     private MvcResult executeMgmtTargetPost(final DistributionSet one, final DistributionSet two,
             final DistributionSet three) throws Exception {
         return mvc
-                .perform(post("/rest/v1/distributionsets/")
+                .perform(post("/rest/v1/distributionsets")
                         .content(JsonBuilder.distributionSets(Arrays.asList(one, two, three)))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
@@ -1036,12 +1036,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Test
     @Description("Ensures that DS property update request to API is reflected by the repository.")
     public void updateDistributionSet() throws Exception {
-
         // prepare test data
         assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
-
         assertThat(distributionSetManagement.count()).isEqualTo(1);
 
         final String body = new JSONObject().put("version", "anotherVersion").put("requiredMigrationStep", true)
@@ -1052,6 +1050,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.version", equalTo("anotherVersion")))
                 .andExpect(jsonPath("$.requiredMigrationStep", equalTo(true)))
+                .andExpect(jsonPath("$.locked", equalTo(false)))
                 .andExpect(jsonPath("$.deleted", equalTo(false)));
 
         final DistributionSet setupdated = distributionSetManagement.get(set.getId()).get();
@@ -1060,6 +1059,54 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         assertThat(setupdated.getVersion()).isEqualTo("anotherVersion");
         assertThat(setupdated.getName()).isEqualTo(set.getName());
         assertThat(setupdated.isDeleted()).isEqualTo(false);
+    }
+
+    @Test
+    @Description("Tests the lock. It is verified that the distribution set can be marked as locked through update operation.")
+    void lockDistributionSet() throws Exception {
+        // prepare test data
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
+
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+        assertThat(distributionSetManagement.count()).isEqualTo(1);
+        assertThat(set.isLocked()).as("Created distribution set should not be locked").isFalse();
+
+        final String body = new JSONObject().put("locked", true).toString();
+
+        mvc.perform(put("/rest/v1/distributionsets/{dsId}", set.getId()).content(body)
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.locked", equalTo(true)));
+
+        final DistributionSet updatedSet = distributionSetManagement.get(set.getId()).get();
+        assertThat(updatedSet.isLocked()).isEqualTo(true);
+    }
+
+    @Test
+    @Description("Tests the unlock. It is verified that the distribution set can't be unmarked as locked through update operation.")
+    void unlockDistributionSetSkippedSilently() throws Exception {
+        // prepare test data
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
+
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+        assertThat(distributionSetManagement.count()).isEqualTo(1);
+        distributionSetManagement.lock(set.getId());
+        assertThat(distributionSetManagement.get(set.getId())
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, set.getId())).isLocked())
+                .as("Created software module should not be locked")
+                .isTrue();
+
+        final String body = new JSONObject().put("locked", false).toString();
+
+        mvc.perform(put("/rest/v1/distributionsets/{dsId}", set.getId()).content(body)
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.locked", equalTo(true)));
+
+        final DistributionSet updatedSet = distributionSetManagement.get(set.getId()).get();
+        assertThat(updatedSet.isLocked()).isEqualTo(true);
     }
 
     @Test
@@ -1271,8 +1318,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final String knownValuePrefix = "knownValue";
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         for (int index = 0; index < totalMetadata; index++) {
-            distributionSetManagement.createMetaData(testDS.getId(), Lists
-                    .newArrayList(entityFactory.generateDsMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
+            distributionSetManagement.createMetaData(testDS.getId(), List.of(entityFactory.generateDsMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
         }
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
@@ -1383,7 +1429,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
     private Set<DistributionSet> createDistributionSetsAlphabetical(final int amount) {
         char character = 'a';
-        final Set<DistributionSet> created = Sets.newHashSetWithExpectedSize(amount);
+        final Set<DistributionSet> created = new HashSet<>(amount);
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
             created.add(testdataFactory.createDistributionSet(str));

@@ -11,20 +11,19 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 
 import java.util.concurrent.locks.Lock;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
  * Scheduler to check target filters for auto assignment of distribution sets
  */
+@Slf4j
 public class AutoAssignScheduler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AutoAssignScheduler.class);
-
+    
     private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.autoassign.scheduler.fixedDelay:2000}";
 
     private final SystemManagement systemManagement;
@@ -83,11 +82,11 @@ public class AutoAssignScheduler {
         }
 
         try {
-            LOGGER.debug("Auto assign scheduled execution has acquired lock and started for each tenant.");
+            log.debug("Auto assign scheduled execution has acquired lock and started for each tenant.");
             systemManagement.forEachTenant(tenant -> autoAssignExecutor.checkAllTargets());
         } finally {
             lock.unlock();
-            LOGGER.debug("Auto assign scheduled execution has released lock and finished.");
+            log.debug("Auto assign scheduled execution has released lock and finished.");
         }
 
         return null;

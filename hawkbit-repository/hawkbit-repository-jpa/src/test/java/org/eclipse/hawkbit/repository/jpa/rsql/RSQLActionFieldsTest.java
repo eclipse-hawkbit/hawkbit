@@ -62,6 +62,11 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
             newAction.setTarget(target);
             newAction.setWeight(45);
             newAction.setInitiatedBy(tenantAware.getCurrentUsername());
+            if ((i % 2) == 0) {
+                newAction.setExternalRef("extRef");
+            } else {
+                newAction.setExternalRef("extRef2");
+            }
             actionRepository.save(newAction);
             target.addAction(newAction);
         }
@@ -100,6 +105,14 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
             fail("Missing expected RSQLParameterUnsupportedFieldException because status cannot be compared with 'true'");
         } catch (final RSQLParameterUnsupportedFieldException e) {
         }
+
+    }
+    @Test
+    @Description("Test action by status")
+    public void testFilterByParameterExtRef() {
+        assertRSQLQuery(ActionFields.EXTERNALREF.name() + "==extRef", 5);
+        assertRSQLQuery(ActionFields.EXTERNALREF.name() + "!=extRef", 6);
+        assertRSQLQuery(ActionFields.EXTERNALREF.name() + "==extRef*", 10);
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expectedEntities) {

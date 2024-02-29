@@ -9,40 +9,38 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.entity.EntityDeletedEvent;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
+import java.io.Serial;
+
 /**
- *
  * Defines the remote event of deleting a {@link org.eclipse.hawkbit.repository.model.TenantConfiguration}.
  */
+@NoArgsConstructor // for serialization libs like jackson
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class TenantConfigurationDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
 
+    @Serial
     private static final long serialVersionUID = 2L;
+
     private String configKey;
+    @ToString.Exclude
     private String configValue;
 
     /**
-     * Default constructor.
-     */
-    public TenantConfigurationDeletedEvent() {
-        // for serialization libs like jackson
-    }
-
-    /**
-     *
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param configKey
-     *            the config key
-     * @param configValue
-     *            the config value
-     * @param entityClass
-     *            the entity class
-     * @param applicationId
-     *            the origin application id
+     * @param tenant the tenant
+     * @param entityId the entity id
+     * @param configKey the config key
+     * @param configValue the config value
+     * @param entityClass the entity class
+     * @param applicationId the origin application id
      */
     public TenantConfigurationDeletedEvent(final String tenant, final Long entityId, final String configKey,
             final String configValue, final Class<? extends TenantAwareBaseEntity> entityClass,
@@ -50,13 +48,5 @@ public class TenantConfigurationDeletedEvent extends RemoteIdEvent implements En
         super(entityId, tenant, entityClass, applicationId);
         this.configKey = configKey;
         this.configValue = configValue;
-    }
-
-    public String getConfigKey() {
-        return configKey;
-    }
-
-    public String getConfigValue() {
-        return configValue;
     }
 }

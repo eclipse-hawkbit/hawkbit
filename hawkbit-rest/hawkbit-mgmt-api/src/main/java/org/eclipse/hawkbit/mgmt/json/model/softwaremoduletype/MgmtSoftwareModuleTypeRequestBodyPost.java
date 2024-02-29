@@ -11,21 +11,26 @@ package org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * Request Body for SoftwareModuleType POST.
- *
  */
+@Data
+@Accessors(chain = true)
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class MgmtSoftwareModuleTypeRequestBodyPost extends MgmtSoftwareModuleTypeRequestBodyPut {
 
     @JsonProperty(required = true)
     @Schema(example = "Example name")
     private String name;
-
     @JsonProperty(required = true)
     @Schema(example = "Example key")
     private String key;
-
     @JsonProperty
     @Schema(example = "1")
     private int maxAssignments;
@@ -41,58 +46,4 @@ public class MgmtSoftwareModuleTypeRequestBodyPost extends MgmtSoftwareModuleTyp
         super.setColour(colour);
         return this;
     }
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param name
-     *            the name to set
-     *
-     * @return updated body
-     */
-    public MgmtSoftwareModuleTypeRequestBodyPost setName(final String name) {
-        this.name = name;
-        return this;
-    }
-
-    /**
-     * @return the key
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * @param key
-     *            the key to set
-     * @return updated body
-     */
-    public MgmtSoftwareModuleTypeRequestBodyPost setKey(final String key) {
-        this.key = key;
-        return this;
-    }
-
-    /**
-     * @return the maxAssignments
-     */
-    public int getMaxAssignments() {
-        return maxAssignments;
-    }
-
-    /**
-     * @param maxAssignments
-     *            the maxAssignments to set
-     *
-     * @return updated body
-     */
-    public MgmtSoftwareModuleTypeRequestBodyPost setMaxAssignments(final int maxAssignments) {
-        this.maxAssignments = maxAssignments;
-        return this;
-    }
-
 }

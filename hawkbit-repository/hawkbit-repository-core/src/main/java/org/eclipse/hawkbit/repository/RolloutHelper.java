@@ -14,8 +14,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -26,10 +28,8 @@ import org.springframework.util.StringUtils;
 /**
  * A collection of static helper methods for the {@link RolloutManagement}
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RolloutHelper {
-
-    private RolloutHelper() {
-    }
 
     /**
      * Verifies that the required success condition and action are actually set.

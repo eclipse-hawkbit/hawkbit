@@ -13,10 +13,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 /**
  * JSON representation of the Attribute THING_CREATED message.
  */
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfCreateThing {
@@ -25,21 +27,8 @@ public class DmfCreateThing {
     private String name;
 
     @JsonProperty
+    private String type;
+
+    @JsonProperty
     private DmfAttributeUpdate attributeUpdate;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public DmfAttributeUpdate getAttributeUpdate() {
-        return attributeUpdate;
-    }
-
-    public void setAttributeUpdate(final DmfAttributeUpdate attributeUpdate) {
-        this.attributeUpdate = attributeUpdate;
-    }
 }

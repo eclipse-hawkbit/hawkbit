@@ -9,25 +9,23 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import com.cronutils.utils.StringUtils;
 
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.parser.Parser;
 import org.jsoup.safety.Cleaner;
 import org.jsoup.safety.Safelist;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.cronutils.utils.StringUtils;
 
 /**
  * Safe html constraint validator for strings submitted into the repository.
- *
  */
+@Slf4j
 public class ValidStringValidator implements ConstraintValidator<ValidString, String> {
-    private static final Logger LOG = LoggerFactory.getLogger(ValidStringValidator.class);
 
     private final Cleaner cleaner = new Cleaner(Safelist.none());
 
@@ -40,7 +38,7 @@ public class ValidStringValidator implements ConstraintValidator<ValidString, St
         try {
             return cleaner.isValid(stringToDocument(value));
         } catch (final Exception ex) {
-            LOG.error(String.format("There was an exception during bean field value (%s) validation", value), ex);
+            log.error(String.format("There was an exception during bean field value (%s) validation", value), ex);
             return false;
         }
     }
@@ -53,5 +51,4 @@ public class ValidStringValidator implements ConstraintValidator<ValidString, St
 
         return resultingDocument;
     }
-
 }

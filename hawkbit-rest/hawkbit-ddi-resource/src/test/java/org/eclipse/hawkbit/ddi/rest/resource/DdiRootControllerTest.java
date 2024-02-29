@@ -45,8 +45,10 @@ import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleTypeCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
@@ -122,7 +124,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(status().isNotFound());
 
         // create tenant -- creates softwaremoduletypes and distributionsettypes
-        systemManagement.getTenantMetadata("tenantDoesNotExists");
+        systemManagement.createTenantMetadata("tenantDoesNotExists");
 
         mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), "aControllerId"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
@@ -230,9 +232,11 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 3), @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6), // implicit lock
             @Expect(type = ActionCreatedEvent.class, count = 2),
-            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1) })
     void rootRsNotModified() throws Exception {
         final String controllerId = "4711";
         final String etag = mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId))
@@ -254,7 +258,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .getContent().get(0);
         final String etagWithFirstUpdate = mvc
                 .perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId)
-                        .header("If-None-Match", etag).accept(MediaType.APPLICATION_JSON))
+                        .header("If-None-Match", etag).accept(MediaType.APPLICATION_JSON).with(new RequestOnHawkbitDefaultPortPostProcessor()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
@@ -266,7 +270,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         assertThat(etagWithFirstUpdate).isNotNull();
 
         mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId).header("If-None-Match",
-                etagWithFirstUpdate)).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotModified());
+                etagWithFirstUpdate).with(new RequestOnHawkbitDefaultPortPostProcessor()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotModified());
 
         // now lets finish the update
         sendDeploymentActionFeedback(target, updateAction, "closed", null).andDo(MockMvcResultPrinter.print())
@@ -276,7 +281,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         // original state cannot be restored
         final String etagAfterInstallation = mvc
                 .perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId)
-                        .header("If-None-Match", etag).accept(MediaType.APPLICATION_JSON))
+                        .header("If-None-Match", etag).accept(MediaType.APPLICATION_JSON)
+                        .with(new RequestOnHawkbitDefaultPortPostProcessor()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
@@ -294,7 +300,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .getContent().get(0);
 
         mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId)
-                .header("If-None-Match", etagAfterInstallation).accept(MediaType.APPLICATION_JSON))
+                .header("If-None-Match", etagAfterInstallation).accept(MediaType.APPLICATION_JSON)
+                .with(new RequestOnHawkbitDefaultPortPostProcessor()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
@@ -383,10 +390,12 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Description("Controller trys to finish an update process after it has been finished by an error action status.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 2),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+            @Expect(type = TargetUpdatedEvent.class, count = 2) })
     void tryToFinishAnUpdateProcessAfterItHasBeenFinished() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
@@ -407,10 +416,12 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Description("Controller sends attribute update request after device successfully closed software update.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 6), @Expect(type = TargetPollEvent.class, count = 4),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1) })
     void attributeUpdateRequestSendingAfterSuccessfulDeployment() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("1");
@@ -485,11 +496,13 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Description("Test to verify that only a specific count of messages are returned based on the input actionHistory for getControllerDeploymentActionFeedback endpoint.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
-            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1) })
     void testActionHistoryCount() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
@@ -521,11 +534,13 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Description("Test to verify that a zero input value of actionHistory results in no action history appended for getControllerDeploymentActionFeedback endpoint.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
-            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1) })
     void testActionHistoryZeroInput() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
@@ -557,11 +572,13 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Description("Test to verify that entire action history is returned if the input value for actionHistory is -1, for getControllerDeploymentActionFeedback endpoint.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
-            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1) })
     void testActionHistoryNegativeInput() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");

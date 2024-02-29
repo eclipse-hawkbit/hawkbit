@@ -17,24 +17,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 
 /**
  * JSON representation of download and update request.
- *
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfDownloadAndUpdateRequest extends DmfActionRequest {
 
+    @Getter
     @JsonProperty
     private String targetSecurityToken;
 
     @JsonProperty
     private List<DmfSoftwareModule> softwareModules;
-
-    public String getTargetSecurityToken() {
-        return targetSecurityToken;
-    }
 
     public void setTargetSecurityToken(final String targetSecurityToken) {
         this.targetSecurityToken = targetSecurityToken;

@@ -81,7 +81,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         // verify distributionSetManagement#findByDistributionSetFilter
         assertThat(distributionSetManagement
                 .findByDistributionSetFilter(Pageable.unpaged(),
-                        new DistributionSetFilter.DistributionSetFilterBuilder().setIsDeleted(false).build())
+                        DistributionSetFilter.builder().isDeleted(false).build())
                 .get().map(Identifiable::getId).toList()).containsOnly(permitted.getId());
 
         // verify distributionSetManagement#get
@@ -264,12 +264,17 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
     @Test
     void verifyAutoAssignmentUsage() {
         // permit all operations first to prepare test setup
+        permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);
 
         final DistributionSet permitted = testdataFactory.createDistributionSet();
         final DistributionSet readOnly = testdataFactory.createDistributionSet();
         final DistributionSet hidden = testdataFactory.createDistributionSet();
+        // has to lock them, otherwise implicit lock shall be made which require DistributionSet update permissions
+        distributionSetManagement.lock(permitted.getId());
+        distributionSetManagement.lock(readOnly.getId());
+        distributionSetManagement.lock(hidden.getId());
 
         // entities created - reset rules
         testAccessControlManger.deleteAllRules();

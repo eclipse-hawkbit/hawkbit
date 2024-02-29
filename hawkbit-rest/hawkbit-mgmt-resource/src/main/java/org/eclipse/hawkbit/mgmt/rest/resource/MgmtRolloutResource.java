@@ -14,8 +14,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
@@ -44,8 +45,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -58,12 +57,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST Resource handling rollout CRUD operations.
- *
  */
+@Slf4j
 @RestController
 public class MgmtRolloutResource implements MgmtRolloutRestApi {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MgmtRolloutResource.class);
 
     private final RolloutManagement rolloutManagement;
 
@@ -161,9 +158,9 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             rollout = rolloutManagement.create(create, rolloutGroups, rolloutGroupConditions);
 
         } else if (rolloutRequestBody.getAmountGroups() != null) {
-            final boolean confirmationRequired = rolloutRequestBody.isConfirmationRequired() == null
+            final boolean confirmationRequired = rolloutRequestBody.getConfirmationRequired() == null
                     ? confirmationFlowActive
-                    : rolloutRequestBody.isConfirmationRequired();
+                    : rolloutRequestBody.getConfirmationRequired();
             rollout = rolloutManagement.create(create, rolloutRequestBody.getAmountGroups(), confirmationRequired,
                     rolloutGroupConditions);
 
@@ -176,10 +173,10 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     private Optional<Boolean> isConfirmationRequiredForGroup(final MgmtRolloutGroup group,
             final MgmtRolloutRestRequestBody request) {
-        if (group.isConfirmationRequired() != null) {
-            return Optional.of(group.isConfirmationRequired());
-        } else if (request.isConfirmationRequired() != null) {
-            return Optional.of(request.isConfirmationRequired());
+        if (group.getConfirmationRequired() != null) {
+            return Optional.of(group.getConfirmationRequired());
+        } else if (request.getConfirmationRequired() != null) {
+            return Optional.of(request.getConfirmationRequired());
         }
         return Optional.empty();
     }
@@ -336,7 +333,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     private static MgmtRepresentationMode parseRepresentationMode(final String representationModeParam) {
         return MgmtRepresentationMode.fromValue(representationModeParam).orElseGet(() -> {
             // no need for a 400, just apply a safe fallback
-            LOG.warn("Received an invalid representation mode: {}", representationModeParam);
+            log.warn("Received an invalid representation mode: {}", representationModeParam);
             return MgmtRepresentationMode.COMPACT;
         });
     }

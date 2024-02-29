@@ -11,17 +11,18 @@ package org.eclipse.hawkbit;
 
 import java.io.Serializable;
 
+import lombok.Data;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Defines global configuration for the controllers/clients on the provisioning
  * targets/devices.
  * 
- * 
  * Note: many of the controller related properties can be overridden on tenant
  * level.
- * 
  */
+@Data
 @ConfigurationProperties(prefix = "hawkbit.controller")
 public class ControllerPollProperties implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -59,56 +60,4 @@ public class ControllerPollProperties implements Serializable {
      * (maintenanceWindowStartTime - t)/maintenanceWindowPollCount.
      */
     private int maintenanceWindowPollCount = 3;
-
-    public String getPollingTime() {
-        return pollingTime;
-    }
-
-    public void setPollingTime(final String pollingTime) {
-        this.pollingTime = pollingTime;
-    }
-
-    public String getPollingOverdueTime() {
-        return pollingOverdueTime;
-    }
-
-    public void setPollingOverdueTime(final String pollingOverdueTime) {
-        this.pollingOverdueTime = pollingOverdueTime;
-    }
-
-    public String getMaxPollingTime() {
-        return maxPollingTime;
-    }
-
-    public void setMaxPollingTime(final String maxPollingTime) {
-        this.maxPollingTime = maxPollingTime;
-    }
-
-    public String getMinPollingTime() {
-        return minPollingTime;
-    }
-
-    public void setMinPollingTime(final String minPollingTime) {
-        this.minPollingTime = minPollingTime;
-    }
-
-    /**
-     * Returns poll count for maintenance window
-     * ({@link ControllerPollProperties#maintenanceWindowPollCount}).
-     *
-     * @return maintenanceWindowPollCount as int.
-     */
-    public int getMaintenanceWindowPollCount() {
-        return maintenanceWindowPollCount;
-    }
-
-    /**
-     * Sets poll count for maintenance window
-     * ({@link ControllerPollProperties#maintenanceWindowPollCount}).
-     *
-     * @param maintenanceWindowPollCount.
-     */
-    public void setMaintenanceWindowPollCount(int maintenanceWindowPollCount) {
-        this.maintenanceWindowPollCount = maintenanceWindowPollCount;
-    }
 }

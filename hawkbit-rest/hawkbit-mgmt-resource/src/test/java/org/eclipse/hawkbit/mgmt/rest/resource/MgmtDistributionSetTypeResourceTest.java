@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -175,7 +176,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Step
     private MvcResult runPostDistributionSetType(final List<DistributionSetType> types) throws Exception {
         return mvc
-                .perform(post("/rest/v1/distributionsettypes/").content(JsonBuilder.distributionSetTypes(types))
+                .perform(post("/rest/v1/distributionsettypes").content(JsonBuilder.distributionSetTypes(types))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -256,7 +257,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         // create software module types
         final int maxSoftwareModuleTypes = quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType();
-        final List<Long> moduleTypeIds = Lists.newArrayList();
+        final List<Long> moduleTypeIds = new ArrayList<>();
         for (int i = 0; i < maxSoftwareModuleTypes + 1; ++i) {
             final SoftwareModuleTypeCreate smCreate = entityFactory.softwareModuleType().create().name("smType_" + i)
                     .description("smType_" + i).maxAssignments(1).colour("blue").key("smType_" + i);

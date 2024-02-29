@@ -11,12 +11,14 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 /**
  * Represents information to validate the correct distribution of targets to
  * rollout groups.
  */
+@Data
 public class RolloutGroupsValidation {
 
     /**
@@ -41,14 +43,6 @@ public class RolloutGroupsValidation {
     public RolloutGroupsValidation(final long totalTargets, @NotNull final List<Long> targetsPerGroup) {
         this.totalTargets = totalTargets;
         this.targetsPerGroup = targetsPerGroup;
-    }
-
-    public long getTotalTargets() {
-        return totalTargets;
-    }
-
-    public List<Long> getTargetsPerGroup() {
-        return targetsPerGroup;
     }
 
     /**

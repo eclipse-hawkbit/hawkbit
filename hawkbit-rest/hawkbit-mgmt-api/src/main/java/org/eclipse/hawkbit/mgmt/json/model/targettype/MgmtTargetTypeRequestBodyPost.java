@@ -19,15 +19,15 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModule
 
 /**
  * Request Body for TargetType POST.
- *
  */
 public class MgmtTargetTypeRequestBodyPost extends MgmtTargetTypeRequestBodyPut {
 
     @JsonProperty
-    @Schema(example = "id.t23")
+    @Schema(description = "Target type key", example = "id.t23")
     private String key;
 
     @JsonProperty
+    @Schema(description = "Array of distribution set types that are compatible to that target type")
     private List<MgmtDistributionSetTypeAssignment> compatibledistributionsettypes;
 
     /**

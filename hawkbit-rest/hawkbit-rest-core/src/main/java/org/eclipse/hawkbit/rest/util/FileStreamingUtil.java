@@ -18,41 +18,35 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
-import com.google.common.base.Preconditions;
-import com.google.common.io.ByteStreams;
-import com.google.common.math.DoubleMath;
-
 /**
  * Utility class for artifact file streaming.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Slf4j
 public final class FileStreamingUtil {
-
-    private static final Logger LOG = LoggerFactory.getLogger(FileStreamingUtil.class);
 
     /**
      * File suffix for MDH hash download (see Linux md5sum).
      */
     public static final String ARTIFACT_MD5_DWNL_SUFFIX = ".MD5SUM";
-
     private static final int BUFFER_SIZE = 0x2000; // 8k
-
-    private FileStreamingUtil() {
-
-    }
-
+    
     /**
      * Write a md5 file response.
      *
@@ -138,7 +132,7 @@ public final class FileStreamingUtil {
         // set the x-content-type options header to prevent browsers from doing
         // MIME-sniffing when downloading an artifact, as this could cause a
         // security vulnerability
-        response.setHeader(com.google.common.net.HttpHeaders.X_CONTENT_TYPE_OPTIONS, "nosniff");
+        response.setHeader("X-Content-Type-Options", "nosniff");
         if (lastModified > 0) {
             response.setDateHeader(HttpHeaders.LAST_MODIFIED, lastModified);
         }
@@ -152,12 +146,12 @@ public final class FileStreamingUtil {
         // Validate and process Range and If-Range headers.
         final String range = request.getHeader("Range");
         if (lastModified > 0 && range != null) {
-            LOG.debug("range header for filename ({}) is: {}", filename, range);
+            log.debug("range header for filename ({}) is: {}", filename, range);
 
             // Range header matches"bytes=n-n,n-n,n-n..."
             if (!range.matches("^bytes=\\d*-\\d*(,\\d*-\\d*)*+$")) {
                 response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + length);
-                LOG.debug("range header for filename ({}) is not satisfiable: ", filename);
+                log.debug("range header for filename ({}) is not satisfiable: ", filename);
                 return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
             }
 
@@ -176,17 +170,17 @@ public final class FileStreamingUtil {
 
         // full request - no range
         if (ranges.isEmpty() || ranges.get(0).equals(full)) {
-            LOG.debug("filename ({}) results into a full request: ", filename);
+            log.debug("filename ({}) results into a full request: ", filename);
             result = handleFullFileRequest(artifact, filename, response, progressListener, full);
         }
         // standard range request
         else if (ranges.size() == 1) {
-            LOG.debug("filename ({}) results into a standard range request: ", filename);
+            log.debug("filename ({}) results into a standard range request: ", filename);
             result = handleStandardRangeRequest(artifact, filename, response, progressListener, ranges);
         }
         // multipart range request
         else {
-            LOG.debug("filename ({}) results into a multipart range request: ", filename);
+            log.debug("filename ({}) results into a multipart range request: ", filename);
             result = handleMultipartRangeRequest(artifact, filename, response, progressListener, ranges);
         }
 
@@ -268,7 +262,7 @@ public final class FileStreamingUtil {
                     ranges.add(full);
                 }
             } catch (final IllegalArgumentException ignore) {
-                LOG.info("Invalid if-range header field", ignore);
+                log.info("Invalid if-range header field", ignore);
                 ranges.add(full);
             }
         }
@@ -320,7 +314,7 @@ public final class FileStreamingUtil {
             final ServletOutputStream to = response.getOutputStream();
             copyStreams(from, to, progressListener, r.getStart(), r.getLength(), filename);
         } catch (final IOException e) {
-            LOG.error("standardRangeRequest of file ({}) failed!", filename, e);
+            log.error("standardRangeRequest of file ({}) failed!", filename, e);
             throw new FileStreamingFailedException(filename);
         }
 
@@ -332,15 +326,15 @@ public final class FileStreamingUtil {
             final String filename) throws IOException {
 
         final long startMillis = System.currentTimeMillis();
-        LOG.trace("Start of copy-streams of file {} from {} to {}", filename, start, length);
+        log.trace("Start of copy-streams of file {} from {} to {}", filename, start, length);
 
-        Preconditions.checkNotNull(from);
-        Preconditions.checkNotNull(to);
+        Objects.requireNonNull(from);
+        Objects.requireNonNull(to);
         final byte[] buf = new byte[BUFFER_SIZE];
         long total = 0;
         int progressPercent = 1;
 
-        ByteStreams.skipFully(from, start);
+        IOUtils.skipFully(from, start);
 
         long toRead = length;
         boolean toContinue = true;
@@ -365,7 +359,7 @@ public final class FileStreamingUtil {
             }
 
             if (progressListener != null) {
-                final int newPercent = DoubleMath.roundToInt(total * 100.0 / length, RoundingMode.DOWN);
+                final int newPercent = (int)Math.floor(total * 100.0 / length);
 
                 // every 10 percent an event
                 if (newPercent == 100 || newPercent > progressPercent + 10) {
@@ -383,7 +377,7 @@ public final class FileStreamingUtil {
                     + " bytes could not be written to client, total time on write: !" + totalTime + " ms");
         }
 
-        LOG.trace("Finished copy-stream of file {} with length {} in {} ms", filename, length, totalTime);
+        log.trace("Finished copy-stream of file {} with length {} in {} ms", filename, length, totalTime);
 
         return total;
     }

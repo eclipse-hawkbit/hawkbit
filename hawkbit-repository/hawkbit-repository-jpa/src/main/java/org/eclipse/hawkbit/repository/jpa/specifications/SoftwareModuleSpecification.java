@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.ListJoin;
+import jakarta.persistence.criteria.ListJoin;
 
 /**
  * Specifications class for {@link SoftwareModule}s. The class provides Spring

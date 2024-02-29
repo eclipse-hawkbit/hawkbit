@@ -11,18 +11,24 @@ package org.eclipse.hawkbit.autoconfigure.security;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.PermissionUtils;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.im.authentication.UserPrincipal;
+import org.eclipse.hawkbit.im.authentication.TenantAwareUser;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -30,110 +36,130 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.ObjectUtils;
 
 /**
- * Auto-configuration for the in-memory-user-management.
- *
+ * Autoconfiguration for the in-memory-user-management.
  */
 @Configuration
-@ConditionalOnMissingBean(UserDetailsService.class)
-@EnableConfigurationProperties({ MultiUserProperties.class })
+@Order(Ordered.HIGHEST_PRECEDENCE)
+@EnableConfigurationProperties({ TenantAwareUserProperties.class })
 public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
     private static final String DEFAULT_TENANT = "DEFAULT";
 
-    private final SecurityProperties securityProperties;
+    private final UserDetailsService userDetailsService;
 
-    private final MultiUserProperties multiUserProperties;
-
-    InMemoryUserManagementAutoConfiguration(final SecurityProperties securityProperties,
-            final MultiUserProperties multiUserProperties) {
-        this.securityProperties = securityProperties;
-        this.multiUserProperties = multiUserProperties;
+    InMemoryUserManagementAutoConfiguration(
+            final SecurityProperties securityProperties,
+            final TenantAwareUserProperties tenantAwareUserProperties,
+            final Optional<PasswordEncoder> passwordEncoder) {
+        userDetailsService = userDetailsService(
+                securityProperties, tenantAwareUserProperties, passwordEncoder.orElse(null));
     }
 
     @Override
-    public void configure(final AuthenticationManagerBuilder auth) throws Exception {
+    public void configure(final AuthenticationManagerBuilder auth) {
         final DaoAuthenticationProvider userDaoAuthenticationProvider = new TenantDaoAuthenticationProvider();
-        userDaoAuthenticationProvider.setUserDetailsService(userDetailsService());
+        userDaoAuthenticationProvider.setUserDetailsService(userDetailsService);
         auth.authenticationProvider(userDaoAuthenticationProvider);
     }
 
-    /**
-     * @return the user details service to load a user from memory user manager.
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    UserDetailsService userDetailsService() {
-
-        final List<UserPrincipal> userPrincipals = new ArrayList<>();
-        for (final MultiUserProperties.User user : multiUserProperties.getUsers()) {
-            final List<String> permissions = user.getPermissions();
-            List<GrantedAuthority> authorityList;
-            // Allows ALL as a shorthand for all permissions
-            if (permissions.size() == 1 && "ALL".equals(permissions.get(0))) {
-                authorityList = PermissionUtils.createAllAuthorityList();
-            } else {
-                authorityList = createAuthoritiesFromList(permissions);
-            }
-
-            final UserPrincipal userPrincipal = new UserPrincipal(user.getUsername(), user.getPassword(),
-                    user.getFirstname(), user.getLastname(), user.getUsername(), user.getEmail(), DEFAULT_TENANT,
-                    authorityList);
+    private static UserDetailsService userDetailsService(
+            final SecurityProperties securityProperties,
+            final TenantAwareUserProperties tenantAwareUserProperties,
+            final PasswordEncoder passwordEncoder) {
+        final List<User> userPrincipals = new ArrayList<>();
+        tenantAwareUserProperties.getUsers().forEach((username, user) -> {
+            final TenantAwareUser userPrincipal = new TenantAwareUser(
+                    username, password(user.getPassword(), passwordEncoder),
+                    createAuthorities(user.getRoles(), Collections::emptyList),
+                    ObjectUtils.isEmpty(user.getTenant()) ? DEFAULT_TENANT : user.getTenant());
             userPrincipals.add(userPrincipal);
-        }
+        });
 
-        // If no users are configured through the multi user properties, set up
-        // the default user from security properties
+        // If no tenant users are configured through the tenant user properties, set up
+        // the default user from spring security properties as super DEFAULT tenant user
         if (userPrincipals.isEmpty()) {
-            final String name = securityProperties.getUser().getName();
-            final String password = securityProperties.getUser().getPassword();
-            final List<String> roles = securityProperties.getUser().getRoles();
-            final List<GrantedAuthority> authorityList = roles.isEmpty() ? PermissionUtils.createAllAuthorityList()
-                    : createAuthoritiesFromList(roles);
             userPrincipals
-                    .add(new UserPrincipal(name, password, name, name, name, null, DEFAULT_TENANT, authorityList));
+                    .add(new TenantAwareUser(
+                            securityProperties.getUser().getName(),
+                            password(securityProperties.getUser().getPassword(), passwordEncoder),
+                            createAuthorities(
+                                    securityProperties.getUser().getRoles(), PermissionUtils::createAllAuthorityList),
+                            DEFAULT_TENANT));
+        } else if (securityProperties != null && securityProperties.getUser() != null &&
+                !securityProperties.getUser().isPasswordGenerated()) {
+            // otherwise if the security user is explicitly setup (no autogenerated password)
+            // set it up as generic non tenant user
+            userPrincipals
+                    .add(new User(
+                            securityProperties.getUser().getName(),
+                            password(securityProperties.getUser().getPassword(), passwordEncoder),
+                            createAuthorities(
+                                    securityProperties.getUser().getRoles(), PermissionUtils::createAllAuthorityList)));
         }
 
-        return new FixedInMemoryUserPrincipalUserDetailsService(userPrincipals);
+        return new FixedInMemoryTenantAwareUserDetailsService(userPrincipals);
     }
 
-    private static List<GrantedAuthority> createAuthoritiesFromList(final List<String> userAuthorities) {
-        final List<GrantedAuthority> grantedAuthorityList = new ArrayList<>(userAuthorities.size());
-        for (final String permission : userAuthorities) {
+    private static String password(final String password, final PasswordEncoder passwordEncoder) {
+        return passwordEncoder == null && !Pattern.compile("^\\{.+}.*$").matcher(password).matches() ?
+                "{noop}" + password : password;
+    }
+
+    private static List<GrantedAuthority> createAuthorities(
+            final List<String> userPermissions, final Supplier<List<GrantedAuthority>> defaultRolesSupplier) {
+        if (ObjectUtils.isEmpty(userPermissions)) {
+            return defaultRolesSupplier.get();
+        }
+
+        // Allows ALL as a shorthand for all permissions
+        if (userPermissions.size() == 1 && "ALL".equals(userPermissions.get(0))) {
+            return PermissionUtils.createAllAuthorityList();
+        }
+
+        final List<GrantedAuthority> grantedAuthorityList = new ArrayList<>(userPermissions.size());
+        for (final String permission : userPermissions) {
             grantedAuthorityList.add(new SimpleGrantedAuthority(permission));
             grantedAuthorityList.add(new SimpleGrantedAuthority("ROLE_" + permission));
         }
         return grantedAuthorityList;
     }
 
-    private static class FixedInMemoryUserPrincipalUserDetailsService implements UserDetailsService {
-        private final HashMap<String, UserPrincipal> userPrincipalMap = new HashMap<>();
+    private static class FixedInMemoryTenantAwareUserDetailsService implements UserDetailsService {
 
-        public FixedInMemoryUserPrincipalUserDetailsService(final Collection<UserPrincipal> userPrincipals) {
-            for (final UserPrincipal user : userPrincipals) {
-                userPrincipalMap.put(user.getUsername(), user);
+        private final HashMap<String, User> userMap = new HashMap<>();
+
+        private FixedInMemoryTenantAwareUserDetailsService(final Collection<User> userPrincipals) {
+            for (final User user : userPrincipals) {
+                userMap.put(user.getUsername(), user);
             }
-        }
-
-        private static UserPrincipal clone(final UserPrincipal a) {
-            return new UserPrincipal(a.getUsername(), a.getPassword(), a.getFirstname(), a.getLastname(),
-                    a.getLoginname(), a.getEmail(), a.getTenant(), a.getAuthorities());
         }
 
         @Override
         public UserDetails loadUserByUsername(final String username) {
-            final UserPrincipal userPrincipal = userPrincipalMap.get(username);
-            if (userPrincipal == null) {
+            final User user = userMap.get(username);
+            if (user == null) {
                 throw new UsernameNotFoundException("No such user");
             }
             // Spring mutates the data, so we must return a copy here
-            return clone(userPrincipal);
+            return clone(user);
         }
 
+        private static User clone(final User user) {
+            if (user instanceof TenantAwareUser) {
+                return new TenantAwareUser(user.getUsername(), user.getPassword(), user.getAuthorities(),
+                        ((TenantAwareUser)user).getTenant());
+            } else {
+                return new User(user.getUsername(), user.getPassword(), user.getAuthorities());
+            }
+        }
     }
 
     /**

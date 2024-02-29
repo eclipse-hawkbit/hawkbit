@@ -84,10 +84,6 @@
          <artifactId>spring-context-support</artifactId>
       </dependency>
       <dependency>
-         <groupId>com.google.guava</groupId>
-         <artifactId>guava</artifactId>
-      </dependency>
-      <dependency>
          <groupId>org.springframework</groupId>
          <artifactId>spring-tx</artifactId>
       </dependency>
@@ -117,13 +113,7 @@
       </dependency>
       <dependency>
          <groupId>org.springframework.cloud</groupId>
-         <artifactId>spring-cloud-stream-binder-test</artifactId>
-         <exclusions>
-            <exclusion>
-               <groupId>junit</groupId>
-               <artifactId>junit</artifactId>
-            </exclusion>
-         </exclusions>
+         <artifactId>spring-cloud-stream-test-binder</artifactId>
       </dependency>
       <dependency>
          <groupId>org.springframework.cloud</groupId>

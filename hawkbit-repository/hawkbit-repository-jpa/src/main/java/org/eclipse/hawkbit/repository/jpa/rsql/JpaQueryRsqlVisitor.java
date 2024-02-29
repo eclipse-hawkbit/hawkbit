@@ -22,34 +22,32 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.MapJoin;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.PluralJoin;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.MapJoin;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.PluralJoin;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 
-import com.google.common.collect.Lists;
 import cz.jirutka.rsql.parser.ast.AndNode;
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.LogicalNode;
 import cz.jirutka.rsql.parser.ast.Node;
 import cz.jirutka.rsql.parser.ast.OrNode;
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.FieldValueConverter;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.orm.jpa.vendor.Database;
@@ -60,20 +58,16 @@ import org.springframework.util.StringUtils;
  * An implementation of the {@link RSQLVisitor} to visit the parsed tokens and
  * build JPA where clauses.
  *
- * @param <A>
- *            the enum for providing the field name of the entity field to
- *            filter on.
- * @param <T>
- *            the entity type referenced by the root
+ * @param <A> the enum for providing the field name of the entity field to filter on.
+ * @param <T> the entity type referenced by the root
  */
+@Slf4j
 public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> extends AbstractFieldNameRSQLVisitor<A>
         implements RSQLVisitor<List<Predicate>, String> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaQueryRsqlVisitor.class);
-
     public static final Character LIKE_WILDCARD = '*';
     private static final char ESCAPE_CHAR = '\\';
-    private static final List<String> NO_JOINS_OPERATOR = Lists.newArrayList("!=", "=out=");
+    private static final List<String> NO_JOINS_OPERATOR = List.of("!=", "=out=");
     private static final String ESCAPE_CHAR_WITH_ASTERISK = ESCAPE_CHAR +"*";
 
     private final Map<Integer, Set<Join<Object, Object>>> joinsInLevel = new HashMap<>(3);
@@ -297,9 +291,9 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
         } catch (final IllegalArgumentException e) {
             // we could not transform the given string value into the enum
             // type, so ignore it and return null and do not filter
-            LOGGER.info("given value {} cannot be transformed into the correct enum type {}", value.toUpperCase(),
+            log.info("given value {} cannot be transformed into the correct enum type {}", value.toUpperCase(),
                     javaType);
-            LOGGER.debug("value cannot be transformed to an enum", e);
+            log.debug("value cannot be transformed to an enum", e);
 
             throw new RSQLParameterUnsupportedFieldException("field {" + node.getSelector()
                     + "} must be one of the following values {" + Arrays.stream(tmpEnumType.getEnumConstants())
@@ -597,7 +591,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
             if (!CollectionUtils.isEmpty(accept)) {
                 childs.addAll(accept);
             } else {
-                LOGGER.debug("visit logical node children but could not parse it, ignoring {}", node2);
+                log.debug("visit logical node children but could not parse it, ignoring {}", node2);
             }
         }
         return childs;

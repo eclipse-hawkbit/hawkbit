@@ -4,6 +4,9 @@
 package org.eclipse.hawkbit.mgmt.json.model.target;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
@@ -13,19 +16,29 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Request Body of DistributionSet for assignment operations (ID only).
- *
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class MgmtDistributionSetAssignment extends MgmtId {
 
-    @Schema(example = "1691065930359")
+    @Schema(description = "Forcetime in milliseconds", example = "1691065930359")
     private long forcetime;
-    @JsonProperty(required = false)
-    @Schema(example = "23")
+
+    @JsonProperty
+    @Schema(description = "Importance of the assignment", example = "23")
     private Integer weight;
-    @JsonProperty(required = false)
-    @Schema(example = "false")
+
+    @JsonProperty
+    @Schema(description = """
+        (Available with user consent flow active) Specifies if the confirmation by the device
+        is required for this action""", example = "false")
     private Boolean confirmationRequired;
+
+    @Schema(description = "The type of the assignment")
     private MgmtActionType type;
+
+    @Schema(description = "Separation of download and install by defining a maintenance window for the installation")
     private MgmtMaintenanceWindowRequestBody maintenanceWindow;
 
     /**
@@ -37,58 +50,5 @@ public class MgmtDistributionSetAssignment extends MgmtId {
     @JsonCreator
     public MgmtDistributionSetAssignment(@JsonProperty(required = true, value = "id") final Long id) {
         super(id);
-    }
-
-    public MgmtActionType getType() {
-        return type;
-    }
-
-    public void setType(final MgmtActionType type) {
-        this.type = type;
-    }
-
-    public long getForcetime() {
-        return forcetime;
-    }
-
-    public void setForcetime(final long forcetime) {
-        this.forcetime = forcetime;
-    }
-
-    public Integer getWeight() {
-        return weight;
-    }
-
-    public void setWeight(final int weight) {
-        this.weight = weight;
-    }
-
-    /**
-     * Returns {@link MgmtMaintenanceWindowRequestBody} for distribution set
-     * assignment.
-     *
-     * @return {@link MgmtMaintenanceWindowRequestBody}.
-     */
-    public MgmtMaintenanceWindowRequestBody getMaintenanceWindow() {
-        return maintenanceWindow;
-    }
-
-    /**
-     * Sets {@link MgmtMaintenanceWindowRequestBody} for distribution set
-     * assignment.
-     *
-     * @param maintenanceWindow
-     *            as {@link MgmtMaintenanceWindowRequestBody}.
-     */
-    public void setMaintenanceWindow(final MgmtMaintenanceWindowRequestBody maintenanceWindow) {
-        this.maintenanceWindow = maintenanceWindow;
-    }
-
-    public Boolean isConfirmationRequired() {
-        return confirmationRequired;
-    }
-
-    public void setConfirmationRequired(final Boolean confirmationRequired) {
-        this.confirmationRequired = confirmationRequired;
     }
 }

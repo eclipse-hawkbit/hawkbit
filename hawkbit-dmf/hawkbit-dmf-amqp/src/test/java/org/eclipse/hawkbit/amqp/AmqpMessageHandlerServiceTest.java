@@ -50,7 +50,6 @@ import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
@@ -168,6 +167,9 @@ public class AmqpMessageHandlerServiceTest {
     private ArgumentCaptor<String> targetNameCaptor;
 
     @Captor
+    private ArgumentCaptor<String> targetTypeNameCaptor;
+
+    @Captor
     private ArgumentCaptor<URI> uriCaptor;
 
     @Captor
@@ -228,7 +230,8 @@ public class AmqpMessageHandlerServiceTest {
                     uriCaptor.capture())).thenReturn(targetMock);
         } else {
             when(controllerManagementMock.findOrRegisterTargetIfItDoesNotExist(targetIdCaptor.capture(),
-                    uriCaptor.capture(), targetNameCaptor.capture())).thenReturn(targetMock);
+                    uriCaptor.capture(), targetNameCaptor.capture(), targetTypeNameCaptor.capture()))
+                    .thenReturn(targetMock);
             if (payload.getAttributeUpdate() != null) {
                 when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(),
                         attributesCaptor.capture(), modeCaptor.capture())).thenReturn(null);
@@ -278,6 +281,27 @@ public class AmqpMessageHandlerServiceTest {
     @Step
     private void assertThingNameCapturedField(final String thingName) {
         assertThat(targetNameCaptor.getValue()).as("Thing name is wrong").isEqualTo(thingName);
+    }
+
+    @Test
+    @Description("Tests the creation of a target/thing with specified type name by calling the same method that incoming RabbitMQ messages would access.")
+    public void createThingWithType() {
+        final String knownThingId = "2";
+        final String knownThingTypeName = "TargetTypeName";
+
+        final DmfCreateThing payload = new DmfCreateThing();
+        payload.setType(knownThingTypeName);
+
+        processThingCreatedMessage(knownThingId, payload);
+
+        assertThingIdCapturedField(knownThingId);
+        assertReplyToCapturedField("MyTest");
+        assertThingTypeCapturedField(knownThingTypeName);
+    }
+
+    @Step
+    private void assertThingTypeCapturedField(final String thingType) {
+        assertThat(targetTypeNameCaptor.getValue()).as("Thing type is wrong").isEqualTo(thingType);
     }
 
     @Test

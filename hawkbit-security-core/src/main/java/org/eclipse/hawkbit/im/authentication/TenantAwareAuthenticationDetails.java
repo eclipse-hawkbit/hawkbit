@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.im.authentication;
 
 import java.io.Serializable;
 
+import lombok.Getter;
+import lombok.ToString;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 
 /**
@@ -19,7 +21,10 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
  * spring security authentication token details to transport the principal and
  * tenant in the security context session.
  */
+@Getter
+@ToString
 public class TenantAwareAuthenticationDetails implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     private final String tenant;
@@ -37,24 +42,4 @@ public class TenantAwareAuthenticationDetails implements Serializable {
         this.tenant = tenant;
         this.controller = controller;
     }
-
-    /**
-     * @return the tenant
-     */
-    public String getTenant() {
-        return tenant;
-    }
-
-    /**
-     * @return the controller
-     */
-    public boolean isController() {
-        return controller;
-    }
-
-    @Override
-    public String toString() {
-        return "TenantAwareAuthenticationDetails [tenant=" + tenant + ", controller=" + controller + "]";
-    }
-
 }

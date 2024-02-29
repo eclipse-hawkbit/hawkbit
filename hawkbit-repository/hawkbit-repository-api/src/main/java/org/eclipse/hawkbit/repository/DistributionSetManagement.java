@@ -13,8 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
@@ -133,6 +133,16 @@ public interface DistributionSetManagement
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     void deleteMetaData(long id, @NotEmpty String key);
+
+    /**
+     * Locks a distribution set. From then on its functional properties could not be changed and
+     * it could be assigned to targets
+     *
+     * @param id the distribution set id
+     * @throws EntityNotFoundException if distribution set with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    void lock(final long id);
 
     /**
      * Retrieves the distribution set for a given action.

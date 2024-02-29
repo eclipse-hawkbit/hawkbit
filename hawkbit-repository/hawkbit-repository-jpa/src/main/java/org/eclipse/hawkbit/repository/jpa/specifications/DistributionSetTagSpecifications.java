@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag_;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 /**
  * Utility class for {@link JpaDistributionSetTag}s {@link Specification}s. The class provides

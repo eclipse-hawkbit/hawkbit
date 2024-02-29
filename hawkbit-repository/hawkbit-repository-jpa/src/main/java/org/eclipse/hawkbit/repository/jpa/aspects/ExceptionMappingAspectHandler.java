@@ -9,19 +9,20 @@
  */
 package org.eclipse.hawkbit.repository.jpa.aspects;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.transaction.TransactionManager;
+import jakarta.transaction.TransactionManager;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.eclipse.hawkbit.exception.GenericSpServerException;
 import org.eclipse.hawkbit.repository.exception.ConcurrentModificationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -29,27 +30,23 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.TransactionSystemException;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 /**
  * {@link Aspect} catches persistence exceptions and wraps them to custom
  * specific exceptions Additionally it checks and prevents access to certain
  * packages. Logging aspect which logs the call stack
  */
+@Slf4j
 @Aspect
 public class ExceptionMappingAspectHandler implements Ordered {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ExceptionMappingAspectHandler.class);
-
-    private static final Map<String, String> EXCEPTION_MAPPING = Maps.newHashMapWithExpectedSize(4);
+    private static final Map<String, String> EXCEPTION_MAPPING = new HashMap<>(4);
 
     /**
      * this is required to enable a certain order of exception and to select the
      * most specific mappable exception according to the type hierarchy of the
      * exception.
      */
-    private static final List<Class<?>> MAPPED_EXCEPTION_ORDER = Lists.newArrayListWithExpectedSize(4);
+    private static final List<Class<?>> MAPPED_EXCEPTION_ORDER = new ArrayList<>(4);
 
     static {
 
@@ -99,7 +96,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
                         .getConstructor(Throwable.class).newInstance(ex);
             }
 
-            LOG.error("there is no mapping configured for exception class {}", mappedEx.getName());
+            log.error("there is no mapping configured for exception class {}", mappedEx.getName());
             throw new GenericSpServerException(ex);
         }
 
@@ -110,7 +107,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
         Throwable exception = rex;
         do {
             final Throwable cause = exception.getCause();
-            if (cause instanceof javax.validation.ConstraintViolationException) {
+            if (cause instanceof jakarta.validation.ConstraintViolationException) {
                 return (Exception) cause;
             }
             exception = cause;

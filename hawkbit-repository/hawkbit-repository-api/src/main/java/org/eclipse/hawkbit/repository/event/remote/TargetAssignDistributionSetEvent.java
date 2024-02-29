@@ -9,30 +9,31 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import java.io.Serial;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.Action;
 
 /**
- * TenantAwareEvent that gets sent when a distribution set gets assigned to a
- * target.
+ * TenantAwareEvent that gets sent when a distribution set gets assigned to a target.
  */
+@NoArgsConstructor // for serialization libs like jackson
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class TargetAssignDistributionSetEvent extends AbstractAssignmentEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private long distributionSetId;
-
     private boolean maintenanceWindowAvailable;
-
-    /**
-     * Default constructor.
-     */
-    public TargetAssignDistributionSetEvent() {
-        // for serialization libs like jackson
-    }
 
     /**
      * Constructor.
@@ -70,13 +71,4 @@ public class TargetAssignDistributionSetEvent extends AbstractAssignmentEvent {
         this(action.getTenant(), action.getDistributionSet().getId(), Collections.singletonList(action), applicationId,
                 action.isMaintenanceWindowAvailable());
     }
-
-    public Long getDistributionSetId() {
-        return distributionSetId;
-    }
-
-    public boolean isMaintenanceWindowAvailable() {
-        return maintenanceWindowAvailable;
-    }
-
 }

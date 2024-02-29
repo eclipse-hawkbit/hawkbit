@@ -22,9 +22,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.validation.ConstraintDeclarationException;
-import javax.validation.ValidationException;
+import jakarta.validation.ConstraintDeclarationException;
+import jakarta.validation.ValidationException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -48,6 +49,7 @@ import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
@@ -73,8 +75,6 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -93,15 +93,13 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.collect.Lists;
-
 /**
  * JPA implementation of {@link RolloutManagement}.
  */
+@Slf4j
 @Validated
 @Transactional(readOnly = true)
 public class JpaRolloutManagement implements RolloutManagement {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaRolloutManagement.class);
 
     private static final List<RolloutStatus> ACTIVE_ROLLOUTS = Arrays.asList(RolloutStatus.CREATING,
             RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING,
@@ -171,7 +169,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public Page<Rollout> findByRsql(final Pageable pageable, final String rsqlParam, final boolean deleted) {
-        final List<Specification<JpaRollout>> specList = Lists.newArrayListWithExpectedSize(2);
+        final List<Specification<JpaRollout>> specList = new ArrayList<>(2);
         specList.add(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
         specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort()));
@@ -208,22 +206,29 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private JpaRollout createRollout(final JpaRollout rollout) {
         WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(rollout);
-        long totalTargets;
-        String errMsg;
+        final JpaDistributionSet distributionSet = (JpaDistributionSet) rollout.getDistributionSet();
+        final long totalTargets;
+        final String errMsg;
         if (RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
             totalTargets = targetManagement.countByFailedInRollout(
                 RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()),
-                rollout.getDistributionSet().getType().getId());
+                    distributionSet.getType().getId());
             errMsg = "No failed targets in Rollout";
          } else {
             totalTargets = targetManagement.countByRsqlAndCompatible(rollout.getTargetFilterQuery(),
-                rollout.getDistributionSet().getType().getId());
+                    distributionSet.getType().getId());
             errMsg = "Rollout does not match any existing targets";
         }
         if (totalTargets == 0) {
             throw new ValidationException(errMsg);
         }
         rollout.setTotalTargets(totalTargets);
+
+        // implicit lock
+        if (!distributionSet.isLocked()) {
+            distributionSetManagement.lock(distributionSet.getId());
+        }
+
         if (rollout.getWeight().isEmpty()) {
             rollout.setWeight(repositoryProperties.getActionWeightIfAbsent());
         }
@@ -384,7 +389,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision, final String remark) {
-        LOGGER.debug("approveOrDeny rollout called for rollout {} with decision {}", rolloutId, decision);
+        log.debug("approveOrDeny rollout called for rollout {} with decision {}", rolloutId, decision);
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.WAITING_FOR_APPROVAL);
         switch (decision) {
@@ -409,7 +414,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout start(final long rolloutId) {
-        LOGGER.debug("startRollout called for rollout {}", rolloutId);
+        log.debug("startRollout called for rollout {}", rolloutId);
 
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         RolloutHelper.checkIfRolloutCanStarted(rollout, rollout);
@@ -529,7 +534,6 @@ public class JpaRolloutManagement implements RolloutManagement {
         rollout.setStartAt(update.getStartAt().orElse(null));
         update.getSet().ifPresent(setId -> {
             final DistributionSet set = distributionSetManagement.getValidAndComplete(setId);
-
             rollout.setDistributionSet(set);
         });
         if (rolloutApprovalStrategy.isApprovalNeeded(rollout)) {
@@ -646,7 +650,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             final JpaRollout jpaRollout = (JpaRollout) rollout;
             jpaRollout.setStatus(RolloutStatus.STOPPING);
             rolloutRepository.save(jpaRollout);
-            LOGGER.debug("Rollout {} stopped", jpaRollout.getId());
+            log.debug("Rollout {} stopped", jpaRollout.getId());
         });
     }
 

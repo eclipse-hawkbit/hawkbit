@@ -221,6 +221,5 @@ public class TenantConfigurationProperties {
                 context.getAutowireCapableBeanFactory().destroyBean(createdBean);
             }
         }
-
     }
 }

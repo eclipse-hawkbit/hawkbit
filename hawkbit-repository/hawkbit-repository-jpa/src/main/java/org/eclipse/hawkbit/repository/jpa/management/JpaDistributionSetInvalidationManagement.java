@@ -13,12 +13,14 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
@@ -29,18 +31,14 @@ import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.Cancelat
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Jpa implementation for {@link DistributionSetInvalidationManagement}
- *
  */
+@Slf4j
 public class JpaDistributionSetInvalidationManagement implements DistributionSetInvalidationManagement {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaDistributionSetInvalidationManagement.class);
 
     private final DistributionSetManagement distributionSetManagement;
     private final RolloutManagement rolloutManagement;
@@ -73,7 +71,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
 
     @Override
     public void invalidateDistributionSet(final DistributionSetInvalidation distributionSetInvalidation) {
-        LOG.debug("Invalidate distribution sets {}", distributionSetInvalidation.getDistributionSetIds());
+        log.debug("Invalidate distribution sets {}", distributionSetInvalidation.getDistributionSetIds());
         final String tenant = tenantAware.getCurrentTenant();
         if (shouldRolloutsBeCanceled(distributionSetInvalidation.getCancelationType(),
                 distributionSetInvalidation.isCancelRollouts())) {
@@ -89,7 +87,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
                     lock.unlock();
                 }
             } catch (final InterruptedException e) {
-                LOG.error("InterruptedException while invalidating distribution sets {}!",
+                log.error("InterruptedException while invalidating distribution sets {}!",
                         distributionSetInvalidation.getDistributionSetIds(), e);
                 Thread.currentThread().interrupt();
             }
@@ -97,7 +95,6 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
             // no lock is needed as no rollout will be stopped
             invalidateDistributionSetsInTransaction(distributionSetInvalidation, tenant);
         }
-
     }
 
     private void invalidateDistributionSetsInTransaction(final DistributionSetInvalidation distributionSetInvalidation,
@@ -111,24 +108,28 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
 
     private void invalidateDistributionSet(final long setId, final CancelationType cancelationType,
             final boolean cancelRollouts) {
-        final DistributionSet set = distributionSetManagement.getValidAndComplete(setId);
-        distributionSetManagement.invalidate(set);
-        LOG.debug("Distribution set {} marked as invalid.", setId);
+        final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
+        if (!distributionSet.isComplete()) {
+            throw new IncompleteDistributionSetException("Distribution set of type "
+                    + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
+        }
+        distributionSetManagement.invalidate(distributionSet);
+        log.debug("Distribution set {} marked as invalid.", setId);
 
         // rollout cancellation should only be permitted with UPDATE_ROLLOUT permission
         if (shouldRolloutsBeCanceled(cancelationType, cancelRollouts)) {
-            LOG.debug("Cancel rollouts after ds invalidation. ID: {}", setId);
-            rolloutManagement.cancelRolloutsForDistributionSet(set);
+            log.debug("Cancel rollouts after ds invalidation. ID: {}", setId);
+            rolloutManagement.cancelRolloutsForDistributionSet(distributionSet);
         }
 
         // Do run as system to ensure all actions (even invisible) are canceled due to invalidation.
         systemSecurityContext.runAsSystem(() -> {
             if (cancelationType != CancelationType.NONE) {
-                LOG.debug("Cancel actions after ds invalidation. ID: {}", setId);
-                deploymentManagement.cancelActionsForDistributionSet(cancelationType, set);
+                log.debug("Cancel actions after ds invalidation. ID: {}", setId);
+                deploymentManagement.cancelActionsForDistributionSet(cancelationType, distributionSet);
             }
 
-            LOG.debug("Cancel auto assignments after ds invalidation. ID: {}", setId);
+            log.debug("Cancel auto assignments after ds invalidation. ID: {}", setId);
             targetFilterQueryManagement.cancelAutoAssignmentForDistributionSet(setId);
             return null;
         });

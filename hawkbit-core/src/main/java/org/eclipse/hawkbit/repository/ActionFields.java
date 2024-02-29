@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Sort fields for {@link ActionRest}.
+ * Sort and search fields for actions.
  */
 public enum ActionFields implements FieldNameProvider, FieldValueConverter<ActionFields> {
 
@@ -64,7 +64,13 @@ public enum ActionFields implements FieldNameProvider, FieldValueConverter<Actio
     /**
      * The rollout field
      */
-    ROLLOUTGROUP("rolloutGroup", RolloutGroupFields.ID.getFieldName(), RolloutGroupFields.NAME.getFieldName());
+    ROLLOUTGROUP("rolloutGroup", RolloutGroupFields.ID.getFieldName(), RolloutGroupFields.NAME.getFieldName()),
+
+
+    /**
+     * The weight field.
+     */
+    EXTERNALREF("externalRef");
 
     private static final String ACTIVE = "pending";
     private static final String INACTIVE = "finished";
@@ -119,5 +125,4 @@ public enum ActionFields implements FieldNameProvider, FieldValueConverter<Actio
             return null;
         }
     }
-
 }

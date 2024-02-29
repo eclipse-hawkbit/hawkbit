@@ -9,18 +9,17 @@
  */
 package org.eclipse.hawkbit.rest.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.result.PrintingResultHandler;
 import org.springframework.util.CollectionUtils;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Slf4j
 public abstract class MockMvcResultPrinter {
-    private static final Logger LOG = LoggerFactory.getLogger(MockMvcResultPrinter.class);
-
-    private MockMvcResultPrinter() {
-    }
 
     /**
      * Print {@link MvcResult} details to logger.
@@ -39,7 +38,7 @@ public abstract class MockMvcResultPrinter {
 
                 @Override
                 public void printHeading(final String heading) {
-                    LOG.debug(String.format("%20s:", heading));
+                    log.debug(String.format("%20s:", heading));
                 }
 
                 @Override
@@ -49,7 +48,7 @@ public abstract class MockMvcResultPrinter {
                     if (value != null && value.getClass().isArray()) {
                         value = CollectionUtils.arrayToList(value);
                     }
-                    LOG.debug(String.format("%20s = %s", label, value));
+                    log.debug(String.format("%20s = %s", label, value));
                 }
             });
         }

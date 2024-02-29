@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.ArtifactStoreException;
 import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
@@ -46,8 +47,6 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -59,17 +58,15 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.validation.annotation.Validated;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 /**
  * JPA based {@link ArtifactManagement} implementation.
- *
  */
+@Slf4j
 @Transactional(readOnly = true)
 @Validated
 public class JpaArtifactManagement implements ArtifactManagement {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaArtifactManagement.class);
 
     private final EntityManager entityManager;
 
@@ -110,8 +107,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final String filename = artifactUpload.getFilename();
         final Artifact existing = softwareModule.getArtifactByFilename(filename).orElse(null);
         if (existing != null) {
-            if (artifactUpload.overrideExisting()) {
-                LOG.debug("overriding existing artifact with new filename {}", filename);
+            if (artifactUpload.isOverrideExisting()) {
+                log.debug("overriding existing artifact with new filename {}", filename);
             } else {
                 throw new EntityAlreadyExistsException("File with that name already exists in the Software Module");
             }
@@ -204,7 +201,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
                 @Override
                 public void afterCommit() {
                     try {
-                        LOG.debug("deleting artifact from repository {}", sha1Hash);
+                        log.debug("deleting artifact from repository {}", sha1Hash);
                         artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), sha1Hash);
                     } catch (final ArtifactStoreException e) {
                         throw new ArtifactDeleteFailedException(e);
@@ -319,7 +316,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         artifact.setSha256Hash(result.getHashes().getSha256());
         artifact.setSize(result.getSize());
 
-        LOG.debug("storing new artifact into repository {}", artifact);
+        log.debug("storing new artifact into repository {}", artifact);
         return localArtifactRepository.save(AccessController.Operation.CREATE, artifact);
     }
 

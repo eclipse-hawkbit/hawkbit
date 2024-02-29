@@ -11,15 +11,17 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.io.InputStream;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
+import lombok.Data;
 import org.eclipse.hawkbit.repository.ValidString;
 
 /**
  * Use to create a new artifact.
  *
  */
+@Data
 public class ArtifactUpload {
 
     @NotNull
@@ -96,41 +98,5 @@ public class ArtifactUpload {
         this.overrideExisting = overrideExisting;
         this.contentType = contentType;
         this.filesize = filesize;
-    }
-
-    public InputStream getInputStream() {
-        return inputStream;
-    }
-
-    public long getModuleId() {
-        return moduleId;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public String getProvidedMd5Sum() {
-        return providedMd5Sum;
-    }
-
-    public String getProvidedSha1Sum() {
-        return providedSha1Sum;
-    }
-
-    public String getProvidedSha256Sum() {
-        return providedSha256Sum;
-    }
-
-    public boolean overrideExisting() {
-        return overrideExisting;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public long getFilesize() {
-        return filesize;
     }
 }

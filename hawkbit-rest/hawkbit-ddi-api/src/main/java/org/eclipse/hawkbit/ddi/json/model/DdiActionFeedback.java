@@ -9,13 +9,16 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  * <p>
@@ -35,12 +38,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * "execution": "closed", "result": { "final": "success", "progress": {} }
  * "details": [], } }
  * </p>
- *
  */
+@Getter
+@EqualsAndHashCode
+@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiActionFeedback {
 
-    @Schema(example = "2023-08-03T12:31:41.890992967Z")
+    @Schema(description = "Timestamp of the action", example = "2023-08-03T12:31:41.890992967Z")
     private final String time;
 
     @NotNull
@@ -50,29 +55,14 @@ public class DdiActionFeedback {
     /**
      * Constructs an action-feedback
      * 
-     * @param time
-     *            time of feedback
-     * @param status
-     *            status to be appended to the action
+     * @param time time of feedback
+     * @param status status to be appended to the action
      */
     @JsonCreator
-    public DdiActionFeedback(@JsonProperty(value = "time") final String time,
+    public DdiActionFeedback(
+            @JsonProperty(value = "time") final String time,
             @JsonProperty(value = "status", required = true) final DdiStatus status) {
         this.time = time;
         this.status = status;
     }
-
-    public String getTime() {
-        return time;
-    }
-
-    public DdiStatus getStatus() {
-        return status;
-    }
-
-    @Override
-    public String toString() {
-        return "ActionFeedback [time=" + time + ", status=" + status + "]";
-    }
-
 }

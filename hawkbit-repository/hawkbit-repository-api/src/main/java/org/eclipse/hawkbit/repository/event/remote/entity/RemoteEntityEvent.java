@@ -11,11 +11,10 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -23,12 +22,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * A base definition class for remote events which contain a tenant aware base
  * entity.
  *
- * @param <E>
- *            the type of the entity
+ * @param <E> the type of the entity
  */
+@Slf4j
 public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteIdEvent {
-
-    private static final Logger LOG = LoggerFactory.getLogger(RemoteEntityEvent.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -69,9 +66,8 @@ public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteId
             return EventEntityManagerHolder.getInstance().getEventEntityManager().findEntity(getTenant(), getEntityId(),
                     clazz);
         } catch (final ClassNotFoundException e) {
-            LOG.error("Cannot reload entity because class is not found", e);
+            log.error("Cannot reload entity because class is not found", e);
         }
         return null;
     }
-
 }

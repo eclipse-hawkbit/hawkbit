@@ -19,11 +19,13 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -53,9 +55,6 @@ import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
-
-import com.google.common.collect.Lists;
-import com.google.common.io.BaseEncoding;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -185,7 +184,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         // now create artifacts for this module until the quota is exceeded
         final long maxArtifacts = quotaManagement.getMaxArtifactsPerSoftwareModule();
-        final List<Long> artifactIds = Lists.newArrayList();
+        final List<Long> artifactIds = new ArrayList<>();
         final int artifactSize = 5 * 1024;
         for (int i = 0; i < maxArtifacts; ++i) {
             artifactIds.add(createArtifactForSoftwareModule("file" + i, smId, artifactSize).getId());
@@ -213,7 +212,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         // create as many small artifacts as possible w/o violating the storage
         // quota
         final long maxBytes = quotaManagement.getMaxArtifactStorage();
-        final List<Long> artifactIds = Lists.newArrayList();
+        final List<Long> artifactIds = new ArrayList<>();
 
         // choose an artifact size which does not violate the max file size
         final int artifactSize = Math.toIntExact(quotaManagement.getMaxArtifactSize() / 10);
@@ -591,7 +590,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     private String toBase16Hash(final String algorithm, final byte[] input) throws NoSuchAlgorithmException {
         final MessageDigest messageDigest = MessageDigest.getInstance(algorithm);
         messageDigest.update(input);
-        return BaseEncoding.base16().lowerCase().encode(messageDigest.digest());
+        return HexFormat.of().withLowerCase().formatHex(messageDigest.digest());
     }
 
     private Artifact createArtifactForSoftwareModule(final String filename, final long moduleId, final int artifactSize)

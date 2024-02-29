@@ -14,103 +14,39 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * A json annotated rest model for DistributionSet for PUT/POST.
- *
  */
+@Data
+@Accessors(chain = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtDistributionSetRequestBodyPut {
 
     @JsonProperty
-    @Schema(example = "dsOne")
+    @Schema(description = "The name of the entity", example = "dsOne")
     private String name;
 
     @JsonProperty
-    @Schema(example = "Description of the distribution set.")
+    @Schema(description = "The description of the entity", example = "Description of the distribution set.")
     private String description;
 
     @JsonProperty
-    @Schema(example = "1.0.0")
+    @Schema(description = "Package version", example = "1.0.0")
     private String version;
 
     @JsonProperty
-    @Schema(example = "false")
+    @Schema(description = "Put it to true only if want to lock the distribution set. Otherwise skip it. " +
+            "Shall not be false!",
+            example = "true")
+    private Boolean locked;
+
+    @JsonProperty
+    @Schema(description = """
+        True if DS is a required migration step for another DS. As a result the DS’s assignment will not be cancelled
+        when another DS is assigned (note: updatable only if DS is not yet assigned to a target)""", example = "false")
     private Boolean requiredMigrationStep;
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param name
-     *            the name to set
-     *
-     * @return updated body
-     */
-    public MgmtDistributionSetRequestBodyPut setName(final String name) {
-        this.name = name;
-        return this;
-    }
-
-    /**
-     * @return the requiredMigrationStep
-     */
-    public Boolean isRequiredMigrationStep() {
-        return requiredMigrationStep;
-    }
-
-    /**
-     * @param requiredMigrationStep
-     *            the requiredMigrationStep to set
-     *
-     * @return updated body
-     */
-    public MgmtDistributionSetRequestBodyPut setRequiredMigrationStep(final Boolean requiredMigrationStep) {
-        this.requiredMigrationStep = requiredMigrationStep;
-
-        return this;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *            the description to set
-     *
-     * @return updated body
-     */
-    public MgmtDistributionSetRequestBodyPut setDescription(final String description) {
-        this.description = description;
-
-        return this;
-    }
-
-    /**
-     * @return the version
-     */
-    public String getVersion() {
-        return version;
-    }
-
-    /**
-     * @param version
-     *            the version to set
-     *
-     * @return updated body
-     */
-    public MgmtDistributionSetRequestBodyPut setVersion(final String version) {
-        this.version = version;
-
-        return this;
-    }
 }

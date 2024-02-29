@@ -17,9 +17,10 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-import javax.validation.ValidationException;
+import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
@@ -53,8 +54,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -69,11 +68,11 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * REST Resource handling target CRUD operations.
  */
+@Slf4j
 @RestController
 public class MgmtTargetResource implements MgmtTargetRestApi {
+    
     private static final String ACTION_TARGET_MISSING_ASSIGN_WARN = "given action ({}) is not assigned to given target ({}).";
-
-    private static final Logger LOG = LoggerFactory.getLogger(MgmtTargetResource.class);
 
     private final TargetManagement targetManagement;
 
@@ -135,10 +134,10 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<List<MgmtTarget>> createTargets(@RequestBody final List<MgmtTargetRequestBody> targets) {
-        LOG.debug("creating {} targets", targets.size());
+        log.debug("creating {} targets", targets.size());
         final Collection<Target> createdTargets = this.targetManagement
                 .create(MgmtTargetMapper.fromRequest(entityFactory, targets));
-        LOG.debug("{} targets created, return status {}", targets.size(), HttpStatus.CREATED);
+        log.debug("{} targets created, return status {}", targets.size(), HttpStatus.CREATED);
         return new ResponseEntity<>(MgmtTargetMapper.toResponse(createdTargets, tenantConfigHelper),
                 HttpStatus.CREATED);
     }
@@ -147,8 +146,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("targetId") final String targetId,
             @RequestBody final MgmtTargetRequestBody targetRest) {
 
-        if (targetRest.isRequestAttributes() != null) {
-            if (targetRest.isRequestAttributes()) {
+        if (targetRest.getRequestAttributes() != null) {
+            if (targetRest.getRequestAttributes()) {
                 targetManagement.requestControllerAttributes(targetId);
             } else {
                 return ResponseEntity.badRequest().build();
@@ -163,13 +162,13 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             // update target without targetType here ...
             updateTarget = this.targetManagement.update(entityFactory.target().update(targetId)
                 .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
-                .securityToken(targetRest.getSecurityToken()).requestAttributes(targetRest.isRequestAttributes()));
+                .securityToken(targetRest.getSecurityToken()).requestAttributes(targetRest.getRequestAttributes()));
 
         } else {
             updateTarget = this.targetManagement.update(
                 entityFactory.target().update(targetId).name(targetRest.getName()).description(targetRest.getDescription())
                     .address(targetRest.getAddress()).targetType(targetRest.getTargetType()).securityToken(targetRest.getSecurityToken())
-                    .requestAttributes(targetRest.isRequestAttributes()));
+                    .requestAttributes(targetRest.getRequestAttributes()));
 
         }
 
@@ -183,7 +182,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<Void> deleteTarget(@PathVariable("targetId") final String targetId) {
         this.targetManagement.deleteByControllerID(targetId);
-        LOG.debug("{} target deleted, return status {}", targetId, HttpStatus.OK);
+        log.debug("{} target deleted, return status {}", targetId, HttpStatus.OK);
         return ResponseEntity.ok().build();
     }
 
@@ -248,7 +247,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         if (!action.getTarget().getControllerId().equals(targetId)) {
-            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
+            log.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
             return ResponseEntity.notFound().build();
         }
 
@@ -263,7 +262,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (!action.getTarget().getControllerId().equals(targetId)) {
-            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, actionId, targetId);
+            log.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, actionId, targetId);
             return ResponseEntity.notFound().build();
         }
 
@@ -291,7 +290,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), target.getId());
+            log.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), target.getId());
             return ResponseEntity.notFound().build();
         }
 
@@ -328,7 +327,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
             @PathVariable("targetId") final String targetId,
-            @Valid @RequestBody final MgmtDistributionSetAssignments dsAssignments,
+            @RequestBody final MgmtDistributionSetAssignments dsAssignments,
             @RequestParam(value = "offline", required = false) final boolean offline) {
         if (offline) {
             final List<Entry<String, Long>> offlineAssignments = dsAssignments.stream()
@@ -340,9 +339,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         findTargetWithExceptionIfNotFound(targetId);
 
         final List<DeploymentRequest> deploymentRequests = dsAssignments.stream().map(dsAssignment -> {
-            final boolean isConfirmationRequired = dsAssignment.isConfirmationRequired() == null
+            final boolean isConfirmationRequired = dsAssignment.getConfirmationRequired() == null
                     ? tenantConfigHelper.isConfirmationFlowEnabled()
-                    : dsAssignment.isConfirmationRequired();
+                    : dsAssignment.getConfirmationRequired();
             return MgmtDeploymentRequestMapper.createAssignmentRequestBuilder(dsAssignment, targetId)
                     .setConfirmationRequired(isConfirmationRequired).build();
         }).collect(Collectors.toList());
@@ -382,7 +381,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         if (!action.getTarget().getControllerId().equals(targetId)) {
-            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
+            log.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
             return ResponseEntity.notFound().build();
         }
 

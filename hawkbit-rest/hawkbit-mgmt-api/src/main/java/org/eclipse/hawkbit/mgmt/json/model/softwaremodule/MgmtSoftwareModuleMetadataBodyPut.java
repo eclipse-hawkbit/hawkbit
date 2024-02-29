@@ -14,11 +14,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
 /**
  * The representation of an meta data in the REST API for PUT/Update.
- *
  */
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSoftwareModuleMetadataBodyPut {
@@ -29,20 +30,4 @@ public class MgmtSoftwareModuleMetadataBodyPut {
     @JsonProperty
     @Schema(example = "true")
     private Boolean targetVisible;
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(final String value) {
-        this.value = value;
-    }
-
-    public Boolean isTargetVisible() {
-        return targetVisible;
-    }
-
-    public void setTargetVisible(final Boolean targetVisible) {
-        this.targetVisible = targetVisible;
-    }
 }

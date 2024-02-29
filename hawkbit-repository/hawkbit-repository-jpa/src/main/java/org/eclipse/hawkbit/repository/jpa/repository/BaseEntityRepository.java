@@ -26,7 +26,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 /**
  * Command repository operations for all {@link TenantAwareBaseEntity}s.

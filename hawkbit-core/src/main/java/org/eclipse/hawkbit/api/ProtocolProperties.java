@@ -14,6 +14,7 @@ package org.eclipse.hawkbit.api;
  * pattern.
  */
 public interface ProtocolProperties {
+
     /**
      * @return the hostname value to resolve in the pattern.
      */

@@ -9,9 +9,14 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
-import javax.validation.constraints.NotNull;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -21,8 +26,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Confirmation base response.
  * Set order to place links at last.
  */
+@NoArgsConstructor // needed for json create
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "autoConfirm" })
+@Schema(
+        description = """
+    **_links**:
+    * **confirmationBase** - confirmation base
+    * **deactivateAutoConfirm** - where to deactivate auto confirm
+    * **activateAutoConfirm** - where to activate auto confirm
+    """,
+        example = """
+    {
+      "autoConfirm" : {
+        "active" : false
+      },
+      "_links" : {
+        "activateAutoConfirm" : {
+          "href" : "https://management-api.host.com/TENANT_ID/controller/v1/CONTROLLER_ID/confirmationBase/activateAutoConfirm"
+        },
+        "confirmationBase" : {
+          "href" : "https://management-api.host.com/TENANT_ID/controller/v1/CONTROLLER_ID/confirmationBase/10?c=-2122565939"
+        }
+      }
+    }""")
 public class DdiConfirmationBase extends RepresentationModel<DdiConfirmationBase> {
 
     @JsonProperty("autoConfirm")
@@ -31,21 +61,10 @@ public class DdiConfirmationBase extends RepresentationModel<DdiConfirmationBase
 
     /**
      * Constructor.
-     */
-    public DdiConfirmationBase() {
-        // needed for json create.
-    }
-
-    /**
-     * Constructor.
      *
      * @param autoConfirmState
      */
     public DdiConfirmationBase(final DdiAutoConfirmationState autoConfirmState) {
         this.autoConfirm = autoConfirmState;
-    }
-
-    public DdiAutoConfirmationState getAutoConfirm() {
-        return autoConfirm;
     }
 }

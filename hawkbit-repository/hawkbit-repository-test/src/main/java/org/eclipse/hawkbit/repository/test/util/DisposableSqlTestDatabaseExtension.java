@@ -10,19 +10,17 @@
 package org.eclipse.hawkbit.repository.test.util;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.eclipse.hawkbit.repository.test.util.DatasourceContext.SPRING_DATASOURCE_URL_KEY;
 
 /**
  * Provides a convenient way to generate a test database that can be used, and disposed of after the test is executed.
  */
+@Slf4j
 public class DisposableSqlTestDatabaseExtension extends SharedSqlTestDatabaseExtension implements AfterAllCallback {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SharedSqlTestDatabaseExtension.class);
     
     private DatasourceContext datasourceContext = null;
 
@@ -37,7 +35,7 @@ public class DisposableSqlTestDatabaseExtension extends SharedSqlTestDatabaseExt
                 sharedContext.getUsername(), sharedContext.getPassword());
         final AbstractSqlTestDatabase database = matchingDatabase(datasourceContext);
         final String randomSchemaUri = database.createRandomSchema().getRandomSchemaUri();
-        LOGGER.info("\033[0;33mRandom Schema URI is {} \033[0m", randomSchemaUri);
+        log.info("\033[0;33mRandom Schema URI is {} \033[0m", randomSchemaUri);
         System.setProperty(SPRING_DATASOURCE_URL_KEY, randomSchemaUri);
     }
 

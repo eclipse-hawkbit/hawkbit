@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.Action;
 
 import java.util.List;
@@ -20,16 +22,10 @@ import java.util.List;
  * actionIds containing the identifiers of the affected actions
  * as payload. This event is only published in case of an assignment.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class MultiActionAssignEvent extends MultiActionEvent {
 
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Default constructor.
-     */
-    public MultiActionAssignEvent() {
-        // for serialization libs like jackson
-    }
 
     /**
      * Constructor.
@@ -44,5 +40,4 @@ public class MultiActionAssignEvent extends MultiActionEvent {
     public MultiActionAssignEvent(String tenant, String applicationId, List<Action> actions) {
         super(tenant, applicationId, actions);
     }
-
 }

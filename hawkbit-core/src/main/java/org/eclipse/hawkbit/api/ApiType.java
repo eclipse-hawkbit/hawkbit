@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.api;
 
 /**
  * hawkBit API type.
- *
  */
 public enum ApiType {
 

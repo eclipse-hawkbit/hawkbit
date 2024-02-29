@@ -9,14 +9,33 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import jakarta.annotation.Nullable;
+
+import java.util.Optional;
+
 /**
  * Update implementation.
  */
 public class GenericSoftwareModuleUpdate extends AbstractSoftwareModuleUpdateCreate<SoftwareModuleUpdate>
         implements SoftwareModuleUpdate {
 
+    @Nullable
+    protected Boolean locked;
+
     public GenericSoftwareModuleUpdate(final Long id) {
         super.id = id;
     }
 
+    public SoftwareModuleUpdate locked(@Nullable final Boolean locked) {
+        if (Boolean.FALSE.equals(locked)) {
+            this.locked = null;
+        } else {
+            this.locked = locked;
+        }
+        return this;
+    }
+
+    public Boolean getLocked() {
+        return locked;
+    }
 }

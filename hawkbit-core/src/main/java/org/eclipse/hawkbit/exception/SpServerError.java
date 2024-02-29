@@ -204,7 +204,16 @@ public enum SpServerError {
      *
      */
     SP_DS_INCOMPLETE("hawkbit.server.error.distributionset.incomplete",
-            "Distribution set is assigned to a target that is incomplete (i.e. mandatory modules are missing)"),
+            "Distribution set is assigned/locked to a target that is incomplete (i.e. mandatory modules are missing)"),
+    /**
+     * error message, which describes that an entity is locked and can't be functionally modified
+     */
+    SP_LOCKED("hawkbit.server.error.locked", "Entry is locked. Could not be functionally modified"),
+
+    /**
+     * error message, which describes that an entity is locked and can't be functionally modified
+     */
+    SP_DELETED("hawkbit.server.error.deleted", "Entry is soft deleted"),
 
     /**
     *

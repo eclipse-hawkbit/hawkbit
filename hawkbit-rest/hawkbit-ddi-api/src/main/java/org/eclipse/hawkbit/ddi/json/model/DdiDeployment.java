@@ -12,82 +12,28 @@ package org.eclipse.hawkbit.ddi.json.model;
 import java.util.Collections;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * Detailed update action information.
  */
+@NoArgsConstructor // needed for json create
+@Getter
+@EqualsAndHashCode
+@ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiDeployment {
-
-    private HandlingType download;
-
-    private HandlingType update;
-
-    @JsonProperty("chunks")
-    @NotNull
-    private List<DdiChunk> chunks;
-
-    private DdiMaintenanceWindowStatus maintenanceWindow;
-
-    /**
-     * Constructor.
-     */
-    public DdiDeployment() {
-        // needed for json create.
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param download
-     *            handling type
-     * @param update
-     *            handling type
-     * @param chunks
-     *            to handle.
-     * @param maintenanceWindow
-     *            specifying whether there is a maintenance schedule associated.
-     *            If it is, the value is either 'available' (i.e. the
-     *            maintenance window is now available as per defined schedule
-     *            and the update can progress) or 'unavailable' (implying that
-     *            maintenance window is not available now and update should not
-     *            be attempted). If there is no maintenance schedule defined,
-     *            the parameter is null.
-     */
-    public DdiDeployment(final HandlingType download, final HandlingType update, final List<DdiChunk> chunks,
-            final DdiMaintenanceWindowStatus maintenanceWindow) {
-        this.download = download;
-        this.update = update;
-        this.chunks = chunks;
-        this.maintenanceWindow = maintenanceWindow;
-    }
-
-    public HandlingType getDownload() {
-        return download;
-    }
-
-    public HandlingType getUpdate() {
-        return update;
-    }
-
-    public List<DdiChunk> getChunks() {
-        if (chunks == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(chunks);
-    }
-
-    public DdiMaintenanceWindowStatus getMaintenanceWindow() {
-        return this.maintenanceWindow;
-    }
 
     /**
      * The handling type for the update action.
@@ -152,10 +98,54 @@ public class DdiDeployment {
         }
     }
 
-    @Override
-    public String toString() {
-        return "Deployment [download=" + download + ", update=" + update + ", chunks=" + chunks
-                + (maintenanceWindow == null ? "]" : (", maintenanceWindow=" + maintenanceWindow + "]"));
+    @Schema(description = """
+        Handling for the download part of the provisioning process ('skip': do not download yet, 'attempt': server asks
+        to download, 'forced': server requests immediate download)""")
+    private HandlingType download;
+
+    @Schema(description = """
+        Handling for the update part of the provisioning process ('skip': do not update yet,
+        'attempt': server asks to update, 'forced': server requests immediate update)""")
+    private HandlingType update;
+
+    @JsonProperty("chunks")
+    @NotNull
+    @Schema(description = "Software chunks of an update. In server mapped by Software Module")
+    private List<DdiChunk> chunks;
+
+    @Schema(description = """
+        Separation of download and installation by defining a maintenance window for the installation. Status shows if
+        currently in a window""")
+    private DdiMaintenanceWindowStatus maintenanceWindow;
+
+    /**
+     * Constructor.
+     *
+     * @param download handling type
+     * @param update handling type
+     * @param chunks to handle.
+     * @param maintenanceWindow
+     *            specifying whether there is a maintenance schedule associated.
+     *            If it is, the value is either 'available' (i.e. the
+     *            maintenance window is now available as per defined schedule
+     *            and the update can progress) or 'unavailable' (implying that
+     *            maintenance window is not available now and update should not
+     *            be attempted). If there is no maintenance schedule defined,
+     *            the parameter is null.
+     */
+    public DdiDeployment(final HandlingType download, final HandlingType update, final List<DdiChunk> chunks,
+            final DdiMaintenanceWindowStatus maintenanceWindow) {
+        this.download = download;
+        this.update = update;
+        this.chunks = chunks;
+        this.maintenanceWindow = maintenanceWindow;
     }
 
+    public List<DdiChunk> getChunks() {
+        if (chunks == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(chunks);
+    }
 }

@@ -14,14 +14,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiApiConfiguration;
@@ -45,8 +46,6 @@ import org.eclipse.hawkbit.security.HttpDownloadAuthenticationFilter;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -86,7 +85,6 @@ import org.springframework.security.web.firewall.FirewalledRequest;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.security.web.session.SessionManagementFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.cors.CorsConfiguration;
@@ -96,23 +94,19 @@ import org.springframework.web.cors.CorsConfigurationSource;
  * All configurations related to HawkBit's authentication and authorization
  * layer.
  */
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.ASPECTJ, proxyTargetClass = true, securedEnabled = true)
-@Order(value = Ordered.HIGHEST_PRECEDENCE)
-@PropertySource("classpath:/hawkbit-security-defaults.properties")
+@Order(Ordered.HIGHEST_PRECEDENCE)
+@PropertySource("classpath:hawkbit-security-defaults.properties")
 public class SecurityManagedConfiguration {
-
-    private static final Logger LOG = LoggerFactory.getLogger(SecurityManagedConfiguration.class);
 
     private static final int DOS_FILTER_ORDER = -200;
 
     /**
-     * @return the {@link UserAuthenticationFilter} to include into the hawkBit
-     *         security configuration.
-     * @throws Exception
-     *             lazy bean exception maybe if the authentication manager
-     *             cannot be instantiated
+     * @return the {@link UserAuthenticationFilter} to include into the hawkBit security configuration.
+     * @throws Exception lazy bean exception maybe if the authentication manager cannot be instantiated
      */
     @Bean
     @ConditionalOnMissingBean
@@ -197,7 +191,7 @@ public class SecurityManagedConfiguration {
             final AuthenticationManager authenticationManager = setAuthenticationManager(http, ddiSecurityConfiguration);
 
             http
-                    .requestMatchers(requestMatchers -> requestMatchers.antMatchers(DDI_ANT_MATCHERS))
+                    .securityMatcher(DDI_ANT_MATCHERS)
                     .csrf(AbstractHttpConfigurer::disable);
 
             if (securityProperties.isRequireSsl()) {
@@ -206,7 +200,7 @@ public class SecurityManagedConfiguration {
 
             final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
             if (ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled()) {
-                LOG.info(
+                log.info(
                         """
                         ******************
                         ** Anonymous controller security enabled, should only be used for developing purposes **
@@ -315,7 +309,7 @@ public class SecurityManagedConfiguration {
             final AuthenticationManager authenticationManager = setAuthenticationManager(http, ddiSecurityConfiguration);
 
             http
-                    .requestMatcher(new AntPathRequestMatcher(DDI_DL_ANT_MATCHER))
+                    .securityMatcher(DDI_DL_ANT_MATCHER)
                     .csrf(AbstractHttpConfigurer::disable);
 
             if (securityProperties.isRequireSsl()) {
@@ -325,7 +319,7 @@ public class SecurityManagedConfiguration {
             final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
 
             if (ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled()) {
-                LOG.info(
+                log.info(
                     """
                     ******************
                     ** Anonymous controller security enabled, should only be used for developing purposes **
@@ -436,7 +430,7 @@ public class SecurityManagedConfiguration {
             downloadIdAuthenticationFilter.setAuthenticationManager(authenticationManager);
 
             http
-                    .requestMatcher(new AntPathRequestMatcher("/**/downloadId/**"))
+                    .securityMatcher(MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE + "/downloadId/*/*")
                     .authorizeHttpRequests(armrRepository -> armrRepository.anyRequest().authenticated())
                     .csrf(AbstractHttpConfigurer::disable)
                     .anonymous(AbstractHttpConfigurer::disable)
@@ -495,11 +489,11 @@ public class SecurityManagedConfiguration {
                 final SystemSecurityContext systemSecurityContext)
                 throws Exception {
             http
-                    .requestMatchers(requestMatchers -> requestMatchers.antMatchers("/rest/**", MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**"))
+                    .securityMatcher("/rest/**", MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
                     .csrf(AbstractHttpConfigurer::disable)
                     .authorizeHttpRequests(amrmRegistry ->
                             amrmRegistry
-                                    .antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
+                                    .requestMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
                                         .hasAnyAuthority(SpPermission.SYSTEM_ADMIN)
                                     .anyRequest()
                                         .authenticated())
@@ -602,7 +596,7 @@ public class SecurityManagedConfiguration {
 
         if (!CollectionUtils.isEmpty(allowedHostNames)) {
             firewall.setAllowedHostnames(hostName -> {
-                LOG.debug("Firewall check host: {}, allowed: {}", hostName, allowedHostNames.contains(hostName));
+                log.debug("Firewall check host: {}, allowed: {}", hostName, allowedHostNames.contains(hostName));
                 return allowedHostNames.contains(hostName);
             });
         }

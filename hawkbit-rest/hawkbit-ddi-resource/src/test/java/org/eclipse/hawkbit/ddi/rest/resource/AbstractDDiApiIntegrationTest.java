@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiProgress;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -37,7 +38,8 @@ import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -55,12 +57,13 @@ import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import com.fasterxml.jackson.dataformat.cbor.CBORParser;
 
 @ContextConfiguration(classes = { DdiApiConfiguration.class, RestConfiguration.class,
-        RepositoryApplicationConfiguration.class, TestConfiguration.class,
-        TestSupportBinderAutoConfiguration.class })
+        RepositoryApplicationConfiguration.class, TestConfiguration.class })
+@Import(TestChannelBinderConfiguration.class)
 @TestPropertySource(locations = "classpath:/ddi-test.properties")
 public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrationTest {
 
-    protected static final String HTTP_LOCALHOST = "http://localhost:8080/";
+    public static final int HTTP_PORT = 8080;
+    protected static final String HTTP_LOCALHOST = String.format("http://localhost:%s/",HTTP_PORT);
     protected static final String CONTROLLER_BASE = "/{tenant}/controller/v1/{controllerId}";
 
     protected static final String SOFTWARE_MODULE_ARTIFACTS = CONTROLLER_BASE
@@ -155,7 +158,8 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
 
     protected ResultActions performGet(final String url, final MediaType mediaType, final ResultMatcher statusMatcher,
             final String... values) throws Exception {
-        return mvc.perform(MockMvcRequestBuilders.get(url, values).accept(mediaType))
+        return mvc.perform(MockMvcRequestBuilders.get(url, values).accept(mediaType)
+                .with(new RequestOnHawkbitDefaultPortPostProcessor()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(statusMatcher)
                 .andExpect(content().contentTypeCompatibleWith(mediaType));
     }
@@ -241,12 +245,12 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     }
 
     protected String installedBaseLink(final String controllerId, final String actionId) {
-        return "http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
+        return HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
                 + "/installedBase/" + actionId;
     }
 
     protected String deploymentBaseLink(final String controllerId, final String actionId) {
-        return "http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
+        return HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
                 + "/deploymentBase/" + actionId;
     }
 
@@ -369,5 +373,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
                 downloadType, updateType);
     }
 
-
+    static void implicitLock(final DistributionSet set) {
+        ((JpaDistributionSet) set).setOptLockRevision(set.getOptLockRevision() + 1);
+    }
 }

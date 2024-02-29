@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.model.helper;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.bus.BusProperties;
 import org.springframework.cloud.bus.ServiceMatcher;
@@ -19,10 +22,12 @@ import org.springframework.context.ApplicationEventPublisher;
  * order to publish remote application events. It can be used in beans not
  * instantiated by spring e.g. JPA entities which cannot be auto-wired.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EventPublisherHolder {
 
     private static final EventPublisherHolder SINGLETON = new EventPublisherHolder();
 
+    @Getter
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
@@ -32,21 +37,11 @@ public final class EventPublisherHolder {
     @Autowired
     private BusProperties bus;
 
-    private EventPublisherHolder() {
-    }
-
     /**
      * @return the event publisher holder singleton instance
      */
     public static EventPublisherHolder getInstance() {
         return SINGLETON;
-    }
-
-    /**
-     * @return the eventPublisher
-     */
-    public ApplicationEventPublisher getEventPublisher() {
-        return eventPublisher;
     }
 
     /**

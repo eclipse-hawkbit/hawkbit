@@ -28,10 +28,6 @@
          <version>${project.version}</version>
       </dependency>
       <dependency>
-         <groupId>com.google.guava</groupId>
-         <artifactId>guava</artifactId>
-      </dependency>
-      <dependency>
          <groupId>org.apache.commons</groupId>
          <artifactId>commons-lang3</artifactId>
       </dependency>
@@ -53,19 +49,11 @@
       </dependency>
       <dependency>
          <groupId>org.springdoc</groupId>
-         <artifactId>springdoc-openapi-ui</artifactId>
+         <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
       </dependency>
       <dependency>
-         <groupId>org.springdoc</groupId>
-         <artifactId>springdoc-openapi-hateoas</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springdoc</groupId>
-         <artifactId>springdoc-openapi-security</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>javax.servlet</groupId>
-         <artifactId>javax.servlet-api</artifactId>
+         <groupId>jakarta.servlet</groupId>
+         <artifactId>jakarta.servlet-api</artifactId>
          <scope>provided</scope>
       </dependency>
 

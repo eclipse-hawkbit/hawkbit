@@ -9,38 +9,25 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * A json annotated rest model for invalidate DistributionSet requests.
- *
  */
+@Data
+@Accessors(chain = true)
 public class MgmtInvalidateDistributionSetRequestBody {
 
     @NotNull
     @JsonProperty
+    @Schema(description = "Type of cancelation for actions referring to the given distribution set")
     private MgmtCancelationType actionCancelationType;
     @JsonProperty
-    @Schema(example = "true")
+    @Schema(description = "Defines if rollouts referring to this distribution set should be canceled", example = "true")
     private boolean cancelRollouts;
-
-    public MgmtCancelationType getActionCancelationType() {
-        return actionCancelationType;
-    }
-
-    public void setActionCancelationType(final MgmtCancelationType actionCancelationType) {
-        this.actionCancelationType = actionCancelationType;
-    }
-
-    public boolean isCancelRollouts() {
-        return cancelRollouts;
-    }
-
-    public void setCancelRollouts(final boolean cancelRollouts) {
-        this.cancelRollouts = cancelRollouts;
-    }
-
 }

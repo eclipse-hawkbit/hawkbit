@@ -9,25 +9,17 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.action;
 
+import lombok.Data;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A json annotated model for Action updates in RESTful API representation.
- *
  */
+@Data
 public class MgmtActionRequestBodyPut {
 
     @JsonProperty(value="forceType")
     private MgmtActionType actionType;
-
-    public MgmtActionType getActionType() {
-        return actionType;
-    }
-
-    public void setActionType(final MgmtActionType actionType) {
-        this.actionType = actionType;
-    }
-
 }

@@ -108,11 +108,8 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test auto assignment of a DS to filtered targets")
     void checkAutoAssign() {
-
-        final DistributionSet setA = testdataFactory.createDistributionSet("dsA"); // will
-                                                                                   // be
-                                                                                   // auto
-                                                                                   // assigned
+        // will be auto assigned
+        final DistributionSet setA = testdataFactory.createDistributionSet("dsA");
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
 
         // target filter query that matches all targets
@@ -121,6 +118,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
                 .updateAutoAssign(targetFilterQueryManagement
                         .create(entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
                 .ds(setA.getId()));
+        implicitLock(setA);
 
         final String targetDsAIdPref = "targ";
         final List<Target> targets = testdataFactory.createTargets(25, targetDsAIdPref,
@@ -129,12 +127,15 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
         // assign set A to first 10 targets
         assignDistributionSet(setA, targets.subList(0, 10));
+        // because of targetFilterQuery the assigned to targets group is a locked one
+        // in the rest it is locked in process and targets gets unlocked (?)
         verifyThatTargetsHaveDistributionSetAssignment(setA, targets.subList(0, 10), targetsCount);
 
         // assign set B to first 5 targets
         // they have now 2 DS in their action history and should not get updated
         // with dsA
         assignDistributionSet(setB, targets.subList(0, 5));
+        implicitLock(setB);
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(0, 5), targetsCount);
 
         // assign set B to next 10 targets
@@ -167,6 +168,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
                 .updateAutoAssign(targetFilterQueryManagement
                         .create(entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
                 .ds(toAssignDs.getId()));
+        implicitLock(toAssignDs);
 
         final List<Target> targets = testdataFactory.createTargets(25);
         final int targetsCount = targets.size();
@@ -267,6 +269,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         // target filter query that matches failed bunch of targets
         targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("filterB")
                 .query("id==" + targetDsAIdPref + "*").autoAssignDistributionSet(setA.getId()));
+        implicitLock(setA);
 
         final List<Target> targetsF = testdataFactory.createTargets(10, targetDsFIdPref,
                 targetDsFIdPref.concat(" description"));
@@ -278,6 +281,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
         // assign set B to first 5 targets of fail group
         assignDistributionSet(setB, targetsF.subList(0, 5));
+        implicitLock(setB);
         verifyThatTargetsHaveDistributionSetAssignment(setB, targetsF.subList(0, 5), targetsCount);
 
         // Run the check
@@ -311,7 +315,6 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
                         .as("assigned DS").isEqualTo(set);
             }
         }
-
     }
 
     @Step
@@ -367,6 +370,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
         final List<Target> targetsA = createTargetsAndAutoAssignDistSet(targetDsAIdPref, 5, distributionSet,
                 ActionType.FORCED);
+        implicitLock(distributionSet);
         final List<Target> targetsB = createTargetsAndAutoAssignDistSet(targetDsBIdPref, 10, distributionSet,
                 ActionType.SOFT);
         final List<Target> targetsC = createTargetsAndAutoAssignDistSet(targetDsCIdPref, 10, distributionSet,

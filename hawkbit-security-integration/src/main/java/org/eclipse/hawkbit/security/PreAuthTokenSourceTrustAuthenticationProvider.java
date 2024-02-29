@@ -13,8 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
@@ -36,13 +35,10 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
  * from e.g. a certificate provided by an reverse proxy. Due this request is
  * only allowed from a specific source address this authentication manager can
  * also check the remote IP address of the request.
- *
- *
- *
  */
+@Slf4j
 public class PreAuthTokenSourceTrustAuthenticationProvider implements AuthenticationProvider {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PreAuthenticatedAuthenticationToken.class);
+    
     private final List<String> authorizedSourceIps;
 
     /**
@@ -154,7 +150,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
             if (!(tokenDetails instanceof TenantAwareWebAuthenticationDetails)) {
                 // is not of type WebAuthenticationDetails, then we cannot
                 // determine the remote address!
-                LOGGER.error(
+                log.error(
                         "Cannot determine the controller remote-ip-address based on the given authentication token - {} , token details are not TenantAwareWebAuthenticationDetails! ",
                         tokenDetails);
                 success = false;

@@ -44,11 +44,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-
-import com.google.common.base.Charsets;
-import com.google.common.net.HttpHeaders;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -81,13 +79,14 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-        assignDistributionSet(ds, targets);
 
         // create artifact
         final int artifactSize = 5 * 1024;
         final byte random[] = RandomUtils.nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize));
+
+        assignDistributionSet(ds, targets);
 
         // no artifact available
         mvc.perform(get("/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/123455",
@@ -208,13 +207,13 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
-        assignDistributionSet(ds, target);
-
         // create artifact
         final int artifactSize = 5 * 1024;
         final byte random[] = RandomUtils.nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(
                 new ArtifactUpload(new ByteArrayInputStream(random), getOsModule(ds), "file1", false, artifactSize));
+
+        assignDistributionSet(ds, target);
 
         // download
         final MvcResult result = mvc.perform(get(
@@ -225,7 +224,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .andReturn();
 
         assertThat(result.getResponse().getContentAsByteArray())
-                .isEqualTo((artifact.getMd5Hash() + "  " + artifact.getFilename()).getBytes(Charsets.US_ASCII));
+                .isEqualTo((artifact.getMd5Hash() + "  " + artifact.getFilename()).getBytes(StandardCharsets.US_ASCII));
     }
 
     @Test

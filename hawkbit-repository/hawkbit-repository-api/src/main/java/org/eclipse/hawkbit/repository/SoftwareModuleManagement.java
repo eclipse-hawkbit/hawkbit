@@ -13,9 +13,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
@@ -322,12 +322,19 @@ public interface SoftwareModuleManagement
      *            to be filtered on
      *
      * @return the found {@link SoftwareModule}s
-     *
-     * @throws EntityNotFoundException
-     *             if software module type with given ID does not exist
+     * @throws EntityNotFoundException if software module type with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Slice<SoftwareModule> findByType(@NotNull Pageable pageable, long typeId);
+
+    /**
+     * Locks a software module.
+     *
+     * @param id the software module id
+     * @throws EntityNotFoundException if software module with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    void lock(long id);
 
     /**
      * Updates a distribution set meta data value if corresponding entry exists.

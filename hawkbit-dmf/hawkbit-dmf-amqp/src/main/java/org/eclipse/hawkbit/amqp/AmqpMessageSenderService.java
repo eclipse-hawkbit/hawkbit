@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.amqp;
 
 import java.net.URI;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import org.springframework.amqp.core.Message;
 
@@ -31,5 +31,4 @@ public interface AmqpMessageSenderService {
      *            the reply to uri
      */
     void sendMessage(@NotNull final Message message, @NotNull final URI replyTo);
-
 }

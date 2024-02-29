@@ -15,37 +15,45 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
 
 /**
  * A json annotated rest model for SoftwareModuleType to RESTful API
  * representation.
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(example = """
+    {
+      "createdBy" : "system",
+      "createdAt" : 1682408579390,
+      "lastModifiedBy" : "bumlux",
+      "lastModifiedAt" : 1682408579394,
+      "name" : "Application",
+      "description" : "Updated description.",
+      "key" : "application",
+      "maxAssignments" : 2147483647,
+      "deleted" : false,
+      "_links" : {
+        "self" : {
+          "href" : "https://management-api.host.com/rest/v1/softwaremoduletypes/4"
+        }
+      },
+      "id" : 4
+    }""")
 public class MgmtSoftwareModuleType extends MgmtTypeEntity {
 
     @JsonProperty(value = "id", required = true)
-    @Schema(example = "83")
+    @Schema(description = "The technical identifier of the entity", example = "83")
     private Long moduleId;
-
     @JsonProperty
-    @Schema(example = "1")
+    @Schema(description = "Software modules of that type can be assigned at this maximum number " +
+            "(e.g. operating system only once)", example = "1")
     private int maxAssignments;
-
-    public Long getModuleId() {
-        return moduleId;
-    }
-
-    public void setModuleId(final Long moduleId) {
-        this.moduleId = moduleId;
-    }
-
-    public int getMaxAssignments() {
-        return maxAssignments;
-    }
-
-    public void setMaxAssignments(final int maxAssignments) {
-        this.maxAssignments = maxAssignments;
-    }
 }

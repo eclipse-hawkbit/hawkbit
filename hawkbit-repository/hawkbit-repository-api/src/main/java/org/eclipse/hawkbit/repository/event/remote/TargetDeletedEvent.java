@@ -9,17 +9,26 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.entity.EntityDeletedEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
+import java.io.Serial;
+
 /**
- *
  * Defines the remote event of deleting a {@link Target}.
  */
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class TargetDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
 
+    @Serial
     private static final long serialVersionUID = 2L;
+
     private String controllerId;
     private String targetAddress;
 
@@ -52,13 +61,4 @@ public class TargetDeletedEvent extends RemoteIdEvent implements EntityDeletedEv
         this.controllerId = controllerId;
         this.targetAddress = targetAddress;
     }
-
-    public String getControllerId() {
-        return controllerId;
-    }
-
-    public String getTargetAddress() {
-        return targetAddress;
-    }
-
 }

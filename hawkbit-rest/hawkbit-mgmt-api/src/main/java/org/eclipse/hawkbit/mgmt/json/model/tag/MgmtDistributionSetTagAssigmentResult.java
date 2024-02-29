@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.mgmt.json.model.tag;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -21,32 +23,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * * A json annotated rest model for DSAssigmentResult to RESTful API
  * representation.
- *
  */
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtDistributionSetTagAssigmentResult {
 
     @JsonProperty
+    @Schema(description = "Assigned distribution sets")
     private List<MgmtDistributionSet> assignedDistributionSets;
-
     @JsonProperty
+    @Schema(description = "Unassigned distribution sets")
     private List<MgmtDistributionSet> unassignedDistributionSets;
-
-    public List<MgmtDistributionSet> getAssignedDistributionSets() {
-        return assignedDistributionSets;
-    }
-
-    public List<MgmtDistributionSet> getUnassignedDistributionSets() {
-        return unassignedDistributionSets;
-    }
-
-    public void setAssignedDistributionSets(final List<MgmtDistributionSet> assignedDistributionSets) {
-        this.assignedDistributionSets = assignedDistributionSets;
-    }
-
-    public void setUnassignedDistributionSets(final List<MgmtDistributionSet> unassignedDistributionSets) {
-        this.unassignedDistributionSets = unassignedDistributionSets;
-    }
-
 }

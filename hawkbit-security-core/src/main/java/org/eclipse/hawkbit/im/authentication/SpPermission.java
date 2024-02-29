@@ -14,8 +14,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -32,9 +31,8 @@ import org.springframework.security.core.GrantedAuthority;
  * etc.
  * </p>
  */
+@Slf4j
 public final class SpPermission {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SpPermission.class);
 
     /**
      * Permission to read the targets (list and filter).
@@ -147,7 +145,7 @@ public final class SpPermission {
                     final String role = (String) field.get(null);
                     allPermissions.add(role);
                 } catch (final IllegalAccessException e) {
-                    LOGGER.error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }

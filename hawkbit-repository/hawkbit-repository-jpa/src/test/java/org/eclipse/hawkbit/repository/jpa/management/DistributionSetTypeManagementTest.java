@@ -17,8 +17,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.util.Lists;
@@ -40,8 +41,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.jupiter.api.Test;
-
-import com.google.common.collect.Sets;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -206,13 +205,13 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
         // add OS
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
-                Sets.newHashSet(osType.getId()));
+                Set.of(osType.getId()));
         assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes())
                 .containsOnly(osType);
 
         // add JVM
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
-                Sets.newHashSet(runtimeType.getId()));
+                Set.of(runtimeType.getId()));
         assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes())
                 .containsOnly(osType, runtimeType);
 
@@ -228,7 +227,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
         final int quota = quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType();
         // create software module types
-        final List<Long> moduleTypeIds = Lists.newArrayList();
+        final List<Long> moduleTypeIds = new ArrayList<>();
         for (int i = 0; i < quota + 1; ++i) {
             final SoftwareModuleTypeCreate smCreate = entityFactory.softwareModuleType().create().name("smType_" + i)
                     .description("smType_" + i).maxAssignments(1).colour("blue").key("smType_" + i);
@@ -290,7 +289,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         final DistributionSetType nonUpdatableType = createDistributionSetTypeUsedByDs();
 
         assertThatThrownBy(() -> distributionSetTypeManagement
-                .assignMandatorySoftwareModuleTypes(nonUpdatableType.getId(), Sets.newHashSet(osType.getId())))
+                .assignMandatorySoftwareModuleTypes(nonUpdatableType.getId(), Set.of(osType.getId())))
                         .isInstanceOf(EntityReadOnlyException.class);
     }
 
@@ -311,7 +310,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
 
         nonUpdatableType = distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(nonUpdatableType.getId(),
-                Sets.newHashSet(osType.getId()));
+                Set.of(osType.getId()));
         distributionSetManagement.create(entityFactory.distributionSet().create().name("newtypesoft").version("1")
                 .type(nonUpdatableType.getKey()));
 

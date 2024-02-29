@@ -75,3 +75,31 @@ services:
     labels:
       NAME: "hawkbit-mgmt"
 
+
+#  # ---------------------
+#  # HawkBit Vaadin 8 based UI (NOT SUPPORTED!)
+#  # Outdated and not supported - may not work or lead to problems.
+#  # NOT Recommended - use it only AT YOUR RISK!
+#  # ---------------------
+#  hawkbit-vv8ui:
+#    image: "hawkbit/hawkbit-vv8-ui:latest-mysql"
+#    environment:
+#      - 'SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/hawkbit'
+#      - 'SPRING_RABBITMQ_HOST=rabbitmq'
+#      - 'SPRING_RABBITMQ_USERNAME=guest'
+#      - 'SPRING_RABBITMQ_PASSWORD=guest'
+#      - 'SPRING_DATASOURCE_USERNAME=root'
+#    volumes:
+#      - artifactrepo:/artifactrepo
+#    restart: always
+#    ports:
+#      - "8082:8082"
+#    depends_on:
+#      mysql:
+#        condition: service_healthy
+#    labels:
+#      NAME: "hawkbit-vv8-ui"
+
+volumes:
+  artifactrepo:
+    driver: local

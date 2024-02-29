@@ -9,11 +9,12 @@
  */
 package org.eclipse.hawkbit.repository.jpa.configuration;
 
+import java.io.Serial;
 import java.util.Objects;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.transaction.Transaction;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.transaction.Transaction;
 
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
@@ -30,6 +31,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  *
  */
 public class MultiTenantJpaTransactionManager extends JpaTransactionManager {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Autowired

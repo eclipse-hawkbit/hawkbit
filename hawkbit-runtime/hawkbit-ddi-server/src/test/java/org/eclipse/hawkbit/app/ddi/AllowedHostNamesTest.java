@@ -30,9 +30,8 @@ public class AllowedHostNamesTest extends AbstractSecurityTest {
 
     @Test
     @Description("Tests whether a RequestRejectedException is thrown when not allowed host is used")
-    public void allowedHostNameWithNotAllowedHost() {
-        assertThatExceptionOfType(RequestRejectedException.class).isThrownBy(
-                () -> mvc.perform(get("/").header(HttpHeaders.HOST, "www.google.com")));
+    public void allowedHostNameWithNotAllowedHost() throws Exception {
+        mvc.perform(get("/").header(HttpHeaders.HOST, "www.google.com")).andExpect(status().isBadRequest());
     }
 
     @Test

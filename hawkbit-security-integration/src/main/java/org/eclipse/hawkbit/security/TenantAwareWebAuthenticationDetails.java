@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.security;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 

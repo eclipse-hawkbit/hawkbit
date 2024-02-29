@@ -15,7 +15,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
@@ -25,14 +27,15 @@ import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 @ContextConfiguration(classes = { MgmtApiConfiguration.class, RestConfiguration.class,
-        RepositoryApplicationConfiguration.class, TestConfiguration.class,
-        TestSupportBinderAutoConfiguration.class })
+        RepositoryApplicationConfiguration.class, TestConfiguration.class })
+@Import(TestChannelBinderConfiguration.class)
 @TestPropertySource(locations = "classpath:/mgmt-test.properties")
 public abstract class AbstractManagementApiIntegrationTest extends AbstractRestIntegrationTest {
 
@@ -222,4 +225,12 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         return new JSONObject();
     }
 
+    // the set is a candidate for implicitly locking. So, lock it if not already locked
+    // set lock flag to true to avoid re-locking
+    static void implicitLock(final DistributionSet set) {
+        if (!set.isLocked()) {
+            ((JpaDistributionSet) set).setOptLockRevision(set.getOptLockRevision() + 1);
+            ((JpaDistributionSet) set).lock();
+        }
+    }
 }

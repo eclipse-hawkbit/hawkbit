@@ -10,6 +10,9 @@
 package org.eclipse.hawkbit.mgmt.json.model.tag;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -20,34 +23,41 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A json annotated rest model for Tag to RESTful API representation.
- *
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(description = """
+    **_links**:
+    * **assignedDistributionSets** - Links to assigned distribution sets
+    """, example = """
+    {
+      "createdBy" : "bumlux",
+      "createdAt" : 1682408561990,
+      "lastModifiedBy" : "bumlux",
+      "lastModifiedAt" : 1682408561992,
+      "name" : "DsTag",
+      "description" : "My name is DsTag",
+      "colour" : "default",
+      "_links" : {
+        "self" : {
+          "href" : "https://management-api.host.com/rest/v1/distributionsettags/6"
+        },
+        "assignedDistributionSets" : {
+          "href" : "https://management-api.host.com/rest/v1/distributionsettags/6/assigned?offset=0&limit=50"
+        }
+      },
+      "id" : 6
+    }""")
 public class MgmtTag extends MgmtNamedEntity {
 
     @JsonProperty(value = "id", required = true)
-    @Schema(example = "2")
+    @Schema(description = "The technical identifier of the entity", example = "2")
     private Long tagId;
 
     @JsonProperty
-    @Schema(example = "rgb(255,0,0)")
+    @Schema(description = "The colour of the entity", example = "red")
     private String colour;
-
-    @JsonIgnore
-    public void setTagId(final Long tagId) {
-        this.tagId = tagId;
-    }
-
-    public Long getTagId() {
-        return tagId;
-    }
-
-    public void setColour(final String colour) {
-        this.colour = colour;
-    }
-
-    public String getColour() {
-        return colour;
-    }
 }

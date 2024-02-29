@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -23,7 +24,9 @@ import org.eclipse.hawkbit.repository.model.MetaData;
  */
 public class EntityNotFoundException extends AbstractServerRtException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_ENTITY_NOT_EXISTS;
 
     /**

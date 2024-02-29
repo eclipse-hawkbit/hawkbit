@@ -11,16 +11,18 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.Objects;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
+import lombok.Data;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
 /**
  * A custom view on assigning a {@link DistributionSet} to a {@link Target}.
- *
  */
+@Data
 public class DeploymentRequest {
+
     private final Long distributionSetId;
     @Valid
     private final TargetWithActionType targetWithActionType;
@@ -76,46 +78,7 @@ public class DeploymentRequest {
         this.distributionSetId = distributionSetId;
     }
 
-    public Long getDistributionSetId() {
-        return distributionSetId;
-    }
-
     public String getControllerId() {
         return targetWithActionType.getControllerId();
-    }
-
-    public TargetWithActionType getTargetWithActionType() {
-        return targetWithActionType;
-    }
-
-    @Override
-    public String toString() {
-        return String.format(
-                "DeploymentRequest [controllerId=%s, distributionSetId=%d, actionType=%s, forceTime=%d, weight=%d, maintenanceSchedule=%s, maintenanceWindowDuration=%s, maintenanceWindowTimeZone=%s, confirmationRequired=%s]",
-                targetWithActionType.getControllerId(), getDistributionSetId(), targetWithActionType.getActionType(),
-                targetWithActionType.getForceTime(), targetWithActionType.getWeight(),
-                targetWithActionType.getMaintenanceSchedule(), targetWithActionType.getMaintenanceWindowDuration(),
-                targetWithActionType.getMaintenanceWindowTimeZone(), targetWithActionType.isConfirmationRequired());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(distributionSetId, targetWithActionType);
-    }
-    
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final DeploymentRequest other = (DeploymentRequest) obj;
-        return Objects.equals(distributionSetId, other.distributionSetId)
-                && Objects.equals(targetWithActionType, other.targetWithActionType);
     }
 }

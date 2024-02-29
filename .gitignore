@@ -61,6 +61,7 @@ maven.properties
 
 # Test Files
 *.tmp
+spring-shell.log
 
 # Documentation
 .gitmodules

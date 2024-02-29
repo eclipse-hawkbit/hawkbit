@@ -29,12 +29,8 @@ public interface MgmtDownloadRestApi {
     /**
      * Handles the GET request for downloading an artifact.
      * 
-     * @param tenant
-     *            the download belongs to
-     * @param downloadId
-     *            the generated download id
-     * @param response
-     *            of the servlet
+     * @param tenant the download belongs to
+     * @param downloadId the generated download id
      * @return {@link ResponseEntity} with status {@link HttpStatus#OK} if
      *         successful
      */

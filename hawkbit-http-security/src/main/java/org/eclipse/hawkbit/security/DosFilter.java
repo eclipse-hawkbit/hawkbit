@@ -15,11 +15,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,12 +37,13 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  * maximum number of request per seconds which can be separately configured for
  * read (GET) and write (PUT/POST/DELETE) requests.
  */
+@Slf4j
 public class DosFilter extends OncePerRequestFilter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DosFilter.class);
-    private static final Logger LOG_DOS = LoggerFactory.getLogger(SecurityConstants.SECURITY_LOG_PREFIX + ".dos");
-    private static final Logger LOG_BLACKLIST = LoggerFactory
-            .getLogger(SecurityConstants.SECURITY_LOG_PREFIX + ".blacklist");
+    private static final Logger LOG_DOS =
+            LoggerFactory.getLogger(SecurityConstants.SECURITY_LOG_PREFIX + ".dos");
+    private static final Logger LOG_BLACKLIST =
+            LoggerFactory.getLogger(SecurityConstants.SECURITY_LOG_PREFIX + ".blacklist");
 
     private final AntPathMatcher antMatcher = new AntPathMatcher();
     private final Collection<String> includeAntPaths;
@@ -84,7 +86,6 @@ public class DosFilter extends OncePerRequestFilter {
      */
     public DosFilter(final Collection<String> includeAntPaths, final int maxRead, final int maxWrite,
             final String ipDosWhiteListPattern, final String ipBlackListPattern, final String forwardHeader) {
-
         this.includeAntPaths = includeAntPaths;
         this.maxRead = maxRead;
         this.maxWrite = maxWrite;
@@ -165,7 +166,7 @@ public class DosFilter extends OncePerRequestFilter {
     }
 
     private static boolean handleMissingIpAddress(final HttpServletResponse response) {
-        LOG.error("Failed to get peer IP adress");
+        log.error("Failed to get peer IP adress");
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         return false;
     }

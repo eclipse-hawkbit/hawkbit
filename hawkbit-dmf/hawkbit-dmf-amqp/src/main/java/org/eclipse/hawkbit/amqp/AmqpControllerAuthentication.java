@@ -9,10 +9,12 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -28,20 +30,14 @@ import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvide
 import org.eclipse.hawkbit.security.PreAuthenticationFilter;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
-import com.google.common.collect.Lists;
-
 /**
- *
  * A controller which handles the DMF AMQP authentication.
  */
+@Slf4j
 public class AmqpControllerAuthentication {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AmqpControllerAuthentication.class);
 
     private final PreAuthTokenSourceTrustAuthenticationProvider preAuthenticatedAuthenticationProvider = new PreAuthTokenSourceTrustAuthenticationProvider();
 
@@ -93,7 +89,7 @@ public class AmqpControllerAuthentication {
     }
 
     private void addFilter() {
-        filterChain = Lists.newArrayListWithExpectedSize(5);
+        filterChain = new ArrayList<>(5);
 
         final ControllerPreAuthenticatedGatewaySecurityTokenFilter gatewaySecurityTokenFilter = new ControllerPreAuthenticatedGatewaySecurityTokenFilter(
                 tenantConfigurationManagement, tenantAware, systemSecurityContext);
@@ -156,11 +152,11 @@ public class AmqpControllerAuthentication {
         final Object credentials = filter.getPreAuthenticatedCredentials(securityToken);
 
         if (principal == null) {
-            LOGGER.debug("No pre-authenticated principal found in message");
+            log.debug("No pre-authenticated principal found in message");
             return null;
         }
 
-        LOGGER.debug("preAuthenticatedPrincipal = {} trying to authenticate", principal);
+        log.debug("preAuthenticatedPrincipal = {} trying to authenticate", principal);
 
         return new PreAuthenticatedAuthenticationToken(principal, credentials,
                 filter.getSuccessfulAuthenticationAuthorities());

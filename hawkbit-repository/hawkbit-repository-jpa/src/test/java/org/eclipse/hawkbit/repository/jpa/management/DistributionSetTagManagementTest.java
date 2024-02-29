@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
+import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Tag;
@@ -107,15 +107,15 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         toggleTagAssignment(dsABCs, distributionSetTagManagement.getByName(tagC.getName()).get());
 
         // search for not deleted
-        final DistributionSetFilterBuilder distributionSetFilterBuilder = getDistributionSetFilterBuilder()
-                .setIsComplete(true);
-        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.setTagNames(Arrays.asList(tagA.getName())),
+        final DistributionSetFilter.DistributionSetFilterBuilder distributionSetFilterBuilder = getDistributionSetFilterBuilder()
+                .isComplete(true);
+        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.tagNames(Arrays.asList(tagA.getName())),
                 Stream.of(dsAs, dsABs, dsACs, dsABCs));
-        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.setTagNames(Arrays.asList(tagB.getName())),
+        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.tagNames(Arrays.asList(tagB.getName())),
                 Stream.of(dsBs, dsABs, dsBCs, dsABCs));
-        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.setTagNames(Arrays.asList(tagC.getName())),
+        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.tagNames(Arrays.asList(tagC.getName())),
                 Stream.of(dsCs, dsACs, dsBCs, dsABCs));
-        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.setTagNames(Arrays.asList(tagX.getName())),
+        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.tagNames(Arrays.asList(tagX.getName())),
                 Stream.empty());
 
         assertThat(distributionSetTagRepository.findAll()).hasSize(5);
@@ -126,16 +126,16 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         distributionSetTagManagement.delete(tagB.getName());
         assertThat(distributionSetTagRepository.findAll()).hasSize(2);
 
-        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.setTagNames(Arrays.asList(tagA.getName())),
+        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.tagNames(Arrays.asList(tagA.getName())),
                 Stream.of(dsAs, dsABs, dsACs, dsABCs));
-        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.setTagNames(Arrays.asList(tagB.getName())),
+        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.tagNames(Arrays.asList(tagB.getName())),
                 Stream.empty());
-        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.setTagNames(Arrays.asList(tagC.getName())),
+        verifyExpectedFilteredDistributionSets(distributionSetFilterBuilder.tagNames(Arrays.asList(tagC.getName())),
                 Stream.of(dsCs, dsACs, dsBCs, dsABCs));
     }
 
     @Step
-    private void verifyExpectedFilteredDistributionSets(final DistributionSetFilterBuilder distributionSetFilterBuilder,
+    private void verifyExpectedFilteredDistributionSets(final DistributionSetFilter.DistributionSetFilterBuilder distributionSetFilterBuilder,
             final Stream<Collection<DistributionSet>> expectedFilteredDistributionSets) {
         final Collection<Long> retrievedFilteredDsIds = distributionSetManagement
                 .findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build()).stream()
@@ -298,8 +298,8 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         return distributionSetTagManagement.findAll(PAGE).getContent();
     }
 
-    private DistributionSetFilterBuilder getDistributionSetFilterBuilder() {
-        return new DistributionSetFilterBuilder();
+    private DistributionSetFilter.DistributionSetFilterBuilder getDistributionSetFilterBuilder() {
+        return DistributionSetFilter.builder();
     }
 
     @SafeVarargs

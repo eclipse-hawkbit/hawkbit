@@ -25,6 +25,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.IterableUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.api.ApiType;
 import org.eclipse.hawkbit.api.ArtifactUrl;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
@@ -62,10 +65,9 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
@@ -78,19 +80,15 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
 
-import com.google.common.collect.Iterables;
-
 /**
  * {@link AmqpMessageDispatcherService} create all outgoing AMQP messages and
  * delegate the messages to a {@link AmqpMessageSenderService}.
  *
  * Additionally the dispatcher listener/subscribe for some target events e.g.
  * assignment.
- *
  */
+@Slf4j
 public class AmqpMessageDispatcherService extends BaseAmqpService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageDispatcherService.class);
 
     private static final int MAX_PROCESSING_SIZE = 1000;
 
@@ -166,7 +164,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 assignedEvent.getActions().keySet());
 
         if (!filteredTargetList.isEmpty()) {
-            LOG.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
+            log.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
             sendUpdateMessageToTargets(assignedEvent.getDistributionSetId(), assignedEvent.getActions(),
                     filteredTargetList);
         }
@@ -183,7 +181,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (!shouldBeProcessed(multiActionEvent)) {
             return;
         }
-        LOG.debug("MultiActionEvent received for {}", multiActionEvent.getControllerIds());
+        log.debug("MultiActionEvent received for {}", multiActionEvent.getControllerIds());
         sendMultiActionRequestMessages(multiActionEvent.getTenant(), multiActionEvent.getControllerIds());
     }
 
@@ -191,7 +189,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return partitionedParallelExecution(controllerIds, partition -> {
             return targetManagement.getByControllerID(partition).stream().filter(target -> {
                 if (hasPendingCancellations(target.getId())) {
-                    LOG.debug("Target {} has pending cancellations. Will not send update message to it.",
+                    log.debug("Target {} has pending cancellations. Will not send update message to it.",
                             target.getControllerId());
                     return false;
                 }
@@ -368,7 +366,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         // Ensure not exceeding the max value of MAX_PROCESSING_SIZE
         if (controllerIds.size() > MAX_PROCESSING_SIZE) {
             // Split the provided collection
-            final Iterable<List<T>> partitions = Iterables.partition(controllerIds, MAX_PROCESSING_SIZE);
+            final Iterable<List<T>> partitions = ListUtils.partition(IterableUtils.toList(controllerIds), MAX_PROCESSING_SIZE);
             // Preserve the security context because it gets lost when executing
             // loading calls in new threads
             final SecurityContext context = SecurityContextHolder.getContext();
@@ -557,9 +555,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private DmfArtifact convertArtifact(final Target target, final Artifact localArtifact) {
         final DmfArtifact artifact = new DmfArtifact();
 
+        final TenantMetaData metaData = systemManagement.getTenantMetadata();
         artifact.setUrls(artifactUrlHandler
-                .getUrls(new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),
-                        systemManagement.getTenantMetadata().getId(), target.getControllerId(), target.getId(),
+                .getUrls(new URLPlaceholder(metaData.getTenant(),
+                        metaData.getId(), target.getControllerId(), target.getId(),
                         new SoftwareData(localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(),
                                 localArtifact.getId(), localArtifact.getSha1Hash())),
                         ApiType.DMF)
@@ -568,6 +567,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         artifact.setFilename(localArtifact.getFilename());
         artifact.setHashes(new DmfArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()));
         artifact.setSize(localArtifact.getSize());
+        artifact.setLastModified(localArtifact.getLastModifiedAt());
         return artifact;
     }
 

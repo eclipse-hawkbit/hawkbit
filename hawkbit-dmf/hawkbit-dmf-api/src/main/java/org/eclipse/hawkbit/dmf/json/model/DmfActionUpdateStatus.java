@@ -20,10 +20,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Setter;
 
 /**
  * JSON representation of action update status.
  */
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfActionUpdateStatus {
@@ -34,6 +38,7 @@ public class DmfActionUpdateStatus {
     @JsonProperty
     private Long softwareModuleId;
 
+    @Setter(AccessLevel.NONE)
     @JsonProperty
     private List<String> message;
 
@@ -46,29 +51,9 @@ public class DmfActionUpdateStatus {
         this.actionStatus = actionStatus;
     }
 
-    public Long getActionId() {
-        return actionId;
-    }
-
-    public Long getSoftwareModuleId() {
-        return softwareModuleId;
-    }
-
-    public void setSoftwareModuleId(final Long softwareModuleId) {
-        this.softwareModuleId = softwareModuleId;
-    }
-
-    public DmfActionStatus getActionStatus() {
-        return actionStatus;
-    }
-
     @JsonIgnore
     public Optional<Integer> getCode() {
         return Optional.ofNullable(code);
-    }
-
-    public void setCode(final Integer code) {
-        this.code = code;
     }
 
     public List<String> getMessage() {
@@ -99,9 +84,4 @@ public class DmfActionUpdateStatus {
 
         return message.addAll(messages);
     }
-
-    public void setCode(final int code) {
-        this.code = code;
-    }
-
 }

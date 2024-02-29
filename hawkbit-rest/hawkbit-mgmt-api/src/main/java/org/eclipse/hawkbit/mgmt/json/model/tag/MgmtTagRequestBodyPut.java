@@ -14,51 +14,27 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * Request Body for PUT/POST.
- *
  */
+@Data
+@Accessors(chain = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtTagRequestBodyPut {
 
     @JsonProperty
-    @Schema(example = "rgb(0,255,0)")
-    private String colour;
-
-    @JsonProperty
-    @Schema(example = "Example name")
+    @Schema(description = "The name of the entity", example = "Example name")
     private String name;
 
     @JsonProperty
-    @Schema(example = "Example description")
+    @Schema(description = "The description of the entity", example = "Example description")
     private String description;
 
-    public String getName() {
-        return name;
-    }
-
-    public MgmtTagRequestBodyPut setName(final String name) {
-        this.name = name;
-        return this;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public MgmtTagRequestBodyPut setDescription(final String description) {
-        this.description = description;
-        return this;
-    }
-
-    public MgmtTagRequestBodyPut setColour(final String colour) {
-        this.colour = colour;
-        return this;
-    }
-
-    public String getColour() {
-        return colour;
-    }
+    @JsonProperty
+    @Schema(description = "The colour of the entity", example = "rgb(0,255,0)")
+    private String colour;
 }

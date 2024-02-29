@@ -14,6 +14,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTypeDeletedEvent;
@@ -70,16 +75,20 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpd
  * between the actual class and the corresponding integer value which is the
  * encoded value in the byte-payload.
  */
+// for marshalling and unmarshalling.
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
+@Getter
+@EqualsAndHashCode
+@ToString
 public class EventType {
 
     private static final Map<Integer, Class<?>> TYPES = new HashMap<>();
 
     /**
      * The associated event-type-value must remain the same as initially
-     * declared. Otherwise messages cannot correctly de-serialized.
+     * declared. Otherwise, messages cannot correctly de-serialized.
      */
     static {
-
         // target
         TYPES.put(1, TargetCreatedEvent.class);
         TYPES.put(2, TargetUpdatedEvent.class);
@@ -165,23 +174,12 @@ public class EventType {
 
     /**
      * Constructor.
-     */
-    public EventType() {
-        // for marshalling and unmarshalling.
-    }
-
-    /**
-     * Constructor.
      *
      * @param value
      *            the value to initialize
      */
     public EventType(final int value) {
         this.value = value;
-    }
-
-    public int getValue() {
-        return value;
     }
 
     public Class<?> getTargetClass() {

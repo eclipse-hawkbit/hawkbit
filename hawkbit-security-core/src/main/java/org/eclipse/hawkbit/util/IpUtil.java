@@ -14,15 +14,17 @@ import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 
 /**
  * A utility which determines the correct IP of a connected {@link Target}. E.g
  * from a {@link HttpServletRequest}.
- *
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 // Exception squid:S2083 - false positive, file paths not handled here
 @SuppressWarnings("squid:S2083")
 public final class IpUtil {
@@ -38,10 +40,6 @@ public final class IpUtil {
     private static final Pattern IPV6_ADDRESS_PATTERN = Pattern.compile("([0-9a-f]{1,4}:){7}([0-9a-f]){1,4}");
     // v6 address with [] amd (optionally) port
     private static final Pattern IPV6_ADDRESS_WITH_PORT_PATTERN = Pattern.compile("\\[(?<address>([0-9a-f]{1,4}:){7}([0-9a-f]){1,4})](:[0-9]{1,5})?");
-
-    private IpUtil() {
-
-    }
 
     /**
      * Retrieves the string based IP address from a given

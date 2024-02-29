@@ -102,7 +102,7 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         String urlPattern = protocol.getRef();
 
         for (final Entry<String, String> entry : entrySet) {
-            if (entry.getKey().equals(PORT_PLACEHOLDER)) {
+            if (List.of(PORT_PLACEHOLDER,PORT_REQUEST_PLACEHOLDER).contains(entry.getKey())) {
                 urlPattern = urlPattern.replace(":{" + entry.getKey() + "}",
                         ObjectUtils.isEmpty(entry.getValue()) ? "" : (":" + entry.getValue()));
             } else {
@@ -157,8 +157,8 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         if (requestUri == null) {
             return getPort(protocol);
         }
-
-        return requestUri.getPort() > 0 ? String.valueOf(requestUri.getPort()) : getPort(protocol);
+        // if port undefined then default protocol port is used
+        return requestUri.getPort() > 0 ? String.valueOf(requestUri.getPort()) : "";
     }
 
     private static String getRequestHost(final UrlProtocol protocol, final URI requestUri) {

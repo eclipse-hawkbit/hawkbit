@@ -9,18 +9,20 @@
  */
 package org.eclipse.hawkbit.autoconfigure.scheduling;
 
+import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -34,17 +36,13 @@ import org.springframework.security.concurrent.DelegatingSecurityContextExecutor
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.concurrent.DelegatingSecurityContextScheduledExecutorService;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-
 /**
  * Central event processors inside update server.
- *
  */
+@Slf4j
 @Configuration
 @EnableConfigurationProperties(AsyncConfigurerThreadpoolProperties.class)
 public class ExecutorAutoConfiguration {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExecutorAutoConfiguration.class);
 
     @Autowired
     private AsyncConfigurerThreadpoolProperties asyncConfigurerProperties;
@@ -78,14 +76,14 @@ public class ExecutorAutoConfiguration {
         return new ThreadPoolExecutor(asyncConfigurerProperties.getCorethreads(),
                 asyncConfigurerProperties.getMaxthreads(), asyncConfigurerProperties.getIdletimeout(),
                 TimeUnit.MILLISECONDS, blockingQueue,
-                new ThreadFactoryBuilder().setNameFormat("central-executor-pool-%d").build(),
+                threadFactory("central-executor-pool-%d"),
                 new PoolSizeExceededPolicy());
     }
 
     private static class PoolSizeExceededPolicy extends CallerRunsPolicy {
         @Override
         public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
-            LOGGER.warn(
+            log.warn(
                     "Caller has to run on its own instead of centralExecutorService, reached limit of queue size {}",
                     executor.getQueue().size());
             super.rejectedExecution(r, executor);
@@ -100,7 +98,7 @@ public class ExecutorAutoConfiguration {
     public Executor uiExecutor() {
         final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(20);
         final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 20, 10000, TimeUnit.MILLISECONDS,
-                blockingQueue, new ThreadFactoryBuilder().setNameFormat("ui-executor-pool-%d").build());
+                blockingQueue, threadFactory("ui-executor-pool-%d"));
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         return new DelegatingSecurityContextExecutor(threadPoolExecutor);
     }
@@ -114,7 +112,7 @@ public class ExecutorAutoConfiguration {
     public ScheduledExecutorService scheduledExecutorService() {
         return new DelegatingSecurityContextScheduledExecutorService(
                 Executors.newScheduledThreadPool(asyncConfigurerProperties.getSchedulerThreads(),
-                        new ThreadFactoryBuilder().setNameFormat("central-scheduled-executor-pool-%d").build()));
+                        threadFactory("central-scheduled-executor-pool-%d")));
     }
 
     /**
@@ -126,4 +124,12 @@ public class ExecutorAutoConfiguration {
         return new ConcurrentTaskScheduler(scheduledExecutorService());
     }
 
+    private static ThreadFactory threadFactory(final String format) {
+        final AtomicLong count = new AtomicLong(0);
+        return (runnable) -> {
+            final Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+            thread.setName(String.format(Locale.ROOT, format, count.getAndIncrement()));
+            return thread;
+        };
+    }
 }

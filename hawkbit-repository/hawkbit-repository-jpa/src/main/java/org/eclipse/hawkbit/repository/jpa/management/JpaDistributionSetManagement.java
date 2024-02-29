@@ -19,8 +19,8 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.EntityManager;
+import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
+import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
@@ -88,8 +89,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
-
-import com.google.common.collect.Lists;
 
 /**
  * JPA implementation of {@link DistributionSetManagement}.
@@ -286,6 +285,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         update.getName().ifPresent(set::setName);
         update.getDescription().ifPresent(set::setDescription);
         update.getVersion().ifPresent(set::setVersion);
+
+        if (Boolean.TRUE.equals(update.getLocked()) && !set.isLocked()) {
+            set.lock();
+        }
 
         if (update.isRequiredMigrationStep() != null
                 && !update.isRequiredMigrationStep().equals(set.isRequiredMigrationStep())) {
@@ -600,7 +603,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private static List<Specification<JpaDistributionSet>> buildDistributionSetSpecifications(
             final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<JpaDistributionSet>> specList = Lists.newArrayListWithExpectedSize(10);
+        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>(10);
 
         Specification<JpaDistributionSet> spec;
 
@@ -692,6 +695,25 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void lock(final long id) {
+        final JpaDistributionSet distributionSet = getById(id);
+        if (!distributionSet.isLocked()) {
+            distributionSet.getModules().forEach(module -> {
+                if (!module.isLocked()) {
+                    final JpaSoftwareModule jpaSoftwareModule = (JpaSoftwareModule)module;
+                    jpaSoftwareModule.lock();
+                    softwareModuleRepository.save(jpaSoftwareModule);
+                }
+            });
+            distributionSet.lock();
+            distributionSetRepository.save(distributionSet);
+        }
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long id) {
         delete(List.of(id));
     }
@@ -764,6 +786,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         if (!distributionSet.isComplete()) {
             throw new IncompleteDistributionSetException("Distribution set of type "
                     + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
+        }
+
+        if (distributionSet.isDeleted()) {
+            throw new DeletedException(DistributionSet.class, id);
         }
 
         return distributionSet;

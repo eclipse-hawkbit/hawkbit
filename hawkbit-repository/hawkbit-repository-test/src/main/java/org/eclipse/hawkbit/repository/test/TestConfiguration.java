@@ -10,9 +10,11 @@
 package org.eclipse.hawkbit.repository.test;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.ControllerPollProperties;
@@ -69,7 +71,7 @@ import org.springframework.security.concurrent.DelegatingSecurityContextExecutor
 import org.springframework.security.concurrent.DelegatingSecurityContextScheduledExecutorService;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Spring context configuration required for Dev.Environment.
@@ -209,8 +211,15 @@ public class TestConfiguration implements AsyncConfigurer {
 
     @Bean
     public ScheduledExecutorService scheduledExecutorService() {
-        return new DelegatingSecurityContextScheduledExecutorService(Executors.newScheduledThreadPool(1,
-                new ThreadFactoryBuilder().setNameFormat("central-scheduled-executor-pool-%d").build()));
+        final AtomicLong count = new AtomicLong(0);
+        return new DelegatingSecurityContextScheduledExecutorService(
+                Executors.newScheduledThreadPool(1, (runnable) -> {
+                    final Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+                    thread.setName(
+                            String.format(
+                                    Locale.ROOT, "central-scheduled-executor-pool-%d", count.getAndIncrement()));
+                    return thread;
+                }));
     }
 
     /**

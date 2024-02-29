@@ -28,14 +28,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.ListJoin;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.ListJoin;
+import jakarta.persistence.criteria.Root;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -89,8 +91,6 @@ import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
@@ -111,17 +111,13 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.collect.Lists;
-
 /**
  * JPA implementation for {@link DeploymentManagement}.
- *
  */
+@Slf4j
 @Transactional(readOnly = true)
 @Validated
 public class JpaDeploymentManagement extends JpaActionManagement implements DeploymentManagement {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaDeploymentManagement.class);
 
     /**
      * Maximum amount of Actions that are started at once.
@@ -282,7 +278,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     private void checkCompatibilityForSingleDsAssignment(final Long distSetId, final List<String> controllerIds) {
         final DistributionSetType distSetType = distributionSetManagement.getValidAndComplete(distSetId).getType();
-        final Set<String> incompatibleTargetTypes = Lists.partition(controllerIds, Constants.MAX_ENTRIES_IN_STATEMENT)
+        final Set<String> incompatibleTargetTypes = ListUtils.partition(controllerIds, Constants.MAX_ENTRIES_IN_STATEMENT)
                 .stream()
                 .map(ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids)
                         .and(TargetSpecifications.notCompatibleWithDistributionSetType(distSetType.getId()))))
@@ -333,10 +329,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private DistributionSetAssignmentResult assignDistributionSetToTargetsWithRetry(final String initiatedBy,
-            final Long dsID, final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
+            final Long dsId, final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
-        final RetryCallback<DistributionSetAssignmentResult, ConcurrencyFailureException> retryCallback = retryContext -> assignDistributionSetToTargets(
-                initiatedBy, dsID, targetsWithActionType, actionMessage, assignmentStrategy);
+        final RetryCallback<DistributionSetAssignmentResult, ConcurrencyFailureException> retryCallback =
+                retryContext -> assignDistributionSetToTargets(
+                        initiatedBy, dsId, targetsWithActionType, actionMessage, assignmentStrategy);
         return retryTemplate.execute(retryCallback);
     }
 
@@ -355,7 +352,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      *
      * @param initiatedBy
      *            the username of the user who initiated the assignment
-     * @param dsID
+     * @param dsId
      *            the ID of the distribution set to assign
      * @param targetsWithActionType
      *            a list of all targets and their action type
@@ -369,35 +366,43 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      *             if mandatory {@link SoftwareModuleType} are not assigned as
      *             define by the {@link DistributionSetType}.
      */
-    private DistributionSetAssignmentResult assignDistributionSetToTargets(final String initiatedBy, final Long dsID,
+    private DistributionSetAssignmentResult assignDistributionSetToTargets(final String initiatedBy, final Long dsId,
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
+        final JpaDistributionSet distributionSet =
+                (JpaDistributionSet) distributionSetManagement.getValidAndComplete(dsId);
+        // implicit lock
+        if (!distributionSet.isLocked()) {
+            // without new transaction DS changed event is not thrown
+            DeploymentHelper.runInNewTransaction(txManager, "Implicit lock", status -> {
+                distributionSetManagement.lock(distributionSet.getId());
+                return null;
+            });
+        }
 
-        final JpaDistributionSet distributionSetEntity = (JpaDistributionSet) distributionSetManagement
-                .getValidAndComplete(dsID);
         final List<String> providedTargetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
                 .distinct().toList();
 
-        final List<String> existingTargetIds = Lists.partition(providedTargetIds, Constants.MAX_ENTRIES_IN_STATEMENT)
+        final List<String> existingTargetIds = ListUtils.partition(providedTargetIds, Constants.MAX_ENTRIES_IN_STATEMENT)
                 .stream()
                 .map(ids -> targetRepository.findAll(AccessController.Operation.UPDATE,
                         TargetSpecifications.hasControllerIdIn(ids)))
                 .flatMap(List::stream).map(JpaTarget::getControllerId).toList();
 
         final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(existingTargetIds,
-                distributionSetEntity.getId());
+                distributionSet.getId());
 
         if (targetEntities.isEmpty()) {
-            return allTargetsAlreadyAssignedResult(distributionSetEntity, existingTargetIds.size());
+            return allTargetsAlreadyAssignedResult(distributionSet, existingTargetIds.size());
         }
 
         final List<TargetWithActionType> existingTargetsWithActionType = targetsWithActionType.stream()
                 .filter(target -> existingTargetIds.contains(target.getControllerId())).toList();
 
         final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(initiatedBy,
-                existingTargetsWithActionType, actionMessage, assignmentStrategy, distributionSetEntity,
+                existingTargetsWithActionType, actionMessage, assignmentStrategy, distributionSet,
                 targetEntities);
-        return buildAssignmentResult(distributionSetEntity, assignedActions, existingTargetsWithActionType.size());
+        return buildAssignmentResult(distributionSet, assignedActions, existingTargetsWithActionType.size());
     }
 
     private DistributionSetAssignmentResult allTargetsAlreadyAssignedResult(
@@ -443,7 +448,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      * statements
      */
     private static List<List<Long>> getTargetEntitiesAsChunks(final List<JpaTarget> targetEntities) {
-        return Lists.partition(targetEntities.stream().map(Target::getId).collect(Collectors.toList()),
+        return ListUtils.partition(targetEntities.stream().map(Target::getId).collect(Collectors.toList()),
                 Constants.MAX_ENTRIES_IN_STATEMENT);
     }
 
@@ -493,7 +498,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             });
             actionRepository.switchStatus(Status.CANCELED, targetIds, false, Status.SCHEDULED);
         } else {
-            LOG.debug("The Multi Assignments feature is enabled: No need to cancel inactive scheduled actions.");
+            log.debug("The Multi Assignments feature is enabled: No need to cancel inactive scheduled actions.");
         }
     }
 
@@ -576,7 +581,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action cancelAction(final long actionId) {
-        LOG.debug("cancelAction({})", actionId);
+        log.debug("cancelAction({})", actionId);
 
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
@@ -588,7 +593,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         assertTargetUpdateAllowed(action);
 
         if (action.isActive()) {
-            LOG.debug("action ({}) was still active. Change to {}.", action, Status.CANCELING);
+            log.debug("action ({}) was still active. Change to {}.", action, Status.CANCELING);
             action.setStatus(Status.CANCELING);
 
             // document that the status has been retrieved
@@ -623,7 +628,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
         assertTargetUpdateAllowed(action);
 
-        LOG.warn("action ({}) was still active and has been force quite.", action);
+        log.warn("action ({}) was still active and has been force quite.", action);
 
         // document that the status has been retrieved
         actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
@@ -704,7 +709,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 && action.getDistributionSet().getId().equals(target.getAssignedDistributionSet().getId())) {
             // the target has already the distribution set assigned, we don't
             // need to start the scheduled action, just finish it.
-            LOG.debug("Target {} has distribution set {} assigned. Closing action...", target.getControllerId(),
+            log.debug("Target {} has distribution set {} assigned. Closing action...", target.getControllerId(),
                     action.getDistributionSet().getName());
             action.setStatus(Status.FINISHED);
             action.setActive(false);
@@ -965,7 +970,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         deleteQuery.setParameter("tenant", tenantAware.getCurrentTenant().toUpperCase());
         deleteQuery.setParameter("last_modified_at", lastModified);
 
-        LOG.debug("Action cleanup: Executing the following (native) query: {}", deleteQuery);
+        log.debug("Action cleanup: Executing the following (native) query: {}", deleteQuery);
         return deleteQuery.executeUpdate();
     }
 
@@ -1037,11 +1042,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                     try {
                         assertTargetUpdateAllowed(action);
                         cancelAction(action.getId());
-                        LOG.debug("Action {} canceled", action.getId());
+                        log.debug("Action {} canceled", action.getId());
                     } catch (final InsufficientPermissionException e) {
-                        LOG.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
+                        log.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
                     } catch (final EntityNotFoundException e) {
-                        LOG.trace("Could not cancel action {} due to entity not found exception.", action.getId(), e);
+                        log.trace("Could not cancel action {} due to entity not found exception.", action.getId(), e);
                     }
                 });
         if (cancelationType == CancelationType.FORCE) {
@@ -1050,11 +1055,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                         try {
                             assertTargetUpdateAllowed(action);
                             forceQuitAction(action.getId());
-                            LOG.debug("Action {} force canceled", action.getId());
+                            log.debug("Action {} force canceled", action.getId());
                         } catch (final InsufficientPermissionException e) {
-                            LOG.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
+                            log.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
                         } catch (final EntityNotFoundException e) {
-                            LOG.trace("Could not cancel action {} due to entity not found exception.", action.getId(),
+                            log.trace("Could not cancel action {} due to entity not found exception.", action.getId(),
                                     e);
                         }
                     });

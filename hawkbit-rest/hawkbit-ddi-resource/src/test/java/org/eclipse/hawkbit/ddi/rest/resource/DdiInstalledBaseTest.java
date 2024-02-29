@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
@@ -83,6 +84,10 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     public void installedBaseResourceCbor() throws Exception {
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
+
+        final Long softwareModuleId = ds.getModules().stream().findAny().get().getId();
+        testdataFactory.createArtifacts(softwareModuleId);
+
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds, target));
         postDeploymentFeedback(target.getControllerId(), actionId, getJsonClosedDeploymentActionFeedback(),
                 status().isOk());
@@ -91,8 +96,6 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         performGet(INSTALLED_BASE, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR), status().isOk(),
                 tenantAware.getCurrentTenant(), target.getControllerId(), actionId.toString());
 
-        final Long softwareModuleId = ds.getModules().stream().findAny().get().getId();
-        testdataFactory.createArtifacts(softwareModuleId);
         // get artifacts
         performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR),
                 status().isOk(), tenantAware.getCurrentTenant(), target.getControllerId(),
@@ -359,17 +362,14 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     public void artifactsOfInstalledActionExist() throws Exception {
         final Target target = createTargetAndAssertNoActiveActions();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
+
+        final Long softwareModuleId = ds.getModules().stream().findAny().get().getId();
+        testdataFactory.createArtifacts(softwareModuleId);
+
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds, target));
 
         postDeploymentFeedback(target.getControllerId(), actionId, getJsonClosedDeploymentActionFeedback(),
                 status().isOk());
-
-        final Long softwareModuleId = ds.getModules().stream().findAny().get().getId();
-        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isOk(),
-                tenantAware.getCurrentTenant(), target.getControllerId(), softwareModuleId.toString())
-                        .andExpect(jsonPath("$", hasSize(0)));
-
-        testdataFactory.createArtifacts(softwareModuleId);
 
         performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isOk(),
                 tenantAware.getCurrentTenant(), target.getControllerId(), softwareModuleId.toString())
@@ -377,7 +377,6 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                         .andExpect(jsonPath("$.[?(@.filename=='filename0')]", hasSize(1)))
                         .andExpect(jsonPath("$.[?(@.filename=='filename1')]", hasSize(1)))
                         .andExpect(jsonPath("$.[?(@.filename=='filename2')]", hasSize(1)));
-
     }
 
     private static Stream<Action.ActionType> actionTypeForDeployment() {
@@ -389,12 +388,13 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     @Description("Test forced deployment to a controller. Checks that action is represented as installedBase after installation.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 5), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 1) })
     public void deploymentActionInInstalledBase(final Action.ActionType actionType) throws Exception {
         // Prepare test data
@@ -439,11 +439,13 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     @Description("Test download-only deployment to a controller. Checks that download-only is not represented as installedBase.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = TargetPollEvent.class, count = 2) })
     public void deploymentDownloadOnlyActionNotInInstalledBase() throws Exception {
         // Prepare test data

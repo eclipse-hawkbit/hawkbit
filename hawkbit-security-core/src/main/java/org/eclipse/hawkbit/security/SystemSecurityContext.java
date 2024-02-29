@@ -15,14 +15,13 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -34,9 +33,8 @@ import org.springframework.security.core.context.SecurityContextImpl;
 /**
  * A Service which provide to run system code.
  */
+@Slf4j
 public class SystemSecurityContext {
-
-    private static final Logger LOG = LoggerFactory.getLogger(SystemSecurityContext.class);
 
     private final TenantAware tenantAware;
 
@@ -99,7 +97,7 @@ public class SystemSecurityContext {
     public <T> T runAsSystemAsTenant(final Callable<T> callable, final String tenant) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
-            LOG.debug("entering system code execution");
+            log.debug("entering system code execution");
             return tenantAware.runAsTenant(tenant, () -> {
                 try {
                     setSystemContext(SecurityContextHolder.getContext());
@@ -114,7 +112,7 @@ public class SystemSecurityContext {
 
         } finally {
             SecurityContextHolder.setContext(oldContext);
-            LOG.debug("leaving system code execution");
+            log.debug("leaving system code execution");
         }
     }
 

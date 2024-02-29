@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -17,74 +20,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Request Body of Target for assignment operations (ID only).
- *
  */
+@Data
+@Accessors(chain = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtTargetAssignmentRequestBody {
 
+    @Schema(description = "The technical identifier of the entity", example = "target4")
     private String id;
+    @Schema(description = "Forcetime in milliseconds", example = "1682408575278")
     private long forcetime;
+    @Schema(description = "The type of the assignment")
     private MgmtActionType type;
+    @Schema(description = "Separation of download and install by defining a maintenance window for the installation")
     private MgmtMaintenanceWindowRequestBody maintenanceWindow;
+    @Schema(description = "Importance of the assignment", example = "100")
     private Integer weight;
+    @Schema(description = "(Available with user consent flow active) Defines, if the confirmation is required for " +
+            "an action. Confirmation is required per default")
     private Boolean confirmationRequired;
 
     /**
      * JsonCreator Constructor
      * 
-     * @param id
-     *            Mandatory ID of the target that should be assigned
+     * @param id Mandatory ID of the target that should be assigned
      */
     @JsonCreator
     public MgmtTargetAssignmentRequestBody(@JsonProperty(required = true, value = "id") final String id) {
         this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(final String id) {
-        this.id = id;
-    }
-
-    public MgmtActionType getType() {
-        return type;
-    }
-
-    public void setType(final MgmtActionType type) {
-        this.type = type;
-    }
-
-    public long getForcetime() {
-        return forcetime;
-    }
-
-    public void setForcetime(final long forcetime) {
-        this.forcetime = forcetime;
-    }
-
-    public Integer getWeight() {
-        return weight;
-    }
-
-    public void setWeight(final Integer weight) {
-        this.weight = weight;
-    }
-
-    public MgmtMaintenanceWindowRequestBody getMaintenanceWindow() {
-        return maintenanceWindow;
-    }
-
-    public void setMaintenanceWindow(final MgmtMaintenanceWindowRequestBody maintenanceWindow) {
-        this.maintenanceWindow = maintenanceWindow;
-    }
-
-    public Boolean isConfirmationRequired() {
-        return confirmationRequired;
-    }
-
-    public void setConfirmationRequired(final boolean confirmationRequired) {
-        this.confirmationRequired = confirmationRequired;
     }
 }

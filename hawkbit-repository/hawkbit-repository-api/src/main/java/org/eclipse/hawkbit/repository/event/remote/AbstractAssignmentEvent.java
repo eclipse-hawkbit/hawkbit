@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import lombok.Data;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 /**
  * Abstract class providing information about an assignment.
  */
+@Data
 public abstract class AbstractAssignmentEvent extends RemoteTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
@@ -46,12 +48,7 @@ public abstract class AbstractAssignmentEvent extends RemoteTenantAwareEvent {
                 .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), ActionProperties::new)));
     }
 
-    public Map<String, ActionProperties> getActions() {
-        return actions;
-    }
-
     public Optional<ActionProperties> getActionPropertiesForController(final String controllerId) {
         return Optional.ofNullable(actions.get(controllerId));
     }
-
 }

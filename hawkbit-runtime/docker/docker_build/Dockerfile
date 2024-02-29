@@ -1,5 +1,5 @@
 # set Java
-ARG JAVA_VERSION=17.0.9_9
+ARG JAVA_VERSION=17.0.10_7
 # extracts spring layers from the app jar (to optimize boot)
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine as build
 
@@ -41,4 +41,4 @@ ENV JAVA_OPTS="-Xms768m -Xmx768m -XX:MaxMetaspaceSize=250m -XX:MetaspaceSize=250
 
 VOLUME "/artifactrepo"
 EXPOSE ${CONTAINER_PORT}
-ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} org.springframework.boot.loader.JarLauncher ${@}"]
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} org.springframework.boot.loader.launch.JarLauncher ${@}"]

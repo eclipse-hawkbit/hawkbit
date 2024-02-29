@@ -30,12 +30,13 @@
          <artifactId>slf4j-api</artifactId>
       </dependency>
       <dependency>
-         <groupId>javax.validation</groupId>
-         <artifactId>validation-api</artifactId>
+         <groupId>jakarta.validation</groupId>
+         <artifactId>jakarta.validation-api</artifactId>
       </dependency>
       <dependency>
-         <groupId>com.google.guava</groupId>
-         <artifactId>guava</artifactId>
+         <groupId>commons-io</groupId>
+         <artifactId>commons-io</artifactId>
+         <version>${commons-io.version}</version>
       </dependency>
     
       <!-- Test -->

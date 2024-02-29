@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -23,6 +24,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * 
  * @see PropertyBasedArtifactUrlHandler
  */
+@Data
 @ConfigurationProperties("hawkbit.artifact.url")
 public class ArtifactUrlHandlerProperties {
 
@@ -31,13 +33,10 @@ public class ArtifactUrlHandlerProperties {
      */
     private final Map<String, UrlProtocol> protocols = new HashMap<>();
 
-    public Map<String, UrlProtocol> getProtocols() {
-        return protocols;
-    }
-
     /**
      * Protocol specific properties to generate URLs accordingly.
      */
+    @Data
     public static class UrlProtocol {
 
         private static final int DEFAULT_HTTP_PORT = 8080;
@@ -85,68 +84,8 @@ public class ArtifactUrlHandlerProperties {
          */
         private List<ApiType> supports = Arrays.asList(ApiType.DDI, ApiType.DMF, ApiType.MGMT);
 
-        public boolean isEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(final boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        public String getRel() {
-            return rel;
-        }
-
-        public void setRel(final String rel) {
-            this.rel = rel;
-        }
-
-        public String getRef() {
-            return ref;
-        }
-
-        public void setRef(final String ref) {
-            this.ref = ref;
-        }
-
-        public String getHostname() {
-            return hostname;
-        }
-
-        public void setHostname(final String hostname) {
-            this.hostname = hostname;
-        }
-
-        public String getIp() {
-            return ip;
-        }
-
-        public void setIp(final String ip) {
-            this.ip = ip;
-        }
-
-        public Integer getPort() {
-            return port;
-        }
-
-        public void setPort(final Integer port) {
-            this.port = port;
-        }
-
-        public List<ApiType> getSupports() {
-            return Collections.unmodifiableList(supports);
-        }
-
         public void setSupports(final List<ApiType> supports) {
             this.supports = Collections.unmodifiableList(supports);
-        }
-
-        public String getProtocol() {
-            return protocol;
-        }
-
-        public void setProtocol(final String protocol) {
-            this.protocol = protocol;
         }
     }
 }

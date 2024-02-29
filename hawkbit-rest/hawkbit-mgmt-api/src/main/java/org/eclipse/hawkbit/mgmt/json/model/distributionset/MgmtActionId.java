@@ -14,6 +14,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.util.Objects;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.springframework.hateoas.RepresentationModel;
 
@@ -25,44 +30,35 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Representation of an Action Id as a Json Object with link to the Action
  * resource
  */
+@NoArgsConstructor
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(description = """
+    {
+      "id" : 13,
+      "_links" : {
+         "self" : {
+           "href" : "https://management-api.host.com/rest/v1/targets/target2/actions/13"
+         }
+      }
+    }""")
 public class MgmtActionId extends RepresentationModel<MgmtActionId> {
 
+    @JsonProperty("id")
+    @Schema(description = "ID of the action")
     private long actionId;
-
-    public MgmtActionId() {
-    }
 
     /**
      * Constructor
      * 
-     * @param actionId
-     *            the actionId
-     * @param controllerId
-     *            the controller Id
+     * @param actionId the actionId
+     * @param controllerId the controller Id
      */
     public MgmtActionId(final String controllerId, final long actionId) {
         this.actionId = actionId;
         add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(controllerId, actionId)).withSelfRel().expand());
-    }
-
-    @JsonProperty("id")
-    public long getActionId() {
-        return actionId;
-    }
-
-    public void setActionId(final long actionId) {
-        this.actionId = actionId;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        return super.equals(obj) && this.getClass().isInstance(obj) && actionId == ((MgmtActionId) obj).getActionId();
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), actionId);
     }
 }

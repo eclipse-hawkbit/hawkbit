@@ -19,7 +19,5 @@ package org.eclipse.hawkbit.repository.event;
 public enum CustomEvents {
 
     TARGETS_CREATED_EVENT,
-
     DISTRIBUTION_CREATED_EVENT
-
 }

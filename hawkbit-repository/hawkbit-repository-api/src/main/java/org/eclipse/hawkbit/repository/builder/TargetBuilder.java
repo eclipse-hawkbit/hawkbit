@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.eclipse.hawkbit.repository.model.Target;
 

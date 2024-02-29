@@ -18,8 +18,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -60,8 +61,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCond
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -74,9 +73,8 @@ import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.a
 /**
  * A Jpa implementation of {@link RolloutExecutor}
  */
+@Slf4j
 public class JpaRolloutExecutor implements RolloutExecutor {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaRolloutExecutor.class);
 
     /**
      * Max amount of targets that are handled in one transaction.
@@ -148,7 +146,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     @Override
     public void execute(final Rollout rollout) {
-        LOGGER.debug("handle rollout {}", rollout.getId());
+        log.debug("handle rollout {}", rollout.getId());
 
         switch (rollout.getStatus()) {
         case CREATING:
@@ -170,13 +168,13 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             handleStopRollout((JpaRollout) rollout);
             break;
         default:
-            LOGGER.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
+            log.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
             break;
         }
     }
 
     private void handleCreateRollout(final JpaRollout rollout) {
-        LOGGER.debug("handleCreateRollout called for rollout {}", rollout.getId());
+        log.debug("handleCreateRollout called for rollout {}", rollout.getId());
 
         final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(
                 PageRequest.of(0, quotaManagement.getMaxRolloutGroupsPerRollout(), Sort.by(Direction.ASC, "id")),
@@ -209,9 +207,9 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
             if (!rolloutApprovalStrategy.isApprovalNeeded(rollout)) {
                 rollout.setStatus(RolloutStatus.READY);
-                LOGGER.debug("rollout {} creation done. Switch to READY.", rollout.getId());
+                log.debug("rollout {} creation done. Switch to READY.", rollout.getId());
             } else {
-                LOGGER.debug("rollout {} creation done. Switch to WAITING_FOR_APPROVAL.", rollout.getId());
+                log.debug("rollout {} creation done. Switch to WAITING_FOR_APPROVAL.", rollout.getId());
                 rollout.setStatus(RolloutStatus.WAITING_FOR_APPROVAL);
                 rolloutApprovalStrategy.onApprovalRequired(rollout);
             }
@@ -222,13 +220,13 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void handleDeleteRollout(final JpaRollout rollout) {
-        LOGGER.debug("handleDeleteRollout called for {}", rollout.getId());
+        log.debug("handleDeleteRollout called for {}", rollout.getId());
 
         // check if there are actions beyond schedule
         boolean hardDeleteRolloutGroups = !actionRepository.existsByRolloutIdAndStatusNotIn(rollout.getId(),
                 Status.SCHEDULED);
         if (hardDeleteRolloutGroups) {
-            LOGGER.debug("Rollout {} has no actions other than scheduled -> hard delete", rollout.getId());
+            log.debug("Rollout {} has no actions other than scheduled -> hard delete", rollout.getId());
             hardDeleteRollout(rollout);
             return;
         }
@@ -265,7 +263,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void handleStopRollout(final JpaRollout rollout) {
-        LOGGER.debug("handleStopRollout called for {}", rollout.getId());
+        log.debug("handleStopRollout called for {}", rollout.getId());
         // clean up all scheduled actions
         final Slice<JpaAction> scheduledActions = findScheduledActionsByRollout(rollout);
         deleteScheduledActions(rollout, scheduledActions);
@@ -299,7 +297,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     private void handleReadyRollout(final Rollout rollout) {
         if (rollout.getStartAt() != null && rollout.getStartAt() <= System.currentTimeMillis()) {
-            LOGGER.debug(
+            log.debug(
                     "handleReadyRollout called for rollout {} with autostart beyond define time. Switch to STARTING",
                     rollout.getId());
             rolloutManagement.start(rollout.getId());
@@ -307,7 +305,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void handleStartingRollout(final Rollout rollout) {
-        LOGGER.debug("handleStartingRollout called for rollout {}", rollout.getId());
+        log.debug("handleStartingRollout called for rollout {}", rollout.getId());
 
         if (ensureAllGroupsAreScheduled(rollout)) {
             startFirstRolloutGroup(rollout);
@@ -315,11 +313,11 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void handleRunningRollout(final JpaRollout rollout) {
-        LOGGER.debug("handleRunningRollout called for rollout {}", rollout.getId());
+        log.debug("handleRunningRollout called for rollout {}", rollout.getId());
 
         if (rollout.isDynamic()) {
             if (fillDynamicRolloutGroupsWithTargets(rollout)) {
-                LOGGER.debug("Dynamic group created for rollout {}", rollout.getId());
+                log.debug("Dynamic group created for rollout {}", rollout.getId());
                 return;
             }
         }
@@ -337,12 +335,12 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             // to find the latest group which
             executeLatestRolloutGroup(rollout);
         } else {
-            LOGGER.debug("Rollout {} has {} running groups", rollout.getId(), rolloutGroupsRunning.size());
+            log.debug("Rollout {} has {} running groups", rollout.getId(), rolloutGroupsRunning.size());
             executeRolloutGroups(rollout, rolloutGroupsRunning, rollout.getRolloutGroups().get(rollout.getRolloutGroups().size() - 1));
         }
 
         if (isRolloutComplete(rollout)) {
-            LOGGER.info("Rollout {} is finished, setting FINISHED status", rollout);
+            log.info("Rollout {} is finished, setting FINISHED status", rollout);
             rollout.setStatus(RolloutStatus.FINISHED);
             rolloutRepository.save(rollout);
         }
@@ -365,7 +363,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
                         .publishEvent(new RolloutUpdatedEvent(rollout, eventPublisherHolder.getApplicationId())));
             } catch (final RuntimeException e) {
-                LOGGER.error("Exception during deletion of actions of rollout {}", rollout, e);
+                log.error("Exception during deletion of actions of rollout {}", rollout, e);
             }
         }
     }
@@ -456,7 +454,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             // rollout because of error?
             final boolean isError = checkErrorState(rollout, evalProxy);
             if (isError) {
-                LOGGER.info("Rollout {} {} has error, calling error action", rollout.getName(), rollout.getId());
+                log.info("Rollout {} {} has error, calling error action", rollout.getName(), rollout.getId());
                 callErrorAction(rollout, rolloutGroup);
             } else {
                 // not in error so check finished state, do we need to
@@ -492,7 +490,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         try {
             evaluationManager.getErrorActionEvaluator(rolloutGroup.getErrorAction()).exec(rollout, rolloutGroup);
         } catch (final EvaluatorNotConfiguredException e) {
-            LOGGER.error("Something bad happened when accessing the error action bean {}",
+            log.error("Something bad happened when accessing the error action bean {}",
                     rolloutGroup.getErrorAction().name(), e);
         }
     }
@@ -518,26 +516,26 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             return evaluationManager.getErrorConditionEvaluator(errorCondition).eval(rollout, rolloutGroup,
                     rolloutGroup.getErrorConditionExp());
         } catch (final EvaluatorNotConfiguredException e) {
-            LOGGER.error("Something bad happened when accessing the error condition bean {}", errorCondition.name(), e);
+            log.error("Something bad happened when accessing the error condition bean {}", errorCondition.name(), e);
             return false;
         }
     }
 
     private boolean checkSuccessCondition(final Rollout rollout, final RolloutGroup rolloutGroup, final RolloutGroup evalProxy,
             final RolloutGroupSuccessCondition successCondition) {
-        LOGGER.trace("Checking finish condition {} on rolloutgroup {}", successCondition, rolloutGroup);
+        log.trace("Checking finish condition {} on rolloutgroup {}", successCondition, rolloutGroup);
         try {
             final boolean isFinished = evaluationManager.getSuccessConditionEvaluator(successCondition).eval(rollout,
                     evalProxy, rolloutGroup.getSuccessConditionExp());
             if (isFinished) {
-                LOGGER.debug("Rolloutgroup {} is finished, starting next group", rolloutGroup);
+                log.debug("Rolloutgroup {} is finished, starting next group", rolloutGroup);
                 executeRolloutGroupSuccessAction(rollout, rolloutGroup);
             } else {
-                LOGGER.debug("Rolloutgroup {} is still running", rolloutGroup);
+                log.debug("Rolloutgroup {} is still running", rolloutGroup);
             }
             return isFinished;
         } catch (final EvaluatorNotConfiguredException e) {
-            LOGGER.error("Something bad happened when accessing the finish condition or success action bean {}",
+            log.error("Something bad happened when accessing the finish condition or success action bean {}",
                     successCondition.name(), e);
             return false;
         }
@@ -548,7 +546,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void startFirstRolloutGroup(final Rollout rollout) {
-        LOGGER.debug("startFirstRolloutGroup called for rollout {}", rollout.getId());
+        log.debug("startFirstRolloutGroup called for rollout {}", rollout.getId());
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.STARTING);
         final JpaRollout jpaRollout = (JpaRollout) rollout;
 
@@ -643,7 +641,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             return rolloutGroupRepository.save(group);
 
         } catch (final TransactionException e) {
-            LOGGER.warn("Transaction assigning Targets to RolloutGroup failed", e);
+            log.warn("Transaction assigning Targets to RolloutGroup failed", e);
             return group;
         }
     }
@@ -730,7 +728,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 return true;
             }
         } catch (final TransactionException e) {
-            LOGGER.warn("Transaction assigning Targets to RolloutGroup failed", e);
+            log.warn("Transaction assigning Targets to RolloutGroup failed", e);
         }
         return false;
     }
@@ -817,7 +815,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             } while (actionsCreated > 0);
 
         } catch (final TransactionException e) {
-            LOGGER.warn("Transaction assigning Targets to RolloutGroup failed", e);
+            log.warn("Transaction assigning Targets to RolloutGroup failed", e);
             return 0;
         }
         return totalActionsCreated;

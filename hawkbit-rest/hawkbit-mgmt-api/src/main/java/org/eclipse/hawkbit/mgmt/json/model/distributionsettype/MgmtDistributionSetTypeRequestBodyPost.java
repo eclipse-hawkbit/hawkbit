@@ -12,28 +12,36 @@ package org.eclipse.hawkbit.mgmt.json.model.distributionsettype;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssigment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Request Body for DistributionSetType POST.
- *
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@Accessors(chain = true)
 public class MgmtDistributionSetTypeRequestBodyPost extends MgmtDistributionSetTypeRequestBodyPut {
 
     @JsonProperty(required = true)
-    @Schema(example = "Example type name")
+    @Schema(description = "The name of the entity", example = "Example type name")
     private String name;
 
     @JsonProperty(required = true)
-    @Schema(example = "Example key")
+    @Schema(description = "Functional key of the distribution set type", example = "Example key")
     private String key;
 
     @JsonProperty
+    @Schema(description = "Mandatory module type IDs")
     private List<MgmtSoftwareModuleTypeAssigment> mandatorymodules;
-
     @JsonProperty
+    @Schema(description = "Optional module type IDs")
     private List<MgmtSoftwareModuleTypeAssigment> optionalmodules;
 
     @Override
@@ -47,79 +55,4 @@ public class MgmtDistributionSetTypeRequestBodyPost extends MgmtDistributionSetT
         super.setColour(colour);
         return this;
     }
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param name
-     *            the name to set
-     *
-     * @return updated body
-     */
-    public MgmtDistributionSetTypeRequestBodyPost setName(final String name) {
-        this.name = name;
-        return this;
-    }
-
-    /**
-     * @return the key
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * @param key
-     *            the key to set
-     *
-     * @return updated body
-     */
-    public MgmtDistributionSetTypeRequestBodyPost setKey(final String key) {
-        this.key = key;
-        return this;
-    }
-
-    /**
-     * @return the mandatory modules
-     */
-    public List<MgmtSoftwareModuleTypeAssigment> getMandatorymodules() {
-        return mandatorymodules;
-    }
-
-    /**
-     * @param mandatorymodules
-     *            the mandatory modules to set
-     *
-     * @return updated body
-     */
-    public MgmtDistributionSetTypeRequestBodyPost setMandatorymodules(
-            final List<MgmtSoftwareModuleTypeAssigment> mandatorymodules) {
-        this.mandatorymodules = mandatorymodules;
-        return this;
-    }
-
-    /**
-     * @return the optional modules
-     */
-    public List<MgmtSoftwareModuleTypeAssigment> getOptionalmodules() {
-        return optionalmodules;
-    }
-
-    /**
-     * @param optionalmodules
-     *            the optional modules to set
-     *
-     * @return updated body
-     */
-    public MgmtDistributionSetTypeRequestBodyPost setOptionalmodules(
-            final List<MgmtSoftwareModuleTypeAssigment> optionalmodules) {
-        this.optionalmodules = optionalmodules;
-        return this;
-    }
-
 }

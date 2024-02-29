@@ -63,6 +63,7 @@ Payload Template (optional):
 ```json
 {
     "name": "String",
+    "type": "String",
     "attributeUpdate": {
         "attributes": {
             "exampleKey1" : "exampleValue1",
@@ -74,6 +75,18 @@ Payload Template (optional):
 ```
 
 The "name" property specifies the name of the thing, which by default is the thing ID. This property is optional.<br />
+<br />
+The "type" property specifies name of a target type which should be assigned to the created/updated target. The 
+target type with the specified name should be created in advance, otherwise it can't be assigned to the target,
+resulting in:
+* error is logged
+* if the target does not exist then it is created without any target type assigned
+* if it exists already then no changes to its target type assignment are made.
+
+If the "type" property is set to a blank string while updating an existing target then any eventual target type
+assignment is removed from the target. This property is optional and if omitted then no changes to the target type
+assignment are made.<br />
+<br />
 The "attributeUpdate" property provides the attributes of the thing, for details see UPDATE_ATTRIBUTES message. This property is optional.
 
 

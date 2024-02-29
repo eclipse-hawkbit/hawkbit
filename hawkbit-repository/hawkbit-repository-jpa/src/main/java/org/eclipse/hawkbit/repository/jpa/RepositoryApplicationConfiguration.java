@@ -9,13 +9,14 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import javax.sql.DataSource;
-import javax.validation.Validation;
+import jakarta.validation.Validation;
 
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
@@ -162,6 +163,7 @@ import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.hibernate.validator.BaseHibernateValidatorConfiguration;
 import org.springframework.beans.BeansException;
@@ -192,13 +194,10 @@ import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
-
-import com.google.common.collect.Maps;
 
 /**
  * General configuration for hawkBit's Repository.
@@ -483,7 +482,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Override
     protected Map<String, Object> getVendorProperties() {
 
-        final Map<String, Object> properties = Maps.newHashMapWithExpectedSize(7);
+        final Map<String, Object> properties = new HashMap<>(7);
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put(PersistenceUnitProperties.WEAVING, "false");
         // needed for reports
@@ -779,10 +778,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    RolloutApprovalStrategy rolloutApprovalStrategy(final UserDetailsService userDetailsService,
+    RolloutApprovalStrategy rolloutApprovalStrategy(final UserAuthoritiesResolver userAuthoritiesResolver,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final SystemSecurityContext systemSecurityContext) {
-        return new DefaultRolloutApprovalStrategy(userDetailsService, tenantConfigurationManagement,
+        return new DefaultRolloutApprovalStrategy(userAuthoritiesResolver, tenantConfigurationManagement,
                 systemSecurityContext);
     }
 

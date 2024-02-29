@@ -9,21 +9,21 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -32,10 +32,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
+@Slf4j
 public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity> implements BaseEntityRepository<T> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseEntityRepositoryACM.class);
 
     private final BaseEntityRepository<T> repository;
     private final AccessController<T> accessController;
@@ -93,7 +93,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
                         throw e.getCause() == null ? e : e.getCause();
                     }
                 });
-        LOGGER.info("Proxy created -> {}", acmProxy);
+        log.info("Proxy created -> {}", acmProxy);
         return acmProxy;
     }
 
@@ -218,9 +218,20 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     }
 
     @Override
+    public <S extends T, R> R findBy(final Specification<T> spec,
+            final Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+        return repository.findBy(accessController.appendAccessRules(AccessController.Operation.READ, spec), queryFunction);
+    }
+
+    @Override
     public boolean exists(@NonNull final Specification<T> spec) {
         return repository.exists(
                 Objects.requireNonNull(accessController.appendAccessRules(AccessController.Operation.READ, spec)));
+    }
+
+    @Override
+    public long delete(final Specification<T> spec) {
+        return repository.delete(accessController.appendAccessRules(AccessController.Operation.DELETE, spec));
     }
 
     @Override

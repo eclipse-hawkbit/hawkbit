@@ -19,11 +19,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
+
 /**
  * A {@link SpringBootApplication} annotated class with a main method to start.
  * The minimal configuration for the stand alone hawkBit DDI server.
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "org.eclipse.hawkbit")
 @EnableHawkbitManagedSecurityConfiguration
 public class DDIStart {
 

@@ -22,6 +22,7 @@ public interface Constants {
     String CREATED_AT = "Created at";
     String LAST_MODIFIED_BY = "Last modified by";
     String LAST_MODIFIED_AT = "Last modified at";
+    String SECURITY_TOKEN = "Security Token";
 
     // rollout
     String GROUP_COUNT = "Group Count";
@@ -41,6 +42,7 @@ public interface Constants {
     String START_TYPE = "Start Type";
     String MANUAL = "Manual";
     String AUTO = "Auto";
+    String DYNAMIC = "Dynamic";
 
     String NAME_ASC = "name:asc";
 }

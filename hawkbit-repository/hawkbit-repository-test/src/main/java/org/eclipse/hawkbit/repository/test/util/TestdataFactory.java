@@ -81,8 +81,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import com.google.common.collect.Lists;
-
 /**
  * Data generator utility for tests.
  */
@@ -438,7 +436,7 @@ public class TestdataFactory {
      */
     public List<DistributionSet> createDistributionSetsWithoutModules(final int number) {
 
-        final List<DistributionSet> sets = Lists.newArrayListWithExpectedSize(number);
+        final List<DistributionSet> sets = new ArrayList<>(number);
         for (int i = 0; i < number; i++) {
             sets.add(distributionSetManagement
                     .create(entityFactory.distributionSet().create().name("DS" + i).version(DEFAULT_VERSION + "." + i)
@@ -913,7 +911,7 @@ public class TestdataFactory {
     }
 
     public List<Target> createTargets(final String prefix, final int offset, final int number) {
-        final List<TargetCreate> targets = Lists.newArrayListWithExpectedSize(number);
+        final List<TargetCreate> targets = new ArrayList<>(number);
         for (int i = 0; i < number; i++) {
             targets.add(entityFactory.target().create().controllerId(prefix + (offset + i)));
         }
@@ -936,7 +934,7 @@ public class TestdataFactory {
     public List<Target> createTargetsWithType(final int number, final String controllerIdPrefix,
             final TargetType targetType) {
 
-        final List<TargetCreate> targets = Lists.newArrayListWithExpectedSize(number);
+        final List<TargetCreate> targets = new ArrayList<>(number);
         for (int i = 0; i < number; i++) {
             targets.add(entityFactory.target().create().controllerId(controllerIdPrefix + i)
                     .targetType(targetType.getId()));
@@ -976,7 +974,7 @@ public class TestdataFactory {
      * @return list of {@link Target} objects
      */
     private List<Target> generateTargets(final int start, final int numberOfTargets, final String controllerIdPrefix) {
-        final List<Target> targets = Lists.newArrayListWithExpectedSize(numberOfTargets);
+        final List<Target> targets = new ArrayList<>(numberOfTargets);
         for (int i = start; i < start + numberOfTargets; i++) {
             targets.add(entityFactory.target().create().controllerId(controllerIdPrefix + i).build());
         }
@@ -1075,7 +1073,7 @@ public class TestdataFactory {
      * @return the created set of {@link TargetTag}s
      */
     public List<TargetTag> createTargetTags(final int number, final String tagPrefix) {
-        final List<TagCreate> result = Lists.newArrayListWithExpectedSize(number);
+        final List<TagCreate> result = new ArrayList<>(number);
 
         for (int i = 0; i < number; i++) {
             result.add(entityFactory.tag().create().name(tagPrefix + i).description(tagPrefix + i)
@@ -1094,7 +1092,7 @@ public class TestdataFactory {
      * @return the persisted {@link DistributionSetTag}s
      */
     public List<DistributionSetTag> createDistributionSetTags(final int number) {
-        final List<TagCreate> result = Lists.newArrayListWithExpectedSize(number);
+        final List<TagCreate> result = new ArrayList<>(number);
 
         for (int i = 0; i < number; i++) {
             result.add(
@@ -1450,7 +1448,7 @@ public class TestdataFactory {
      * @return persisted {@link TargetType}
      */
     public List<TargetType> createTargetTypes(final String targetTypePrefix, final int count) {
-        final List<TargetTypeCreate> result = Lists.newArrayListWithExpectedSize(count);
+        final List<TargetTypeCreate> result = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             result.add(entityFactory.targetType().create()
                     .name(targetTypePrefix + i).description(targetTypePrefix + " description")

@@ -9,12 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import lombok.Data;
+
 import java.util.List;
 
 /**
  * Result object for {@link DistributionSetTag} assignments.
  *
  */
+@Data
 public class DistributionSetTagAssignmentResult extends AbstractAssignmentResult<DistributionSet> {
 
     private final DistributionSetTag distributionSetTag;
@@ -37,9 +40,4 @@ public class DistributionSetTagAssignmentResult extends AbstractAssignmentResult
         super(alreadyAssigned, assigned, unassigned);
         this.distributionSetTag = distributionSetTag;
     }
-
-    public DistributionSetTag getDistributionSetTag() {
-        return distributionSetTag;
-    }
-
 }

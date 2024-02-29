@@ -12,81 +12,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <!--
-    TODO - when hawkbit is megrated to SpringBoot 3.x make hawwkit-runtime the parent.
-    TODO - Also, remove the unnecessary (then) versions, plugins ...
-    -->
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.5</version>
-        <relativePath/>
+        <groupId>org.eclipse.hawkbit</groupId>
+        <artifactId>hawkbit-runtime-parent</artifactId>
+        <version>${revision}</version>
     </parent>
 
-    <groupId>org.eclipse.hawkbit</groupId>
     <artifactId>hawkbit-simple-ui</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
     <name>hawkBit :: Runtime :: Simple UI</name>
 
     <properties>
-        <revision>0-SNAPSHOT</revision>
-
-        <java.version>17</java.version>
         <vaadin.version>24.2.2</vaadin.version>
         <spring-cloud-starter-openfeign.version>4.0.4</spring-cloud-starter-openfeign.version>
-
-        <!-- TODO - remove after the parent become a hawkBit pom -->
-        <dash.skip>true</dash.skip>
-        <dash.fail>true</dash.fail>
-        <dash.projectId>iot.hawkbit</dash.projectId>
-        <dash.summary>${project.build.directory}/dash/summary</dash.summary>
-        <!-- To automatically create IP Team review requests for identified content call with -Ddash.iplab.token=<token> (do not share your access token) -->
-        <dash.review.summary>${project.build.directory}/dash/review-summary</dash.review.summary>
-        <excludeGroupIds>org.eclipse,org.junit</excludeGroupIds>
-        <!-- Release - START -->
-        <release.scm.connection>scm:git:git@github.com:eclipse/hawkbit.git</release.scm.connection>
-        <release.scm.developerConnection>scm:git:https://github.com/eclipse/hawkbit.git</release.scm.developerConnection>
-        <release.scm.url>https://github.com/eclipse/hawkbit.git</release.scm.url>
-        <!-- Release - END -->
-        <!-- Sonar - START -->
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.organization>bosch-iot-rollouts</sonar.organization>
-        <sonar.projectKey>${project.groupId}:${project.artifactId}</sonar.projectKey>
-        <sonar.branch.name>LOCAL_SCAN</sonar.branch.name>
-        <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
-        <sonar.qualitygate.timeout>600</sonar.qualitygate.timeout>
-        <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
-        <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
-        <sonar.exclusions>
-            **/target/generated-sources/apt/**,**/src/test/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**
-        </sonar.exclusions>
-        <sonar.coverage.exclusions>
-            **/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**
-        </sonar.coverage.exclusions>
-        <jacoco.version>0.8.8</jacoco.version>
-        <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
-        <sonar.coverage.jacoco.xmlReportPaths>
-            ${project.basedir}/../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml,
-            ${project.basedir}/../../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml
-        </sonar.coverage.jacoco.xmlReportPaths>
-        <!-- Sonar - END -->
+        <openfeign-hc5.version>13.0</openfeign-hc5.version>
     </properties>
 
-    <!-- TODO - remove after the parent become a hawkBit pom -->
-    <distributionManagement>
-        <repository>
-            <id>ossrh</id>
-            <name>hawkBit Repository - Release</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <name>hawkBit Repository - Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
     <repositories>
         <repository>
             <id>Vaadin Repo</id>
@@ -96,12 +38,6 @@
             </snapshots>
         </repository>
     </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>dash-licenses</id>
-            <url>https://repo.eclipse.org/content/repositories/dash-licenses</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <dependencyManagement>
         <dependencies>
@@ -116,6 +52,11 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-sdk-commons</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-mgmt-api</artifactId>
@@ -141,27 +82,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
-            <version>${spring-cloud-starter-openfeign.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.openfeign</groupId>
-            <artifactId>feign-hc5</artifactId>
-            <version>13.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
@@ -185,154 +105,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!-- TODO - remove after the parent become a hawkBit pom -->
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>2.11</version>
-                <configuration>
-                    <header>licenses/LICENSE_HEADER_TEMPLATE.txt</header>
-                    <excludes>
-                        <exclude>**/banner.txt</exclude>
-                        <exclude>**/README.md</exclude>
-                        <exclude>**/frontend/**</exclude>
-                    </excludes>
-                    <mapping>
-                        <scss>JAVADOC_STYLE</scss>
-                    </mapping>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.5.0</version>
-                <configuration>
-                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
-                    <updatePomFile>true</updatePomFile>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>flatten</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>flatten</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>flatten.clean</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.dash</groupId>
-                <artifactId>license-tool-plugin</artifactId>
-                <version>1.0.2</version>
-                <executions>
-                    <execution>
-                        <id>license-check</id>
-                        <goals>
-                            <goal>license-check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
-
-    <!-- TODO - remove after the parent become a hawkBit pom -->
-    <profiles>
-        <profile>
-            <id>nexus_staging</id>
-            <activation>
-                <property>
-                    <name>!skipNexusStaging</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <!-- Use the Nexus Staging plugin as a full replacement
-                           for the standard Maven Deploy plugin. See https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin
-                           why this makes sense :-) We can control whether we want to deploy to the
-                           Eclipse repo or Maven Central by a combination of the version being a SNAPSHOT
-                           or RELEASE version and property skipNexusStaging=true/false. In any case
-                           we can take advantage of the plugin's "deferred deploy" feature which makes
-                           sure that all artifacts of a multi-module project are deployed as a whole
-                           at the end of the build process instead of deploying each module's artifacts
-                           individually as part of building the module. -->
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.13</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-<!--                            <stagingProfileId>1d2b23f380235e</stagingProfileId>-->
-                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <!-- this profile generates GPG signatures -->
-            <id>create_gpg_signature</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-                <property>
-                    <name>createGPGSignature</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                                <configuration>
-                                    <gpgArguments>
-                                        <arg>--pinentry-mode</arg>
-                                        <arg>loopback</arg>
-                                    </gpgArguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
-    <!-- TODO - remove after the parent become a hawkBit pom -->
-    <licenses>
-        <license>
-            <name>EPL-2.0</name>
-            <url>https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt</url>
-            <comments>Eclipse Public License - Version 2.0</comments>
-        </license>
-    </licenses>
 </project>

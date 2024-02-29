@@ -13,10 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -26,116 +28,152 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * A json annotated rest model for DistributionSet to RESTful API
  * representation.
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(description = """
+    **_links**:
+    * **type** - The type of the distribution set
+    * **modules** - List of software modules
+    * **metadata** - List of metadata
+    """, example = """
+    {
+       "createdBy" : "bumlux",
+       "createdAt" : 1682408574924,
+       "lastModifiedBy" : "bumlux",
+       "lastModifiedAt" : 1682408574925,
+       "name" : "DS",
+       "description" : "Updated Desc: 2LaONizh7WZp0on6XEOZI9AwEYIjj77YZskEmA2LVrKtAOXj9vvqACopEghLMqt6DIWpIahn6XM4jUlRZ1T5SZS2NWMuWHGoFIg1",
+       "version" : "1.0",
+       "modules" : [ {
+         "createdBy" : "bumlux",
+         "createdAt" : 1682408574921,
+         "lastModifiedBy" : "bumlux",
+         "lastModifiedAt" : 1682408574926,
+         "name" : "Firmware",
+         "description" : "Updated Desc: 2LaONizh7WZp0on6XEOZI9AwEYIjj77YZskEmA2LVrKtAOXj9vvqACopEghLMqt6DIWpIahn6XM4jUlRZ1T5SZS2NWMuWHGoFIg1",
+         "version" : "1.0.42",
+         "type" : "os",
+         "typeName" : "OS",
+         "vendor" : "vendor Limited Inc, California",
+         "locked" : true,
+         "deleted" : false,
+         "encrypted" : false,
+         "_links" : {
+           "self" : {
+             "href" : "https://management-api.host.com/rest/v1/softwaremodules/18"
+           }
+         },
+         "id" : 18
+       }, {
+         "createdBy" : "bumlux",
+         "createdAt" : 1682408574920,
+         "lastModifiedBy" : "bumlux",
+         "lastModifiedAt" : 1682408574925,
+         "name" : "app runtime",
+         "description" : "Updated Desc: 2LaONizh7WZp0on6XEOZI9AwEYIjj77YZskEmA2LVrKtAOXj9vvqACopEghLMqt6DIWpIahn6XM4jUlRZ1T5SZS2NWMuWHGoFIg1",
+         "version" : "1.0.25",
+         "type" : "runtime",
+         "typeName" : "runtime",
+         "vendor" : "vendor GmbH, Stuttgart, Germany",
+         "locked" : true,
+         "deleted" : false,
+         "encrypted" : false,
+         "_links" : {
+           "self" : {
+             "href" : "https://management-api.host.com/rest/v1/softwaremodules/17"
+           }
+         },
+         "id" : 17
+       }, {
+         "createdBy" : "bumlux",
+         "createdAt" : 1682408574919,
+         "lastModifiedBy" : "bumlux",
+         "lastModifiedAt" : 1682408574926,
+         "name" : "application",
+         "description" : "Updated Desc: 2LaONizh7WZp0on6XEOZI9AwEYIjj77YZskEmA2LVrKtAOXj9vvqACopEghLMqt6DIWpIahn6XM4jUlRZ1T5SZS2NWMuWHGoFIg1",
+         "version" : "1.0.67",
+         "type" : "application",
+         "typeName" : "Application",
+         "vendor" : "vendor Limited, California",
+         "locked" : true,
+         "deleted" : false,
+         "encrypted" : false,
+         "_links" : {
+           "self" : {
+             "href" : "https://management-api.host.com/rest/v1/softwaremodules/16"
+           }
+         },
+         "id" : 16
+       } ],
+       "requiredMigrationStep" : false,
+       "type" : "test_default_ds_type",
+       "typeName" : "OS (FW) mandatory, runtime (FW) and app (SW) optional",
+       "complete" : true,
+       "deleted" : false,
+       "valid" : true,
+       "_links" : {
+         "self" : {
+           "href" : "https://management-api.host.com/rest/v1/distributionsets/6"
+         },
+         "modules" : {
+           "href" : "https://management-api.host.com/rest/v1/distributionsets/6/assignedSM?offset=0&limit=50"
+         },
+         "type" : {
+           "href" : "https://management-api.host.com/rest/v1/distributionsettypes/24"
+         },
+         "metadata" : {
+           "href" : "https://management-api.host.com/rest/v1/distributionsets/6/metadata?offset=0&limit=50"
+         }
+       },
+       "id" : 6
+     }""")
 public class MgmtDistributionSet extends MgmtNamedEntity {
 
     @JsonProperty(value = "id", required = true)
-    @Schema(example = "51")
+    @Schema(description = "The technical identifier of the entity", example = "51")
     private Long dsId;
 
     @JsonProperty
-    @Schema(example = "1.4.2")
+    @Schema(description = "Package version", example = "1.4.2")
     private String version;
 
     @JsonProperty
-    private List<MgmtSoftwareModule> modules = new ArrayList<>();
-
-    @JsonProperty
-    @Schema(example = "false")
-    private boolean requiredMigrationStep;
-
-    @JsonProperty
-    @Schema(example = "test_default_ds_type")
+    @Schema(description = "The type of the distribution set", example = "test_default_ds_type")
     private String type;
 
     @JsonProperty
-    @Schema(example = "OS (FW) mandatory, runtime (FW) and app (SW) optional")
+    @Schema(description = "The type name of the distribution set",
+            example = "OS (FW) mandatory, runtime (FW) and app (SW) optional")
     private String typeName;
 
     @JsonProperty
-    @Schema(example = "true")
+    @Schema(description = """
+        True of the distribution set software module setup is complete as defined by the
+        distribution set type""", example = "true")
     private Boolean complete;
 
     @JsonProperty
-    @Schema(example = "false")
+    @Schema(description = "If the distribution set is locked", example = "true")
+    private boolean locked;
+
+    @JsonProperty
+    @Schema(description = "Deleted flag, used for soft deleted entities", example = "false")
     private boolean deleted;
 
     @JsonProperty
-    @Schema(example = "true")
+    @Schema(description = "True by default and false after the distribution set is invalidated by the user",
+            example = "true")
     private boolean valid;
 
-    public boolean isValid() {
-        return valid;
-    }
+    @JsonProperty
+    @Schema(description = """
+        True if DS is a required migration step for another DS. As a result the DS’s assignment will not be cancelled
+        when another DS is assigned (note: updatable only if DS is not yet assigned to a target)""", example = "false")
+    private boolean requiredMigrationStep;
 
-    public void setValid(final boolean valid) {
-        this.valid = valid;
-    }
-
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(final boolean deleted) {
-        this.deleted = deleted;
-    }
-
-    public Long getDsId() {
-        return dsId;
-    }
-
-    @JsonIgnore
-    public void setDsId(final Long id) {
-        dsId = id;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(final String version) {
-        this.version = version;
-    }
-
-    public boolean isRequiredMigrationStep() {
-        return requiredMigrationStep;
-    }
-
-    public void setRequiredMigrationStep(final boolean requiredMigrationStep) {
-        this.requiredMigrationStep = requiredMigrationStep;
-    }
-
-    public List<MgmtSoftwareModule> getModules() {
-        return modules;
-    }
-
-    public void setModules(final List<MgmtSoftwareModule> modules) {
-        this.modules = modules;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(final String type) {
-        this.type = type;
-    }
-
-    public String getTypeName() {
-        return typeName;
-    }
-
-    public void setTypeName(final String typeName) {
-        this.typeName = typeName;
-    }
-
-    public Boolean getComplete() {
-        return complete;
-    }
-
-    public void setComplete(final Boolean complete) {
-        this.complete = complete;
-    }
-
+    @JsonProperty
+    private List<MgmtSoftwareModule> modules = new ArrayList<>();
 }

@@ -14,11 +14,12 @@ import java.util.Collection;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import lombok.Data;
 
 /**
  * Model representation of an Cache entry as json.
- *
  */
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSystemCache {
@@ -35,29 +36,5 @@ public class MgmtSystemCache {
     public MgmtSystemCache(final String name, final Collection<String> cacheKeys) {
         this.name = name;
         this.keys = cacheKeys;
-    }
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @return the keys
-     */
-    public Collection<String> getKeys() {
-        return keys;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return "MgmtSystemCache [name=" + name + ", keys=" + keys + "]";
     }
 }

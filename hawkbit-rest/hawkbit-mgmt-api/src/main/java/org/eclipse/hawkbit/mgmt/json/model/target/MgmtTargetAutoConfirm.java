@@ -11,35 +11,54 @@ package org.eclipse.hawkbit.mgmt.json.model.target;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.springframework.hateoas.RepresentationModel;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Response representing the current state of auto-confirmation for a specific target
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "active", "initiator", "remark", "activatedAt" })
+@Schema(description = """
+    **_links**:
+    * **deactivate** - Reference link to deactivate auto confirm (present if active)
+    """, example = """
+    {
+      "active" : true,
+      "initiator" : "custom_initiator_value",
+      "remark" : "custom_remark",
+      "activatedAt" : 1682408577704,
+      "_links" : {
+        "deactivate" : {
+          "href" : "https://management-api.host.com/rest/v1/targets/137/autoConfirm/deactivate"
+        }
+      }
+    }""")
 public class MgmtTargetAutoConfirm extends RepresentationModel<MgmtTargetAutoConfirm> {
-    @NotNull
-    @Schema(example = "true")
-    private boolean active;
-    @Schema(example = "custom_initiator_value")
-    private String initiator;
-    @Schema(example = "custom_remark")
-    private String remark;
-    @Schema(example = "1691065938576")
-    private Long activatedAt;
 
-    /**
-     * Constructor.
-     */
-    public MgmtTargetAutoConfirm() {
-        // needed for json create.
-    }
+    @NotNull
+    @Schema(description = "Flag if auto confirm is active", example = "true")
+    private boolean active;
+
+    @Schema(description = "Initiator set on activation", example = "custom_initiator_value")
+    private String initiator;
+
+    @Schema(description = "Remark set on activation", example = "custom_remark")
+    private String remark;
+
+    @Schema(description = "Timestamp of the activation", example = "1691065938576")
+    private Long activatedAt;
 
     public static MgmtTargetAutoConfirm active(final long activatedAt) {
         final MgmtTargetAutoConfirm state = new MgmtTargetAutoConfirm();
@@ -50,37 +69,5 @@ public class MgmtTargetAutoConfirm extends RepresentationModel<MgmtTargetAutoCon
 
     public static MgmtTargetAutoConfirm disabled() {
         return new MgmtTargetAutoConfirm();
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(final boolean active) {
-        this.active = active;
-    }
-
-    public Long getActivatedAt() {
-        return activatedAt;
-    }
-
-    public void setActivatedAt(final long activatedAt) {
-        this.activatedAt = activatedAt;
-    }
-
-    public String getInitiator() {
-        return initiator;
-    }
-
-    public void setInitiator(final String initiator) {
-        this.initiator = initiator;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(final String remark) {
-        this.remark = remark;
     }
 }

@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
@@ -38,9 +38,11 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  *
  */
 public class RolloutStatusCache {
+
     private static final String CACHE_RO_NAME = "RolloutStatus";
     private static final String CACHE_GR_NAME = "RolloutGroupStatus";
     private static final long DEFAULT_SIZE = 50_000;
+    
     private final TenancyCacheManager cacheManager;
     private final TenantAware tenantAware;
 

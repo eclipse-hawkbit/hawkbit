@@ -1,0 +1,30 @@
+<!--
+
+    Copyright (c) 2023 Bosch.IO GmbH and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.eclipse.hawkbit</groupId>
+        <artifactId>hawkbit-parent</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>hawkbit-sdk</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>hawkbit-sdk-commons</module>
+        <module>hawkbit-sdk-device</module>
+        <module>hawkbit-sdk-demo</module>
+    </modules>
+</project>

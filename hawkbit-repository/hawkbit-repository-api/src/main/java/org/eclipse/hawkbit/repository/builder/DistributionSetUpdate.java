@@ -9,12 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+
+import java.util.Optional;
 
 /**
  * Builder to update an existing {@link DistributionSet} entry. Defines all
@@ -23,29 +26,31 @@ import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
  */
 public interface DistributionSetUpdate {
     /**
-     * @param name
-     *            for {@link DistributionSet#getName()}
+     * @param name for {@link DistributionSet#getName()}
      * @return updated builder instance
      */
     DistributionSetUpdate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
-     * @param version
-     *            for {@link DistributionSet#getVersion()}
+     * @param version for {@link DistributionSet#getVersion()}
      * @return updated builder instance
      */
     DistributionSetUpdate version(@Size(min = 1, max = NamedVersionedEntity.VERSION_MAX_SIZE) @NotNull String version);
 
     /**
-     * @param description
-     *            for {@link DistributionSet#getDescription()}
+     * @param description for {@link DistributionSet#getDescription()}
      * @return updated builder instance
      */
     DistributionSetUpdate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
-     * @param requiredMigrationStep
-     *            for {@link DistributionSet#isRequiredMigrationStep()}
+     * @param locked update request if any. If not empty shall be <code>true</code>
+     * @return updated builder instance
+     */
+    DistributionSetUpdate locked(@Null Boolean locked);
+
+    /**
+     * @param requiredMigrationStep for {@link DistributionSet#isRequiredMigrationStep()}
      * @return updated builder instance
      */
     DistributionSetUpdate requiredMigrationStep(Boolean requiredMigrationStep);

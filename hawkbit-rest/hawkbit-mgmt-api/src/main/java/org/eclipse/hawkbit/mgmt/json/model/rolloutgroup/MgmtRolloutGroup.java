@@ -10,6 +10,9 @@
 package org.eclipse.hawkbit.mgmt.json.model.rolloutgroup;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.AbstractMgmtRolloutConditionsEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -18,38 +21,21 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 /**
  * Model for defining the Attributes of a Rollout Group
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtRolloutGroup extends AbstractMgmtRolloutConditionsEntity {
 
-    @Schema(example = "controllerId==exampleTarget*")
+    @Schema(description = "The name of the entity", example = "controllerId==exampleTarget*")
     private String targetFilterQuery;
-    @Schema(example = "20.0")
+
+    @Schema(description = "Percentage of remaining and matching targets that should be added to this group",
+            example = "20.0")
     private Float targetPercentage;
-    @Schema(example = "false")
+
+    @Schema(description = "(Available with user consent flow active) If the confirmation is required for this " +
+            "rollout group. Confirmation is required per default", example = "false")
     private Boolean confirmationRequired;
-
-    public String getTargetFilterQuery() {
-        return targetFilterQuery;
-    }
-
-    public void setTargetFilterQuery(final String targetFilterQuery) {
-        this.targetFilterQuery = targetFilterQuery;
-    }
-
-    public Float getTargetPercentage() {
-        return targetPercentage;
-    }
-
-    public void setTargetPercentage(Float targetPercentage) {
-        this.targetPercentage = targetPercentage;
-    }
-
-    public Boolean isConfirmationRequired() {
-        return confirmationRequired;
-    }
-
-    public void setConfirmationRequired(final Boolean confirmationRequired) {
-        this.confirmationRequired = confirmationRequired;
-    }
 }

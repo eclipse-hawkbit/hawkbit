@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCond
  *
  */
 public class RolloutGroupConditionBuilder {
+
     private final RolloutGroupConditions conditions = new RolloutGroupConditions();
 
     /**

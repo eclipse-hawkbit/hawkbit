@@ -13,46 +13,20 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 /**
  * JSON representation of auto confirmation config.
  */
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfAutoConfirmation {
 
     @JsonProperty
     private boolean enabled;
-
     @JsonProperty
     private String initiator;
-
     @JsonProperty
     private String remark;
-
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(final boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public String getInitiator() {
-        return initiator;
-    }
-
-    public void setInitiator(final String initiator) {
-        this.initiator = initiator;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(final String remark) {
-        this.remark = remark;
-    }
-
 }

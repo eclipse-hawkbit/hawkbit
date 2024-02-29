@@ -12,11 +12,14 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.text.StrLookup;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
@@ -24,8 +27,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldExc
 import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactoryHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.util.CollectionUtils;
@@ -69,18 +70,10 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
  * <em>lastControllerRequestAt=le=${OVERDUE_TS}</em><br>
  * It is possible to escape a macro expression by using a second '$':
  * $${OVERDUE_TS} would prevent the ${OVERDUE_TS} token from being expanded.
- *
  */
+@Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RSQLUtility {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RSQLUtility.class);
-
-    /**
-     * private constructor due utility class.
-     */
-    private RSQLUtility() {
-
-    }
 
     /**
      * Builds a JPA {@link Specification} which corresponds with the given RSQL
@@ -138,7 +131,7 @@ public final class RSQLUtility {
 
     private static Node parseRsql(final String rsql) {
         try {
-            LOGGER.debug("Parsing rsql string {}", rsql);
+            log.debug("Parsing rsql string {}", rsql);
             final Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
             return new RSQLParser(operators).parse(rsql.toLowerCase());
         } catch (final IllegalArgumentException e) {

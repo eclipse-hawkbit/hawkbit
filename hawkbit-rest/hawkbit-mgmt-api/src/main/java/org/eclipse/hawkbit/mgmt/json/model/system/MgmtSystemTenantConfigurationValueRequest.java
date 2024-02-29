@@ -16,31 +16,23 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  * A json annotated rest model for System Configuration for PUT.
  */
+@Getter
+@EqualsAndHashCode
+@ToString
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSystemTenantConfigurationValueRequest {
 
     @JsonProperty(required = true)
-    @Schema(example = "exampleToken")
+    @Schema(description = "Current value of of configuration parameter", example = "exampleToken")
     private Serializable value;
-
-    /**
-     * 
-     * @return the value of the MgmtSystemTenantConfigurationValueRequest
-     */
-    public Serializable getValue() {
-        return value;
-    }
-
-    /**
-     * Sets the value of the MgmtSystemTenantConfigurationValueRequest
-     * 
-     * @param value
-     */
 
     public void setValue(final Object value) {
         if (!(value instanceof Serializable)) {

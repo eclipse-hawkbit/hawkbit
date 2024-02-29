@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
@@ -71,13 +72,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.bus.ServiceMatcher;
-import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -91,11 +91,13 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.TestPropertySource;
 
+@Slf4j
 @ActiveProfiles({ "test" })
 @ExtendWith({ JUnitTestLoggerExtension.class , SharedSqlTestDatabaseExtension.class })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
 @SpringBootTest
-@ContextConfiguration(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+@ContextConfiguration(classes = { TestConfiguration.class})
+@Import(TestChannelBinderConfiguration.class)
 // destroy the context after each test class because otherwise we get problem
 // when context is
 // refreshed we e.g. get two instances of CacheManager which leads to very
@@ -108,7 +110,6 @@ import org.springframework.test.context.TestPropertySource;
         mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
 public abstract class AbstractIntegrationTest {
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     protected static final Pageable PAGE = PageRequest.of(0, 500, Sort.by(Direction.ASC, "id"));
 
@@ -434,7 +435,7 @@ public abstract class AbstractIntegrationTest {
             try {
                 FileUtils.cleanDirectory(new File(ARTIFACT_DIRECTORY));
             } catch (final IOException | IllegalArgumentException e) {
-                LOG.warn("Cannot cleanup file-directory", e);
+                log.warn("Cannot cleanup file-directory", e);
             }
         }
     }
@@ -450,7 +451,7 @@ public abstract class AbstractIntegrationTest {
             try {
                 FileUtils.deleteDirectory(new File(ARTIFACT_DIRECTORY));
             } catch (final IOException | IllegalArgumentException e) {
-                LOG.warn("Cannot delete file-directory", e);
+                log.warn("Cannot delete file-directory", e);
             }
         }
     }

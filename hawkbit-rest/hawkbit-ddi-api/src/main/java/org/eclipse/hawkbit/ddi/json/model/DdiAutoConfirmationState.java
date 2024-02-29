@@ -9,14 +9,22 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.hateoas.RepresentationModel;
 
+@NoArgsConstructor // needed for json create
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "active", "initiator", "remark", "activatedAt" })
@@ -33,13 +41,6 @@ public class DdiAutoConfirmationState extends RepresentationModel<DdiAutoConfirm
     @Schema(example = "1691065895439")
     private Long activatedAt;
 
-    /**
-     * Constructor.
-     */
-    public DdiAutoConfirmationState() {
-        // needed for json create.
-    }
-
     public static DdiAutoConfirmationState active(final long activatedAt) {
         final DdiAutoConfirmationState state = new DdiAutoConfirmationState();
         state.setActive(true);
@@ -50,37 +51,4 @@ public class DdiAutoConfirmationState extends RepresentationModel<DdiAutoConfirm
     public static DdiAutoConfirmationState disabled() {
         return new DdiAutoConfirmationState();
     }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(final boolean active) {
-        this.active = active;
-    }
-
-    public Long getActivatedAt() {
-        return activatedAt;
-    }
-
-    public void setActivatedAt(final long activatedAt) {
-        this.activatedAt = activatedAt;
-    }
-
-    public String getInitiator() {
-        return initiator;
-    }
-
-    public void setInitiator(final String initiator) {
-        this.initiator = initiator;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    public void setRemark(final String remark) {
-        this.remark = remark;
-    }
-
 }

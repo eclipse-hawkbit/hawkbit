@@ -9,27 +9,24 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.target;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.NoArgsConstructor;
 
 /**
  * Class to hold multiple distribution set assignments. A JSON object
  * representing a single {@link MgmtDistributionSetAssignment} can be
  * deserialized to an object of this class.
  */
+@NoArgsConstructor
 @JsonDeserialize(using = MgmtDistributionSetAssignmentsDeserializer.class)
 public class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSetAssignment> {
-    private static final long serialVersionUID = 1L;
 
-    /**
-     * Constructor for an object that contains no distribution set assignment
-     * 
-     */
-    public MgmtDistributionSetAssignments() {
-        super();
-    }
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * Constructor for an object that contains a single distribution set
@@ -39,7 +36,6 @@ public class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSe
      *            the assignment
      */
     public MgmtDistributionSetAssignments(final MgmtDistributionSetAssignment assignment) {
-        super();
         add(assignment);
     }
 
@@ -53,5 +49,4 @@ public class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSe
     public MgmtDistributionSetAssignments(final List<MgmtDistributionSetAssignment> assignments) {
         super(assignments);
     }
-
 }

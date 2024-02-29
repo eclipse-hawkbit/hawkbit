@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -51,8 +52,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -67,20 +66,17 @@ import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.util.StringUtils;
 
 /**
- *
  * {@link AmqpMessageHandlerService} handles all incoming target interaction
  * AMQP messages (e.g. create target, check for updates etc.) for the queue
  * which is configured for the property hawkbit.dmf.rabbitmq.receiverQueue.
- *
  */
+@Slf4j
 public class AmqpMessageHandlerService extends BaseAmqpService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageHandlerService.class);
 
     private final AmqpMessageDispatcherService amqpMessageDispatcherService;
 
     private ControllerManagement controllerManagement;
-    private ConfirmationManagement confirmationManagement;
+    private final ConfirmationManagement confirmationManagement;
 
     private final EntityFactory entityFactory;
 
@@ -231,21 +227,25 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
             final Target target;
             if (isOptionalMessageBodyEmpty(message)) {
+                log.debug("Received \"THING_CREATED\" AMQP message for thing \"{}\" without body.", thingId);
                 target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
             } else {
                 checkContentTypeJson(message);
                 final DmfCreateThing thingCreateBody = convertMessage(message, DmfCreateThing.class);
                 final DmfAttributeUpdate thingAttributeUpdateBody = thingCreateBody.getAttributeUpdate();
 
+                log.debug("Received \"THING_CREATED\" AMQP message for thing \"{}\" with target name \"{}\" and type " +
+                                "\"{}\".", thingId, thingCreateBody.getName(), thingCreateBody.getType());
+
                 target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri,
-                        thingCreateBody.getName());
+                        thingCreateBody.getName(), thingCreateBody.getType());
 
                 if (thingAttributeUpdateBody != null) {
                     controllerManagement.updateControllerAttributes(thingId, thingAttributeUpdateBody.getAttributes(),
                             getUpdateMode(thingAttributeUpdateBody));
                 }
             }
-            LOG.debug("Target {} reported online state.", thingId);
+            log.debug("Target {} reported online state.", thingId);
             sendUpdateCommandToTarget(target);
         } catch (final EntityAlreadyExistsException e) {
             throw new AmqpRejectAndDontRequeueException(
@@ -352,14 +352,14 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final DmfAutoConfirmation autoConfirmation = convertMessage(message, DmfAutoConfirmation.class);
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
         if (autoConfirmation.isEnabled()) {
-            LOG.debug("Activate auto-confirmation for device {} using DMF. Initiator: {}. Remark: {}", thingId,
+            log.debug("Activate auto-confirmation for device {} using DMF. Initiator: {}. Remark: {}", thingId,
                     autoConfirmation.getInitiator(), autoConfirmation.getRemark());
             final String remark = autoConfirmation.getRemark() == null
                     ? "Activated using Device Management Federation API."
                     : autoConfirmation.getRemark();
             controllerManagement.activateAutoConfirmation(thingId, autoConfirmation.getInitiator(), remark);
         } else {
-            LOG.debug("Deactivate auto-confirmation for device {} using DMF.", thingId);
+            log.debug("Deactivate auto-confirmation for device {} using DMF.", thingId);
             controllerManagement.deactivateAutoConfirmation(thingId);
         }
     }
@@ -476,7 +476,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private Action checkActionExist(final Message message, final DmfActionUpdateStatus actionUpdateStatus) {
         final Long actionId = actionUpdateStatus.getActionId();
 
-        LOG.debug("Target notifies intermediate about action {} with status {}.", actionId,
+        log.debug("Target notifies intermediate about action {} with status {}.", actionId,
                 actionUpdateStatus.getActionStatus());
 
         final Optional<Action> findActionWithDetails = controllerManagement.findActionWithDetails(actionId);
