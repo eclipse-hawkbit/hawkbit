@@ -102,13 +102,8 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
                 grantedAuthorityList.add(new SimpleGrantedAuthority("ROLE_" + role));
             }
         }
-        // Allows ALL as a shorthand for all permissions
-        if (userPermissions.size() == 1 && "ALL".equals(userPermissions.get(0))) {
-            grantedAuthorityList.addAll(PermissionUtils.createAllAuthorityList());
-        } else {
-            for (final String permission : userPermissions) {
-                grantedAuthorityList.add(new SimpleGrantedAuthority(permission));
-            }
+        for (final String permission : userPermissions) {
+            grantedAuthorityList.add(new SimpleGrantedAuthority(permission));
         }
 
         return grantedAuthorityList;

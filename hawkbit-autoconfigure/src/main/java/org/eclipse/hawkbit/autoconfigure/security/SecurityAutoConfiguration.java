@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.ContextAware;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties;
 import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties.User;
 import org.eclipse.hawkbit.im.authentication.PermissionService;
@@ -36,6 +37,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -164,4 +169,20 @@ public class SecurityAutoConfiguration {
         return simpleUrlLogoutSuccessHandler;
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    static RoleHierarchy roleHierarchy() {
+        final RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
+        hierarchy.setHierarchy(SpRole.DEFAULT_ROLE_HIERARCHY);
+        return hierarchy;
+    }
+
+    // and, if using method security also add
+    @Bean
+    @ConditionalOnMissingBean
+    static MethodSecurityExpressionHandler methodSecurityExpressionHandler(final RoleHierarchy roleHierarchy) {
+        final DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+        expressionHandler.setRoleHierarchy(roleHierarchy);
+        return expressionHandler;
+    }
 }
