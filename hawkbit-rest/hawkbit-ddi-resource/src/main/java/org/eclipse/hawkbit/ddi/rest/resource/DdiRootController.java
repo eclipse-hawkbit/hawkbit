@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiDeployment;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.DdiMaintenanceWindowStatus;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeploymentBase;
+import org.eclipse.hawkbit.ddi.json.model.DdiAssignedVersion;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult.FinalResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiUpdateMode;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
@@ -83,7 +84,6 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
@@ -760,6 +760,16 @@ public class DdiRootController implements DdiRootControllerRestApi {
         log.debug("Deactivate auto-confirmation request for device ‘{}‘", controllerId);
         confirmationManagement.deactivateAutoConfirmation(controllerId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> setAsssignedOfflineVersion(@Valid  @RequestBody DdiAssignedVersion ddiAssignedVersion,
+            @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId){
+            boolean updated = controllerManagement.updateOfflineAssignedVersion(controllerId,
+                    ddiAssignedVersion.getName(), ddiAssignedVersion.getVersion());
+            if (updated)
+                return new ResponseEntity<>(HttpStatus.CREATED);
+            return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

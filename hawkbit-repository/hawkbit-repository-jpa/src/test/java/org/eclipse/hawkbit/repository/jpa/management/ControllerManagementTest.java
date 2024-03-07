@@ -1560,6 +1560,36 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(foundAction).isPresent();
         assertThat(foundAction.get().getId()).isEqualTo(actionId);
     }
+    @Test
+    @Description("Verify that assigning version form target works")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3)}
+          )
+    void assignVersionToTarget() {
+
+        final DistributionSet knownDistributionSet = testdataFactory.createDistributionSet();
+
+        // GIVEN
+        testdataFactory.createTarget(DEFAULT_CONTROLLER_ID).getId();
+
+        // WHEN
+        boolean updated1 = controllerManagement.updateOfflineAssignedVersion(DEFAULT_CONTROLLER_ID,
+                knownDistributionSet.getName(),knownDistributionSet.getVersion());
+        // if target is already assigned to a distribution then it shouldn't reassign the distribution
+        boolean updated2 = controllerManagement.updateOfflineAssignedVersion(DEFAULT_CONTROLLER_ID,
+                knownDistributionSet.getName(),knownDistributionSet.getVersion());
+
+        // THEN
+        assertAssignedDistributionSetId(DEFAULT_CONTROLLER_ID, knownDistributionSet.getId());
+        assertInstalledDistributionSetId(DEFAULT_CONTROLLER_ID, knownDistributionSet.getId());
+        assertThat(updated1).isTrue();
+        assertThat(updated2).isFalse();
+    }
 
     @Test
     @Description("Verify that a null externalRef cannot be assigned to an action")

@@ -527,4 +527,22 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     void deactivateAutoConfirmation(@NotEmpty String controllerId);
+
+    /**
+     * Updates distributionSet installed version
+     *
+     * @param distributionName
+     *            installed
+     * @param version
+     *            installed
+     *
+     * @return updated {@link Target}
+     *
+     * @throws EntityNotFoundException
+     *             if target that has to be updated could not be found
+     * @throws java.util.NoSuchElementException
+     *             if DistributionSetAssignmentResult list is empty
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    boolean updateOfflineAssignedVersion(@NotEmpty String controllerId, String distributionName, String version);
 }

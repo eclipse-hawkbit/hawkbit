@@ -103,6 +103,37 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
+    @Description("Ensure that assigned version is self assigned version")
+    public void installedVersion() throws Exception {
+        final Target target = createTargetAndAssertNoActiveActions();
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+
+
+        // update assigned version
+        postInstalledBase(target.getControllerId(),getJsonInstalledBase(ds.getName(),ds.getVersion()),status()
+                .isCreated());
+
+        assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get().getId())
+                .isEqualTo(ds.getId());
+
+        // update assigned version while version already assigned
+        postInstalledBase(target.getControllerId(),getJsonInstalledBase(ds.getName(),ds.getVersion()),status().isOk());
+    }
+    @Test
+    @Description("Ensure that installedVersion is version self assigned")
+    public void installedVersionNotExist() throws Exception {
+        final Target target = createTargetAndAssertNoActiveActions();
+        final String dsName = "unknown";
+        final String dsVersion = "1.0.0";
+
+
+        // get installed base
+        postInstalledBase(target.getControllerId(),getJsonInstalledBase(dsName,dsVersion),status().isNotFound());
+
+        assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).isEmpty()).isTrue();
+    }
+
+    @Test
     @Description("Test several deployments to a controller. Checks that action is represented as installedBase after installation.")
     public void deploymentSeveralActionsInInstalledBase() throws Exception {
         // Prepare test data

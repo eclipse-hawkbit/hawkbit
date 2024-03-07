@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiConfirmationBaseAction;
 import org.eclipse.hawkbit.ddi.json.model.DdiConfirmationFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiControllerBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeploymentBase;
+import org.eclipse.hawkbit.ddi.json.model.DdiAssignedVersion;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
@@ -826,4 +827,40 @@ public interface DdiRootControllerRestApi {
             + DdiRestConstants.CONFIRMATION_BASE + "/" + DdiRestConstants.AUTO_CONFIRM_DEACTIVATE)
     ResponseEntity<Void> deactivateAutoConfirmation(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId);
+
+
+    /**
+     * Assign an already installed distribution for a target
+     *
+     * @param tenant
+     *            of the client
+     *            to provide
+     * @param controllerId
+     *            of the target that matches to controller id
+     * @param ddiAssignedVersion
+     *            as {@link DdiAssignedVersion}
+     *
+     * @return the response
+     */
+    @Operation(summary = "Set offline assigned version", description = """
+        Allow to set current running version.
+        """)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Target or Distribution not found", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "410", description = "Action is not active anymore.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not supported by the server for this resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
+    @PostMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
+            + DdiRestConstants.INSTALLED_BASE_ACTION, consumes = {
+            MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
+    ResponseEntity<Void> setAsssignedOfflineVersion(@Valid DdiAssignedVersion ddiAssignedVersion,
+            @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId);
 }

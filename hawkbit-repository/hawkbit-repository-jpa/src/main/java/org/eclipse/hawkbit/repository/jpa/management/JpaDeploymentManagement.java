@@ -187,6 +187,12 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(
             final Collection<Entry<String, Long>> assignments) {
+            return offlineAssignedDistributionSets(assignments,tenantAware.getCurrentUsername());
+    }
+
+    @Override
+    public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(
+            Collection<Entry<String, Long>> assignments, String initiatedBy) {
         final Collection<Entry<String, Long>> distinctAssignments = assignments.stream().distinct().toList();
         enforceMaxAssignmentsPerRequest(distinctAssignments.size());
 
@@ -194,7 +200,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .map(entry -> DeploymentManagement.deploymentRequest(entry.getKey(), entry.getValue()).build())
                 .toList();
 
-        return assignDistributionSets(tenantAware.getCurrentUsername(), deploymentRequests, null,
+        return assignDistributionSets(Objects.requireNonNull(initiatedBy), deploymentRequests, null,
                 offlineDsAssignmentStrategy);
     }
 
