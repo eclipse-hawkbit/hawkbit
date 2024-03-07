@@ -30,6 +30,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
@@ -189,6 +190,14 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String securityTokenWithReadPermission = SecurityContextSwitch.runAs(
                 SecurityContextSwitch.withUser("OnlyTargetReadPermission", false, SpPermission.READ_TARGET_SEC_TOKEN),
                 createdTarget::getSecurityToken);
+        // retrieve security token only with ROLE_TARGET_ADMIN permission
+        final String securityTokenWithTargetAdminPermission = SecurityContextSwitch.runAs(
+                SecurityContextSwitch.withUser("OnlyTargetAdminPermission", false, SpRole.TARGET_ADMIN),
+                createdTarget::getSecurityToken);
+        // retrieve security token only with ROLE_TENANT_ADMIN permission
+        final String securityTokenWithTenantAdminPermission = SecurityContextSwitch.runAs(
+                SecurityContextSwitch.withUser("OnlyTenantAdminPermission", false, SpRole.TENANT_ADMIN),
+                createdTarget::getSecurityToken);
 
         // retrieve security token as system code execution
         final String securityTokenAsSystemCode = systemSecurityContext.runAsSystem(createdTarget::getSecurityToken);
@@ -199,6 +208,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(createdTarget.getSecurityToken()).isEqualTo("token");
         assertThat(securityTokenWithReadPermission).isNotNull();
+        assertThat(securityTokenWithTargetAdminPermission).isNotNull();
+        assertThat(securityTokenWithTenantAdminPermission).isNotNull();
         assertThat(securityTokenAsSystemCode).isNotNull();
 
         assertThat(securityTokenWithoutPermission).isNull();

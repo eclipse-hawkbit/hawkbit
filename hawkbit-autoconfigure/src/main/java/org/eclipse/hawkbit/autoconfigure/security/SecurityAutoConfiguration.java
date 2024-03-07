@@ -127,8 +127,9 @@ public class SecurityAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public SystemSecurityContext systemSecurityContext(final TenantAware tenantAware) {
-        return new SystemSecurityContext(tenantAware);
+    public SystemSecurityContext systemSecurityContext(
+            final TenantAware tenantAware, final RoleHierarchy roleHierarchy) {
+        return new SystemSecurityContext(tenantAware, roleHierarchy);
     }
 
     /**
