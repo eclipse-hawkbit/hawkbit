@@ -51,7 +51,6 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
-import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityChecker;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
@@ -65,6 +64,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
@@ -320,8 +320,10 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
      */
     @Override
     public String getSecurityToken() {
-        if (SystemSecurityContextHolder.getInstance().getSystemSecurityContext().isCurrentThreadSystemCode()
-                || SecurityChecker.hasPermission(SpPermission.READ_TARGET_SEC_TOKEN)) {
+        final SystemSecurityContext systemSecurityContext =
+                SystemSecurityContextHolder.getInstance().getSystemSecurityContext();
+        if (systemSecurityContext.isCurrentThreadSystemCode() ||
+                systemSecurityContext.hasPermission(SpPermission.READ_TARGET_SEC_TOKEN)) {
             return securityToken;
         }
         return null;
