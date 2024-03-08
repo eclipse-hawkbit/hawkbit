@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
@@ -219,7 +218,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         assertThat(distributionSetManagement.assignTag(Collections.singletonList(permitted.getId()), dsTag.getId()))
                 .hasSize(1);
         // verify distributionSetManagement#unAssignTag on permitted target
-        assertThat(distributionSetManagement.unAssignTag(permitted.getId(), dsTag.getId()).getId())
+        assertThat(distributionSetManagement.unassignTag(permitted.getId(), dsTag.getId()).getId())
                 .isEqualTo(permitted.getId());
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
@@ -237,7 +236,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
         assertThatThrownBy(() -> {
-            distributionSetManagement.unAssignTag(readOnly.getId(), dsTag.getId());
+            distributionSetManagement.unassignTag(readOnly.getId(), dsTag.getId());
         }).as("Missing update permissions for target to toggle tag assignment.")
                 .isInstanceOf(InsufficientPermissionException.class);
 
@@ -256,7 +255,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
 
         // assignment is denied for hiddenTarget since it's hidden
         assertThatThrownBy(() -> {
-            distributionSetManagement.unAssignTag(hidden.getId(), dsTag.getId());
+            distributionSetManagement.unassignTag(hidden.getId(), dsTag.getId());
         }).as("Missing update permissions for target to toggle tag assignment.")
                 .isInstanceOf(EntityNotFoundException.class);
     }
