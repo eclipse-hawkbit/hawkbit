@@ -202,7 +202,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             @PathVariable("distributionsetId") final Long distributionsetId) {
         log.debug("Unassign ds {} for ds tag {}", distributionsetId, distributionsetTagId);
-        this.distributionSetManagement.unAssignTag(distributionsetId, distributionsetTagId);
+        this.distributionSetManagement.unassignTag(distributionsetId, distributionsetTagId);
         return ResponseEntity.ok().build();
     }
 

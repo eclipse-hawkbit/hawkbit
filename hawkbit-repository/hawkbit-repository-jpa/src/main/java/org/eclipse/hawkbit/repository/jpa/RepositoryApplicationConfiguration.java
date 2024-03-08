@@ -164,6 +164,7 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.hibernate.validator.BaseHibernateValidatorConfiguration;
 import org.springframework.beans.BeansException;
@@ -532,25 +533,24 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    DistributionSetManagement distributionSetManagement(final EntityManager entityManager,
-                                                        final DistributionSetRepository distributionSetRepository,
-                                                        final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
-                                                        final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
-                                                        final DistributionSetMetadataRepository distributionSetMetadataRepository,
-                                                        final TargetRepository targetRepository,
-                                                        final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
-                                                        final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
-                                                        final VirtualPropertyReplacer virtualPropertyReplacer,
-                                                        final SoftwareModuleRepository softwareModuleRepository,
-                                                        final DistributionSetTagRepository distributionSetTagRepository,
-                                                        final AfterTransactionCommitExecutor afterCommit,
-                                                        final JpaProperties properties) {
+    DistributionSetManagement distributionSetManagement(
+            final EntityManager entityManager,
+            final DistributionSetRepository distributionSetRepository,
+            final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
+            final DistributionSetMetadataRepository distributionSetMetadataRepository,
+            final TargetRepository targetRepository,
+            final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
+            final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement tenantConfigurationManagement,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final SoftwareModuleRepository softwareModuleRepository,
+            final DistributionSetTagRepository distributionSetTagRepository,
+            final JpaProperties properties, final RepositoryProperties repositoryProperties) {
         return new JpaDistributionSetManagement(entityManager, distributionSetRepository, distributionSetTagManagement,
                 systemManagement, distributionSetTypeManagement, quotaManagement, distributionSetMetadataRepository,
-                targetRepository, targetFilterQueryRepository, actionRepository, eventPublisherHolder, tenantAware,
-                virtualPropertyReplacer, softwareModuleRepository, distributionSetTagRepository, afterCommit,
-                properties.getDatabase());
-
+                targetRepository, targetFilterQueryRepository, actionRepository,
+                TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement),
+                virtualPropertyReplacer, softwareModuleRepository, distributionSetTagRepository,
+                properties.getDatabase(), repositoryProperties);
     }
 
     /**

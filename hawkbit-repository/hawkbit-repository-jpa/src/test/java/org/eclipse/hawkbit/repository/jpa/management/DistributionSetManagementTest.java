@@ -31,6 +31,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.api.Condition;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
@@ -67,6 +68,7 @@ import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -142,10 +144,10 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 () -> distributionSetManagement.toggleTagAssignment(singletonList(set.getId()), NOT_EXIST_ID),
                 "DistributionSetTag");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.unAssignTag(set.getId(), NOT_EXIST_IDL),
+        verifyThrownExceptionBy(() -> distributionSetManagement.unassignTag(set.getId(), NOT_EXIST_IDL),
                 "DistributionSetTag");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.unAssignTag(NOT_EXIST_IDL, dsTag.getId()),
+        verifyThrownExceptionBy(() -> distributionSetManagement.unassignTag(NOT_EXIST_IDL, dsTag.getId()),
                 "DistributionSet");
 
         verifyThrownExceptionBy(
@@ -424,7 +426,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .isEqualTo(distributionSetManagement.findByTag(PAGE, tag.getId()).getNumberOfElements());
 
         final JpaDistributionSet unAssignDS = (JpaDistributionSet) distributionSetManagement
-                .unAssignTag(assignDS.get(0), findDistributionSetTag.getId());
+                .unassignTag(assignDS.get(0), findDistributionSetTag.getId());
         assertThat(unAssignDS.getId()).as("unassigned ds is wrong").isEqualTo(assignDS.get(0));
         assertThat(unAssignDS.getTags().size()).as("unassigned ds has wrong tag size").isZero();
         assertThat(distributionSetTagManagement.getByName(TAG1_NAME)).isPresent();
@@ -1042,10 +1044,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleCount).isNotEqualTo(0);
         distributionSetManagement.lock(distributionSet.getId());
         assertThat(
-                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked)
-                        .orElse(false))
+                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false))
                 .isTrue();
-
 
         // try add
         assertThatExceptionOfType(LockedException.class)
@@ -1064,6 +1064,32 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetManagement.get(distributionSet.getId()).get().getModules().size())
                 .as("Software module shall not be removed from a locked DS.")
                 .isEqualTo(softwareModuleCount);
+    }
+
+    @Autowired RepositoryProperties repositoryProperties;
+    @Test
+    @Description("Test implicit locks for a DS and skip tags.")
+    void isImplicitLockApplicableDistributionSet() {
+        final JpaDistributionSetManagement distributionSetManagement =
+                (JpaDistributionSetManagement)this.distributionSetManagement;
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-non-skip");
+        // assert that implicit lock is applicable for non skip tags
+        assertThat(distributionSetManagement.isImplicitLockApplicable(distributionSet)).isTrue();
+
+        assertThat(repositoryProperties.getSkipImplicitLockForTags().size()).isNotEqualTo(0);
+        final List<DistributionSetTag> skipTags = distributionSetTagManagement.create(
+            repositoryProperties.getSkipImplicitLockForTags().stream()
+                    .map(skipTag -> entityFactory.tag().create().name(skipTag))
+                    .toList());
+        // assert that implicit lock locks for every skip tag
+        skipTags.forEach(skipTag -> {
+            DistributionSet distributionSetWithSkipTag =
+                    testdataFactory.createDistributionSet("ds-skip-" + skipTag.getName());
+            distributionSetManagement.assignTag(List.of(distributionSetWithSkipTag.getId()), skipTag.getId());
+            distributionSetWithSkipTag = distributionSetManagement.get(distributionSetWithSkipTag.getId()).orElseThrow();
+            // assert that implicit lock isn't applicable for skip tags
+            assertThat(distributionSetManagement.isImplicitLockApplicable(distributionSetWithSkipTag)).isFalse();
+        });
     }
 
     @Test
