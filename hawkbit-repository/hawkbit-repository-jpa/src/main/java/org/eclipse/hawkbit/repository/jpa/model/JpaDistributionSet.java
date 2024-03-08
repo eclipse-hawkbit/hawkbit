@@ -268,6 +268,10 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         locked = true;
     }
 
+    public void unlock() {
+        locked = false;
+    }
+
     public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
     }

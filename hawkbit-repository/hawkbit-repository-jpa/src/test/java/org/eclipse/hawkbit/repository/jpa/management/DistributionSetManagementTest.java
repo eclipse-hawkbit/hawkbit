@@ -1008,6 +1008,30 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked)
                         .orElse(false))
                 .isTrue();
+        // assert software modules are locked
+        assertThat(distributionSet.getModules().size()).isNotEqualTo(0);
+        distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::getModules)
+                .orElseThrow().forEach(module -> assertThat(module.isLocked()).isTrue());
+    }
+
+    @Test
+    @Description("Unlocks a DS.")
+    void unlockDistributionSet() {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
+        distributionSetManagement.lock(distributionSet.getId());
+        assertThat(
+                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked)
+                        .orElse(false))
+                .isTrue();
+        distributionSetManagement.unlock(distributionSet.getId());
+        assertThat(
+                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked)
+                        .orElse(true))
+                .isFalse();
+        // assert software modules are not unlocked
+        assertThat(distributionSet.getModules().size()).isNotEqualTo(0);
+        distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::getModules)
+                .orElseThrow().forEach(module -> assertThat(module.isLocked()).isTrue());
     }
 
     @Test
