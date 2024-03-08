@@ -39,8 +39,11 @@ public class MgmtDistributionSetRequestBodyPut {
     private String version;
 
     @JsonProperty
-    @Schema(description = "Put it to true only if want to lock the distribution set. Otherwise skip it. " +
-            "Shall not be false!",
+    @Schema(description = """
+            Should be set only if change of locked state is requested. If put, the distribution set locked flag will be
+            set to the requested. Note: unlock (i.e. set this property to false) with extreme care!
+            In general once distribution set is locked it shall not be unlocked. Note that it could have been assigned /
+            deployed to targets.""",
             example = "true")
     private Boolean locked;
 
