@@ -22,7 +22,7 @@ import java.util.Optional;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString
+@ToString(callSuper = true)
 @Accessors(fluent = true)
 public class GenericSoftwareModuleUpdate extends AbstractSoftwareModuleUpdateCreate<SoftwareModuleUpdate>
         implements SoftwareModuleUpdate {

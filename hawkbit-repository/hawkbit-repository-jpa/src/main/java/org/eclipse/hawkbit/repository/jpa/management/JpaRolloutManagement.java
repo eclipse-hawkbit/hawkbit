@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.addSuccessAndErrorConditionsAndActions;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.IMPLICIT_LOCK_ENABLED;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +18,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -75,6 +75,7 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -143,6 +144,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     private final ContextAware contextAware;
     private final Database database;
 
+    private final TenantConfigHelper tenantConfigHelper;
+
     public JpaRolloutManagement(final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement, final EventPublisherHolder eventPublisherHolder,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
@@ -159,6 +162,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         this.systemSecurityContext = systemSecurityContext;
         this.eventPublisherHolder = eventPublisherHolder;
         this.contextAware = contextAware;
+
+        tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
     }
 
     @Override
@@ -225,7 +230,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         rollout.setTotalTargets(totalTargets);
 
         // implicit lock
-        if (!distributionSet.isLocked()) {
+        if (!distributionSet.isLocked() && tenantConfigHelper.getConfigValue(IMPLICIT_LOCK_ENABLED, Boolean.class)) {
             distributionSetManagement.lock(distributionSet.getId());
         }
 

@@ -35,5 +35,4 @@ public interface TenantConfiguration extends TenantAwareBaseEntity {
      * @return value of the entry
      */
     String getValue();
-
 }

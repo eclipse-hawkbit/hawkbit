@@ -12,18 +12,19 @@ package org.eclipse.hawkbit.repository.model;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * Represents a tenant configuration value including some meta data
  * 
- * @param <T>
- *            type of the configuration value
+ * @param <T> type of the configuration value
  */
 @Data
 @Builder
 public final class TenantConfigurationValue<T extends Serializable> implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private T value;
