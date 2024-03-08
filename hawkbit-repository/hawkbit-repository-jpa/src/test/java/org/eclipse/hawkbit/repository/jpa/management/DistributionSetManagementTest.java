@@ -1069,7 +1069,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Autowired RepositoryProperties repositoryProperties;
     @Test
     @Description("Test implicit locks for a DS and skip tags.")
-    void isImplicitLockApplicableDistributionSet() {
+    void isImplicitLockApplicableForDistributionSet() {
         final JpaDistributionSetManagement distributionSetManagement =
                 (JpaDistributionSetManagement)this.distributionSetManagement;
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-non-skip");
@@ -1079,6 +1079,10 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(repositoryProperties.getSkipImplicitLockForTags().size()).isNotEqualTo(0);
         final List<DistributionSetTag> skipTags = distributionSetTagManagement.create(
             repositoryProperties.getSkipImplicitLockForTags().stream()
+                    .map(String::toLowerCase)
+                    // remove same in case-insensitive terms tags
+                    // in of case-insensitive db's it will end up as same names and constraint violation (?)
+                    .distinct()
                     .map(skipTag -> entityFactory.tag().create().name(skipTag))
                     .toList());
         // assert that implicit lock locks for every skip tag

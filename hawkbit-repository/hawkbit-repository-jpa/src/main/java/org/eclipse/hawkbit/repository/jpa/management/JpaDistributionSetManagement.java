@@ -832,7 +832,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         final List<String> skipForTags = repositoryProperties.getSkipImplicitLockForTags();
         if (!ObjectUtils.isEmpty(skipForTags)) {
-            final Set<DistributionSetTag> tags = ((JpaDistributionSet)jpaDistributionSet).getTags();
+            final Set<DistributionSetTag> tags = jpaDistributionSet.getTags();
             if (!ObjectUtils.isEmpty(tags)) {
                 for (final DistributionSetTag tag : tags) {
                     if (skipForTags.contains(tag.getName())) {
