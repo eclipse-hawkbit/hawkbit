@@ -202,6 +202,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .pollInterval(10L, TimeUnit.MILLISECONDS)
                 .until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
 
+        // lock
         final String body = new JSONObject().put("locked", true).toString();
         final ResultActions resultActions =
                 mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
@@ -221,15 +222,15 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
-    @Description("Tests the unlock. It is verified that the software module can't be unmarked as locked through update operation.")
+    @Description("Tests the unlock.")
     @WithUser(principal = "smUpdateTester", allSpPermissions = true)
-    void unlockSoftwareModuleSkippedSilently() throws Exception {
+    void unlockSoftwareModule() throws Exception {
         final SoftwareModule sm = softwareModuleManagement.create(
                 entityFactory.softwareModule().create().type(osType).name("name1").version("version1"));
         softwareModuleManagement.lock(sm.getId());
         assertThat(softwareModuleManagement.get(sm.getId())
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, sm.getId())).isLocked())
-                .as("Created software module should not be locked")
+                .as("Software module is locked")
                 .isTrue();
         // ensures that we are not to fast so that last modified is not set correctly
         Awaitility.await()
@@ -237,6 +238,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .pollInterval(10L, TimeUnit.MILLISECONDS)
                 .until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
 
+        // unlock
         final String body = new JSONObject().put("locked", false).toString();
         final ResultActions resultActions =
                 mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
@@ -244,14 +246,14 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         final SoftwareModule updatedSm = softwareModuleManagement.get(sm.getId()).get();
         assertThat(updatedSm.getLastModifiedBy()).isEqualTo("smUpdateTester");
-        assertThat(updatedSm.isLocked()).isTrue(); // not unlocked
+        assertThat(updatedSm.isLocked()).isFalse(); // not unlocked
 
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(sm.getId().intValue())))
                 .andExpect(jsonPath("$.lastModifiedBy", equalTo("smUpdateTester")))
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(updatedSm.getLastModifiedAt())))
-                .andExpect(jsonPath("$.locked", equalTo(true)));
+                .andExpect(jsonPath("$.locked", equalTo(false)));
     }
 
     @Test
