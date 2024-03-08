@@ -130,7 +130,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
             final String configurationKeyName) {
         final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(configurationKeyName);
 
-        return getConfigurationValue(configurationKeyName, configurationKey.getDataType());
+        return getConfigurationValue(configurationKeyName, (Class<T>)configurationKey.getDataType());
     }
 
     @Override

@@ -9,10 +9,13 @@
  */
 package org.eclipse.hawkbit.tenancy.configuration;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.Data;
+import lombok.ToString;
 import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.HawkbitServerProperties.Anonymous.Download;
 import org.eclipse.hawkbit.repository.exception.InvalidTenantConfigurationKeyException;
@@ -24,19 +27,13 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * Properties for tenant configuration default values.
- *
  */
+@Data
+@ToString
 @ConfigurationProperties("hawkbit.server.tenant")
 public class TenantConfigurationProperties {
 
     private final Map<String, TenantConfigurationKey> configuration = new HashMap<>();
-
-    /**
-     * @return full map of all configured tenant properties
-     */
-    public Map<String, TenantConfigurationKey> getConfiguration() {
-        return configuration;
-    }
 
     /**
      * @return full list of {@link TenantConfigurationKey}s
@@ -46,8 +43,7 @@ public class TenantConfigurationProperties {
     }
 
     /**
-     * @param keyName
-     *            name of the TenantConfigurationKey
+     * @param keyName name of the TenantConfigurationKey
      * @return the TenantConfigurationKey with the name keyName
      */
     public TenantConfigurationKey fromKeyName(final String keyName) {
@@ -59,8 +55,9 @@ public class TenantConfigurationProperties {
     /**
      * Tenant specific configurations which can be configured for each tenant
      * separately by means of override of the system defaults.
-     *
      */
+    @Data
+    @ToString
     public static class TenantConfigurationKey {
 
         /**
@@ -158,59 +155,22 @@ public class TenantConfigurationProperties {
          */
         public static final String USER_CONFIRMATION_ENABLED = "user.confirmation.flow.enabled";
 
+        /**
+         * Switch to enable/disable the implicit locking
+         */
+        public static final String IMPLICIT_LOCK_ENABLED = "implicit.lock.enabled";
+
         private String keyName;
         private String defaultValue = "";
-        private Class<?> dataType = String.class;
+        private Class<? extends Serializable> dataType = String.class;
         private Class<? extends TenantConfigurationValidator> validator = TenantConfigurationStringValidator.class;
 
-        public String getKeyName() {
-            return keyName;
-        }
-
-        public void setKeyName(final String keyName) {
-            this.keyName = keyName;
-        }
-
         /**
+         * validates if a object matches the allowed data format of the corresponding key
          * 
-         * @return the data type of the tenant configuration value. (e.g.
-         *         Integer.class, String.class)
-         */
-        @SuppressWarnings("unchecked")
-        public <T> Class<T> getDataType() {
-            return (Class<T>) dataType;
-        }
-
-        public void setDataType(final Class<?> dataType) {
-            this.dataType = dataType;
-        }
-
-        public String getDefaultValue() {
-            return defaultValue;
-        }
-
-        public void setDefaultValue(final String defaultValue) {
-            this.defaultValue = defaultValue;
-        }
-
-        public Class<? extends TenantConfigurationValidator> getValidator() {
-            return validator;
-        }
-
-        public void setValidator(final Class<? extends TenantConfigurationValidator> validator) {
-            this.validator = validator;
-        }
-
-        /**
-         * validates if a object matches the allowed data format of the
-         * corresponding key
-         * 
-         * @param context
-         *            application context
-         * @param value
-         *            which will be validated
-         * @throws TenantConfigurationValidatorException
-         *             is thrown, when object is invalid
+         * @param context application context
+         * @param value which will be validated
+         * @throws TenantConfigurationValidatorException is thrown, when object is invalid
          */
         public void validate(final ApplicationContext context, final Object value) {
             final TenantConfigurationValidator createdBean = context.getAutowireCapableBeanFactory()

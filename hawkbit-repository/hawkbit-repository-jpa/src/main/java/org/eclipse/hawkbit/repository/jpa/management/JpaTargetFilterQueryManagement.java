@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.IMPLICIT_LOCK_ENABLED;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -87,6 +89,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     private final Database database;
 
+    private final TenantConfigHelper tenantConfigHelper;
+
     public JpaTargetFilterQueryManagement(final TargetFilterQueryRepository targetFilterQueryRepository,
             final TargetManagement targetManagement, final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
@@ -103,6 +107,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         this.repositoryProperties = repositoryProperties;
         this.systemSecurityContext = systemSecurityContext;
         this.contextAware = contextAware;
+
+        tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
     }
 
     @Override
@@ -278,8 +284,9 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             assertMaxTargetsQuota(targetFilterQuery.getQuery(), targetFilterQuery.getName(), update.getDsId());
             final JpaDistributionSet distributionSet = (JpaDistributionSet) distributionSetManagement
                     .getValidAndComplete(update.getDsId());
+
             // implicit lock
-            if (!distributionSet.isLocked()) {
+            if (!distributionSet.isLocked() && tenantConfigHelper.getConfigValue(IMPLICIT_LOCK_ENABLED, Boolean.class)) {
                 distributionSetManagement.lock(distributionSet.getId());
             }
 

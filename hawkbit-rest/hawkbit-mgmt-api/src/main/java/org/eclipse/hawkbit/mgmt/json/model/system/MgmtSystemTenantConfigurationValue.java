@@ -53,6 +53,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
         * **pollingOverdueTime** - String, The configuration key 'pollingOverdueTime' defines the period of time after the SP server will recognize a target, which is not performing pull requests anymore.
         * **multi.assignments.enabled** - Boolean, The configuration key 'multi.assignments.enabled' defines if multiple distribution sets can be assigned to the same targets.
         * **batch.assignments.enabled** - Boolean, The configuration key 'batch.assignments.enabled' defines if distribution set can be assigned to multiple targets in a single batch message.
+        * **implicit.lock.enabled** - Boolean (true by default), The configuration key 'implicit.lock.enabled' defines if distribution set and their software modules shall be implicitly locked when assigned to target, rollout or target filter.
         """, example = """
     {
       "value" : "",

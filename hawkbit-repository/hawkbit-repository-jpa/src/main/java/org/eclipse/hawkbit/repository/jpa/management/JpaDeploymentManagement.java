@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.IMPLICIT_LOCK_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
 
 import java.io.Serializable;
@@ -371,8 +372,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final AbstractDsAssignmentStrategy assignmentStrategy) {
         final JpaDistributionSet distributionSet =
                 (JpaDistributionSet) distributionSetManagement.getValidAndComplete(dsId);
+
         // implicit lock
-        if (!distributionSet.isLocked()) {
+        if (!distributionSet.isLocked() && getConfigValue(IMPLICIT_LOCK_ENABLED, Boolean.class)) {
             // without new transaction DS changed event is not thrown
             DeploymentHelper.runInNewTransaction(txManager, "Implicit lock", status -> {
                 distributionSetManagement.lock(distributionSet.getId());
