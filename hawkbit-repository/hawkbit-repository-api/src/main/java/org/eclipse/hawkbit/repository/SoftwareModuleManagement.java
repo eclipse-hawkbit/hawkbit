@@ -337,6 +337,17 @@ public interface SoftwareModuleManagement
     void lock(long id);
 
     /**
+     * Unlocks a software module.<br/>
+     * Use it with extreme care! In general once software module is locked
+     * it shall not be unlocked. Note that it could have been assigned / deployed to targets.
+     *
+     * @param id the software module id
+     * @throws EntityNotFoundException if software module with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    void unlock(long id);
+
+    /**
      * Updates a distribution set meta data value if corresponding entry exists.
      *
      * @param update

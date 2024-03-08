@@ -714,6 +714,18 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void unlock(final long id) {
+        final JpaDistributionSet distributionSet = getById(id);
+        if (distributionSet.isLocked()) {
+            distributionSet.unlock();
+            distributionSetRepository.save(distributionSet);
+        }
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long id) {
         delete(List.of(id));
     }
