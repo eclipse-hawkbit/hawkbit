@@ -360,11 +360,13 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
             @Override
             public byte[] getBytes() throws IOException {
-               return getInputStream().readAllBytes();
+                try (final InputStream is = getInputStream()) {
+                    return is.readAllBytes();
+                }
             }
 
             @Override
-            public InputStream getInputStream() throws IOException {
+            public InputStream getInputStream() {
                 return fileBuffer.getInputStream();
             }
 
