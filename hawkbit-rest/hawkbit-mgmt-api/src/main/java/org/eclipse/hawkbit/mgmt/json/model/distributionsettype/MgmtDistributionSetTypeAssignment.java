@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 
 /**
  * Request Body of DistributionSetType for assignment operations (ID only).
- *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtDistributionSetTypeAssignment extends MgmtId {
