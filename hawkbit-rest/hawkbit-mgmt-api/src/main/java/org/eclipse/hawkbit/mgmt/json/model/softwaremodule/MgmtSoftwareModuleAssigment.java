@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Request Body of SoftwareModule for assignment operations (ID only).
- *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSoftwareModuleAssigment extends MgmtId {
