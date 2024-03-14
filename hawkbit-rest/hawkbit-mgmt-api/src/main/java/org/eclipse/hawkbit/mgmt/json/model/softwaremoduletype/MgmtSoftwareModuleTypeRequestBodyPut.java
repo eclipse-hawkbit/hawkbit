@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 /**
@@ -19,6 +20,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
+@ToString
 public class MgmtSoftwareModuleTypeRequestBodyPut {
 
     @JsonProperty

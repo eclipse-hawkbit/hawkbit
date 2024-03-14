@@ -24,9 +24,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Request Body for DistributionSetType POST.
  */
 @Data
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@Accessors(chain = true)
 public class MgmtDistributionSetTypeRequestBodyPost extends MgmtDistributionSetTypeRequestBodyPut {
 
     @JsonProperty(required = true)

@@ -14,16 +14,18 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 import static org.checkerframework.checker.units.qual.Prefix.exa;
 
 /**
  * A json annotated rest model for PollStatus to RESTful API representation.
- *
- *
- *
- *
  */
+@Data
+@Accessors(chain = true)
+@ToString
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtPollStatus {
@@ -39,49 +41,4 @@ public class MgmtPollStatus {
     @JsonProperty
     @Schema(example = "false")
     private boolean overdue;
-
-    /**
-     * @return the lastRequestAt
-     */
-    public Long getLastRequestAt() {
-        return lastRequestAt;
-    }
-
-    /**
-     * @param lastRequestAt
-     *            the lastRequestAt to set
-     */
-    public void setLastRequestAt(final Long lastRequestAt) {
-        this.lastRequestAt = lastRequestAt;
-    }
-
-    /**
-     * @return the nextExpectedRequestAt
-     */
-    public Long getNextExpectedRequestAt() {
-        return nextExpectedRequestAt;
-    }
-
-    /**
-     * @param nextExpectedRequestAt
-     *            the nextExpectedRequestAt to set
-     */
-    public void setNextExpectedRequestAt(final Long nextExpectedRequestAt) {
-        this.nextExpectedRequestAt = nextExpectedRequestAt;
-    }
-
-    /**
-     * @return the overdue
-     */
-    public boolean isOverdue() {
-        return overdue;
-    }
-
-    /**
-     * @param overdue
-     *            the overdue to set
-     */
-    public void setOverdue(final boolean overdue) {
-        this.overdue = overdue;
-    }
 }

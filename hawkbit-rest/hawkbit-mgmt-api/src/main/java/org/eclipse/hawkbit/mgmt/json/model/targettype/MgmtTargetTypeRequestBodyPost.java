@@ -13,13 +13,19 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeAssignment;
-import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
-import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssigment;
 
 /**
  * Request Body for TargetType POST.
  */
+@Data
+@Accessors(chain = true)
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class MgmtTargetTypeRequestBodyPost extends MgmtTargetTypeRequestBodyPut {
 
     @JsonProperty
@@ -29,56 +35,4 @@ public class MgmtTargetTypeRequestBodyPost extends MgmtTargetTypeRequestBodyPut 
     @JsonProperty
     @Schema(description = "Array of distribution set types that are compatible to that target type")
     private List<MgmtDistributionSetTypeAssignment> compatibledistributionsettypes;
-
-    /**
-     * @param name
-     *          the name to set
-     * @return  post request body
-     */
-    @Override
-    public MgmtTargetTypeRequestBodyPost setName(final String name) {
-        super.setName(name);
-        return this;
-    }
-
-    @Override
-    public MgmtTargetTypeRequestBodyPost setDescription(final String description) {
-        super.setDescription(description);
-        return this;
-    }
-
-    public MgmtTargetTypeRequestBodyPost setKey(final String key) {
-        this.key = key;
-        return this;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    @Override
-    public MgmtTargetTypeRequestBodyPost setColour(final String colour) {
-        super.setColour(colour);
-        return this;
-    }
-
-
-    /**
-     * @return the compatible ds types
-     */
-    public List<MgmtDistributionSetTypeAssignment> getCompatibleDsTypes() {
-        return compatibledistributionsettypes;
-    }
-
-    /**
-     * @param compatibleDsTypes
-     *            the compatible ds types to set
-     *
-     * @return updated body
-     */
-    public MgmtTargetTypeRequestBodyPost setCompatibleDsTypes(
-            final List<MgmtDistributionSetTypeAssignment> compatibleDsTypes) {
-        this.compatibledistributionsettypes = compatibleDsTypes;
-        return this;
-    }
 }

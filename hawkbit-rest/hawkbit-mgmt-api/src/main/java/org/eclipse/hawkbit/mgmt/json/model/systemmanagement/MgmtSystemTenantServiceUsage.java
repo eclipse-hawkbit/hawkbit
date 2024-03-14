@@ -16,25 +16,34 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * Response body for system usage report.
  */
 @Data
+@Accessors(chain = true)
+@ToString
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSystemTenantServiceUsage {
 
     @JsonProperty
     private String tenantName;
+
     @JsonProperty
     private long targets;
+
     @JsonProperty
     private long artifacts;
+
     @JsonProperty
     private long actions;
+
     @JsonProperty
     private long overallArtifactVolumeInBytes;
+
     @JsonProperty
     private Map<String, String> usageData;
 }

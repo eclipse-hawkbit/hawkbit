@@ -15,6 +15,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * Request body for maintenance window PUT/POST commands, based on a schedule
@@ -22,6 +24,8 @@ import lombok.Data;
  * offset from UTC.
  */
 @Data
+@Accessors(chain = true)
+@ToString
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtMaintenanceWindowRequestBody {
