@@ -55,7 +55,7 @@ public final class MgmtTargetTypeMapper {
     }
 
     private static Collection<Long> getDistributionSets(final MgmtTargetTypeRequestBodyPost targetTypesRest) {
-        return Optional.ofNullable(targetTypesRest.getCompatibleDsTypes())
+        return Optional.ofNullable(targetTypesRest.getCompatibledistributionsettypes())
                 .map(ds -> ds.stream().map(MgmtDistributionSetTypeAssignment::getId).collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
     }

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
 
 /**
@@ -25,6 +26,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
  * representation.
  */
 @Data
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @JsonInclude(Include.NON_NULL)

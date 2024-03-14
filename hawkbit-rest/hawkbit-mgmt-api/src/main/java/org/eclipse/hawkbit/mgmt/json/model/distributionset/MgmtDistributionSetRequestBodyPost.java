@@ -27,9 +27,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * A json annotated rest model for DistributionSet for POST.
  */
 @Data
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@Accessors(chain = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtDistributionSetRequestBodyPost extends MgmtDistributionSetRequestBodyPut {

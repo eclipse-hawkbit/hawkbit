@@ -34,10 +34,11 @@ public class MgmtSystemTenantConfigurationValueRequest {
     @Schema(description = "Current value of of configuration parameter", example = "exampleToken")
     private Serializable value;
 
-    public void setValue(final Object value) {
+    public MgmtSystemTenantConfigurationValueRequest setValue(final Object value) {
         if (!(value instanceof Serializable)) {
             throw new IllegalArgumentException("The value must be a instance of " + Serializable.class.getName());
         }
         this.value = (Serializable) value;
+        return this;
     }
 }

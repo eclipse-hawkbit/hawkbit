@@ -13,11 +13,15 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * Payload to activate the auto-confirmation by given initiator and remark.
  */
 @Data
+@Accessors(chain = true)
+@ToString
 public class MgmtTargetAutoConfirmUpdate {
 
     @JsonProperty

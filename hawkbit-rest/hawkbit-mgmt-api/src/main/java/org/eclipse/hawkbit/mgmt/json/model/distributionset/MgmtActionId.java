@@ -19,6 +19,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.springframework.hateoas.RepresentationModel;
 
@@ -32,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @NoArgsConstructor
 @Data
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)

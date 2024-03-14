@@ -10,11 +10,13 @@
 package org.eclipse.hawkbit.mgmt.json.model.distributionsettype;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 
 /**
  * Request Body of DistributionSetType for assignment operations (ID only).
  */
+@Accessors(chain = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtDistributionSetTypeAssignment extends MgmtId {
 }

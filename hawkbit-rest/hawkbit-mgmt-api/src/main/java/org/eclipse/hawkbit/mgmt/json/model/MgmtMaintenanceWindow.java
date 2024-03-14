@@ -15,26 +15,25 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * JSON model for Management API to define the maintenance window.
  */
+@Data
+@Accessors(chain = true)
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtMaintenanceWindow extends MgmtMaintenanceWindowRequestBody {
 
     /**
-     * Time in {@link TimeUnit#MILLISECONDS} of the next maintenance window
-     * start
+     * Time in {@link TimeUnit#MILLISECONDS} of the next maintenance window start
      */
     @JsonProperty
     private long nextStartAt;
-
-    public long getNextStartAt() {
-        return nextStartAt;
-    }
-
-    public void setNextStartAt(final long nextStartAt) {
-        this.nextStartAt = nextStartAt;
-    }
 }
