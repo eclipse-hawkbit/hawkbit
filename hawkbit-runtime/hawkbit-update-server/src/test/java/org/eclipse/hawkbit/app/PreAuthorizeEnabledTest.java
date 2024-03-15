@@ -13,6 +13,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,15 @@ public class PreAuthorizeEnabledTest extends AbstractSecurityTest {
     @Description("Tests whether request succeed if a role is granted for the user")
     @WithUser(authorities =  { SpPermission.READ_REPOSITORY })
     public void successIfHasRole() throws Exception {
+        mvc.perform(get("/rest/v1/distributionsets")).andExpect(result -> {
+            assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
+        });
+    }
+
+    @Test
+    @Description("Tests whether request succeed if a role is granted for the user")
+    @WithUser(authorities =  { SpRole.TENANT_ADMIN })
+    public void successIfHasTenantAdminRole() throws Exception {
         mvc.perform(get("/rest/v1/distributionsets")).andExpect(result -> {
             assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
         });
