@@ -101,9 +101,9 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
 
         abstractControllerAuthenticationFilter = createControllerAuthenticationFilter();
         if (abstractControllerAuthenticationFilter.isEnable(securityToken)) {
-            log().debug("Filter is disabled for the tenant {}", securityToken.getTenant());
             super.doFilter(request, response, chain);
         } else {
+            log().debug("Filter is disabled for the tenant {}", securityToken.getTenant());
             chain.doFilter(request, response);
         }
     }
