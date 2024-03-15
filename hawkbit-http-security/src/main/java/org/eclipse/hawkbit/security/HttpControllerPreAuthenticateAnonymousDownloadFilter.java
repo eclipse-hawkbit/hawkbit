@@ -9,9 +9,11 @@
  */
 package org.eclipse.hawkbit.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.slf4j.Logger;
 
 /**
  * An pre-authenticated processing filter which add the
@@ -19,19 +21,15 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
  * security context in case the anonymous download is allowed through
  * configuration.
  */
+@Slf4j
 public class HttpControllerPreAuthenticateAnonymousDownloadFilter extends AbstractHttpControllerAuthenticationFilter {
 
     /**
      * Constructor.
      * 
-     * @param tenantConfigurationManagement
-     *            the system management service to retrieve configuration
-     *            properties
-     * @param tenantAware
-     *            the tenant aware service to get configuration for the specific
-     *            tenant
-     * @param systemSecurityContext
-     *            the system security context
+     * @param tenantConfigurationManagement the system management service to retrieve configuration properties
+     * @param tenantAware the tenant aware service to get configuration for the specific tenant
+     * @param systemSecurityContext the system security context
      */
     public HttpControllerPreAuthenticateAnonymousDownloadFilter(
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
@@ -45,4 +43,8 @@ public class HttpControllerPreAuthenticateAnonymousDownloadFilter extends Abstra
                 systemSecurityContext);
     }
 
+    @Override
+    protected Logger log() {
+        return log;
+    }
 }
