@@ -17,7 +17,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>3.2.2</version>
+      <version>3.2.3</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -38,9 +38,11 @@
       <revision>0-SNAPSHOT</revision>
       <java.version>17</java.version>
 
-      <spring.boot.version>3.2.2</spring.boot.version>
+      <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
+
+      <spring.boot.version>3.2.3</spring.boot.version>
       <spring.cloud.version>2023.0.0</spring.cloud.version>
-      <springdoc-openapi.version>2.3.0</springdoc-openapi.version>
+      <springdoc-openapi.version>2.4.0</springdoc-openapi.version>
       <spring.plugin.core.version>3.0.0</spring.plugin.core.version>
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
@@ -53,30 +55,31 @@
 
       <!-- Misc libraries versions - START -->
       <cron-utils.version>9.2.1</cron-utils.version>
-      <jsoup.version>1.16.1</jsoup.version>
+      <jsoup.version>1.17.2</jsoup.version>
       <jaxb-api.version>2.3.1</jaxb-api.version>
-      <guava.version>32.1.2-jre</guava.version>
+      <guava.version>33.1.0-jre</guava.version>
       <javax.el-api.version>3.0.0</javax.el-api.version>
-      <commons-io.version>2.13.0</commons-io.version>
+      <commons-io.version>2.15.0</commons-io.version>
       <rsql-parser.version>2.1.0</rsql-parser.version>
       <io-protostuff.version>1.8.0</io-protostuff.version>
       <!-- test -->
-      <rabbitmq.http-client.version>5.1.0</rabbitmq.http-client.version>
-      <surefire.forkcount>1</surefire.forkcount>
-      <allure.version>2.24.0</allure.version>
+      <rabbitmq.http-client.version>5.2.0</rabbitmq.http-client.version>
+      <allure.version>2.25.0</allure.version>
       <awaitility.version>4.2.0</awaitility.version>
       <!-- Misc libraries versions - END -->
 
       <!-- Maven Plugin versions - START -->
       <maven.scm.plugin.version>2.0.1</maven.scm.plugin.version>
       <maven.site.plugin.version>3.12.1</maven.site.plugin.version>
-      <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
-      <maven.failsafe.plugin.version>3.1.2</maven.failsafe.plugin.version>
-      <maven.enforcer.plugin.version>3.3.0</maven.enforcer.plugin.version>
-      <!-- Maven Plugin versions - END -->
+      <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
+      <maven.failsafe.plugin.version>3.2.5</maven.failsafe.plugin.version>
+      <maven.enforcer.plugin.version>3.4.1</maven.enforcer.plugin.version>
 
-      <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
-      <test.jvm.args/>
+      <jacoco.maven.plugin.version>0.8.11</jacoco.maven.plugin.version>
+      <license.tool.plugin.version>1.0.2</license.tool.plugin.version>
+      <flatten.maven.plugin.version>1.5.0</flatten.maven.plugin.version>
+      <license.maven.plugin.version>2.11</license.maven.plugin.version>
+      <!-- Maven Plugin versions - END -->
 
       <!-- Release - START -->
       <release.scm.connection>scm:git:git@github.com:eclipse/hawkbit.git</release.scm.connection>
@@ -99,7 +102,6 @@
       <sonar.coverage.exclusions>
          **/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**
       </sonar.coverage.exclusions>
-      <jacoco.version>0.8.11</jacoco.version>
       <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
       <sonar.coverage.jacoco.xmlReportPaths>
          ${project.basedir}/../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml,
@@ -115,7 +117,12 @@
       <!-- To automatically create IP Team review requests for identified content call with -Ddash.iplab.token=<token> (do not share your access token) -->
       <dash.review.summary>${project.build.directory}/dash/review-summary</dash.review.summary>
       <excludeGroupIds>org.eclipse,org.junit</excludeGroupIds>
-      <!-- Dash tool integration - START -->
+      <!-- Dash tool integration - END -->
+
+      <!-- test -->
+      <surefire.forkcount>1</surefire.forkcount>
+      <test.jvm.args/>
+      <!-- Test - END -->
    </properties>
 
    <modules>
@@ -304,7 +311,7 @@
          <plugin>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
-            <version>${jacoco.version}</version>
+            <version>${jacoco.maven.plugin.version}</version>
             <executions>
                <execution>
                   <id>prepare-ut-agent</id>
@@ -343,7 +350,7 @@
          <plugin>
             <groupId>org.eclipse.dash</groupId>
             <artifactId>license-tool-plugin</artifactId>
-            <version>1.0.2</version>
+            <version>${license.tool.plugin.version}</version>
             <executions>
                <execution>
                   <id>license-check</id>
@@ -360,7 +367,7 @@
             <plugin>
                <groupId>org.codehaus.mojo</groupId>
                <artifactId>flatten-maven-plugin</artifactId>
-               <version>1.5.0</version>
+               <version>${flatten.maven.plugin.version}</version>
             </plugin>
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
@@ -373,7 +380,7 @@
             <plugin>
                <groupId>com.mycila</groupId>
                <artifactId>license-maven-plugin</artifactId>
-               <version>2.11</version>
+               <version>${license.maven.plugin.version}</version>
                <configuration>
                   <header>licenses/LICENSE_HEADER_TEMPLATE.txt</header>
                   <validHeaders>
@@ -515,7 +522,7 @@
             <plugin>
                <groupId>org.jacoco</groupId>
                <artifactId>jacoco-maven-plugin</artifactId>
-               <version>${jacoco.version}</version>
+               <version>${jacoco.maven.plugin.version}</version>
             </plugin>
             <plugin>
                <groupId>org.bsc.maven</groupId>

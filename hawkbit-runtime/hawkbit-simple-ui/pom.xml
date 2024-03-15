@@ -24,9 +24,7 @@
     <name>hawkBit :: Runtime :: Simple UI</name>
 
     <properties>
-        <vaadin.version>24.2.2</vaadin.version>
-        <spring-cloud-starter-openfeign.version>4.0.4</spring-cloud-starter-openfeign.version>
-        <openfeign-hc5.version>13.0</openfeign-hc5.version>
+        <vaadin.version>24.3.7</vaadin.version>
     </properties>
 
     <repositories>
