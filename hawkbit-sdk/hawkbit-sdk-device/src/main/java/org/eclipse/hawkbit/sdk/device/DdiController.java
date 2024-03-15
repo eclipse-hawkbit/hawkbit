@@ -217,6 +217,7 @@ public class DdiController {
     }
 
     void sendFeedback(final UpdateStatus updateStatus) {
+        log.debug(LOG_PREFIX + "Send feedback {} -> {}", getTenantId(), getControllerId(), currentActionId, updateStatus);
         getDdiApi().postDeploymentBaseActionFeedback(
                 updateStatus.feedback(), getTenantId(), getControllerId(), currentActionId);
         if (updateStatus.status() == UpdateStatus.Status.SUCCESSFUL ||

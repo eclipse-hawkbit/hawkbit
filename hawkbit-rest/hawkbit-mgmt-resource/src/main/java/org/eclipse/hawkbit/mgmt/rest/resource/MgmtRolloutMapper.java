@@ -211,6 +211,8 @@ final class MgmtRolloutMapper {
             body.setConfirmationRequired(rolloutGroup.isConfirmationRequired());
         }
 
+        body.setDynamic(rolloutGroup.isDynamic());
+
         body.setSuccessCondition(new MgmtRolloutCondition(map(rolloutGroup.getSuccessCondition()),
                 rolloutGroup.getSuccessConditionExp()));
         body.setSuccessAction(
