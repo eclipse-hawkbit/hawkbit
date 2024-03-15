@@ -9,9 +9,11 @@
  */
 package org.eclipse.hawkbit.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.slf4j.Logger;
 
 /**
  * An pre-authenticated processing filter which extracts (if enabled through
@@ -25,10 +27,8 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
  * custom headers which have then weird side-effects. Furthermore frameworks are
  * aware of the sensitivity of the Authorization header and do not log it and
  * store it somewhere.
- *
- *
- *
  */
+@Slf4j
 public class HttpControllerPreAuthenticateSecurityTokenFilter extends AbstractHttpControllerAuthenticationFilter {
 
     private final ControllerManagement controllerManagement;
@@ -61,4 +61,8 @@ public class HttpControllerPreAuthenticateSecurityTokenFilter extends AbstractHt
                 tenantAware, systemSecurityContext);
     }
 
+    @Override
+    protected Logger log() {
+        return log;
+    }
 }

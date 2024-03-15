@@ -42,5 +42,4 @@ public class ControllerPreAuthenticatedAnonymousFilter implements PreAuthenticat
     public boolean isEnable(final DmfTenantSecurityToken securityToken) {
         return ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled();
     }
-
 }
