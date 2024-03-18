@@ -200,7 +200,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .map(entry -> DeploymentManagement.deploymentRequest(entry.getKey(), entry.getValue()).build())
                 .toList();
 
-        return assignDistributionSets(Objects.requireNonNull(initiatedBy), deploymentRequests, null,
+        return assignDistributionSets(tenantAware.getCurrentUsername(), deploymentRequests, null,
                 offlineDsAssignmentStrategy);
     }
 

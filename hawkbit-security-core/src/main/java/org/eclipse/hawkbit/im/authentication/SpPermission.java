@@ -420,13 +420,6 @@ public final class SpPermission {
         public static final String IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET =
                 IS_CONTROLLER + HAS_AUTH_OR + HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET;
 
-        /**
-         * Spring security eval hasAuthority expression to check if spring
-         * context contains {@link SpPermission#IS_CONTROLLER} or
-         * {@link #HAS_AUTH_READ_REPOSITORY}.
-         */
-        public static final String IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY =
-                IS_CONTROLLER + HAS_AUTH_OR + HAS_AUTH_READ_REPOSITORY;
         private SpringEvalExpressions() {
             // utility class
         }

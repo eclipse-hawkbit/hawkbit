@@ -164,7 +164,7 @@ public interface DeploymentManagement {
      *             if the request results in multiple assignments to the same
      *             target and multiassignment is disabled
      */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(Collection<Entry<String, Long>> assignments, String initiatedBy);
 
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)

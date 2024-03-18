@@ -182,7 +182,7 @@ public interface DistributionSetManagement
      *
      * @return the page with the found {@link DistributionSet}
      */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<DistributionSet> getByNameAndVersion(@NotEmpty String distributionName, @NotEmpty String version);
 
     /**
@@ -203,7 +203,7 @@ public interface DistributionSetManagement
      * @throws IncompleteDistributionSetException
      *             if distribution set with given ID is incomplete
      */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     DistributionSet getValidAndComplete(long id);
 
     /**

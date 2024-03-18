@@ -1109,16 +1109,17 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Override
     public boolean updateOfflineAssignedVersion(@NotEmpty String controllerId, String distributionName, String version){
         List<DistributionSetAssignmentResult> distributionSetAssignmentResults =
-                distributionSetManagement.getByNameAndVersion(distributionName,version).map(
-                distributionSet -> deploymentManagement.offlineAssignedDistributionSets(
-                        List.of(Map.entry(controllerId, distributionSet.getId())),controllerId))
-                .orElseThrow(() ->
-                        new EntityNotFoundException(DistributionSet.class, Map.entry(distributionName, version)))
-                        .stream().toList();
-        boolean notAleradyAssigned = distributionSetAssignmentResults.stream().findFirst()
+                systemSecurityContext.runAsSystem(() ->
+                    distributionSetManagement.getByNameAndVersion(distributionName,version).map(
+                    distributionSet -> deploymentManagement.offlineAssignedDistributionSets(
+                            List.of(Map.entry(controllerId, distributionSet.getId())),controllerId))
+                    .orElseThrow(() ->
+                            new EntityNotFoundException(DistributionSet.class, Map.entry(distributionName, version)))
+                            .stream().toList());
+        boolean notAlreadyAssigned = distributionSetAssignmentResults.stream().findFirst()
                 .map(result-> result.getAlreadyAssigned()==0)
                 .orElseThrow();
-        return notAleradyAssigned;
+        return notAlreadyAssigned;
     }
 
     private void cancelAssignDistributionSetEvent(final Action action) {
