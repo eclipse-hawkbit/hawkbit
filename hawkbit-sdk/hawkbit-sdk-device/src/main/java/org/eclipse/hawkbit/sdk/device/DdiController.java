@@ -73,11 +73,13 @@ public class DdiController {
     private volatile ScheduledExecutorService executorService;
     private volatile Long currentActionId;
 
+    private volatile Long lastActionId;
+
     /**
      * Creates a new device instance.
      *
      * @param tenant the tenant of the device belongs to
-     * @param controller the the controller
+     * @param controller the controller
      * @param hawkbitClient a factory for creating to {@link DdiRootControllerRestApi} (and used)
      *                      for communication to hawkBit
      */
@@ -102,6 +104,7 @@ public class DdiController {
 
     public void stop() {
         executorService = null;
+        lastActionId = null;
         currentActionId = null;
     }
 
@@ -121,6 +124,12 @@ public class DdiController {
                             getRequiredLink(controllerBase, DEPLOYMENT_BASE_LINK).flatMap(this::getActionWithDeployment).ifPresentOrElse(actionWithDeployment -> {
                                 final long actionId = actionWithDeployment.getKey();
                                 if (currentActionId == null) {
+                                    if (lastActionId != null && lastActionId == actionId) {
+                                        log.info(LOG_PREFIX + "Still receive the last action {}",
+                                                getTenantId(), getControllerId(), actionId);
+                                        return;
+                                    }
+
                                     log.info(LOG_PREFIX + "Process action {}", getTenantId(), getControllerId(),
                                             actionId);
                                     final DdiDeployment deployment = actionWithDeployment.getValue().getDeployment();
@@ -132,13 +141,13 @@ public class DdiController {
                                             updateHandler.getUpdateProcessor(this, updateType, modules));
                                 } else if (currentActionId != actionId) {
                                     // TODO - cancel and start new one?
-                                    log.info(LOG_PREFIX + "Action {} is canceled while in process!", getTenantId(),
-                                            getControllerId(), getCurrentActionId());
+                                    log.info(LOG_PREFIX + "Action {} is canceled while in process (new {})!", getTenantId(),
+                                            getControllerId(), currentActionId, actionId);
                                 } // else same action - already processing
                             }, () -> {
                                 if (currentActionId != null) {
                                     // TODO - cancel current?
-                                    log.info(LOG_PREFIX + "Action {} is canceled while in process!", getTenantId(),
+                                    log.info(LOG_PREFIX + "Action {} is canceled while in process (not returned)!", getTenantId(),
                                             getControllerId(), getCurrentActionId());
                                 }
                             });
@@ -218,10 +227,17 @@ public class DdiController {
 
     void sendFeedback(final UpdateStatus updateStatus) {
         log.debug(LOG_PREFIX + "Send feedback {} -> {}", getTenantId(), getControllerId(), currentActionId, updateStatus);
-        getDdiApi().postDeploymentBaseActionFeedback(
-                updateStatus.feedback(), getTenantId(), getControllerId(), currentActionId);
+        try {
+            getDdiApi().postDeploymentBaseActionFeedback(updateStatus.feedback(), getTenantId(), getControllerId(),
+                    currentActionId);
+        } catch (final RuntimeException e) {
+            log.error(LOG_PREFIX + "Failed to send feedback {} -> {}", getTenantId(), getControllerId(),
+                    currentActionId, updateStatus, e);
+        }
+
         if (updateStatus.status() == UpdateStatus.Status.SUCCESSFUL ||
-                updateStatus.status() == UpdateStatus.Status.ERROR) {
+                updateStatus.status() == UpdateStatus.Status.FAILURE) {
+            lastActionId = currentActionId;
             currentActionId = null;
         }
     }

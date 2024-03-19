@@ -95,7 +95,6 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
                               final TargetRepository targetRepository, final EntityManager entityManager,
                               final VirtualPropertyReplacer virtualPropertyReplacer, final RolloutStatusCache rolloutStatusCache,
                               final Database database) {
-
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.rolloutRepository = rolloutRepository;
         this.actionRepository = actionRepository;
@@ -108,7 +107,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     @Override
     public Optional<RolloutGroup> get(final long rolloutGroupId) {
-        return rolloutGroupRepository.findById(rolloutGroupId).map(rg -> (RolloutGroup) rg);
+        return rolloutGroupRepository.findById(rolloutGroupId).map(RolloutGroup.class::cast);
     }
 
     @Override
@@ -146,7 +145,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
                 .collect(Collectors.toList());
 
         if (rolloutGroupIds.isEmpty()) {
-            // groups might already deleted, so return empty list.
+            // groups might have been already deleted, so return empty list.
             return new PageImpl<>(Collections.emptyList());
         }
 
@@ -155,7 +154,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
         for (final JpaRolloutGroup rolloutGroup : rolloutGroups) {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
-                    allStatesForRollout.get(rolloutGroup.getId()), Long.valueOf(rolloutGroup.getTotalTargets()),
+                    allStatesForRollout.get(rolloutGroup.getId()), (long)rolloutGroup.getTotalTargets(),
                     rolloutGroup.getRollout().getActionType());
             rolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
         }

@@ -95,25 +95,27 @@ public interface UpdateHandler {
 
         @Override
         public void run() {
-            ddiController.sendFeedback(new UpdateStatus(UpdateStatus.Status.RUNNING, List.of("Update begins!")));
+            ddiController.sendFeedback(new UpdateStatus(UpdateStatus.Status.PROCEEDING, List.of("Update begin ...")));
 
             if (!CollectionUtils.isEmpty(modules)) {
                 try {
                     final UpdateStatus updateStatus = download();
                     ddiController.sendFeedback(updateStatus);
-                    if (updateStatus.status() == UpdateStatus.Status.ERROR) {
+                    if (updateStatus.status() == UpdateStatus.Status.FAILURE) {
                         return;
                     } else {
-                        ddiController.sendFeedback(update());
+                        if (updateType != DdiDeployment.HandlingType.SKIP) {
+                            ddiController.sendFeedback(update());
+                        }
                     }
                 } finally {
                     cleanup();
                 }
             }
 
-            if (updateType != DdiDeployment.HandlingType.SKIP) {
+            if (updateType == DdiDeployment.HandlingType.SKIP) {
                 ddiController.sendFeedback(
-                        new UpdateStatus(UpdateStatus.Status.SUCCESSFUL, List.of("Update complete!")));
+                        new UpdateStatus(UpdateStatus.Status.SUCCESSFUL, List.of("Update (download-only) completed.")));
             }
         }
 
@@ -126,11 +128,11 @@ public interface UpdateHandler {
         protected UpdateStatus download() {
             ddiController.sendFeedback(
                     new UpdateStatus(
-                            UpdateStatus.Status.DOWNLOADING,
+                            UpdateStatus.Status.DOWNLOAD,
                             modules.stream().flatMap(mod -> mod.getArtifacts().stream())
-                                    .map(art -> "Download starts for: " + art.getFilename() +
+                                    .map(art -> "Download start for: " + art.getFilename() +
                                             " with size " + art.getSize() +
-                                            " and hashes " + art.getHashes())
+                                            " and hashes " + art.getHashes() + " ...")
                                     .collect(Collectors.toList())));
 
             log.info(LOG_PREFIX + "Start download", ddiController.getTenantId(), ddiController.getControllerId());
@@ -146,28 +148,28 @@ public interface UpdateHandler {
                 }
             }));
 
-            log.info(LOG_PREFIX + "Download complete", ddiController.getTenantId(), ddiController.getControllerId());
+            log.info(LOG_PREFIX + "Download complete.", ddiController.getTenantId(), ddiController.getControllerId());
 
             final List<String> messages = new LinkedList<>();
-            messages.add("Download complete!");
+            messages.add("Download complete.");
             updateStatusList.forEach(download -> messages.addAll(download.messages()));
             return new UpdateStatus(
-                    updateStatusList.stream().anyMatch(status -> status.status() == UpdateStatus.Status.ERROR) ?
-                            UpdateStatus.Status.ERROR : UpdateStatus.Status.DOWNLOADED,
+                    updateStatusList.stream().anyMatch(status -> status.status() == UpdateStatus.Status.FAILURE) ?
+                            UpdateStatus.Status.FAILURE : UpdateStatus.Status.DOWNLOADED,
                     messages);
         }
 
         /**
-         * Extension point. Called after all artifacts has been successfully downloadec. An overriding implementation
+         * Extension point. Called after all artifacts has been successfully downloaded. An overriding implementation
          * may get the {@link #downloads} map and apply them
          */
         protected UpdateStatus update() {
             log.info(LOG_PREFIX + "Updated", ddiController.getTenantId(), ddiController.getControllerId());
-            return new UpdateStatus(UpdateStatus.Status.SUCCESSFUL, List.of("Update applied"));
+            return new UpdateStatus(UpdateStatus.Status.SUCCESSFUL, List.of("Update complete."));
         }
 
         /**
-         * Extension point. Called after download and update has been finished. By default it deletes all downloaded
+         * Extension point. Called after download and update has been finished. By default, it deletes all downloaded
          * files (if any).
          */
         protected void cleanup() {
@@ -189,8 +191,7 @@ public interface UpdateHandler {
             artifact.getLink("download").ifPresentOrElse(
                     // HTTPS
                     link -> status.add(downloadUrl(link.getHref(), gatewayToken, targetToken,
-                            artifact.getHashes(), artifact.getSize()))
-                    ,
+                            artifact.getHashes(), artifact.getSize())),
                     // HTTP
                     () -> status.add(downloadUrl(
                             artifact.getLink("download-http")
@@ -216,7 +217,7 @@ public interface UpdateHandler {
                 log.error(LOG_PREFIX + "Failed to download {}",
                         ddiController.getTenantId(), ddiController.getControllerId(), url, e);
                 return new UpdateStatus(
-                        UpdateStatus.Status.ERROR,
+                        UpdateStatus.Status.FAILURE,
                         List.of("Failed to download " + url + ": " + e.getMessage()));
             }
         }
@@ -273,7 +274,7 @@ public interface UpdateHandler {
                                     ddiController.getTenantId(), ddiController.getControllerId());
                         }
                         downloadHandler.finished(ArtifactHandler.DownloadHandler.Status.ERROR);
-                        return new UpdateStatus(UpdateStatus.Status.ERROR, List.of(message));
+                        return new UpdateStatus(UpdateStatus.Status.FAILURE, List.of(message));
                     }
                 });
             }
