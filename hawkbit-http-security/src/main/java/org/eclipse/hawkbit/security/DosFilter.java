@@ -166,7 +166,7 @@ public class DosFilter extends OncePerRequestFilter {
     }
 
     private static boolean handleMissingIpAddress(final HttpServletResponse response) {
-        log.error("Failed to get peer IP adress");
+        log.error("Failed to get peer IP address");
         response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         return false;
     }

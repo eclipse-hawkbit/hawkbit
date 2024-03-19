@@ -332,7 +332,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     public ResponseEntity<Void> postDeploymentBaseActionFeedback(@Valid @RequestBody final DdiActionFeedback feedback,
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") @NotNull final Long actionId) {
-        log.debug("provideBasedeploymentActionFeedback for target [{},{}]: {}", controllerId, actionId, feedback);
+        log.debug("postDeploymentBaseActionFeedback for target [{},{}]: {}", controllerId, actionId, feedback);
 
         final Target target = findTarget(controllerId);
         final Action action = findActionForTarget(actionId, target);
@@ -350,7 +350,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
         controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, controllerId, actionId));
 
         return ResponseEntity.ok().build();
-
     }
 
     private ActionStatusCreate generateUpdateStatus(final DdiActionFeedback feedback, final String controllerId,
@@ -761,5 +760,4 @@ public class DdiRootController implements DdiRootControllerRestApi {
         confirmationManagement.deactivateAutoConfirmation(controllerId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }
