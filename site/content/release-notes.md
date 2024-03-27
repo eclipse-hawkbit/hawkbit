@@ -3,6 +3,13 @@ title: Release notes
 weight: 100
 ---
 
+## 0.5.0
+
+**Release Date:** Friday, March 22, 2024 <br />
+Hawkbit: [Tag](https://github.com/eclipse/hawkbit/releases/tag/0.5.0) /
+[Release](https://github.com/eclipse/hawkbit/milestone/26) <br />
+Extensions: [Tag](https://github.com/eclipse/hawkbit-extensions/releases/tag/0.5.0)
+
 ## 0.4.1
 
 **Release Date:** Friday, January 12, 2024 <br />
