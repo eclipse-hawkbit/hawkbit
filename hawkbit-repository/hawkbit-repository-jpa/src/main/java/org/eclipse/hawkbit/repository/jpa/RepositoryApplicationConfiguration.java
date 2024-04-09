@@ -482,7 +482,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     @Override
     protected Map<String, Object> getVendorProperties() {
-
         final Map<String, Object> properties = new HashMap<>(7);
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put(PersistenceUnitProperties.WEAVING, "false");
@@ -490,7 +489,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         properties.put(PersistenceUnitProperties.ALLOW_NATIVE_SQL_QUERIES, "true");
         // flyway
         properties.put(PersistenceUnitProperties.DDL_GENERATION, "none");
-        // Embeed into hawkBit logging
+        // Embed into hawkBit logging
         properties.put(PersistenceUnitProperties.LOGGING_LOGGER, "JavaLogger");
         // Ensure that we flush only at the end of the transaction
         properties.put(PersistenceUnitProperties.PERSISTENCE_CONTEXT_FLUSH_MODE, "COMMIT");
@@ -498,7 +497,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         properties.put(PersistenceUnitProperties.BATCH_WRITING, "JDBC");
         // Batch size
         properties.put(PersistenceUnitProperties.BATCH_WRITING_SIZE, "500");
-
         return properties;
     }
 
