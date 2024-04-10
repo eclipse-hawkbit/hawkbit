@@ -140,7 +140,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     private final EntityManager entityManager;
     private final DistributionSetManagement distributionSetManagement;
-    private final DistributionSetRepository distributionSetRepository;
     private final TargetRepository targetRepository;
     private final AuditorAware<String> auditorProvider;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
@@ -154,8 +153,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final RetryTemplate retryTemplate;
 
     public JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
-            final DistributionSetManagement distributionSetManagement,
-            final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
+            final DistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
             final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
@@ -164,7 +162,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final RepositoryProperties repositoryProperties) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.entityManager = entityManager;
-        this.distributionSetRepository = distributionSetRepository;
         this.distributionSetManagement = distributionSetManagement;
         this.targetRepository = targetRepository;
         this.auditorProvider = auditorProvider;

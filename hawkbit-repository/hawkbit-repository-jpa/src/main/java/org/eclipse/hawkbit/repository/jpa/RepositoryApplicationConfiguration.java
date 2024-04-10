@@ -807,7 +807,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     DeploymentManagement deploymentManagement(final EntityManager entityManager,
-                                              final ActionRepository actionRepository, final DistributionSetRepository distributionSetRepository,
+                                              final ActionRepository actionRepository,
                                               final DistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
                                               final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
                                               final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
@@ -815,8 +815,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
                                               final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
                                               final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
                                               final JpaProperties properties, final RepositoryProperties repositoryProperties) {
-        return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetManagement,
-                distributionSetRepository, targetRepository, actionStatusRepository, auditorProvider,
+        return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetManagement, targetRepository, actionStatusRepository, auditorProvider,
                 eventPublisherHolder, afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement,
                 quotaManagement, systemSecurityContext, tenantAware, properties.getDatabase(), repositoryProperties);
     }
