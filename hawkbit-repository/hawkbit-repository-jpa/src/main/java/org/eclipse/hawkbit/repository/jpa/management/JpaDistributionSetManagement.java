@@ -574,7 +574,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                         throw new InsufficientPermissionException("Target not accessible (or not found)!");
                     }
                     return distributionSetRepository
-                            .findOne(DistributionSetSpecification.byActionId(actionId))
+                            .findOne(DistributionSetSpecification.byId(action.getDistributionSet().getId()))
                             .orElseThrow(() ->
                                     new InsufficientPermissionException("DistributionSet not accessible (or not found)!"));
                 })
@@ -628,14 +628,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         if (hasTagsFilterActive(distributionSetFilter)) {
             spec = DistributionSetSpecification.hasTags(distributionSetFilter.getTagNames(),
                     distributionSetFilter.getSelectDSWithNoTag());
-            specList.add(spec);
-        }
-        if (distributionSetFilter.getInstalledTargetId() != null) {
-            spec = DistributionSetSpecification.installedTarget(distributionSetFilter.getInstalledTargetId());
-            specList.add(spec);
-        }
-        if (distributionSetFilter.getAssignedTargetId() != null) {
-            spec = DistributionSetSpecification.assignedTarget(distributionSetFilter.getAssignedTargetId());
             specList.add(spec);
         }
         return specList;

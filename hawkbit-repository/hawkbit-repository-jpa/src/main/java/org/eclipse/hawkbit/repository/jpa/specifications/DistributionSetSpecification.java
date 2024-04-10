@@ -117,15 +117,6 @@ public final class DistributionSetSpecification {
         };
     }
 
-    public static Specification<JpaDistributionSet> byActionId(final Long actionId) {
-        return (dsRoot, query, cb) -> {
-            final ListJoin<JpaDistributionSet, JpaAction> join = dsRoot.join(JpaDistributionSet_.actions,
-                    JoinType.LEFT);
-            query.distinct(true);
-            return cb.equal(join.get(JpaAction_.id), actionId);
-        };
-    }
-
     /**
      * {@link Specification} for retrieving {@link DistributionSet} with given
      * {@link DistributionSet#getId()}s.
@@ -248,36 +239,6 @@ public final class DistributionSetSpecification {
      */
     public static Specification<JpaDistributionSet> hasType(final Collection<Long> typeIds) {
         return (dsRoot, query, cb) -> dsRoot.get(JpaDistributionSet_.type).get(JpaDistributionSetType_.id).in(typeIds);
-    }
-
-    /**
-     * @param installedTargetId
-     *            the targetID which is installed to a distribution set to search
-     *            for.
-     * @return the specification to search for a distribution set which is installed
-     *         to the given targetId
-     */
-    public static Specification<JpaDistributionSet> installedTarget(final String installedTargetId) {
-        return (dsRoot, query, cb) -> {
-            final ListJoin<JpaDistributionSet, JpaTarget> installedTargetJoin = dsRoot
-                    .join(JpaDistributionSet_.installedAtTargets, JoinType.INNER);
-            return cb.equal(installedTargetJoin.get(JpaTarget_.controllerId), installedTargetId);
-        };
-    }
-
-    /**
-     * @param assignedTargetId
-     *            the targetID which is assigned to a distribution set to search
-     *            for.
-     * @return the specification to search for a distribution set which is assigned
-     *         to the given targetId
-     */
-    public static Specification<JpaDistributionSet> assignedTarget(final String assignedTargetId) {
-        return (dsRoot, query, cb) -> {
-            final ListJoin<JpaDistributionSet, JpaTarget> assignedTargetJoin = dsRoot
-                    .join(JpaDistributionSet_.assignedToTargets, JoinType.INNER);
-            return cb.equal(assignedTargetJoin.get(JpaTarget_.controllerId), assignedTargetId);
-        };
     }
 
     /**
