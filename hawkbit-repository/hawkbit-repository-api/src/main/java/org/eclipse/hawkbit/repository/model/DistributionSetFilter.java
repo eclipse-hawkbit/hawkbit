@@ -28,6 +28,4 @@ public final class DistributionSetFilter {
     private final String searchText;
     private final Boolean selectDSWithNoTag;
     private final Collection<String> tagNames;
-    private final String assignedTargetId;
-    private final String installedTargetId;
 }

@@ -934,15 +934,16 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Optional<DistributionSet> getAssignedDistributionSet(final String controllerId) {
-        // target access checked in assertTargetReadAllowed
-        assertTargetReadAllowed(controllerId);
-        return distributionSetRepository.findAssignedToTarget(controllerId);
+        return targetRepository
+                .findOne(TargetSpecifications.hasControllerId(controllerId))
+                .map(JpaTarget::getAssignedDistributionSet);
     }
 
     @Override
     public Optional<DistributionSet> getInstalledDistributionSet(final String controllerId) {
-        assertTargetReadAllowed(controllerId);
-        return distributionSetRepository.findInstalledAtTarget(controllerId);
+        return targetRepository
+                .findOne(TargetSpecifications.hasControllerId(controllerId))
+                .map(JpaTarget::getInstalledDistributionSet);
     }
 
     @Override

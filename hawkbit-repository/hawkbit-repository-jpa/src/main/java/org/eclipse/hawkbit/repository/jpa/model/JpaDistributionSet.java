@@ -35,7 +35,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -46,13 +45,11 @@ import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedExce
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
@@ -122,26 +119,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Column(name = "required_migration_step")
     private boolean requiredMigrationStep;
-
-    @ToString.Exclude
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "autoAssignDistributionSet", targetEntity = JpaTargetFilterQuery.class, fetch = FetchType.LAZY)
-    private List<TargetFilterQuery> autoAssignFilters;
-
-    @ToString.Exclude
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "assignedDistributionSet", targetEntity = JpaTarget.class, fetch = FetchType.LAZY)
-    private List<JpaTarget> assignedToTargets;
-
-    @ToString.Exclude
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "installedDistributionSet", targetEntity = JpaTarget.class, fetch = FetchType.LAZY)
-    private List<JpaTarget> installedAtTargets;
-
-    @ToString.Exclude
-    @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "distributionSet", targetEntity = JpaAction.class, fetch = FetchType.LAZY)
-    private List<JpaAction> actions;
 
     /**
      * Parameterized constructor.
@@ -282,14 +259,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     public void setRequiredMigrationStep(final boolean isRequiredMigrationStep) {
         requiredMigrationStep = isRequiredMigrationStep;
-    }
-
-    public List<Action> getActions() {
-        if (actions == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(actions);
     }
 
     @Override
