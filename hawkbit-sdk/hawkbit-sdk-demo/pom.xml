@@ -37,6 +37,11 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-sdk-dmf</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-mgmt-api</artifactId>
          <version>${project.version}</version>
       </dependency>
