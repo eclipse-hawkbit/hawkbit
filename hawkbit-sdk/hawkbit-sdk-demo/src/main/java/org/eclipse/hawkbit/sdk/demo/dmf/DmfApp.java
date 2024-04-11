@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Bosch.IO GmbH and others
+ * Copyright (c) 2024 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
