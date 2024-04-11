@@ -46,7 +46,7 @@ public class DmfSenderService extends MessageService {
     private final String spExchange;
     private final ConcurrentHashMap<String, BiConsumer<String, Message>> pingListeners = new ConcurrentHashMap<>();
 
-    DmfSenderService(final RabbitTemplate rabbitTemplate, final DmfProperties dmfProperties) {
+    public DmfSenderService(final RabbitTemplate rabbitTemplate, final DmfProperties dmfProperties) {
         super(rabbitTemplate, dmfProperties);
         spExchange = AmqpSettings.DMF_EXCHANGE;
     }
