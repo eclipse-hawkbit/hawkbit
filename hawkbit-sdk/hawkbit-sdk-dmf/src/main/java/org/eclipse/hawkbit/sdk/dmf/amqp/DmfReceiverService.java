@@ -50,8 +50,8 @@ public class DmfReceiverService extends MessageService {
     private final Set<Long> openActions = Collections.synchronizedSet(new HashSet<>());
 
     public DmfReceiverService(final RabbitTemplate rabbitTemplate, final DmfSenderService dmfSenderService,
-            final DeviceManagement deviceManagement, final DmfProperties dmfProperties) {
-        super(rabbitTemplate, dmfProperties);
+            final DeviceManagement deviceManagement, final AmqpProperties amqpProperties) {
+        super(rabbitTemplate, amqpProperties);
         this.dmfSenderService = dmfSenderService;
         this.deviceManagement = deviceManagement;
     }

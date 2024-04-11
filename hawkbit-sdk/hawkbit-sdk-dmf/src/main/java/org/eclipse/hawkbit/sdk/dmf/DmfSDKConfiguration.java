@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.sdk.dmf;
 import java.time.Duration;
 import java.util.Map;
 
+import org.eclipse.hawkbit.sdk.dmf.amqp.AmqpProperties;
 import org.eclipse.hawkbit.sdk.dmf.amqp.DmfReceiverService;
 import org.eclipse.hawkbit.sdk.dmf.amqp.DmfSenderService;
 import org.springframework.amqp.core.Binding;
@@ -32,7 +33,7 @@ import org.springframework.context.annotation.Configuration;
  * The spring AMQP configuration to use a AMQP for communication with SP update server.
  */
 @Configuration
-@EnableConfigurationProperties(DmfProperties.class)
+@EnableConfigurationProperties({DmfProperties.class, AmqpProperties.class})
 @ConditionalOnProperty(prefix = DmfProperties.CONFIGURATION_PREFIX, name = "enabled", matchIfMissing = true)
 public class DmfSDKConfiguration {
 
@@ -44,8 +45,8 @@ public class DmfSDKConfiguration {
     @Bean
     DmfSenderService dmfSenderService(
             final RabbitTemplate rabbitTemplate,
-            final DmfProperties dmfProperties) {
-        return new DmfSenderService(rabbitTemplate, dmfProperties);
+            final AmqpProperties amqpProperties) {
+        return new DmfSenderService(rabbitTemplate, amqpProperties);
     }
 
     @Bean
@@ -53,8 +54,8 @@ public class DmfSDKConfiguration {
             final RabbitTemplate rabbitTemplate,
             final DmfSenderService dmfSenderService,
             final DeviceManagement deviceManagement,
-            final DmfProperties dmfProperties) {
-        return new DmfReceiverService(rabbitTemplate, dmfSenderService, deviceManagement, dmfProperties);
+            final AmqpProperties amqpProperties) {
+        return new DmfReceiverService(rabbitTemplate, dmfSenderService, deviceManagement, amqpProperties);
     }
 
     @Bean
@@ -76,8 +77,8 @@ public class DmfSDKConfiguration {
      * Creates the receiver queue from update server for receiving message from update server.
      */
     @Bean
-    Queue receiverConnectorQueueFromHawkBit(final DmfProperties dmfProperties) {
-        return QueueBuilder.nonDurable(dmfProperties.getReceiverConnectorQueueFromSp()).autoDelete()
+    Queue receiverConnectorQueueFromHawkBit(final AmqpProperties amqpProperties) {
+        return QueueBuilder.nonDurable(amqpProperties.getReceiverConnectorQueueFromSp()).autoDelete()
                 .withArguments(Map.of(
                         "x-message-ttl", Duration.ofDays(1).toMillis(),
                         "x-max-length", 100_000))
@@ -88,8 +89,8 @@ public class DmfSDKConfiguration {
      * Creates the receiver exchange for sending messages to update server.
      */
     @Bean
-    FanoutExchange exchangeQueueToConnector(final DmfProperties dmfProperties) {
-        return new FanoutExchange(dmfProperties.getSenderForSpExchange(), false, true);
+    FanoutExchange exchangeQueueToConnector(final AmqpProperties amqpProperties) {
+        return new FanoutExchange(amqpProperties.getSenderForSpExchange(), false, true);
     }
 
     /**
@@ -98,9 +99,9 @@ public class DmfSDKConfiguration {
      * @return the binding and create the queue and exchange
      */
     @Bean
-    Binding bindReceiverQueueToSpExchange(final DmfProperties dmfProperties) {
-        return BindingBuilder.bind(receiverConnectorQueueFromHawkBit(dmfProperties))
-                .to(exchangeQueueToConnector(dmfProperties));
+    Binding bindReceiverQueueToSpExchange(final AmqpProperties amqpProperties) {
+        return BindingBuilder.bind(receiverConnectorQueueFromHawkBit(amqpProperties))
+                .to(exchangeQueueToConnector(amqpProperties));
     }
 
     @Configuration
@@ -108,8 +109,8 @@ public class DmfSDKConfiguration {
     protected static class CachingConnectionFactoryInitializer {
 
         CachingConnectionFactoryInitializer(
-                final CachingConnectionFactory connectionFactory, final DmfProperties dmfProperties) {
-            connectionFactory.setVirtualHost(dmfProperties.getCustomVhost());
+                final CachingConnectionFactory connectionFactory, final AmqpProperties amqpProperties) {
+            connectionFactory.setVirtualHost(amqpProperties.getCustomVhost());
         }
     }
 
