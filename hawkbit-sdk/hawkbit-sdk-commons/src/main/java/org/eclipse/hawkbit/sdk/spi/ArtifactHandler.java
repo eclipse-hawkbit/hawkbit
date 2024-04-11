@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.sdk.dmf;
+package org.eclipse.hawkbit.sdk.spi;
 
 import java.nio.file.Path;
 import java.util.Optional;

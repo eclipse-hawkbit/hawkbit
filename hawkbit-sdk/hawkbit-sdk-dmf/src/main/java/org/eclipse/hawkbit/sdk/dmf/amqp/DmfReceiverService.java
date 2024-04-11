@@ -49,7 +49,7 @@ public class DmfReceiverService extends MessageService {
 
     private final Set<Long> openActions = Collections.synchronizedSet(new HashSet<>());
 
-    DmfReceiverService(final RabbitTemplate rabbitTemplate, final DmfSenderService dmfSenderService,
+    public DmfReceiverService(final RabbitTemplate rabbitTemplate, final DmfSenderService dmfSenderService,
             final DeviceManagement deviceManagement, final DmfProperties dmfProperties) {
         super(rabbitTemplate, dmfProperties);
         this.dmfSenderService = dmfSenderService;
