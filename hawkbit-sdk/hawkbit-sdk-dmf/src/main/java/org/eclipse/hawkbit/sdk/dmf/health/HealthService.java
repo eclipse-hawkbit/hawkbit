@@ -7,14 +7,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.sdk.dmf;
+package org.eclipse.hawkbit.sdk.dmf.health;
 
-import org.eclipse.hawkbit.sdk.dmf.amqp.DmfSenderService;
+import org.eclipse.hawkbit.sdk.dmf.DmfTenant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,18 +24,16 @@ import java.util.UUID;
 /**
  * Handle all incoming Messages from hawkBit update server.
  */
-class HealthService {
+public class HealthService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HealthService.class);
 
-    private final DeviceManagement deviceManagement;
-    private final DmfSenderService dmfSenderService;
+    private final Collection<DmfTenant> dmfTenants;
 
     private final Set<String> openPings = Collections.synchronizedSet(new HashSet<>());
 
-    HealthService(final DeviceManagement deviceManagement, final DmfSenderService dmfSenderService) {
-        this.deviceManagement = deviceManagement;
-        this.dmfSenderService = dmfSenderService;
+    HealthService(final Collection<DmfTenant> dmfTenants) {
+        this.dmfTenants = dmfTenants;
     }
 
     @Scheduled(fixedDelay = 5_000, initialDelay = 5_000)
@@ -45,11 +44,11 @@ class HealthService {
             LOGGER.debug("Currently {} open pings", openPings.size());
         }
 
-        deviceManagement.getTenants().forEach(tenant -> {
+        dmfTenants.forEach(tenant -> {
             final String correlationId = UUID.randomUUID().toString();
             openPings.add(correlationId);
             LOGGER.debug("Ping tenant {} with correlationId {}", tenant, correlationId);
-            dmfSenderService.ping(tenant, correlationId, this::pingReceived);
+            tenant.ping(correlationId, this::pingReceived);
         });
     }
 

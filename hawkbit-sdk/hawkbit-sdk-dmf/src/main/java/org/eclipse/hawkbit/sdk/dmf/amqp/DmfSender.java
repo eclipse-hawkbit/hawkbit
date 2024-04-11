@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.sdk.dmf.amqp;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -17,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -25,7 +23,6 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
-import org.eclipse.hawkbit.sdk.dmf.UpdateInfo;
 import org.eclipse.hawkbit.sdk.dmf.UpdateStatus;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -34,20 +31,23 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.util.ObjectUtils;
 
+import static org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings.DMF_EXCHANGE;
+
 /**
  * Sender service to send messages to update server.
  */
 @Slf4j
-public class DmfSenderService extends MessageService {
+public class DmfSender {
 
     private static final byte[] EMPTY_BODY = new byte[0];
 
-    private final String spExchange;
+    protected final RabbitTemplate rabbitTemplate;
+    private final AmqpProperties amqpProperties;
     private final ConcurrentHashMap<String, BiConsumer<String, Message>> pingListeners = new ConcurrentHashMap<>();
 
-    public DmfSenderService(final RabbitTemplate rabbitTemplate, final AmqpProperties amqpProperties) {
-        super(rabbitTemplate, amqpProperties);
-        spExchange = AmqpSettings.DMF_EXCHANGE;
+    public DmfSender(final RabbitTemplate rabbitTemplate, final AmqpProperties amqpProperties) {
+        this.rabbitTemplate = rabbitTemplate;
+        this.amqpProperties = amqpProperties;
     }
 
     public void createOrUpdateThing(final String tenant, final String controllerId) {
@@ -59,17 +59,13 @@ public class DmfSenderService extends MessageService {
         messagePropertiesForSP.setContentType(MessageProperties.CONTENT_TYPE_JSON);
         messagePropertiesForSP.setReplyTo(amqpProperties.getSenderForSpExchange());
 
-        sendMessage(spExchange, new Message(EMPTY_BODY, messagePropertiesForSP));
+        sendMessage(DMF_EXCHANGE, new Message(EMPTY_BODY, messagePropertiesForSP));
     }
 
-    /**
-     * Finish the update process. This will send a action status to SP.
-     *
-     * @param update the simulated update object
-     * @param updateResultMessages a description according the update process
-     */
-    public void finishUpdateProcess(final UpdateInfo update, final List<String> updateResultMessages) {
-        sendMessage(spExchange, createActionStatusMessage(update, updateResultMessages, DmfActionStatus.FINISHED));
+    public void finishUpdateProcess(final String tenantId, final long actionId, final List<String> updateResultMessages) {
+        sendMessage(
+                DMF_EXCHANGE,
+                createActionStatusMessage(tenantId, actionId, DmfActionStatus.FINISHED, updateResultMessages));
     }
 
     /**
@@ -86,9 +82,9 @@ public class DmfSenderService extends MessageService {
         }
         message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
 
-        final String correlationId = UUID.randomUUID().toString();
-
-        if (ObjectUtils.isEmpty(message.getMessageProperties().getCorrelationId())) {
+        String correlationId = message.getMessageProperties().getCorrelationId();
+        if (ObjectUtils.isEmpty(correlationId)) {
+            correlationId = UUID.randomUUID().toString();
             message.getMessageProperties().setCorrelationId(correlationId);
         }
 
@@ -101,23 +97,13 @@ public class DmfSenderService extends MessageService {
         rabbitTemplate.send(address, null, message, new CorrelationData(correlationId));
     }
 
-    public Message convertMessage(final Object object, final MessageProperties messageProperties) {
-        return rabbitTemplate.getMessageConverter().toMessage(object, messageProperties);
-    }
-
     public void sendFeedback(
             final String tenant, final Long actionId,
             final UpdateStatus updateStatus) {
         final Message message = createActionStatusMessage(tenant, actionId, updateStatus.status(), updateStatus.messages());
-        sendMessage(spExchange, message);
+        sendMessage(DMF_EXCHANGE, message);
     }
 
-    public void updateAttributes(
-            final String tenant, final String controllerId,
-            final DmfUpdateMode mode,
-            final String key, final String value) {
-        updateAttributes(tenant, controllerId, mode, Collections.singletonMap(key, value));
-    }
     public void updateAttributes(
             final String tenant, final String controllerId,
             final DmfUpdateMode mode,
@@ -134,7 +120,7 @@ public class DmfSenderService extends MessageService {
         attributeUpdate.setMode(mode);
         attributeUpdate.getAttributes().putAll(attributes);
 
-        sendMessage(spExchange, convertMessage(attributeUpdate, messagePropertiesForSP));
+        sendMessage(DMF_EXCHANGE, convertMessage(attributeUpdate, messagePropertiesForSP));
     }
 
     public void ping(final String tenant, final String correlationId, final BiConsumer<String, Message> listener) {
@@ -149,7 +135,7 @@ public class DmfSenderService extends MessageService {
             pingListeners.put(correlationId, listener);
         }
 
-        sendMessage(spExchange, new Message(EMPTY_BODY, messageProperties));
+        sendMessage(DMF_EXCHANGE, new Message(EMPTY_BODY, messageProperties));
     }
 
     void pingResponse(final String controllerId, final Message message) {
@@ -159,9 +145,8 @@ public class DmfSenderService extends MessageService {
         }
     }
 
-    private Message createActionStatusMessage(final UpdateInfo update,
-            final List<String> updateResultMessages, final DmfActionStatus status) {
-        return createActionStatusMessage(update.getTenant(), update.getActionId(), status, updateResultMessages);
+    private Message convertMessage(final Object object, final MessageProperties messageProperties) {
+        return rabbitTemplate.getMessageConverter().toMessage(object, messageProperties);
     }
 
     private Message createActionStatusMessage(final String tenant, final Long actionId,

@@ -34,5 +34,22 @@ public class Tenant {
     @Nullable
     private String gatewayToken;
 
+    // amqp settings (if DMF is used)
+    @Nullable
+    private DMF dmf;
+
     private boolean downloadAuthenticationEnabled = true;
+
+    @Data
+    @ToString
+    public static class DMF {
+
+        @Nullable
+        private String virtualHost;
+        @Nullable
+        private String username;
+        @Nullable
+        @ToString.Exclude
+        private String password;
+    }
 }

@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
  */
 @Data
 @ToString
-@Component
 @ConfigurationProperties(AmqpProperties.CONFIGURATION_PREFIX)
 public class AmqpProperties {
 
@@ -42,6 +41,4 @@ public class AmqpProperties {
      * Message time to live (ttl) for the deadletter queue. Default ttl is 1 hour.
      */
     private int deadLetterTtl = 60_000;
-
-    private String customVhost;
 }

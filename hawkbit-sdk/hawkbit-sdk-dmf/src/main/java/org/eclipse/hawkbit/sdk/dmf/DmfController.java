@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.sdk.Controller;
 import org.eclipse.hawkbit.sdk.Tenant;
-import org.eclipse.hawkbit.sdk.dmf.amqp.DmfSenderService;
+import org.eclipse.hawkbit.sdk.dmf.amqp.DmfSender;
 
 import java.util.Collections;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class DmfController {
     private final String tenantId;
     private final String controllerId;
     private final UpdateHandler updateHandler;
-    private final DmfSenderService dmfSenderService;
+    private final DmfSender dmfSender;
 
     // configuration
     private final boolean downloadAuthenticationEnabled;
@@ -54,26 +54,26 @@ public class DmfController {
      * @param tenant the tenant of the device belongs to
      * @param controller the controller
      */
-    public DmfController(
+    DmfController(
             final Tenant tenant, final Controller controller,
             final UpdateHandler updateHandler,
-            final DmfSenderService dmfSenderService) {
+            final DmfSender dmfSender) {
         this.tenantId = tenant.getTenantId();
         downloadAuthenticationEnabled = tenant.isDownloadAuthenticationEnabled();
         this.controllerId = controller.getControllerId();
         this.updateHandler = updateHandler == null ? UpdateHandler.SKIP : updateHandler;
-        this.dmfSenderService = dmfSenderService;
+        this.dmfSender = dmfSender;
     }
 
     public void connect() {
         log.debug(LOG_PREFIX + "Connecting/Polling ...", getTenantId(), getControllerId());
-        dmfSenderService.createOrUpdateThing(getTenantId(), getControllerId());
+        dmfSender.createOrUpdateThing(getTenantId(), getControllerId());
         log.debug(LOG_PREFIX + "Done. Create thing sent.", getTenantId(), getControllerId());
     }
 
     public void poll() {
         log.debug(LOG_PREFIX + "Polling ..", getTenantId(), getControllerId());
-        dmfSenderService.createOrUpdateThing(getTenantId(), getControllerId());
+        dmfSender.createOrUpdateThing(getTenantId(), getControllerId());
         log.debug(LOG_PREFIX + "Done. Create thing sent.", getTenantId(), getControllerId());
     }
 
@@ -87,6 +87,6 @@ public class DmfController {
     }
 
     public void sendFeedback(final UpdateStatus updateStatus) {
-        dmfSenderService.sendFeedback(tenantId, currentActionId, updateStatus);
+        dmfSender.sendFeedback(tenantId, currentActionId, updateStatus);
     }
 }
