@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.sdk.dmf.amqp;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.sdk.dmf.DmfProperties;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
@@ -22,11 +21,11 @@ import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 class MessageService {
 
     protected final RabbitTemplate rabbitTemplate;
-    protected final DmfProperties dmfProperties;
+    protected final AmqpProperties amqpProperties;
 
-    MessageService(final RabbitTemplate rabbitTemplate, final DmfProperties dmfProperties) {
+    MessageService(final RabbitTemplate rabbitTemplate, final AmqpProperties amqpProperties) {
         this.rabbitTemplate = rabbitTemplate;
-        this.dmfProperties = dmfProperties;
+        this.amqpProperties = amqpProperties;
     }
 
     /**

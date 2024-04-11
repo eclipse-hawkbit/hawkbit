@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.sdk.dmf;
+package org.eclipse.hawkbit.sdk.dmf.amqp;
 
 import lombok.Data;
 import lombok.ToString;
@@ -20,26 +20,28 @@ import org.springframework.stereotype.Component;
 @Data
 @ToString
 @Component
-@ConfigurationProperties(DmfProperties.CONFIGURATION_PREFIX)
-public class DmfProperties {
+@ConfigurationProperties(AmqpProperties.CONFIGURATION_PREFIX)
+public class AmqpProperties {
 
     /**
      * The prefix for this configuration.
      */
-    public static final String CONFIGURATION_PREFIX = "hawkbit.sdk.dmf";
+    public static final String CONFIGURATION_PREFIX = "hawkbit.sdk.dmf.amqp";
 
     /**
-     * The property string of ~.amqp.enabled
+     * Queue for receiving DMF messages from update server.
      */
-    public static final String CONFIGURATION_ENABLED_PROPERTY = CONFIGURATION_PREFIX + ".enabled";
+    private String receiverConnectorQueueFromSp = "sdk_receiver";
 
     /**
-     * Indicates if the AMQP interface is enabled for the device simulator.
+     * Exchange for sending DMF messages to update server.
      */
-    private boolean enabled;
+    private String senderForSpExchange = "sdk.replyTo";
 
     /**
-     * Set to true for the simulator run DMF health check.
+     * Message time to live (ttl) for the deadletter queue. Default ttl is 1 hour.
      */
-    private boolean healthCheckEnabled;
+    private int deadLetterTtl = 60_000;
+
+    private String customVhost;
 }

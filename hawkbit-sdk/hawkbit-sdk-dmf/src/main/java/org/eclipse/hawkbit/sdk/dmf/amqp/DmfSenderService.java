@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
-import org.eclipse.hawkbit.sdk.dmf.DmfProperties;
 import org.eclipse.hawkbit.sdk.dmf.UpdateInfo;
 import org.eclipse.hawkbit.sdk.dmf.UpdateStatus;
 import org.springframework.amqp.core.Message;
@@ -46,8 +45,8 @@ public class DmfSenderService extends MessageService {
     private final String spExchange;
     private final ConcurrentHashMap<String, BiConsumer<String, Message>> pingListeners = new ConcurrentHashMap<>();
 
-    public DmfSenderService(final RabbitTemplate rabbitTemplate, final DmfProperties dmfProperties) {
-        super(rabbitTemplate, dmfProperties);
+    public DmfSenderService(final RabbitTemplate rabbitTemplate, final AmqpProperties amqpProperties) {
+        super(rabbitTemplate, amqpProperties);
         spExchange = AmqpSettings.DMF_EXCHANGE;
     }
 
@@ -58,7 +57,7 @@ public class DmfSenderService extends MessageService {
         messagePropertiesForSP.setHeader(MessageHeaderKey.THING_ID, controllerId);
         messagePropertiesForSP.setHeader(MessageHeaderKey.SENDER, "hawkBit-sdk");
         messagePropertiesForSP.setContentType(MessageProperties.CONTENT_TYPE_JSON);
-        messagePropertiesForSP.setReplyTo(dmfProperties.getSenderForSpExchange());
+        messagePropertiesForSP.setReplyTo(amqpProperties.getSenderForSpExchange());
 
         sendMessage(spExchange, new Message(EMPTY_BODY, messagePropertiesForSP));
     }
@@ -129,7 +128,7 @@ public class DmfSenderService extends MessageService {
         messagePropertiesForSP.setHeader(MessageHeaderKey.TENANT, tenant);
         messagePropertiesForSP.setHeader(MessageHeaderKey.THING_ID, controllerId);
         messagePropertiesForSP.setContentType(MessageProperties.CONTENT_TYPE_JSON);
-        messagePropertiesForSP.setReplyTo(dmfProperties.getSenderForSpExchange());
+        messagePropertiesForSP.setReplyTo(amqpProperties.getSenderForSpExchange());
 
         final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
         attributeUpdate.setMode(mode);
@@ -143,7 +142,7 @@ public class DmfSenderService extends MessageService {
         messageProperties.getHeaders().put(MessageHeaderKey.TENANT, tenant);
         messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.PING.toString());
         messageProperties.setCorrelationId(correlationId);
-        messageProperties.setReplyTo(dmfProperties.getSenderForSpExchange());
+        messageProperties.setReplyTo(amqpProperties.getSenderForSpExchange());
         messageProperties.setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN);
 
         if (listener != null) {
