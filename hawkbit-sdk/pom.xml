@@ -25,6 +25,7 @@
     <modules>
         <module>hawkbit-sdk-commons</module>
         <module>hawkbit-sdk-device</module>
+        <module>hawkbit-sdk-dmf</module>
         <module>hawkbit-sdk-demo</module>
     </modules>
 </project>
