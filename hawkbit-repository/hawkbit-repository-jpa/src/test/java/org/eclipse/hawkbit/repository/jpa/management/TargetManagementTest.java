@@ -188,15 +188,15 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         // retrieve security token only with READ_TARGET_SEC_TOKEN permission
         final String securityTokenWithReadPermission = SecurityContextSwitch.runAs(
-                SecurityContextSwitch.withUser("OnlyTargetReadPermission", false, SpPermission.READ_TARGET_SEC_TOKEN),
+                SecurityContextSwitch.withUser("OnlyTargetReadPermission", SpPermission.READ_TARGET_SEC_TOKEN),
                 createdTarget::getSecurityToken);
         // retrieve security token only with ROLE_TARGET_ADMIN permission
         final String securityTokenWithTargetAdminPermission = SecurityContextSwitch.runAs(
-                SecurityContextSwitch.withUser("OnlyTargetAdminPermission", false, SpRole.TARGET_ADMIN),
+                SecurityContextSwitch.withUser("OnlyTargetAdminPermission", SpRole.TARGET_ADMIN),
                 createdTarget::getSecurityToken);
         // retrieve security token only with ROLE_TENANT_ADMIN permission
         final String securityTokenWithTenantAdminPermission = SecurityContextSwitch.runAs(
-                SecurityContextSwitch.withUser("OnlyTenantAdminPermission", false, SpRole.TENANT_ADMIN),
+                SecurityContextSwitch.withUser("OnlyTenantAdminPermission", SpRole.TENANT_ADMIN),
                 createdTarget::getSecurityToken);
 
         // retrieve security token as system code execution
@@ -204,7 +204,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         // retrieve security token without any permissions
         final String securityTokenWithoutPermission = SecurityContextSwitch
-                .runAs(SecurityContextSwitch.withUser("NoPermission", false), createdTarget::getSecurityToken);
+                .runAs(SecurityContextSwitch.withUser("NoPermission"), createdTarget::getSecurityToken);
 
         assertThat(createdTarget.getSecurityToken()).isEqualTo("token");
         assertThat(securityTokenWithReadPermission).isNotNull();

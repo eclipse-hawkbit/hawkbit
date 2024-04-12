@@ -133,7 +133,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
 
         for (int i = 0; i < tenants; i++) {
             final String tenantname = "tenant" + i;
-            SecurityContextSwitch.runAs(SecurityContextSwitch.withUserAndTenant("bumlux", tenantname, true, true, false,
+            SecurityContextSwitch.runAs(SecurityContextSwitch.withUserAndTenantAllSpPermissions("bumlux", tenantname, true, true, false,
                     SpringEvalExpressions.SYSTEM_ROLE), () -> {
                         systemManagement.getTenantMetadata();
                         if (artifactSize > 0) {
