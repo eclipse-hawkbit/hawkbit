@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -21,6 +22,7 @@ import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationV
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTenantManagementRestApi;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
@@ -51,14 +53,21 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
 
     @Override
     public ResponseEntity<Map<String, MgmtSystemTenantConfigurationValue>> getTenantConfiguration() {
-        //Load and Construct default Tenant Configuration
-        Map<String, MgmtSystemTenantConfigurationValue> tenantConfigurationValueMap = tenantConfigurationProperties.getConfigurationKeys().stream().collect(
-            Collectors.toMap(TenantConfigurationProperties.TenantConfigurationKey::getKeyName,
-            key -> loadTenantConfigurationValueBy(key.getKeyName())));
-        //Load and Add Default DistributionSetType
-        MgmtSystemTenantConfigurationValue defaultDsTypeId = loadTenantConfigurationValueBy(MgmtTenantManagementMapper.DEFAULT_DISTRIBUTION_SET_TYPE_KEY);
+        // Load and Construct default Tenant Configuration
+        final Map<String, MgmtSystemTenantConfigurationValue> tenantConfigurationValueMap = new HashMap<>();
+        tenantConfigurationProperties.getConfigurationKeys().forEach(key -> {
+            try {
+                tenantConfigurationValueMap.put(key.getKeyName(), loadTenantConfigurationValueBy(key.getKeyName()));
+            } catch (final InsufficientPermissionException e) {
+                // some values as gateway token may not be accessibly for the caller - just skip them
+            }
+        });
+
+        // Load and Add Default DistributionSetType
+        final MgmtSystemTenantConfigurationValue defaultDsTypeId = loadTenantConfigurationValueBy(MgmtTenantManagementMapper.DEFAULT_DISTRIBUTION_SET_TYPE_KEY);
         tenantConfigurationValueMap.put(MgmtTenantManagementMapper.DEFAULT_DISTRIBUTION_SET_TYPE_KEY, defaultDsTypeId);
-        //return combined TenantConfiguration and TenantMetadata
+
+        // return combined TenantConfiguration and TenantMetadata
         log.debug("getTenantConfiguration, return status {}", HttpStatus.OK);
         return ResponseEntity.ok(tenantConfigurationValueMap);
     }

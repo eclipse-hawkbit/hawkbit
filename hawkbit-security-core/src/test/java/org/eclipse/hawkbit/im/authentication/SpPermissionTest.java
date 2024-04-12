@@ -34,7 +34,7 @@ public final class SpPermissionTest {
 	@Test
 	@Description("Verify the get permission function")
 	public void testGetPermissions() {
-		final int allPermission = 18;
+		final int allPermission = 20;
 		final Collection<String> allAuthorities = SpPermission.getAllAuthorities();
 		final List<GrantedAuthority> allAuthoritiesList = PermissionUtils.createAllAuthorityList();
 		assertThat(allAuthorities).hasSize(allPermission);
