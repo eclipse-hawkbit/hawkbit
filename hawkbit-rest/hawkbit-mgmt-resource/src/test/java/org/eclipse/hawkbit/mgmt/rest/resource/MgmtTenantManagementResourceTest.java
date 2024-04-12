@@ -18,9 +18,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValueRequest;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.json.JSONObject;
@@ -60,6 +62,37 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
                 .andExpect(jsonPath("$.['" + DEFAULT_DISTRIBUTION_SET_TYPE_KEY + "']").exists())
                 .andExpect(jsonPath("$.['" + DEFAULT_DISTRIBUTION_SET_TYPE_KEY + "'].value", equalTo(getActualDefaultDsType().intValue())));
 
+    }
+
+    @Test
+    @Description("Handles GET request for receiving all tenant specific configurations depending on read gateway token permissions.")
+    void getTenantConfigurationReadGWToken() throws Exception {
+        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenant_admin", SpPermission.TENANT_CONFIGURATION), () -> {
+                    tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
+                            "123");
+                    return null;
+        });
+
+        // TODO - should be able to read with TENANT_CONFIGURATION but somehow here the role hierarchy doesn't play
+        // checked in mgmt / update server runtime PreAuthorizeEnabledTest
+        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenant_admin", SpPermission.READ_TENANT_CONFIGURATION, SpPermission.READ_GATEWAY_SEC_TOKEN), () -> {
+            mvc.perform(get(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs"))
+                    .andDo(MockMvcResultPrinter.print())
+                    .andDo(m -> System.out.println("-> 1: " + m.getResponse().getContentAsString()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.['" + AUTHENTICATION_GATEWAYTOKEN_KEY + "']").exists())
+                    .andExpect(jsonPath("$.['" + AUTHENTICATION_GATEWAYTOKEN_KEY + "'].value", equalTo("123")));
+            return null;
+        });
+
+        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenant_read", SpPermission.READ_TENANT_CONFIGURATION), () -> {
+            mvc.perform(get(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs"))
+                    .andDo(MockMvcResultPrinter.print())
+                    .andDo(m -> System.out.println("-> 2: " + m.getResponse().getContentAsString()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.['" + AUTHENTICATION_GATEWAYTOKEN_KEY + "']").doesNotExist());
+            return null;
+        });
     }
 
     @Test

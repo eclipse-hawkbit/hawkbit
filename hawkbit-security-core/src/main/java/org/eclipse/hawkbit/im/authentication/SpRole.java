@@ -50,7 +50,7 @@ public final class SpRole {
 
     public static final String TENANT_CONFIGURATION_HIERARCHY =
             SpPermission.TENANT_CONFIGURATION + IMPLIES + SpPermission.READ_TENANT_CONFIGURATION + LINE_BREAK +
-                    SpPermission.TENANT_CONFIGURATION + IMPLIES + SpPermission.READ_GATEWAY_SEC_TOKEN;
+                    SpPermission.TENANT_CONFIGURATION + IMPLIES + SpPermission.READ_GATEWAY_SEC_TOKEN + LINE_BREAK;
 
     public static final String TENANT_ADMIN = "ROLE_TENANT_ADMIN";
     public static final String TENANT_ADMIN_HIERARCHY =
