@@ -63,22 +63,6 @@ public interface TenantConfigurationManagement {
     <T extends Serializable> Map<String, TenantConfigurationValue<T>>  addOrUpdateConfiguration(Map<String, T> configurations);
 
     /**
-     * Build the tenant configuration by the given key
-     * 
-     * @param configurationKey
-     *            the key
-     * @param propertyType
-     *            the property type
-     * @param tenantConfiguration
-     *            the configuration
-     * @return <null> if no default value is set and no database value available
-     *         or returns the tenant configuration value
-     */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
-    <T extends Serializable> TenantConfigurationValue<T> buildTenantConfigurationValueByKey(
-            TenantConfigurationKey configurationKey, Class<T> propertyType, TenantConfiguration tenantConfiguration);
-
-    /**
      * Deletes a specific configuration for the current tenant. Does nothing in
      * case there is no tenant specific configuration value.
      *
@@ -106,7 +90,7 @@ public interface TenantConfigurationManagement {
      *             if the property cannot be converted to the given
      *             {@code propertyType}
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION_READ)
     <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(String configurationKeyName);
 
     /**
@@ -132,7 +116,7 @@ public interface TenantConfigurationManagement {
      *             if the property cannot be converted to the given
      *             {@code propertyType}
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION_READ)
     <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(String configurationKeyName,
             Class<T> propertyType);
 
@@ -156,6 +140,6 @@ public interface TenantConfigurationManagement {
      *             if the property cannot be converted to the given
      *             {@code propertyType}
      */
-    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION_READ)
     <T> T getGlobalConfigurationValue(String configurationKeyName, Class<T> propertyType);
 }
