@@ -47,6 +47,7 @@ public abstract class MgmtBaseEntity extends RepresentationModel<MgmtBaseEntity>
     @JsonProperty
     @Schema(description = "Entity was last modified at (timestamp UTC in milliseconds)",
             accessMode = Schema.AccessMode.READ_ONLY, example = "1691065906407")
+    @EqualsAndHashCode.Exclude
     private Long lastModifiedAt;
 
     /**
