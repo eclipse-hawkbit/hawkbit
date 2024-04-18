@@ -78,6 +78,7 @@ public class MgmtSystemTenantConfigurationValue extends RepresentationModel<Mgmt
     private boolean global = true;
 
     @Schema(description = "Entity was last modified at (timestamp UTC in milliseconds)", example = "1623085150")
+    @EqualsAndHashCode.Exclude
     private Long lastModifiedAt;
 
     @Schema(description = "Entity was last modified by (User, AMQP-Controller, anonymous etc.)",
