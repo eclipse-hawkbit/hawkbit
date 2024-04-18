@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties;
 import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties.User;
-import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.InMemoryUserAuthoritiesResolver;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
@@ -97,16 +96,6 @@ public class SecurityAutoConfiguration {
                     securityProperties.getUser().getRoles());
         }
         return new InMemoryUserAuthoritiesResolver(usersToPermissions);
-    }
-
-    /**
-     * @return permission service to check if current user has the necessary
-     *         permissions.
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public PermissionService permissionService() {
-        return new PermissionService();
     }
 
     /**
