@@ -46,5 +46,5 @@ The delete process which is performed, when there are historical connections to 
 Just in case there are no connections to Distribution Sets and targets the server will perform a HardDelete. This process deletes all stored data, including all meta information.
 
 {{% note %}}
-In case of of a SoftDelete the unique constraints are still in place, i.e. you cannot create an entity with the same name/key. This constraint might be removed in future versions because of the impact on the user experience (i.e. he does not see the soft deleted module but cannot create a new one).
+In case of a SoftDelete the unique constraints are still in place, i.e. you cannot create an entity with the same name/key. This constraint might be removed in future versions because of the impact on the user experience (i.e. he does not see the soft deleted module but cannot create a new one).
 {{% /note %}}
