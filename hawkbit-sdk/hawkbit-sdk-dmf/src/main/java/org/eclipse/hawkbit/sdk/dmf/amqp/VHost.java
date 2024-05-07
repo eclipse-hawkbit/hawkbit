@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.sdk.dmf.amqp;
 
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.C;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -27,15 +26,12 @@ import org.springframework.amqp.core.MessageListener;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.lang.Nullable;
-import org.springframework.messaging.handler.annotation.Header;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -57,7 +53,7 @@ public class VHost extends DmfSender implements MessageListener {
 
     private final Set<Long> openActions = Collections.synchronizedSet(new HashSet<>());
 
-    VHost(final ConnectionFactory connectionFactory, final AmqpProperties amqpProperties) {
+    public VHost(final ConnectionFactory connectionFactory, final AmqpProperties amqpProperties, final boolean createQueues) {
         super(new RabbitTemplate(connectionFactory), amqpProperties);
 
         // It is necessary to define rabbitTemplate as a Bean and set
@@ -68,16 +64,18 @@ public class VHost extends DmfSender implements MessageListener {
         // SimpleMessageConverter is used instead per default.
         rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
 
-        final RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
-        final Queue queue = QueueBuilder.nonDurable(amqpProperties.getReceiverConnectorQueueFromSp()).autoDelete()
-                .withArguments(Map.of(
-                        "x-message-ttl", Duration.ofDays(1).toMillis(),
-                        "x-max-length", 100_000))
-                .build();
-        rabbitAdmin.declareQueue(queue);
-        final FanoutExchange exchange = new FanoutExchange(amqpProperties.getSenderForSpExchange(), false, true);
-        rabbitAdmin.declareExchange(exchange);
-        rabbitAdmin.declareBinding(BindingBuilder.bind(queue).to(exchange));
+        if (createQueues) {
+            final RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
+            final Queue queue = QueueBuilder.nonDurable(amqpProperties.getReceiverConnectorQueueFromSp()).autoDelete()
+                    .withArguments(Map.of(
+                            "x-message-ttl", Duration.ofDays(1).toMillis(),
+                            "x-max-length", 100_000))
+                    .build();
+            rabbitAdmin.declareQueue(queue);
+            final FanoutExchange exchange = new FanoutExchange(amqpProperties.getSenderForSpExchange(), false, true);
+            rabbitAdmin.declareExchange(exchange);
+            rabbitAdmin.declareBinding(BindingBuilder.bind(queue).to(exchange));
+        }
         
         container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);

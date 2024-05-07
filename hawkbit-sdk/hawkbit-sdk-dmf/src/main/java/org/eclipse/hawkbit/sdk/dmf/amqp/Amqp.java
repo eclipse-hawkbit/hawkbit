@@ -10,10 +10,8 @@
 package org.eclipse.hawkbit.sdk.dmf.amqp;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.sdk.Tenant;
 import org.eclipse.hawkbit.sdk.Tenant.DMF;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.util.ObjectUtils;
 
@@ -43,7 +41,8 @@ public class Amqp {
                 (rabbitProperties.getVirtualHost() == null ? "/" :rabbitProperties.getVirtualHost()) :
                 dmf.getVirtualHost();
         return vHosts.computeIfAbsent(vHost, vh -> {
-            final CachingConnectionFactory connectionFactory = new CachingConnectionFactory(rabbitProperties.getHost());
+            final CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
+            connectionFactory.setUri(rabbitProperties.getHost());
             connectionFactory.setUsername(
                     dmf == null || ObjectUtils.isEmpty(dmf.getUsername()) ?
                             rabbitProperties.getUsername() : dmf.getUsername());
@@ -51,7 +50,8 @@ public class Amqp {
                     dmf == null || ObjectUtils.isEmpty(dmf.getPassword()) ?
                             rabbitProperties.getPassword() : dmf.getPassword());
             connectionFactory.setVirtualHost(vHost);
-            return new VHost(connectionFactory, amqpProperties);
+            connectionFactory.setPort(rabbitProperties.getPort());
+            return new VHost(connectionFactory, amqpProperties, true);
         });
     }
 }

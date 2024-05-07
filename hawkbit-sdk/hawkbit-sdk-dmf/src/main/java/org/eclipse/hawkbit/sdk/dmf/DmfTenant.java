@@ -42,6 +42,13 @@ public class DmfTenant {
         vHost.register(this);
     }
 
+    public DmfTenant(final Tenant tenant, final Amqp amqp, final VHost vHost) {
+        this.tenant = tenant;
+        this.amqp = amqp;
+        this.vHost = vHost;
+        vHost.register(this);
+    }
+
     public void destroy() {
         controllers.values().forEach(DmfController::stop);
         controllers.clear();
