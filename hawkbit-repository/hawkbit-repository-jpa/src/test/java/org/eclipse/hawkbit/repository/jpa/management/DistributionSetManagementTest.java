@@ -1017,6 +1017,37 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Locked a DS could be hard deleted.")
+    void deleteUnassignedLockedDistributionSet() {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
+        distributionSetManagement.lock(distributionSet.getId());
+        assertThat(
+                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked)
+                        .orElse(false))
+                .isTrue();
+
+        distributionSetManagement.delete(distributionSet.getId());
+        assertThat(distributionSetManagement.get(distributionSet.getId())).isEmpty();
+    }
+
+    @Test
+    @Description("Locked an assigned DS could be soft deleted.")
+    void deleteAssignedLockedDistributionSet() {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
+        distributionSetManagement.lock(distributionSet.getId());
+        assertThat(
+                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked)
+                        .orElse(false))
+                .isTrue();
+
+        final Target target = testdataFactory.createTarget();
+        assignDistributionSet(distributionSet.getId(), target.getControllerId());
+
+        distributionSetManagement.delete(distributionSet.getId());
+        assertThat(distributionSetManagement.getOrElseThrowException(distributionSet.getId()).isDeleted()).isTrue();
+    }
+
+    @Test
     @Description("Unlocks a DS.")
     void unlockDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
