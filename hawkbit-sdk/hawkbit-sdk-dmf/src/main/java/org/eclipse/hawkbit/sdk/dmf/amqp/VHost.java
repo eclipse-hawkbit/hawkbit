@@ -53,6 +53,10 @@ public class VHost extends DmfSender implements MessageListener {
 
     private final Set<Long> openActions = Collections.synchronizedSet(new HashSet<>());
 
+    public VHost(final ConnectionFactory connectionFactory, final AmqpProperties amqpProperties) {
+        this(connectionFactory, amqpProperties, true);
+    }
+
     public VHost(final ConnectionFactory connectionFactory, final AmqpProperties amqpProperties, final boolean createQueues) {
         super(new RabbitTemplate(connectionFactory), amqpProperties);
 

@@ -35,17 +35,13 @@ public class DmfTenant {
     private final VHost vHost;
 
     public DmfTenant(final Tenant tenant, final Amqp amqp) {
-        this.tenant = tenant;
-        this.amqp = amqp;
-        this.vHost = amqp.getVhost(tenant.getDmf());
-        // register as tenant in order received events to access the tenant's devices
-        vHost.register(this);
+        this(tenant, amqp, null);
     }
 
     public DmfTenant(final Tenant tenant, final Amqp amqp, final VHost vHost) {
         this.tenant = tenant;
         this.amqp = amqp;
-        this.vHost = vHost;
+        this.vHost = vHost != null ? vHost : amqp.getVhost(tenant.getDmf());
         vHost.register(this);
     }
 
