@@ -35,14 +35,14 @@ public class DmfTenant {
     private final VHost vHost;
 
     public DmfTenant(final Tenant tenant, final Amqp amqp) {
-        this(tenant, amqp, null);
+        this(tenant, amqp, true);
     }
 
-    public DmfTenant(final Tenant tenant, final Amqp amqp, final VHost vHost) {
+    public DmfTenant(final Tenant tenant, final Amqp amqp, final boolean isEnvLocal) {
         this.tenant = tenant;
         this.amqp = amqp;
-        this.vHost = vHost != null ? vHost : amqp.getVhost(tenant.getDmf());
-        vHost.register(this);
+        this.vHost = amqp.getVhost(tenant.getDmf(), isEnvLocal);
+        this.vHost.register(this);
     }
 
     public void destroy() {

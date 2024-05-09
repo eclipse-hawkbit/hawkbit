@@ -103,6 +103,7 @@ public class VHost extends DmfSender implements MessageListener {
         final String controllerId = (String)message.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID);
         final String type = (String)message.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE);
 
+        log.info("Message received for target {}, value : {}", controllerId, message.toString());
         switch (MessageType.valueOf(type)) {
             case EVENT: {
                 checkContentTypeJson(message);
@@ -143,8 +144,7 @@ public class VHost extends DmfSender implements MessageListener {
         case CONFIRM:
             handleConfirmation(message, thingId);
             break;
-        case DOWNLOAD_AND_INSTALL:
-        case DOWNLOAD:
+        case DOWNLOAD_AND_INSTALL, DOWNLOAD:
             handleUpdateProcess(message, thingId, eventTopic);
             break;
         case CANCEL_DOWNLOAD:
@@ -207,7 +207,7 @@ public class VHost extends DmfSender implements MessageListener {
         }
     }
 
-    private void handleAttributeUpdateRequest(final Message message, final String controllerId) {
+    public void handleAttributeUpdateRequest(final Message message, final String controllerId) {
         final String tenantId = getTenant(message);
         Optional.ofNullable(dmfTenants.get(tenantId))
                 .flatMap(dmfTenant -> dmfTenant.getController(controllerId))
@@ -218,7 +218,7 @@ public class VHost extends DmfSender implements MessageListener {
     private static String getTenant(final Message message) {
         final MessageProperties messageProperties = message.getMessageProperties();
         final Map<String, Object> headers = messageProperties.getHeaders();
-        return (String) headers.get(MessageHeaderKey.TENANT);
+        return ((String) headers.get(MessageHeaderKey.TENANT)).toLowerCase();
     }
 
     private void handleCancelDownloadAction(final Message message, final String thingId) {
@@ -233,10 +233,11 @@ public class VHost extends DmfSender implements MessageListener {
         openActions.remove(actionId);
     }
 
-    private void handleUpdateProcess(final Message message, final String controllerId, final EventTopic actionType) {
+    public void handleUpdateProcess(final Message message, final String controllerId, final EventTopic actionType) {
         final String tenant = getTenant(message);
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(message,
                 DmfDownloadAndUpdateRequest.class);
+        dmfTenants.get(tenant).getController(controllerId).get().setCurrentActionId(downloadAndUpdateRequest.getActionId());
         processUpdate(tenant, controllerId, actionType, downloadAndUpdateRequest);
     }
 
