@@ -39,7 +39,14 @@ public class Amqp {
         vHosts.values().forEach(VHost::stop);
     }
 
-    public ConnectionFactory getConnectionFactory(final DMF dmf) {
+    public VHost getVhost(final DMF dmf, final boolean isEnvLocal) {
+        final String vHost = dmf == null || ObjectUtils.isEmpty(dmf.getVirtualHost()) ?
+                (rabbitProperties.getVirtualHost() == null ? "/" :rabbitProperties.getVirtualHost()) :
+                dmf.getVirtualHost();
+        return vHosts.computeIfAbsent(vHost, vh -> new VHost(getConnectionFactory(dmf), amqpProperties, isEnvLocal));
+    }
+
+    private ConnectionFactory getConnectionFactory(final DMF dmf) {
         final String vHost = dmf == null || ObjectUtils.isEmpty(dmf.getVirtualHost()) ?
                 (rabbitProperties.getVirtualHost() == null ? "/" :rabbitProperties.getVirtualHost()) :
                 dmf.getVirtualHost();
@@ -62,12 +69,5 @@ public class Amqp {
                         rabbitProperties.getPassword() : dmf.getPassword());
         connectionFactory.setVirtualHost(vHost);
         return connectionFactory;
-    }
-
-    public VHost getVhost(final DMF dmf, final boolean isEnvLocal) {
-        final String vHost = dmf == null || ObjectUtils.isEmpty(dmf.getVirtualHost()) ?
-                (rabbitProperties.getVirtualHost() == null ? "/" :rabbitProperties.getVirtualHost()) :
-                dmf.getVirtualHost();
-        return vHosts.computeIfAbsent(vHost, vh -> new VHost(getConnectionFactory(dmf), amqpProperties, isEnvLocal));
     }
 }
