@@ -43,14 +43,10 @@ public class Amqp {
         final String vHost = dmf == null || ObjectUtils.isEmpty(dmf.getVirtualHost()) ?
                 (rabbitProperties.getVirtualHost() == null ? "/" :rabbitProperties.getVirtualHost()) :
                 dmf.getVirtualHost();
-        return vHosts.computeIfAbsent(vHost, vh -> new VHost(getConnectionFactory(dmf), amqpProperties, isEnvLocal));
+        return vHosts.computeIfAbsent(vHost, vh -> new VHost(getConnectionFactory(dmf, vHost), amqpProperties, isEnvLocal));
     }
 
-    private ConnectionFactory getConnectionFactory(final DMF dmf) {
-        final String vHost = dmf == null || ObjectUtils.isEmpty(dmf.getVirtualHost()) ?
-                (rabbitProperties.getVirtualHost() == null ? "/" :rabbitProperties.getVirtualHost()) :
-                dmf.getVirtualHost();
-
+    private ConnectionFactory getConnectionFactory(final DMF dmf, final String vHost) {
         final CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
         connectionFactory.setHost(rabbitProperties.getHost());
         connectionFactory.setPort(rabbitProperties.determinePort());

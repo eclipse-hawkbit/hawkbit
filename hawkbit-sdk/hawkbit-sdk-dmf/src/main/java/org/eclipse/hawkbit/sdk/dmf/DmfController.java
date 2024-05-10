@@ -85,24 +85,25 @@ public class DmfController {
     }
 
     public void processUpdate(final EventTopic actionType, final DmfDownloadAndUpdateRequest updateRequest) {
-        log.info("Processing update for {} actionId : {}", controllerId, updateRequest.getActionId());
+        log.info(LOG_PREFIX + "Processing update for action {} .", getTenantId(), controllerId, updateRequest.getActionId());
         updateHandler.getUpdateProcessor(this, actionType, updateRequest).run();
-        updateRequest.getSoftwareModules().forEach(sm -> {
-            updateAttributes(sm.getModuleId().toString(), sm.getModuleVersion());
-        });
     }
 
     public void sendFeedback(final UpdateStatus updateStatus) {
-        log.info("Sending {} for controller : {} action : {}", updateStatus.status(), controllerId, currentActionId);
+        log.info(LOG_PREFIX + "Sending UPDATE_ACTION_STATUS for action : {}", getTenantId(), controllerId, currentActionId);
         dmfSender.sendFeedback(tenantId, currentActionId, updateStatus);
     }
 
     public void sendUpdateAttributes() {
-        log.info("Sending UPDATE_ATTRIBUTES for controller {}", controllerId);
+        log.info(LOG_PREFIX + "Sending UPDATE_ATTRIBUTES", getTenantId(), controllerId);
         dmfSender.updateAttributes(tenantId, controllerId, DmfUpdateMode.MERGE, attributes);
     }
 
-    public void updateAttributes(final String key, final String value) {
+    public void setAttribute(final String key, final String value) {
         this.attributes.put(key, value);
+    }
+
+    public void removeAttribute(final String key) {
+        this.attributes.remove(key);
     }
 }

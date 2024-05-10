@@ -97,7 +97,6 @@ public interface UpdateHandler {
 
         @Override
         public void run() {
-            log.info("Sending feedback for {}", dmfController.getControllerId());
             dmfController.sendFeedback(new UpdateStatus(DmfActionStatus.RUNNING, List.of("Update begin ...")));
 
             final List<DmfSoftwareModule> modules = updateRequest.getSoftwareModules();
