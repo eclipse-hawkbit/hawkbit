@@ -39,11 +39,11 @@ public class Amqp {
         vHosts.values().forEach(VHost::stop);
     }
 
-    public VHost getVhost(final DMF dmf, final boolean isEnvLocal) {
+    public VHost getVhost(final DMF dmf, final boolean initVHost) {
         final String vHost = dmf == null || ObjectUtils.isEmpty(dmf.getVirtualHost()) ?
                 (rabbitProperties.getVirtualHost() == null ? "/" :rabbitProperties.getVirtualHost()) :
                 dmf.getVirtualHost();
-        return vHosts.computeIfAbsent(vHost, vh -> new VHost(getConnectionFactory(dmf, vHost), amqpProperties, isEnvLocal));
+        return vHosts.computeIfAbsent(vHost, vh -> new VHost(getConnectionFactory(dmf, vHost), amqpProperties, initVHost));
     }
 
     private ConnectionFactory getConnectionFactory(final DMF dmf, final String vHost) {

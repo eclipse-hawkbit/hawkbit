@@ -57,7 +57,7 @@ public class VHost extends DmfSender implements MessageListener {
         this(connectionFactory, amqpProperties, true);
     }
 
-    public VHost(final ConnectionFactory connectionFactory, final AmqpProperties amqpProperties, final boolean createQueues) {
+    public VHost(final ConnectionFactory connectionFactory, final AmqpProperties amqpProperties, final boolean initVHost) {
         super(new RabbitTemplate(connectionFactory), amqpProperties);
 
         // It is necessary to define rabbitTemplate as a Bean and set
@@ -68,7 +68,7 @@ public class VHost extends DmfSender implements MessageListener {
         // SimpleMessageConverter is used instead per default.
         rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
 
-        if (createQueues) {
+        if (initVHost) {
             final RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
             final Queue queue = QueueBuilder.nonDurable(amqpProperties.getReceiverConnectorQueueFromSp()).autoDelete()
                     .withArguments(Map.of(
