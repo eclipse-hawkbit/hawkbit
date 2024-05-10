@@ -207,7 +207,7 @@ public class VHost extends DmfSender implements MessageListener {
         }
     }
 
-    private void handleAttributeUpdateRequest(final Message message, final String controllerId) {
+    protected void handleAttributeUpdateRequest(final Message message, final String controllerId) {
         final String tenantId = getTenant(message);
         Optional.ofNullable(dmfTenants.get(tenantId))
                 .flatMap(dmfTenant -> dmfTenant.getController(controllerId))
@@ -221,7 +221,7 @@ public class VHost extends DmfSender implements MessageListener {
         return ((String) headers.get(MessageHeaderKey.TENANT)).toLowerCase();
     }
 
-    private void handleCancelDownloadAction(final Message message, final String thingId) {
+    protected void handleCancelDownloadAction(final Message message, final String thingId) {
         final String tenant = getTenant(message);
         final Long actionId = extractActionIdFrom(message);
 
