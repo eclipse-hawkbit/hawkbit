@@ -10,13 +10,14 @@
 package org.eclipse.hawkbit.sdk.dmf.amqp;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.sdk.Tenant;
 import org.eclipse.hawkbit.sdk.Tenant.DMF;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.util.ObjectUtils;
 
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -38,20 +39,31 @@ public class Amqp {
         vHosts.values().forEach(VHost::stop);
     }
 
-    public VHost getVhost(final DMF dmf) {
+    public VHost getVhost(final DMF dmf, final boolean initVHost) {
         final String vHost = dmf == null || ObjectUtils.isEmpty(dmf.getVirtualHost()) ?
                 (rabbitProperties.getVirtualHost() == null ? "/" :rabbitProperties.getVirtualHost()) :
                 dmf.getVirtualHost();
-        return vHosts.computeIfAbsent(vHost, vh -> {
-            final CachingConnectionFactory connectionFactory = new CachingConnectionFactory(rabbitProperties.getHost());
-            connectionFactory.setUsername(
-                    dmf == null || ObjectUtils.isEmpty(dmf.getUsername()) ?
-                            rabbitProperties.getUsername() : dmf.getUsername());
-            connectionFactory.setPassword(
-                    dmf == null || ObjectUtils.isEmpty(dmf.getPassword()) ?
-                            rabbitProperties.getPassword() : dmf.getPassword());
-            connectionFactory.setVirtualHost(vHost);
-            return new VHost(connectionFactory, amqpProperties);
-        });
+        return vHosts.computeIfAbsent(vHost, vh -> new VHost(getConnectionFactory(dmf, vHost), amqpProperties, initVHost));
+    }
+
+    private ConnectionFactory getConnectionFactory(final DMF dmf, final String vHost) {
+        final CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
+        connectionFactory.setHost(rabbitProperties.getHost());
+        connectionFactory.setPort(rabbitProperties.determinePort());
+        if (rabbitProperties.getSsl().determineEnabled()) {
+            try {
+                connectionFactory.getRabbitConnectionFactory().useSslProtocol();
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        connectionFactory.setUsername(
+                dmf == null || ObjectUtils.isEmpty(dmf.getUsername()) ?
+                        rabbitProperties.getUsername() : dmf.getUsername());
+        connectionFactory.setPassword(
+                dmf == null || ObjectUtils.isEmpty(dmf.getPassword()) ?
+                        rabbitProperties.getPassword() : dmf.getPassword());
+        connectionFactory.setVirtualHost(vHost);
+        return connectionFactory;
     }
 }

@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.sdk.dmf.amqp;
 
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.C;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -27,15 +26,12 @@ import org.springframework.amqp.core.MessageListener;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.lang.Nullable;
-import org.springframework.messaging.handler.annotation.Header;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -57,7 +53,11 @@ public class VHost extends DmfSender implements MessageListener {
 
     private final Set<Long> openActions = Collections.synchronizedSet(new HashSet<>());
 
-    VHost(final ConnectionFactory connectionFactory, final AmqpProperties amqpProperties) {
+    public VHost(final ConnectionFactory connectionFactory, final AmqpProperties amqpProperties) {
+        this(connectionFactory, amqpProperties, true);
+    }
+
+    public VHost(final ConnectionFactory connectionFactory, final AmqpProperties amqpProperties, final boolean initVHost) {
         super(new RabbitTemplate(connectionFactory), amqpProperties);
 
         // It is necessary to define rabbitTemplate as a Bean and set
@@ -68,16 +68,18 @@ public class VHost extends DmfSender implements MessageListener {
         // SimpleMessageConverter is used instead per default.
         rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
 
-        final RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
-        final Queue queue = QueueBuilder.nonDurable(amqpProperties.getReceiverConnectorQueueFromSp()).autoDelete()
-                .withArguments(Map.of(
-                        "x-message-ttl", Duration.ofDays(1).toMillis(),
-                        "x-max-length", 100_000))
-                .build();
-        rabbitAdmin.declareQueue(queue);
-        final FanoutExchange exchange = new FanoutExchange(amqpProperties.getSenderForSpExchange(), false, true);
-        rabbitAdmin.declareExchange(exchange);
-        rabbitAdmin.declareBinding(BindingBuilder.bind(queue).to(exchange));
+        if (initVHost) {
+            final RabbitAdmin rabbitAdmin = new RabbitAdmin(connectionFactory);
+            final Queue queue = QueueBuilder.nonDurable(amqpProperties.getReceiverConnectorQueueFromSp()).autoDelete()
+                    .withArguments(Map.of(
+                            "x-message-ttl", Duration.ofDays(1).toMillis(),
+                            "x-max-length", 100_000))
+                    .build();
+            rabbitAdmin.declareQueue(queue);
+            final FanoutExchange exchange = new FanoutExchange(amqpProperties.getSenderForSpExchange(), false, true);
+            rabbitAdmin.declareExchange(exchange);
+            rabbitAdmin.declareBinding(BindingBuilder.bind(queue).to(exchange));
+        }
         
         container = new SimpleMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
@@ -101,6 +103,7 @@ public class VHost extends DmfSender implements MessageListener {
         final String controllerId = (String)message.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID);
         final String type = (String)message.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE);
 
+        log.info("Message received for target {}, value : {}", controllerId, message.toString());
         switch (MessageType.valueOf(type)) {
             case EVENT: {
                 checkContentTypeJson(message);
@@ -141,8 +144,7 @@ public class VHost extends DmfSender implements MessageListener {
         case CONFIRM:
             handleConfirmation(message, thingId);
             break;
-        case DOWNLOAD_AND_INSTALL:
-        case DOWNLOAD:
+        case DOWNLOAD_AND_INSTALL, DOWNLOAD:
             handleUpdateProcess(message, thingId, eventTopic);
             break;
         case CANCEL_DOWNLOAD:
@@ -205,7 +207,7 @@ public class VHost extends DmfSender implements MessageListener {
         }
     }
 
-    private void handleAttributeUpdateRequest(final Message message, final String controllerId) {
+    protected void handleAttributeUpdateRequest(final Message message, final String controllerId) {
         final String tenantId = getTenant(message);
         Optional.ofNullable(dmfTenants.get(tenantId))
                 .flatMap(dmfTenant -> dmfTenant.getController(controllerId))
@@ -216,10 +218,10 @@ public class VHost extends DmfSender implements MessageListener {
     private static String getTenant(final Message message) {
         final MessageProperties messageProperties = message.getMessageProperties();
         final Map<String, Object> headers = messageProperties.getHeaders();
-        return (String) headers.get(MessageHeaderKey.TENANT);
+        return ((String) headers.get(MessageHeaderKey.TENANT)).toLowerCase();
     }
 
-    private void handleCancelDownloadAction(final Message message, final String thingId) {
+    protected void handleCancelDownloadAction(final Message message, final String thingId) {
         final String tenant = getTenant(message);
         final Long actionId = extractActionIdFrom(message);
 
@@ -231,10 +233,11 @@ public class VHost extends DmfSender implements MessageListener {
         openActions.remove(actionId);
     }
 
-    private void handleUpdateProcess(final Message message, final String controllerId, final EventTopic actionType) {
+    protected void handleUpdateProcess(final Message message, final String controllerId, final EventTopic actionType) {
         final String tenant = getTenant(message);
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(message,
                 DmfDownloadAndUpdateRequest.class);
+        dmfTenants.get(tenant).getController(controllerId).get().setCurrentActionId(downloadAndUpdateRequest.getActionId());
         processUpdate(tenant, controllerId, actionType, downloadAndUpdateRequest);
     }
 
