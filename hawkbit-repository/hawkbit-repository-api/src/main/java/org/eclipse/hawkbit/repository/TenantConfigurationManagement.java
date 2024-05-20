@@ -10,11 +10,18 @@
 package org.eclipse.hawkbit.repository;
 
 import java.io.Serializable;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.model.TenantConfiguration;
+import org.eclipse.hawkbit.repository.model.PollStatus;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
+import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
 import org.springframework.core.convert.ConversionFailedException;
@@ -142,4 +149,26 @@ public interface TenantConfigurationManagement {
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION_READ)
     <T> T getGlobalConfigurationValue(String configurationKeyName, Class<T> propertyType);
+
+    // PreAuthorize for TENANT_CONFIGURATION_READ won't be applied but actually we want just read target
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    default Function<Target, PollStatus> pollStatusResolver() {
+        final Duration pollTime = DurationHelper.formattedStringToDuration(
+                getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
+        final Duration overdueTime = DurationHelper.formattedStringToDuration(
+                getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class)
+                        .getValue());
+        return target -> {
+            final Long lastTargetQuery = target.getLastTargetQuery();
+            if (lastTargetQuery == null) {
+                return null;
+            }
+            final LocalDateTime currentDate = LocalDateTime.now();
+            final LocalDateTime lastPollDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastTargetQuery),
+                    ZoneId.systemDefault());
+            final LocalDateTime nextPollDate = lastPollDate.plus(pollTime);
+            final LocalDateTime overdueDate = nextPollDate.plus(overdueTime);
+            return new PollStatus(lastPollDate, nextPollDate, overdueDate, currentDate);
+        };
+    }
 }
