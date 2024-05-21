@@ -54,7 +54,7 @@ public class Amqp {
             try {
                 connectionFactory.getRabbitConnectionFactory().useSslProtocol();
             } catch (NoSuchAlgorithmException | KeyManagementException e) {
-                throw new RuntimeException(e);
+                log.error("Failed to enable ssl ... Reason : ", e);
             }
         }
         connectionFactory.setUsername(

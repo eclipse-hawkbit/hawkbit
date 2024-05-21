@@ -42,8 +42,8 @@ public class DmfController {
     // configuration
     private final boolean downloadAuthenticationEnabled;
 
-    @Getter @Setter
-    private volatile Map<String, String> attributes = new HashMap<>();
+    @Getter
+    private final Map<String, String> attributes = new HashMap<>();
 
     @Setter
     private volatile Long currentActionId;
