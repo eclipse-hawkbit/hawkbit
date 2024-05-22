@@ -13,9 +13,12 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.USER_CONFIRMATION_ENABLED;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.model.PollStatus;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 
 import java.io.Serializable;
+import java.util.function.Function;
 
 /**
  * A collection of static helper methods for the tenant configuration
@@ -66,5 +69,9 @@ public final class TenantConfigHelper {
      */
     public boolean isConfirmationFlowEnabled() {
         return getConfigValue(USER_CONFIRMATION_ENABLED, Boolean.class);
+    }
+
+    public Function<Target, PollStatus> pollStatusResolver() {
+        return tenantConfigurationManagement.pollStatusResolver();
     }
 }

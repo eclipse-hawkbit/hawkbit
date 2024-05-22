@@ -17,7 +17,6 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -99,8 +98,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<MgmtTarget> getTarget(@PathVariable("targetId") final String targetId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
         // to single response include poll status
-        final MgmtTarget response = MgmtTargetMapper.toResponse(findTarget, tenantConfigHelper);
-        MgmtTargetMapper.addPollStatus(findTarget, response);
+        final MgmtTarget response = MgmtTargetMapper.toResponse(findTarget, tenantConfigHelper, null);
         MgmtTargetMapper.addTargetLinks(response);
 
         return ResponseEntity.ok(response);
@@ -172,8 +170,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         }
 
-        final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget, tenantConfigHelper);
-        MgmtTargetMapper.addPollStatus(updateTarget, response);
+        final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget, tenantConfigHelper, null);
         MgmtTargetMapper.addTargetLinks(response);
 
         return ResponseEntity.ok(response);

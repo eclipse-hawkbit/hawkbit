@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
@@ -114,8 +115,8 @@ public final class MgmtTargetMapper {
         return response;
     }
 
-    static void addPollStatus(final Target target, final MgmtTarget targetRest) {
-        final PollStatus pollStatus = target.getPollStatus();
+    private static void addPollStatus(final Target target, final MgmtTarget targetRest, final Function<Target, PollStatus> pollStatusResolver) {
+        final PollStatus pollStatus = pollStatusResolver == null ? target.getPollStatus() : pollStatusResolver.apply(target);
         if (pollStatus != null) {
             final MgmtPollStatus pollStatusRest = new MgmtPollStatus();
             pollStatusRest.setLastRequestAt(
@@ -139,8 +140,9 @@ public final class MgmtTargetMapper {
             return Collections.emptyList();
         }
 
+        final Function<Target, PollStatus> pollStatusResolver = configHelper.pollStatusResolver();
         return new ResponseList<>(
-                targets.stream().map(target -> toResponse(target, configHelper)).collect(Collectors.toList()));
+                targets.stream().map(target -> toResponse(target, configHelper, pollStatusResolver)).collect(Collectors.toList()));
     }
 
     /**
@@ -150,7 +152,7 @@ public final class MgmtTargetMapper {
      *            the target
      * @return the response
      */
-    public static MgmtTarget toResponse(final Target target, final TenantConfigHelper configHelper) {
+    public static MgmtTarget toResponse(final Target target, final TenantConfigHelper configHelper, final Function<Target, PollStatus> pollStatusResolver) {
         if (target == null) {
             return null;
         }
@@ -197,6 +199,8 @@ public final class MgmtTargetMapper {
 
         targetRest.add(
                 linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel().expand());
+
+        addPollStatus(target, targetRest, pollStatusResolver == null ? configHelper.pollStatusResolver() : pollStatusResolver);
 
         return targetRest;
     }
