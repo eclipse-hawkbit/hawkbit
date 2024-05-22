@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.rest.util.FileStreamingFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -248,7 +249,7 @@ public class ResponseExceptionHandler {
         final List<Throwable> throwables = ExceptionUtils.getThrowableList(ex);
         final Throwable responseCause = throwables.get(throwables.size() - 1);
 
-        if (responseCause.getMessage().isEmpty()) {
+        if (ObjectUtils.isEmpty(responseCause.getMessage())) {
             log.warn("Request {} lead to MultipartException without root cause message:\n{}", request.getRequestURL(),
                     ex.getStackTrace());
         }
