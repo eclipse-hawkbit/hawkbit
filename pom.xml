@@ -17,7 +17,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>3.2.6</version>
+      <version>3.3.0</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -40,8 +40,8 @@
 
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
-      <spring.boot.version>3.2.6</spring.boot.version>
-      <spring.cloud.version>2023.0.1</spring.cloud.version>
+      <spring.boot.version>3.3.0</spring.boot.version>
+      <spring.cloud.version>2023.0.2</spring.cloud.version>
       <springdoc-openapi.version>2.5.0</springdoc-openapi.version>
       <spring.plugin.core.version>3.0.0</spring.plugin.core.version>
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
@@ -49,36 +49,38 @@
       <!-- Spring boot version overrides - END -->
 
       <!-- Eclipselink - START -->
-      <eclipselink.version>4.0.2</eclipselink.version>
-      <eclipselink.maven.plugin.version>3.0.0</eclipselink.maven.plugin.version>
+      <eclipselink.version>4.0.3</eclipselink.version>
+      <!-- for some reason 3.0.2 does't work -->
+      <eclipselink.maven.plugin.version>3.0.1</eclipselink.maven.plugin.version>
       <!-- Eclipselink - END -->
 
       <!-- Misc libraries versions - START -->
       <cron-utils.version>9.2.1</cron-utils.version>
       <jsoup.version>1.17.2</jsoup.version>
       <jaxb-api.version>2.3.1</jaxb-api.version>
-      <guava.version>33.1.0-jre</guava.version>
       <javax.el-api.version>3.0.0</javax.el-api.version>
-      <commons-io.version>2.15.0</commons-io.version>
       <rsql-parser.version>2.1.0</rsql-parser.version>
+      <guava.version>33.2.1-jre</guava.version>
+      <commons-io.version>2.16.1</commons-io.version>
+      <commons-collections4.version>4.4</commons-collections4.version>
       <io-protostuff.version>1.8.0</io-protostuff.version>
       <!-- test -->
       <rabbitmq.http-client.version>5.2.0</rabbitmq.http-client.version>
-      <allure.version>2.25.0</allure.version>
-      <awaitility.version>4.2.0</awaitility.version>
+      <allure.version>2.27.0</allure.version>
+      <awaitility.version>4.2.1</awaitility.version>
       <!-- Misc libraries versions - END -->
 
       <!-- Maven Plugin versions - START -->
-      <maven.scm.plugin.version>2.0.1</maven.scm.plugin.version>
+      <maven.scm.plugin.version>2.1.0</maven.scm.plugin.version>
       <maven.site.plugin.version>3.12.1</maven.site.plugin.version>
       <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
       <maven.failsafe.plugin.version>3.2.5</maven.failsafe.plugin.version>
-      <maven.enforcer.plugin.version>3.4.1</maven.enforcer.plugin.version>
+      <maven.enforcer.plugin.version>3.5.0</maven.enforcer.plugin.version>
 
-      <jacoco.maven.plugin.version>0.8.11</jacoco.maven.plugin.version>
-      <license.tool.plugin.version>1.0.2</license.tool.plugin.version>
-      <flatten.maven.plugin.version>1.5.0</flatten.maven.plugin.version>
-      <license.maven.plugin.version>2.11</license.maven.plugin.version>
+      <jacoco.maven.plugin.version>0.8.12</jacoco.maven.plugin.version>
+      <license.tool.plugin.version>1.1.0</license.tool.plugin.version>
+      <flatten.maven.plugin.version>1.6.0</flatten.maven.plugin.version>
+      <license.maven.plugin.version>4.5</license.maven.plugin.version>
       <!-- Maven Plugin versions - END -->
 
       <!-- Release - START -->
@@ -382,49 +384,54 @@
                <artifactId>license-maven-plugin</artifactId>
                <version>${license.maven.plugin.version}</version>
                <configuration>
-                  <header>licenses/LICENSE_HEADER_TEMPLATE.txt</header>
-                  <validHeaders>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_CONTRIBUTORS_23.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_15.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_19.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_20.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_21.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_22.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_23.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_20.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_19.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_20.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_KIWIGRID_19.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_ENAPTER.txt</validHeader>
-                  </validHeaders>
-                  <excludes>
-                     <exclude>.3rd-party/**</exclude>
-                     <exclude>.azure-pipelines/*</exclude>
-                     <exclude>.devcontainer/*</exclude>
-                     <exclude>.git*</exclude>
-                     <exclude>.github/**</exclude>
-                     <exclude>.sonar</exclude>
-                     <exclude>licenses/LICENSE*</exclude>
-                     <exclude>eclipse_codeformatter.xml</exclude>
-                     <exclude>**/banner.txt</exclude>
-                     <exclude>**/helm/**</exclude>
-                     <exclude>**/README</exclude>
-                     <exclude>**/.git*</exclude>
-                     <exclude>**/*.sql</exclude>
-                     <exclude>**/docker/**</exclude>
-                     <exclude>**/.sonar/**</exclude>
-                     <exclude>**/frontend/**</exclude>
-                     <exclude>site/content/**</exclude>
-                     <exclude>site/layouts/**</exclude>
-                     <exclude>site/static/**</exclude>
-                     <exclude>site/*.toml</exclude>
-                     <exclude>**/spring.factories</exclude>
-                  </excludes>
+                  <licenseSets>
+                     <licenseSet>
+                        <header>licenses/LICENSE_HEADER_TEMPLATE.txt</header>
+                        <validHeaders>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_CONTRIBUTORS_23.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_15.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_19.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_20.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_21.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_22.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_23.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_20.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_19.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_20.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_KIWIGRID_19.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_ENAPTER.txt</validHeader>
+                        </validHeaders>
+                        <excludes>
+                           <exclude>.3rd-party/**</exclude>
+                           <exclude>.azure-pipelines/*</exclude>
+                           <exclude>.devcontainer/*</exclude>
+                           <exclude>.git*</exclude>
+                           <exclude>.github/**</exclude>
+                           <exclude>.sonar</exclude>
+                           <exclude>licenses/LICENSE*</exclude>
+                           <exclude>eclipse_codeformatter.xml</exclude>
+                           <exclude>**/banner.txt</exclude>
+                           <exclude>**/helm/**</exclude>
+                           <exclude>**/README</exclude>
+                           <exclude>**/.git*</exclude>
+                           <exclude>**/*.sql</exclude>
+                           <exclude>**/docker/**</exclude>
+                           <exclude>**/.sonar/**</exclude>
+                           <exclude>**/frontend/**</exclude>
+                           <exclude>site/content/**</exclude>
+                           <exclude>site/layouts/**</exclude>
+                           <exclude>site/static/**</exclude>
+                           <exclude>site/*.toml</exclude>
+                           <exclude>**/spring.factories</exclude>
+                        </excludes>
+                     </licenseSet>
+                  </licenseSets>
                   <mapping>
+                     <java>JAVADOC_STYLE</java>
                      <scss>JAVADOC_STYLE</scss>
                   </mapping>
                </configuration>
@@ -746,6 +753,11 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>${commons-io.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>${commons-collections4.version}</version>
          </dependency>
          <dependency>
             <groupId>io.qameta.allure</groupId>

@@ -15,7 +15,7 @@ COPY org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar ${APP}-${VERSIO
 RUN set -x &&\
  mkdir -p ${BUILD_DIR} &&\
  cd ${BUILD_DIR} &&\
- java -Djarmode=layertools -jar /${APP}-${VERSION}.jar extract --destination . &&\
+ java -Djarmode=tools -jar /${APP}-${VERSION}.jar extract --layers --launcher --destination . &&\
  rm /${APP}-${VERSION}.jar
 
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
