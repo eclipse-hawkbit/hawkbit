@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTypeRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtTenantManagementRestApi;
 import org.springframework.http.ResponseEntity;
 import java.util.function.Supplier;
 
@@ -42,6 +43,7 @@ public class HawkbitMgmtClient {
     private final MgmtTargetTagRestApi targetTagRestApi;
     private final MgmtTargetFilterQueryRestApi targetFilterQueryRestApi;
     private final MgmtRolloutRestApi rolloutRestApi;
+    private final MgmtTenantManagementRestApi tenantManagementRestApi;
 
     HawkbitMgmtClient(final Tenant tenant, final HawkbitClient hawkbitClient) {
         this.tenant = tenant;
@@ -57,6 +59,7 @@ public class HawkbitMgmtClient {
         targetTagRestApi = service(MgmtTargetTagRestApi.class);
         targetFilterQueryRestApi = service(MgmtTargetFilterQueryRestApi.class);
         rolloutRestApi = service(MgmtRolloutRestApi.class);
+        tenantManagementRestApi = service(MgmtTenantManagementRestApi.class);
     }
 
     boolean hasSoftwareModulesRead() {
