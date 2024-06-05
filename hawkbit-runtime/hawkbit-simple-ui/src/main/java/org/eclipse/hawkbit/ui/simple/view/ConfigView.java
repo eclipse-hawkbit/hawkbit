@@ -22,14 +22,14 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.RolesAllowed;
 
 @PageTitle("Config")
 @Route(value = "config", layout = MainLayout.class)
-@RolesAllowed({ "ANONYMOUS" })
+@RolesAllowed({ "CONFIG_READ" })
 public class ConfigView extends VerticalLayout {
 	private final Map<String, MgmtSystemTenantConfigurationValueRequest> configValue = new HashMap();
 
@@ -39,23 +39,37 @@ public class ConfigView extends VerticalLayout {
 		hawkbitClient.getTenantManagementRestApi().getTenantConfiguration().getBody().forEach((k, v) -> {
 			Component value = null;
 			if (v.getValue() instanceof String) {
-				value = new TextField(k, v.getValue().toString(), event -> {
+				TextField tf = new TextField(k, v.getValue().toString(), event -> {
 					MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
 					vre.setValue(event.getValue());
 					configValue.put(k, vre);
 				});
+				tf.getElement().getStyle().set("width", "300px");
+				value = tf;
 			} else if (v.getValue() instanceof Boolean) {
 				value = new Checkbox(k, (Boolean) v.getValue(), event -> {
 					MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
 					vre.setValue(event.getValue());
 					configValue.put(k, vre);
 				});
-			} else if (v.getValue() instanceof Integer) {
-				value = new IntegerField(k, (Integer) v.getValue(), event -> {
+			} else if (v.getValue() instanceof Long) {
+				Double d = (double) ((Long) v.getValue());
+				NumberField nf = new NumberField(k, d, event -> {
 					MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
 					vre.setValue(event.getValue());
 					configValue.put(k, vre);
 				});
+				nf.getElement().getStyle().set("width", "300px");
+				value = nf;
+			} else if (v.getValue() instanceof Integer) {
+				Double d = (double) ((Integer) v.getValue());
+				NumberField nf = new NumberField(k, d, event -> {
+					MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
+					vre.setValue(event.getValue());
+					configValue.put(k, vre);
+				});
+				nf.getElement().getStyle().set("width", "300px");
+				value = nf;
 			} else {
 				System.out.println(k + ":" + v);
 			}

@@ -104,7 +104,7 @@ public class MainLayout extends AppLayout {
             nav.addItem(new SideNavItem("Software Modules", SoftwareModuleView.class, VaadinIcon.FILE.create()));
         }
         if (accessChecker.hasAccess(ConfigView.class)) {
-            nav.addItem(new SideNavItem("Config", ConfigView.class, VaadinIcon.FILE.create()));
+            nav.addItem(new SideNavItem("Config", ConfigView.class, VaadinIcon.COG.create()));
         }
         if (accessChecker.hasAccess(AboutView.class)) {
             nav.addItem(new SideNavItem("About", AboutView.class, VaadinIcon.INFO_CIRCLE.create()));

@@ -77,6 +77,9 @@ public class HawkbitMgmtClient {
     boolean hasTargetRead() {
         return hasRead(() -> targetRestApi.getTarget("_#ETE$ER"));
     }
+    boolean hasConfigRead() {
+        return hasRead(() -> tenantManagementRestApi.getTenantConfigurationValue("_#ETE$ER"));
+    }
 
     private boolean hasRead(final Supplier<ResponseEntity<?>> doCall) {
         try {
