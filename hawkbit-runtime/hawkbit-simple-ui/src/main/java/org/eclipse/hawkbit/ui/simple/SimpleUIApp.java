@@ -110,6 +110,9 @@ public class SimpleUIApp implements AppShellConfigurator {
                     if (hawkbitClient.hasTargetRead()) {
                         roles.add("TARGET_READ");
                     }
+                    if (hawkbitClient.hasConfigRead()) {
+                        roles.add("CONFIG_READ");
+                    }
                 } finally {
                     SecurityContextHolder.setContext(currentContext);
                 }
