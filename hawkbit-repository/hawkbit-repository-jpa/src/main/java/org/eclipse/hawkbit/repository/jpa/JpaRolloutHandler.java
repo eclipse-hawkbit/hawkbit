@@ -84,7 +84,7 @@ public class JpaRolloutHandler implements RolloutHandler {
                 try {
                     handleRolloutInNewTransaction(rolloutId, handlerId);
                 } catch (final Throwable throwable) {
-                    log.error("Failed to proccess rollout with id " + rolloutId + " . Reason : " , throwable);
+                    log.error("Failed to process rollout with id {}", rolloutId , throwable);
                 }});
         } finally {
             if (log.isTraceEnabled()) {
