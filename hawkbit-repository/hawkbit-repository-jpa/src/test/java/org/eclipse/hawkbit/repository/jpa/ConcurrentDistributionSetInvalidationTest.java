@@ -119,7 +119,7 @@ public class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegr
 
         return rolloutManagement.create(entityFactory.rollout().create()
                 .name("verifyInvalidateDistributionSetWithLargeRolloutThrowsException").description("desc")
-                        .targetFilterQuery("name==*").set(distributionSet).actionType(ActionType.FORCED),
+                        .targetFilterQuery("name==*").distributionSetId(distributionSet).actionType(ActionType.FORCED),
                 quotaManagement.getMaxRolloutGroupsPerRollout(), false, conditions);
     }
 

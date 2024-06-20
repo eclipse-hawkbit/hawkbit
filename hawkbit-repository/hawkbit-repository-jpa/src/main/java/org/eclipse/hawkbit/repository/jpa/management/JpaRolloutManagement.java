@@ -58,7 +58,6 @@ import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
-import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -523,24 +522,9 @@ public class JpaRolloutManagement implements RolloutManagement {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(update.getId());
 
         checkIfDeleted(update.getId(), rollout.getStatus());
+
         update.getName().ifPresent(rollout::setName);
         update.getDescription().ifPresent(rollout::setDescription);
-        update.getActionType().ifPresent(rollout::setActionType);
-        update.getForcedTime().ifPresent(rollout::setForcedTime);
-        update.getWeight().ifPresent(rollout::setWeight);
-        // resetting back to manual start is done by setting start at time to
-        // null
-        rollout.setStartAt(update.getStartAt().orElse(null));
-        update.getSet().ifPresent(setId -> {
-            final DistributionSet set = distributionSetManagement.getValidAndComplete(setId);
-            rollout.setDistributionSet(set);
-        });
-        if (rolloutApprovalStrategy.isApprovalNeeded(rollout)) {
-            rollout.setStatus(RolloutStatus.WAITING_FOR_APPROVAL);
-            rollout.setApprovalDecidedBy(null);
-            rollout.setApprovalRemark(null);
-        }
-
         return rolloutRepository.save(rollout);
     }
 

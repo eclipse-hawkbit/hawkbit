@@ -19,7 +19,8 @@ import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
-import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
@@ -130,9 +131,8 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     @Override
     public ResponseEntity<MgmtRolloutResponseBody> create(
-            @RequestBody final MgmtRolloutRestRequestBody rolloutRequestBody) {
-
-        // first check the given RSQL query if it's well formed, otherwise and
+            @RequestBody final MgmtRolloutRestRequestBodyPost rolloutRequestBody) {
+        // first check the given RSQL query if it's well-formed, otherwise and
         // exception is thrown
         final String targetFilterQuery = rolloutRequestBody.getTargetFilterQuery();
         if (targetFilterQuery == null) {
@@ -170,15 +170,23 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(MgmtRolloutMapper.toResponseRollout(rollout, true));
     }
-
     private Optional<Boolean> isConfirmationRequiredForGroup(final MgmtRolloutGroup group,
-            final MgmtRolloutRestRequestBody request) {
+            final MgmtRolloutRestRequestBodyPost request) {
         if (group.getConfirmationRequired() != null) {
             return Optional.of(group.getConfirmationRequired());
         } else if (request.getConfirmationRequired() != null) {
             return Optional.of(request.getConfirmationRequired());
         }
         return Optional.empty();
+    }
+
+    @Override
+    public ResponseEntity<MgmtRolloutResponseBody> update(
+            @PathVariable("rolloutId") final Long rolloutId,
+            @RequestBody final MgmtRolloutRestRequestBodyPut rolloutUpdateBody) {
+        final Rollout updated =
+                rolloutManagement.update(MgmtRolloutMapper.fromRequest(entityFactory, rolloutUpdateBody, rolloutId));
+        return ResponseEntity.ok(MgmtRolloutMapper.toResponseRollout(updated, true));
     }
 
     @Override

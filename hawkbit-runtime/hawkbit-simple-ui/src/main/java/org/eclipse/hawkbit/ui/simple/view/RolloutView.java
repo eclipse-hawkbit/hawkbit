@@ -43,7 +43,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutCondition;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutErrorAction;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
-import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.springframework.util.ObjectUtils;
@@ -403,7 +403,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         private void addCreateClickListener(final HawkbitMgmtClient hawkbitClient) {
             create.addClickListener(e -> {
                 close();
-                final MgmtRolloutRestRequestBody request = new MgmtRolloutRestRequestBody();
+                final MgmtRolloutRestRequestBodyPost request = new MgmtRolloutRestRequestBodyPost();
                 request.setName(name.getValue());
                 request.setDistributionSetId(distributionSet.getValue().getDsId());
                 request.setTargetFilterQuery(targetFilter.getValue().getQuery());
