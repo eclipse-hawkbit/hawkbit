@@ -23,7 +23,6 @@ import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutExecutor;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -60,6 +59,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -152,20 +152,41 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         case CREATING:
             handleCreateRollout((JpaRollout) rollout);
             break;
-        case DELETING:
-            handleDeleteRollout((JpaRollout) rollout);
-            break;
         case READY:
             handleReadyRollout(rollout);
             break;
         case STARTING:
-            handleStartingRollout(rollout);
+            // the lastModifiedBy user is probably the user that has actually called the rollout start (unless overridden) - not the creator
+            SpringSecurityAuditorAware.setAuditorOverride(rollout.getLastModifiedBy());
+            try {
+                handleStartingRollout(rollout);
+            } finally {
+                // clear, ALWAYS, the set auditor override
+                SpringSecurityAuditorAware.clearAuditorOverride();
+            }
             break;
         case RUNNING:
             handleRunningRollout((JpaRollout) rollout);
             break;
         case STOPPING:
-            handleStopRollout((JpaRollout) rollout);
+            // the lastModifiedBy user is probably the user that has actually called the rollout stop (unless overridden) - not the creator
+            SpringSecurityAuditorAware.setAuditorOverride(rollout.getLastModifiedBy());
+            try {
+                handleStopRollout((JpaRollout) rollout);
+            } finally {
+                // clear, ALWAYS, the set auditor override
+                SpringSecurityAuditorAware.clearAuditorOverride();
+            }
+            break;
+        case DELETING:
+            // the lastModifiedBy user is probably the user that has actually called the rollout delete (unless overridden) - not the creator
+            SpringSecurityAuditorAware.setAuditorOverride(rollout.getLastModifiedBy());
+            try {
+                handleDeleteRollout((JpaRollout) rollout);
+            } finally {
+                // clear, ALWAYS, the set auditor override
+                SpringSecurityAuditorAware.clearAuditorOverride();
+            }
             break;
         default:
             log.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());

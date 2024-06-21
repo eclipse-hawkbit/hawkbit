@@ -104,6 +104,8 @@ public class JpaRolloutHandler implements RolloutHandler {
         DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId, status -> {
             rolloutManagement.get(rolloutId).ifPresentOrElse(
                     rollout -> {
+                        // auditor is retrieved and set on transaction commit
+                        // if not overridden, the system user will be the auditor
                         rollout.getAccessControlContext().ifPresentOrElse(
                             context -> // has stored context - executes it with it
                                 contextAware.runInContext(
