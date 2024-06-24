@@ -1246,7 +1246,7 @@ public class TestdataFactory {
 
         final Rollout rollout = rolloutManagement.create(
                 entityFactory.rollout().create().name(rolloutName).description(rolloutDescription)
-                        .targetFilterQuery(filterQuery).set(distributionSet).actionType(actionType).weight(weight)
+                        .targetFilterQuery(filterQuery).distributionSetId(distributionSet).actionType(actionType).weight(weight)
                         .dynamic(dynamic),
                 groupSize, confirmationRequired, conditions);
 

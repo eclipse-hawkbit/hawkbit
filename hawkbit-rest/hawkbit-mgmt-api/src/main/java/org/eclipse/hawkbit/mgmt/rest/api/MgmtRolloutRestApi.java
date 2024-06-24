@@ -17,7 +17,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
-import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
@@ -28,6 +29,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -144,7 +147,7 @@ public interface MgmtRolloutRestApi {
     /**
      * Handles the POST request for creating rollout.
      *
-     * @param rolloutRequestBody
+     * @param rolloutCreateBody
      *            the rollout body to be created.
      * @return In case rollout could successful created the ResponseEntity with
      *         status code 201 with the successfully created rollout. In any
@@ -161,7 +164,7 @@ public interface MgmtRolloutRestApi {
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "403", 
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                        "data volume restriction applies.", 
+                        "data volume restriction applies.",
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
@@ -180,7 +183,50 @@ public interface MgmtRolloutRestApi {
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING, consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtRolloutResponseBody> create(MgmtRolloutRestRequestBody rolloutRequestBody);
+    ResponseEntity<MgmtRolloutResponseBody> create(MgmtRolloutRestRequestBodyPost rolloutCreateBody);
+
+    /**
+     * Handles the POST request for creating rollout.
+     *
+     * @param rolloutUpdateBody
+     *            the rollout body with details for update.
+     * @return In case rollout could successful updated the ResponseEntity with
+     *         status code 200 with the successfully created rollout. In any
+     *         failure the JsonResponseExceptionHandler is handling the
+     *         response.
+     */
+    @Operation(summary = "Update Rollout", description = "Handles the UPDATE request for a single " +
+            "Rollout. Required permission: UPDATE_ROLLOUT")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
+                    "changed (i.e. read-only) or data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Distribution Set not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
+                    "user in another request at the same time. You may retry your modification request.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
+                    "supported by the server for this resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further " +
+                    "attempts and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
+    @PutMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}", consumes = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
+            MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
+    ResponseEntity<MgmtRolloutResponseBody> update(@PathVariable("rolloutId") Long rolloutId,
+            @RequestBody MgmtRolloutRestRequestBodyPut rolloutUpdateBody);
 
     /**
      * Handles the request for approving a rollout.

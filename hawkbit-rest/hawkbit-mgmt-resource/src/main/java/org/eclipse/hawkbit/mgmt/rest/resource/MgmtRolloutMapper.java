@@ -22,7 +22,8 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutCondition.Conditio
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutErrorAction;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutErrorAction.ErrorAction;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
-import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutSuccessAction;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutSuccessAction.SuccessAction;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
@@ -33,6 +34,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
+import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -123,22 +125,30 @@ final class MgmtRolloutMapper {
         return body;
     }
 
-    static RolloutCreate fromRequest(final EntityFactory entityFactory, final MgmtRolloutRestRequestBody restRequest,
+    static RolloutCreate fromRequest(final EntityFactory entityFactory, final MgmtRolloutRestRequestBodyPost restRequest,
             final DistributionSet distributionSet) {
-
-        return entityFactory.rollout().create().name(restRequest.getName()).description(restRequest.getDescription())
-                .dynamic(restRequest.isDynamic())
-                .set(distributionSet).targetFilterQuery(restRequest.getTargetFilterQuery())
+        return entityFactory.rollout().create()
+                .name(restRequest.getName())
+                .description(restRequest.getDescription())
+                .distributionSetId(distributionSet)
+                .targetFilterQuery(restRequest.getTargetFilterQuery())
                 .actionType(MgmtRestModelMapper.convertActionType(restRequest.getType()))
                 .forcedTime(restRequest.getForcetime()).startAt(restRequest.getStartAt())
-                .weight(restRequest.getWeight());
+                .weight(restRequest.getWeight())
+                .dynamic(restRequest.isDynamic());
+    }
+
+    static RolloutUpdate fromRequest(final EntityFactory entityFactory, final MgmtRolloutRestRequestBodyPut restRequest, final long rolloutId) {
+        return entityFactory.rollout().update(rolloutId)
+                .name(restRequest.getName())
+                .description(restRequest.getDescription());
     }
 
     static RolloutCreate fromRetriedRollout(final EntityFactory entityFactory, final Rollout rollout) {
         return entityFactory.rollout().create()
                 .name(rollout.getName().concat("_retry"))
                 .description(rollout.getDescription())
-                .set(rollout.getDistributionSet())
+                .distributionSetId(rollout.getDistributionSet())
                 .targetFilterQuery("failedrollout==".concat(String.valueOf(rollout.getId())))
                 .actionType(rollout.getActionType())
                 .forcedTime(rollout.getForcedTime())

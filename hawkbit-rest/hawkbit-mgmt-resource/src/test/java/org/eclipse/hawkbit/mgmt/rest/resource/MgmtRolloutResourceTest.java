@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -56,6 +57,7 @@ import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -271,6 +273,31 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
+    @Description("Testing that rollout can be updated")
+    void updateRollout() throws Exception {
+        testdataFactory.createTargets(4, "rollout", "description");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+        // create a running rollout for the created targets
+        final Rollout rollout = rolloutManagement.create(
+                entityFactory
+                        .rollout()
+                        .create()
+                        .name("rollout1")
+                        .distributionSetId(dsA.getId())
+                        .targetFilterQuery("controllerId==rollout*"),
+                4, false, new RolloutGroupConditionBuilder().withDefaults()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+
+
+        mvc.perform(put("/rest/v1/rollouts/" + rollout.getId()).content(
+                                new JSONObject().put("name", "newName").put("description", "newDesc").toString()
+                        ).contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", equalTo("newName")))
+                .andExpect(jsonPath("$.description", equalTo("newDesc")));
+    }
+
+    @Test
     @Description("Testing the empty list is returned if no rollout exists")
     void noRolloutReturnsEmptyList() throws Exception {
         mvc.perform(get("/rest/v1/rollouts").accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -286,7 +313,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
                         .targetFilterQuery("controllerId==rollout*"),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
@@ -305,7 +332,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create a running rollout for the created targets
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
                         .targetFilterQuery("controllerId==rollout*"),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
@@ -345,13 +372,13 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create a running rollout for the created targets
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
                         .targetFilterQuery("controllerId==rollout*"),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
         rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout2").set(dsA.getId())
+                entityFactory.rollout().create().name("rollout2").distributionSetId(dsA.getId())
                         .targetFilterQuery("controllerId==rollout*"),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
@@ -399,7 +426,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                             .rollout()
                             .create()
                             .name("rollout1")
-                            .set(dsA.getId())
+                            .distributionSetId(dsA.getId())
                             .targetFilterQuery("controllerId==rollout*"),
                     4, false, new RolloutGroupConditionBuilder().withDefaults()
                             .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
@@ -431,7 +458,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
                         .targetFilterQuery("controllerId==rollout*"),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
@@ -982,7 +1009,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
                         .targetFilterQuery("controllerId==rollout*"),
                 4, confirmationRequired, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
@@ -1328,7 +1355,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create a running rollout for the created targets
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
                         .targetFilterQuery("controllerId==rollout*"),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
@@ -1509,7 +1536,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery, final boolean confirmationRequired) {
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name(name).set(distributionSetId).targetFilterQuery(targetFilterQuery),
+                entityFactory.rollout().create().name(name).distributionSetId(distributionSetId).targetFilterQuery(targetFilterQuery),
                 amountGroups, confirmationRequired, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 

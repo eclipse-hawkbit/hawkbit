@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.builder;
 /**
  * Update implementation.
  */
-public class GenericRolloutUpdate extends AbstractRolloutUpdateCreate<RolloutUpdate> implements RolloutUpdate {
+public class GenericRolloutUpdate extends AbstractNamedEntityBuilder<RolloutUpdate> implements RolloutUpdate {
 
     public GenericRolloutUpdate(final Long id) {
         super.id = id;
