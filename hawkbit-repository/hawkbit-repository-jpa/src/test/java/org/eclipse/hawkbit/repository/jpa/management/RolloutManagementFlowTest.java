@@ -13,7 +13,9 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
+import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -85,7 +87,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
     @Description("Verifies a simple dynamic rollout flow")
     void dynamicRolloutFlow() {
         final String rolloutName = "dynamic-rollout-std";
-        final int amountGroups = 5; // static only
+        final int amountGroups = 3; // static only
         final String targetPrefix = "controller-dynamic-rollout-std-";
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
 
@@ -175,6 +177,193 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 5);
         assertAndGetRunning(rollout, 3);
         assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 2); // assign the target created when paused
+    }
+
+    @Test
+    @Description("Verifies a simple dynamic rollout flow with a dynamic group template")
+    void dynamicRolloutTemplateFlow() {
+        final String rolloutName = "dynamic-template-rollout-std";
+        final int amountGroups = 3; // static only
+        final String targetPrefix = "controller-template-dynamic-rollout-std-";
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
+
+        // create rollout with amountGroups static groups * 3 targets and dynamic group template with 6 targets
+        testdataFactory.createTargets(targetPrefix, 0, amountGroups * 3);
+        final Rollout rollout = testdataFactory.createRolloutByVariables(rolloutName, rolloutName, amountGroups,
+                "controllerid==" + targetPrefix + "*", distributionSet, "60", "30",
+                Action.ActionType.FORCED, 1000, false, true,
+                DynamicRolloutGroupTemplate.builder().nameSuffix("-dyn").targetCount(6).build());
+
+        // rollout is READY, amountGroups + 1 (dynamic) rollout groups and amountGroups * 3 targets in static groups
+        assertRollout(rollout, true, RolloutStatus.READY, amountGroups + 1, amountGroups * 3);
+        List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(
+                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
+                rollout.getId()).getContent();
+        final RolloutGroup dynamic1 = groups.get(amountGroups);
+        assertRollout(rollout, true, RolloutStatus.READY, amountGroups + 1, amountGroups * 3); // + dynamic
+        for (int i = 0; i < amountGroups; i++) {
+            assertGroup(groups.get(i), false, RolloutGroupStatus.READY, 3);
+        }
+        assertGroup(dynamic1, true, RolloutGroupStatus.READY, 0);
+
+        // add 4 targets for the first dynamic group, fill partially
+        testdataFactory.createTargets(targetPrefix, amountGroups * 3, 4);
+        // start rollout
+        rolloutManagement.start(rollout.getId());
+
+        // handleStartingRollout (no handleRunning called yet)
+        rolloutHandler.handleAll();
+        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 1, amountGroups * 3);
+        for (int i = 0; i < amountGroups; i++) {
+            assertGroup(groups.get(i), false, i == 0 ? RolloutGroupStatus.RUNNING : RolloutGroupStatus.SCHEDULED, 3);
+        }
+        assertGroup(dynamic1, true, RolloutGroupStatus.SCHEDULED, 0);
+
+        executeStaticWithoutOneTargetFromTheLastGroup(groups, rollout, amountGroups);
+
+        // partially fill the first dynamic (it is running and now create actions for 4 targets)
+        rolloutHandler.handleAll();
+        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 1, amountGroups * 3 + 4);
+        assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 4);
+
+        // fill first (2) and create fill partially the second (+2 new)
+        testdataFactory.createTargets(targetPrefix, amountGroups * 3 + 4, 4);
+        rolloutHandler.handleAll(); // fill first dynamic group and create a new dynamic2
+        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 6);
+        assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
+        groups = rolloutGroupManagement.findByRollout(
+                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
+                rollout.getId()).getContent();
+        final RolloutGroup dynamic2 = groups.get(amountGroups + 1);
+        assertGroup(dynamic2, true, RolloutGroupStatus.SCHEDULED, 0);
+
+        // create scheduled actions for the dynamic2
+        rolloutHandler.handleAll();
+        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 6);
+        assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
+        assertGroup(dynamic2, true, RolloutGroupStatus.SCHEDULED, 0);
+        assertAndGetRunning(rollout, 7); // one from the last static group and 6 from the first dynamic
+        assertScheduled(rollout, 0);
+
+        // executes last from static and dynamic1 without 1 target
+        assertAndGetRunning(rollout, 7)// one from the last static and 6 from the first dynamic
+                .stream()
+                // remove the last assigned to dynamic1 - it could be amountGroups * 3 + 2 or bigger by id
+                .filter(action -> Integer.parseInt(action.getTarget().getControllerId().substring(targetPrefix.length())) < amountGroups * 3 + 5)
+                .forEach(this::finishAction);
+        assertAndGetRunning(rollout, 1); // remains on in the first dynamic
+
+        rolloutHandler.handleAll();
+        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 6);
+        assertGroup(groups.get(amountGroups - 1), false, RolloutGroupStatus.FINISHED, 3);
+        assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
+        assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 0);
+
+        rolloutHandler.handleAll(); // add 2 action to now running second dynamic
+        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 8);
+        assertAndGetRunning(rollout, 3);
+        assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 2);
+
+        testdataFactory.createTargets(targetPrefix, amountGroups * 3 + 8, 2);
+        rolloutManagement.pauseRollout(rollout.getId());
+        rolloutHandler.handleAll();
+        assertRollout(rollout, true, RolloutStatus.PAUSED, amountGroups + 2, amountGroups * 3 + 8);
+        assertAndGetRunning(rollout, 3);
+        assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 2); // no new assignment
+
+        rolloutManagement.resumeRollout(rollout.getId());
+        rolloutHandler.handleAll();
+        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 10);
+        assertAndGetRunning(rollout, 5);
+        assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 4); // assign the target created when paused
+    }
+
+
+    @Test
+    @Description("Verifies a simple pure (no static groups) dynamic rollout flow with a dynamic group template")
+    void dynamicRolloutPureFlow() {
+        final String rolloutName = "pure-dynamic-rollout-std";
+        final String targetPrefix = "controller-pure-dynamic-rollout-std-";
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
+
+        final Rollout rollout = testdataFactory.createRolloutByVariables(rolloutName, rolloutName, 0,
+                "controllerid==" + targetPrefix + "*", distributionSet, "60", "30",
+                Action.ActionType.FORCED, 1000, false, true,
+                DynamicRolloutGroupTemplate.builder().nameSuffix("-dyn").targetCount(6).build());
+
+        // rollout is READY, amountGroups + 1 (dynamic) rollout groups and amountGroups * 3 targets in static groups
+        assertRollout(rollout, true, RolloutStatus.READY, 1, 0);
+        List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(
+                new OffsetBasedPageRequest(0, 10, Sort.by(Direction.ASC, "id")),
+                rollout.getId()).getContent();
+        final RolloutGroup dynamic1 = groups.get(0);
+        assertRollout(rollout, true, RolloutStatus.READY, 1, 0); // + dynamic
+        assertGroup(dynamic1, true, RolloutGroupStatus.READY, 0);
+
+        // add 4 targets for the first dynamic group, fill partially
+        testdataFactory.createTargets(targetPrefix, 0, 4);
+        // start rollout
+        rolloutManagement.start(rollout.getId());
+
+        // handleStartingRollout (no handleRunning called yet)
+        rolloutHandler.handleAll();
+        assertRollout(rollout, true, RolloutStatus.RUNNING, 1, 0);
+        assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 0);
+
+        // partially fill the first dynamic (it is running and now create actions for 4 targets)
+        rolloutHandler.handleAll();
+        assertRollout(rollout, true, RolloutStatus.RUNNING, 1, 4);
+        assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 4);
+
+        // fill first (2) and create fill partially the second (+2 new)
+        testdataFactory.createTargets(targetPrefix, 4, 4);
+        rolloutHandler.handleAll(); // fill first dynamic group and create a new dynamic2
+        assertRollout(rollout, true, RolloutStatus.RUNNING, 2, 6);
+        assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
+        groups = rolloutGroupManagement.findByRollout(
+                new OffsetBasedPageRequest(0, 10, Sort.by(Direction.ASC, "id")),
+                rollout.getId()).getContent();
+        final RolloutGroup dynamic2 = groups.get(1);
+        assertGroup(dynamic2, true, RolloutGroupStatus.SCHEDULED, 0);
+
+        // create scheduled actions for the dynamic2
+        rolloutHandler.handleAll();
+        assertRollout(rollout, true, RolloutStatus.RUNNING, 2, 6);
+        assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
+        assertGroup(dynamic2, true, RolloutGroupStatus.SCHEDULED, 0);
+        assertAndGetRunning(rollout, 6); // 6 from the first dynamic
+        assertScheduled(rollout, 0);
+
+        // executes dynamic1 without 1 target
+        assertAndGetRunning(rollout, 6)// 6 from the first dynamic
+                .stream()
+                // remove the last assigned to dynamic1 - it could be amountGroups * 3 + 2 or bigger by id
+                .filter(action -> Integer.parseInt(action.getTarget().getControllerId().substring(targetPrefix.length())) < 5)
+                .forEach(this::finishAction);
+        assertAndGetRunning(rollout, 1); // remains on in the first dynamic
+
+        rolloutHandler.handleAll();
+        assertRollout(rollout, true, RolloutStatus.RUNNING,  2, 6);
+        assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
+        assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 0);
+
+        rolloutHandler.handleAll(); // add 2 action to now running second dynamic
+        assertRollout(rollout, true, RolloutStatus.RUNNING, 2, 8);
+        assertAndGetRunning(rollout, 3);
+        assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 2);
+
+        testdataFactory.createTargets(targetPrefix, 8, 2);
+        rolloutManagement.pauseRollout(rollout.getId());
+        rolloutHandler.handleAll();
+        assertRollout(rollout, true, RolloutStatus.PAUSED, 2, 8);
+        assertAndGetRunning(rollout, 3);
+        assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 2); // no new assignment
+
+        rolloutManagement.resumeRollout(rollout.getId());
+        rolloutHandler.handleAll();
+        assertRollout(rollout, true, RolloutStatus.RUNNING, 2, 10);
+        assertAndGetRunning(rollout, 5);
+        assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 4); // assign the target created when paused
     }
 
     private void executeStaticWithoutOneTargetFromTheLastGroup(

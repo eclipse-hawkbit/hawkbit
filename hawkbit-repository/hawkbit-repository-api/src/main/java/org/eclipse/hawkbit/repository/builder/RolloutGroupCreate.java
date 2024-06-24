@@ -24,49 +24,41 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
  * Builder to create a new {@link RolloutGroup} entry. Defines all fields that
  * can be set at creation time. Other fields are set by the repository
  * automatically, e.g. {@link BaseEntity#getCreatedAt()}.
- *
  */
 public interface RolloutGroupCreate {
     /**
-     * @param name
-     *            for {@link Rollout#getName()}
+     * @param name for {@link Rollout#getName()}
      * @return updated builder instance
      */
     RolloutGroupCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
-     * @param description
-     *            for {@link Rollout#getDescription()}
+     * @param description for {@link Rollout#getDescription()}
      * @return updated builder instance
      */
     RolloutGroupCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
-     * @param targetFilterQuery
-     *            for {@link Rollout#getTargetFilterQuery()}
+     * @param targetFilterQuery for {@link Rollout#getTargetFilterQuery()}
      * @return updated builder instance
      */
     RolloutGroupCreate targetFilterQuery(
             @Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE) @NotNull String targetFilterQuery);
 
     /**
-     * @param targetPercentage
-     *            the percentage of matching Targets that should be assigned to
-     *            this Group
+     * @param targetPercentage the percentage of matching Targets that should be assigned to this Group
      * @return updated builder instance
      */
     RolloutGroupCreate targetPercentage(Float targetPercentage);
 
     /**
-     * @param conditions
-     *            as created by {@link RolloutGroupConditionBuilder}.
+     * @param conditions as created by {@link RolloutGroupConditionBuilder}.
      * @return updated builder instance
      */
     RolloutGroupCreate conditions(RolloutGroupConditions conditions);
 
     /**
-     * @param confirmationRequired
-     *            if confirmation is required for this rollout group (considered
+     * @param confirmationRequired if confirmation is required for this rollout group (considered
      *            with confirmation flow active)
      * @return updated builder instance
      */
@@ -76,5 +68,4 @@ public interface RolloutGroupCreate {
      * @return peek on current state of {@link RolloutGroup} in the builder
      */
     RolloutGroup build();
-
 }

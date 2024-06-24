@@ -12,15 +12,12 @@ package org.eclipse.hawkbit.repository.builder;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
 
 /**
  * Builder to update an existing {@link Rollout} entry. Defines all fields that
  * can be updated.
- *
  */
 public interface RolloutUpdate {
     /**
