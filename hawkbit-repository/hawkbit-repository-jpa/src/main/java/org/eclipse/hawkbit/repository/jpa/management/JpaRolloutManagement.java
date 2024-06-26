@@ -199,13 +199,15 @@ public class JpaRolloutManagement implements RolloutManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout create(final RolloutCreate rollout, final int amountGroup, final boolean confirmationRequired,
             final RolloutGroupConditions conditions, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
-        if (amountGroup == 0) {
+        if (amountGroup < 0) {
+            throw new ValidationException("The amount of groups cannot be lower than or equal to zero for static rollouts");
+        } else if (amountGroup == 0) {
             if (dynamicRolloutGroupTemplate == null) {
                 throw new ValidationException(
                     "When amount of groups is 0, the rollouts shall be dynamic and a dynamic group template must be provided");
             }
         } else {
-            RolloutHelper.verifyRolloutGroupParameter(amountGroup, quotaManagement);
+            RolloutHelper.verifyRolloutGroupAmount(amountGroup, quotaManagement);
         }
 
         final JpaRollout rolloutRequest = (JpaRollout) rollout.build();
@@ -223,7 +225,10 @@ public class JpaRolloutManagement implements RolloutManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout create(final RolloutCreate rollout, final List<RolloutGroupCreate> groups,
             final RolloutGroupConditions conditions) {
-        RolloutHelper.verifyRolloutGroupParameter(groups.size(), quotaManagement);
+        if (groups.isEmpty()) {
+            throw new ValidationException("The amount of groups cannot be 0");
+        }
+        RolloutHelper.verifyRolloutGroupAmount(groups.size(), quotaManagement);
         final JpaRollout rolloutRequest = (JpaRollout) rollout.build();
         final JpaRollout savedRollout = createRollout(rolloutRequest, false);
         return createRolloutGroups(groups, conditions, savedRollout);
@@ -329,6 +334,8 @@ public class JpaRolloutManagement implements RolloutManagement {
             publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup, rollout);
         }
 
+        // lastSavedGroup is never null! amountOfGroups > 0 (and has static groups) or dynamicRolloutGroupTemplate is
+        // not null (validated) and (validated) the rollout is dynamic, so has dynamic group
         rollout.setRolloutGroupsCreated(lastSavedGroup.isDynamic() ? amountOfGroups + 1 : amountOfGroups);
         return rolloutRepository.save(rollout);
     }
