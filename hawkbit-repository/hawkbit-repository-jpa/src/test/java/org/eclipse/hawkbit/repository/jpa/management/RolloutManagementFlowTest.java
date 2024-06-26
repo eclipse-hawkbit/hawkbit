@@ -15,6 +15,7 @@ import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -23,6 +24,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
@@ -70,7 +72,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
             assertGroup(groups.get(i), false, i == 0 ? RolloutGroupStatus.RUNNING : RolloutGroupStatus.SCHEDULED, 3);
         }
 
-        executeStaticWithoutOneTargetFromTheLastGroup(groups, rollout, amountGroups);
+        executeStaticWithoutOneTargetFromTheLastGroupAndHandleAll(groups, rollout, amountGroups);
 
         rolloutManagement.pauseRollout(rollout.getId());
         rolloutHandler.handleAll();
@@ -120,7 +122,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         }
         assertGroup(dynamic1, true, RolloutGroupStatus.SCHEDULED, 0);
 
-        executeStaticWithoutOneTargetFromTheLastGroup(groups, rollout, amountGroups);
+        executeStaticWithoutOneTargetFromTheLastGroupAndHandleAll(groups, rollout, amountGroups);
 
         // partially fill the first dynamic (it is running and now create actions for 2 targets)
         rolloutHandler.handleAll();
@@ -147,11 +149,12 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertScheduled(rollout, 0);
 
         // executes last from static and dynamic1 without 1 target
-        assertAndGetRunning(rollout, 4)// one from the last static and 3 for the first dynamic
+        assertAndGetRunning(rollout, 4)// one from the last static and 6 for the first dynamic
                 .stream()
-                // remove the last assigned to dynamic1 - it could be amountGroups * 3 + 2 or bigger by id
-                .filter(action -> Integer.parseInt(action.getTarget().getControllerId().substring(targetPrefix.length())) < amountGroups * 3 + 2)
+                // filters for action of the last static group
+                .filter(action -> Integer.parseInt(action.getTarget().getControllerId().substring(targetPrefix.length())) < amountGroups * 3)
                 .forEach(this::finishAction);
+        executeWithoutOneTargetFromAGroup(rollout, dynamic1, 3);
         assertAndGetRunning(rollout, 1); // remains on in the first dynamic
 
         rolloutHandler.handleAll();
@@ -219,7 +222,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         }
         assertGroup(dynamic1, true, RolloutGroupStatus.SCHEDULED, 0);
 
-        executeStaticWithoutOneTargetFromTheLastGroup(groups, rollout, amountGroups);
+        executeStaticWithoutOneTargetFromTheLastGroupAndHandleAll(groups, rollout, amountGroups);
 
         // partially fill the first dynamic (it is running and now create actions for 4 targets)
         rolloutHandler.handleAll();
@@ -246,11 +249,12 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertScheduled(rollout, 0);
 
         // executes last from static and dynamic1 without 1 target
-        assertAndGetRunning(rollout, 7)// one from the last static and 6 from the first dynamic
+        assertAndGetRunning(rollout, 7)// one from the last static and 6 for the first dynamic
                 .stream()
-                // remove the last assigned to dynamic1 - it could be amountGroups * 3 + 2 or bigger by id
-                .filter(action -> Integer.parseInt(action.getTarget().getControllerId().substring(targetPrefix.length())) < amountGroups * 3 + 5)
+                // filters for action of the last static group
+                .filter(action -> Integer.parseInt(action.getTarget().getControllerId().substring(targetPrefix.length())) < amountGroups * 3)
                 .forEach(this::finishAction);
+        executeWithoutOneTargetFromAGroup(rollout, dynamic1, 6);
         assertAndGetRunning(rollout, 1); // remains on in the first dynamic
 
         rolloutHandler.handleAll();
@@ -335,11 +339,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertScheduled(rollout, 0);
 
         // executes dynamic1 without 1 target
-        assertAndGetRunning(rollout, 6)// 6 from the first dynamic
-                .stream()
-                // remove the last assigned to dynamic1 - it could be amountGroups * 3 + 2 or bigger by id
-                .filter(action -> Integer.parseInt(action.getTarget().getControllerId().substring(targetPrefix.length())) < 5)
-                .forEach(this::finishAction);
+        executeWithoutOneTargetFromAGroup(rollout, dynamic1, 6);
         assertAndGetRunning(rollout, 1); // remains on in the first dynamic
 
         rolloutHandler.handleAll();
@@ -366,7 +366,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 4); // assign the target created when paused
     }
 
-    private void executeStaticWithoutOneTargetFromTheLastGroup(
+    private void executeStaticWithoutOneTargetFromTheLastGroupAndHandleAll(
             final List<RolloutGroup> groups,
             final Rollout rollout, final int amountGroups) {
         // execute groups (without on of the last)
@@ -400,5 +400,29 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
                 assertThat(refresh(groups.get(i + 1)).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
             }
         }
+    }
+
+    private void executeWithoutOneTargetFromAGroup(
+            final Rollout rollout, final RolloutGroup group, final int count) {
+        // execute groups (without on of the last)
+        assertThat(refresh(group).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        // skip on from the last group only
+        final AtomicBoolean skipOne = new AtomicBoolean(true);
+        final Page<JpaAction> running = actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.RUNNING);
+        assertThat(running.getTotalElements()).as("Action count").isEqualTo(count);
+        running.stream()
+                // check if the action belongs to the needed group. group equals may not working because of the optLockRevision
+                .filter(action -> action.getRolloutGroup().getId().equals(group.getId()))
+                .filter(action -> {
+                    if (skipOne.get()) {
+                        skipOne.set(false);
+                        // in the last group, skip first
+                        return false;
+                    } else {
+                        return true;
+                    }
+                })
+                .forEach(this::finishAction);
+        assertAndGetRunning(rollout, 1);
     }
 }
