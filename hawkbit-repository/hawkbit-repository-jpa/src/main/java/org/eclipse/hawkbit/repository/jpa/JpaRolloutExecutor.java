@@ -742,7 +742,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     private void createDynamicGroup(final JpaRollout rollout, final RolloutGroup lastGroup, final int groupCount, final RolloutGroupStatus status) {
         try {
-            RolloutHelper.verifyRolloutGroupParameter(groupCount + 1, quotaManagement);
+            RolloutHelper.verifyRolloutGroupAmount(groupCount + 1, quotaManagement);
         } catch (final AssignmentQuotaExceededException e) {
             log.warn("Quota exceeded for dynamic rollout group creation: {}. Stop it", e.getMessage());
             if (isRolloutComplete(rollout)) {

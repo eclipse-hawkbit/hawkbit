@@ -154,7 +154,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
                 // filters for action of the last static group
                 .filter(action -> Integer.parseInt(action.getTarget().getControllerId().substring(targetPrefix.length())) < amountGroups * 3)
                 .forEach(this::finishAction);
-        executeWithoutOneTargetFromAGroup(rollout, dynamic1, 3);
+        executeWithoutOneTargetFromAGroup(dynamic1, rollout, 3);
         assertAndGetRunning(rollout, 1); // remains on in the first dynamic
 
         rolloutHandler.handleAll();
@@ -254,7 +254,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
                 // filters for action of the last static group
                 .filter(action -> Integer.parseInt(action.getTarget().getControllerId().substring(targetPrefix.length())) < amountGroups * 3)
                 .forEach(this::finishAction);
-        executeWithoutOneTargetFromAGroup(rollout, dynamic1, 6);
+        executeWithoutOneTargetFromAGroup(dynamic1, rollout, 6);
         assertAndGetRunning(rollout, 1); // remains on in the first dynamic
 
         rolloutHandler.handleAll();
@@ -339,7 +339,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertScheduled(rollout, 0);
 
         // executes dynamic1 without 1 target
-        executeWithoutOneTargetFromAGroup(rollout, dynamic1, 6);
+        executeWithoutOneTargetFromAGroup(dynamic1, rollout, 6);
         assertAndGetRunning(rollout, 1); // remains on in the first dynamic
 
         rolloutHandler.handleAll();
@@ -402,8 +402,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    private void executeWithoutOneTargetFromAGroup(
-            final Rollout rollout, final RolloutGroup group, final int count) {
+    private void executeWithoutOneTargetFromAGroup(final RolloutGroup group, final Rollout rollout, final int count) {
         // execute groups (without on of the last)
         assertThat(refresh(group).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
         // skip on from the last group only
