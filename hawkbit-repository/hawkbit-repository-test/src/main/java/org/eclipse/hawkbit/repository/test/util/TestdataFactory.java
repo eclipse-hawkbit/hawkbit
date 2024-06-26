@@ -45,6 +45,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
@@ -1239,6 +1240,14 @@ public class TestdataFactory {
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition, final Action.ActionType actionType,
             final Integer weight, final boolean confirmationRequired, final boolean dynamic) {
+        return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
+                successCondition, errorCondition, actionType, weight, confirmationRequired, dynamic, null);
+    }
+    public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
+            final int groupSize, final String filterQuery, final DistributionSet distributionSet,
+            final String successCondition, final String errorCondition, final Action.ActionType actionType,
+            final Integer weight, final boolean confirmationRequired, final boolean dynamic,
+            final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
@@ -1248,7 +1257,7 @@ public class TestdataFactory {
                 entityFactory.rollout().create().name(rolloutName).description(rolloutDescription)
                         .targetFilterQuery(filterQuery).distributionSetId(distributionSet).actionType(actionType).weight(weight)
                         .dynamic(dynamic),
-                groupSize, confirmationRequired, conditions);
+                groupSize, confirmationRequired, conditions, dynamicRolloutGroupTemplate);
 
         // Run here, because Scheduler is disabled during tests
         rolloutHandler.handleAll();

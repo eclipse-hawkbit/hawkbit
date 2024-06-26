@@ -13,7 +13,6 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 
 /**
  * Builder for {@link Rollout}.
- *
  */
 @FunctionalInterface
 public interface RolloutGroupBuilder {
@@ -22,5 +21,4 @@ public interface RolloutGroupBuilder {
      * @return builder instance
      */
     RolloutGroupCreate create();
-
 }

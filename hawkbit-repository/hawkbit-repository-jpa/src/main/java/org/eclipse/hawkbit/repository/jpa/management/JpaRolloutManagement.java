@@ -22,8 +22,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.validation.ConstraintDeclarationException;
+import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -36,6 +38,7 @@ import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.ContextAware;
+import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
@@ -185,11 +188,33 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Rollout create(@NotNull @Valid RolloutCreate create, int amountGroup, boolean confirmationRequired,
+            @NotNull RolloutGroupConditions conditions) {
+        return create(create, amountGroup, confirmationRequired, conditions, null);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout create(final RolloutCreate rollout, final int amountGroup, final boolean confirmationRequired,
-            final RolloutGroupConditions conditions) {
-        RolloutHelper.verifyRolloutGroupParameter(amountGroup, quotaManagement);
-        final JpaRollout savedRollout = createRollout((JpaRollout) rollout.build());
-        return createRolloutGroups(amountGroup, conditions, savedRollout, confirmationRequired);
+            final RolloutGroupConditions conditions, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
+        if (amountGroup == 0) {
+            if (dynamicRolloutGroupTemplate == null) {
+                throw new ValidationException(
+                    "When amount of groups is 0, the rollouts shall be dynamic and a dynamic group template must be provided");
+            }
+        } else {
+            RolloutHelper.verifyRolloutGroupParameter(amountGroup, quotaManagement);
+        }
+
+        final JpaRollout rolloutRequest = (JpaRollout) rollout.build();
+        if (dynamicRolloutGroupTemplate != null && !rolloutRequest.isDynamic()) {
+            throw new ValidationException("Dynamic group template is only allowed for dynamic rollouts");
+        }
+
+        final JpaRollout savedRollout = createRollout(rolloutRequest, amountGroup == 0);
+        return createRolloutGroups(amountGroup, conditions, savedRollout, confirmationRequired, dynamicRolloutGroupTemplate);
     }
 
     @Override
@@ -199,29 +224,35 @@ public class JpaRolloutManagement implements RolloutManagement {
     public Rollout create(final RolloutCreate rollout, final List<RolloutGroupCreate> groups,
             final RolloutGroupConditions conditions) {
         RolloutHelper.verifyRolloutGroupParameter(groups.size(), quotaManagement);
-        final JpaRollout savedRollout = createRollout((JpaRollout) rollout.build());
+        final JpaRollout rolloutRequest = (JpaRollout) rollout.build();
+        final JpaRollout savedRollout = createRollout(rolloutRequest, false);
         return createRolloutGroups(groups, conditions, savedRollout);
     }
 
-    private JpaRollout createRollout(final JpaRollout rollout) {
+    private JpaRollout createRollout(final JpaRollout rollout, final boolean pureDynamic) {
         WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(rollout);
         final JpaDistributionSet distributionSet = (JpaDistributionSet) rollout.getDistributionSet();
-        final long totalTargets;
-        final String errMsg;
-        if (RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
-            totalTargets = targetManagement.countByFailedInRollout(
-                RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()),
-                    distributionSet.getType().getId());
-            errMsg = "No failed targets in Rollout";
-         } else {
-            totalTargets = targetManagement.countByRsqlAndCompatible(rollout.getTargetFilterQuery(),
-                    distributionSet.getType().getId());
-            errMsg = "Rollout does not match any existing targets";
+
+        if (pureDynamic) {
+            rollout.setTotalTargets(0);
+        } else {
+            final long totalTargets;
+            final String errMsg;
+            if (RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
+                totalTargets = targetManagement.countByFailedInRollout(
+                        RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()),
+                        distributionSet.getType().getId());
+                errMsg = "No failed targets in Rollout";
+            } else {
+                totalTargets = targetManagement.countByRsqlAndCompatible(rollout.getTargetFilterQuery(),
+                        distributionSet.getType().getId());
+                errMsg = "Rollout does not match any existing targets";
+            }
+            if (totalTargets == 0) {
+                throw new ValidationException(errMsg);
+            }
+            rollout.setTotalTargets(totalTargets);
         }
-        if (totalTargets == 0) {
-            throw new ValidationException(errMsg);
-        }
-        rollout.setTotalTargets(totalTargets);
 
         if (((JpaDistributionSetManagement)distributionSetManagement).isImplicitLockApplicable(distributionSet)) {
             distributionSetManagement.lock(distributionSet.getId());
@@ -235,45 +266,71 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private Rollout createRolloutGroups(final int amountOfGroups, final RolloutGroupConditions conditions,
-            final JpaRollout rollout, final boolean isConfirmationRequired) {
+            final JpaRollout rollout, final boolean isConfirmationRequired, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.CREATING);
         RolloutHelper.verifyRolloutGroupConditions(conditions);
 
-        final JpaRollout savedRollout = rollout;
-
-        // we can enforce the 'max targets per group' quota right here because
-        // we want to distribute the targets equally to the different groups
-        assertTargetsPerRolloutGroupQuota(rollout.getTotalTargets() / amountOfGroups);
-
         RolloutGroup lastSavedGroup = null;
-        for (int i = 0; i < amountOfGroups; i++) {
-            final String nameAndDesc = "group-" + (i + 1);
+        if (amountOfGroups == 0) {
+            if (dynamicRolloutGroupTemplate == null) {
+                throw new ConstraintDeclarationException(
+                        "At least one static rollout group must be defined for a static rollout");
+            }
+        } else {
+            // we can enforce the 'max targets per group' quota right here because
+            // we want to distribute the targets equally to the different groups
+            assertTargetsPerRolloutGroupQuota(rollout.getTotalTargets() / amountOfGroups);
+
+            for (int i = 0; i < amountOfGroups; i++) {
+                final String nameAndDesc = "group-" + (i + 1);
+                final JpaRolloutGroup group = new JpaRolloutGroup();
+                group.setName(nameAndDesc);
+                group.setDescription(nameAndDesc);
+                group.setRollout(rollout);
+                group.setParent(lastSavedGroup);
+                group.setStatus(RolloutGroupStatus.CREATING);
+                group.setConfirmationRequired(isConfirmationRequired);
+
+                addSuccessAndErrorConditionsAndActions(group, conditions);
+
+                // total percent of the all devices. Before, it was relative percent -
+                // the percent of the "rest" of the devices. Thus, if you have
+                // first a group 10% (the rest is 90%) and the second group is 50%
+                // then the percent would be 50% of 90% - 45%.
+                // This is very unintuitive and is switched in order to be interpreted easier.
+                // the "new style" (vs "old style") rollouts could be detected by
+                // JpaRollout#isNewStyleTargetPercent (which uses that old style rollouts
+                // have null as dynamic
+                group.setTargetPercentage(100.0F / amountOfGroups);
+
+                lastSavedGroup = rolloutGroupRepository.save(group);
+                publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup, rollout);
+            }
+        }
+
+        if (dynamicRolloutGroupTemplate != null && rollout.isDynamic()) { // if not null then it is a dynamic rollout (already validated), but for sure
+            // create first template rollout group
+            final String nameAndDesc = "group-" + (amountOfGroups + 1) + dynamicRolloutGroupTemplate.getNameSuffix();
             final JpaRolloutGroup group = new JpaRolloutGroup();
             group.setName(nameAndDesc);
             group.setDescription(nameAndDesc);
-            group.setRollout(savedRollout);
+            group.setRollout(rollout);
             group.setParent(lastSavedGroup);
-            group.setStatus(RolloutGroupStatus.CREATING);
+            group.setDynamic(true);
+            group.setStatus(RolloutGroupStatus.READY);
             group.setConfirmationRequired(isConfirmationRequired);
 
             addSuccessAndErrorConditionsAndActions(group, conditions);
 
-            // total percent of the all devices. Before, it was relative percent -
-            // the percent of the "rest" of the devices. Thus, if you have
-            // first a group 10% (the rest is 90%) and the second group is 50%
-            // then the percent would be 50% of 90% - 45%.
-            // This is very unintuitive and is switched in order to be interpreted easier.
-            // the "new style" (vs "old style") rollouts could be detected by
-            // JpaRollout#isNewStyleTargetPercent (which uses that old style rollouts
-            // have null as dynamic
-            group.setTargetPercentage(100.0F / amountOfGroups);
+            // for dynamic groups the target count is kept in target percentage
+            group.setTargetPercentage(dynamicRolloutGroupTemplate.getTargetCount());
 
             lastSavedGroup = rolloutGroupRepository.save(group);
             publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup, rollout);
         }
 
-        savedRollout.setRolloutGroupsCreated(amountOfGroups);
-        return rolloutRepository.save(savedRollout);
+        rollout.setRolloutGroupsCreated(lastSavedGroup.isDynamic() ? amountOfGroups + 1 : amountOfGroups);
+        return rolloutRepository.save(rollout);
     }
 
     private Rollout createRolloutGroups(final List<RolloutGroupCreate> groupList,

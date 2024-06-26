@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.management.JpaRolloutManagement;
@@ -221,7 +222,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         // When all groups are ready the rollout status can be changed to be
         // ready, too.
         if (readyGroups == rolloutGroups.size()) {
-            if (rollout.isDynamic()) {
+            if (rollout.isDynamic() && !rolloutGroups.get(rolloutGroups.size() - 1).isDynamic()) {
                 // add first dynamic group one by using the last as a parent and as a pattern
                 createDynamicGroup(rollout, rolloutGroups.get(rolloutGroups.size() - 1), rolloutGroups.size(), RolloutGroupStatus.READY);
             }
@@ -395,9 +396,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void sendRolloutGroupDeletedEvents(final JpaRollout rollout) {
-        final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId)
-                .collect(Collectors.toList());
-
+        final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId).toList();
         afterCommit.afterCommit(() -> groupIds.forEach(rolloutGroupId -> eventPublisherHolder.getEventPublisher()
                 .publishEvent(new RolloutGroupDeletedEvent(tenantAware.getCurrentTenant(), rolloutGroupId,
                         JpaRolloutGroup.class, eventPublisherHolder.getApplicationId()))));
@@ -425,24 +424,11 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         executeRolloutGroupSuccessAction(rollout, latestRolloutGroup.get(0));
     }
 
-    private static final int DEFAULT_DYNAMIC_GROUP_EXPECTED = 100;
-    private static int expectedDynamicGroupSize(final List<? extends RolloutGroup> rolloutGroups) {
-        int expected = 0;
-        // gets the size of last static group (it is a pattern for dynamic groups)
-        for (final RolloutGroup rolloutGroup : rolloutGroups) {
-            if (rolloutGroup.isDynamic()) {
-                break;
-            }
-            expected = rolloutGroup.getTotalTargets();
-        }
-        return expected <= 0 ? DEFAULT_DYNAMIC_GROUP_EXPECTED /* default if the last static group has been empty */ : expected;
-    }
-
     // fakes getTotalTargets count to match expected for the last dynamic group
     // so the evaluation to use total targets to properly
     private RolloutGroup evalProxy(final RolloutGroup group, final List<JpaRolloutGroup> rolloutGroups) {
         if (group.isDynamic()) {
-            final int expected = expectedDynamicGroupSize(rolloutGroups);
+            final int expected = Math.max((int)group.getTargetPercentage(), 1);
             return (RolloutGroup) Proxy.newProxyInstance(
                     RolloutGroup.class.getClassLoader(),
                     new Class<?>[] {RolloutGroup.class},
@@ -702,8 +688,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             return false;
         }
 
-        // expected as last full group - last static or previously filled in dynamic group
-        final long expectedInGroup = expectedDynamicGroupSize(rolloutGroups);
+        // expected as last full group
+        final long expectedInGroup = Math.max((int)group.getTargetPercentage(), 1);
 
         final long currentlyInGroup = group.getTotalTargets();
         if (currentlyInGroup >= expectedInGroup) {
@@ -739,7 +725,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 updateTotalTargetCount(group, group.getTotalTargets() + newActions);
 
                 if (targetsLeftToAdd == 0) {
-                    // this is filled create a new one in sheduled state
+                    // this is filled create a new one in scheduled state
                     createDynamicGroup(rollout, group, rolloutGroups.size(), RolloutGroupStatus.SCHEDULED);
                     return true;
                 }
@@ -755,19 +741,32 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void createDynamicGroup(final JpaRollout rollout, final RolloutGroup lastGroup, final int groupCount, final RolloutGroupStatus status) {
+        try {
+            RolloutHelper.verifyRolloutGroupParameter(groupCount + 1, quotaManagement);
+        } catch (final AssignmentQuotaExceededException e) {
+            log.warn("Quota exceeded for dynamic rollout group creation: {}. Stop it", e.getMessage());
+            if (isRolloutComplete(rollout)) {
+                rollout.setStatus(RolloutStatus.STOPPED);
+                rolloutRepository.save(rollout);
+            }
+            return;
+        }
         final JpaRolloutGroup group = new JpaRolloutGroup();
-        final String nameAndDesc = "group-" + (groupCount + 1) + "-dynamic";
-        group.setDynamic(true);
+        final String lastGroupWithoutSuffix = "group-" + groupCount;
+        final String suffix = lastGroup.getName().startsWith(lastGroupWithoutSuffix) ? lastGroup.getName().substring(lastGroupWithoutSuffix.length()) : "";
+        final String nameAndDesc = "group-" + (groupCount + 1) + suffix;
         group.setName(nameAndDesc);
         group.setDescription(nameAndDesc);
         group.setRollout(rollout);
         group.setParent(lastGroup);
+        group.setDynamic(true);
         // no need to be filled with targets, directly in ready (if first on create - it will be scheduled on start)
         // or scheduled state (for next dynamic groups)
         group.setStatus(status);
         group.setConfirmationRequired(lastGroup.isConfirmationRequired());
 
-        group.setTargetPercentage(lastGroup.getTargetPercentage());
+        // for dynamic groups the target count is kept in target percentage
+        group.setTargetPercentage(lastGroup.isDynamic() ? lastGroup.getTargetPercentage() : lastGroup.getTotalTargets());
         group.setTargetFilterQuery(lastGroup.getTargetFilterQuery());
 
         addSuccessAndErrorConditionsAndActions(group, lastGroup.getSuccessCondition(),

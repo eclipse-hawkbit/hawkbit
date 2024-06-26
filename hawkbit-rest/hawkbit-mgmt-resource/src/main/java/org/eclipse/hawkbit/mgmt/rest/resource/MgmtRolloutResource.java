@@ -146,8 +146,14 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final RolloutCreate create = MgmtRolloutMapper.fromRequest(entityFactory, rolloutRequestBody, distributionSet);
         final boolean confirmationFlowActive = tenantConfigHelper.isConfirmationFlowEnabled();
 
-        Rollout rollout;
+        final Rollout rollout;
         if (rolloutRequestBody.getGroups() != null) {
+            if (rolloutRequestBody.isDynamic()) {
+                throw new ValidationException("Dynamic rollouts are not supported with groups");
+            }
+            if (rolloutRequestBody.getAmountGroups() != null) {
+                throw new ValidationException("Either 'amountGroups' or 'groups' must be defined in the request");
+            }
             final List<RolloutGroupCreate> rolloutGroups = rolloutRequestBody.getGroups().stream()
                     .map(mgmtRolloutGroup -> {
                         final boolean confirmationRequired = isConfirmationRequiredForGroup(mgmtRolloutGroup,
@@ -156,14 +162,12 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
                                 .confirmationRequired(confirmationRequired);
                     }).collect(Collectors.toList());
             rollout = rolloutManagement.create(create, rolloutGroups, rolloutGroupConditions);
-
         } else if (rolloutRequestBody.getAmountGroups() != null) {
             final boolean confirmationRequired = rolloutRequestBody.getConfirmationRequired() == null
                     ? confirmationFlowActive
                     : rolloutRequestBody.getConfirmationRequired();
             rollout = rolloutManagement.create(create, rolloutRequestBody.getAmountGroups(), confirmationRequired,
-                    rolloutGroupConditions);
-
+                    rolloutGroupConditions, MgmtRolloutMapper.fromRequest(rolloutRequestBody.getDynamicGroupTemplate()));
         } else {
             throw new ValidationException("Either 'amountGroups' or 'groups' must be defined in the request");
         }
@@ -332,8 +336,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final RolloutCreate create = MgmtRolloutMapper.fromRetriedRollout(entityFactory, rolloutForRetry);
         final RolloutGroupConditions groupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
-        final Rollout retriedRollout = rolloutManagement.create(create, 1, false,
-            groupConditions);
+        final Rollout retriedRollout = rolloutManagement.create(create, 1, false, groupConditions, null);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(MgmtRolloutMapper.toResponseRollout(retriedRollout, true));
     }

@@ -14,6 +14,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.rollout.AbstractMgmtRolloutConditionsEntity;
@@ -26,12 +27,14 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPos
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutSuccessAction;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutSuccessAction.SuccessAction;
+import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtDynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
@@ -157,10 +160,19 @@ final class MgmtRolloutMapper {
     }
 
     static RolloutGroupCreate fromRequest(final EntityFactory entityFactory, final MgmtRolloutGroup restRequest) {
-
         return entityFactory.rolloutGroup().create().name(restRequest.getName())
                 .description(restRequest.getDescription()).targetFilterQuery(restRequest.getTargetFilterQuery())
                 .targetPercentage(restRequest.getTargetPercentage()).conditions(fromRequest(restRequest, false));
+    }
+
+    static DynamicRolloutGroupTemplate fromRequest(final MgmtDynamicRolloutGroupTemplate restRequest) {
+        if (restRequest == null) {
+            return null;
+        }
+        return DynamicRolloutGroupTemplate.builder()
+                .nameSuffix(Optional.ofNullable(restRequest.getNameSuffix()).orElse(""))
+                .targetCount(restRequest.getTargetCount())
+                .build();
     }
 
     static RolloutGroupConditions fromRequest(final AbstractMgmtRolloutConditionsEntity restRequest,

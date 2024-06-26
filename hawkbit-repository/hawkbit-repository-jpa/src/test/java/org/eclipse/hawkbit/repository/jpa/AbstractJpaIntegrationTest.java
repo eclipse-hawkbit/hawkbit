@@ -174,28 +174,28 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     protected void assertRollout(final Rollout rollout, final boolean dynamic, final Rollout.RolloutStatus status, final int groupCreated, final long totalTargets) {
         final Rollout refreshed = refresh(rollout);
-        assertThat(refreshed.isDynamic()).isEqualTo(dynamic);
-        assertThat(refreshed.getStatus()).isEqualTo(status);
-        assertThat(refreshed.getRolloutGroupsCreated()).isEqualTo(groupCreated);
-        assertThat(refreshed.getTotalTargets()).isEqualTo(totalTargets);
+        assertThat(refreshed.isDynamic()).as("Is dynamic").isEqualTo(dynamic);
+        assertThat(refreshed.getStatus()).as("Status").isEqualTo(status);
+        assertThat(refreshed.getRolloutGroupsCreated()).as("Groups created").isEqualTo(groupCreated);
+        assertThat(refreshed.getTotalTargets()).as("Total targets").isEqualTo(totalTargets);
     }
 
     protected void assertGroup(final RolloutGroup group, final boolean dynamic, final RolloutGroup.RolloutGroupStatus status, final long totalTargets) {
         final RolloutGroup refreshed = refresh(group);
-        assertThat(refreshed.isDynamic()).isEqualTo(dynamic);
-        assertThat(refreshed.getStatus()).isEqualTo(status);
-        assertThat(refreshed.getTotalTargets()).isEqualTo(totalTargets);
+        assertThat(refreshed.isDynamic()).as("Is dynamic").isEqualTo(dynamic);
+        assertThat(refreshed.getStatus()).as("Status").isEqualTo(status);
+        assertThat(refreshed.getTotalTargets()).as("Total targets").isEqualTo(totalTargets);
     }
 
     protected Page<JpaAction> assertAndGetRunning(final Rollout rollout, final int count) {
         final Page<JpaAction> running = actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.RUNNING);
-        assertThat(running.getTotalElements()).isEqualTo(count);
+        assertThat(running.getTotalElements()).as("Action count").isEqualTo(count);
         return running;
     }
 
     protected void assertScheduled(final Rollout rollout, final int count) {
         final Page<JpaAction> running = actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.SCHEDULED);
-        assertThat(running.getTotalElements()).isEqualTo(count);
+        assertThat(running.getTotalElements()).as("Action count").isEqualTo(count);
     }
 
     protected void finishAction(final Action action) {

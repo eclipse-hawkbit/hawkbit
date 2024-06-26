@@ -17,6 +17,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
+import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtDynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -86,6 +87,10 @@ public class MgmtRolloutRestRequestBodyPost extends AbstractMgmtRolloutCondition
     @JsonProperty
     @Schema(example = "true")
     private boolean dynamic;
+
+    @JsonProperty
+    @Schema(description = "Template for dynamic groups (only if dynamic flag is true)")
+    private MgmtDynamicRolloutGroupTemplate dynamicGroupTemplate;
 
     @JsonProperty
     @Schema(description = """
