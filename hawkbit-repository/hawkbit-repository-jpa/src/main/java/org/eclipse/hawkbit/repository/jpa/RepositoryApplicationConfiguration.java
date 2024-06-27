@@ -653,10 +653,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final JpaProperties properties, final TenantConfigurationManagement tenantConfigurationManagement,
             final RepositoryProperties repositoryProperties,
-            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware) {
+            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final AuditorAware<String> auditorAware) {
         return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetManagement,
                 virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase(),
-                tenantConfigurationManagement, repositoryProperties, systemSecurityContext, contextAware);
+                tenantConfigurationManagement, repositoryProperties, systemSecurityContext, contextAware, auditorAware);
     }
 
 
@@ -813,11 +813,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
                                               final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
                                               final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
                                               final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
-                                              final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
+                                              final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final AuditorAware<String> auditorAware,
                                               final JpaProperties properties, final RepositoryProperties repositoryProperties) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetManagement, targetRepository, actionStatusRepository, auditorProvider,
                 eventPublisherHolder, afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement,
-                quotaManagement, systemSecurityContext, tenantAware, properties.getDatabase(), repositoryProperties);
+                quotaManagement, systemSecurityContext, tenantAware, auditorAware, properties.getDatabase(), repositoryProperties);
     }
 
     @Bean
