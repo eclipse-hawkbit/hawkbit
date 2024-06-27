@@ -149,6 +149,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final SystemSecurityContext systemSecurityContext;
     private final TenantAware tenantAware;
+    private final AuditorAware<String> auditorAware;
     private final Database database;
     private final RetryTemplate retryTemplate;
 
@@ -158,8 +159,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
-            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database,
-            final RepositoryProperties repositoryProperties) {
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final AuditorAware<String> auditorAware,
+            final Database database, final RepositoryProperties repositoryProperties) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.entityManager = entityManager;
         this.distributionSetManagement = distributionSetManagement;
@@ -176,6 +177,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
+        this.auditorAware = auditorAware;
         this.database = database;
         this.retryTemplate = createRetryTemplate();
     }
@@ -191,8 +193,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .map(entry -> DeploymentManagement.deploymentRequest(entry.getKey(), entry.getValue()).build())
                 .toList();
 
-        return assignDistributionSets(tenantAware.getCurrentUsername(), deploymentRequests, null,
-                offlineDsAssignmentStrategy);
+        return assignDistributionSets(
+                auditorAware.getCurrentAuditor().orElse(tenantAware.getCurrentUsername()),
+                deploymentRequests, null, offlineDsAssignmentStrategy);
     }
 
     @Override
