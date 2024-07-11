@@ -68,7 +68,7 @@ public final class PagingUtility {
             // default
             return Sort.by(Direction.ASC, TargetTypeFields.ID.getFieldName());
         }
-        return Sort.by(SortUtility.parse(TargetFields.class, sortParam));
+        return Sort.by(SortUtility.parse(TargetTypeFields.class, sortParam));
     }
 
     static Sort sanitizeTagSortParam(final String sortParam) {
