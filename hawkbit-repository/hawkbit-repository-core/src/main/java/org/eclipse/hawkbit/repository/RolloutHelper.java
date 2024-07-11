@@ -110,7 +110,7 @@ public final class RolloutHelper {
      */
     public static String getTargetFilterQuery(final String targetFilter, final Long createdAt) {
         if (createdAt != null) {
-            return targetFilter + ";createdat=le=" + createdAt.toString();
+            return "(" + targetFilter + ");createdat=le=" + createdAt;
         }
         return targetFilter;
     }
