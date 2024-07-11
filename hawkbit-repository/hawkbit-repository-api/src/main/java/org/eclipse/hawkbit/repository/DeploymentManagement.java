@@ -498,6 +498,14 @@ public interface DeploymentManagement {
     long startScheduledActionsByRolloutGroupParent(long rolloutId, long distributionSetId, Long rolloutGroupParentId);
 
     /**
+     * Handles the target assignments. Shall be part of same group
+     *
+     * @param rolloutGroupActions rollouts group actions part of a same group
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    void startScheduledActions(final List<Action> rolloutGroupActions);
+
+    /**
      * Returns {@link DistributionSet} that is assigned to given {@link Target}.
      *
      * @param controllerId

@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -711,7 +712,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             do {
                 // Add up to TRANSACTION_TARGETS actions of the left targets
                 // In case a TransactionException is thrown this loop aborts
-                final long createdActions = createActionsForDynamicGroupInNewTransaction(rollout, group, groupTargetFilter,
+                final int createdActions = createActionsForDynamicGroupInNewTransaction(rollout, group, groupTargetFilter,
                         Math.min(TRANSACTION_TARGETS, targetsLeftToAdd));
                 if (createdActions == 0) {
                     break; // no more to assign
@@ -781,9 +782,9 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         ((JpaRolloutManagement) rolloutManagement).publishRolloutGroupCreatedEventAfterCommit(savedGroup, rollout);
     }
 
-    private Long createActionsForDynamicGroupInNewTransaction(final JpaRollout rollout, final RolloutGroup group,
+    private int createActionsForDynamicGroupInNewTransaction(final JpaRollout rollout, final RolloutGroup group,
             final String targetFilter, final long limit) {
-        return DeploymentHelper.runInNewTransaction(txManager, "createActionsForRolloutDynamicGroup", status -> {
+        final List<Action> newActions = DeploymentHelper.runInNewTransaction(txManager, "createActionsForRolloutDynamicGroup", status -> {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final Slice<Target> targets = targetManagement.findByNotInGEGroupAndNotInActiveActionGEWeightOrInRolloutAndTargetFilterQueryAndCompatibleAndUpdatable(
                     pageRequest,
@@ -791,15 +792,21 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                     rolloutGroupRepository.findByRolloutOrderByIdAsc(rollout).get(0).getId(),
                     targetFilter, rollout.getDistributionSet().getType());
 
-            if (targets.getNumberOfElements() > 0) {
-                final DistributionSet distributionSet = rollout.getDistributionSet();
-                final ActionType actionType = rollout.getActionType();
-                final long forceTime = rollout.getForcedTime();
-                createActions(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
+            if (targets.getNumberOfElements() == 0) {
+                return Collections.emptyList();
             }
 
-            return Long.valueOf(targets.getNumberOfElements());
+            final DistributionSet distributionSet = rollout.getDistributionSet();
+            final ActionType actionType = rollout.getActionType();
+            final long forceTime = rollout.getForcedTime();
+            return createActions(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
         });
+
+        if (!newActions.isEmpty()) {
+            deploymentManagement.startScheduledActions(newActions);
+        }
+
+        return newActions.size();
     }
 
     /**
@@ -867,7 +874,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
      * scheduled actions the scheduled actions gets canceled. A scheduled action
      * is created in-active for static and running for dynamic groups.
      */
-    private void createActions(final Collection<Target> targets, final DistributionSet distributionSet,
+    private List<Action> createActions(final Collection<Target> targets, final DistributionSet distributionSet,
             final ActionType actionType, final Long forcedTime, final Rollout rollout,
             final RolloutGroup rolloutGroup) {
         // cancel all current scheduled actions for this target. E.g. an action
@@ -876,22 +883,27 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         // created.
         final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
         deploymentManagement.cancelInactiveScheduledActionsForTargets(targetIds);
-        targets.forEach(target -> {
-            assertActionsPerTargetQuota(target, 1);
+        return targets.stream()
+                .map(target -> {
+                    assertActionsPerTargetQuota(target, 1);
 
-            final JpaAction action = new JpaAction();
-            action.setTarget(target);
-            action.setActive(rolloutGroup.isDynamic());
-            action.setDistributionSet(distributionSet);
-            action.setActionType(actionType);
-            action.setForcedTime(forcedTime);
-            action.setStatus(rolloutGroup.isDynamic() ? Status.RUNNING : Status.SCHEDULED);
-            action.setRollout(rollout);
-            action.setRolloutGroup(rolloutGroup);
-            action.setInitiatedBy(rollout.getCreatedBy());
-            rollout.getWeight().ifPresent(action::setWeight);
-            actionRepository.save(action);
-        });
+                    final JpaAction action = new JpaAction();
+                    action.setTarget(target);
+                    action.setActive(false);
+                    action.setDistributionSet(distributionSet);
+                    action.setActionType(actionType);
+                    action.setForcedTime(forcedTime);
+                    action.setStatus(Status.SCHEDULED);
+                    action.setRollout(rollout);
+                    action.setRolloutGroup(rolloutGroup);
+                    action.setInitiatedBy(rollout.getCreatedBy());
+                    rollout.getWeight().ifPresent(action::setWeight);
+                    actionRepository.save(action);
+
+                    return action;
+                })
+                .map(Action.class::cast)
+                .toList();
     }
 
     /**
