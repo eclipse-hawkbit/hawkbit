@@ -275,9 +275,14 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         // lock/unlock ONLY if locked flag is present!
         if (Boolean.TRUE.equals(update.locked())) {
-            set.lock();
+            if (!set.isLocked()) {
+                lockSoftwareModules(set);
+                set.lock();
+            }
         } else if (Boolean.FALSE.equals(update.locked())) {
-            set.unlock();
+            if (set.isLocked()) {
+                set.unlock();
+            }
         }
 
         if (update.isRequiredMigrationStep() != null
@@ -680,13 +685,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public void lock(final long id) {
         final JpaDistributionSet distributionSet = getById(id);
         if (!distributionSet.isLocked()) {
-            distributionSet.getModules().forEach(module -> {
-                if (!module.isLocked()) {
-                    final JpaSoftwareModule jpaSoftwareModule = (JpaSoftwareModule)module;
-                    jpaSoftwareModule.lock();
-                    softwareModuleRepository.save(jpaSoftwareModule);
-                }
-            });
+            lockSoftwareModules(distributionSet);
             distributionSet.lock();
             distributionSetRepository.save(distributionSet);
         }
@@ -837,6 +836,16 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         // finally - implicit lock is applicable
         return true;
+    }
+
+    private void lockSoftwareModules(final JpaDistributionSet distributionSet) {
+        distributionSet.getModules().forEach(module -> {
+            if (!module.isLocked()) {
+                final JpaSoftwareModule jpaSoftwareModule = (JpaSoftwareModule)module;
+                jpaSoftwareModule.lock();
+                softwareModuleRepository.save(jpaSoftwareModule);
+            }
+        });
     }
 
     private JpaDistributionSet getById(final long id) {
