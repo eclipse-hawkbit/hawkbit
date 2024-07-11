@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -43,34 +44,30 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("daA");
         target = (JpaTarget) targetManagement
                 .create(entityFactory.target().create().controllerId("targetId123").description("targetId123"));
-        action = new JpaAction();
-        action.setActionType(ActionType.SOFT);
-        action.setDistributionSet(dsA);
-        action.setTarget(target);
-        action.setStatus(Status.RUNNING);
-        action.setWeight(45);
-        action.setInitiatedBy(tenantAware.getCurrentUsername());
+
+        action = newJpaAction(dsA, false, null);
+        for (int i = 0; i < 10; i++) {
+            newJpaAction(dsA, i % 2 == 0, i % 2 == 0 ? "extRef" : "extRef2");
+        }
+    }
+
+    private @NotNull JpaAction newJpaAction(final DistributionSet dsA, final boolean active, final String extRef) {
+        final JpaAction newAction = new JpaAction();
+        newAction.setActionType(ActionType.SOFT);
+        newAction.setDistributionSet(dsA);
+        newAction.setActive(active);
+        newAction.setStatus(Status.RUNNING);
+        newAction.setTarget(target);
+        newAction.setWeight(45);
+        newAction.setInitiatedBy(tenantAware.getCurrentUsername());
+        if (extRef != null) {
+            newAction.setExternalRef(extRef);
+        }
+        actionRepository.save(newAction);
+
         target.addAction(action);
 
-        actionRepository.save(action);
-        for (int i = 0; i < 10; i++) {
-            final JpaAction newAction = new JpaAction();
-            newAction.setActionType(ActionType.SOFT);
-            newAction.setDistributionSet(dsA);
-            newAction.setActive((i % 2) == 0);
-            newAction.setStatus(Status.RUNNING);
-            newAction.setTarget(target);
-            newAction.setWeight(45);
-            newAction.setInitiatedBy(tenantAware.getCurrentUsername());
-            if ((i % 2) == 0) {
-                newAction.setExternalRef("extRef");
-            } else {
-                newAction.setExternalRef("extRef2");
-            }
-            actionRepository.save(newAction);
-            target.addAction(newAction);
-        }
-
+        return newAction;
     }
 
     @Test
@@ -116,11 +113,11 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expectedEntities) {
-
-        final Slice<Action> findEnitity = deploymentManagement.findActionsByTarget(rsqlParam, target.getControllerId(),
+        final Slice<Action> findEntity = deploymentManagement.findActionsByTarget(rsqlParam, target.getControllerId(),
                 PageRequest.of(0, 100));
         final long countAllEntities = deploymentManagement.countActionsByTarget(rsqlParam, target.getControllerId());
-        assertThat(findEnitity).isNotNull();
+        assertThat(findEntity).isNotNull();
+        assertThat(findEntity.getContent().size()).isEqualTo(expectedEntities);
         assertThat(countAllEntities).isEqualTo(expectedEntities);
     }
 }

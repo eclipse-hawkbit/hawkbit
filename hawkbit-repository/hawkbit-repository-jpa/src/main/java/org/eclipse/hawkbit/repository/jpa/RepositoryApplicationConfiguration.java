@@ -157,7 +157,7 @@ import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;
-import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactoryHolder;
+import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
@@ -1016,13 +1016,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * Obtains the {@link RsqlVisitorFactoryHolder} bean.
+     * Obtains the {@link RsqlConfigHolder} bean.
      *
-     * @return The {@link RsqlVisitorFactoryHolder} singleton.
+     * @return The {@link RsqlConfigHolder} singleton.
      */
     @Bean
-    RsqlVisitorFactoryHolder rsqlVisitorFactoryHolder() {
-        return RsqlVisitorFactoryHolder.getInstance();
+    RsqlConfigHolder rsqlVisitorFactoryHolder() {
+        return RsqlConfigHolder.getInstance();
     }
 
     /**

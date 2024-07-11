@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Set;
 
@@ -24,7 +25,7 @@ import org.apache.commons.lang3.text.StrLookup;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactoryHolder;
+import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.springframework.data.jpa.domain.Specification;
@@ -80,62 +81,46 @@ public final class RSQLUtility {
      * query. The specification can be used to filter for JPA entities with the
      * given RSQL query.
      *
-     * @param rsql
-     *            the rsql query to be parsed
-     * @param fieldNameProvider
-     *            the enum class type which implements the
-     *            {@link FieldNameProvider}
-     * @param virtualPropertyReplacer
-     *            holds the logic how the known macros have to be resolved; may
-     *            be <code>null</code>
-     * @param database
-     *            in use
+     * @param rsql the rsql query to be parsed
+     * @param fieldNameProvider the enum class type which implements the {@link FieldNameProvider}
+     * @param virtualPropertyReplacer holds the logic how the known macros have to be resolved; may be <code>null</code>
+     * @param database database in use
      *
-     * @return an specification which can be used with JPA
-     * @throws RSQLParameterUnsupportedFieldException
-     *             if a field in the RSQL string is used but not provided by the
-     *             given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException
-     *             if the RSQL syntax is wrong
-     *
+     * @return a specification which can be used with JPA
+     * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
+     *         given {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
-    public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> buildRsqlSpecification(final String rsql,
-            final Class<A> fieldNameProvider, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final Database database) {
+    public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> buildRsqlSpecification(
+            final String rsql, final Class<A> fieldNameProvider,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
         return new RSQLSpecification<>(rsql, fieldNameProvider, virtualPropertyReplacer, database);
     }
 
     /**
      * Validates the RSQL string
      * 
-     * @param rsql
-     *            RSQL string to validate
+     * @param rsql RSQL string to validate
      * @param fieldNameProvider
      * 
-     * @throws RSQLParserException
-     *             if RSQL syntax is invalid
-     * @throws RSQLParameterUnsupportedFieldException
-     *             if RSQL key is not allowed
+     * @throws RSQLParserException if RSQL syntax is invalid
+     * @throws RSQLParameterUnsupportedFieldException if RSQL key is not allowed
      */
-    public static <A extends Enum<A> & FieldNameProvider> void validateRsqlFor(final String rsql,
-            final Class<A> fieldNameProvider) {
-        final RSQLVisitor<Void, String> visitor = getValidationRsqlVisitor(fieldNameProvider);
+    public static <A extends Enum<A> & FieldNameProvider> void validateRsqlFor(
+            final String rsql, final Class<A> fieldNameProvider) {
+        final RSQLVisitor<Void, String> visitor =
+                RsqlConfigHolder.getInstance().getRsqlVisitorFactory().validationRsqlVisitor(fieldNameProvider);
         final Node rootNode = parseRsql(rsql);
         rootNode.accept(visitor);
     }
 
-    private static <A extends Enum<A> & FieldNameProvider> RSQLVisitor<Void, String> getValidationRsqlVisitor(
-            final Class<A> fieldNameProvider) {
-        return RsqlVisitorFactoryHolder.getInstance().getRsqlVisitorFactory().validationRsqlVisitor(fieldNameProvider);
-    }
-
     private static Node parseRsql(final String rsql) {
+        log.debug("Parsing rsql string {}", rsql);
         try {
-            log.debug("Parsing rsql string {}", rsql);
             final Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
-            return new RSQLParser(operators).parse(rsql.toLowerCase());
+            return new RSQLParser(operators).parse(RsqlConfigHolder.getInstance().isIgnoreCase() ? rsql.toLowerCase() : rsql);
         } catch (final IllegalArgumentException e) {
-            throw new RSQLParameterSyntaxException("rsql filter must not be null", e);
+            throw new RSQLParameterSyntaxException("RSQL filter must not be null", e);
         } catch (final RSQLParserException e) {
             throw new RSQLParameterSyntaxException(e);
         }
@@ -143,6 +128,7 @@ public final class RSQLUtility {
 
     private static final class RSQLSpecification<A extends Enum<A> & FieldNameProvider, T> implements Specification<T> {
 
+        @Serial
         private static final long serialVersionUID = 1L;
 
         private final String rsql;
@@ -164,15 +150,13 @@ public final class RSQLUtility {
             query.distinct(true);
 
             final JpaQueryRsqlVisitor<A, T> jpqQueryRSQLVisitor = new JpaQueryRsqlVisitor<>(root, cb, enumType,
-                    virtualPropertyReplacer, database, query);
+                    virtualPropertyReplacer, database, query, RsqlConfigHolder.getInstance().isIgnoreCase());
             final List<Predicate> accept = rootNode.<List<Predicate>, String> accept(jpqQueryRSQLVisitor);
 
             if (!CollectionUtils.isEmpty(accept)) {
-                return cb.and(accept.toArray(new Predicate[accept.size()]));
+                return cb.and(accept.toArray(new Predicate[0]));
             }
             return cb.conjunction();
-
         }
     }
-
 }
