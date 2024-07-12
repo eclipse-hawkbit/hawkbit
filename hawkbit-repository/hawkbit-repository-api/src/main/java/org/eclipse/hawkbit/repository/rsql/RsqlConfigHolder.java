@@ -25,11 +25,20 @@ public final class RsqlConfigHolder {
     private static final RsqlConfigHolder SINGLETON = new RsqlConfigHolder();
 
     /**
-     * If RSQL operands and string values shall ignore case. If ignore case operators as
-     * "aND" will be accepted and "x == ax" will match "x == aX"
+     * If RSQL comparison operators shall ignore the case. If ignore case is <code>true</code>
+     * "x == ax" will match "x == aX"
      */
     @Value("${hawkbit.rsql.ignoreCase:true}")
     private boolean ignoreCase;
+    /**
+     * Declares if the database is case-insensitive, by default assumes <code>false</code>. In case it is case-sensitive and,
+     * {@link #ignoreCase} is set to <code>true</code> the SQL queries use upper case comparisons to ignore case.
+     *
+     * If the database is declared as case-sensitive and ignoreCase is set to <code>false</code> the RSQL queries shall use strict
+     * syntax - i.e. 'and' instead of 'AND' / 'aND'. Otherwise, the queries would be case-insensitive regarding operators.
+     */
+    @Value("${hawkbit.rsql.caseInsensitiveDB:false}")
+    private boolean caseInsensitiveDB;
     @Autowired
     private RsqlVisitorFactory rsqlVisitorFactory;
 

@@ -75,7 +75,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
     private final CriteriaBuilder cb;
     private final CriteriaQuery<?> query;
     private final Database database;
-    private final boolean ignoreCase;
+    private final boolean ensureIgnoreCase;
     private final Root<T> root;
     private final SimpleTypeConverter simpleTypeConverter;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
@@ -86,7 +86,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
 
     public JpaQueryRsqlVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
-            final CriteriaQuery<?> query, final boolean ignoreCase) {
+            final CriteriaQuery<?> query, final boolean ensureIgnoreCase) {
         super(enumType);
         this.root = root;
         this.cb = cb;
@@ -94,7 +94,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.simpleTypeConverter = new SimpleTypeConverter();
         this.database = database;
-        this.ignoreCase = ignoreCase;
+        this.ensureIgnoreCase = ensureIgnoreCase;
     }
 
     private void beginLevel(final boolean isOr) {
@@ -583,9 +583,9 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
     }
 
     private Expression<String> caseWise(final CriteriaBuilder cb, final Expression<String> expression) {
-        return ignoreCase ? cb.upper(expression) : expression;
+        return ensureIgnoreCase ? cb.upper(expression) : expression;
     }
     private String caseWise(final String str) {
-        return ignoreCase ? str.toUpperCase() : str;
+        return ensureIgnoreCase ? str.toUpperCase() : str;
     }
 }

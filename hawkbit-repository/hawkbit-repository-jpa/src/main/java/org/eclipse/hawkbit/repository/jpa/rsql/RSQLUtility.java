@@ -118,7 +118,8 @@ public final class RSQLUtility {
         log.debug("Parsing rsql string {}", rsql);
         try {
             final Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
-            return new RSQLParser(operators).parse(RsqlConfigHolder.getInstance().isIgnoreCase() ? rsql.toLowerCase() : rsql);
+            return new RSQLParser(operators).parse(
+                    RsqlConfigHolder.getInstance().isCaseInsensitiveDB() || RsqlConfigHolder.getInstance().isIgnoreCase() ? rsql.toLowerCase() : rsql);
         } catch (final IllegalArgumentException e) {
             throw new RSQLParameterSyntaxException("RSQL filter must not be null", e);
         } catch (final RSQLParserException e) {
@@ -150,8 +151,9 @@ public final class RSQLUtility {
             query.distinct(true);
 
             final JpaQueryRsqlVisitor<A, T> jpqQueryRSQLVisitor = new JpaQueryRsqlVisitor<>(root, cb, enumType,
-                    virtualPropertyReplacer, database, query, RsqlConfigHolder.getInstance().isIgnoreCase());
-            final List<Predicate> accept = rootNode.<List<Predicate>, String> accept(jpqQueryRSQLVisitor);
+                    virtualPropertyReplacer, database, query,
+                    !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase());
+            final List<Predicate> accept = rootNode.accept(jpqQueryRSQLVisitor);
 
             if (!CollectionUtils.isEmpty(accept)) {
                 return cb.and(accept.toArray(new Predicate[0]));
