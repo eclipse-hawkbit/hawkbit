@@ -64,7 +64,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
@@ -645,44 +644,43 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         long totalActionsCount = 0L;
         long lastStartedActionsCount;
         do {
-            lastStartedActionsCount = startScheduledActionsByRolloutGroupParentInNewTransaction(rolloutId,
-                    distributionSetId, rolloutGroupParentId, ACTION_PAGE_LIMIT);
+            lastStartedActionsCount = DeploymentHelper.runInNewTransaction(
+                    txManager,
+                    "startScheduledActions-" + rolloutId,
+                    status -> {
+                        final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(
+                                rolloutId, rolloutGroupParentId, ACTION_PAGE_LIMIT);
+
+                        if (rolloutGroupActions.getContent().isEmpty()) {
+                            return 0L;
+                        }
+
+                        // self invocation won't check @PreAuthorize but it is already checked for the method
+                        startScheduledActions(rolloutGroupActions.getContent());
+
+                        return rolloutGroupActions.getTotalElements();
+                    });
             totalActionsCount += lastStartedActionsCount;
         } while (lastStartedActionsCount > 0);
 
         return totalActionsCount;
     }
 
-    private long startScheduledActionsByRolloutGroupParentInNewTransaction(final Long rolloutId,
-            final Long distributionSetId, final Long rolloutGroupParentId, final int limit) {
-        return DeploymentHelper.runInNewTransaction(txManager, "startScheduledActions-" + rolloutId, status -> {
-            final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rolloutId,
-                    rolloutGroupParentId, limit);
 
-            if (rolloutGroupActions.getContent().isEmpty()) {
-                return 0L;
-            }
-
-            final List<Action> newTargetAssignments = handleTargetAssignments(rolloutGroupActions);
-
-            if (!newTargetAssignments.isEmpty()) {
-                onlineDsAssignmentStrategy.sendDeploymentEvents(distributionSetId, newTargetAssignments);
-            }
-
-            return rolloutGroupActions.getTotalElements();
-        });
-    }
-
-    private List<Action> handleTargetAssignments(final Page<Action> rolloutGroupActions) {
+    @Override
+    public void startScheduledActions(final List<Action> rolloutGroupActions) {
         // Close actions already assigned and collect pending assignments
-        final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.getContent().stream()
+        final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.stream()
                 .map(JpaAction.class::cast).map(this::closeActionIfSetWasAlreadyAssigned).filter(Objects::nonNull)
                 .collect(Collectors.toList());
         if (pendingTargetAssignments.isEmpty()) {
-            return new ArrayList<>(pendingTargetAssignments);
+            return;
         }
         // check if old actions needs to be canceled first
-        return startScheduledActionsAndHandleOpenCancellationFirst(pendingTargetAssignments);
+        final List<Action> newTargetAssignments = startScheduledActionsAndHandleOpenCancellationFirst(pendingTargetAssignments);
+        if (!newTargetAssignments.isEmpty()) {
+            onlineDsAssignmentStrategy.sendDeploymentEvents(newTargetAssignments.get(0).getDistributionSet().getId(), newTargetAssignments);
+        }
     }
 
     private Page<Action> findActionsByRolloutAndRolloutGroupParent(final Long rolloutId,
