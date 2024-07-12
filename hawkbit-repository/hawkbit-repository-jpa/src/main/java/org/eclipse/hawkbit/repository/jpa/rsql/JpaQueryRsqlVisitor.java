@@ -352,38 +352,19 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
         }
     }
 
-    private Predicate getOutPredicate(final List<Object> transformedValues, final String finalProperty,
+    private Predicate getOutPredicate(
+            final List<Object> transformedValues, final String finalProperty,
             final A enumField, final Path<Object> fieldPath) {
-
         final String[] fieldNames = enumField.getSubAttributes(finalProperty);
-        final List<String> outParams = transformedValues.stream().filter(String.class::isInstance)
-                .map(String.class::cast).map(String::toUpperCase).collect(Collectors.toList());
 
         if (isSimpleField(fieldNames, enumField.isMap())) {
-            return toNullOrNotInPredicate(fieldPath, transformedValues, outParams);
+            final Path<String> pathOfString = pathOfString(fieldPath);
+            return cb.or(cb.isNull(pathOfString), cb.not(in(pathOfString, transformedValues)));
         }
 
         clearOuterJoinsIfNotNeeded();
 
-        return toOutWithSubQueryPredicate(fieldNames, transformedValues, enumField, outParams);
-    }
-
-    private Predicate toNullOrNotInPredicate(final Path<Object> fieldPath, final List<Object> transformedValues,
-            final List<String> outParams) {
-
-        final Path<String> pathOfString = pathOfString(fieldPath);
-        final Predicate inPredicate = outParams.isEmpty() ? fieldPath.in(transformedValues)
-                : caseWise(cb, pathOfString).in(outParams);
-
-        return cb.or(cb.isNull(pathOfString), cb.not(inPredicate));
-    }
-
-    private Predicate toOutWithSubQueryPredicate(final String[] fieldNames, final List<Object> transformedValues,
-            final A enumField, final List<String> outParams) {
-        final Function<Expression<String>, Predicate> inPredicateProvider = expressionToCompare -> outParams.isEmpty()
-                ? caseWise(cb, expressionToCompare).in(transformedValues)
-                : caseWise(cb, expressionToCompare).in(outParams);
-        return toNotExistsSubQueryPredicate(fieldNames, enumField, inPredicateProvider);
+        return toNotExistsSubQueryPredicate(fieldNames, enumField, expressionToCompare -> in(expressionToCompare, transformedValues));
     }
 
     private Path<Object> getMapValueFieldPath(final A enumField, final Path<Object> fieldPath) {
@@ -440,19 +421,19 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
             final String finalProperty, final A enumField) {
 
         if (transformedValue == null) {
-            return toNotNullPredicate(fieldPath);
+            return cb.isNotNull(pathOfString(fieldPath));
         }
 
         if ((transformedValue instanceof String transformedValueStr) && !NumberUtils.isCreatable(transformedValueStr)) {
             if (ObjectUtils.isEmpty(transformedValue)) {
-                return toNotNullAndNotEmptyPredicate(fieldPath);
+                return cb.and(cb.isNotNull(pathOfString(fieldPath)), cb.notEqual(pathOfString(fieldPath), ""));
             }
 
             final String[] fieldNames = enumField.getSubAttributes(finalProperty);
 
             if (isSimpleField(fieldNames, enumField.isMap())) {
                 if (isPattern(transformedValueStr)) { // a pattern, use like
-                    return toNullOrNotLikePredicate(fieldPath, toSQL(transformedValueStr));
+                    return cb.or(cb.isNull(pathOfString(fieldPath)), notLike(pathOfString(fieldPath), toSQL(transformedValueStr)));
                 } else {
                     return toNullOrNotEqualPredicate(fieldPath, transformedValueStr);
                 }
@@ -461,9 +442,9 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
             clearOuterJoinsIfNotNeeded();
 
             if (isPattern(transformedValueStr)) { // a pattern, use like
-                return toNotLikeWithSubQueryPredicate(enumField, toSQL(transformedValueStr), fieldNames);
+                return toNotExistsSubQueryPredicate(fieldNames, enumField, expressionToCompare -> like(expressionToCompare, toSQL(transformedValueStr)));
             } else {
-                return toNotEqualWithSubQueryPredicate(enumField, transformedValueStr, fieldNames);
+                return toNotExistsSubQueryPredicate(fieldNames, enumField, expressionToCompare -> equal(expressionToCompare, transformedValueStr));
             }
         }
 
@@ -476,38 +457,12 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
         }
     }
 
-    private Predicate toNotNullPredicate(final Path<Object> fieldPath) {
-        return cb.isNotNull(pathOfString(fieldPath));
-    }
-
-    private Predicate toNullOrNotLikePredicate(final Path<Object> fieldPath, final String sqlValue) {
-        return cb.or(cb.isNull(pathOfString(fieldPath)), notLike(pathOfString(fieldPath), sqlValue));
-    }
-
     private Predicate toNullOrNotEqualPredicate(final Path<Object> fieldPath, final Object transformedValue) {
         return cb.or(
                 cb.isNull(pathOfString(fieldPath)),
                 transformedValue instanceof String transformedValueStr
                         ? notEqual(pathOfString(fieldPath), transformedValueStr)
                         : cb.notEqual(fieldPath, transformedValue));
-    }
-
-    private Predicate toNotNullAndNotEmptyPredicate(final Path<Object> fieldPath) {
-        return cb.and(cb.isNotNull(pathOfString(fieldPath)), cb.notEqual(pathOfString(fieldPath), ""));
-    }
-
-    private Predicate toNotLikeWithSubQueryPredicate(final A enumField, final String sqlValue,
-            final String[] fieldNames) {
-        final Function<Expression<String>, Predicate> likePredicateProvider = expressionToCompare -> like(
-                expressionToCompare, sqlValue);
-        return toNotExistsSubQueryPredicate(fieldNames, enumField, likePredicateProvider);
-    }
-
-    private Predicate toNotEqualWithSubQueryPredicate(final A enumField, final String sqlValue,
-            final String[] fieldNames) {
-        final Function<Expression<String>, Predicate> likePredicateProvider = expressionToCompare -> equal(
-                expressionToCompare, sqlValue);
-        return toNotExistsSubQueryPredicate(fieldNames, enumField, likePredicateProvider);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -622,17 +577,9 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
         return cb.notLike(caseWise(cb, expressionToCompare), caseWise(sqlValue), ESCAPE_CHAR);
     }
     private Predicate in(final Expression<String> expressionToCompare, final List<Object> transformedValues) {
-        final List<String> inParams = new ArrayList<>();
-        for (final Object param : transformedValues) {
-            if (param instanceof String paramStr) {
-                inParams.add(caseWise(paramStr));
-            }
-        }
-        if (!inParams.isEmpty()) {
-            return caseWise(cb, expressionToCompare).in(inParams);
-        } else {
-            return expressionToCompare.in(transformedValues);
-        }
+        final List<String> inParams = transformedValues.stream().filter(String.class::isInstance)
+                .map(String.class::cast).map(this::caseWise).collect(Collectors.toList());
+        return inParams.isEmpty() ? expressionToCompare.in(transformedValues) : caseWise(cb, expressionToCompare).in(inParams);
     }
 
     private Expression<String> caseWise(final CriteriaBuilder cb, final Expression<String> expression) {
