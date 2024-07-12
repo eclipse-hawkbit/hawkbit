@@ -784,7 +784,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     private int createActionsForDynamicGroupInNewTransaction(final JpaRollout rollout, final RolloutGroup group,
             final String targetFilter, final long limit) {
-        final List<Action> newActions = DeploymentHelper.runInNewTransaction(txManager, "createActionsForRolloutDynamicGroup", status -> {
+        return DeploymentHelper.runInNewTransaction(txManager, "createActionsForRolloutDynamicGroup", status -> {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final Slice<Target> targets = targetManagement.findByNotInGEGroupAndNotInActiveActionGEWeightOrInRolloutAndTargetFilterQueryAndCompatibleAndUpdatable(
                     pageRequest,
@@ -793,20 +793,19 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                     targetFilter, rollout.getDistributionSet().getType());
 
             if (targets.getNumberOfElements() == 0) {
-                return Collections.emptyList();
+                return 0;
             }
 
             final DistributionSet distributionSet = rollout.getDistributionSet();
             final ActionType actionType = rollout.getActionType();
             final long forceTime = rollout.getForcedTime();
-            return createActions(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
+            final List<Action> newActions = createActions(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
+            if (!newActions.isEmpty()) {
+                deploymentManagement.startScheduledActions(newActions);
+            }
+
+            return newActions.size();
         });
-
-        if (!newActions.isEmpty()) {
-            deploymentManagement.startScheduledActions(newActions);
-        }
-
-        return newActions.size();
     }
 
     /**
