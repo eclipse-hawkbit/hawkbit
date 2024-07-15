@@ -89,7 +89,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
     @Description("Verifies a simple dynamic rollout flow")
     void dynamicRolloutFlow() {
         final String rolloutName = "dynamic-rollout-std";
-        final int amountGroups = 3; // static only
+        final int amountGroups = 2; // static only
         final String targetPrefix = "controller-dynamic-rollout-std-";
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
 
@@ -180,6 +180,24 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 5);
         assertAndGetRunning(rollout, 3);
         assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 2); // assign the target created when paused
+
+        // finish the second dynamic group
+        testdataFactory.createTargets(targetPrefix, amountGroups * 3 + 5, 1);
+        rolloutHandler.handleAll();
+        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 3, amountGroups * 3 + 6);
+        assertAndGetRunning(rollout, 4); // one from the dynamic1 and 3 from the dynamic2
+        assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 3); // assign the target created when paused
+        // create third dynamic group
+        rolloutHandler.handleAll();
+        assertThat(rolloutGroupManagement.findByRollout(
+                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
+                rollout.getId()).getContent().size()).isEqualTo(amountGroups + 3);
+        executeAllFromGroup(rollout, dynamic1, 1);
+        executeAllFromGroup(rollout, dynamic2, 3);
+        assertAndGetRunning(rollout, 0);
+        // create third dynamic group
+        rolloutHandler.handleAll();
+        assertThat(refresh(dynamic2).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
     }
 
     @Test
@@ -402,13 +420,30 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         }
     }
 
+    // count of GROUP running actions
+    private void executeAllFromGroup(final Rollout rollout, final RolloutGroup group, final int count) {
+        final List<JpaAction> running =
+                actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.RUNNING).getContent()
+                        .stream().filter(action -> action.getRolloutGroup().getId().equals(group.getId())).toList();
+        if (count >= 0) {
+            assertThat(running.size()).as("Action count").isEqualTo(count);
+        }
+        running.forEach(this::finishAction);
+    }
+
+    // count of GROUP running actions
     private void executeWithoutOneTargetFromAGroup(final RolloutGroup group, final Rollout rollout, final int count) {
         // execute groups (without on of the last)
         assertThat(refresh(group).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        final List<JpaAction> running =
+                actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.RUNNING).getContent()
+                        .stream().filter(action -> action.getRolloutGroup().getId().equals(group.getId())).toList();
+        if (count >= 0) {
+            assertThat(running.size()).as("Action count").isEqualTo(count);
+        }
+
         // skip on from the last group only
         final AtomicBoolean skipOne = new AtomicBoolean(true);
-        final Page<JpaAction> running = actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.RUNNING);
-        assertThat(running.getTotalElements()).as("Action count").isEqualTo(count);
         running.stream()
                 // check if the action belongs to the needed group. group equals may not working because of the optLockRevision
                 .filter(action -> action.getRolloutGroup().getId().equals(group.getId()))
@@ -422,6 +457,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
                     }
                 })
                 .forEach(this::finishAction);
-        assertAndGetRunning(rollout, 1);
+
+        assertThat(skipOne.get()).as("One action should be skipped").isFalse();
     }
 }
