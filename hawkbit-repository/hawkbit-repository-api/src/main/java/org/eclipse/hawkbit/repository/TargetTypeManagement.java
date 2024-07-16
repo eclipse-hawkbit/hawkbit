@@ -124,38 +124,6 @@ public interface TargetTypeManagement {
     Optional<TargetType> get(long id);
 
     /**
-     * @param targetId
-     *            Target ID
-     * @return Target Type
-     */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Optional<TargetType> findByTargetId(long targetId);
-
-    /**
-     * @param targetIds
-     *            List of Target ID
-     * @return Target Type
-     */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<TargetType> findByTargetIds(Collection<Long> targetIds);
-
-    /**
-     * @param controllerId
-     *            Target controller ID
-     * @return Target Type
-     */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Optional<TargetType> findByTargetControllerId(String controllerId);
-
-    /**
-     * @param controllerIds
-     *            List of Target controller ID
-     * @return Target Type
-     */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<TargetType> findByTargetControllerIds(Collection<String> controllerIds);
-
-    /**
      * @param ids
      *            List of Target type ID
      * @return Target type list
