@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.hawkbit.repository.TargetTagFields;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
@@ -24,6 +25,7 @@ import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag_;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
@@ -145,15 +147,5 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     @Override
     public Page<TargetTag> findAll(final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(targetTagRepository, pageable, null);
-    }
-
-    @Override
-    public Page<TargetTag> findByTarget(final Pageable pageable, final String controllerId) {
-        if (!targetRepository.exists(TargetSpecifications.hasControllerId(controllerId))) {
-            throw new EntityNotFoundException(Target.class, controllerId);
-        }
-
-        return JpaManagementHelper.findAllWithCountBySpec(targetTagRepository, pageable,
-                Collections.singletonList(TagSpecification.ofTarget(controllerId)));
     }
 }

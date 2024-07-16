@@ -97,13 +97,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     private String controllerId;
 
     @CascadeOnDelete
-    @ManyToMany(targetEntity = JpaTargetTag.class)
-    @JoinTable(name = "sp_target_target_tag", joinColumns = {
-            @JoinColumn(name = "target", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_target")) }, inverseJoinColumns = {
-                    @JoinColumn(name = "tag", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_tag")) })
-    private Set<TargetTag> tags;
-
-    @CascadeOnDelete
     @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, targetEntity = JpaAction.class)
     private List<JpaAction> actions;
 
@@ -111,7 +104,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
      * the security token of the target which allows if enabled to authenticate
      * with this security token.
      */
-    @Column(name = "sec_token", updatable = true, nullable = false, length = Target.SECURITY_TOKEN_MAX_SIZE)
+    @Column(name = "sec_token", nullable = false, length = Target.SECURITY_TOKEN_MAX_SIZE)
     @Size(min = 1, max = Target.SECURITY_TOKEN_MAX_SIZE)
     @NotNull
     private String securityToken;
@@ -149,40 +142,50 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @JoinColumn(name = "assigned_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_assign_ds"))
     private JpaDistributionSet assignedDistributionSet;
 
-    /**
-     * Read only on management API. Are committed by controller.
-     */
-    @CascadeOnDelete
-    @ElementCollection
-    @Column(name = "attribute_value", length = Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE)
-    @MapKeyColumn(name = "attribute_key", nullable = false, length = Target.CONTROLLER_ATTRIBUTE_KEY_SIZE)
-    @CollectionTable(name = "sp_target_attributes", joinColumns = {
-            @JoinColumn(name = "target_id", nullable = false, updatable = false) }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
-    private Map<String, String> controllerAttributes;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = true, targetEntity = JpaTargetType.class)
-    @JoinColumn(name = "target_type", nullable = true, updatable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_relation_target_type"))
-    private TargetType targetType;
-
-    // set default request controller attributes to true, because we want to
-    // request them the first
-    // time
+    // set default request controller attributes to true, because we want to request them the first time
     @Column(name = "request_controller_attributes", nullable = false)
     private boolean requestControllerAttributes = true;
-
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, targetEntity = JpaTargetMetadata.class)
-    private List<TargetMetadata> metadata;
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "target", orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private JpaAutoConfirmationStatus autoConfirmationStatus;
 
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity = JpaTargetType.class)
+    @JoinColumn(name = "target_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_relation_target_type"))
+    private TargetType targetType;
+
+    @CascadeOnDelete
+    @ManyToMany(targetEntity = JpaTargetTag.class)
+    @JoinTable(
+            name = "sp_target_target_tag",
+            joinColumns = {
+                    @JoinColumn(name = "target", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_target")) },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "tag", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_tag"))
+            })
+    private Set<TargetTag> tags;
+
+    /**
+     * Supplied / committed by the controller. Read-only via management API.
+     */
+    @CascadeOnDelete
+    @ElementCollection
+    @Column(name = "attribute_value", length = Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE)
+    @MapKeyColumn(name = "attribute_key", nullable = false, length = Target.CONTROLLER_ATTRIBUTE_KEY_SIZE)
+    @CollectionTable(
+            name = "sp_target_attributes",
+            joinColumns = {
+                    @JoinColumn(name = "target_id", nullable = false, updatable = false) }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
+    private Map<String, String> controllerAttributes;
+
+    @CascadeOnDelete
+    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, targetEntity = JpaTargetMetadata.class)
+    private List<TargetMetadata> metadata;
+
     /**
      * Constructor.
      *
-     * @param controllerId
-     *            controller ID of the {@link Target}
+     * @param controllerId controller ID of the {@link Target}
      */
     public JpaTarget(final String controllerId) {
         this(controllerId, SecurityTokenGeneratorHolder.getInstance().generateToken());
@@ -191,20 +194,14 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     /**
      * Constructor.
      *
-     * @param controllerId
-     *            controller ID of the {@link Target}
-     * @param securityToken
-     *            for target authentication if enabled
+     * @param controllerId controller ID of the {@link Target}
+     * @param securityToken for target authentication if enabled
      */
     public JpaTarget(final String controllerId, final String securityToken) {
         this.controllerId = controllerId;
-        setName(truncateControllerIdToMaxNameLength(controllerId));
+        // truncate controller ID to max name length (if needed)
+        setName(controllerId != null && controllerId.length() > NAME_MAX_SIZE ? controllerId.substring(0, NAME_MAX_SIZE) : controllerId);
         this.securityToken = securityToken;
-    }
-
-    private static String truncateControllerIdToMaxNameLength(final String controllerId) {
-        return controllerId != null && controllerId.length() > NAME_MAX_SIZE ? controllerId.substring(0, NAME_MAX_SIZE)
-                : controllerId;
     }
 
     /**

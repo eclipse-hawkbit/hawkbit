@@ -69,7 +69,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> targetTagManagement.update(entityFactory.tag().update(NOT_EXIST_IDL)),
                 "TargetTag");
 
-        verifyThrownExceptionBy(() -> targetTagManagement.findByTarget(PAGE, NOT_EXIST_ID), "Target");
+        verifyThrownExceptionBy(() -> getTargetTags(NOT_EXIST_ID), "Target");
     }
 
     @Test
@@ -237,7 +237,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         final TargetTag toDelete = tags.iterator().next();
 
         for (final Target target : targetRepository.findAll()) {
-            assertThat(targetTagManagement.findByTarget(PAGE, target.getControllerId()).getContent())
+            assertThat(getTargetTags(target.getControllerId()))
                     .contains(toDelete);
         }
 
@@ -246,7 +246,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
 
         // check
         for (final Target target : targetRepository.findAll()) {
-            assertThat(targetTagManagement.findByTarget(PAGE, target.getControllerId()).getContent())
+            assertThat(getTargetTags(target.getControllerId()))
                     .doesNotContain(toDelete);
         }
         assertThat(targetTagRepository.findById(toDelete.getId())).as("No tag should be found").isNotPresent();
