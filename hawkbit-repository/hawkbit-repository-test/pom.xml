@@ -61,12 +61,6 @@
          <groupId>org.postgresql</groupId>
          <artifactId>postgresql</artifactId>
       </dependency>
-      <!-- Add a JDBC DB2 compatabile driver if you want to run tests against DB2, e.g. -->
-      <!--       <dependency> -->
-      <!--          <groupId>com.ibm.db2.jcc</groupId> -->
-      <!--          <artifactId>db2jcc4</artifactId> -->
-      <!--          <version>11.1.2.2</version> -->
-      <!--       </dependency> -->
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-starter-logging</artifactId>
