@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.sdk.device;
 
-import com.google.common.io.BaseEncoding;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -39,6 +38,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HexFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -361,7 +361,7 @@ public interface UpdateHandler {
                 }
 
                 private void check() {
-                    final String actual = BaseEncoding.base16().lowerCase().encode(messageDigest.digest());
+                    final String actual = HexFormat.of().withLowerCase().formatHex(messageDigest.digest());
                     if (!actual.equals(expected)) {
                         throw new SecurityException(
                                 messageDigest.getAlgorithm() + " hash mismatch " + EXPECTED + expected + BUT_GOT_LOG_MESSAGE + actual + ")!");
