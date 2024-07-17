@@ -18,8 +18,6 @@ import lombok.Data;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
-import static org.checkerframework.checker.units.qual.Prefix.exa;
-
 /**
  * A json annotated rest model for PollStatus to RESTful API representation.
  */

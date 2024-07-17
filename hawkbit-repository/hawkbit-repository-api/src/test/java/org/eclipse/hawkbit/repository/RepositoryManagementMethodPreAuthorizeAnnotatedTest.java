@@ -11,16 +11,15 @@ package org.eclipse.hawkbit.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import com.google.common.reflect.ClassPath;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
+import io.github.classgraph.ScanResult;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -40,13 +39,17 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
 
     @Test
     @Description("Verifies that repository methods are @PreAuthorize annotated")
-    public void repositoryManagementMethodsArePreAuthorizedAnnotated() throws IOException {
-        final List<Class<?>> findInterfacesInPackage = findInterfacesInPackage(getClass().getPackage(),
-                Pattern.compile(".*Management"));
-
-        assertThat(findInterfacesInPackage).isNotEmpty();
-        for (final Class<?> interfaceToCheck : findInterfacesInPackage) {
-            assertDeclaredMethodsContainsPreAuthorizeAnnotations(interfaceToCheck);
+    public void repositoryManagementMethodsArePreAuthorizedAnnotated() {
+        final String packageName = getClass().getPackage().getName();
+        try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {
+            final List<? extends Class<?>> matchingClasses = scanResult.getAllClasses()
+                    .stream()
+                    .filter(classInPackage -> classInPackage.getSimpleName().endsWith("Management") && classInPackage.isInterface())
+                    .map(ClassInfo::loadClass)
+                    .toList();
+            assertThat(matchingClasses).isNotEmpty();
+            matchingClasses.forEach(
+                    RepositoryManagementMethodPreAuthorizeAnnotatedTest::assertDeclaredMethodsContainsPreAuthorizeAnnotations);
         }
 
         // all exclusion should be used, otherwise the method exclusion should be
@@ -76,12 +79,6 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
             assertThat(annotation).as("The public method " + method.getName() + " in class " + clazz.getName()
                     + " is not annotated with @PreAuthorize, security leak?").isNotNull();
         }
-    }
-
-    private List<Class<?>> findInterfacesInPackage(final Package p, final Pattern includeFilter) throws IOException {
-        return ClassPath.from(Thread.currentThread().getContextClassLoader()).getTopLevelClasses(p.getName()).stream()
-                .filter(clazzInfo -> includeFilter.matcher(clazzInfo.getSimpleName()).matches())
-                .map(clazzInfo -> clazzInfo.load()).filter(clazz -> clazz.isInterface()).collect(Collectors.toList());
     }
 
     private static Method getMethod(final Class<?> clazz, final String methodName, final Class<?>... parameterTypes) {
