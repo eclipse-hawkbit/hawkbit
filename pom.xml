@@ -60,12 +60,12 @@
       <jaxb-api.version>2.3.1</jaxb-api.version>
       <javax.el-api.version>3.0.0</javax.el-api.version>
       <rsql-parser.version>2.1.0</rsql-parser.version>
-      <guava.version>33.2.1-jre</guava.version>
       <commons-io.version>2.16.1</commons-io.version>
       <commons-collections4.version>4.4</commons-collections4.version>
       <io-protostuff.version>1.8.0</io-protostuff.version>
       <!-- test -->
       <rabbitmq.http-client.version>5.2.0</rabbitmq.http-client.version>
+      <classgraph.version>4.8.174</classgraph.version>
       <allure.version>2.27.0</allure.version>
       <awaitility.version>4.2.1</awaitility.version>
       <!-- Misc libraries versions - END -->
@@ -765,10 +765,12 @@
             <artifactId>commons-collections4</artifactId>
             <version>${commons-collections4.version}</version>
          </dependency>
+
+         <!-- Test -->
          <dependency>
-            <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-junit5</artifactId>
-            <version>${allure.version}</version>
+            <groupId>io.github.classgraph</groupId>
+            <artifactId>classgraph</artifactId>
+            <version>${classgraph.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
@@ -784,6 +786,12 @@
             <scope>test</scope>
          </dependency>
          <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-junit5</artifactId>
+            <version>${allure.version}</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>${awaitility.version}</version>
@@ -796,38 +804,6 @@
          <groupId>org.projectlombok</groupId>
          <artifactId>lombok</artifactId>
          <optional>true</optional>
-      </dependency>
-      <dependency>
-         <groupId>com.google.guava</groupId>
-         <artifactId>guava</artifactId>
-         <version>${guava.version}</version>
-         <!-- https://github.com/google/guava/issues/2824 -->
-         <exclusions>
-            <exclusion>
-               <groupId>com.google.j2objc</groupId>
-               <artifactId>j2objc-annotations</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>com.google.code.findbugs</groupId>
-               <artifactId>jsr305</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.checkerframework</groupId>
-               <artifactId>checker-compat-qual</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>com.google.errorprone</groupId>
-               <artifactId>error_prone_annotations</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>com.google.j2objc</groupId>
-               <artifactId>j2objc-annotations</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.codehaus.mojo</groupId>
-               <artifactId>animal-sniffer-annotations</artifactId>
-            </exclusion>
-         </exclusions>
       </dependency>
    </dependencies>
 </project>
