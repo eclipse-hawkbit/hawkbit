@@ -241,6 +241,20 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         rolloutManagement.start(rollout.getId());
         rolloutHandler.handleAll();
 
+        mvc.perform(get("/rest/v1/rollouts?representation=full").accept(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)))
+            .andExpect(jsonPath("content[0].id", equalTo(rollout.getId().intValue())))
+            .andExpect(jsonPath("content[0].name", equalTo("rollout1")))
+            .andExpect(jsonPath("content[0].status", equalTo("running")))
+            .andExpect(jsonPath("content[0].targetFilterQuery", equalTo("name==rollout*")))
+            .andExpect(jsonPath("content[0].distributionSetId", equalTo(dsA.getId().intValue())))
+            .andExpect(jsonPath("content[0].totalTargets", equalTo(10)))
+            .andExpect(jsonPath("content[0].totalTargetsPerStatus").exists())
+            .andExpect(jsonPath("content[0].totalTargetsPerStatus.running", equalTo(10)))
+            .andExpect(jsonPath("content[0].totalGroups", equalTo(2)));
+
         final int amountOfDynamicTargets = 2;
         List<Target> additionalTargets = testdataFactory.createTargets(amountOfDynamicTargets, "rollout-dynamic-addition-", "rollout");
 
