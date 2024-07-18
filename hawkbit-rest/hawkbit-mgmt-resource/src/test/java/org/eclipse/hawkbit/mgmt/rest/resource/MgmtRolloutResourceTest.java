@@ -252,10 +252,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, group.getId()).forEach(target -> deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).forEach(action -> {
 
                     deploymentManagement.cancelAction(action.getId());
-                    awaitCancelingAction(action.getId());
+                    awaitActionStatus(action.getId(), Status.CANCELING);
 
                     deploymentManagement.forceQuitAction(action.getId());
-                    awaitCanceledAction(action.getId());
+                    awaitActionStatus(action.getId(), Status.CANCELED);
                 }));
             }
         });
@@ -1301,20 +1301,12 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                         .getStatus().equals(RolloutStatus.RUNNING));
     }
 
-    private void awaitCancelingAction(final Long actionId) {
+    private void awaitActionStatus(final Long actionId, final Status status) {
         Awaitility.await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(100)).with()
             .until(() -> SecurityContextSwitch
                 .runAsPrivileged(
                     () -> deploymentManagement.findAction(actionId).orElseThrow(NoSuchElementException::new))
-                .getStatus().equals(Status.CANCELING));
-    }
-
-    private void awaitCanceledAction(final Long actionId) {
-        Awaitility.await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(100)).with()
-            .until(() -> SecurityContextSwitch
-                .runAsPrivileged(
-                    () -> deploymentManagement.findAction(actionId).orElseThrow(NoSuchElementException::new))
-                .getStatus().equals(Status.CANCELED));
+                .getStatus().equals(status));
     }
 
     private void awaitPendingDeviceInRollout(final String controllerId) {
