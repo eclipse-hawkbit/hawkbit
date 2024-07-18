@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.remote.TargetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeUpdatedEvent;
@@ -38,8 +40,9 @@ import java.util.Set;
 /**
  * A target type defines which distribution set types can or have to be
  * {@link Target}.
- *
  */
+@NoArgsConstructor // default public constructor for JPA
+@ToString(callSuper = true)
 @Entity
 @Table(name = "sp_target_type", indexes = {
         @Index(name = "sp_idx_target_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
@@ -56,94 +59,51 @@ public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, 
             @JoinColumn(name = "distribution_set_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_ds_type"))})
     private Set<DistributionSetType> distributionSetTypes;
 
-    @OneToMany(targetEntity = JpaTarget.class, mappedBy = "targetType", fetch = FetchType.LAZY)
-    private Set<Target> targets;
-
-    /**
-     * Constructor
-     */
-    public JpaTargetType() {
-        // default public constructor for JPA
-    }
-
-    /**
-     * Constructor, legacy support where <code>key</code> is set to passed <code>name</code>.
-     *
-     * @deprecated will be removed
-     *
-     * @param name
-     *            of the type
-     * @param description
-     *            of the type
-     * @param colour
-     *            of the type
-     */
-    @Deprecated(forRemoval = true)
-    public JpaTargetType(final String name, final String description, final String colour) {
-        this(name, name, description, colour);
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param key
-     *            of the type
-     * @param name
-     *            of the type
-     * @param description
-     *            of the type
-     * @param colour
-     *            of the type. It will be null by default
-     */
     public JpaTargetType(final String key, final String name, final String description, final String colour) {
         super(name, description, key, colour);
     }
 
     /**
-     * @param dsSetType
-     *          Distribution set type
+     * Adds a compatible distribution set type to this target type.
+     *
+     * @param dsSetType Distribution set type to add
      * @return Target type
      */
-    public void addCompatibleDistributionSetType(final DistributionSetType dsSetType) {
+    public JpaTargetType addCompatibleDistributionSetType(final DistributionSetType dsSetType) {
         if (distributionSetTypes == null) {
             distributionSetTypes = new HashSet<>();
         }
 
         distributionSetTypes.add(dsSetType);
+
+        return this;
     }
 
     /**
-     * @param dsTypeId
-     *          Distribution set type ID
+     * Remove a compatible distribution set type from this target type.
+     * @param dsTypeId Distribution set type ID
      * @return Target type
      */
     public JpaTargetType removeDistributionSetType(final Long dsTypeId) {
         if (distributionSetTypes == null) {
             return this;
         }
-        distributionSetTypes.stream().filter(element -> element.getId().equals(dsTypeId)).findAny()
+
+        distributionSetTypes.stream()
+                .filter(element -> element.getId().equals(dsTypeId))
+                .findAny()
                 .ifPresent(distributionSetTypes::remove);
+
         return this;
     }
 
     @Override
     public Set<DistributionSetType> getCompatibleDistributionSetTypes() {
-
         if (distributionSetTypes == null) {
             return Collections.emptySet();
         }
 
         return Collections.unmodifiableSet(distributionSetTypes);
-    }
-
-    @Override
-    public Set<Target> getTargets() {
-        return targets;
-    }
-
-    @Override
-    public String toString() {
-        return "TargetType [key=" + getKey() + ", isDeleted()=" + isDeleted() + ", getId()=" + getId() + "]";
     }
 
     @Override

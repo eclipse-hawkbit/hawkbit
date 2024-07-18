@@ -67,31 +67,6 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
         assertThat(targetTypeManagement.findByRsql(Pageable.unpaged(), "id==*").get().map(Identifiable::getId).toList())
                 .containsOnly(permittedTargetType.getId());
 
-        // verify targetTypeManagement#findByTargetControllerId
-        assertThat(targetTypeManagement.findByTargetControllerId(targetWithPermittedTargetType.getControllerId()))
-                .hasValueSatisfying(foundType -> assertThat(foundType.getId()).isEqualTo(permittedTargetType.getId()));
-        assertThat(targetTypeManagement.findByTargetControllerId(targetWithHiddenTargetType.getControllerId()))
-                .isEmpty();
-
-        // verify targetTypeManagement#findByTargetControllerIds
-        assertThat(
-                targetTypeManagement
-                        .findByTargetControllerIds(Arrays.asList(targetWithPermittedTargetType.getControllerId(),
-                                targetWithHiddenTargetType.getControllerId()))
-                        .stream().map(Identifiable::getId).toList())
-                .hasSize(1).containsOnly(permittedTargetType.getId());
-
-        // verify targetTypeManagement#findByTargetId
-        assertThat(targetTypeManagement.findByTargetId(targetWithPermittedTargetType.getId()))
-                .hasValueSatisfying(foundType -> assertThat(foundType.getId()).isEqualTo(permittedTargetType.getId()));
-        assertThat(targetTypeManagement.findByTargetId(targetWithHiddenTargetType.getId())).isEmpty();
-
-        // verify targetTypeManagement#findByTargetIds
-        assertThat(targetTypeManagement
-                .findByTargetIds(
-                        Arrays.asList(targetWithPermittedTargetType.getId(), targetWithHiddenTargetType.getId()))
-                .stream().map(Identifiable::getId).toList()).hasSize(1).containsOnly(permittedTargetType.getId());
-
         // verify targetTypeManagement#findByName
         assertThat(targetTypeManagement.findByName(Pageable.unpaged(), permittedTargetType.getName()).getContent())
                 .hasSize(1).satisfies(results -> {

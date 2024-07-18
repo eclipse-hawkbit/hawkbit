@@ -16,15 +16,14 @@ import java.util.List;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.ListJoin;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.SetJoin;
 
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag_;
@@ -41,12 +40,9 @@ import org.springframework.util.CollectionUtils;
 /**
  * Specifications class for {@link DistributionSet}s. The class provides Spring
  * Data JPQL Specifications.
- *
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DistributionSetSpecification {
-    private DistributionSetSpecification() {
-        // utility class
-    }
 
     /**
      * {@link Specification} for retrieving {@link DistributionSet}s with
@@ -293,5 +289,4 @@ public final class DistributionSetSpecification {
             return cb.equal(targetRoot.get(JpaTarget_.controllerId), linkedControllerId);
         };
     }
-
 }
