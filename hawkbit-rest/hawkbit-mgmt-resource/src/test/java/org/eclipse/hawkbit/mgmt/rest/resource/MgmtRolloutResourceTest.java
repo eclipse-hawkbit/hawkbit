@@ -1326,12 +1326,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     private void awaitPendingDeviceInRollout(final String controllerId) {
         Awaitility.await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(100)).with()
             .until(() -> {
-                SecurityContextSwitch.runAsPrivileged(() -> {
-                    rolloutHandler.handleAll();
-                    return null;
-                });
-
                 Optional<Target> maybeTarget = SecurityContextSwitch.runAsPrivileged(() -> {
+                    rolloutHandler.handleAll();
                     List<Target> targets = targetManagement.findByRsql(PAGE, "controllerId==" + controllerId).getContent();
                     if (targets.size() == 1) {
                         return Optional.of(targets.get(0));
