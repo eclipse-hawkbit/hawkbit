@@ -9,10 +9,6 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Describing the fields of the Tag model which can be used in the REST API e.g.
  * for sorting etc.
