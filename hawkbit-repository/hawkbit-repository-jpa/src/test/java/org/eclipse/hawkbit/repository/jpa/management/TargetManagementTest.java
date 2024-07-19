@@ -402,7 +402,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> assignedTargets = targetManagement.assignTag(assignTarget, targetTag.getId());
         assertThat(assignedTargets.size()).as("Assigned targets are wrong").isEqualTo(4);
         assignedTargets.forEach(target -> assertThat(
-                targetTagManagement.findByTarget(PAGE, target.getControllerId()).getNumberOfElements()).isEqualTo(1));
+                getTargetTags(target.getControllerId()).size()).isEqualTo(1));
 
         final TargetTag findTargetTag = targetTagManagement.getByName("Tag1").orElseThrow(IllegalStateException::new);
         assertThat(assignedTargets.size()).as("Assigned targets are wrong")
@@ -410,7 +410,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final Target unAssignTarget = targetManagement.unassignTag("targetId123", findTargetTag.getId());
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
-        assertThat(targetTagManagement.findByTarget(PAGE, unAssignTarget.getControllerId())).as("Tag size is wrong")
+        assertThat(getTargetTags(unAssignTarget.getControllerId())).as("Tag size is wrong")
                 .isEmpty();
         targetTagManagement.getByName("Tag1").orElseThrow(NoSuchElementException::new);
         assertThat(targetManagement.findByTag(PAGE, targetTag.getId())).as("Assigned targets are wrong").hasSize(3);
@@ -569,7 +569,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
      */
     private void checkTargetHasTags(final boolean strict, final Iterable<Target> targets, final TargetTag... tags) {
         _target: for (final Target tl : targets) {
-            for (final Tag tt : targetTagManagement.findByTarget(PAGE, tl.getControllerId())) {
+            for (final Tag tt : getTargetTags(tl.getControllerId())) {
                 for (final Tag tag : tags) {
                     if (tag.getName().equals(tt.getName())) {
                         continue _target;
@@ -588,7 +588,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
             targetManagement.getByControllerID(tl.getControllerId()).get();
 
             for (final Tag tag : tags) {
-                for (final Tag tt : targetTagManagement.findByTarget(PAGE, tl.getControllerId())) {
+                for (final Tag tt : getTargetTags(tl.getControllerId())) {
                     if (tag.getName().equals(tt.getName())) {
                         fail("Target should have no tags");
                     }
@@ -719,16 +719,16 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final Target t11 = targetManagement.getByControllerID(t1.getControllerId())
                 .orElseThrow(IllegalStateException::new);
-        assertThat(targetTagManagement.findByTarget(PAGE, t11.getControllerId()).getContent()).as("Tag size is wrong")
+        assertThat(getTargetTags(t11.getControllerId())).as("Tag size is wrong")
                 .hasSize(noT1Tags).containsAll(t1Tags);
-        assertThat(targetTagManagement.findByTarget(PAGE, t11.getControllerId()).getContent()).as("Tag size is wrong")
+        assertThat(getTargetTags(t11.getControllerId())).as("Tag size is wrong")
                 .hasSize(noT1Tags).doesNotContain(toArray(t2Tags, TargetTag.class));
 
         final Target t21 = targetManagement.getByControllerID(t2.getControllerId())
                 .orElseThrow(IllegalStateException::new);
-        assertThat(targetTagManagement.findByTarget(PAGE, t21.getControllerId()).getContent()).as("Tag size is wrong")
+        assertThat(getTargetTags(t21.getControllerId())).as("Tag size is wrong")
                 .hasSize(noT2Tags).containsAll(t2Tags);
-        assertThat(targetTagManagement.findByTarget(PAGE, t21.getControllerId()).getContent()).as("Tag size is wrong")
+        assertThat(getTargetTags(t21.getControllerId())).as("Tag size is wrong")
                 .hasSize(noT2Tags).doesNotContain(toArray(t1Tags, TargetTag.class));
     }
 

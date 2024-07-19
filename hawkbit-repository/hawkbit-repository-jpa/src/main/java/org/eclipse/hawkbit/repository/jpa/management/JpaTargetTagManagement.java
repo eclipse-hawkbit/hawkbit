@@ -29,9 +29,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag_;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
-import org.eclipse.hawkbit.repository.jpa.specifications.TagSpecification;
-import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -145,15 +142,5 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     @Override
     public Page<TargetTag> findAll(final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(targetTagRepository, pageable, null);
-    }
-
-    @Override
-    public Page<TargetTag> findByTarget(final Pageable pageable, final String controllerId) {
-        if (!targetRepository.exists(TargetSpecifications.hasControllerId(controllerId))) {
-            throw new EntityNotFoundException(Target.class, controllerId);
-        }
-
-        return JpaManagementHelper.findAllWithCountBySpec(targetTagRepository, pageable,
-                Collections.singletonList(TagSpecification.ofTarget(controllerId)));
     }
 }

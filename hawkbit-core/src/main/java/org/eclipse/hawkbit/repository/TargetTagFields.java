@@ -9,14 +9,10 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Describing the fields of the Tag model which can be used in the REST API e.g.
  * for sorting etc.
- * Additionally here were added fields for Target in order
+ * Additionally, here were added fields for Target in order
  * filtering over target fields also.
  */
 public enum TargetTagFields implements FieldNameProvider {
@@ -36,31 +32,12 @@ public enum TargetTagFields implements FieldNameProvider {
   /**
    * The controllerId field.
    */
-  COLOUR(TagFields.COLOUR.getFieldName()),
-
-  /**
-   * Target fields
-   */
-  TARGET("assignedToTargets",
-      TargetFields.ID.getFieldName(), TargetFields.NAME.getFieldName());
+  COLOUR(TagFields.COLOUR.getFieldName());
 
   private final String fieldName;
 
-  private final List<String> subEntityAttributes;
-
-  private TargetTagFields(final String fieldName) {
+  TargetTagFields(final String fieldName) {
     this.fieldName = fieldName;
-    this.subEntityAttributes = Collections.emptyList();
-  }
-
-  private TargetTagFields(final String fieldName, final String... subEntityAttributes) {
-    this.fieldName = fieldName;
-    this.subEntityAttributes = Arrays.asList(subEntityAttributes);
-  }
-
-  @Override
-  public List<String> getSubEntityAttributes() {
-    return Collections.unmodifiableList(subEntityAttributes);
   }
 
   @Override

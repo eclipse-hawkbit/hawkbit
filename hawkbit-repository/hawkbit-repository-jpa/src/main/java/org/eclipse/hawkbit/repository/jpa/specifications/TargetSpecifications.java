@@ -18,7 +18,6 @@ import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.ListJoin;
-import jakarta.persistence.criteria.MapJoin;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
@@ -27,13 +26,14 @@ import jakarta.persistence.criteria.SetJoin;
 import jakarta.persistence.criteria.Subquery;
 import jakarta.validation.constraints.NotNull;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -57,22 +57,15 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.query.QueryUtils;
 
 /**
- * Specifications class for {@link Target}s. The class provides Spring Data JPQL
- * Specifications.
- *
+ * Specifications class for {@link Target}s. The class provides Spring Data JPQL Specifications.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TargetSpecifications {
-    private TargetSpecifications() {
-        // utility class
-    }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s including
-     * {@link TargetTag}s.
+     * {@link Specification} for retrieving {@link Target}s including {@link TargetTag}s.
      *
-     * @param controllerIDs
-     *            to search for
-     *
+     * @param controllerIDs to search for
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> byControllerIdWithTagsInJoin(final Collection<String> controllerIDs) {
@@ -87,9 +80,7 @@ public final class TargetSpecifications {
     /**
      * {@link Specification} for retrieving {@link Target}s by controllerId
      *
-     * @param controllerID
-     *            to search for
-     *
+     * @param controllerID to search for
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasControllerId(final String controllerID) {
@@ -99,9 +90,7 @@ public final class TargetSpecifications {
     /**
      * {@link Specification} for retrieving {@link Target}s by controllerId
      *
-     * @param controllerIDs
-     *            to search for
-     *
+     * @param controllerIDs to search for
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasControllerIdIn(final Collection<String> controllerIDs) {
