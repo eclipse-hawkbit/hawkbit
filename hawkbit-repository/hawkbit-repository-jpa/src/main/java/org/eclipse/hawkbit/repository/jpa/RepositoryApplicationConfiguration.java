@@ -668,9 +668,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     TargetTagManagement targetTagManagement(final TargetTagRepository targetTagRepository,
-            final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
             final JpaProperties properties) {
-        return new JpaTargetTagManagement(targetTagRepository, targetRepository, virtualPropertyReplacer,
+        return new JpaTargetTagManagement(targetTagRepository, virtualPropertyReplacer,
                 properties.getDatabase());
     }
 
