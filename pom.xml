@@ -535,12 +535,6 @@
                   </execution>
                </executions>
             </plugin>
-
-<!--            <plugin>-->
-<!--               <groupId>org.bsc.maven</groupId>-->
-<!--               <artifactId>maven-processor-plugin</artifactId>-->
-<!--               <version>${maven.processor.plugin.version}</version>-->
-<!--            </plugin>-->
             <plugin>
                <groupId>com.ethlo.persistence.tools</groupId>
                <artifactId>eclipselink-maven-plugin</artifactId>

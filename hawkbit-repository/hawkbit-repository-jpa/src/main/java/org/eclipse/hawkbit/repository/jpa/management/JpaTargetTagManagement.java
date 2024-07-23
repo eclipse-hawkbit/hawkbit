@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag_;
-import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -49,17 +48,15 @@ import org.springframework.validation.annotation.Validated;
 public class JpaTargetTagManagement implements TargetTagManagement {
 
     private final TargetTagRepository targetTagRepository;
-    private final TargetRepository targetRepository;
 
     private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final Database database;
 
     public JpaTargetTagManagement(
-            final TargetTagRepository targetTagRepository, final TargetRepository targetRepository,
+            final TargetTagRepository targetTagRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final Database database) {
         this.targetTagRepository = targetTagRepository;
-        this.targetRepository = targetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.database = database;
     }
