@@ -17,6 +17,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTagRestApi;
@@ -30,14 +32,10 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.rest.data.ResponseList;
 
 /**
- * A mapper which maps repository model to RESTful model representation and
- * back.
- *
+ * A mapper which maps repository model to RESTful model representation and back.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class MgmtTagMapper {
-    private MgmtTagMapper() {
-        // Utility class
-    }
 
     static List<MgmtTag> toResponse(final List<TargetTag> targetTags) {
         final List<MgmtTag> tagsRest = new ArrayList<>();

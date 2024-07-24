@@ -201,7 +201,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @SafeVarargs
-    private final <T> Collection<T> concat(final Collection<T>... targets) {
+    private <T> Collection<T> concat(final Collection<T>... targets) {
         final List<T> result = new ArrayList<>();
         Arrays.asList(targets).forEach(result::addAll);
         return result;

@@ -207,11 +207,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     }
 
     protected Set<TargetTag> getTargetTags(final String controllerId) {
-        return targetRepository
-                .findOne(TargetSpecifications.hasControllerId(controllerId))
-                .map(JpaTarget.class::cast)
-                .map(JpaTarget::getTags)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        return targetManagement.getTagsByControllerId(controllerId);
     }
 
     private JpaRollout refresh(final Rollout rollout) {
