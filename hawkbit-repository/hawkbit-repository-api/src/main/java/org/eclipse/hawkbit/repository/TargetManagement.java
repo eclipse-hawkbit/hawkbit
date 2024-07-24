@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
@@ -850,6 +851,16 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     boolean isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(@NotNull String controllerId,
             long distributionSetId, @NotNull String targetFilterQuery);
+
+    /**
+     * Finds a single target tags its id.
+     *
+     * @param controllerId of the {@link Target}
+     * @return the found Tag set
+     * @throws EntityNotFoundException if target with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Set<TargetTag> getTagsByControllerId(@NotEmpty String controllerId);
 
     /**
      * Creates a list of target meta data entries.

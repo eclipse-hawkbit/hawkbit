@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
+import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignments;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
@@ -714,6 +715,34 @@ public interface MgmtTargetRestApi {
     @GetMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/installedDS", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(@PathVariable("targetId") String targetId);
+
+    /**
+     * Gets a paged list of meta data for a target.
+     *
+     * @param targetId the ID of the target for the meta data
+     */
+    @Operation(summary = "Return tags for specific target", description = "Get a paged list of tags for a target. Required permission: READ_REPOSITORY")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "204", description = "No tags"),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Target not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
+    @GetMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/tags", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<List<MgmtTag>> getTags(@PathVariable("targetId") String targetId);
 
     /**
      * Gets a paged list of meta data for a target.
