@@ -61,14 +61,8 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.logout.LogoutHandler;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Auto-configuration for OpenID Connect user management.
@@ -85,22 +79,6 @@ public class OidcUserManagementAutoConfiguration {
     public AuthenticationSuccessHandler oidcAuthenticationSuccessHandler(
             final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext) {
         return new OidcAuthenticationSuccessHandler(systemManagement, systemSecurityContext);
-    }
-
-    /**
-     * @return the logout success handler for OpenID Connect
-     */
-    @Bean
-    public LogoutSuccessHandler oidcLogoutSuccessHandler() {
-        return new OidcLogoutSuccessHandler();
-    }
-
-    /**
-     * @return the OpenID Connect logout handler
-     */
-    @Bean
-    public LogoutHandler oidcLogoutHandler() {
-        return new OidcLogoutHandler();
     }
 
     /**
@@ -215,48 +193,6 @@ public class OidcUserManagementAutoConfiguration {
             }
 
             super.onAuthenticationSuccess(request, response, authentication);
-        }
-    }
-
-    /**
-     * LogoutHandler to invalidate OpenID Connect tokens
-     */
-    private static class OidcLogoutHandler extends SecurityContextLogoutHandler {
-
-        @Override
-        public void logout(final HttpServletRequest request, final HttpServletResponse response,
-                           final Authentication authentication) {
-            super.logout(request, response, authentication);
-
-            final Object principal = authentication.getPrincipal();
-            if (principal instanceof OidcUser) {
-                final OidcUser user = (OidcUser) authentication.getPrincipal();
-                final String endSessionEndpoint = user.getIssuer() + "/protocol/openid-connect/logout";
-
-                final UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(endSessionEndpoint)
-                        .queryParam("id_token_hint", user.getIdToken().getTokenValue());
-
-                final RestTemplate restTemplate = new RestTemplate();
-                restTemplate.getForEntity(builder.toUriString(), String.class);
-            }
-        }
-    }
-
-    /**
-     * LogoutSuccessHandler that decides where to redirect to after logout, depending on
-     * the previously used auth mechanism
-     */
-   private static  class OidcLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
-
-        @Override
-        public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
-                throws IOException, ServletException {
-            if (authentication instanceof OAuth2AuthenticationToken) {
-                this.setTargetUrlParameter("/");
-            } else {
-                this.setTargetUrlParameter("login");
-            }
-            super.onLogoutSuccess(request, response, authentication);
         }
     }
 
