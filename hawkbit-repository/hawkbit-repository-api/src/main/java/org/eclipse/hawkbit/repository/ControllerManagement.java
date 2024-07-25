@@ -529,7 +529,7 @@ public interface ControllerManagement {
     void deactivateAutoConfirmation(@NotEmpty String controllerId);
 
     /**
-     * Updates distributionSet installed version
+     * Updates distributionSet installed version (experimental)
      *
      * @param distributionName
      *            installed
