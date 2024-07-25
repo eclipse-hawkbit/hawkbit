@@ -82,7 +82,7 @@ public class RestConfiguration {
         // in the ShallowEtagHeaderFilter, just using the SH1 hash of the
         // artifact itself as 'ETag', because otherwise the file will be copied
         // in memory!
-        filterRegBean.setFilter(new ExcludePathAwareShallowETagFilter("/UI/**",
+        filterRegBean.setFilter(new ExcludePathAwareShallowETagFilter(
                 "/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
                 "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
                 "/api/v1/downloadserver/**"));
