@@ -49,6 +49,10 @@ public class HawkbitSecurityProperties {
      * Basic authentication realm, see https://tools.ietf.org/html/rfc2617#page-3 .
      */
     private String basicRealm = "hawkBit";
+    /**
+     * If to allow http authentication when there is OAuth2 authentication enabled.
+     */
+    private boolean allowHttpBasicOnOAuthEnabled = false;
 
     /**
      * Security configuration related to CORS.

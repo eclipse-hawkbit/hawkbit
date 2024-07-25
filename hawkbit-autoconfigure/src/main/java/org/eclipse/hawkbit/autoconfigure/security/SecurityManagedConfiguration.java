@@ -9,17 +9,10 @@
  */
 package org.eclipse.hawkbit.autoconfigure.security;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +21,6 @@ import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiApiConfiguration;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
-import org.eclipse.hawkbit.im.authentication.UserAuthenticationFilter;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.MgmtApiConfiguration;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -48,13 +40,11 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -62,31 +52,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
-import org.springframework.security.oauth2.jwt.JwtDecoders;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
-import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.firewall.FirewalledRequest;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.security.web.session.SessionManagementFilter;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -104,31 +86,13 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityManagedConfiguration {
 
     private static final int DOS_FILTER_ORDER = -200;
+    public static final String ANONYMOUS_CONTROLLER_SECURITY_ENABLED_SHOULD_ONLY_BE_USED_FOR_DEVELOPMENT_PURPOSES = """
+            ******************
+            ** Anonymous controller security enabled, should only be used for development purposes **
+            ******************""";
 
     /**
-     * @return the {@link UserAuthenticationFilter} to include into the hawkBit security configuration.
-     * @throws Exception lazy bean exception maybe if the authentication manager cannot be instantiated
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    // Exception squid:S00112 - Is aspectJ proxy
-    @SuppressWarnings({ "squid:S00112" })
-    UserAuthenticationFilter userAuthenticationFilter(final AuthenticationConfiguration configuration)
-            throws Exception {
-        return new UserAuthenticationFilterBasicAuth(configuration.getAuthenticationManager());
-    }
-
-    private static final class UserAuthenticationFilterBasicAuth extends BasicAuthenticationFilter
-            implements UserAuthenticationFilter {
-
-        private UserAuthenticationFilterBasicAuth(final AuthenticationManager authenticationManager) {
-            super(authenticationManager);
-        }
-
-    }
-
-    /**
-     * {@link WebSecurityConfigurer} for the hawkBit server DDI interface.
+     * Security configuration for the hawkBit server DDI interface.
      */
     @Configuration
     @EnableWebSecurity
@@ -165,18 +129,14 @@ public class SecurityManagedConfiguration {
         }
 
         /**
-         * Filter to protect the hawkBit server DDI interface against to many
-         * requests.
+         * Filter to protect the hawkBit server DDI interface against too many requests.
          *
-         * @param securityProperties
-         *            for filter configuration
-         *
-         * @return the spring filter registration bean for registering a denial
-         *         of service protection filter in the filter chain
+         * @param securityProperties for filter configuration
+         * @return the spring filter registration bean for registering a denial of service protection filter in the filter chain
          */
         @Bean
         @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
-        public FilterRegistrationBean<DosFilter> dosFilterDDI(final HawkbitSecurityProperties securityProperties) {
+        protected FilterRegistrationBean<DosFilter> dosFilterDDI(final HawkbitSecurityProperties securityProperties) {
             final FilterRegistrationBean<DosFilter> filterRegBean =
                     dosFilter(List.of(DDI_ANT_MATCHERS),
                         securityProperties.getDos().getFilter(), securityProperties.getClients());
@@ -201,11 +161,7 @@ public class SecurityManagedConfiguration {
 
             final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
             if (ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled()) {
-                log.info(
-                        """
-                        ******************
-                        ** Anonymous controller security enabled, should only be used for developing purposes **
-                        ******************""");
+                log.warn(ANONYMOUS_CONTROLLER_SECURITY_ENABLED_SHOULD_ONLY_BE_USED_FOR_DEVELOPMENT_PURPOSES);
 
                 final AnonymousAuthenticationFilter anonymousFilter = new AnonymousAuthenticationFilter(
                         "controllerAnonymousFilter", "anonymous",
@@ -253,8 +209,7 @@ public class SecurityManagedConfiguration {
     }
 
     /**
-     * {@link WebSecurityConfigurer} for the hawkBit server DDI download
-     * interface.
+     * Security configuration for the hawkBit server DDI download interface.
      */
     @Configuration
     @ConditionalOnClass(DdiApiConfiguration.class)
@@ -284,14 +239,10 @@ public class SecurityManagedConfiguration {
         }
 
         /**
-         * Filter to protect the hawkBit server DDI download interface against
-         * to many requests.
+         * Filter to protect the hawkBit server DDI download interface against too many requests.
          *
-         * @param securityProperties
-         *            for filter configuration
-         *
-         * @return the spring filter registration bean for registering a denial
-         *         of service protection filter in the filter chain
+         * @param securityProperties for filter configuration
+         * @return the spring filter registration bean for registering a denial of service protection filter in the filter chain
          */
         @Bean
         @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
@@ -320,11 +271,7 @@ public class SecurityManagedConfiguration {
             final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
 
             if (ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled()) {
-                log.info(
-                    """
-                    ******************
-                    ** Anonymous controller security enabled, should only be used for developing purposes **
-                    ******************""");
+                log.warn(ANONYMOUS_CONTROLLER_SECURITY_ENABLED_SHOULD_ONLY_BE_USED_FOR_DEVELOPMENT_PURPOSES);
 
                 final AnonymousAuthenticationFilter anonymousFilter = new AnonymousAuthenticationFilter(
                         "controllerAnonymousFilter", "anonymous",
@@ -377,14 +324,10 @@ public class SecurityManagedConfiguration {
     }
 
     /**
-     * Filter to protect the hawkBit server system management interface against
-     * to many requests.
+     * Filter to protect the hawkBit server system management interface against too many requests.
      *
-     * @param securityProperties
-     *            for filter configuration
-     *
-     * @return the spring filter registration bean for registering a denial of
-     *         service protection filter in the filter chain
+     * @param securityProperties for filter configuration
+     * @return the spring filter registration bean for registering a denial of service protection filter in the filter chain
      */
     @Bean
     @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
@@ -411,7 +354,7 @@ public class SecurityManagedConfiguration {
     }
 
     /**
-     * A Websecurity config to handle and filter the download ids.
+     * Security config to handle and filter the download ids.
      */
     @Configuration
     @EnableWebSecurity
@@ -435,7 +378,7 @@ public class SecurityManagedConfiguration {
                     .authorizeHttpRequests(armrRepository -> armrRepository.anyRequest().authenticated())
                     .csrf(AbstractHttpConfigurer::disable)
                     .anonymous(AbstractHttpConfigurer::disable)
-                    .addFilterBefore(downloadIdAuthenticationFilter, FilterSecurityInterceptor.class)
+                    .addFilterBefore(downloadIdAuthenticationFilter, AuthorizationFilter.class)
                     .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
             return http.build();
@@ -460,15 +403,17 @@ public class SecurityManagedConfiguration {
          * Filter to protect the hawkBit server Management interface against to
          * many requests.
          *
-         * @return the spring filter registration bean for registering a denial
-         *         of service protection filter in the filter chain
+         * @return the spring filter registration bean for registering a denial of service protection filter in the filter chain
          */
         @Bean
         @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
         public FilterRegistrationBean<DosFilter> dosFilterREST() {
             final FilterRegistrationBean<DosFilter> filterRegBean = dosFilter(null,
                     securityProperties.getDos().getFilter(), securityProperties.getClients());
-            filterRegBean.setUrlPatterns(List.of("/rest/*", "/api/*"));
+            filterRegBean.setUrlPatterns(List.of(
+                    MgmtRestConstants.BASE_REST_MAPPING + "/*",
+                    MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/*",
+                    MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE + "/*"));
             filterRegBean.setOrder(DOS_FILTER_ORDER);
             filterRegBean.setName("dosMgmtFilter");
 
@@ -479,25 +424,22 @@ public class SecurityManagedConfiguration {
         @Order(350)
         SecurityFilterChain filterChainREST(
                 final HttpSecurity http,
-                @Lazy
-                final UserAuthenticationFilter userAuthenticationFilter,
                 @Autowired(required = false)
-                final OidcUserManagementAutoConfiguration.OidcBearerTokenAuthenticationFilter
-                        oidcBearerTokenAuthenticationFilter,
-                @Autowired(required = false)
-                final InMemoryClientRegistrationRepository clientRegistrationRepository,
+                final Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer,
                 final SystemManagement systemManagement,
-                final SystemSecurityContext systemSecurityContext)
-                throws Exception {
+                final SystemSecurityContext systemSecurityContext) throws Exception {
             http
-                    .securityMatcher("/rest/**", MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
-                    .csrf(AbstractHttpConfigurer::disable)
+                    .securityMatcher(MgmtRestConstants.BASE_REST_MAPPING + "/**", MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
                     .authorizeHttpRequests(amrmRegistry ->
                             amrmRegistry
                                     .requestMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
                                         .hasAnyAuthority(SpPermission.SYSTEM_ADMIN)
                                     .anyRequest()
                                         .authenticated())
+                    .anonymous(AbstractHttpConfigurer::disable)
+                    .csrf(AbstractHttpConfigurer::disable)
+                    .exceptionHandling(Customizer.withDefaults())
+                    .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .addFilterAfter(
                             // Servlet filter to create metadata after successful authentication over RESTful.
                             (request, response, chain) -> {
@@ -507,9 +449,7 @@ public class SecurityManagedConfiguration {
                                 }
                                 chain.doFilter(request, response);
                             },
-                            SessionManagementFilter.class)
-                    .anonymous(AbstractHttpConfigurer::disable)
-                    .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                            SessionManagementFilter.class);
 
             if (securityProperties.getCors().isEnabled()) {
                 http.cors(configurer -> configurer.configurationSource(corsConfigurationSource()));
@@ -519,64 +459,21 @@ public class SecurityManagedConfiguration {
                 http.requiresChannel(crmRegistry -> crmRegistry.anyRequest().requiresSecure());
             }
 
-            if (oidcBearerTokenAuthenticationFilter != null) {
-                // Only get the first client registration. Testing against every
-                // client could increase the
-                // attack vector
-                final ClientRegistration clientRegistration = clientRegistrationRepository != null
-                        && clientRegistrationRepository.iterator().hasNext()
-                                ? clientRegistrationRepository.iterator().next()
-                                : null;
-
-                Assert.notNull(clientRegistration, "There must be a valid client registration");
-                http.oauth2ResourceServer(configurer -> configurer.jwt(configurer2 -> {
-                    if (clientRegistration.getProviderDetails().getJwkSetUri() == null) {
-                        configurer2.decoder(JwtDecoders.fromIssuerLocation(clientRegistration.getProviderDetails().getIssuerUri()));
-                    } else {
-                        configurer2.jwkSetUri(clientRegistration.getProviderDetails().getJwkSetUri());
-                    }
-                }));
-
-                oidcBearerTokenAuthenticationFilter.setClientRegistration(clientRegistration);
-
-                http.addFilterAfter(oidcBearerTokenAuthenticationFilter, BearerTokenAuthenticationFilter.class);
-            } else {
-                final BasicAuthenticationEntryPoint basicAuthEntryPoint = new BasicAuthenticationEntryPoint();
-                basicAuthEntryPoint.setRealmName(securityProperties.getBasicRealm());
-
-                http.addFilterBefore(new Filter() {
-                    @Override
-                    public void init(final FilterConfig filterConfig) throws ServletException {
-                        userAuthenticationFilter.init(filterConfig);
-                    }
-
-                    @Override
-                    public void doFilter(final ServletRequest request, final ServletResponse response,
-                            final FilterChain chain) throws IOException, ServletException {
-                        userAuthenticationFilter.doFilter(request, response, chain);
-                    }
-
-                    @Override
-                    public void destroy() {
-                        userAuthenticationFilter.destroy();
-                    }
-                }, RequestHeaderAuthenticationFilter.class);
-                http
-                        .httpBasic(Customizer.withDefaults())
-                        .exceptionHandling(configurer -> configurer.authenticationEntryPoint(basicAuthEntryPoint));
+            if (oauth2ResourceServerCustomizer != null) {
+                http.oauth2ResourceServer(oauth2ResourceServerCustomizer);
+            }
+            if (oauth2ResourceServerCustomizer == null || securityProperties.isAllowHttpBasicOnOAuthEnabled()) {
+                http.httpBasic(configurer -> {
+                    final BasicAuthenticationEntryPoint basicAuthEntryPoint = new BasicAuthenticationEntryPoint();
+                    basicAuthEntryPoint.setRealmName(securityProperties.getBasicRealm());
+                    configurer.authenticationEntryPoint(basicAuthEntryPoint);
+                });
             }
 
             return http.build();
         }
 
-        @Bean
-        @ConditionalOnProperty(prefix = "hawkbit.server.security.cors", name = "enabled")
-        CorsConfigurationSource corsConfigurationSource() {
-            final CorsConfiguration configuration = corsConfiguration();
-            return request -> configuration;
-        }
-
-        private CorsConfiguration corsConfiguration() {
+        private CorsConfigurationSource corsConfigurationSource() {
             final CorsConfiguration corsConfiguration = new CorsConfiguration();
 
             corsConfiguration.setAllowedOrigins(securityProperties.getCors().getAllowedOrigins());
@@ -584,8 +481,7 @@ public class SecurityManagedConfiguration {
             corsConfiguration.setAllowedHeaders(securityProperties.getCors().getAllowedHeaders());
             corsConfiguration.setAllowedMethods(securityProperties.getCors().getAllowedMethods());
             corsConfiguration.setExposedHeaders(securityProperties.getCors().getExposedHeaders());
-
-            return corsConfiguration;
+            return request -> corsConfiguration;
         }
     }
 
