@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import lombok.Data;
@@ -68,4 +69,7 @@ public class RepositoryProperties {
     private long dsInvalidationLockTimeout = 5;
 
     private boolean implicitTenantCreateAllowed;
+
+    private List<String> skipImplicitLockForTags =
+            List.of("skip-implicit-lock", "skip_implicit_lock", "SKIP_IMPLICIT_LOCK", "SKIP-IMPLICIT-LOCK");
 }

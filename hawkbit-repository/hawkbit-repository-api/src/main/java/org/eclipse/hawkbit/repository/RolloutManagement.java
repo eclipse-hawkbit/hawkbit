@@ -18,6 +18,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
@@ -102,6 +103,45 @@ public interface RolloutManagement {
      * @param conditions
      *            the rolloutgroup conditions and actions which should be applied
      *            for each {@link RolloutGroup}
+     * @param dynamicRolloutGroupTemplate the template for dynamic rollout groups
+     * @return the persisted rollout.
+     *
+     * @throws EntityNotFoundException
+     *             if given {@link DistributionSet} does not exist
+     * @throws ConstraintViolationException
+     *             if rollout or group parameters are invalid.
+     * @throws AssignmentQuotaExceededException
+     *             if the maximum number of allowed targets per rollout group is
+     *             exceeded.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
+    Rollout create(@NotNull @Valid RolloutCreate create, int amountGroup, boolean confirmationRequired,
+            @NotNull RolloutGroupConditions conditions, DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate);
+
+    /**
+     * Persists a new rollout entity. The filter within the
+     * {@link Rollout#getTargetFilterQuery()} is used to retrieve the targets which
+     * are effected by this rollout to create. The amount of groups will be defined
+     * as equally sized.
+     *
+     * The rollout is not started. Only the preparation of the rollout is done,
+     * creating and persisting all the necessary groups. The Rollout and the groups
+     * are persisted in {@link RolloutStatus#CREATING} and
+     * {@link RolloutGroupStatus#CREATING}.
+     *
+     * The RolloutScheduler will start to assign targets to the groups. Once all
+     * targets have been assigned to the groups, the rollout status is changed to
+     * {@link RolloutStatus#READY} so it can be started with .
+     *
+     * @param create
+     *            the rollout entity to create
+     * @param amountGroup
+     *            the amount of groups to split the rollout into
+     * @param confirmationRequired
+     *            if a confirmation is required by the device group(s) of the rollout
+     * @param conditions
+     *            the rolloutgroup conditions and actions which should be applied
+     *            for each {@link RolloutGroup}
      * @return the persisted rollout.
      *
      * @throws EntityNotFoundException
@@ -130,7 +170,7 @@ public interface RolloutManagement {
      * The RolloutScheduler will start to assign targets to the groups. Once all
      * targets have been assigned to the groups, the rollout status is changed to
      * {@link RolloutStatus#READY} so it can be started with
-     * {@link #start(Rollout)}.
+     * {@link #start(long)}.
      *
      * @param rollout
      *            the rollout entity to create
@@ -274,8 +314,6 @@ public interface RolloutManagement {
      *
      * @param rolloutId
      *            rollout id
-     * @param deleted
-     *            flag if deleted rollouts should be included
      * @return rollout details of targets count for different statuses
      *
      *

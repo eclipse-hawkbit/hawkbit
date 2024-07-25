@@ -14,6 +14,10 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -27,10 +31,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * total elements and size of content. The content of the actual list is stored
  * in the {@link #content} field.
  *
- * @param <T>
- *            the type of elements in this list
- *
+ * @param <T> the type of elements in this list
  */
+@Data
+@Accessors(chain = true)
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
 public class PagedList<T> extends RepresentationModel<PagedList<T>> {
@@ -45,12 +51,9 @@ public class PagedList<T> extends RepresentationModel<PagedList<T>> {
      * creates a new paged list with the given {@code content} and {@code total}
      * .
      *
-     * @param content
-     *            the actual content of the list
-     * @param total
-     *            the total amount of elements
-     * @throws NullPointerException
-     *             in case {@code content} is {@code null}.
+     * @param content the actual content of the list
+     * @param total the total amount of elements
+     * @throws NullPointerException in case {@code content} is {@code null}.
      */
     @JsonCreator
     public PagedList(@JsonProperty("content") @NotNull final List<T> content, @JsonProperty("total") final long total) {
@@ -58,23 +61,4 @@ public class PagedList<T> extends RepresentationModel<PagedList<T>> {
         this.total = total;
         this.content = content;
     }
-
-    /**
-     * @return the size of the content list
-     */
-    public int getSize() {
-        return size;
-    }
-
-    /**
-     * @return the total amount of elements
-     */
-    public long getTotal() {
-        return total;
-    }
-
-    public List<T> getContent() {
-        return Collections.unmodifiableList(content);
-    }
-
 }

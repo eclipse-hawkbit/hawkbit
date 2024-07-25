@@ -28,11 +28,11 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
  *
  */
 public interface RolloutCreate {
+
     /**
      * Set name
      * 
-     * @param name
-     *            for {@link Rollout#getName()}
+     * @param name for {@link Rollout#getName()}
      * @return updated builder instance
      */
     RolloutCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
@@ -40,8 +40,7 @@ public interface RolloutCreate {
     /**
      * Set description
      * 
-     * @param description
-     *            for {@link Rollout#getDescription()}
+     * @param description for {@link Rollout#getDescription()}
      * @return updated builder instance
      */
     RolloutCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
@@ -49,28 +48,25 @@ public interface RolloutCreate {
     /**
      * Set the {@link DistributionSet}
      * 
-     * @param set
-     *            for {@link Rollout#getDistributionSet()}
+     * @param set for {@link Rollout#getDistributionSet()}
      * @return updated builder instance
      */
-    default RolloutCreate set(final DistributionSet set) {
-        return set(Optional.ofNullable(set).map(DistributionSet::getId).orElse(null));
+    default RolloutCreate distributionSetId(final DistributionSet set) {
+        return distributionSetId(Optional.ofNullable(set).map(DistributionSet::getId).orElse(null));
     }
 
     /**
      * Set the id of the {@link DistributionSet}
      * 
-     * @param setId
-     *            for {@link Rollout#getDistributionSet()}
+     * @param distributionSetId for {@link Rollout#getDistributionSet()}
      * @return updated builder instance
      */
-    RolloutCreate set(long setId);
+    RolloutCreate distributionSetId(long distributionSetId);
 
     /**
      * Set the {@link TargetFilterQuery}
      * 
-     * @param targetFilterQuery
-     *            for {@link Rollout#getTargetFilterQuery()}
+     * @param targetFilterQuery for {@link Rollout#getTargetFilterQuery()}
      * @return updated builder instance
      */
     RolloutCreate targetFilterQuery(
@@ -79,26 +75,23 @@ public interface RolloutCreate {
     /**
      * Set the {@link ActionType}
      * 
-     * @param actionType
-     *            for {@link Rollout#getActionType()}
+     * @param actionType for {@link Rollout#getActionType()}
      * @return updated builder instance
      */
     RolloutCreate actionType(@NotNull ActionType actionType);
 
     /**
-     * Set the forcedTime of the resulting {@link Actions}
+     * Set the forcedTime of the resulting {@link org.eclipse.hawkbit.repository.model.Action}s
      * 
-     * @param forcedTime
-     *            for {@link Rollout#getForcedTime()}
+     * @param forcedTime for {@link Rollout#getForcedTime()}
      * @return updated builder instance
      */
     RolloutCreate forcedTime(Long forcedTime);
 
     /**
-     * Set the weight of the resulting {@link Actions}
+     * Set the weight of the resulting {@link org.eclipse.hawkbit.repository.model.Action}s
      * 
-     * @param weight
-     *            for {@link Rollout#getWeight()}
+     * @param weight for {@link Rollout#getWeight()}
      * @return updated builder instance
      */
     RolloutCreate weight(Integer weight);
@@ -106,17 +99,15 @@ public interface RolloutCreate {
     /**
      * Set if the rollout shall be dynamic
      *
-     * @param dynamic
-     *            for {@link Rollout#isDynamic()}
+     * @param dynamic for {@link Rollout#isDynamic()}
      * @return updated builder instance
      */
     RolloutCreate dynamic(boolean dynamic);
 
     /**
-     * set start
+     * Set start at
      * 
-     * @param startAt
-     *            for {@link Rollout#getStartAt()}
+     * @param startAt for {@link Rollout#getStartAt()}
      * @return updated builder instance
      */
     RolloutCreate startAt(Long startAt);

@@ -14,10 +14,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
+import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignments;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
@@ -52,6 +53,7 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
+import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
@@ -99,8 +101,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<MgmtTarget> getTarget(@PathVariable("targetId") final String targetId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
         // to single response include poll status
-        final MgmtTarget response = MgmtTargetMapper.toResponse(findTarget, tenantConfigHelper);
-        MgmtTargetMapper.addPollStatus(findTarget, response);
+        final MgmtTarget response = MgmtTargetMapper.toResponse(findTarget, tenantConfigHelper, null);
         MgmtTargetMapper.addTargetLinks(response);
 
         return ResponseEntity.ok(response);
@@ -172,8 +173,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         }
 
-        final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget, tenantConfigHelper);
-        MgmtTargetMapper.addPollStatus(updateTarget, response);
+        final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget, tenantConfigHelper, null);
         MgmtTargetMapper.addTargetLinks(response);
 
         return ResponseEntity.ok(response);
@@ -392,6 +392,16 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         action = deploymentManagement.forceTargetAction(actionId);
 
         return ResponseEntity.ok(MgmtTargetMapper.toResponseWithLinks(targetId, action));
+    }
+
+    @Override
+    public ResponseEntity<List<MgmtTag>> getTags(@PathVariable("targetId") String targetId) {
+        final Set<TargetTag> tags = targetManagement.getTagsByControllerId(targetId);
+        if (tags.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(MgmtTagMapper.toResponse(tags.stream().toList()));
+        }
     }
 
     @Override

@@ -9,16 +9,16 @@
  */
 package org.eclipse.hawkbit.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.slf4j.Logger;
 
 /**
  * An pre-authenticated processing filter which extracts the principal from a
  * request URI and the credential from a request header.
- * 
- *
- *
  */
+@Slf4j
 public class HttpControllerPreAuthenticatedSecurityHeaderFilter extends AbstractHttpControllerAuthenticationFilter {
 
     private final String caCommonNameHeader;
@@ -60,4 +60,8 @@ public class HttpControllerPreAuthenticatedSecurityHeaderFilter extends Abstract
                 tenantConfigurationManagement, tenantAware, systemSecurityContext);
     }
 
+    @Override
+    protected Logger log() {
+        return log;
+    }
 }

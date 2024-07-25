@@ -1,5 +1,5 @@
 # set Java
-ARG JAVA_VERSION=17.0.10_7
+ARG JAVA_VERSION=17.0.11_9
 # extracts spring layers from the app jar (to optimize boot)
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine as build
 
@@ -21,7 +21,7 @@ RUN set -x &&\
  wget -O ${APP}.jar.asc --no-verbose https://repo1.maven.org/maven2/org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar.asc &&\
  gpg --batch --verify ${APP}.jar.asc ${APP}.jar &&\
  apk del build-dependencies &&\
- java -Djarmode=layertools -jar ${APP}.jar extract --destination . &&\
+ java -Djarmode=tools -jar /${APP}.jar extract --layers --launcher --destination . &&\
  rm ${APP}.jar ${APP}.jar.asc /KEY
 
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine

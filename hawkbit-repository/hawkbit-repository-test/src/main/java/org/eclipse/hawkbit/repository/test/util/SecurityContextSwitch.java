@@ -64,19 +64,15 @@ public class SecurityContextSwitch {
     }
 
     public static WithUser withController(final String principal, final String... authorities) {
-        return withUserAndTenant(principal, DEFAULT_TENANT, true, true, true, authorities);
+        return withUserAndTenant(principal, DEFAULT_TENANT, true, false, true, authorities);
     }
 
     public static WithUser withUser(final String principal, final String... authorities) {
-        return withUserAndTenant(principal, DEFAULT_TENANT, true, true, false, authorities);
+        return withUserAndTenant(principal, DEFAULT_TENANT, true, false, false, authorities);
     }
 
-    public static WithUser withUser(final String principal, final boolean allSpPermision, final String... authorities) {
-        return withUserAndTenant(principal, DEFAULT_TENANT, true, allSpPermision, false, authorities);
-    }
-
-    public static WithUser withUserAndTenant(final String principal, final String tenant, final String... authorities) {
-        return withUserAndTenant(principal, tenant, true, true, false, authorities);
+    public static WithUser withUserAndTenantAllSpPermissions(final String principal, final String tenant) {
+        return withUserAndTenant(principal, tenant, true, true, false);
     }
 
     public static WithUser withUserAndTenant(final String principal, final String tenant,

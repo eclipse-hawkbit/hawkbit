@@ -15,11 +15,15 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * The representation of an meta data in the REST API for POST/Create.
  */
 @Data
+@Accessors(chain = true)
+@ToString
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtMetadata {
@@ -27,6 +31,7 @@ public class MgmtMetadata {
     @JsonProperty(required = true)
     @Schema(description = "Metadata property key", example = "someKnownKey")
     private String key;
+
     @JsonProperty
     @Schema(description = "Metadata property value", example = "someKnownKeyValue")
     private String value;

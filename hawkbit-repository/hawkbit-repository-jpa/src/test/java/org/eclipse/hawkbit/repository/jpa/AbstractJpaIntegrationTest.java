@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -28,6 +29,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
@@ -44,6 +46,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TenantMetaDataRepository;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -174,33 +177,37 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     protected void assertRollout(final Rollout rollout, final boolean dynamic, final Rollout.RolloutStatus status, final int groupCreated, final long totalTargets) {
         final Rollout refreshed = refresh(rollout);
-        assertThat(refreshed.isDynamic()).isEqualTo(dynamic);
-        assertThat(refreshed.getStatus()).isEqualTo(status);
-        assertThat(refreshed.getRolloutGroupsCreated()).isEqualTo(groupCreated);
-        assertThat(refreshed.getTotalTargets()).isEqualTo(totalTargets);
+        assertThat(refreshed.isDynamic()).as("Is dynamic").isEqualTo(dynamic);
+        assertThat(refreshed.getStatus()).as("Status").isEqualTo(status);
+        assertThat(refreshed.getRolloutGroupsCreated()).as("Groups created").isEqualTo(groupCreated);
+        assertThat(refreshed.getTotalTargets()).as("Total targets").isEqualTo(totalTargets);
     }
 
     protected void assertGroup(final RolloutGroup group, final boolean dynamic, final RolloutGroup.RolloutGroupStatus status, final long totalTargets) {
         final RolloutGroup refreshed = refresh(group);
-        assertThat(refreshed.isDynamic()).isEqualTo(dynamic);
-        assertThat(refreshed.getStatus()).isEqualTo(status);
-        assertThat(refreshed.getTotalTargets()).isEqualTo(totalTargets);
+        assertThat(refreshed.isDynamic()).as("Is dynamic").isEqualTo(dynamic);
+        assertThat(refreshed.getStatus()).as("Status").isEqualTo(status);
+        assertThat(refreshed.getTotalTargets()).as("Total targets").isEqualTo(totalTargets);
     }
 
     protected Page<JpaAction> assertAndGetRunning(final Rollout rollout, final int count) {
         final Page<JpaAction> running = actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.RUNNING);
-        assertThat(running.getTotalElements()).isEqualTo(count);
+        assertThat(running.getTotalElements()).as("Action count").isEqualTo(count);
         return running;
     }
 
     protected void assertScheduled(final Rollout rollout, final int count) {
         final Page<JpaAction> running = actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.SCHEDULED);
-        assertThat(running.getTotalElements()).isEqualTo(count);
+        assertThat(running.getTotalElements()).as("Action count").isEqualTo(count);
     }
 
     protected void finishAction(final Action action) {
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Action.Status.FINISHED));
+    }
+
+    protected Set<TargetTag> getTargetTags(final String controllerId) {
+        return targetManagement.getTagsByControllerId(controllerId);
     }
 
     private JpaRollout refresh(final Rollout rollout) {

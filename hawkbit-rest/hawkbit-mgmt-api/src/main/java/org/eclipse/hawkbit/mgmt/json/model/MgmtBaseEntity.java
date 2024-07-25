@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
 
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * A json annotated rest model for BaseEntity to RESTful API representation.
  */
 @Data
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public abstract class MgmtBaseEntity extends RepresentationModel<MgmtBaseEntity> {
@@ -45,6 +47,7 @@ public abstract class MgmtBaseEntity extends RepresentationModel<MgmtBaseEntity>
     @JsonProperty
     @Schema(description = "Entity was last modified at (timestamp UTC in milliseconds)",
             accessMode = Schema.AccessMode.READ_ONLY, example = "1691065906407")
+    @EqualsAndHashCode.Exclude
     private Long lastModifiedAt;
 
     /**

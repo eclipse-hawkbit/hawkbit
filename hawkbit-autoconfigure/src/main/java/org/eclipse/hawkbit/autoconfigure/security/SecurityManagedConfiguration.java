@@ -74,6 +74,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
@@ -528,7 +529,13 @@ public class SecurityManagedConfiguration {
                                 : null;
 
                 Assert.notNull(clientRegistration, "There must be a valid client registration");
-                http.oauth2ResourceServer(configurer -> configurer.jwt().jwkSetUri(clientRegistration.getProviderDetails().getJwkSetUri()));
+                http.oauth2ResourceServer(configurer -> configurer.jwt(configurer2 -> {
+                    if (clientRegistration.getProviderDetails().getJwkSetUri() == null) {
+                        configurer2.decoder(JwtDecoders.fromIssuerLocation(clientRegistration.getProviderDetails().getIssuerUri()));
+                    } else {
+                        configurer2.jwkSetUri(clientRegistration.getProviderDetails().getJwkSetUri());
+                    }
+                }));
 
                 oidcBearerTokenAuthenticationFilter.setClientRegistration(clientRegistration);
 

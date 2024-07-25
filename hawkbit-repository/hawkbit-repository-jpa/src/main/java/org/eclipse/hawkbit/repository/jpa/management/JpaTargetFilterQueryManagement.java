@@ -52,6 +52,7 @@ import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.dao.ConcurrencyFailureException;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -75,16 +76,14 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     private final TargetFilterQueryRepository targetFilterQueryRepository;
     private final TargetManagement targetManagement;
-
     private final VirtualPropertyReplacer virtualPropertyReplacer;
-
     private final DistributionSetManagement distributionSetManagement;
     private final QuotaManagement quotaManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final RepositoryProperties repositoryProperties;
     private final SystemSecurityContext systemSecurityContext;
     private final ContextAware contextAware;
-
+    private final AuditorAware<String> auditorAware;
     private final Database database;
 
     public JpaTargetFilterQueryManagement(final TargetFilterQueryRepository targetFilterQueryRepository,
@@ -92,7 +91,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final Database database, final TenantConfigurationManagement tenantConfigurationManagement,
             final RepositoryProperties repositoryProperties,
-            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware) {
+            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final AuditorAware<String> auditorAware) {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetManagement = targetManagement;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
@@ -103,6 +102,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         this.repositoryProperties = repositoryProperties;
         this.systemSecurityContext = systemSecurityContext;
         this.contextAware = contextAware;
+        this.auditorAware = auditorAware;
     }
 
     @Override
@@ -278,14 +278,15 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             assertMaxTargetsQuota(targetFilterQuery.getQuery(), targetFilterQuery.getName(), update.getDsId());
             final JpaDistributionSet distributionSet = (JpaDistributionSet) distributionSetManagement
                     .getValidAndComplete(update.getDsId());
-            // implicit lock
-            if (!distributionSet.isLocked()) {
+
+            if (((JpaDistributionSetManagement)distributionSetManagement).isImplicitLockApplicable(distributionSet)) {
                 distributionSetManagement.lock(distributionSet.getId());
             }
 
             targetFilterQuery.setAutoAssignDistributionSet(distributionSet);
             contextAware.getCurrentContext().ifPresent(targetFilterQuery::setAccessControlContext);
-            targetFilterQuery.setAutoAssignInitiatedBy(contextAware.getCurrentUsername());
+            targetFilterQuery.setAutoAssignInitiatedBy(
+                    auditorAware.getCurrentAuditor().orElse(targetFilterQuery.getCreatedBy()));
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
             targetFilterQuery.setAutoAssignWeight(
                     update.getWeight() == null ? repositoryProperties.getActionWeightIfAbsent() : update.getWeight());

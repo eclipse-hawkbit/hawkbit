@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +24,6 @@ import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
-import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutExecutor;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.management.JpaRolloutManagement;
@@ -60,6 +61,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -152,20 +154,41 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         case CREATING:
             handleCreateRollout((JpaRollout) rollout);
             break;
-        case DELETING:
-            handleDeleteRollout((JpaRollout) rollout);
-            break;
         case READY:
             handleReadyRollout(rollout);
             break;
         case STARTING:
-            handleStartingRollout(rollout);
+            // the lastModifiedBy user is probably the user that has actually called the rollout start (unless overridden) - not the creator
+            SpringSecurityAuditorAware.setAuditorOverride(rollout.getLastModifiedBy());
+            try {
+                handleStartingRollout(rollout);
+            } finally {
+                // clear, ALWAYS, the set auditor override
+                SpringSecurityAuditorAware.clearAuditorOverride();
+            }
             break;
         case RUNNING:
             handleRunningRollout((JpaRollout) rollout);
             break;
         case STOPPING:
-            handleStopRollout((JpaRollout) rollout);
+            // the lastModifiedBy user is probably the user that has actually called the rollout stop (unless overridden) - not the creator
+            SpringSecurityAuditorAware.setAuditorOverride(rollout.getLastModifiedBy());
+            try {
+                handleStopRollout((JpaRollout) rollout);
+            } finally {
+                // clear, ALWAYS, the set auditor override
+                SpringSecurityAuditorAware.clearAuditorOverride();
+            }
+            break;
+        case DELETING:
+            // the lastModifiedBy user is probably the user that has actually called the rollout delete (unless overridden) - not the creator
+            SpringSecurityAuditorAware.setAuditorOverride(rollout.getLastModifiedBy());
+            try {
+                handleDeleteRollout((JpaRollout) rollout);
+            } finally {
+                // clear, ALWAYS, the set auditor override
+                SpringSecurityAuditorAware.clearAuditorOverride();
+            }
             break;
         default:
             log.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
@@ -200,7 +223,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         // When all groups are ready the rollout status can be changed to be
         // ready, too.
         if (readyGroups == rolloutGroups.size()) {
-            if (rollout.isDynamic()) {
+            if (rollout.isDynamic() && !rolloutGroups.get(rolloutGroups.size() - 1).isDynamic()) {
                 // add first dynamic group one by using the last as a parent and as a pattern
                 createDynamicGroup(rollout, rolloutGroups.get(rolloutGroups.size() - 1), rolloutGroups.size(), RolloutGroupStatus.READY);
             }
@@ -374,9 +397,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void sendRolloutGroupDeletedEvents(final JpaRollout rollout) {
-        final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId)
-                .collect(Collectors.toList());
-
+        final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId).toList();
         afterCommit.afterCommit(() -> groupIds.forEach(rolloutGroupId -> eventPublisherHolder.getEventPublisher()
                 .publishEvent(new RolloutGroupDeletedEvent(tenantAware.getCurrentTenant(), rolloutGroupId,
                         JpaRolloutGroup.class, eventPublisherHolder.getApplicationId()))));
@@ -404,24 +425,11 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         executeRolloutGroupSuccessAction(rollout, latestRolloutGroup.get(0));
     }
 
-    private static final int DEFAULT_DYNAMIC_GROUP_EXPECTED = 100;
-    private static int expectedDynamicGroupSize(final List<? extends RolloutGroup> rolloutGroups) {
-        int expected = 0;
-        // gets the size of last static group (it is a pattern for dynamic groups)
-        for (final RolloutGroup rolloutGroup : rolloutGroups) {
-            if (rolloutGroup.isDynamic()) {
-                break;
-            }
-            expected = rolloutGroup.getTotalTargets();
-        }
-        return expected <= 0 ? DEFAULT_DYNAMIC_GROUP_EXPECTED /* default if the last static group has been empty */ : expected;
-    }
-
     // fakes getTotalTargets count to match expected for the last dynamic group
     // so the evaluation to use total targets to properly
     private RolloutGroup evalProxy(final RolloutGroup group, final List<JpaRolloutGroup> rolloutGroups) {
         if (group.isDynamic()) {
-            final int expected = expectedDynamicGroupSize(rolloutGroups);
+            final int expected = Math.max((int)group.getTargetPercentage(), 1);
             return (RolloutGroup) Proxy.newProxyInstance(
                     RolloutGroup.class.getClassLoader(),
                     new Class<?>[] {RolloutGroup.class},
@@ -681,8 +689,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             return false;
         }
 
-        // expected as last full group - last static or previously filled in dynamic group
-        final long expectedInGroup = expectedDynamicGroupSize(rolloutGroups);
+        // expected as last full group
+        final long expectedInGroup = Math.max((int)group.getTargetPercentage(), 1);
 
         final long currentlyInGroup = group.getTotalTargets();
         if (currentlyInGroup >= expectedInGroup) {
@@ -704,7 +712,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             do {
                 // Add up to TRANSACTION_TARGETS actions of the left targets
                 // In case a TransactionException is thrown this loop aborts
-                final long createdActions = createActionsForDynamicGroupInNewTransaction(rollout, group, groupTargetFilter,
+                final int createdActions = createActionsForDynamicGroupInNewTransaction(rollout, group, groupTargetFilter,
                         Math.min(TRANSACTION_TARGETS, targetsLeftToAdd));
                 if (createdActions == 0) {
                     break; // no more to assign
@@ -718,7 +726,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 updateTotalTargetCount(group, group.getTotalTargets() + newActions);
 
                 if (targetsLeftToAdd == 0) {
-                    // this is filled create a new one in sheduled state
+                    // this is filled create a new one in scheduled state
                     createDynamicGroup(rollout, group, rolloutGroups.size(), RolloutGroupStatus.SCHEDULED);
                     return true;
                 }
@@ -734,19 +742,32 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void createDynamicGroup(final JpaRollout rollout, final RolloutGroup lastGroup, final int groupCount, final RolloutGroupStatus status) {
+        try {
+            RolloutHelper.verifyRolloutGroupAmount(groupCount + 1, quotaManagement);
+        } catch (final AssignmentQuotaExceededException e) {
+            log.warn("Quota exceeded for dynamic rollout group creation: {}. Stop it", e.getMessage());
+            if (isRolloutComplete(rollout)) {
+                rollout.setStatus(RolloutStatus.STOPPED);
+                rolloutRepository.save(rollout);
+            }
+            return;
+        }
         final JpaRolloutGroup group = new JpaRolloutGroup();
-        final String nameAndDesc = "group-" + (groupCount + 1) + "-dynamic";
-        group.setDynamic(true);
+        final String lastGroupWithoutSuffix = "group-" + groupCount;
+        final String suffix = lastGroup.getName().startsWith(lastGroupWithoutSuffix) ? lastGroup.getName().substring(lastGroupWithoutSuffix.length()) : "";
+        final String nameAndDesc = "group-" + (groupCount + 1) + suffix;
         group.setName(nameAndDesc);
         group.setDescription(nameAndDesc);
         group.setRollout(rollout);
         group.setParent(lastGroup);
+        group.setDynamic(true);
         // no need to be filled with targets, directly in ready (if first on create - it will be scheduled on start)
         // or scheduled state (for next dynamic groups)
         group.setStatus(status);
         group.setConfirmationRequired(lastGroup.isConfirmationRequired());
 
-        group.setTargetPercentage(lastGroup.getTargetPercentage());
+        // for dynamic groups the target count is kept in target percentage
+        group.setTargetPercentage(lastGroup.isDynamic() ? lastGroup.getTargetPercentage() : lastGroup.getTotalTargets());
         group.setTargetFilterQuery(lastGroup.getTargetFilterQuery());
 
         addSuccessAndErrorConditionsAndActions(group, lastGroup.getSuccessCondition(),
@@ -761,7 +782,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         ((JpaRolloutManagement) rolloutManagement).publishRolloutGroupCreatedEventAfterCommit(savedGroup, rollout);
     }
 
-    private Long createActionsForDynamicGroupInNewTransaction(final JpaRollout rollout, final RolloutGroup group,
+    private int createActionsForDynamicGroupInNewTransaction(final JpaRollout rollout, final RolloutGroup group,
             final String targetFilter, final long limit) {
         return DeploymentHelper.runInNewTransaction(txManager, "createActionsForRolloutDynamicGroup", status -> {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
@@ -771,14 +792,19 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                     rolloutGroupRepository.findByRolloutOrderByIdAsc(rollout).get(0).getId(),
                     targetFilter, rollout.getDistributionSet().getType());
 
-            if (targets.getNumberOfElements() > 0) {
-                final DistributionSet distributionSet = rollout.getDistributionSet();
-                final ActionType actionType = rollout.getActionType();
-                final long forceTime = rollout.getForcedTime();
-                createActions(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
+            if (targets.getNumberOfElements() == 0) {
+                return 0;
             }
 
-            return Long.valueOf(targets.getNumberOfElements());
+            final DistributionSet distributionSet = rollout.getDistributionSet();
+            final ActionType actionType = rollout.getActionType();
+            final long forceTime = rollout.getForcedTime();
+            final List<Action> newActions = createActions(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
+            if (!newActions.isEmpty()) {
+                deploymentManagement.startScheduledActions(newActions);
+            }
+
+            return newActions.size();
         });
     }
 
@@ -847,7 +873,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
      * scheduled actions the scheduled actions gets canceled. A scheduled action
      * is created in-active for static and running for dynamic groups.
      */
-    private void createActions(final Collection<Target> targets, final DistributionSet distributionSet,
+    private List<Action> createActions(final Collection<Target> targets, final DistributionSet distributionSet,
             final ActionType actionType, final Long forcedTime, final Rollout rollout,
             final RolloutGroup rolloutGroup) {
         // cancel all current scheduled actions for this target. E.g. an action
@@ -856,22 +882,27 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         // created.
         final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
         deploymentManagement.cancelInactiveScheduledActionsForTargets(targetIds);
-        targets.forEach(target -> {
-            assertActionsPerTargetQuota(target, 1);
+        return targets.stream()
+                .map(target -> {
+                    assertActionsPerTargetQuota(target, 1);
 
-            final JpaAction action = new JpaAction();
-            action.setTarget(target);
-            action.setActive(rolloutGroup.isDynamic());
-            action.setDistributionSet(distributionSet);
-            action.setActionType(actionType);
-            action.setForcedTime(forcedTime);
-            action.setStatus(rolloutGroup.isDynamic() ? Status.RUNNING : Status.SCHEDULED);
-            action.setRollout(rollout);
-            action.setRolloutGroup(rolloutGroup);
-            action.setInitiatedBy(rollout.getCreatedBy());
-            rollout.getWeight().ifPresent(action::setWeight);
-            actionRepository.save(action);
-        });
+                    final JpaAction action = new JpaAction();
+                    action.setTarget(target);
+                    action.setActive(false);
+                    action.setDistributionSet(distributionSet);
+                    action.setActionType(actionType);
+                    action.setForcedTime(forcedTime);
+                    action.setStatus(Status.SCHEDULED);
+                    action.setRollout(rollout);
+                    action.setRolloutGroup(rolloutGroup);
+                    action.setInitiatedBy(rollout.getCreatedBy());
+                    rollout.getWeight().ifPresent(action::setWeight);
+                    actionRepository.save(action);
+
+                    return action;
+                })
+                .map(Action.class::cast)
+                .toList();
     }
 
     /**

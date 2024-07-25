@@ -15,7 +15,7 @@ jobs:
     working_directory: ~/hawkBit
 
     docker:
-    - image: cimg/openjdk:17.0.8
+    - image: cimg/openjdk:17.0.11
       auth:
         username: $DOCKERHUB_USER
         password: $DOCKERHUB_ACCESSTOKEN

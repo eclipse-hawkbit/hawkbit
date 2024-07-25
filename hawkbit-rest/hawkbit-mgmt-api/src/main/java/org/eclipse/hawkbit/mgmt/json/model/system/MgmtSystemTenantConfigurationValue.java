@@ -17,6 +17,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -28,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
  * representation.
  */
 @Data
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @JsonInclude(Include.NON_NULL)
@@ -53,6 +55,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
         * **pollingOverdueTime** - String, The configuration key 'pollingOverdueTime' defines the period of time after the SP server will recognize a target, which is not performing pull requests anymore.
         * **multi.assignments.enabled** - Boolean, The configuration key 'multi.assignments.enabled' defines if multiple distribution sets can be assigned to the same targets.
         * **batch.assignments.enabled** - Boolean, The configuration key 'batch.assignments.enabled' defines if distribution set can be assigned to multiple targets in a single batch message.
+        * **implicit.lock.enabled** - Boolean (true by default), The configuration key 'implicit.lock.enabled' defines if distribution set and their software modules shall be implicitly locked when assigned to target, rollout or target filter.
         """, example = """
     {
       "value" : "",
@@ -75,6 +78,7 @@ public class MgmtSystemTenantConfigurationValue extends RepresentationModel<Mgmt
     private boolean global = true;
 
     @Schema(description = "Entity was last modified at (timestamp UTC in milliseconds)", example = "1623085150")
+    @EqualsAndHashCode.Exclude
     private Long lastModifiedAt;
 
     @Schema(description = "Entity was last modified by (User, AMQP-Controller, anonymous etc.)",

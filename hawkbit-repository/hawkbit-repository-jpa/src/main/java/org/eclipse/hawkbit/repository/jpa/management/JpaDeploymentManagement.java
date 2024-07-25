@@ -64,7 +64,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
@@ -140,7 +139,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     private final EntityManager entityManager;
     private final DistributionSetManagement distributionSetManagement;
-    private final DistributionSetRepository distributionSetRepository;
     private final TargetRepository targetRepository;
     private final AuditorAware<String> auditorProvider;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
@@ -150,21 +148,20 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final SystemSecurityContext systemSecurityContext;
     private final TenantAware tenantAware;
+    private final AuditorAware<String> auditorAware;
     private final Database database;
     private final RetryTemplate retryTemplate;
 
     public JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
-            final DistributionSetManagement distributionSetManagement,
-            final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
+            final DistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
             final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
-            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database,
-            final RepositoryProperties repositoryProperties) {
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final AuditorAware<String> auditorAware,
+            final Database database, final RepositoryProperties repositoryProperties) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.entityManager = entityManager;
-        this.distributionSetRepository = distributionSetRepository;
         this.distributionSetManagement = distributionSetManagement;
         this.targetRepository = targetRepository;
         this.auditorProvider = auditorProvider;
@@ -179,6 +176,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
+        this.auditorAware = auditorAware;
         this.database = database;
         this.retryTemplate = createRetryTemplate();
     }
@@ -200,8 +198,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .map(entry -> DeploymentManagement.deploymentRequest(entry.getKey(), entry.getValue()).build())
                 .toList();
 
-        return assignDistributionSets(tenantAware.getCurrentUsername(), deploymentRequests, null,
-                offlineDsAssignmentStrategy);
+        return assignDistributionSets(
+                auditorAware.getCurrentAuditor().orElse(tenantAware.getCurrentUsername()),
+                deploymentRequests, null, offlineDsAssignmentStrategy);
     }
 
     @Override
@@ -377,8 +376,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final AbstractDsAssignmentStrategy assignmentStrategy) {
         final JpaDistributionSet distributionSet =
                 (JpaDistributionSet) distributionSetManagement.getValidAndComplete(dsId);
-        // implicit lock
-        if (!distributionSet.isLocked()) {
+
+        if (((JpaDistributionSetManagement)distributionSetManagement).isImplicitLockApplicable(distributionSet)) {
             // without new transaction DS changed event is not thrown
             DeploymentHelper.runInNewTransaction(txManager, "Implicit lock", status -> {
                 distributionSetManagement.lock(distributionSet.getId());
@@ -651,44 +650,43 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         long totalActionsCount = 0L;
         long lastStartedActionsCount;
         do {
-            lastStartedActionsCount = startScheduledActionsByRolloutGroupParentInNewTransaction(rolloutId,
-                    distributionSetId, rolloutGroupParentId, ACTION_PAGE_LIMIT);
+            lastStartedActionsCount = DeploymentHelper.runInNewTransaction(
+                    txManager,
+                    "startScheduledActions-" + rolloutId,
+                    status -> {
+                        final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(
+                                rolloutId, rolloutGroupParentId, ACTION_PAGE_LIMIT);
+
+                        if (rolloutGroupActions.getContent().isEmpty()) {
+                            return 0L;
+                        }
+
+                        // self invocation won't check @PreAuthorize but it is already checked for the method
+                        startScheduledActions(rolloutGroupActions.getContent());
+
+                        return rolloutGroupActions.getTotalElements();
+                    });
             totalActionsCount += lastStartedActionsCount;
         } while (lastStartedActionsCount > 0);
 
         return totalActionsCount;
     }
 
-    private long startScheduledActionsByRolloutGroupParentInNewTransaction(final Long rolloutId,
-            final Long distributionSetId, final Long rolloutGroupParentId, final int limit) {
-        return DeploymentHelper.runInNewTransaction(txManager, "startScheduledActions-" + rolloutId, status -> {
-            final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rolloutId,
-                    rolloutGroupParentId, limit);
 
-            if (rolloutGroupActions.getContent().isEmpty()) {
-                return 0L;
-            }
-
-            final List<Action> newTargetAssignments = handleTargetAssignments(rolloutGroupActions);
-
-            if (!newTargetAssignments.isEmpty()) {
-                onlineDsAssignmentStrategy.sendDeploymentEvents(distributionSetId, newTargetAssignments);
-            }
-
-            return rolloutGroupActions.getTotalElements();
-        });
-    }
-
-    private List<Action> handleTargetAssignments(final Page<Action> rolloutGroupActions) {
+    @Override
+    public void startScheduledActions(final List<Action> rolloutGroupActions) {
         // Close actions already assigned and collect pending assignments
-        final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.getContent().stream()
+        final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.stream()
                 .map(JpaAction.class::cast).map(this::closeActionIfSetWasAlreadyAssigned).filter(Objects::nonNull)
                 .collect(Collectors.toList());
         if (pendingTargetAssignments.isEmpty()) {
-            return new ArrayList<>(pendingTargetAssignments);
+            return;
         }
         // check if old actions needs to be canceled first
-        return startScheduledActionsAndHandleOpenCancellationFirst(pendingTargetAssignments);
+        final List<Action> newTargetAssignments = startScheduledActionsAndHandleOpenCancellationFirst(pendingTargetAssignments);
+        if (!newTargetAssignments.isEmpty()) {
+            onlineDsAssignmentStrategy.sendDeploymentEvents(newTargetAssignments.get(0).getDistributionSet().getId(), newTargetAssignments);
+        }
     }
 
     private Page<Action> findActionsByRolloutAndRolloutGroupParent(final Long rolloutId,
@@ -940,15 +938,16 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Optional<DistributionSet> getAssignedDistributionSet(final String controllerId) {
-        // target access checked in assertTargetReadAllowed
-        assertTargetReadAllowed(controllerId);
-        return distributionSetRepository.findAssignedToTarget(controllerId);
+        return targetRepository
+                .findOne(TargetSpecifications.hasControllerId(controllerId))
+                .map(JpaTarget::getAssignedDistributionSet);
     }
 
     @Override
     public Optional<DistributionSet> getInstalledDistributionSet(final String controllerId) {
-        assertTargetReadAllowed(controllerId);
-        return distributionSetRepository.findInstalledAtTarget(controllerId);
+        return targetRepository
+                .findOne(TargetSpecifications.hasControllerId(controllerId))
+                .map(JpaTarget::getInstalledDistributionSet);
     }
 
     @Override

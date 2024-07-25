@@ -840,6 +840,20 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Unlocks a SM.")
+    void unlockSoftwareModule() {
+        final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("sm-1");
+        softwareModuleManagement.lock(softwareModule.getId());
+        assertThat(
+                softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(false))
+                .isTrue();
+        softwareModuleManagement.unlock(softwareModule.getId());
+        assertThat(
+                softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(true))
+                .isFalse();
+    }
+
+    @Test
     @Description("Artifacts of a locked SM can't be modified. Expected behaviour is to throw an exception and to do not modify them.")
     void lockSoftwareModuleApplied() {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("sm-1");

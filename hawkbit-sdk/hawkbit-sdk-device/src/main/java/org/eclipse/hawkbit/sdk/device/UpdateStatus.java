@@ -24,6 +24,21 @@ public record UpdateStatus(Status status, List<String> messages) {
     public enum Status {
 
         /**
+         * Update is running (intermediate status).
+         */
+        PROCEEDING(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE, null),
+
+        /**
+         * Device starts to download.
+         */
+        DOWNLOAD(DdiStatus.ExecutionStatus.DOWNLOAD, DdiResult.FinalResult.NONE, null),
+
+        /**
+         * Device is finished with downloading.
+         */
+        DOWNLOADED(DdiStatus.ExecutionStatus.DOWNLOADED, DdiResult.FinalResult.NONE, null),
+
+        /**
          * Update has been successful and response the successful update.
          */
         SUCCESSFUL(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, 200),
@@ -31,22 +46,7 @@ public record UpdateStatus(Status status, List<String> messages) {
         /**
          * Update has been not successful and response the error update.
          */
-        ERROR(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.FAILURE, null),
-
-        /**
-         * Update is running (intermediate status).
-         */
-        RUNNING(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE, null),
-
-        /**
-         * Device starts to download.
-         */
-        DOWNLOADING(DdiStatus.ExecutionStatus.DOWNLOAD, DdiResult.FinalResult.NONE, null),
-
-        /**
-         * Device is finished with downloading.
-         */
-        DOWNLOADED(DdiStatus.ExecutionStatus.DOWNLOADED, DdiResult.FinalResult.NONE, null);
+        FAILURE(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.FAILURE, null);
 
         private final DdiStatus.ExecutionStatus executionStatus;
         private final DdiResult.FinalResult finalResult;

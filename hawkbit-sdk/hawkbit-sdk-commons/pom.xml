@@ -24,8 +24,8 @@
    <description>SDK commons</description>
 
    <properties>
-      <spring-cloud-starter-openfeign.version>4.0.4</spring-cloud-starter-openfeign.version>
-      <openfeign-hc5.version>13.0</openfeign-hc5.version>
+      <spring-cloud-starter-openfeign.version>4.1.0</spring-cloud-starter-openfeign.version>
+      <openfeign-hc5.version>13.2.1</openfeign-hc5.version>
    </properties>
 
    <dependencies>

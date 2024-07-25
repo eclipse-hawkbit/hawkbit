@@ -12,49 +12,31 @@ package org.eclipse.hawkbit.mgmt.json.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * A generic abstract rest model which contains only a ID for use-case e.g.
  * which allows only posting or putting an ID into the request body, e.g. for
  * assignments.
- *
  */
+@NoArgsConstructor
+@Data
+@Accessors(chain = true)
+@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtId {
+
     @Schema(example = "108")
     private Long id;
-    
-    /**
-     * Constructor
-     */
-    public MgmtId() {
-    }
 
     /**
-     * Constructor
-     * 
-     * @param id
-     *            ID of object
+     * @param id ID of object
      */
     @JsonCreator
     public MgmtId(final Long id) {
         this.id = id;
     }
-
-
-    /**
-     * @return the ID
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * @param id
-     *            the ID to set
-     */
-    public void setId(final Long id) {
-        this.id = id;
-    }
-
 }

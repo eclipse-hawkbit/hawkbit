@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,11 +52,13 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCond
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -221,6 +224,81 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
+    @Description("Testing dynamic rollouts with default dynamic group definition")
+    void createDynamicRolloutWithDefaultDynamicGroupDefinition() throws Exception {
+        final DistributionSet dsA = testdataFactory.createDistributionSet("ro");
+
+        final int amountTargets = 10;
+        testdataFactory.createTargets(amountTargets, "rollout-dynamic", "rollout");
+
+        postRollout("rollout1", 1, dsA.getId(), "name==rollout*", 10, Action.ActionType.FORCED,
+            null, null, true, null, 1);
+
+        rolloutHandler.handleAll();
+
+        final Rollout rollout = rolloutManagement.findByRsql(PAGE, "name==rollout1", false).getContent().get(0);
+
+        rolloutManagement.start(rollout.getId());
+        rolloutHandler.handleAll();
+
+        mvc.perform(get("/rest/v1/rollouts?representation=full").accept(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)))
+            .andExpect(jsonPath("content[0].id", equalTo(rollout.getId().intValue())))
+            .andExpect(jsonPath("content[0].name", equalTo("rollout1")))
+            .andExpect(jsonPath("content[0].status", equalTo("running")))
+            .andExpect(jsonPath("content[0].targetFilterQuery", equalTo("name==rollout*")))
+            .andExpect(jsonPath("content[0].distributionSetId", equalTo(dsA.getId().intValue())))
+            .andExpect(jsonPath("content[0].totalTargets", equalTo(10)))
+            .andExpect(jsonPath("content[0].totalTargetsPerStatus").exists())
+            .andExpect(jsonPath("content[0].totalTargetsPerStatus.running", equalTo(10)))
+            .andExpect(jsonPath("content[0].totalGroups", equalTo(2)));
+
+        final int amountOfDynamicTargets = 2;
+        List<Target> additionalTargets = testdataFactory.createTargets(amountOfDynamicTargets, "rollout-dynamic-addition-", "rollout");
+
+        rolloutHandler.handleAll();
+
+        final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getContent();
+        groups.forEach(group -> {
+            if (!group.getName().contains("-dynamic")) {
+                rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, group.getId()).forEach(target -> deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).forEach(action -> {
+
+                    deploymentManagement.cancelAction(action.getId());
+                    awaitActionStatus(action.getId(), Status.CANCELING);
+
+                    deploymentManagement.forceQuitAction(action.getId());
+                    awaitActionStatus(action.getId(), Status.CANCELED);
+                }));
+            }
+        });
+
+        awaitPendingDeviceInRollout(additionalTargets.get(0).getControllerId());
+
+        mvc.perform(get("/rest/v1/rollouts?representation=full").accept(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)))
+            .andExpect(jsonPath("content[0].id", equalTo(rollout.getId().intValue())))
+            .andExpect(jsonPath("content[0].name", equalTo("rollout1")))
+            .andExpect(jsonPath("content[0].status", equalTo("running")))
+            .andExpect(jsonPath("content[0].targetFilterQuery", equalTo("name==rollout*")))
+            .andExpect(jsonPath("content[0].distributionSetId", equalTo(dsA.getId().intValue())))
+            .andExpect(jsonPath("content[0].totalTargets", equalTo(11)))
+            .andExpect(jsonPath("content[0].totalTargetsPerStatus").exists())
+            .andExpect(jsonPath("content[0].totalTargetsPerStatus.running", equalTo(1)))
+            .andExpect(jsonPath("content[0].totalTargetsPerStatus.notstarted", equalTo(0)))
+            .andExpect(jsonPath("content[0].totalTargetsPerStatus.scheduled", equalTo(0)))
+            .andExpect(jsonPath("content[0].totalTargetsPerStatus.cancelled", equalTo(10)))
+            .andExpect(jsonPath("content[0].totalTargetsPerStatus.finished", equalTo(0)))
+            .andExpect(jsonPath("content[0].totalTargetsPerStatus.error", equalTo(0)))
+            .andExpect(jsonPath("content[0].deleted", equalTo(false)))
+            .andExpect(jsonPath("content[0].totalGroups", equalTo(3)))
+            .andExpect(jsonPath("content[0]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)));
+    }
+
+    @Test
     @Description("Testing that no rollout with groups that have illegal percentages can be created")
     void createRolloutWithTooLowPercentage() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro2");
@@ -271,6 +349,31 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
+    @Description("Testing that rollout can be updated")
+    void updateRollout() throws Exception {
+        testdataFactory.createTargets(4, "rollout", "description");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+        // create a running rollout for the created targets
+        final Rollout rollout = rolloutManagement.create(
+                entityFactory
+                        .rollout()
+                        .create()
+                        .name("rollout1")
+                        .distributionSetId(dsA.getId())
+                        .targetFilterQuery("controllerId==rollout*"),
+                4, false, new RolloutGroupConditionBuilder().withDefaults()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+
+
+        mvc.perform(put("/rest/v1/rollouts/" + rollout.getId()).content(
+                                new JSONObject().put("name", "newName").put("description", "newDesc").toString()
+                        ).contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", equalTo("newName")))
+                .andExpect(jsonPath("$.description", equalTo("newDesc")));
+    }
+
+    @Test
     @Description("Testing the empty list is returned if no rollout exists")
     void noRolloutReturnsEmptyList() throws Exception {
         mvc.perform(get("/rest/v1/rollouts").accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -286,7 +389,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
                         .targetFilterQuery("controllerId==rollout*"),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
@@ -305,7 +408,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create a running rollout for the created targets
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
                         .targetFilterQuery("controllerId==rollout*"),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
@@ -345,13 +448,13 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create a running rollout for the created targets
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
                         .targetFilterQuery("controllerId==rollout*"),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
         rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout2").set(dsA.getId())
+                entityFactory.rollout().create().name("rollout2").distributionSetId(dsA.getId())
                         .targetFilterQuery("controllerId==rollout*"),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
@@ -399,7 +502,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                             .rollout()
                             .create()
                             .name("rollout1")
-                            .set(dsA.getId())
+                            .distributionSetId(dsA.getId())
                             .targetFilterQuery("controllerId==rollout*"),
                     4, false, new RolloutGroupConditionBuilder().withDefaults()
                             .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
@@ -431,7 +534,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
                         .targetFilterQuery("controllerId==rollout*"),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
@@ -982,7 +1085,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
                         .targetFilterQuery("controllerId==rollout*"),
                 4, confirmationRequired, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
@@ -1212,6 +1315,30 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                         .getStatus().equals(RolloutStatus.RUNNING));
     }
 
+    private void awaitActionStatus(final Long actionId, final Status status) {
+        Awaitility.await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(100)).with()
+            .until(() -> SecurityContextSwitch
+                .runAsPrivileged(
+                    () -> deploymentManagement.findAction(actionId).orElseThrow(NoSuchElementException::new))
+                .getStatus().equals(status));
+    }
+
+    private void awaitPendingDeviceInRollout(final String controllerId) {
+        Awaitility.await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(100)).with()
+            .until(() -> {
+                Optional<Target> maybeTarget = SecurityContextSwitch.runAsPrivileged(() -> {
+                    rolloutHandler.handleAll();
+                    List<Target> targets = targetManagement.findByRsql(PAGE, "controllerId==" + controllerId).getContent();
+                    if (targets.size() == 1) {
+                        return Optional.of(targets.get(0));
+                    } else {
+                        return Optional.empty();
+                    }
+                });
+                return maybeTarget.isPresent() && maybeTarget.get().getUpdateStatus().equals(TargetUpdateStatus.PENDING);
+            });
+    }
+
     @Test
     @Description("Deletion of a rollout")
     void deleteRollout() throws Exception {
@@ -1328,7 +1455,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create a running rollout for the created targets
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                entityFactory.rollout().create().name("rollout1").distributionSetId(dsA.getId())
                         .targetFilterQuery("controllerId==rollout*"),
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
@@ -1465,40 +1592,47 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     private void postRollout(final String name, final int groupSize, final Long distributionSetId,
             final String targetFilterQuery, final int targets, final Action.ActionType type, final Long startTime,
             final Long forceTime) throws Exception {
+        postRollout(name, groupSize, distributionSetId, targetFilterQuery, targets, type, startTime, forceTime, false, null, 0);
+    }
+
+    private void postRollout(final String name, final int groupSize, final Long distributionSetId,
+                             final String targetFilterQuery, final int targets, final Action.ActionType type, final Long startTime,
+                             final Long forceTime, boolean isDynamic, String dynamicGroupSuffix, int dynamicGroupTargetsCount) throws Exception {
         final String actionType = MgmtRestModelMapper.convertActionType(type).getName();
         final String rollout = JsonBuilder.rollout(name, "desc", groupSize, distributionSetId, targetFilterQuery,
-                new RolloutGroupConditionBuilder().withDefaults().build(), null, actionType, null, startTime, forceTime,
-                null);
+            new RolloutGroupConditionBuilder().withDefaults().build(), null, actionType, null, startTime, forceTime,
+            null, isDynamic, dynamicGroupSuffix, dynamicGroupTargetsCount);
 
         mvc.perform(post("/rest/v1/rollouts").content(rollout).contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name", equalTo(name))).andExpect(jsonPath("$.status", equalTo("creating")))
-                .andExpect(jsonPath("$.type", equalTo(actionType)))
-                .andExpect(jsonPath("$.targetFilterQuery", equalTo(targetFilterQuery)))
-                .andExpect(jsonPath("$.description", equalTo("desc")))
-                .andExpect(jsonPath("$.distributionSetId", equalTo(distributionSetId.intValue())))
-                .andExpect(jsonPath("$.createdBy", equalTo("bumlux")))
-                .andExpect(jsonPath("$.createdAt", not(equalTo(0))))
-                .andExpect(jsonPath("$.lastModifiedBy", equalTo("bumlux")))
-                .andExpect(jsonPath("$.lastModifiedAt", not(equalTo(0))))
-                .andExpect(jsonPath("$.totalTargets", equalTo(targets)))
-                .andExpect(startTime != null ? jsonPath("$.startAt", equalTo(startTime.intValue()))
-                        : jsonPath("$.startAt").doesNotExist())
-                .andExpect(forceTime != null ? jsonPath("$.forcetime", equalTo(forceTime.intValue()))
-                        : jsonPath("$.forcetime", equalTo(0)))
-                .andExpect(jsonPath("$.totalTargetsPerStatus.running", equalTo(0)))
-                .andExpect(jsonPath("$.totalTargetsPerStatus.notstarted", equalTo(targets)))
-                .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(0)))
-                .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
-                .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
-                .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
-                .andExpect(jsonPath("$._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)))
-                .andExpect(jsonPath("$._links.start.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/start"))))
-                .andExpect(jsonPath("$._links.pause.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/pause"))))
-                .andExpect(
-                        jsonPath("$._links.resume.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
-                .andExpect(jsonPath("$._links.groups.href",
-                        allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))));
+            .andExpect(jsonPath("$.name", equalTo(name))).andExpect(jsonPath("$.status", equalTo("creating")))
+            .andExpect(jsonPath("$.type", equalTo(actionType)))
+            .andExpect(jsonPath("$.targetFilterQuery", equalTo(targetFilterQuery)))
+            .andExpect(jsonPath("$.description", equalTo("desc")))
+            .andExpect(jsonPath("$.distributionSetId", equalTo(distributionSetId.intValue())))
+            .andExpect(jsonPath("$.createdBy", equalTo("bumlux")))
+            .andExpect(jsonPath("$.createdAt", not(equalTo(0))))
+            .andExpect(jsonPath("$.lastModifiedBy", equalTo("bumlux")))
+            .andExpect(jsonPath("$.lastModifiedAt", not(equalTo(0))))
+            .andExpect(jsonPath("$.totalTargets", equalTo(targets)))
+            .andExpect(startTime != null ? jsonPath("$.startAt", equalTo(startTime.intValue()))
+                : jsonPath("$.startAt").doesNotExist())
+            .andExpect(forceTime != null ? jsonPath("$.forcetime", equalTo(forceTime.intValue()))
+                : jsonPath("$.forcetime", equalTo(0)))
+            .andExpect(jsonPath("$.totalTargetsPerStatus.running", equalTo(0)))
+            .andExpect(jsonPath("$.totalTargetsPerStatus.notstarted", equalTo(targets)))
+            .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(0)))
+            .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
+            .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
+            .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
+            .andExpect(jsonPath("$._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)))
+            .andExpect(jsonPath("$._links.start.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/start"))))
+            .andExpect(jsonPath("$._links.pause.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/pause"))))
+            .andExpect(jsonPath("$.dynamic", equalTo(isDynamic)))
+            .andExpect(
+                jsonPath("$._links.resume.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
+            .andExpect(jsonPath("$._links.groups.href",
+                allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))));
     }
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
@@ -1509,7 +1643,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery, final boolean confirmationRequired) {
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name(name).set(distributionSetId).targetFilterQuery(targetFilterQuery),
+                entityFactory.rollout().create().name(name).distributionSetId(distributionSetId).targetFilterQuery(targetFilterQuery),
                 amountGroups, confirmationRequired, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 

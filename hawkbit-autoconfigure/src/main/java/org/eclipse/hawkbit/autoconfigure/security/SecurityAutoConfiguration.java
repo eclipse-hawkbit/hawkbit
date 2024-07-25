@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties;
 import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties.User;
-import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.InMemoryUserAuthoritiesResolver;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
@@ -100,16 +99,6 @@ public class SecurityAutoConfiguration {
     }
 
     /**
-     * @return permission service to check if current user has the necessary
-     *         permissions.
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public PermissionService permissionService() {
-        return new PermissionService();
-    }
-
-    /**
      * Creates the auditor aware.
      *
      * @return the spring security auditor aware
@@ -127,8 +116,9 @@ public class SecurityAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public SystemSecurityContext systemSecurityContext(final TenantAware tenantAware) {
-        return new SystemSecurityContext(tenantAware);
+    public SystemSecurityContext systemSecurityContext(
+            final TenantAware tenantAware, final RoleHierarchy roleHierarchy) {
+        return new SystemSecurityContext(tenantAware, roleHierarchy);
     }
 
     /**

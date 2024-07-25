@@ -177,6 +177,10 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
         locked = true;
     }
 
+    public void unlock() {
+        locked = false;
+    }
+
     /**
      * Marks or un-marks this software module as deleted.
      * 

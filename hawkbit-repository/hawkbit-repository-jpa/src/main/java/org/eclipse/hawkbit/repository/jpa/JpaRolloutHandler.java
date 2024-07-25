@@ -80,7 +80,12 @@ public class JpaRolloutHandler implements RolloutHandler {
 
         try {
             log.trace("Trigger handling {} rollouts.", rollouts.size());
-            rollouts.forEach(rolloutId -> handleRolloutInNewTransaction(rolloutId, handlerId));
+            rollouts.forEach(rolloutId -> {
+                try {
+                    handleRolloutInNewTransaction(rolloutId, handlerId);
+                } catch (final Throwable throwable) {
+                    log.error("Failed to process rollout with id {}", rolloutId , throwable);
+                }});
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Unlock lock {}", lock);
@@ -99,6 +104,8 @@ public class JpaRolloutHandler implements RolloutHandler {
         DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId, status -> {
             rolloutManagement.get(rolloutId).ifPresentOrElse(
                     rollout -> {
+                        // auditor is retrieved and set on transaction commit
+                        // if not overridden, the system user will be the auditor
                         rollout.getAccessControlContext().ifPresentOrElse(
                             context -> // has stored context - executes it with it
                                 contextAware.runInContext(

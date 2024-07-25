@@ -145,6 +145,17 @@ public interface DistributionSetManagement
     void lock(final long id);
 
     /**
+     * Unlocks a distribution set.<br/>
+     * Use it with extreme care! In general once distribution set is locked
+     * it shall not be unlocked. Note that it could have been assigned / deployed to targets.
+     *
+     * @param id the distribution set id
+     * @throws EntityNotFoundException if distribution set with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    void unlock(final long id);
+
+    /**
      * Retrieves the distribution set for a given action.
      *
      * @param actionId
@@ -494,7 +505,7 @@ public interface DistributionSetManagement
      *             if set or tag with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSet unAssignTag(long id, long tagId);
+    DistributionSet unassignTag(long id, long tagId);
 
     /**
      * Updates a distribution set meta data value if corresponding entry exists.

@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -70,6 +71,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
+import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
@@ -1893,6 +1895,39 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final Slice<Action> actionsByTarget = deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE);
         assertThat(actionsByTarget.getContent()).hasSize(1);
         return targetManagement.getByControllerID(tA.getControllerId()).get();
+    }
+
+    @Test
+    void getControllerTagReturnsTagWithNoContent() throws Exception {
+        // create target with attributes
+        final String knownTargetId = "targetIdWithNoTags";
+        final Target target = testdataFactory.createTarget(knownTargetId);
+
+        // test query target over rest resource
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/tags"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void getControllerTagReturnsTagWithOk() throws Exception {
+        // create target with attributes
+        final String knownTargetId = "targetIdWithTags";
+        final Target target = testdataFactory.createTarget(knownTargetId);
+        final List<TargetTag> targetTags = testdataFactory.createTargetTags(2, "tag_getControllerTagReturnsTagWithOk");
+        final List<String> tagNames = new ArrayList<>();
+        for (final TargetTag targetTag : targetTags) {
+            targetManagement.toggleTagAssignment(Collections.singletonList(target.getControllerId()), targetTag.getName());
+            tagNames.add(targetTag.getName());
+        }
+
+        // test query target over rest resource
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/tags"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", Matchers.hasSize(2)))
+                .andExpect(jsonPath("$.[0].name", in(tagNames)))
+                .andExpect(jsonPath("$.[1].name", in(tagNames)));
     }
 
     @Test

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
 
 /**
@@ -25,6 +26,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
  * representation.
  */
 @Data
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @JsonInclude(Include.NON_NULL)
@@ -52,6 +54,7 @@ public class MgmtSoftwareModuleType extends MgmtTypeEntity {
     @JsonProperty(value = "id", required = true)
     @Schema(description = "The technical identifier of the entity", example = "83")
     private Long moduleId;
+
     @JsonProperty
     @Schema(description = "Software modules of that type can be assigned at this maximum number " +
             "(e.g. operating system only once)", example = "1")

@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.json.model.softwaremodule;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 /**
@@ -19,6 +20,7 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
+@ToString
 public class MgmtSoftwareModuleRequestBodyPut {
 
     @JsonProperty
@@ -30,8 +32,11 @@ public class MgmtSoftwareModuleRequestBodyPut {
     private String vendor;
 
     @JsonProperty
-    @Schema(description = "Put it to true only if want to lock the software module. Otherwise skip it. " +
-            "Shall not be false!",
+    @Schema(description = """
+            Should be set only if change of locked state is requested. If put, the software module locked flag will be
+            set to the requested. Note: unlock (i.e. set this property to false) with extreme care!
+            In general once software module is locked it shall not be unlocked. Note that it could have been assigned /
+            deployed to targets.""",
             example = "true")
     private Boolean locked;
 }

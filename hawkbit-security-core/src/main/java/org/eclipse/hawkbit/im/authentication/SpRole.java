@@ -48,6 +48,10 @@ public final class SpRole {
             ROLLOUT_ADMIN + IMPLIES + SpPermission.HANDLE_ROLLOUT + LINE_BREAK +
             ROLLOUT_ADMIN + IMPLIES + SpPermission.APPROVE_ROLLOUT + LINE_BREAK;
 
+    public static final String TENANT_CONFIGURATION_HIERARCHY =
+            SpPermission.TENANT_CONFIGURATION + IMPLIES + SpPermission.READ_TENANT_CONFIGURATION + LINE_BREAK +
+                    SpPermission.TENANT_CONFIGURATION + IMPLIES + SpPermission.READ_GATEWAY_SEC_TOKEN + LINE_BREAK;
+
     public static final String TENANT_ADMIN = "ROLE_TENANT_ADMIN";
     public static final String TENANT_ADMIN_HIERARCHY =
             TENANT_ADMIN + IMPLIES + TARGET_ADMIN + LINE_BREAK +
@@ -61,6 +65,8 @@ public final class SpRole {
     public static String DEFAULT_ROLE_HIERARCHY =
             TARGET_ADMIN_HIERARCHY +
             REPOSITORY_ADMIN_HIERARCHY +
-            ROLLOUT_ADMIN_HIERARCHY + TENANT_ADMIN_HIERARCHY +
+            ROLLOUT_ADMIN_HIERARCHY +
+            TENANT_CONFIGURATION_HIERARCHY +
+            TENANT_ADMIN_HIERARCHY +
             SYSTEM_ADMIN_HIERARCHY;
 }

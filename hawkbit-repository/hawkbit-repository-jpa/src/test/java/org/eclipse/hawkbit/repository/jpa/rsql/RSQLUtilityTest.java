@@ -46,7 +46,7 @@ import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;
-import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactoryHolder;
+import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -116,8 +116,8 @@ public class RSQLUtilityTest {
         }
 
         @Bean
-        RsqlVisitorFactoryHolder rsqlVisitorFactoryHolder() {
-            return RsqlVisitorFactoryHolder.getInstance();
+        RsqlConfigHolder rsqlVisitorFactoryHolder() {
+            return RsqlConfigHolder.getInstance();
         }
     }
 
@@ -284,9 +284,33 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void correctRsqlBuildsSimpleNotLikePredicate() {
+    public void correctRsqlBuildsSimpleNotEqualPredicate() {
         reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name!=abc";
+        when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
+        when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
+
+        when(criteriaBuilderMock.isNull(any(Expression.class))).thenReturn(mock(Predicate.class));
+        when(criteriaBuilderMock.notEqual(any(Expression.class), anyString()))
+                .thenReturn(mock(Predicate.class));
+        when(criteriaBuilderMock.upper(eq(pathOfString(baseSoftwareModuleRootMock))))
+                .thenReturn(pathOfString(baseSoftwareModuleRootMock));
+
+        // test
+        RSQLUtility.buildRsqlSpecification(correctRsql, SoftwareModuleFields.class, null, testDb)
+                .toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+
+        // verification
+        verify(criteriaBuilderMock, times(1)).or(any(Predicate.class), any(Predicate.class));
+        verify(criteriaBuilderMock, times(1)).isNull(eq(pathOfString(baseSoftwareModuleRootMock)));
+        verify(criteriaBuilderMock, times(1)).notEqual(eq(pathOfString(baseSoftwareModuleRootMock)),
+                eq("abc".toUpperCase()));
+    }
+
+    @Test
+    public void correctRsqlBuildsSimpleNotLikePredicate() {
+        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        final String correctRsql = "name!=abc*";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
 
@@ -304,7 +328,7 @@ public class RSQLUtilityTest {
         verify(criteriaBuilderMock, times(1)).or(any(Predicate.class), any(Predicate.class));
         verify(criteriaBuilderMock, times(1)).isNull(eq(pathOfString(baseSoftwareModuleRootMock)));
         verify(criteriaBuilderMock, times(1)).notLike(eq(pathOfString(baseSoftwareModuleRootMock)),
-                eq("abc".toUpperCase()), eq('\\'));
+                eq("abc%".toUpperCase()), eq('\\'));
     }
 
     @Test
@@ -335,9 +359,30 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void correctRsqlBuildsLikePredicateWithPercentage() {
+    public void correctRsqlBuildsEqualPredicateWithPercentage() {
         reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name==a%";
+        when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
+        when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
+        when(criteriaBuilderMock.equal(any(Expression.class), anyString())).thenReturn(mock(Predicate.class));
+        when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
+                .thenReturn(mock(Predicate.class));
+        when(criteriaBuilderMock.upper(eq(pathOfString(baseSoftwareModuleRootMock))))
+                .thenReturn(pathOfString(baseSoftwareModuleRootMock));
+        // test
+        RSQLUtility.buildRsqlSpecification(correctRsql, SoftwareModuleFields.class, null, Database.H2)
+                .toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+
+        // verification
+        verify(criteriaBuilderMock, times(1)).and(any(Predicate.class));
+        verify(criteriaBuilderMock, times(1)).equal(eq(pathOfString(baseSoftwareModuleRootMock)),
+                eq("a%".toUpperCase()));
+    }
+
+    @Test
+    public void correctRsqlBuildsLikePredicateWithPercentage() {
+        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        final String correctRsql = "name==a%*";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
         when(criteriaBuilderMock.like(any(Expression.class), anyString(), eq('\\'))).thenReturn(mock(Predicate.class));
@@ -352,13 +397,13 @@ public class RSQLUtilityTest {
         // verification
         verify(criteriaBuilderMock, times(1)).and(any(Predicate.class));
         verify(criteriaBuilderMock, times(1)).like(eq(pathOfString(baseSoftwareModuleRootMock)),
-                eq("a\\%".toUpperCase()), eq('\\'));
+                eq("a\\%%".toUpperCase()), eq('\\'));
     }
 
     @Test
     public void correctRsqlBuildsLikePredicateWithPercentageSQLServer() {
         reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
-        final String correctRsql = "name==a%";
+        final String correctRsql = "name==a%*";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
         when(criteriaBuilderMock.upper(eq(pathOfString(baseSoftwareModuleRootMock))))
@@ -374,7 +419,7 @@ public class RSQLUtilityTest {
         // verification
         verify(criteriaBuilderMock, times(1)).and(any(Predicate.class));
         verify(criteriaBuilderMock, times(1)).like(eq(pathOfString(baseSoftwareModuleRootMock)),
-                eq("a[%]".toUpperCase()), eq('\\'));
+                eq("a[%]%".toUpperCase()), eq('\\'));
     }
 
     @Test

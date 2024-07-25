@@ -167,30 +167,6 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
-    public Optional<TargetType> findByTargetId(final long targetId) {
-        return targetTypeRepository.findOne(TargetTypeSpecification.hasTarget(targetId)).map(TargetType.class::cast);
-    }
-
-    @Override
-    public List<TargetType> findByTargetIds(final Collection<Long> targetIds) {
-        return targetTypeRepository
-                .findAll(TargetTypeSpecification.hasTarget(targetIds)).stream().map(TargetType.class::cast).toList();
-    }
-
-    @Override
-    public Optional<TargetType> findByTargetControllerId(final String controllerId) {
-        return targetTypeRepository
-                .findOne(TargetTypeSpecification.hasTargetControllerId(controllerId)).map(TargetType.class::cast);
-    }
-
-    @Override
-    public List<TargetType> findByTargetControllerIds(final Collection<String> controllerIds) {
-        return targetTypeRepository
-                .findAll(TargetTypeSpecification.hasTargetControllerIdIn(controllerIds))
-                .stream().map(TargetType.class::cast).toList();
-    }
-
-    @Override
     public List<TargetType> get(final Collection<Long> ids) {
         return Collections.unmodifiableList(targetTypeRepository.findAllById(ids));
     }

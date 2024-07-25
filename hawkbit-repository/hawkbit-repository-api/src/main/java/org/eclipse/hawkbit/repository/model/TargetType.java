@@ -34,11 +34,6 @@ public interface TargetType extends Type {
     Set<DistributionSetType> getCompatibleDistributionSetTypes();
 
     /**
-     * @return immutable set of optional {@link Target}s
-     */
-    Set<Target> getTargets();
-
-    /**
      * Checks if the given {@link DistributionSetType} is in
      * {@link #getCompatibleDistributionSetTypes()}.
      *

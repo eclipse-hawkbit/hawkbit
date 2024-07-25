@@ -117,7 +117,7 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         // check that the cache is not getting in the way, i.e. "bumlux" results
         // in bumlux and not
         // mytenant
-        assertThat(SecurityContextSwitch.runAs(SecurityContextSwitch.withUserAndTenant("user", "bumlux"),
+        assertThat(SecurityContextSwitch.runAs(SecurityContextSwitch.withUserAndTenantAllSpPermissions("user", "bumlux"),
                 () -> systemManagement.getTenantMetadata().getTenant().toUpperCase()))
                         .isEqualTo("bumlux".toUpperCase());
     }
@@ -171,7 +171,7 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
     }
 
     private <T> T runAsTenant(final String tenant, final Callable<T> callable) throws Exception {
-        return SecurityContextSwitch.runAs(SecurityContextSwitch.withUserAndTenant("user", tenant), callable);
+        return SecurityContextSwitch.runAs(SecurityContextSwitch.withUserAndTenantAllSpPermissions("user", tenant), callable);
     }
 
     private Target createTargetForTenant(final String controllerId, final String tenant) throws Exception {

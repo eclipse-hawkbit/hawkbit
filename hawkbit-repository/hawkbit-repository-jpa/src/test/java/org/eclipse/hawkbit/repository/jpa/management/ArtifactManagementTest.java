@@ -611,7 +611,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private <T> T runAsTenant(final String tenant, final Callable<T> callable) throws Exception {
-        return SecurityContextSwitch.runAs(SecurityContextSwitch.withUserAndTenant("user", tenant), callable);
+        return SecurityContextSwitch.runAs(SecurityContextSwitch.withUserAndTenantAllSpPermissions("user", tenant), callable);
     }
 
     private SoftwareModule createSoftwareModuleForTenant(final String tenant) throws Exception {

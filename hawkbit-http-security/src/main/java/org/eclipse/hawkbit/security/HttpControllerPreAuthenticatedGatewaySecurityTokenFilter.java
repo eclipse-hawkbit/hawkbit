@@ -9,8 +9,10 @@
  */
 package org.eclipse.hawkbit.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.slf4j.Logger;
 
 /**
  * Extract the {@code Authorization} header is a HTTP standard and reverse proxy
@@ -18,10 +20,8 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
  * maybe custom headers which have then weird side-effects. Furthermore
  * frameworks are aware of the sensitivity of the Authorization header and do
  * not log it and store it somewhere.
- *
- *
- *
  */
+@Slf4j
 public class HttpControllerPreAuthenticatedGatewaySecurityTokenFilter
         extends AbstractHttpControllerAuthenticationFilter {
 
@@ -49,4 +49,8 @@ public class HttpControllerPreAuthenticatedGatewaySecurityTokenFilter
                 systemSecurityContext);
     }
 
+    @Override
+    protected Logger log() {
+        return log;
+    }
 }

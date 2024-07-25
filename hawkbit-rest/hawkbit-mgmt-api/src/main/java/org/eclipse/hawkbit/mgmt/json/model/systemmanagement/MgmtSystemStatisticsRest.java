@@ -16,12 +16,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 /**
  * Body for system statistics.
  */
 @Data
+@ToString
 @Accessors(chain = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -29,14 +31,19 @@ public class MgmtSystemStatisticsRest {
 
     @JsonProperty
     private long overallTargets;
+
     @JsonProperty
     private long overallArtifacts;
+
     @JsonProperty
     private long overallArtifactVolumeInBytes;
+
     @JsonProperty
     private long overallActions;
+
     @JsonProperty
     private long overallTenants;
+
     @JsonProperty
     private List<MgmtSystemTenantServiceUsage> tenantStats;
 }

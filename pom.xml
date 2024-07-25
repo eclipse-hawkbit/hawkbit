@@ -17,7 +17,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>3.2.2</version>
+      <version>3.3.1</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -38,45 +38,54 @@
       <revision>0-SNAPSHOT</revision>
       <java.version>17</java.version>
 
-      <spring.boot.version>3.2.2</spring.boot.version>
-      <spring.cloud.version>2023.0.0</spring.cloud.version>
-      <springdoc-openapi.version>2.3.0</springdoc-openapi.version>
+      <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
+
+      <spring.boot.version>3.3.1</spring.boot.version>
+      <spring.cloud.version>2023.0.2</spring.cloud.version>
+      <springdoc-openapi.version>2.5.0</springdoc-openapi.version>
       <spring.plugin.core.version>3.0.0</spring.plugin.core.version>
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
       <!-- Spring boot version overrides - END -->
 
       <!-- Eclipselink - START -->
-      <eclipselink.version>4.0.2</eclipselink.version>
-      <eclipselink.maven.plugin.version>3.0.0</eclipselink.maven.plugin.version>
+      <eclipselink.version>4.0.3</eclipselink.version>
+      <!-- for some reason 3.0.2 does't work -->
+      <eclipselink.maven.plugin.version>3.0.1</eclipselink.maven.plugin.version>
       <!-- Eclipselink - END -->
 
       <!-- Misc libraries versions - START -->
       <cron-utils.version>9.2.1</cron-utils.version>
-      <jsoup.version>1.16.1</jsoup.version>
+      <jsoup.version>1.17.2</jsoup.version>
       <jaxb-api.version>2.3.1</jaxb-api.version>
-      <guava.version>32.1.2-jre</guava.version>
       <javax.el-api.version>3.0.0</javax.el-api.version>
-      <commons-io.version>2.13.0</commons-io.version>
       <rsql-parser.version>2.1.0</rsql-parser.version>
+      <commons-io.version>2.16.1</commons-io.version>
+      <commons-collections4.version>4.4</commons-collections4.version>
       <io-protostuff.version>1.8.0</io-protostuff.version>
       <!-- test -->
-      <rabbitmq.http-client.version>5.1.0</rabbitmq.http-client.version>
-      <surefire.forkcount>1</surefire.forkcount>
-      <allure.version>2.24.0</allure.version>
-      <awaitility.version>4.2.0</awaitility.version>
+      <rabbitmq.http-client.version>5.2.0</rabbitmq.http-client.version>
+      <classgraph.version>4.8.174</classgraph.version>
+      <allure.version>2.27.0</allure.version>
+      <awaitility.version>4.2.1</awaitility.version>
       <!-- Misc libraries versions - END -->
 
       <!-- Maven Plugin versions - START -->
-      <maven.scm.plugin.version>2.0.1</maven.scm.plugin.version>
+      <maven.enforcer.plugin.version>3.5.0</maven.enforcer.plugin.version>
+      <flatten.maven.plugin.version>1.6.0</flatten.maven.plugin.version>
+      <maven.scm.plugin.version>2.1.0</maven.scm.plugin.version>
       <maven.site.plugin.version>3.12.1</maven.site.plugin.version>
-      <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
-      <maven.failsafe.plugin.version>3.1.2</maven.failsafe.plugin.version>
-      <maven.enforcer.plugin.version>3.3.0</maven.enforcer.plugin.version>
-      <!-- Maven Plugin versions - END -->
 
-      <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
-      <test.jvm.args/>
+      <license.tool.plugin.version>1.1.0</license.tool.plugin.version>
+      <license.maven.plugin.version>4.5</license.maven.plugin.version>
+
+      <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
+      <maven.failsafe.plugin.version>3.2.5</maven.failsafe.plugin.version>
+      <jacoco.maven.plugin.version>0.8.12</jacoco.maven.plugin.version>
+
+      <nexus.staging.maven.plugin.version>1.6.14</nexus.staging.maven.plugin.version>
+      <maven.gpg.plugin.version>1.6</maven.gpg.plugin.version>
+      <!-- Maven Plugin versions - END -->
 
       <!-- Release - START -->
       <release.scm.connection>scm:git:git@github.com:eclipse/hawkbit.git</release.scm.connection>
@@ -99,7 +108,6 @@
       <sonar.coverage.exclusions>
          **/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**
       </sonar.coverage.exclusions>
-      <jacoco.version>0.8.11</jacoco.version>
       <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
       <sonar.coverage.jacoco.xmlReportPaths>
          ${project.basedir}/../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml,
@@ -115,7 +123,12 @@
       <!-- To automatically create IP Team review requests for identified content call with -Ddash.iplab.token=<token> (do not share your access token) -->
       <dash.review.summary>${project.build.directory}/dash/review-summary</dash.review.summary>
       <excludeGroupIds>org.eclipse,org.junit</excludeGroupIds>
-      <!-- Dash tool integration - START -->
+      <!-- Dash tool integration - END -->
+
+      <!-- test -->
+      <surefire.forkcount>1</surefire.forkcount>
+      <test.jvm.args/>
+      <!-- Test - END -->
    </properties>
 
    <modules>
@@ -226,141 +239,53 @@
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-               <compilerArgument>-Xlint:all</compilerArgument>
-               <showWarnings>true</showWarnings>
-               <showDeprecation>true</showDeprecation>
-            </configuration>
          </plugin>
          <plugin>
-            <groupId>com.mycila</groupId>
-            <artifactId>license-maven-plugin</artifactId>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
          </plugin>
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-enforcer-plugin</artifactId>
-            <version>${maven.enforcer.plugin.version}</version>
-            <executions>
-               <execution>
-                  <!-- Make sure that only non-snapshot versions are used
-                     for the dependencies. Only active when property 'snapshotDependencyAllowed'
-                     is false. -->
-                  <id>enforce-no-snapshots</id>
-                  <goals>
-                     <goal>enforce</goal>
-                  </goals>
-                  <configuration>
-                     <skip>${snapshotDependencyAllowed}</skip>
-                     <rules>
-                        <requireReleaseDeps>
-                           <message>No Snapshots Allowed!</message>
-                        </requireReleaseDeps>
-                        <requireReleaseVersion>
-                           <message>No Snapshots Allowed!</message>
-                        </requireReleaseVersion>
-                        <requireMavenVersion>
-                           <version>3.5</version>
-                        </requireMavenVersion>
-                     </rules>
-                  </configuration>
-               </execution>
-            </executions>
          </plugin>
          <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>flatten-maven-plugin</artifactId>
-            <configuration>
-               <flattenMode>resolveCiFriendliesOnly</flattenMode>
-               <updatePomFile>true</updatePomFile>
-            </configuration>
-            <executions>
-               <execution>
-                  <id>flatten</id>
-                  <phase>process-resources</phase>
-                  <goals>
-                     <goal>flatten</goal>
-                  </goals>
-               </execution>
-               <execution>
-                  <id>flatten.clean</id>
-                  <phase>clean</phase>
-                  <goals>
-                     <goal>clean</goal>
-                  </goals>
-               </execution>
-            </executions>
+         </plugin>
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-scm-plugin</artifactId>
          </plugin>
          <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>versions-maven-plugin</artifactId>
          </plugin>
+
          <plugin>
-            <artifactId>maven-scm-plugin</artifactId>
-            <version>${maven.scm.plugin.version}</version>
-            <configuration>
-               <tag>${project.version}</tag>
-            </configuration>
-         </plugin>
-         <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <version>${jacoco.version}</version>
-            <executions>
-               <execution>
-                  <id>prepare-ut-agent</id>
-                  <phase>process-test-classes</phase>
-                  <goals>
-                     <goal>prepare-agent</goal>
-                  </goals>
-                  <configuration>
-                     <propertyName>jacoco.agent.ut.arg</propertyName>
-                  </configuration>
-               </execution>
-               <execution>
-                  <id>prepare-it-agent</id>
-                  <phase>pre-integration-test</phase>
-                  <goals>
-                     <goal>prepare-agent-integration</goal>
-                  </goals>
-                  <configuration>
-                     <propertyName>jacoco.agent.it.arg</propertyName>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <executions>
-               <execution>
-                  <id>attach-sources</id>
-                  <goals>
-                     <goal>jar</goal>
-                  </goals>
-               </execution>
-            </executions>
+            <groupId>com.mycila</groupId>
+            <artifactId>license-maven-plugin</artifactId>
          </plugin>
          <plugin>
             <groupId>org.eclipse.dash</groupId>
             <artifactId>license-tool-plugin</artifactId>
-            <version>1.0.2</version>
-            <executions>
-               <execution>
-                  <id>license-check</id>
-                  <goals>
-                     <goal>license-check</goal>
-                  </goals>
-               </execution>
-            </executions>
+         </plugin>
+
+         <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
          </plugin>
       </plugins>
 
       <pluginManagement>
          <plugins>
             <plugin>
-               <groupId>org.codehaus.mojo</groupId>
-               <artifactId>flatten-maven-plugin</artifactId>
-               <version>1.5.0</version>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-compiler-plugin</artifactId>
+               <configuration>
+                  <compilerArgument>-Xlint:all</compilerArgument>
+                  <showWarnings>true</showWarnings>
+                  <showDeprecation>true</showDeprecation>
+               </configuration>
             </plugin>
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
@@ -369,83 +294,163 @@
                   <doclint>syntax</doclint>
                </configuration>
             </plugin>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-source-plugin</artifactId>
+               <executions>
+                  <execution>
+                     <id>attach-sources</id>
+                     <goals>
+                        <goal>jar</goal>
+                     </goals>
+                  </execution>
+               </executions>
+            </plugin>
+
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-enforcer-plugin</artifactId>
+               <version>${maven.enforcer.plugin.version}</version>
+               <executions>
+                  <execution>
+                     <!-- Make sure that only non-snapshot versions are used
+                        for the dependencies. Only active when property 'snapshotDependencyAllowed'
+                        is false. -->
+                     <id>enforce-no-snapshots</id>
+                     <goals>
+                        <goal>enforce</goal>
+                     </goals>
+                     <configuration>
+                        <skip>${snapshotDependencyAllowed}</skip>
+                        <rules>
+                           <requireReleaseDeps>
+                              <message>No Snapshots Allowed!</message>
+                           </requireReleaseDeps>
+                           <requireReleaseVersion>
+                              <message>No Snapshots Allowed!</message>
+                           </requireReleaseVersion>
+                           <requireMavenVersion>
+                              <version>3.9</version>
+                           </requireMavenVersion>
+                        </rules>
+                     </configuration>
+                  </execution>
+               </executions>
+            </plugin>
+            <plugin>
+               <groupId>org.codehaus.mojo</groupId>
+               <artifactId>flatten-maven-plugin</artifactId>
+               <version>${flatten.maven.plugin.version}</version>
+               <configuration>
+                  <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                  <updatePomFile>true</updatePomFile>
+               </configuration>
+               <executions>
+                  <execution>
+                     <id>flatten</id>
+                     <phase>process-resources</phase>
+                     <goals>
+                        <goal>flatten</goal>
+                     </goals>
+                  </execution>
+                  <execution>
+                     <id>flatten.clean</id>
+                     <phase>clean</phase>
+                     <goals>
+                        <goal>clean</goal>
+                     </goals>
+                  </execution>
+               </executions>
+            </plugin>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-scm-plugin</artifactId>
+               <version>${maven.scm.plugin.version}</version>
+               <configuration>
+                  <tag>${project.version}</tag>
+               </configuration>
+            </plugin>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-site-plugin</artifactId>
+               <version>${maven.site.plugin.version}</version>
+               <configuration>
+                  <skip>true</skip>
+                  <skipDeploy>true</skipDeploy>
+               </configuration>
+            </plugin>
 
             <plugin>
                <groupId>com.mycila</groupId>
                <artifactId>license-maven-plugin</artifactId>
-               <version>2.11</version>
+               <version>${license.maven.plugin.version}</version>
                <configuration>
-                  <header>licenses/LICENSE_HEADER_TEMPLATE.txt</header>
-                  <validHeaders>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_CONTRIBUTORS_23.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_15.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_19.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_20.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_21.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_22.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_23.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_20.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_19.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_20.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_KIWIGRID_19.txt</validHeader>
-                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_ENAPTER.txt</validHeader>
-                  </validHeaders>
-                  <excludes>
-                     <exclude>.3rd-party/**</exclude>
-                     <exclude>.azure-pipelines/*</exclude>
-                     <exclude>.devcontainer/*</exclude>
-                     <exclude>.git*</exclude>
-                     <exclude>.github/**</exclude>
-                     <exclude>.sonar</exclude>
-                     <exclude>licenses/LICENSE*</exclude>
-                     <exclude>eclipse_codeformatter.xml</exclude>
-                     <exclude>**/banner.txt</exclude>
-                     <exclude>**/helm/**</exclude>
-                     <exclude>**/README</exclude>
-                     <exclude>**/.git*</exclude>
-                     <exclude>**/*.sql</exclude>
-                     <exclude>**/docker/**</exclude>
-                     <exclude>**/.sonar/**</exclude>
-                     <exclude>**/frontend/**</exclude>
-                     <exclude>site/content/**</exclude>
-                     <exclude>site/layouts/**</exclude>
-                     <exclude>site/static/**</exclude>
-                     <exclude>site/*.toml</exclude>
-                     <exclude>**/spring.factories</exclude>
-                  </excludes>
+                  <licenseSets>
+                     <licenseSet>
+                        <header>licenses/LICENSE_HEADER_TEMPLATE.txt</header>
+                        <validHeaders>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_CONTRIBUTORS_23.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_15.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_19.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_20.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_21.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_22.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_23.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_20.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_19.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_20.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_KIWIGRID_19.txt</validHeader>
+                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_ENAPTER.txt</validHeader>
+                        </validHeaders>
+                        <excludes>
+                           <exclude>.3rd-party/**</exclude>
+                           <exclude>.azure-pipelines/*</exclude>
+                           <exclude>.devcontainer/*</exclude>
+                           <exclude>.git*</exclude>
+                           <exclude>.github/**</exclude>
+                           <exclude>.sonar</exclude>
+                           <exclude>licenses/LICENSE*</exclude>
+                           <exclude>eclipse_codeformatter.xml</exclude>
+                           <exclude>**/banner.txt</exclude>
+                           <exclude>**/helm/**</exclude>
+                           <exclude>**/README</exclude>
+                           <exclude>**/.git*</exclude>
+                           <exclude>**/*.sql</exclude>
+                           <exclude>**/docker/**</exclude>
+                           <exclude>**/.sonar/**</exclude>
+                           <exclude>**/frontend/**</exclude>
+                           <exclude>site/content/**</exclude>
+                           <exclude>site/layouts/**</exclude>
+                           <exclude>site/static/**</exclude>
+                           <exclude>site/*.toml</exclude>
+                           <exclude>**/spring.factories</exclude>
+                        </excludes>
+                     </licenseSet>
+                  </licenseSets>
                   <mapping>
+                     <java>JAVADOC_STYLE</java>
                      <scss>JAVADOC_STYLE</scss>
                   </mapping>
                </configuration>
             </plugin>
             <plugin>
-               <groupId>org.eclipse.m2e</groupId>
-               <artifactId>lifecycle-mapping</artifactId>
-               <version>1.0.0</version>
-               <configuration>
-                  <lifecycleMappingMetadata>
-                     <pluginExecutions>
-                        <pluginExecution>
-                           <pluginExecutionFilter>
-                              <groupId>org.apache.maven.plugins</groupId>
-                              <artifactId>maven-dependency-plugin</artifactId>
-                              <versionRange>[2.8,)</versionRange>
-                              <goals>
-                                 <goal>copy-dependencies</goal>
-                              </goals>
-                           </pluginExecutionFilter>
-                           <action>
-                              <ignore />
-                           </action>
-                        </pluginExecution>
-                     </pluginExecutions>
-                  </lifecycleMappingMetadata>
-               </configuration>
+               <groupId>org.eclipse.dash</groupId>
+               <artifactId>license-tool-plugin</artifactId>
+               <version>${license.tool.plugin.version}</version>
+               <executions>
+                  <execution>
+                     <id>license-check</id>
+                     <goals>
+                        <goal>license-check</goal>
+                     </goals>
+                  </execution>
+               </executions>
             </plugin>
+
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-surefire-plugin</artifactId>
@@ -504,23 +509,31 @@
                </executions>
             </plugin>
             <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-site-plugin</artifactId>
-               <version>${maven.site.plugin.version}</version>
-               <configuration>
-                  <skip>true</skip>
-                  <skipDeploy>true</skipDeploy>
-               </configuration>
-            </plugin>
-            <plugin>
                <groupId>org.jacoco</groupId>
                <artifactId>jacoco-maven-plugin</artifactId>
-               <version>${jacoco.version}</version>
-            </plugin>
-            <plugin>
-               <groupId>org.bsc.maven</groupId>
-               <artifactId>maven-processor-plugin</artifactId>
-               <version>${maven.processor.plugin.version}</version>
+               <version>${jacoco.maven.plugin.version}</version>
+               <executions>
+                  <execution>
+                     <id>prepare-ut-agent</id>
+                     <phase>process-test-classes</phase>
+                     <goals>
+                        <goal>prepare-agent</goal>
+                     </goals>
+                     <configuration>
+                        <propertyName>jacoco.agent.ut.arg</propertyName>
+                     </configuration>
+                  </execution>
+                  <execution>
+                     <id>prepare-it-agent</id>
+                     <phase>pre-integration-test</phase>
+                     <goals>
+                        <goal>prepare-agent-integration</goal>
+                     </goals>
+                     <configuration>
+                        <propertyName>jacoco.agent.it.arg</propertyName>
+                     </configuration>
+                  </execution>
+               </executions>
             </plugin>
             <plugin>
                <groupId>com.ethlo.persistence.tools</groupId>
@@ -530,6 +543,7 @@
          </plugins>
       </pluginManagement>
    </build>
+
    <profiles>
       <profile>
          <id>nexus_staging</id>
@@ -552,7 +566,7 @@
                      individually as part of building the module. -->
                   <groupId>org.sonatype.plugins</groupId>
                   <artifactId>nexus-staging-maven-plugin</artifactId>
-                  <version>1.6.13</version>
+                  <version>${nexus.staging.maven.plugin.version}</version>
                   <extensions>true</extensions>
                   <configuration>
                      <serverId>ossrh</serverId>
@@ -577,7 +591,7 @@
                <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-gpg-plugin</artifactId>
-                  <version>1.6</version>
+                  <version>${maven.gpg.plugin.version}</version>
                   <executions>
                      <execution>
                         <id>sign-artifacts</id>
@@ -741,9 +755,16 @@
             <version>${commons-io.version}</version>
          </dependency>
          <dependency>
-            <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-junit5</artifactId>
-            <version>${allure.version}</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>${commons-collections4.version}</version>
+         </dependency>
+
+         <!-- Test -->
+         <dependency>
+            <groupId>io.github.classgraph</groupId>
+            <artifactId>classgraph</artifactId>
+            <version>${classgraph.version}</version>
             <scope>test</scope>
          </dependency>
          <dependency>
@@ -759,6 +780,12 @@
             <scope>test</scope>
          </dependency>
          <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-junit5</artifactId>
+            <version>${allure.version}</version>
+            <scope>test</scope>
+         </dependency>
+         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>${awaitility.version}</version>
@@ -771,38 +798,6 @@
          <groupId>org.projectlombok</groupId>
          <artifactId>lombok</artifactId>
          <optional>true</optional>
-      </dependency>
-      <dependency>
-         <groupId>com.google.guava</groupId>
-         <artifactId>guava</artifactId>
-         <version>${guava.version}</version>
-         <!-- https://github.com/google/guava/issues/2824 -->
-         <exclusions>
-            <exclusion>
-               <groupId>com.google.j2objc</groupId>
-               <artifactId>j2objc-annotations</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>com.google.code.findbugs</groupId>
-               <artifactId>jsr305</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.checkerframework</groupId>
-               <artifactId>checker-compat-qual</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>com.google.errorprone</groupId>
-               <artifactId>error_prone_annotations</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>com.google.j2objc</groupId>
-               <artifactId>j2objc-annotations</artifactId>
-            </exclusion>
-            <exclusion>
-               <groupId>org.codehaus.mojo</groupId>
-               <artifactId>animal-sniffer-annotations</artifactId>
-            </exclusion>
-         </exclusions>
       </dependency>
    </dependencies>
 </project>

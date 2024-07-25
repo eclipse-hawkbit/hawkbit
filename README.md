@@ -28,9 +28,9 @@ Next to the hawkBit core hosted here the project maintains as well [examples](ht
 
 # hawkBit sandbox
 
-We offer a sandbox installation that is free for everyone to try out hawkBit. However, keep in mind that the sandbox database will be reset from time to time. It is also not possible to upload any artifacts into the sandbox. But you can use it to try out the Management UI, Management API and DDI API. Keep in mind as well that you are not permitted to store any kind of personal data in the sandbox.
+We offer a sandbox installation that is free for everyone to try out hawkBit. However, keep in mind that the sandbox database will be reset from time to time. It is also not possible to upload any artifacts into the sandbox. But you can use it to try out the Management API and DDI API. Keep in mind as well that you are not permitted to store any kind of personal data in the sandbox.
 
-[https://hawkbit.eclipseprojects.io/UI/login](https://hawkbit.eclipseprojects.io/UI/login)
+[https://hawkbit.eclipseprojects.io](https://hawkbit.eclipseprojects.io)
 
 In addition the following vendors offer free trial accounts for their hawkBit compatible products:
 
@@ -41,14 +41,14 @@ In addition the following vendors offer free trial accounts for their hawkBit co
 
 hawkBit exposes HTTP/JSON based [Direct Device Integration (API) API](https://www.eclipse.org/hawkbit/apis/ddi_api/) that allow any update client to integrate quite easily.
 
-The [Eclipse Hara subproject](https://projects.eclipse.org/projects/iot.hawkbit.hara) aims to provide a reference agent software implementation of the Eclipse hawkBit device API. The [hara-ddiclient repository](https://github.com/eclipse/hara-ddiclient) provides:
+The [Eclipse Hara subproject](https://projects.eclipse.org/projects/iot.hawkbit.hara) aims to provide a reference agent software implementation of the Eclipse hawkBit device API. The [hara-ddiclient repository](https://github.com/eclipse-hara/hara-ddiclient) provides:
 
 - a Kotlin library that facilitates and speeds up the development of DDI API clients running on the JVM
 - a virtual-device application which provides:
     - a reference example on how to use the library
     - a configurable virtual device that can be used for different testing scenarios
 
-The hara-ddiclient library has [reached version 2.x](https://github.com/eclipse/hara-ddiclient/releases), and has been successfully used in production for years.
+The hara-ddiclient library has [reached version 2.x](https://github.com/eclipse-hara/hara-ddiclient/releases), and has been successfully used in production for years.
 
 Additionally, the hawkBit project has the long term goal to provide [Eclipse Hono](https://github.com/eclipse/hono) integration which will provide connectivity through various IoT protocols and as a result will allow a wide range of clients to connect to hawkBit.
 

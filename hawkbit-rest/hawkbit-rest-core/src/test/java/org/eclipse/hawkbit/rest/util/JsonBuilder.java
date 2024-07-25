@@ -514,6 +514,14 @@ public abstract class JsonBuilder {
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
             final List<String> groupJsonList, final String type, final Integer weight, final Long startAt, final Long forceTime,
             final Boolean confirmationRequired) {
+        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, groupJsonList, type,
+            weight, startAt, forceTime, confirmationRequired, false, null, 0);
+    }
+
+    public static String rollout(final String name, final String description, final Integer groupSize,
+                                 final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
+                                 final List<String> groupJsonList, final String type, final Integer weight, final Long startAt, final Long forceTime,
+                                 final Boolean confirmationRequired, final boolean isDynamic, final String dynamicGroupSuffix, final int dynamicGroupTargetsCount) {
         final JSONObject json = new JSONObject();
 
         try {
@@ -565,6 +573,15 @@ public abstract class JsonBuilder {
                 json.put("errorAction", errorAction);
                 errorAction.put("action", conditions.getErrorAction().toString());
                 errorAction.put("expression", conditions.getErrorActionExp());
+            }
+
+            if (isDynamic) {
+                json.put("dynamic", isDynamic);
+
+                final JSONObject dynamicGroupTemplate = new JSONObject();
+                json.put("dynamicGroupTemplate", dynamicGroupTemplate);
+                dynamicGroupTemplate.put("nameSuffix", (dynamicGroupSuffix == null || dynamicGroupSuffix.isEmpty()) ? "-dynamic" : dynamicGroupSuffix);
+                dynamicGroupTemplate.put("targetCount", dynamicGroupTargetsCount < 0 ? 1 : dynamicGroupTargetsCount);
             }
 
             if (!CollectionUtils.isEmpty(groupJsonList)) {

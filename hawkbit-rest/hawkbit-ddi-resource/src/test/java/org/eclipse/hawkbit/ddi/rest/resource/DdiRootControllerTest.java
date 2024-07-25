@@ -12,8 +12,8 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION;
 import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.SYSTEM_ROLE;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.TENANT_CONFIGURATION;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -210,7 +210,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void pollWithModifiedGlobalPollingTime() throws Exception {
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION),
+        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenantadmin", TENANT_CONFIGURATION),
                 () -> {
                     tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
                             "00:02:00");
@@ -611,7 +611,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     void sleepTimeResponseForDifferentMaintenanceWindowParameters() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION),
+        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenantadmin", TENANT_CONFIGURATION),
                 () -> {
                     tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
                             "00:05:00");

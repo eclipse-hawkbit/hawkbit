@@ -22,12 +22,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * Model for the rollout group annotated with json-annotations for easier
  * serialization and de-serialization.
  */
 @Data
+@Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @JsonInclude(Include.NON_NULL)
@@ -81,6 +83,9 @@ public class MgmtRolloutGroupResponseBody extends MgmtRolloutGroup {
     @JsonProperty(value = "id", required = true)
     @Schema(description = "Rollouts id", example = "63")
     private Long rolloutGroupId;
+
+    @Schema(description = "If the rollout group is dynamic", example = "false")
+    private boolean dynamic;
 
     @JsonProperty(required = true)
     @Schema(description = "The status of this rollout", example = "ready")

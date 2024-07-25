@@ -142,8 +142,12 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
         update.getDescription().ifPresent(module::setDescription);
         update.getVendor().ifPresent(module::setVendor);
-        if (Boolean.TRUE.equals(update.getLocked()) && !module.isLocked()) {
+
+        // lock/unlock ONLY if locked flag is present!
+        if (Boolean.TRUE.equals(update.locked())) {
             module.lock();
+        } else if (Boolean.FALSE.equals(update.locked())) {
+            module.unlock();
         }
 
         return softwareModuleRepository.save(module);
@@ -629,6 +633,20 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
         if (!softwareModule.isLocked()) {
             softwareModule.lock();
+            softwareModuleRepository.save(softwareModule);
+        }
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void unlock(final long id) {
+        final JpaSoftwareModule softwareModule = softwareModuleRepository
+                .findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
+        if (softwareModule.isLocked()) {
+            softwareModule.unlock();
             softwareModuleRepository.save(softwareModule);
         }
     }

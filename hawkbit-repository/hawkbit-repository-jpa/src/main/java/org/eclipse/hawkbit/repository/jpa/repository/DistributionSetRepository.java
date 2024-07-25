@@ -121,12 +121,6 @@ public interface DistributionSetRepository
     @Query("select ra.distributionSet.id from JpaRollout ra where ra.distributionSet.id in :ids")
     List<Long> findAssignedToRolloutDistributionSetsById(@Param("ids") Collection<Long> ids);
 
-    @Query("select DISTINCT ds from JpaDistributionSet ds join fetch ds.modules join ds.assignedToTargets t where t.controllerId = :controllerId")
-    Optional<DistributionSet> findAssignedToTarget(@Param("controllerId") String controllerId);
-
-    @Query("select DISTINCT ds from JpaDistributionSet ds join fetch ds.modules join ds.installedAtTargets t where t.controllerId = :controllerId")
-    Optional<DistributionSet> findInstalledAtTarget(@Param("controllerId") String controllerId);
-
     /**
      * Counts {@link DistributionSet} instances of given type in the repository.
      * <p/>

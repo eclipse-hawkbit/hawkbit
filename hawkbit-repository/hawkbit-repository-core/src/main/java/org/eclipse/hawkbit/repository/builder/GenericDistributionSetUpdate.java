@@ -10,12 +10,20 @@
 package org.eclipse.hawkbit.repository.builder;
 
 import jakarta.annotation.Nullable;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 import java.util.Optional;
 
 /**
  * Update implementation.
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@Accessors(fluent = true)
 public class GenericDistributionSetUpdate extends AbstractDistributionSetUpdateCreate<DistributionSetUpdate>
         implements DistributionSetUpdate {
 
@@ -24,18 +32,5 @@ public class GenericDistributionSetUpdate extends AbstractDistributionSetUpdateC
 
     public GenericDistributionSetUpdate(final Long id) {
         super.id = id;
-    }
-
-    public DistributionSetUpdate locked(@Nullable final Boolean locked) {
-        if (Boolean.FALSE.equals(locked)) {
-            this.locked = null;
-        } else {
-            this.locked = locked;
-        }
-        return this;
-    }
-
-    public Boolean getLocked() {
-        return locked;
     }
 }

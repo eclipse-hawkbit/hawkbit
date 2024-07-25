@@ -98,7 +98,7 @@ public class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery) {
         return rolloutManagement.create(
-                entityFactory.rollout().create().set(distributionSetManagement.get(distributionSetId).get()).name(name)
+                entityFactory.rollout().create().distributionSetId(distributionSetManagement.get(distributionSetId).get()).name(name)
                         .targetFilterQuery(targetFilterQuery),
                 amountGroups, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());

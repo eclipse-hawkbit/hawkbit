@@ -14,6 +14,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.rollout.AbstractMgmtRolloutConditionsEntity;
@@ -22,17 +23,21 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutCondition.Conditio
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutErrorAction;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutErrorAction.ErrorAction;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
-import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPost;
+import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutSuccessAction;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutSuccessAction.SuccessAction;
+import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtDynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
+import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -123,22 +128,30 @@ final class MgmtRolloutMapper {
         return body;
     }
 
-    static RolloutCreate fromRequest(final EntityFactory entityFactory, final MgmtRolloutRestRequestBody restRequest,
+    static RolloutCreate fromRequest(final EntityFactory entityFactory, final MgmtRolloutRestRequestBodyPost restRequest,
             final DistributionSet distributionSet) {
-
-        return entityFactory.rollout().create().name(restRequest.getName()).description(restRequest.getDescription())
-                .dynamic(restRequest.isDynamic())
-                .set(distributionSet).targetFilterQuery(restRequest.getTargetFilterQuery())
+        return entityFactory.rollout().create()
+                .name(restRequest.getName())
+                .description(restRequest.getDescription())
+                .distributionSetId(distributionSet)
+                .targetFilterQuery(restRequest.getTargetFilterQuery())
                 .actionType(MgmtRestModelMapper.convertActionType(restRequest.getType()))
                 .forcedTime(restRequest.getForcetime()).startAt(restRequest.getStartAt())
-                .weight(restRequest.getWeight());
+                .weight(restRequest.getWeight())
+                .dynamic(restRequest.isDynamic());
+    }
+
+    static RolloutUpdate fromRequest(final EntityFactory entityFactory, final MgmtRolloutRestRequestBodyPut restRequest, final long rolloutId) {
+        return entityFactory.rollout().update(rolloutId)
+                .name(restRequest.getName())
+                .description(restRequest.getDescription());
     }
 
     static RolloutCreate fromRetriedRollout(final EntityFactory entityFactory, final Rollout rollout) {
         return entityFactory.rollout().create()
                 .name(rollout.getName().concat("_retry"))
                 .description(rollout.getDescription())
-                .set(rollout.getDistributionSet())
+                .distributionSetId(rollout.getDistributionSet())
                 .targetFilterQuery("failedrollout==".concat(String.valueOf(rollout.getId())))
                 .actionType(rollout.getActionType())
                 .forcedTime(rollout.getForcedTime())
@@ -147,10 +160,19 @@ final class MgmtRolloutMapper {
     }
 
     static RolloutGroupCreate fromRequest(final EntityFactory entityFactory, final MgmtRolloutGroup restRequest) {
-
         return entityFactory.rolloutGroup().create().name(restRequest.getName())
                 .description(restRequest.getDescription()).targetFilterQuery(restRequest.getTargetFilterQuery())
                 .targetPercentage(restRequest.getTargetPercentage()).conditions(fromRequest(restRequest, false));
+    }
+
+    static DynamicRolloutGroupTemplate fromRequest(final MgmtDynamicRolloutGroupTemplate restRequest) {
+        if (restRequest == null) {
+            return null;
+        }
+        return DynamicRolloutGroupTemplate.builder()
+                .nameSuffix(Optional.ofNullable(restRequest.getNameSuffix()).orElse(""))
+                .targetCount(restRequest.getTargetCount())
+                .build();
     }
 
     static RolloutGroupConditions fromRequest(final AbstractMgmtRolloutConditionsEntity restRequest,
@@ -210,6 +232,8 @@ final class MgmtRolloutMapper {
         if (confirmationFlowEnabled) {
             body.setConfirmationRequired(rolloutGroup.isConfirmationRequired());
         }
+
+        body.setDynamic(rolloutGroup.isDynamic());
 
         body.setSuccessCondition(new MgmtRolloutCondition(map(rolloutGroup.getSuccessCondition()),
                 rolloutGroup.getSuccessConditionExp()));

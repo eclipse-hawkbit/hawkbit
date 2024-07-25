@@ -10,13 +10,17 @@
 package org.eclipse.hawkbit.mgmt.json.model.auth;
 
 import lombok.Data;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
 /**
  * A json annotated rest model for Userinfo to RESTful API representation.
  */
 @Data
+@Accessors(chain = true)
+@ToString
 public class MgmtUserInfo {
 
-    private String username;
     private String tenant;
+    private String username;
 }

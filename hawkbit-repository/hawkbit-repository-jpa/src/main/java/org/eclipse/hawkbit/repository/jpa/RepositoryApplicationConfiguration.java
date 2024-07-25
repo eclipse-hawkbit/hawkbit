@@ -157,13 +157,14 @@ import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;
-import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactoryHolder;
+import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.hibernate.validator.BaseHibernateValidatorConfiguration;
 import org.springframework.beans.BeansException;
@@ -481,7 +482,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     @Override
     protected Map<String, Object> getVendorProperties() {
-
         final Map<String, Object> properties = new HashMap<>(7);
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put(PersistenceUnitProperties.WEAVING, "false");
@@ -489,7 +489,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         properties.put(PersistenceUnitProperties.ALLOW_NATIVE_SQL_QUERIES, "true");
         // flyway
         properties.put(PersistenceUnitProperties.DDL_GENERATION, "none");
-        // Embeed into hawkBit logging
+        // Embed into hawkBit logging
         properties.put(PersistenceUnitProperties.LOGGING_LOGGER, "JavaLogger");
         // Ensure that we flush only at the end of the transaction
         properties.put(PersistenceUnitProperties.PERSISTENCE_CONTEXT_FLUSH_MODE, "COMMIT");
@@ -497,7 +497,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         properties.put(PersistenceUnitProperties.BATCH_WRITING, "JDBC");
         // Batch size
         properties.put(PersistenceUnitProperties.BATCH_WRITING_SIZE, "500");
-
         return properties;
     }
 
@@ -532,25 +531,24 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    DistributionSetManagement distributionSetManagement(final EntityManager entityManager,
-                                                        final DistributionSetRepository distributionSetRepository,
-                                                        final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
-                                                        final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
-                                                        final DistributionSetMetadataRepository distributionSetMetadataRepository,
-                                                        final TargetRepository targetRepository,
-                                                        final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
-                                                        final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
-                                                        final VirtualPropertyReplacer virtualPropertyReplacer,
-                                                        final SoftwareModuleRepository softwareModuleRepository,
-                                                        final DistributionSetTagRepository distributionSetTagRepository,
-                                                        final AfterTransactionCommitExecutor afterCommit,
-                                                        final JpaProperties properties) {
+    DistributionSetManagement distributionSetManagement(
+            final EntityManager entityManager,
+            final DistributionSetRepository distributionSetRepository,
+            final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
+            final DistributionSetMetadataRepository distributionSetMetadataRepository,
+            final TargetRepository targetRepository,
+            final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
+            final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement tenantConfigurationManagement,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final SoftwareModuleRepository softwareModuleRepository,
+            final DistributionSetTagRepository distributionSetTagRepository,
+            final JpaProperties properties, final RepositoryProperties repositoryProperties) {
         return new JpaDistributionSetManagement(entityManager, distributionSetRepository, distributionSetTagManagement,
                 systemManagement, distributionSetTypeManagement, quotaManagement, distributionSetMetadataRepository,
-                targetRepository, targetFilterQueryRepository, actionRepository, eventPublisherHolder, tenantAware,
-                virtualPropertyReplacer, softwareModuleRepository, distributionSetTagRepository, afterCommit,
-                properties.getDatabase());
-
+                targetRepository, targetFilterQueryRepository, actionRepository,
+                TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement),
+                virtualPropertyReplacer, softwareModuleRepository, distributionSetTagRepository,
+                properties.getDatabase(), repositoryProperties);
     }
 
     /**
@@ -655,10 +653,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final JpaProperties properties, final TenantConfigurationManagement tenantConfigurationManagement,
             final RepositoryProperties repositoryProperties,
-            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware) {
+            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final AuditorAware<String> auditorAware) {
         return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetManagement,
                 virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase(),
-                tenantConfigurationManagement, repositoryProperties, systemSecurityContext, contextAware);
+                tenantConfigurationManagement, repositoryProperties, systemSecurityContext, contextAware, auditorAware);
     }
 
 
@@ -670,9 +668,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     TargetTagManagement targetTagManagement(final TargetTagRepository targetTagRepository,
-            final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
             final JpaProperties properties) {
-        return new JpaTargetTagManagement(targetTagRepository, targetRepository, virtualPropertyReplacer,
+        return new JpaTargetTagManagement(targetTagRepository, virtualPropertyReplacer,
                 properties.getDatabase());
     }
 
@@ -809,18 +807,17 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     DeploymentManagement deploymentManagement(final EntityManager entityManager,
-                                              final ActionRepository actionRepository, final DistributionSetRepository distributionSetRepository,
+                                              final ActionRepository actionRepository,
                                               final DistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
                                               final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
                                               final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
                                               final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
                                               final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
-                                              final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
+                                              final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final AuditorAware<String> auditorAware,
                                               final JpaProperties properties, final RepositoryProperties repositoryProperties) {
-        return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetManagement,
-                distributionSetRepository, targetRepository, actionStatusRepository, auditorProvider,
+        return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetManagement, targetRepository, actionStatusRepository, auditorProvider,
                 eventPublisherHolder, afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement,
-                quotaManagement, systemSecurityContext, tenantAware, properties.getDatabase(), repositoryProperties);
+                quotaManagement, systemSecurityContext, tenantAware, auditorAware, properties.getDatabase(), repositoryProperties);
     }
 
     @Bean
@@ -1019,13 +1016,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * Obtains the {@link RsqlVisitorFactoryHolder} bean.
+     * Obtains the {@link RsqlConfigHolder} bean.
      *
-     * @return The {@link RsqlVisitorFactoryHolder} singleton.
+     * @return The {@link RsqlConfigHolder} singleton.
      */
     @Bean
-    RsqlVisitorFactoryHolder rsqlVisitorFactoryHolder() {
-        return RsqlVisitorFactoryHolder.getInstance();
+    RsqlConfigHolder rsqlVisitorFactoryHolder() {
+        return RsqlConfigHolder.getInstance();
     }
 
     /**

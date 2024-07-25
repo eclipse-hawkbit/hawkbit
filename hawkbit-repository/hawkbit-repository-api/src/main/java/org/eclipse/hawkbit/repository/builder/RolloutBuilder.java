@@ -13,13 +13,11 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 
 /**
  * Builder for {@link Rollout}.
- *
  */
 public interface RolloutBuilder {
 
     /**
-     * @param id
-     *            of the updatable entity
+     * @param id of the updatable entity
      * @return builder instance
      */
     RolloutUpdate update(long id);
@@ -28,5 +26,4 @@ public interface RolloutBuilder {
      * @return builder instance
      */
     RolloutCreate create();
-
 }

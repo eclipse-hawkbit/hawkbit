@@ -13,6 +13,7 @@ import org.eclipse.hawkbit.ui.simple.view.TargetView;
 import org.eclipse.hawkbit.ui.simple.view.RolloutView;
 import org.eclipse.hawkbit.ui.simple.security.AuthenticatedUser;
 import org.eclipse.hawkbit.ui.simple.view.AboutView;
+import org.eclipse.hawkbit.ui.simple.view.ConfigView;
 import org.eclipse.hawkbit.ui.simple.view.DistributionSetView;
 import org.eclipse.hawkbit.ui.simple.view.SoftwareModuleView;
 import com.vaadin.flow.component.Unit;
@@ -101,6 +102,9 @@ public class MainLayout extends AppLayout {
         }
         if (accessChecker.hasAccess(SoftwareModuleView.class)) {
             nav.addItem(new SideNavItem("Software Modules", SoftwareModuleView.class, VaadinIcon.FILE.create()));
+        }
+        if (accessChecker.hasAccess(ConfigView.class)) {
+            nav.addItem(new SideNavItem("Config", ConfigView.class, VaadinIcon.COG.create()));
         }
         if (accessChecker.hasAccess(AboutView.class)) {
             nav.addItem(new SideNavItem("About", AboutView.class, VaadinIcon.INFO_CIRCLE.create()));

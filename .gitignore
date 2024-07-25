@@ -55,6 +55,9 @@ classpath-data.json
 # Intellij
 *.iml
 
+# local Spring configs
+application-local.properties
+
 # Maven
 maven.properties
 .flattened-pom.xml

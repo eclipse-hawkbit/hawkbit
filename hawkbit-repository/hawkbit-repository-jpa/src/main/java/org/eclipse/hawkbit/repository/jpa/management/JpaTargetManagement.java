@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
@@ -176,6 +177,13 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public long count() {
         return targetRepository.count();
+    }
+
+    @Override
+    public Set<TargetTag> getTagsByControllerId(@NotEmpty String controllerId) {
+        // the method has PreAuthorized by itself
+        return getByControllerID(controllerId).map(JpaTarget.class::cast).map(JpaTarget::getTags)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
     }
 
     @Override

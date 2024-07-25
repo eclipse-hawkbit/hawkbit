@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
@@ -100,22 +101,6 @@ public interface TargetTagManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<TargetTag> findAll(@NotNull Pageable pageable);
-
-    /**
-     * Returns all {@link TargetTag}s assigned to {@link Target} with given ID.
-     * 
-     * @param pageable
-     *            page parameter
-     * @param controllerId
-     *            of the assigned target
-     *
-     * @return {@link TargetTag}s assigned to {@link Target} with given ID
-     * 
-     * @throws EntityNotFoundException
-     *             if target with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetTag> findByTarget(@NotNull Pageable pageable, @NotEmpty String controllerId);
 
     /**
      * Retrieves all target tags based on the given specification.

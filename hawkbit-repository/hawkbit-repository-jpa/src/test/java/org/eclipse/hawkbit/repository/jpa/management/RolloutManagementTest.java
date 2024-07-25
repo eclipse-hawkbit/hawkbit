@@ -58,7 +58,6 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
-import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -1408,7 +1407,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
         final RolloutCreate rollout = entityFactory.rollout().create().name(rolloutName).description(rolloutName)
-                .targetFilterQuery("controllerId==" + targetPrefixName + "-*").set(distributionSet);
+                .targetFilterQuery("controllerId==" + targetPrefixName + "-*").distributionSetId(distributionSet);
 
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> rolloutManagement.create(rollout, amountGroups, false, conditions));
@@ -1436,7 +1435,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // group1 exceeds the quota
         assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
                 entityFactory.rollout().create().name(rolloutName).description(rolloutName)
-                        .targetFilterQuery("controllerId==" + rolloutName + "-*").set(distributionSet),
+                        .targetFilterQuery("controllerId==" + rolloutName + "-*").distributionSetId(distributionSet),
                 Arrays.asList(group1, group2), conditions));
 
         // create group definitions
@@ -1448,7 +1447,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // group4 exceeds the quota
         assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
                 entityFactory.rollout().create().name(rolloutName).description(rolloutName)
-                        .targetFilterQuery("controllerId==" + rolloutName + "-*").set(distributionSet),
+                        .targetFilterQuery("controllerId==" + rolloutName + "-*").distributionSetId(distributionSet),
                 Arrays.asList(group3, group4), conditions));
 
         // create group definitions
@@ -1462,15 +1461,14 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // should work fine
         assertThat(rolloutManagement.create(
                 entityFactory.rollout().create().name(rolloutName).description(rolloutName)
-                        .targetFilterQuery("controllerId==" + rolloutName + "-*").set(distributionSet),
+                        .targetFilterQuery("controllerId==" + rolloutName + "-*").distributionSetId(distributionSet),
                 Arrays.asList(group5, group6, group7), conditions)).isNotNull();
 
     }
 
     @Test
-    @Description("Verify the creation and the automatic start of a rollout.")
-    void createAndAutoStartRollout() {
-
+    @Description("Verify the update of a rollout")
+    void updateRollout() {
         final int amountTargetsForRollout = 50;
         final int amountGroups = 5;
         final String successCondition = "50";
@@ -1487,31 +1485,13 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         // schedule rollout auto start into the future
         final Long myRolloutId = myRollout.getId();
         rolloutManagement
-                .update(entityFactory.rollout().update(myRolloutId).startAt(System.currentTimeMillis() + 60000));
+                .update(entityFactory.rollout().update(myRolloutId).name("newName").description("newDesc"));
         rolloutHandler.handleAll();
 
         // rollout should not have been started
         myRollout = getRollout(myRolloutId);
-        assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
-
-        // schedule to now
-        rolloutManagement.update(entityFactory.rollout().update(myRolloutId).startAt(System.currentTimeMillis()));
-        rolloutHandler.handleAll();
-
-        myRollout = getRollout(myRolloutId);
-        assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.STARTING);
-
-        // Run here, because scheduler is disabled during tests
-        rolloutHandler.handleAll();
-
-        awaitRunningState(myRolloutId);
-
-        myRollout = getRollout(myRolloutId);
-        assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.RUNNING);
-        final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus = createInitStatusMap();
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 10L);
-        expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 40L);
-        validateRolloutActionStatus(myRolloutId, expectedTargetCountStatus);
+        assertThat(myRollout.getName()).isEqualTo("newName");
+        assertThat(myRollout.getDescription()).isEqualTo("newDesc");
     }
 
     private Rollout reloadRollout(final Rollout r) {
@@ -1766,7 +1746,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
         final RolloutCreate rolloutToCreate = entityFactory.rollout().create().name(rolloutName)
-                .description("some description").targetFilterQuery("id==" + rolloutName + "-*").set(distributionSet);
+                .description("some description").targetFilterQuery("id==" + rolloutName + "-*").distributionSetId(distributionSet);
 
         Rollout myRollout = rolloutManagement.create(rolloutToCreate, amountGroups, false, conditions);
         myRollout = getRollout(myRollout.getId());
@@ -1942,7 +1922,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final String prefixRolloutRunning = randomString + "1";
         final RolloutCreate rolloutRunningCreate = entityFactory.rollout().create()
                 .name(prefixRolloutRunning + "-testRollout").targetFilterQuery("name==" + randomString + "*")
-                .set(testDs);
+                .distributionSetId(testDs);
 
         Rollout rolloutRunning = rolloutManagement.create(rolloutRunningCreate, 1, false, conditions);
         // Let the executor handle created Rollout
@@ -1955,7 +1935,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         final String prefixRolloutReady = randomString + "2";
         final RolloutCreate rolloutReadyCreate = entityFactory.rollout().create()
-                .name(prefixRolloutReady + "-testRollout").targetFilterQuery("name==" + randomString + "*").set(testDs);
+                .name(prefixRolloutReady + "-testRollout").targetFilterQuery("name==" + randomString + "*").distributionSetId(testDs);
         Rollout rolloutReady = rolloutManagement.create(rolloutReadyCreate, 1, false, conditions);
         // Let the executor handle created Rollout
         rolloutHandler.handleAll();
@@ -2067,34 +2047,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that an exception is thrown when trying to update a rollout with an invalidated distribution set.")
-    void updateRolloutWithInvalidDistributionSet() {
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        testdataFactory.createTarget();
-        final Rollout rollout = testdataFactory.createRolloutByVariables("updateRolloutWithInvalidDistributionSet",
-                "desc", 2, "name==*", distributionSet, "50", "80");
-        final DistributionSet invalidDistributionSet = testdataFactory.createAndInvalidateDistributionSet();
-
-        assertThatExceptionOfType(InvalidDistributionSetException.class)
-                .as("Invalid distributionSet should throw an exception").isThrownBy(() -> rolloutManagement
-                        .update(entityFactory.rollout().update(rollout.getId()).set(invalidDistributionSet.getId())));
-    }
-
-    @Test
-    @Description("Verifies that an exception is thrown when trying to update a rollout with an incomplete distribution set.")
-    void updateRolloutWithIncompleteDistributionSet() {
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        testdataFactory.createTarget();
-        final Rollout rollout = testdataFactory.createRolloutByVariables("updateRolloutWithIncompleteDistributionSet",
-                "desc", 2, "name==*", distributionSet, "50", "80");
-        final DistributionSet incompleteDistributionSet = testdataFactory.createIncompleteDistributionSet();
-
-        assertThatExceptionOfType(IncompleteDistributionSetException.class)
-                .as("Incomplete distributionSet should throw an exception").isThrownBy(() -> rolloutManagement.update(
-                        entityFactory.rollout().update(rollout.getId()).set(incompleteDistributionSet.getId())));
-    }
-
-    @Test
     @Description("Verify the that only compatible targets are part of a Rollout.")
     void createAndStartRolloutWithTargetTypes() {
         final String rolloutName = "rolloutTestCompatibility";
@@ -2114,7 +2066,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults().build();
         final RolloutCreate rolloutToCreate = entityFactory.rollout().create().name(rolloutName)
-                .targetFilterQuery("name==*").set(testDs);
+                .targetFilterQuery("name==*").distributionSetId(testDs);
 
         final Rollout createdRollout = rolloutManagement.create(rolloutToCreate, 1, false, conditions);
 
@@ -2156,7 +2108,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         return entityFactory.rollout().create().name(rolloutName)
                 .description("This is a test description for the rollout")
-                .targetFilterQuery("controllerId==" + rolloutName + "-*").set(distributionSet);
+                .targetFilterQuery("controllerId==" + rolloutName + "-*").distributionSetId(distributionSet);
     }
 
     private void validateRolloutGroupActionStatus(final RolloutGroup rolloutGroup,
