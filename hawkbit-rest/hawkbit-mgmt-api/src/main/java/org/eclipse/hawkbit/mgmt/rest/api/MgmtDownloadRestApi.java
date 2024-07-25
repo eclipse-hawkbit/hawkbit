@@ -31,8 +31,7 @@ public interface MgmtDownloadRestApi {
      * 
      * @param tenant the download belongs to
      * @param downloadId the generated download id
-     * @return {@link ResponseEntity} with status {@link HttpStatus#OK} if
-     *         successful
+     * @return {@link ResponseEntity} with status {@link HttpStatus#OK} if successful
      */
     @GetMapping(value = MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE
             + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING)

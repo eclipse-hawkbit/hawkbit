@@ -9,10 +9,13 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * Constants for RESTful API.
- *
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtRestConstants {
 
     /**
@@ -23,7 +26,12 @@ public final class MgmtRestConstants {
     /**
      * The base URL mapping of the SP rest resources.
      */
-    public static final String BASE_V1_REQUEST_MAPPING = "/rest/v1";
+    public static final String BASE_REST_MAPPING = "/rest";
+
+    /**
+     * The base URL mapping of the SP rest resources.
+     */
+    public static final String BASE_V1_REQUEST_MAPPING = BASE_REST_MAPPING + "/v1";
 
     /**
      * String representation of
@@ -276,9 +284,4 @@ public final class MgmtRestConstants {
      * Request parameter if the artifact url handler should be used
      */
     public static final String REQUEST_PARAMETER_USE_ARTIFACT_URL_HANDLER = "useartifacturlhandler";
-
-    // constant class, private constructor.
-    private MgmtRestConstants() {
-
-    }
 }
