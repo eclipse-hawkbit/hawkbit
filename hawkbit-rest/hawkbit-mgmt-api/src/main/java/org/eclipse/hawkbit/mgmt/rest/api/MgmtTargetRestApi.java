@@ -724,7 +724,6 @@ public interface MgmtTargetRestApi {
     @Operation(summary = "Return tags for specific target", description = "Get a paged list of tags for a target. Required permission: READ_REPOSITORY")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "204", description = "No tags"),
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",

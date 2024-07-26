@@ -1898,22 +1898,17 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
-    void getControllerTagReturnsTagWithNoContent() throws Exception {
-        // create target with attributes
-        final String knownTargetId = "targetIdWithNoTags";
-        final Target target = testdataFactory.createTarget(knownTargetId);
-
-        // test query target over rest resource
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/tags"))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void getControllerTagReturnsTagWithOk() throws Exception {
+    void getControllerTagReturnsTagsWithOk() throws Exception {
         // create target with attributes
         final String knownTargetId = "targetIdWithTags";
         final Target target = testdataFactory.createTarget(knownTargetId);
+
+        // test query target over rest resource with no tags - expect OK with empty list
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/tags"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", Matchers.hasSize(0)));
+
         final List<TargetTag> targetTags = testdataFactory.createTargetTags(2, "tag_getControllerTagReturnsTagWithOk");
         final List<String> tagNames = new ArrayList<>();
         for (final TargetTag targetTag : targetTags) {
@@ -1921,7 +1916,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
             tagNames.add(targetTag.getName());
         }
 
-        // test query target over rest resource
+        // test query target over rest resource with 2 tags - expect OK with 2 tags the target is tagged with
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/tags"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
