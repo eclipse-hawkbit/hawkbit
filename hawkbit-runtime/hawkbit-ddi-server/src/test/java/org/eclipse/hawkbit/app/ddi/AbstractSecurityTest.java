@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.app.ddi;
 
 import org.eclipse.hawkbit.repository.test.util.SharedSqlTestDatabaseExtension;
-import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +26,6 @@ public abstract class AbstractSecurityTest {
 
     @Autowired
     private WebApplicationContext context;
-    @Autowired
-    private FilterHttpResponse filterHttpResponse;
 
     protected MockMvc mvc;
 
@@ -36,7 +33,6 @@ public abstract class AbstractSecurityTest {
     public void setup() {
         final DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(context)
                 .apply(SecurityMockMvcConfigurers.springSecurity()).dispatchOptions(true);
-        builder.addFilter(filterHttpResponse);
         mvc = builder.build();
     }
 }

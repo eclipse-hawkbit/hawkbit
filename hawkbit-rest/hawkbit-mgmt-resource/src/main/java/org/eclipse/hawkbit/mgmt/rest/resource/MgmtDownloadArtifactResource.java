@@ -46,9 +46,6 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
     @Autowired
     private ArtifactManagement artifactManagement;
 
-    @Autowired
-    private RequestResponseContextHolder requestResponseContextHolder;
-
     /**
      * Handles the GET request for downloading an artifact.
      *
@@ -74,14 +71,13 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
         final DbArtifact file = artifactManagement
                 .loadArtifactBinary(artifact.getSha1Hash(), module.getId(), module.isEncrypted())
                 .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
-        final HttpServletRequest request = requestResponseContextHolder.getHttpServletRequest();
+        final HttpServletRequest request = RequestResponseContextHolder.getHttpServletRequest();
         final String ifMatch = request.getHeader(HttpHeaders.IF_MATCH);
         if (ifMatch != null && !HttpUtil.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
             return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         }
 
         return FileStreamingUtil.writeFileResponse(file, artifact.getFilename(), artifact.getCreatedAt(),
-                requestResponseContextHolder.getHttpServletResponse(), request, null);
+                RequestResponseContextHolder.getHttpServletResponse(), request, null);
     }
-
 }

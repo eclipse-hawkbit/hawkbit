@@ -39,13 +39,9 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
 
     private final DownloadIdCache downloadIdCache;
 
-    private final RequestResponseContextHolder requestResponseContextHolder;
-
-    MgmtDownloadResource(final ArtifactRepository artifactRepository, final DownloadIdCache downloadIdCache,
-            final RequestResponseContextHolder requestResponseContextHolder) {
+    MgmtDownloadResource(final ArtifactRepository artifactRepository, final DownloadIdCache downloadIdCache) {
         this.artifactRepository = artifactRepository;
         this.downloadIdCache = downloadIdCache;
-        this.requestResponseContextHolder = requestResponseContextHolder;
     }
 
     @Override
@@ -77,8 +73,8 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
             }
 
             return FileStreamingUtil.writeFileResponse(artifact, downloadId, 0L,
-                    requestResponseContextHolder.getHttpServletResponse(),
-                    requestResponseContextHolder.getHttpServletRequest(), null);
+                    RequestResponseContextHolder.getHttpServletResponse(),
+                    RequestResponseContextHolder.getHttpServletRequest(), null);
 
         } finally {
             downloadIdCache.evict(downloadId);

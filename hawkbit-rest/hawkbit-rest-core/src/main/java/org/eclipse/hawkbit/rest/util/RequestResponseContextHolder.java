@@ -9,36 +9,32 @@
  */
 package org.eclipse.hawkbit.rest.util;
 
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.util.Objects;
 
 /**
- * Store the request and response for the rest resources.
+ * Gives access to the request and response for the rest resources.
  */
 public class RequestResponseContextHolder {
 
-    private HttpServletRequest httpServletRequest;
-
-    private HttpServletResponse httpServletResponse;
-
-    public HttpServletRequest getHttpServletRequest() {
-        return httpServletRequest;
+    public static HttpServletRequest getHttpServletRequest() {
+        return Objects
+                .requireNonNull(
+                        (ServletRequestAttributes) RequestContextHolder.getRequestAttributes(),
+                        "Request attribute is unavailable")
+                .getRequest();
     }
 
-    public HttpServletResponse getHttpServletResponse() {
-        return httpServletResponse;
-    }
-
-    @Autowired
-    public void setHttpServletRequest(final HttpServletRequest httpServletRequest) {
-        this.httpServletRequest = httpServletRequest;
-    }
-
-    @Resource(name = HttpResponseFactoryBean.FACTORY_BEAN_NAME)
-    public void setHttpServletResponse(final HttpServletResponse httpServletResponse) {
-        this.httpServletResponse = httpServletResponse;
+    public static HttpServletResponse getHttpServletResponse() {
+        return Objects
+                .requireNonNull(
+                        (ServletRequestAttributes) RequestContextHolder.getRequestAttributes(),
+                        "Request attribute is unavailable")
+                .getResponse();
     }
 }

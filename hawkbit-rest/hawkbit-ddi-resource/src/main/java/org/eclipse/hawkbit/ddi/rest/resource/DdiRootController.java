@@ -134,9 +134,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private ArtifactUrlHandler artifactUrlHandler;
 
     @Autowired
-    private RequestResponseContextHolder requestResponseContextHolder;
-
-    @Autowired
     private EntityFactory entityFactory;
 
     @Override
@@ -152,7 +149,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         return new ResponseEntity<>(
                 DataConversionHelper.createArtifacts(target, softwareModule, artifactUrlHandler, systemManagement,
-                        new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest())),
+                        new ServletServerHttpRequest(RequestResponseContextHolder.getHttpServletRequest())),
                 HttpStatus.OK);
     }
 
@@ -162,7 +159,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         log.debug("getControllerBase({})", controllerId);
 
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, IpUtil
-                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
+                .getClientIpFromRequest(RequestResponseContextHolder.getHttpServletRequest(), securityProperties));
         final Action activeAction = controllerManagement.findActiveActionWithHighestWeight(controllerId).orElse(null);
 
         final Action installedAction = controllerManagement.getInstalledActionByTarget(controllerId).orElse(null);
@@ -197,18 +194,18 @@ public class DdiRootController implements DdiRootControllerRestApi {
                     .loadArtifactBinary(artifact.getSha1Hash(), module.getId(), module.isEncrypted())
                     .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
 
-            final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader(HttpHeaders.IF_MATCH);
+            final String ifMatch = RequestResponseContextHolder.getHttpServletRequest().getHeader(HttpHeaders.IF_MATCH);
             if (ifMatch != null && !HttpUtil.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
                 result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
             } else {
-                final ActionStatus action = checkAndLogDownload(requestResponseContextHolder.getHttpServletRequest(),
+                final ActionStatus action = checkAndLogDownload(RequestResponseContextHolder.getHttpServletRequest(),
                         target, module.getId());
 
                 final Long statusId = action.getId();
 
                 result = FileStreamingUtil.writeFileResponse(file, artifact.getFilename(), artifact.getCreatedAt(),
-                        requestResponseContextHolder.getHttpServletResponse(),
-                        requestResponseContextHolder.getHttpServletRequest(),
+                        RequestResponseContextHolder.getHttpServletResponse(),
+                        RequestResponseContextHolder.getHttpServletRequest(),
                         (length, shippedSinceLastEvent,
                                 total) -> eventPublisher.publishEvent(new DownloadProgressEvent(
                                         tenantAware.getCurrentTenant(), statusId, shippedSinceLastEvent,
@@ -262,10 +259,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Artifact artifact = module.getArtifactByFilename(fileName)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, fileName));
 
-        checkAndLogDownload(requestResponseContextHolder.getHttpServletRequest(), target, module.getId());
+        checkAndLogDownload(RequestResponseContextHolder.getHttpServletRequest(), target, module.getId());
 
         try {
-            FileStreamingUtil.writeMD5FileResponse(requestResponseContextHolder.getHttpServletResponse(),
+            FileStreamingUtil.writeMD5FileResponse(RequestResponseContextHolder.getHttpServletResponse(),
                     artifact.getMd5Hash(), fileName);
         } catch (final IOException e) {
             log.error("Failed to stream MD5 File", e);
@@ -658,7 +655,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private DdiDeployment generateDdiDeployment(final Target target, final Action action) {
         final List<DdiChunk> chunks = DataConversionHelper.createChunks(target, action, artifactUrlHandler,
-                systemManagement, new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest()),
+                systemManagement, new ServletServerHttpRequest(RequestResponseContextHolder.getHttpServletRequest()),
                 controllerManagement);
         final HandlingType downloadType = calculateDownloadType(action);
         final HandlingType updateType = calculateUpdateType(action, downloadType);
@@ -719,7 +716,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     public ResponseEntity<DdiConfirmationBase> getConfirmationBase(final String tenant, final String controllerId) {
         log.debug("getConfirmationBase is called [controllerId={}].", controllerId);
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, IpUtil
-                .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
+                .getClientIpFromRequest(RequestResponseContextHolder.getHttpServletRequest(), securityProperties));
         final Action activeAction = controllerManagement.findActiveActionWithHighestWeight(controllerId).orElse(null);
 
         final DdiAutoConfirmationState autoConfirmationState = getAutoConfirmationState(controllerId);
