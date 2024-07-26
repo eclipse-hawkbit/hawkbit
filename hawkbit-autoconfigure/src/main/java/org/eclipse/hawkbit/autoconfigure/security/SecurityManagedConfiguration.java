@@ -448,6 +448,7 @@ public class SecurityManagedConfiguration {
                                         .authenticated())
                     .anonymous(AbstractHttpConfigurer::disable)
                     .csrf(AbstractHttpConfigurer::disable)
+                    .requestCache(AbstractHttpConfigurer::disable)
                     .exceptionHandling(Customizer.withDefaults())
                     .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .addFilterAfter(
