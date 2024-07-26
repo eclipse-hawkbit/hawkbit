@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.oauth2.client.ClientsConfiguredCondition;
@@ -88,7 +89,7 @@ public class OidcUserManagementAutoConfiguration {
         return new JwtAuthoritiesOidcUserService(extractor);
     }
 
-    @Bean
+    @Bean("hawkbitOAuth2ResourceServerCustomizer")
     @ConditionalOnMissingBean
     Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer(
             final InMemoryClientRegistrationRepository clientRegistrationRepository,

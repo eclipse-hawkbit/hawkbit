@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvide
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -56,6 +57,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
@@ -425,7 +427,15 @@ public class SecurityManagedConfiguration {
         SecurityFilterChain filterChainREST(
                 final HttpSecurity http,
                 @Autowired(required = false)
+                @Qualifier("hawkbitOAuth2ResourceServerCustomizer")
                 final Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer,
+                // called just before build of the SecurityFilterChain.
+                // could be used for instance to set authentication provider
+                // Note: implementation of the customizer shall always take in account what is the already set by the
+                //       hawkBit
+                @Autowired(required = false)
+                @Qualifier("hawkbitHttpSecurityCustomizer")
+                final Customizer<HttpSecurity> httpSecurityCustomizer,
                 final SystemManagement systemManagement,
                 final SystemSecurityContext systemSecurityContext) throws Exception {
             http
@@ -468,6 +478,10 @@ public class SecurityManagedConfiguration {
                     basicAuthEntryPoint.setRealmName(securityProperties.getBasicRealm());
                     configurer.authenticationEntryPoint(basicAuthEntryPoint);
                 });
+            }
+
+            if (httpSecurityCustomizer != null) {
+                httpSecurityCustomizer.customize(http);
             }
 
             return http.build();
