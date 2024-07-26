@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -397,11 +398,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<List<MgmtTag>> getTags(@PathVariable("targetId") String targetId) {
         final Set<TargetTag> tags = targetManagement.getTagsByControllerId(targetId);
-        if (tags.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.ok(MgmtTagMapper.toResponse(tags.stream().toList()));
-        }
+        return ResponseEntity.ok(
+                MgmtTagMapper.toResponse(tags == null ? Collections.emptyList() : tags.stream().toList()));
     }
 
     @Override
