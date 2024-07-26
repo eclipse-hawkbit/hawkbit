@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.autoconfigure.security;
 
-import org.eclipse.hawkbit.im.authentication.MultitenancyIndicator;
 import org.eclipse.hawkbit.im.authentication.StaticAuthenticationProvider;
 import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -45,14 +44,5 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
     @Override
     public void configure(final AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(authenticationProvider);
-    }
-
-    /**
-     * @return the multi-tenancy indicator to disallow multi-tenancy
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    MultitenancyIndicator multiTenancyIndicator() {
-        return () -> false;
     }
 }
