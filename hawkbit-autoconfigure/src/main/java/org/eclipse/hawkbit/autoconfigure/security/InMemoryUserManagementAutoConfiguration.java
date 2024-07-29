@@ -35,10 +35,8 @@ public class InMemoryUserManagementAutoConfiguration extends GlobalAuthenticatio
     private final StaticAuthenticationProvider authenticationProvider;
 
     InMemoryUserManagementAutoConfiguration(final SecurityProperties securityProperties,
-            final TenantAwareUserProperties tenantAwareUserProperties,
-            final Optional<PasswordEncoder> passwordEncoder) {
-        authenticationProvider = new StaticAuthenticationProvider(tenantAwareUserProperties, securityProperties,
-                passwordEncoder.orElse(null));
+            final TenantAwareUserProperties tenantAwareUserProperties) {
+        authenticationProvider = new StaticAuthenticationProvider(tenantAwareUserProperties, securityProperties);
     }
 
     @Override

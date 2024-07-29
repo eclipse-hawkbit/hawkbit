@@ -37,9 +37,8 @@ import java.util.regex.Pattern;
 public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
 
     public StaticAuthenticationProvider(
-            final TenantAwareUserProperties tenantAwareUserProperties, final SecurityProperties securityProperties,
-            final PasswordEncoder passwordEncoder) {
-        setUserDetailsService(userDetailsService(securityProperties, tenantAwareUserProperties, passwordEncoder));
+            final TenantAwareUserProperties tenantAwareUserProperties, final SecurityProperties securityProperties) {
+        setUserDetailsService(userDetailsService(securityProperties, tenantAwareUserProperties));
     }
 
     @Override
@@ -56,11 +55,10 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
 
     private static UserDetailsService userDetailsService(
             final SecurityProperties securityProperties,
-            final TenantAwareUserProperties tenantAwareUserProperties,
-            final PasswordEncoder passwordEncoder) {
+            final TenantAwareUserProperties tenantAwareUserProperties) {
         final List<User> userPrincipals = new ArrayList<>();
         tenantAwareUserProperties.getUser().forEach((username, user) -> {
-            final String password = password(user.getPassword(), passwordEncoder);
+            final String password = password(user.getPassword());
             final List<GrantedAuthority> credentials =
                     createAuthorities(user.getRoles(), user.getPermissions(), Collections::emptyList);
             if (ObjectUtils.isEmpty(user.getTenant())) {
@@ -75,7 +73,7 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
             // explicitly setup system user - add is as a regular (non-tenant scoped) user
             userPrincipals.add(new User(
                     securityProperties.getUser().getName(),
-                    password(securityProperties.getUser().getPassword(), passwordEncoder),
+                    password(securityProperties.getUser().getPassword()),
                     createAuthorities(
                             securityProperties.getUser().getRoles(), Collections.emptyList(),
                             PermissionUtils::createAllAuthorityList)));
@@ -84,9 +82,8 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
         return new FixedInMemoryTenantAwareUserDetailsService(userPrincipals);
     }
 
-    private static String password(final String password, final PasswordEncoder passwordEncoder) {
-        return passwordEncoder == null && !Pattern.compile("^\\{.+}.*$").matcher(password).matches() ?
-                "{noop}" + password : password;
+    private static String password(final String password) {
+        return !Pattern.compile("^\\{.+}.*$").matcher(password).matches() ? "{noop}" + password : password;
     }
 
     private static List<GrantedAuthority> createAuthorities(
