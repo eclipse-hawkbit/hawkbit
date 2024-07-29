@@ -13,7 +13,6 @@ import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.rest.filter.ExcludePathAwareShallowETagFilter;
-import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,16 +30,13 @@ import org.springframework.web.filter.CharacterEncodingFilter;
  * Abstract Test for Rest tests.
  */
 @WebAppConfiguration
-@ContextConfiguration(classes = { RestConfiguration.class, RepositoryApplicationConfiguration.class,
-        TestConfiguration.class})
+@ContextConfiguration(classes = {
+        RestConfiguration.class, RepositoryApplicationConfiguration.class, TestConfiguration.class})
 @Import(TestChannelBinderConfiguration.class)
 @AutoConfigureMockMvc
 public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTest {
 
     protected MockMvc mvc;
-
-    @Autowired
-    private FilterHttpResponse filterHttpResponse;
 
     @Autowired
     private CharacterEncodingFilter characterEncodingFilter;
@@ -62,7 +58,6 @@ public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTes
                 new ExcludePathAwareShallowETagFilter("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
                         "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
                         "/api/v1/downloadserver/**"));
-        createMvcWebAppContext.addFilter(filterHttpResponse);
 
         return createMvcWebAppContext;
     }
