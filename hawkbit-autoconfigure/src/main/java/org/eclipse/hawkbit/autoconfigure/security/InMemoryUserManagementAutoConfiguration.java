@@ -11,18 +11,13 @@ package org.eclipse.hawkbit.autoconfigure.security;
 
 import org.eclipse.hawkbit.im.authentication.StaticAuthenticationProvider;
 import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.GlobalAuthenticationConfigurerAdapter;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.Optional;
 
 /**
  * Autoconfiguration for the in-memory-user-management.

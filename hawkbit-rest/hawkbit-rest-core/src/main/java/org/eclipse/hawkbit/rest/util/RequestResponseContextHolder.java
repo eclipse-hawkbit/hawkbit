@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.rest.util;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import lombok.NoArgsConstructor;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -20,6 +21,7 @@ import java.util.Objects;
 /**
  * Gives access to the request and response for the rest resources.
  */
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class RequestResponseContextHolder {
 
     public static HttpServletRequest getHttpServletRequest() {
