@@ -212,6 +212,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                 .first().isEqualTo(ah);
         assertThat(softwareModuleManagement.findByTextAndType(PAGE, ":1.0", appType.getId()).getContent()).hasSize(2);
 
+        distributionSetManagement.unlock(ds.getId()); // otherwise delete will be rejected as a part of a locked DS
         softwareModuleManagement.delete(ah2.getId());
 
         assertThat(softwareModuleManagement.findByTextAndType(PAGE, ":1.0", appType.getId()).getContent()).hasSize(1);
@@ -424,8 +425,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Delete two assigned softwaremodules which share an artifact.")
-    public void deleteMultipleSoftwareModulesWhichShareAnArtifact() throws IOException {
-
+    public void deleteMultipleSoftwareModulesWhichShareAnArtifact() {
         // Init artifact binary data, target and DistributionSets
         final int artifactSize = 1024;
         final byte[] source = RandomUtils.nextBytes(artifactSize);
@@ -456,6 +456,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(disSetY, Collections.singletonList(target));
 
         // [STEP5]: Delete SoftwareModuleX
+        distributionSetManagement.unlock(disSetX.getId()); // otherwise delete will be rejected as a part of a locked DS
+        distributionSetManagement.unlock(disSetY.getId()); // otherwise delete will be rejected as a part of a locked DS
         softwareModuleManagement.delete(moduleX.getId());
 
         // [STEP6]: Delete SoftwareModuleY
@@ -890,6 +892,27 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(artifactManagement.get(artifactId))
                 .as("Artifact shall not be removed if belongs to a locked SM.")
                 .isPresent();
+    }
+
+    @Test
+    @Description("Artifacts of a locked SM can't be modified. Expected behaviour is to throw an exception and to do not modify them.")
+    void lockedContainingDistributionSetApplied() {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
+        final List<SoftwareModule> modules = distributionSet.getModules().stream().toList();
+        assertThat(modules.size()).isGreaterThan(1);
+
+        // try delete while DS is not locked
+        softwareModuleManagement.delete(modules.get(0).getId());
+
+        distributionSetManagement.lock(distributionSet.getId());
+        assertThat(
+                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false))
+                .isTrue();
+
+        // try delete SM of a locked DS
+        assertThatExceptionOfType(LockedException.class)
+                .as("Attempt to delete a software module of a locked DS should throw an exception")
+                .isThrownBy(() -> softwareModuleManagement.delete(modules.get(1).getId()));
     }
 
     @Test
