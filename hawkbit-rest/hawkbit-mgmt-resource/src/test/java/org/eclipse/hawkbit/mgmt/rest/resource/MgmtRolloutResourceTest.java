@@ -52,7 +52,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCond
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
@@ -70,6 +69,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 import io.qameta.allure.Description;
@@ -82,6 +82,7 @@ import io.qameta.allure.Story;
  */
 @Feature("Component Tests - Management API")
 @Story("Rollout Resource")
+@TestPropertySource(locations = "classpath:/mgmt-test.properties", properties = { "hawkbit.server.repository.dynamicRolloutsMinInvolvePeriodMS=-1" })
 class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String HREF_ROLLOUT_PREFIX = "http://localhost/rest/v1/rollouts/";
@@ -256,25 +257,29 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
             .andExpect(jsonPath("content[0].totalGroups", equalTo(2)));
 
         final int amountOfDynamicTargets = 2;
-        List<Target> additionalTargets = testdataFactory.createTargets(amountOfDynamicTargets, "rollout-dynamic-addition-", "rollout");
+        testdataFactory.createTargets(amountOfDynamicTargets, "rollout-dynamic-addition-", "rollout");
 
         rolloutHandler.handleAll();
 
         final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getContent();
         groups.forEach(group -> {
-            if (!group.getName().contains("-dynamic")) {
-                rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, group.getId()).forEach(target -> deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).forEach(action -> {
+            if (!group.isDynamic()) {
+                rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, group.getId())
+                        .forEach(target -> deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE)
+                                .forEach(action -> {
+                                    deploymentManagement.cancelAction(action.getId());
+                                    awaitActionStatus(action.getId(), Status.CANCELING);
 
-                    deploymentManagement.cancelAction(action.getId());
-                    awaitActionStatus(action.getId(), Status.CANCELING);
-
-                    deploymentManagement.forceQuitAction(action.getId());
-                    awaitActionStatus(action.getId(), Status.CANCELED);
-                }));
+                                    deploymentManagement.forceQuitAction(action.getId());
+                                    awaitActionStatus(action.getId(), Status.CANCELED);
+                                }));
             }
         });
 
-        awaitPendingDeviceInRollout(additionalTargets.get(0).getControllerId());
+        // process as much as needed to start first dynamic
+        for (int i = 0; i < 5; i++) {
+            rolloutHandler.handleAll();
+        }
 
         mvc.perform(get("/rest/v1/rollouts?representation=full").accept(MediaType.APPLICATION_JSON))
             .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -285,16 +290,16 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
             .andExpect(jsonPath("content[0].status", equalTo("running")))
             .andExpect(jsonPath("content[0].targetFilterQuery", equalTo("name==rollout*")))
             .andExpect(jsonPath("content[0].distributionSetId", equalTo(dsA.getId().intValue())))
-            .andExpect(jsonPath("content[0].totalTargets", equalTo(11)))
+            .andExpect(jsonPath("content[0].totalTargets", equalTo(amountTargets + amountOfDynamicTargets)))
             .andExpect(jsonPath("content[0].totalTargetsPerStatus").exists())
             .andExpect(jsonPath("content[0].totalTargetsPerStatus.running", equalTo(1)))
             .andExpect(jsonPath("content[0].totalTargetsPerStatus.notstarted", equalTo(0)))
-            .andExpect(jsonPath("content[0].totalTargetsPerStatus.scheduled", equalTo(0)))
+            .andExpect(jsonPath("content[0].totalTargetsPerStatus.scheduled", equalTo(1)))
             .andExpect(jsonPath("content[0].totalTargetsPerStatus.cancelled", equalTo(10)))
             .andExpect(jsonPath("content[0].totalTargetsPerStatus.finished", equalTo(0)))
             .andExpect(jsonPath("content[0].totalTargetsPerStatus.error", equalTo(0)))
             .andExpect(jsonPath("content[0].deleted", equalTo(false)))
-            .andExpect(jsonPath("content[0].totalGroups", equalTo(3)))
+            .andExpect(jsonPath("content[0].totalGroups", equalTo(4)))
             .andExpect(jsonPath("content[0]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)));
     }
 
@@ -1321,22 +1326,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .runAsPrivileged(
                     () -> deploymentManagement.findAction(actionId).orElseThrow(NoSuchElementException::new))
                 .getStatus().equals(status));
-    }
-
-    private void awaitPendingDeviceInRollout(final String controllerId) {
-        Awaitility.await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(100)).with()
-            .until(() -> {
-                Optional<Target> maybeTarget = SecurityContextSwitch.runAsPrivileged(() -> {
-                    rolloutHandler.handleAll();
-                    List<Target> targets = targetManagement.findByRsql(PAGE, "controllerId==" + controllerId).getContent();
-                    if (targets.size() == 1) {
-                        return Optional.of(targets.get(0));
-                    } else {
-                        return Optional.empty();
-                    }
-                });
-                return maybeTarget.isPresent() && maybeTarget.get().getUpdateStatus().equals(TargetUpdateStatus.PENDING);
-            });
     }
 
     @Test

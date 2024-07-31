@@ -72,4 +72,10 @@ public class RepositoryProperties {
 
     private List<String> skipImplicitLockForTags =
             List.of("skip-implicit-lock", "skip_implicit_lock", "SKIP_IMPLICIT_LOCK", "SKIP-IMPLICIT-LOCK");
+
+    /**
+     * The minimum period (in milli-seconds) on which dynamic rollouts should make attempt to involve
+     * new targets
+     */
+    private long dynamicRolloutsMinInvolvePeriodMS = 60_000;
 }

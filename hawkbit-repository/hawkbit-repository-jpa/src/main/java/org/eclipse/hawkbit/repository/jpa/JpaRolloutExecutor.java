@@ -13,9 +13,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -24,6 +26,7 @@ import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutExecutor;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -99,51 +102,55 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private static final List<Status> DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES = Arrays.asList(Status.ERROR,
             Status.FINISHED, Status.CANCELED, Status.DOWNLOADED);
 
-    private final RolloutTargetGroupRepository rolloutTargetGroupRepository;
-    private final EntityManager entityManager;
-    private final RolloutRepository rolloutRepository;
     private final ActionRepository actionRepository;
     private final RolloutGroupRepository rolloutGroupRepository;
-    private final AfterTransactionCommitExecutor afterCommit;
-    private final TenantAware tenantAware;
-    private final RolloutGroupManagement rolloutGroupManagement;
-    private final QuotaManagement quotaManagement;
-    private final DeploymentManagement deploymentManagement;
+    private final RolloutTargetGroupRepository rolloutTargetGroupRepository;
+    private final RolloutRepository rolloutRepository;
+
     private final TargetManagement targetManagement;
-    private final EventPublisherHolder eventPublisherHolder;
-    private final PlatformTransactionManager txManager;
-    private final RolloutApprovalStrategy rolloutApprovalStrategy;
-    private final RolloutGroupEvaluationManager evaluationManager;
+    private final DeploymentManagement deploymentManagement;
+    private final RolloutGroupManagement rolloutGroupManagement;
     private final RolloutManagement rolloutManagement;
-    
-    /**
-     * Constructor
-     */
-    public JpaRolloutExecutor(final RolloutTargetGroupRepository rolloutTargetGroupRepository,
-            final EntityManager entityManager, final RolloutRepository rolloutRepository,
+    private final QuotaManagement quotaManagement;
+
+    private final RolloutGroupEvaluationManager evaluationManager;
+    private final RolloutApprovalStrategy rolloutApprovalStrategy;
+
+    private final EntityManager entityManager;
+    private final PlatformTransactionManager txManager;
+    private final AfterTransactionCommitExecutor afterCommit;
+    private final EventPublisherHolder eventPublisherHolder;
+
+    private final TenantAware tenantAware;
+    private final RepositoryProperties repositoryProperties;
+
+    public JpaRolloutExecutor(
             final ActionRepository actionRepository, final RolloutGroupRepository rolloutGroupRepository,
-            final AfterTransactionCommitExecutor afterCommit, final TenantAware tenantAware,
-            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
-            final DeploymentManagement deploymentManagement, final TargetManagement targetManagement,
-            final EventPublisherHolder eventPublisherHolder, final PlatformTransactionManager txManager,
-            final RolloutApprovalStrategy rolloutApprovalStrategy,
-            final RolloutGroupEvaluationManager evaluationManager, final RolloutManagement rolloutManagement) {
-        this.rolloutTargetGroupRepository = rolloutTargetGroupRepository;
-        this.entityManager = entityManager;
-        this.rolloutRepository = rolloutRepository;
+            final RolloutTargetGroupRepository rolloutTargetGroupRepository,
+            final RolloutRepository rolloutRepository, final TargetManagement targetManagement,
+            final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
+            final RolloutManagement rolloutManagement, final QuotaManagement quotaManagement,
+            final RolloutGroupEvaluationManager evaluationManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
+            final EntityManager entityManager, final PlatformTransactionManager txManager,
+            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final TenantAware tenantAware, final RepositoryProperties repositoryProperties) {
         this.actionRepository = actionRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
-        this.afterCommit = afterCommit;
-        this.tenantAware = tenantAware;
-        this.rolloutGroupManagement = rolloutGroupManagement;
-        this.quotaManagement = quotaManagement;
-        this.deploymentManagement = deploymentManagement;
+        this.rolloutTargetGroupRepository = rolloutTargetGroupRepository;
+        this.rolloutRepository = rolloutRepository;
         this.targetManagement = targetManagement;
-        this.eventPublisherHolder = eventPublisherHolder;
-        this.txManager = txManager;
-        this.rolloutApprovalStrategy = rolloutApprovalStrategy;
-        this.evaluationManager = evaluationManager;
+        this.deploymentManagement = deploymentManagement;
+        this.rolloutGroupManagement = rolloutGroupManagement;
         this.rolloutManagement = rolloutManagement;
+        this.quotaManagement = quotaManagement;
+        this.evaluationManager = evaluationManager;
+        this.rolloutApprovalStrategy = rolloutApprovalStrategy;
+        this.entityManager = entityManager;
+        this.txManager = txManager;
+        this.afterCommit = afterCommit;
+        this.eventPublisherHolder = eventPublisherHolder;
+        this.tenantAware = tenantAware;
+        this.repositoryProperties = repositoryProperties;
     }
 
     @Override
@@ -427,7 +434,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     // fakes getTotalTargets count to match expected for the last dynamic group
     // so the evaluation to use total targets to properly
-    private RolloutGroup evalProxy(final RolloutGroup group, final List<JpaRolloutGroup> rolloutGroups) {
+    private RolloutGroup evalProxy(final RolloutGroup group) {
         if (group.isDynamic()) {
             final int expected = Math.max((int)group.getTargetPercentage(), 1);
             return (RolloutGroup) Proxy.newProxyInstance(
@@ -457,7 +464,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             }
 
             final RolloutGroup evalProxy = rolloutGroup == rolloutGroups.get(rolloutGroups.size() - 1) ?
-                    evalProxy(rolloutGroup, rolloutGroups) : rolloutGroup;
+                    evalProxy(rolloutGroup) : rolloutGroup;
             // error state check, do we need to stop the whole
             // rollout because of error?
             final boolean isError = checkErrorState(rollout, evalProxy);
@@ -529,7 +536,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         }
     }
 
-    private boolean checkSuccessCondition(final Rollout rollout, final RolloutGroup rolloutGroup, final RolloutGroup evalProxy,
+    private void checkSuccessCondition(final Rollout rollout, final RolloutGroup rolloutGroup, final RolloutGroup evalProxy,
             final RolloutGroupSuccessCondition successCondition) {
         log.trace("Checking finish condition {} on rolloutgroup {}", successCondition, rolloutGroup);
         try {
@@ -541,11 +548,9 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             } else {
                 log.debug("Rolloutgroup {} is still running", rolloutGroup);
             }
-            return isFinished;
         } catch (final EvaluatorNotConfiguredException e) {
             log.error("Something bad happened when accessing the finish condition or success action bean {}",
                     successCondition.name(), e);
-            return false;
         }
     }
 
@@ -675,32 +680,32 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         });
     }
 
+    private final Map<Long, AtomicLong> lastDynamicGroupFill = new ConcurrentHashMap<>();
     // return if group change is made
     private boolean fillDynamicRolloutGroupsWithTargets(final JpaRollout rollout) {
+        final AtomicLong lastFill = lastDynamicGroupFill.computeIfAbsent(rollout.getId(), id -> new AtomicLong(0));
+        final long now = System.currentTimeMillis();
+        if (now - lastFill.get() < repositoryProperties.getDynamicRolloutsMinInvolvePeriodMS()) {
+            // too early to make another dynamic involvement attempt
+            return false;
+        } else {
+            lastFill.set(now);
+        }
+
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.RUNNING);
         final List<RolloutGroup> rolloutGroups = rollout.getRolloutGroups();
 
         final JpaRolloutGroup group = (JpaRolloutGroup)rolloutGroups.get(rolloutGroups.size() - 1);
 
-        if (group.getStatus() == RolloutGroupStatus.FINISHED) {
-            createDynamicGroup(rollout, group, rolloutGroups.size(), RolloutGroupStatus.RUNNING);
-            return true;
-        } else if (group.getStatus() != RolloutGroupStatus.RUNNING) {
-            return false;
-        }
-
-        // expected as last full group
         final long expectedInGroup = Math.max((int)group.getTargetPercentage(), 1);
-
         final long currentlyInGroup = group.getTotalTargets();
-        if (currentlyInGroup >= expectedInGroup) {
-            // the last one is filled. create new and start filling it
+        if (currentlyInGroup >= expectedInGroup || group.getStatus() == RolloutGroupStatus.FINISHED) {
+            // the last one is full. create new and start filling it on the next iteration
             createDynamicGroup(rollout, group, rolloutGroups.size(), RolloutGroupStatus.SCHEDULED);
             return true;
         }
 
-        // there are more to be filled for that group
-        // do this until there are more matching
+        // there are more to be filled for the last group do this until there are more matching
         try {
             long targetsLeftToAdd = expectedInGroup - currentlyInGroup;
             final String groupTargetFilter = RolloutHelper.getGroupTargetFilter(
@@ -724,12 +729,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
             if (newActions > 0) {
                 updateTotalTargetCount(group, group.getTotalTargets() + newActions);
-
-                if (targetsLeftToAdd == 0) {
-                    // this is filled create a new one in scheduled state
-                    createDynamicGroup(rollout, group, rolloutGroups.size(), RolloutGroupStatus.SCHEDULED);
-                    return true;
-                }
 
                 // TODO - try to return false and proceed with handleRunningRollout
                 // the problem is that OptimisticLockException is thrown in that case
@@ -800,7 +799,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final ActionType actionType = rollout.getActionType();
             final long forceTime = rollout.getForcedTime();
             final List<Action> newActions = createActions(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
-            if (!newActions.isEmpty()) {
+            if (!newActions.isEmpty() && group.getStatus() == RolloutGroupStatus.RUNNING) {
                 deploymentManagement.startScheduledActions(newActions);
             }
 
@@ -906,13 +905,10 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     /**
-     * Enforces the quota defining the maximum number of {@link Action}s per
-     * {@link Target}.
+     * Enforces the quota defining the maximum number of {@link Action}s per {@link Target}.
      *
-     * @param target
-     *            The target
-     * @param requested
-     *            number of actions to check
+     * @param target the target
+     * @param requested number of actions to check
      */
     private void assertActionsPerTargetQuota(final Target target, final int requested) {
         final int quota = quotaManagement.getMaxActionsPerTarget();

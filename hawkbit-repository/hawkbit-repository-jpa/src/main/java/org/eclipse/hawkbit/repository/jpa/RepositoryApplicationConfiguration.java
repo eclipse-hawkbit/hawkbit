@@ -739,19 +739,20 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    RolloutExecutor rolloutExecutor(final RolloutTargetGroupRepository rolloutTargetGroupRepository,
-            final EntityManager entityManager, final RolloutRepository rolloutRepository,
+    RolloutExecutor rolloutExecutor(
             final ActionRepository actionRepository, final RolloutGroupRepository rolloutGroupRepository,
-            final AfterTransactionCommitExecutor afterCommit, final TenantAware tenantAware,
-            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
-            final DeploymentManagement deploymentManagement, final TargetManagement targetManagement,
-            final EventPublisherHolder eventPublisherHolder, final PlatformTransactionManager txManager,
-            final RolloutApprovalStrategy rolloutApprovalStrategy,
-            final RolloutGroupEvaluationManager evaluationManager, final RolloutManagement rolloutManagement) {
-        return new JpaRolloutExecutor(rolloutTargetGroupRepository, entityManager, rolloutRepository, actionRepository,
-                rolloutGroupRepository, afterCommit, tenantAware, rolloutGroupManagement, quotaManagement,
-                deploymentManagement, targetManagement, eventPublisherHolder, txManager, rolloutApprovalStrategy,
-                evaluationManager, rolloutManagement);
+            final RolloutTargetGroupRepository rolloutTargetGroupRepository,
+            final RolloutRepository rolloutRepository, final TargetManagement targetManagement,
+            final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
+            final RolloutManagement rolloutManagement, final QuotaManagement quotaManagement,
+            final RolloutGroupEvaluationManager evaluationManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
+            final EntityManager entityManager, final PlatformTransactionManager txManager,
+            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final TenantAware tenantAware, final RepositoryProperties repositoryProperties) {
+        return new JpaRolloutExecutor(actionRepository, rolloutGroupRepository, rolloutTargetGroupRepository,
+                rolloutRepository, targetManagement, deploymentManagement, rolloutGroupManagement, rolloutManagement,
+                quotaManagement, evaluationManager, rolloutApprovalStrategy, entityManager, txManager, afterCommit,
+                eventPublisherHolder, tenantAware, repositoryProperties);
     }
 
     @Bean

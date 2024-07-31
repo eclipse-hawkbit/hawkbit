@@ -24,9 +24,11 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -38,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @Feature("Component Tests - Repository")
 @Story("Rollout Management (Flow)")
+@TestPropertySource(properties = { "hawkbit.server.repository.dynamicRolloutsMinInvolvePeriodMS=-1" })
 class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
 
     @BeforeEach
@@ -131,7 +134,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
 
         // fill first and create second
         testdataFactory.createTargets(targetPrefix, amountGroups * 3 + 2, 2);
-        rolloutHandler.handleAll(); // fill first dynamic group and create a new dynamic2
+        rolloutHandler.handleAll(); // fill first dynamic group
+        rolloutHandler.handleAll(); // and create a new dynamic2
         assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 3);
         assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 3);
         groups = rolloutGroupManagement.findByRollout(
@@ -142,11 +146,11 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
 
         // create scheduled actions for the dynamic2
         rolloutHandler.handleAll();
-        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 3);
+        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 4);
         assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 3);
-        assertGroup(dynamic2, true, RolloutGroupStatus.SCHEDULED, 0);
+        assertGroup(dynamic2, true, RolloutGroupStatus.SCHEDULED, 1);
         assertAndGetRunning(rollout, 4); // one from the last static group and 3 from the first dynamic
-        assertScheduled(rollout, 0);
+        assertScheduled(rollout, 1);
 
         // executes last from static and dynamic1 without 1 target
         assertAndGetRunning(rollout, 4)// one from the last static and 6 for the first dynamic
@@ -158,15 +162,12 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertAndGetRunning(rollout, 1); // remains on in the first dynamic
 
         rolloutHandler.handleAll();
-        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 3);
+        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 4);
         assertGroup(groups.get(amountGroups - 1), false, RolloutGroupStatus.FINISHED, 3);
         assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 3);
-        assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 0);
-
-        rolloutHandler.handleAll(); // add 1 action to now running second dynamic
-        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 4);
-        assertAndGetRunning(rollout, 2);
+        // first dynamic threshold is reached, second is started
         assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 1);
+        assertAndGetRunning(rollout, 2);
 
         testdataFactory.createTargets(targetPrefix, amountGroups * 3 + 4, 1);
         rolloutManagement.pauseRollout(rollout.getId());
@@ -184,6 +185,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         // finish the second dynamic group
         testdataFactory.createTargets(targetPrefix, amountGroups * 3 + 5, 1);
         rolloutHandler.handleAll();
+        rolloutHandler.handleAll(); // create next
         assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 3, amountGroups * 3 + 6);
         assertAndGetRunning(rollout, 4); // one from the dynamic1 and 3 from the dynamic2
         assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 3); // assign the target created when paused
@@ -249,7 +251,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
 
         // fill first (2) and create fill partially the second (+2 new)
         testdataFactory.createTargets(targetPrefix, amountGroups * 3 + 4, 4);
-        rolloutHandler.handleAll(); // fill first dynamic group and create a new dynamic2
+        rolloutHandler.handleAll(); // fill first dynamic group
+        rolloutHandler.handleAll(); // and create a new dynamic2
         assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 6);
         assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
         groups = rolloutGroupManagement.findByRollout(
@@ -260,11 +263,11 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
 
         // create scheduled actions for the dynamic2
         rolloutHandler.handleAll();
-        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 6);
+        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 8);
         assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
-        assertGroup(dynamic2, true, RolloutGroupStatus.SCHEDULED, 0);
+        assertGroup(dynamic2, true, RolloutGroupStatus.SCHEDULED, 2);
         assertAndGetRunning(rollout, 7); // one from the last static group and 6 from the first dynamic
-        assertScheduled(rollout, 0);
+        assertScheduled(rollout, 2);
 
         // executes last from static and dynamic1 without 1 target
         assertAndGetRunning(rollout, 7)// one from the last static and 6 for the first dynamic
@@ -276,15 +279,12 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertAndGetRunning(rollout, 1); // remains on in the first dynamic
 
         rolloutHandler.handleAll();
-        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 6);
+        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 8);
         assertGroup(groups.get(amountGroups - 1), false, RolloutGroupStatus.FINISHED, 3);
         assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
-        assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 0);
-
-        rolloutHandler.handleAll(); // add 2 action to now running second dynamic
-        assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 8);
-        assertAndGetRunning(rollout, 3);
+        // first dynamic threshold is reached, second is started
         assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 2);
+        assertAndGetRunning(rollout, 3);
 
         testdataFactory.createTargets(targetPrefix, amountGroups * 3 + 8, 2);
         rolloutManagement.pauseRollout(rollout.getId());
@@ -339,7 +339,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
 
         // fill first (2) and create fill partially the second (+2 new)
         testdataFactory.createTargets(targetPrefix, 4, 4);
-        rolloutHandler.handleAll(); // fill first dynamic group and create a new dynamic2
+        rolloutHandler.handleAll(); // fill first dynamic group
+        rolloutHandler.handleAll(); // and create a new dynamic2
         assertRollout(rollout, true, RolloutStatus.RUNNING, 2, 6);
         assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
         groups = rolloutGroupManagement.findByRollout(
@@ -350,25 +351,22 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
 
         // create scheduled actions for the dynamic2
         rolloutHandler.handleAll();
-        assertRollout(rollout, true, RolloutStatus.RUNNING, 2, 6);
+        assertRollout(rollout, true, RolloutStatus.RUNNING, 2, 8);
         assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
-        assertGroup(dynamic2, true, RolloutGroupStatus.SCHEDULED, 0);
+        assertGroup(dynamic2, true, RolloutGroupStatus.SCHEDULED, 2);
         assertAndGetRunning(rollout, 6); // 6 from the first dynamic
-        assertScheduled(rollout, 0);
+        assertScheduled(rollout, 2);
 
         // executes dynamic1 without 1 target
         executeWithoutOneTargetFromAGroup(dynamic1, rollout, 6);
         assertAndGetRunning(rollout, 1); // remains on in the first dynamic
 
         rolloutHandler.handleAll();
-        assertRollout(rollout, true, RolloutStatus.RUNNING,  2, 6);
+        assertRollout(rollout, true, RolloutStatus.RUNNING,  2, 8);
         assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
-        assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 0);
-
-        rolloutHandler.handleAll(); // add 2 action to now running second dynamic
-        assertRollout(rollout, true, RolloutStatus.RUNNING, 2, 8);
-        assertAndGetRunning(rollout, 3);
+        // first dynamic threshold is reached, second is started
         assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 2);
+        assertAndGetRunning(rollout, 3);
 
         testdataFactory.createTargets(targetPrefix, 8, 2);
         rolloutManagement.pauseRollout(rollout.getId());
@@ -387,6 +385,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
     private void executeStaticWithoutOneTargetFromTheLastGroupAndHandleAll(
             final List<RolloutGroup> groups,
             final Rollout rollout, final int amountGroups) {
+        // create dynamic group if needed
+        rolloutHandler.handleAll();
         // execute groups (without on of the last)
         assertThat(refresh(groups.get(0)).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
         for (int i = 0; i < amountGroups; i++) {
