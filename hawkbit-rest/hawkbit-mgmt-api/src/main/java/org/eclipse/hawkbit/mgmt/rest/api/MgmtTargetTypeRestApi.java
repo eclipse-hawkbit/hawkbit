@@ -231,7 +231,7 @@ public interface MgmtTargetTypeRestApi {
     @Operation(summary = "Create target types", description = "Handles the POST request for creating new target " +
             "types. The request body must always be a list of types. Required Permission: CREATE_TARGET")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "201", description = "Successfully created"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication.", 

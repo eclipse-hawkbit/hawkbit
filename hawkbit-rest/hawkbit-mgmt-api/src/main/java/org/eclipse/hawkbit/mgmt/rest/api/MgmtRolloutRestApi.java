@@ -157,7 +157,7 @@ public interface MgmtRolloutRestApi {
     @Operation(summary = "Create a new Rollout",
             description = "Handles the POST request of creating new rollout. Required Permission: CREATE_ROLLOUT")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "201", description = "Successfully created"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication.", 
@@ -663,7 +663,7 @@ public interface MgmtRolloutRestApi {
     @Operation(summary = "Retry a rollout", description = "Handles the POST request of retrying a rollout. " +
             "Required Permission: CREATE_ROLLOUT")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "201", description = "Successfully created"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication.", 
