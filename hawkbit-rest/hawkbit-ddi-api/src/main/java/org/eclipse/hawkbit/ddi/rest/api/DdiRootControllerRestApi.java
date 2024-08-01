@@ -844,6 +844,7 @@ public interface DdiRootControllerRestApi {
      */
     @Operation(summary = "Set offline assigned version", description = """
         Allow to set current running version.
+        This method is experimental and may change in future releases.
         """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
@@ -858,7 +859,7 @@ public interface DdiRootControllerRestApi {
             @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not supported by the server for this resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
+    @PutMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
             + DdiRestConstants.INSTALLED_BASE_ACTION, consumes = {
             MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> setAsssignedOfflineVersion(@Valid DdiAssignedVersion ddiAssignedVersion,
