@@ -42,7 +42,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
-import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -56,9 +55,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -110,14 +107,14 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
 
         // update assigned version
-        postInstalledBase(target.getControllerId(),getJsonInstalledBase(ds.getName(),ds.getVersion()),status()
+        putInstalledBase(target.getControllerId(),getJsonInstalledBase(ds.getName(),ds.getVersion()),status()
                 .isCreated());
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get().getId())
                 .isEqualTo(ds.getId());
 
         // update assigned version while version already assigned
-        postInstalledBase(target.getControllerId(),getJsonInstalledBase(ds.getName(),ds.getVersion()),status().isOk());
+        putInstalledBase(target.getControllerId(),getJsonInstalledBase(ds.getName(),ds.getVersion()),status().isOk());
     }
     @Test
     @Description("Ensure that installedVersion is version self assigned")
@@ -128,7 +125,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
 
         // get installed base
-        postInstalledBase(target.getControllerId(),getJsonInstalledBase(dsName,dsVersion),status().isNotFound());
+        putInstalledBase(target.getControllerId(),getJsonInstalledBase(dsName,dsVersion),status().isNotFound());
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).isEmpty()).isTrue();
     }
