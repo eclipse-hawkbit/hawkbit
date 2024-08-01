@@ -763,8 +763,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId){
             boolean updated = controllerManagement.updateOfflineAssignedVersion(controllerId,
                     ddiAssignedVersion.getName(), ddiAssignedVersion.getVersion());
-            if (updated)
+            if (updated) {
                 return new ResponseEntity<>(HttpStatus.CREATED);
+            }
             return new ResponseEntity<>(HttpStatus.OK);
    }
 }

@@ -190,7 +190,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(
-            Collection<Entry<String, Long>> assignments, String initiatedBy) {
+            final Collection<Entry<String, Long>> assignments, final String initiatedBy) {
         final Collection<Entry<String, Long>> distinctAssignments = assignments.stream().distinct().toList();
         enforceMaxAssignmentsPerRequest(distinctAssignments.size());
 

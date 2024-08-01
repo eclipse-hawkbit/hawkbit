@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -137,9 +138,9 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
                 statusMatcher);
     }
 
-    protected ResultActions postInstalledBase(final String controllerId, final String content,
-            final ResultMatcher statusMatcher) throws Exception {
-        return mvc.perform(post(INSTALLED_BASE_ROOT, tenantAware.getCurrentTenant(), controllerId)
+    protected ResultActions putInstalledBase(final String controllerId, final String content,
+                                             final ResultMatcher statusMatcher) throws Exception {
+        return mvc.perform(put(INSTALLED_BASE_ROOT, tenantAware.getCurrentTenant(), controllerId)
                         .content(content.getBytes()).contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(statusMatcher);
     }

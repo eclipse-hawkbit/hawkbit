@@ -13,7 +13,6 @@ import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
 import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
-import static org.eclipse.hawkbit.security.SecurityContextTenantAware.SYSTEM_USER;
 
 import java.net.URI;
 import java.time.Duration;
@@ -54,7 +53,6 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
@@ -1107,19 +1105,18 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public boolean updateOfflineAssignedVersion(@NotEmpty String controllerId, String distributionName, String version){
+    public boolean updateOfflineAssignedVersion(@NotEmpty final String controllerId, final String distributionName, final String version){
         List<DistributionSetAssignmentResult> distributionSetAssignmentResults =
                 systemSecurityContext.runAsSystem(() ->
                     distributionSetManagement.getByNameAndVersion(distributionName,version).map(
                     distributionSet -> deploymentManagement.offlineAssignedDistributionSets(
                             List.of(Map.entry(controllerId, distributionSet.getId())),controllerId))
                     .orElseThrow(() ->
-                            new EntityNotFoundException(DistributionSet.class, Map.entry(distributionName, version)))
-                            .stream().toList());
-        boolean notAlreadyAssigned = distributionSetAssignmentResults.stream().findFirst()
+                            new EntityNotFoundException(DistributionSet.class, Map.entry(distributionName, version))));
+
+      return distributionSetAssignmentResults.stream().findFirst()
                 .map(result-> result.getAlreadyAssigned()==0)
                 .orElseThrow();
-        return notAlreadyAssigned;
     }
 
     private void cancelAssignDistributionSetEvent(final Action action) {
