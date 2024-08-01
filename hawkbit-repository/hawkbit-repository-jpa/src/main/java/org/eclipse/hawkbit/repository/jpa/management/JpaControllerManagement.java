@@ -13,6 +13,7 @@ import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
 import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
+import static org.eclipse.hawkbit.security.SecurityContextTenantAware.SYSTEM_USER;
 
 import java.net.URI;
 import java.time.Duration;
@@ -44,11 +45,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
@@ -85,6 +89,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -160,6 +165,12 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Autowired
     private TargetTypeManagement targetTypeManagement;
+
+    @Autowired
+    private DeploymentManagement deploymentManagement;
+
+    @Autowired
+    private DistributionSetManagement distributionSetManagement;
 
     public JpaControllerManagement(final ScheduledExecutorService executorService,
                                    final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
@@ -1093,6 +1104,22 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Override
     public void deactivateAutoConfirmation(final String controllerId) {
         confirmationManagement.deactivateAutoConfirmation(controllerId);
+    }
+
+    @Override
+    public boolean updateOfflineAssignedVersion(@NotEmpty String controllerId, String distributionName, String version){
+        List<DistributionSetAssignmentResult> distributionSetAssignmentResults =
+                systemSecurityContext.runAsSystem(() ->
+                    distributionSetManagement.getByNameAndVersion(distributionName,version).map(
+                    distributionSet -> deploymentManagement.offlineAssignedDistributionSets(
+                            List.of(Map.entry(controllerId, distributionSet.getId())),controllerId))
+                    .orElseThrow(() ->
+                            new EntityNotFoundException(DistributionSet.class, Map.entry(distributionName, version)))
+                            .stream().toList());
+        boolean notAlreadyAssigned = distributionSetAssignmentResults.stream().findFirst()
+                .map(result-> result.getAlreadyAssigned()==0)
+                .orElseThrow();
+        return notAlreadyAssigned;
     }
 
     private void cancelAssignDistributionSetEvent(final Action action) {

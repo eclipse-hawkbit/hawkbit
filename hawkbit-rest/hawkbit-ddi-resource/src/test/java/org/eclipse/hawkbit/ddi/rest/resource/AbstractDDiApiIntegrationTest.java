@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiConfirmationFeedback;
+import org.eclipse.hawkbit.ddi.json.model.DdiAssignedVersion;
 import org.eclipse.hawkbit.ddi.json.model.DdiProgress;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
@@ -71,6 +72,8 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     protected static final String DEPLOYMENT_BASE = CONTROLLER_BASE + "/deploymentBase/{actionId}";
     protected static final String CANCEL_ACTION = CONTROLLER_BASE + "/cancelAction/{actionId}";
     protected static final String INSTALLED_BASE = CONTROLLER_BASE + "/installedBase/{actionId}";
+    protected static final String INSTALLED_BASE_ROOT = CONTROLLER_BASE + "/installedBase";
+
     protected static final String DEPLOYMENT_FEEDBACK = DEPLOYMENT_BASE + "/feedback";
     protected static final String CANCEL_FEEDBACK = CANCEL_ACTION + "/feedback";
 
@@ -132,6 +135,13 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
             final ResultMatcher statusMatcher) throws Exception {
         return postDeploymentFeedback(MediaType.APPLICATION_JSON_UTF8, controllerId, actionId, content.getBytes(),
                 statusMatcher);
+    }
+
+    protected ResultActions postInstalledBase(final String controllerId, final String content,
+            final ResultMatcher statusMatcher) throws Exception {
+        return mvc.perform(post(INSTALLED_BASE_ROOT, tenantAware.getCurrentTenant(), controllerId)
+                        .content(content.getBytes()).contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andDo(MockMvcResultPrinter.print()).andExpect(statusMatcher);
     }
 
     protected ResultActions postDeploymentFeedback(final MediaType mediaType, final String controllerId,
@@ -358,6 +368,10 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     protected String getJsonConfirmationFeedback(final DdiConfirmationFeedback.Confirmation confirmation,
              final Integer code, final List<String> messages) throws JsonProcessingException {
         return objectMapper.writeValueAsString(new DdiConfirmationFeedback(confirmation, code, messages));
+    }
+
+    protected String getJsonInstalledBase(String name, String version) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(new DdiAssignedVersion(name, version));
     }
 
     protected static ObjectMapper getMapper(){
