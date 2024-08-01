@@ -163,7 +163,7 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Create target(s)", description = "Handles the POST request of creating new targets. The request body must always be a list of targets. Required Permission: CREATE_TARGET")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "201", description = "Successfully created"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication.", 
@@ -932,7 +932,7 @@ public interface MgmtTargetRestApi {
      */
     @Operation(summary = "Create a list of meta data for a specific target", description = "Create a list of meta data entries Required permissions: READ_REPOSITORY and UPDATE_TARGET")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "201", description = "Successfully created"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication.", 

@@ -153,7 +153,7 @@ public interface MgmtDistributionSetTagRestApi {
     @Operation(summary = "Creates new Distribution Set Tags", description = "Handles the POST request of creating " +
             "new distribution set tag. The request body must always be a list of distribution set tags.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "201", description = "Successfully created"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication.", 
