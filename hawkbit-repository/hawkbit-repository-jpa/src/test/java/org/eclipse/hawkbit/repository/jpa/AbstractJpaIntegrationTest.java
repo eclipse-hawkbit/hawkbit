@@ -231,10 +231,12 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
         return array;
     }
 
+    // just increase the opt lock revision if the instance in order to match it against locked db instance - not really locking
     protected static void implicitLock(final DistributionSet set) {
         ((JpaDistributionSet) set).setOptLockRevision(set.getOptLockRevision() + 1);
     }
 
+    // just increase the opt lock revision if the instance in order to match it against locked db instance - not really locking
     protected static void implicitLock(final SoftwareModule module) {
         ((JpaSoftwareModule) module).setOptLockRevision(module.getOptLockRevision() + 1);
     }
