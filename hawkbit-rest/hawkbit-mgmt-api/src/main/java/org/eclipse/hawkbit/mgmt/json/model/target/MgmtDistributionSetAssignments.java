@@ -13,6 +13,7 @@ import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.NoArgsConstructor;
 
@@ -48,5 +49,11 @@ public class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSe
      */
     public MgmtDistributionSetAssignments(final List<MgmtDistributionSetAssignment> assignments) {
         super(assignments);
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isEmpty() {
+        return super.isEmpty();
     }
 }

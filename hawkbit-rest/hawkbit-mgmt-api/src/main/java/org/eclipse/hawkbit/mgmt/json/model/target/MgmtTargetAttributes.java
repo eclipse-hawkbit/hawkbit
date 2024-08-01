@@ -3,6 +3,8 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.target;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,4 +16,10 @@ public class MgmtTargetAttributes extends HashMap<String, String> {
 
     @Serial
     private static final long serialVersionUID = 1L;
+
+    @Override
+    @JsonIgnore
+    public boolean isEmpty() {
+        return super.isEmpty();
+    }
 }
