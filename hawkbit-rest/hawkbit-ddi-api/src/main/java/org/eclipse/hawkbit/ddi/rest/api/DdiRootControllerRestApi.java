@@ -844,7 +844,7 @@ public interface DdiRootControllerRestApi {
      */
     @Operation(summary = "Set offline assigned version", description = """
         Allow to set current running version.
-        This method is experimental and may change in future releases.
+        This method is EXPERIMENTAL and may change in future releases.
         """)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
