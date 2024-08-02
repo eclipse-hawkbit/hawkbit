@@ -382,6 +382,36 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 4); // assign the target created when paused
     }
 
+    @Test
+    @Description("Verifies a simple rollout flow")
+    void rollout0ThresholdFlow() {
+        final String rolloutName = "rollout-std-0threshold";
+        final int amountGroups = 5; // static only
+        final String targetPrefix = "controller-rollout-std-0threshold-";
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
+
+        testdataFactory.createTargets(targetPrefix, 0, amountGroups * 3);
+        final Rollout rollout = testdataFactory.createRolloutByVariables(rolloutName, rolloutName, amountGroups,
+                "controllerid==" + targetPrefix + "*", distributionSet, "0", "25", false, false);
+        final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(
+                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
+                rollout.getId()).getContent();
+
+        // start rollout
+        rolloutManagement.start(rollout.getId());
+
+        // handleStartingRollout (no handleRunning called yet)
+        rolloutHandler.handleAll();
+        assertRollout(rollout, false, RolloutStatus.RUNNING, amountGroups, amountGroups * 3);
+        for (int step = 1; step <= amountGroups; step++) {
+            for (int i = 0; i < amountGroups; i++) {
+                assertGroup(groups.get(i), false, i < step ? RolloutGroupStatus.RUNNING : RolloutGroupStatus.SCHEDULED, 3);
+            }
+            // starting the next group
+            rolloutHandler.handleAll();
+        }
+    }
+
     private void executeStaticWithoutOneTargetFromTheLastGroupAndHandleAll(
             final List<RolloutGroup> groups,
             final Rollout rollout, final int amountGroups) {
