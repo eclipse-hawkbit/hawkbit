@@ -17,7 +17,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>3.3.1</version>
+      <version>3.3.2</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -40,23 +40,23 @@
 
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
-      <spring.boot.version>3.3.1</spring.boot.version>
+      <spring.boot.version>3.3.2</spring.boot.version>
       <spring.cloud.version>2023.0.2</spring.cloud.version>
-      <springdoc-openapi.version>2.5.0</springdoc-openapi.version>
+      <springdoc-openapi.version>2.6.0</springdoc-openapi.version>
       <spring.plugin.core.version>3.0.0</spring.plugin.core.version>
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
       <!-- Spring boot version overrides - END -->
 
       <!-- Eclipselink - START -->
-      <eclipselink.version>4.0.3</eclipselink.version>
-      <!-- for some reason 3.0.2 does't work -->
+      <eclipselink.version>4.0.4</eclipselink.version>
+      <!-- for some reason 3.0.2 doesn't work -->
       <eclipselink.maven.plugin.version>3.0.1</eclipselink.maven.plugin.version>
       <!-- Eclipselink - END -->
 
       <!-- Misc libraries versions - START -->
       <cron-utils.version>9.2.1</cron-utils.version>
-      <jsoup.version>1.17.2</jsoup.version>
+      <jsoup.version>1.18.1</jsoup.version>
       <jaxb-api.version>2.3.1</jaxb-api.version>
       <javax.el-api.version>3.0.0</javax.el-api.version>
       <rsql-parser.version>2.1.0</rsql-parser.version>
@@ -66,7 +66,7 @@
       <!-- test -->
       <rabbitmq.http-client.version>5.2.0</rabbitmq.http-client.version>
       <classgraph.version>4.8.174</classgraph.version>
-      <allure.version>2.27.0</allure.version>
+      <allure.version>2.28.1</allure.version>
       <awaitility.version>4.2.1</awaitility.version>
       <!-- Misc libraries versions - END -->
 
@@ -79,12 +79,12 @@
       <license.tool.plugin.version>1.1.0</license.tool.plugin.version>
       <license.maven.plugin.version>4.5</license.maven.plugin.version>
 
-      <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
-      <maven.failsafe.plugin.version>3.2.5</maven.failsafe.plugin.version>
+      <maven.surefire.plugin.version>3.3.1</maven.surefire.plugin.version>
+      <maven.failsafe.plugin.version>3.3.1</maven.failsafe.plugin.version>
       <jacoco.maven.plugin.version>0.8.12</jacoco.maven.plugin.version>
 
-      <nexus.staging.maven.plugin.version>1.6.14</nexus.staging.maven.plugin.version>
-      <maven.gpg.plugin.version>1.6</maven.gpg.plugin.version>
+      <nexus.staging.maven.plugin.version>1.7.0</nexus.staging.maven.plugin.version>
+      <maven.gpg.plugin.version>3.2.4</maven.gpg.plugin.version>
       <!-- Maven Plugin versions - END -->
 
       <!-- Release - START -->
