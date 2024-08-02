@@ -688,8 +688,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         if (now - lastFill.get() < repositoryProperties.getDynamicRolloutsMinInvolvePeriodMS()) {
             // too early to make another dynamic involvement attempt
             return false;
-        } else {
-            lastFill.set(now);
         }
 
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.RUNNING);
@@ -702,6 +700,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         if (currentlyInGroup >= expectedInGroup || group.getStatus() == RolloutGroupStatus.FINISHED) {
             // the last one is full. create new and start filling it on the next iteration
             createDynamicGroup(rollout, group, rolloutGroups.size(), RolloutGroupStatus.SCHEDULED);
+            // don't update lastFill - want to run again next time to start filling in
             return true;
         }
 
@@ -732,11 +731,16 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
                 // TODO - try to return false and proceed with handleRunningRollout
                 // the problem is that OptimisticLockException is thrown in that case
+
+                // don't update lastFill - want to run again next time in case there are more
                 return true;
             }
         } catch (final TransactionException e) {
             log.warn("Transaction assigning Targets to RolloutGroup failed", e);
         }
+
+        // set to skip for some time
+        lastFill.set(now);
         return false;
     }
 
