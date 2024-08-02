@@ -64,12 +64,12 @@ public class JpaRolloutHandler implements RolloutHandler {
     @Override
     public void handleAll() {
         final List<Long> rollouts = rolloutManagement.findActiveRollouts();
-
         if (rollouts.isEmpty()) {
             return;
         }
 
-        final String handlerId = createRolloutLockKey(tenantAware.getCurrentTenant());
+        final String tenant = tenantAware.getCurrentTenant();
+        final String handlerId = createRolloutLockKey(tenant);
         final Lock lock = lockRegistry.obtain(handlerId);
         if (!lock.tryLock()) {
             if (log.isTraceEnabled()) {
@@ -79,13 +79,16 @@ public class JpaRolloutHandler implements RolloutHandler {
         }
 
         try {
-            log.trace("Trigger handling {} rollouts.", rollouts.size());
+            log.debug("[{}] Trigger handling {} rollouts.", tenant, rollouts.size());
             rollouts.forEach(rolloutId -> {
                 try {
+                    log.debug("[{}] Handling rollout {}", tenant, rolloutId);
                     handleRolloutInNewTransaction(rolloutId, handlerId);
+                    log.debug("[{}] Rollout {} processed", tenant, rolloutId);
                 } catch (final Throwable throwable) {
-                    log.error("Failed to process rollout with id {}", rolloutId , throwable);
+                    log.error("[{}] Failed to process rollout with id {}", tenant, rolloutId , throwable);
                 }});
+            log.debug("[{}] Finished handling of the rollouts.", tenant);
         } finally {
             if (log.isTraceEnabled()) {
                 log.trace("Unlock lock {}", lock);
