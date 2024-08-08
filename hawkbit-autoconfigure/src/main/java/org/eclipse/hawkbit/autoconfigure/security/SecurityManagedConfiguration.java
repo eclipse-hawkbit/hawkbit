@@ -521,7 +521,6 @@ public class SecurityManagedConfiguration {
         return firewall;
     }
 
-
     private static class IgnorePathsStrictHttpFirewall extends StrictHttpFirewall {
 
         private final Collection<String> pathsToIgnore;

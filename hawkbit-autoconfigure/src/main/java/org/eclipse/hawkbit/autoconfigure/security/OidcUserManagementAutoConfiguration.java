@@ -178,8 +178,7 @@ public class OidcUserManagementAutoConfiguration {
     }
 
     /**
-     * Utility class to extract authorities out of the jwt. It interprets the user's
-     * role as their authorities.
+     * Utility class to extract authorities out of the jwt. It interprets the user's role as their authorities.
      */
     private record DefaultJwtAuthoritiesExtractor(GrantedAuthoritiesMapper authoritiesMapper) implements JwtAuthoritiesExtractor {
 
