@@ -49,7 +49,8 @@
       <!-- Spring boot version overrides - END -->
 
       <!-- Eclipselink - START -->
-      <eclipselink.version>4.0.4</eclipselink.version>
+      <!-- 4.0.4 doesn't work because of https://github.com/eclipse-ee4j/eclipselink/issues/2219 -->
+      <eclipselink.version>4.0.3</eclipselink.version>
       <!-- for some reason 3.0.2 doesn't work -->
       <eclipselink.maven.plugin.version>3.0.1</eclipselink.maven.plugin.version>
       <!-- Eclipselink - END -->
