@@ -38,9 +38,9 @@ public class MDCHandler {
 
     @Value("${hawkbit.logging.mdchandler.enabled:true}")
     private boolean mdcEnabled;
-    @Autowired
-    private SpringSecurityAuditorAware springSecurityAuditorAware;
-    @Autowired
+    @Autowired(required = false)
+    private SpringSecurityAuditorAware springSecurityAuditorAware = new SpringSecurityAuditorAware();
+    @Autowired(required = false)
     private SystemSecurityContext securityContext;
 
     /**
@@ -110,7 +110,7 @@ public class MDCHandler {
         final String user = springSecurityAuditorAware
                 .getCurrentAuditor()
                 .filter(username -> !username.equals("system")) // null and system are the same - system user
-                .map(username -> (securityContext.isCurrentThreadSystemCode() ? "as " : "") + username)
+                .map(username -> (securityContext != null && securityContext.isCurrentThreadSystemCode() ? "as " : "") + username)
                 .orElse(null);
 
         final String currentUser = MDC.get(MDC_KEY_USER);
