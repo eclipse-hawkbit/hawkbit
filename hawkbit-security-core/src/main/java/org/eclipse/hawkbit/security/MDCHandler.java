@@ -36,7 +36,7 @@ public class MDCHandler {
 
     private static final MDCHandler SINGLETON = new MDCHandler();
 
-    @Value("${hawkbit.logging.mdchandler.enable:true}")
+    @Value("${hawkbit.logging.mdchandler.enabled:true}")
     private boolean mdcEnabled;
     @Autowired
     private SpringSecurityAuditorAware springSecurityAuditorAware;
@@ -77,10 +77,6 @@ public class MDCHandler {
     }
 
     public void addLoggingFilter(final HttpSecurity httpSecurity) {
-        if (!mdcEnabled) {
-            return;
-        }
-
         httpSecurity.addFilterBefore(new OncePerRequestFilter() {
             @Override
             protected void doFilterInternal(
@@ -103,8 +99,7 @@ public class MDCHandler {
                         throw we.toRuntimeException();
                     }
                 } catch (final Exception e) {
-                    // should never be here - if mdc is handler is enabled non runtime exceptions are
-                    // always wrapped
+                    // should never be here - if mdc is handler is enabled non-runtime exceptions are always wrapped
                     throw new RuntimeException(e);
                 }
             }
@@ -114,6 +109,7 @@ public class MDCHandler {
     private <T> T putUserAndCall(final Callable<T> callable) throws WrappedException {
         final String user = springSecurityAuditorAware
                 .getCurrentAuditor()
+                .filter(username -> !username.equals("system")) // null and system are the same - system user
                 .map(username -> (securityContext.isCurrentThreadSystemCode() ? "as " : "") + username)
                 .orElse(null);
 
