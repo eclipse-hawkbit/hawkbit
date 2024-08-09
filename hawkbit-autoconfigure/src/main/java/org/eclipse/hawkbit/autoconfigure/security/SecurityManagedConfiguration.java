@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateSecurityTokenFi
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedGatewaySecurityTokenFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedSecurityHeaderFilter;
 import org.eclipse.hawkbit.security.HttpDownloadAuthenticationFilter;
+import org.eclipse.hawkbit.security.MDCHandler;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -57,7 +58,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
@@ -206,6 +206,8 @@ public class SecurityManagedConfiguration {
                         .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
             }
 
+            MDCHandler.getInstance().addLoggingFilter(http);
+
             return http.build();
         }
     }
@@ -321,6 +323,8 @@ public class SecurityManagedConfiguration {
                         .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
             }
 
+            MDCHandler.getInstance().addLoggingFilter(http);
+
             return http.build();
         }
     }
@@ -382,6 +386,8 @@ public class SecurityManagedConfiguration {
                     .anonymous(AbstractHttpConfigurer::disable)
                     .addFilterBefore(downloadIdAuthenticationFilter, AuthorizationFilter.class)
                     .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+            MDCHandler.getInstance().addLoggingFilter(http);
 
             return http.build();
         }
@@ -484,6 +490,8 @@ public class SecurityManagedConfiguration {
             if (httpSecurityCustomizer != null) {
                 httpSecurityCustomizer.customize(http);
             }
+
+            MDCHandler.getInstance().addLoggingFilter(http);
 
             return http.build();
         }
