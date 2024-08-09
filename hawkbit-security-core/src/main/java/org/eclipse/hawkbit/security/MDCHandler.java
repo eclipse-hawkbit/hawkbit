@@ -125,12 +125,10 @@ public class MDCHandler {
                     put(MDC_KEY_USER, currentUser);
                 }
             }
+        } catch (final RuntimeException e) {
+            throw e;
         } catch (final Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            } else {
-                throw new WrappedException(e);
-            }
+            throw new WrappedException(e);
         }
     }
 
