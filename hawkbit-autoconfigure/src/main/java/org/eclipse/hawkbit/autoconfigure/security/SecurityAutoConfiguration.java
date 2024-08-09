@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties.User;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.InMemoryUserAuthoritiesResolver;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+import org.eclipse.hawkbit.security.MDCHandler;
 import org.eclipse.hawkbit.security.SecurityContextSerializer;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
@@ -121,36 +122,30 @@ public class SecurityAutoConfiguration {
         return new SystemSecurityContext(tenantAware, roleHierarchy);
     }
 
-    /**
-     * @return {@link SecurityTokenGenerator} bean
-     */
+    @Bean
+    @ConditionalOnMissingBean
+    public MDCHandler mdcHandler() {
+        return MDCHandler.getInstance();
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public SecurityTokenGenerator securityTokenGenerator() {
         return new SecurityTokenGenerator();
     }
 
-    /**
-     * @return {@link AuthenticationSuccessHandler} bean
-     */
     @Bean
     @ConditionalOnMissingBean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
         return new SimpleUrlAuthenticationSuccessHandler();
     }
 
-    /**
-     * @return {@link LogoutHandler} bean
-     */
     @Bean
     @ConditionalOnMissingBean
     public LogoutHandler logoutHandler() {
         return new SecurityContextLogoutHandler();
     }
 
-    /**
-     * @return {@link LogoutSuccessHandler} bean
-     */
     @Bean
     @ConditionalOnMissingBean
     public LogoutSuccessHandler logoutSuccessHandler() {

@@ -115,15 +115,13 @@ public class SystemSecurityContext {
             return tenantAware.runAsTenant(tenant, () -> {
                 try {
                     setSystemContext(SecurityContextHolder.getContext());
-                    return callable.call();
-
+                    return MDCHandler.getInstance().withLogging(callable);
                 } catch (final RuntimeException e) {
                     throw e;
                 } catch (final Exception e) {
                     throw new RuntimeException(e);
                 }
             });
-
         } finally {
             SecurityContextHolder.setContext(oldContext);
             log.debug("leaving system code execution");
@@ -154,21 +152,18 @@ public class SystemSecurityContext {
             return tenantAware.runAsTenant(tenant, () -> {
                 try {
                     setCustomSecurityContext(tenant, oldContext.getAuthentication().getPrincipal(), authorities);
-                    return callable.call();
-
+                    return MDCHandler.getInstance().withLogging(callable);
                 } catch (final Exception e) {
                     throw new RuntimeException(e);
                 }
             });
-
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }
     }
 
     /**
-     * @return {@code true} if the current running code is running as system
-     *         code block.
+     * @return {@code true} if the current running code is running as system code block.
      */
     public boolean isCurrentThreadSystemCode() {
         return SecurityContextHolder.getContext().getAuthentication() instanceof SystemCodeAuthentication;
@@ -195,6 +190,13 @@ public class SystemSecurityContext {
         return false;
     }
 
+    static void setSystemContext(final SecurityContext oldContext) {
+        final Authentication oldAuthentication = oldContext.getAuthentication();
+        final SecurityContextImpl securityContextImpl = new SecurityContextImpl();
+        securityContextImpl.setAuthentication(new SystemCodeAuthentication(oldAuthentication));
+        SecurityContextHolder.setContext(securityContextImpl);
+    }
+
     private void setCustomSecurityContext(final String tenantId, final Object principal,
             final Collection<? extends GrantedAuthority> authorities) {
         final AnonymousAuthenticationToken authenticationToken = new AnonymousAuthenticationToken(
@@ -202,13 +204,6 @@ public class SystemSecurityContext {
         authenticationToken.setDetails(new TenantAwareAuthenticationDetails(tenantId, true));
         final SecurityContextImpl securityContextImpl = new SecurityContextImpl();
         securityContextImpl.setAuthentication(authenticationToken);
-        SecurityContextHolder.setContext(securityContextImpl);
-    }
-
-    static void setSystemContext(final SecurityContext oldContext) {
-        final Authentication oldAuthentication = oldContext.getAuthentication();
-        final SecurityContextImpl securityContextImpl = new SecurityContextImpl();
-        securityContextImpl.setAuthentication(new SystemCodeAuthentication(oldAuthentication));
         SecurityContextHolder.setContext(securityContextImpl);
     }
 
