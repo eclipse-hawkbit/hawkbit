@@ -29,10 +29,6 @@ public class HawkbitSecurityProperties {
     private final Cors cors = new Cors();
 
     /**
-     * Content Security policy Header for Manager UI.
-     */
-    private String contentSecurityPolicy;
-    /**
      * Secure access enforced.
      */
     private boolean requireSsl;
