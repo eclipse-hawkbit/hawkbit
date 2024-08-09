@@ -33,8 +33,7 @@ public class Start {
     /**
      * Main method to start the spring-boot application.
      *
-     * @param args
-     *            the VM arguments.
+     * @param args the VM arguments.
      */
     // Exception squid:S2095 - Spring boot standard behavior
     @SuppressWarnings({ "squid:S2095" })
