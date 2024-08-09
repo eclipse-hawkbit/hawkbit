@@ -65,13 +65,13 @@ public class MDCHandler {
 
         final String currentTenant = MDC.get(MDC_KEY_TENANT);
         if (Objects.equals(currentTenant, tenant)) {
-            return putUser(callable);
+            return putUserAndCall(callable);
         } else {
-            set(MDC_KEY_TENANT, tenant);
+            put(MDC_KEY_TENANT, tenant);
             try {
-                return putUser(callable);
+                return putUserAndCall(callable);
             } finally {
-                set(MDC_KEY_TENANT, currentTenant);
+                put(MDC_KEY_TENANT, currentTenant);
             }
         }
     }
@@ -111,7 +111,7 @@ public class MDCHandler {
         }, AuthorizationFilter.class);
     }
 
-    private <T> T putUser(final Callable<T> callable) throws WrappedException {
+    private <T> T putUserAndCall(final Callable<T> callable) throws WrappedException {
         final String user = springSecurityAuditorAware
                 .getCurrentAuditor()
                 .map(username -> (securityContext.isCurrentThreadSystemCode() ? "as " : "") + username)
@@ -122,11 +122,11 @@ public class MDCHandler {
             if (Objects.equals(currentUser, user)) {
                 return callable.call();
             } else {
-                set(MDC_KEY_USER, user);
+                put(MDC_KEY_USER, user);
                 try {
                     return callable.call();
                 } finally {
-                    set(MDC_KEY_USER, currentUser);
+                    put(MDC_KEY_USER, currentUser);
                 }
             }
         } catch (final Exception e) {
@@ -138,7 +138,7 @@ public class MDCHandler {
         }
     }
 
-    private static void set(final String key, final String value) {
+    private static void put(final String key, final String value) {
         if (value == null) {
             MDC.remove(key);
         } else {
