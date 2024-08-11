@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.security;
 
+import ch.qos.logback.classic.turbo.MDCFilter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -76,36 +77,6 @@ public class MDCHandler {
         }
     }
 
-    public void addLoggingFilter(final HttpSecurity httpSecurity) {
-        httpSecurity.addFilterBefore(new OncePerRequestFilter() {
-            @Override
-            protected void doFilterInternal(
-                    final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
-                    throws ServletException, IOException {
-                try {
-                    withLogging(() -> {
-                        filterChain.doFilter(request, response);
-                        return null;
-                    });
-                } catch (final RuntimeException re) {
-                    throw re;
-                } catch (final WrappedException we) {
-                    final Throwable cause = we.getCause();
-                    if (cause instanceof ServletException se) {
-                        throw se;
-                    } else if (cause instanceof IOException ioe) {
-                        throw ioe;
-                    } else {
-                        throw we.toRuntimeException();
-                    }
-                } catch (final Exception e) {
-                    // should never be here - if mdc is handler is enabled non-runtime exceptions are always wrapped
-                    throw new RuntimeException(e);
-                }
-            }
-        }, AuthorizationFilter.class);
-    }
-
     private <T> T putUserAndCall(final Callable<T> callable) throws WrappedException {
         final String user = springSecurityAuditorAware
                 .getCurrentAuditor()
@@ -149,6 +120,42 @@ public class MDCHandler {
 
         public RuntimeException toRuntimeException() {
             return new RuntimeException(getCause() == null ? this : getCause());
+        }
+    }
+
+    public static class Filter {
+
+        public static void addLoggingFilter(final HttpSecurity httpSecurity) {
+            httpSecurity.addFilterBefore(new OncePerRequestFilter() {
+
+                private final MDCHandler mdcFilter = MDCHandler.getInstance();
+
+                @Override
+                protected void doFilterInternal(
+                        final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
+                        throws ServletException, IOException {
+                    try {
+                        mdcFilter.withLogging(() -> {
+                            filterChain.doFilter(request, response);
+                            return null;
+                        });
+                    } catch (final RuntimeException re) {
+                        throw re;
+                    } catch (final WrappedException we) {
+                        final Throwable cause = we.getCause();
+                        if (cause instanceof ServletException se) {
+                            throw se;
+                        } else if (cause instanceof IOException ioe) {
+                            throw ioe;
+                        } else {
+                            throw we.toRuntimeException();
+                        }
+                    } catch (final Exception e) {
+                        // should never be here - if mdc is handler is enabled non-runtime exceptions are always wrapped
+                        throw new RuntimeException(e);
+                    }
+                }
+            }, AuthorizationFilter.class);
         }
     }
 }

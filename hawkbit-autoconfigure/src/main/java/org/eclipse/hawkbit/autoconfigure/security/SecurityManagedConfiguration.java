@@ -206,7 +206,7 @@ public class SecurityManagedConfiguration {
                         .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
             }
 
-            MDCHandler.getInstance().addLoggingFilter(http);
+            MDCHandler.Filter.addLoggingFilter(http);
 
             return http.build();
         }
@@ -323,7 +323,7 @@ public class SecurityManagedConfiguration {
                         .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
             }
 
-            MDCHandler.getInstance().addLoggingFilter(http);
+            MDCHandler.Filter.addLoggingFilter(http);
 
             return http.build();
         }
@@ -387,7 +387,7 @@ public class SecurityManagedConfiguration {
                     .addFilterBefore(downloadIdAuthenticationFilter, AuthorizationFilter.class)
                     .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-            MDCHandler.getInstance().addLoggingFilter(http);
+            MDCHandler.Filter.addLoggingFilter(http);
 
             return http.build();
         }
@@ -491,7 +491,7 @@ public class SecurityManagedConfiguration {
                 httpSecurityCustomizer.customize(http);
             }
 
-            MDCHandler.getInstance().addLoggingFilter(http);
+            MDCHandler.Filter.addLoggingFilter(http);
 
             return http.build();
         }
