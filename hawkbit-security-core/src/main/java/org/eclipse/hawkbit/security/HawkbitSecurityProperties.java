@@ -17,8 +17,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Security related hawkbit configuration.
- *
+ * Security related hawkBit configuration.
  */
 @Data
 @ConfigurationProperties("hawkbit.server.security")

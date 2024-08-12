@@ -12,17 +12,15 @@ package org.eclipse.hawkbit.im.authentication;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 /**
  * Utility method for creation of <tt>GrantedAuthority</tt> collections etc.
  */
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class PermissionUtils {
-
-	private PermissionUtils() {
-
-	}
 
 	/**
 	 * Returns all authorities.

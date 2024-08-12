@@ -20,7 +20,6 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 /**
  * Auditor class that allows BaseEntitys to insert current logged in user for
  * repository changes.
- *
  */
 public class SpringSecurityAuditorAware implements AuditorAware<String> {
 

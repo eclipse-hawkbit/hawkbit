@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.security;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
@@ -76,8 +75,7 @@ public class SystemSecurityContext {
      * The system code is executed for a current tenant by using the
      * {@link TenantAware#getCurrentTenant()}.
      * 
-     * @param callable
-     *            the callable to call within the system security context
+     * @param callable the callable to call within the system security context
      * @return the return value of the {@link Callable#call()} method.
      */
     // Exception squid:S2221 - Callable declares Exception
@@ -100,10 +98,8 @@ public class SystemSecurityContext {
      * The system code is executed for a specific given tenant by using the
      * {@link TenantAware}.
      * 
-     * @param callable
-     *            the callable to call within the system security context
-     * @param tenant
-     *            the tenant to act as system code
+     * @param callable the callable to call within the system security context
+     * @param tenant the tenant to act as system code
      * @return the return value of the {@link Callable#call()} method.
      */
     // The callable API throws a Exception and not a specific one
@@ -136,10 +132,8 @@ public class SystemSecurityContext {
      * The security context will be switched to the a new
      * {@link SecurityContext} and back after the callable is called.
      * 
-     * @param tenant
-     *            under which the {@link Callable#call()} must be executed.
-     * @param callable
-     *            to call within the security context
+     * @param tenant under which the {@link Callable#call()} must be executed.
+     * @param callable to call within the security context
      * @return the return value of the {@link Callable#call()} method.
      */
     // The callable API throws a Exception and not a specific one
