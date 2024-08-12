@@ -57,6 +57,10 @@ public class MDCHandler {
         }
 
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return callable.call();
+        }
+
         final String tenant;
         if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails) {
             tenant = tenantAwareAuthenticationDetails.getTenant();
