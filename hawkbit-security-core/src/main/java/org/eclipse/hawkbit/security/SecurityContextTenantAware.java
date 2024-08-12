@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.ContextAware;
@@ -43,8 +44,8 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 public class SecurityContextTenantAware implements ContextAware {
 
     public static final String SYSTEM_USER = "system";
-    private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES = Collections
-            .singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
+    private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES =
+            Collections.singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
 
     private final UserAuthoritiesResolver authoritiesResolver;
     private final SecurityContextSerializer securityContextSerializer;
@@ -66,11 +67,8 @@ public class SecurityContextTenantAware implements ContextAware {
      * Creates the {@link SecurityContextTenantAware} based on the given
      * {@link UserAuthoritiesResolver}.
      * 
-     * @param authoritiesResolver
-     *            Resolver to retrieve the authorities for a given user. Must
-     *            not be <code>null</code>.
-     * @param  securityContextSerializer
-     *            Serializer that is used to serialize / deserialize {@link SecurityContext}s.
+     * @param authoritiesResolver Resolver to retrieve the authorities for a given user. Must not be <code>null</code>.
+     * @param  securityContextSerializer Serializer that is used to serialize / deserialize {@link SecurityContext}s.
      */
     public SecurityContextTenantAware(final UserAuthoritiesResolver authoritiesResolver, @Nullable final SecurityContextSerializer securityContextSerializer) {
         this.authoritiesResolver = authoritiesResolver;
@@ -107,23 +105,24 @@ public class SecurityContextTenantAware implements ContextAware {
     }
 
     @Override
+    public Optional<String> getCurrentContext() {
+        return Optional.ofNullable(SecurityContextHolder.getContext()).map(securityContextSerializer::serialize);
+    }
+
+    @Override
     public <T> T runAsTenant(final String tenant, final TenantRunner<T> tenantRunner) {
-        return runInContext(buildSystemSecurityContext(tenant), tenantRunner);
+        return runInContext(buildUserSecurityContext(tenant, SYSTEM_USER, SYSTEM_AUTHORITIES), tenantRunner::run);
     }
 
     @Override
     public <T> T runAsTenantAsUser(final String tenant, final String username, final TenantRunner<T> tenantRunner) {
         Objects.requireNonNull(tenant);
         Objects.requireNonNull(username);
+
         final List<SimpleGrantedAuthority> authorities = runAsSystem(
                 () -> authoritiesResolver.getUserAuthorities(tenant, username).stream().map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList()));
-        return runInContext(buildUserSecurityContext(tenant, username, authorities), tenantRunner);
-    }
-
-    @Override
-    public Optional<String> getCurrentContext() {
-        return Optional.ofNullable(SecurityContextHolder.getContext()).map(securityContextSerializer::serialize);
+        return runInContext(buildUserSecurityContext(tenant, username, authorities), tenantRunner::run);
     }
 
     @Override
@@ -133,45 +132,35 @@ public class SecurityContextTenantAware implements ContextAware {
         final SecurityContext securityContext = securityContextSerializer.deserialize(serializedContext);
         Objects.requireNonNull(securityContext);
 
+        return runInContext(securityContext, () -> function.apply(t));
+    }
+
+    private static <T> T runInContext(final SecurityContext securityContext, final Supplier<T> supplier) {
         final SecurityContext originalContext = SecurityContextHolder.getContext();
         if (Objects.equals(securityContext, originalContext)) {
-            return function.apply(t);
+            return supplier.get();
         } else {
             SecurityContextHolder.setContext(securityContext);
             try {
-                return function.apply(t);
+                return MDCHandler.getInstance().withLoggingRE(supplier::get);
             } finally {
                 SecurityContextHolder.setContext(originalContext);
             }
         }
     }
 
-    private static <T> T runInContext(final SecurityContext context, final TenantRunner<T> tenantRunner) {
-        final SecurityContext originalContext = SecurityContextHolder.getContext();
-        try {
-            SecurityContextHolder.setContext(context);
-            return tenantRunner.run();
-        } finally {
-            SecurityContextHolder.setContext(originalContext);
-        }
-    }
-
-    private static SecurityContext buildSystemSecurityContext(final String tenant) {
-        return buildUserSecurityContext(tenant, SYSTEM_USER, SYSTEM_AUTHORITIES);
-    }
-
     private static <T> T runAsSystem(final TenantRunner<T> tenantRunner) {
         final SecurityContext currentContext = SecurityContextHolder.getContext();
+        SystemSecurityContext.setSystemContext(currentContext);
         try {
-            SystemSecurityContext.setSystemContext(currentContext);
-            return tenantRunner.run();
+          return MDCHandler.getInstance().withLoggingRE(tenantRunner::run);
         } finally {
             SecurityContextHolder.setContext(currentContext);
         }
     }
 
-    private static SecurityContext buildUserSecurityContext(final String tenant, final String username,
-            final Collection<? extends GrantedAuthority> authorities) {
+    private static SecurityContext buildUserSecurityContext(
+            final String tenant, final String username, final Collection<? extends GrantedAuthority> authorities) {
         final SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(new AuthenticationDelegate(
                 SecurityContextHolder.getContext().getAuthentication(), tenant, username, authorities));
@@ -189,21 +178,25 @@ public class SecurityContextTenantAware implements ContextAware {
         private static final long serialVersionUID = 1L;
 
         private final Authentication delegate;
-
         private final TenantAwareUser principal;
-
         private final TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails;
 
         private AuthenticationDelegate(final Authentication delegate, final String tenant, final String username,
                 final Collection<? extends GrantedAuthority> authorities) {
             this.delegate = delegate;
-            this.principal = new TenantAwareUser(username, username, authorities, tenant);
+            principal = new TenantAwareUser(username, username, authorities, tenant);
             tenantAwareAuthenticationDetails = new TenantAwareAuthenticationDetails(tenant, false);
         }
 
         @Override
         public boolean equals(final Object another) {
-            return Objects.equals(delegate, another);
+            if (another instanceof Authentication anotherAuthentication) {
+                return Objects.equals(delegate, anotherAuthentication) &&
+                        Objects.equals(principal, anotherAuthentication.getPrincipal()) &&
+                        Objects.equals(tenantAwareAuthenticationDetails, anotherAuthentication.getDetails());
+            } else {
+                return false;
+            }
         }
 
         @Override

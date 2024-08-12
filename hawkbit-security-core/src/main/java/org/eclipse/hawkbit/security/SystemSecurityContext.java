@@ -107,20 +107,14 @@ public class SystemSecurityContext {
     public <T> T runAsSystemAsTenant(final Callable<T> callable, final String tenant) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         try {
-            log.debug("entering system code execution");
+            log.debug("Entering system code execution");
             return tenantAware.runAsTenant(tenant, () -> {
-                try {
-                    setSystemContext(SecurityContextHolder.getContext());
-                    return MDCHandler.getInstance().withLogging(callable);
-                } catch (final RuntimeException e) {
-                    throw e;
-                } catch (final Exception e) {
-                    throw new RuntimeException(e);
-                }
+                setSystemContext(SecurityContextHolder.getContext());
+                return MDCHandler.getInstance().withLoggingRE(callable);
             });
         } finally {
             SecurityContextHolder.setContext(oldContext);
-            log.debug("leaving system code execution");
+            log.debug("Leaving system code execution");
         }
     }
 
@@ -144,12 +138,8 @@ public class SystemSecurityContext {
                 .singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS));
         try {
             return tenantAware.runAsTenant(tenant, () -> {
-                try {
-                    setCustomSecurityContext(tenant, oldContext.getAuthentication().getPrincipal(), authorities);
-                    return MDCHandler.getInstance().withLogging(callable);
-                } catch (final Exception e) {
-                    throw new RuntimeException(e);
-                }
+                setCustomSecurityContext(tenant, oldContext.getAuthentication().getPrincipal(), authorities);
+                return MDCHandler.getInstance().withLoggingRE(callable);
             });
         } finally {
             SecurityContextHolder.setContext(oldContext);
