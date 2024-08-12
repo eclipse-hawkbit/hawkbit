@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.security;
 
-import ch.qos.logback.classic.turbo.MDCFilter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
