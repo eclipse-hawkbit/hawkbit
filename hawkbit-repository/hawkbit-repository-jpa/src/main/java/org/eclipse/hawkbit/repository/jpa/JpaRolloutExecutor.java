@@ -155,7 +155,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     @Override
     public void execute(final Rollout rollout) {
-        log.debug("handle rollout {}", rollout.getId());
+        log.debug("Processing rollout {}", rollout.getId());
 
         switch (rollout.getStatus()) {
         case CREATING:
@@ -201,6 +201,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             log.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
             break;
         }
+
+        log.debug("Rollout {} processed", rollout.getId());
     }
 
     private void handleCreateRollout(final JpaRollout rollout) {

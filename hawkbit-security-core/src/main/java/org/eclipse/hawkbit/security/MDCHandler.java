@@ -111,7 +111,6 @@ public class MDCHandler {
         final String user = springSecurityAuditorAware
                 .getCurrentAuditor()
                 .filter(username -> !username.equals("system")) // null and system are the same - system user
-                .map(username -> (securityContext != null && securityContext.isCurrentThreadSystemCode() ? "as " : "") + username)
                 .orElse(null);
 
         final String currentUser = MDC.get(MDC_KEY_USER);
