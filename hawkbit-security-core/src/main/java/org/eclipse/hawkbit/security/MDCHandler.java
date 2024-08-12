@@ -13,6 +13,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.slf4j.MDC;
@@ -28,7 +29,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MDCHandler {
 
     public static String MDC_KEY_TENANT = "tenant";
@@ -126,6 +127,7 @@ public class MDCHandler {
         }
     }
 
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class Filter {
 
         public static void addLoggingFilter(final HttpSecurity httpSecurity) {
