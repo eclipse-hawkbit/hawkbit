@@ -90,7 +90,7 @@ public class MDCHandler {
     }
 
     /**
-     * With logging throwing Runtime Exception (wihtLoggingRE). Calls the {@link #withLogging(Callable)} method and
+     * With logging throwing Runtime Exception (withLoggingRE). Calls the {@link #withLogging(Callable)} method and
      * wraps any catchable exception into a {@link RuntimeException}.
      *
      * @param <T> the return type
@@ -111,7 +111,6 @@ public class MDCHandler {
         final String user = springSecurityAuditorAware
                 .getCurrentAuditor()
                 .filter(username -> !username.equals("system")) // null and system are the same - system user
-                .map(username -> (securityContext != null && securityContext.isCurrentThreadSystemCode() ? "as " : "") + username)
                 .orElse(null);
 
         final String currentUser = MDC.get(MDC_KEY_USER);
