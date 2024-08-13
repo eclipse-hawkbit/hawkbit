@@ -90,7 +90,7 @@ public class MDCHandler {
     }
 
     /**
-     * With logging throwing Runtime Exception (wihtLoggingRE). Calls the {@link #withLogging(Callable)} method and
+     * With logging throwing Runtime Exception (withLoggingRE). Calls the {@link #withLogging(Callable)} method and
      * wraps any catchable exception into a {@link RuntimeException}.
      *
      * @param <T> the return type
