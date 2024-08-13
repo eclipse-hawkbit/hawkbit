@@ -51,6 +51,14 @@ public class MDCHandler {
         return SINGLETON;
     }
 
+    /**
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user in the MDC context.
+     *
+     * @param <T> the return type
+     * @param callable the callable to execute
+     * @return the result
+     * @throws Exception if thrown by the callable
+     */
     public <T> T withLogging(final Callable<T> callable) throws Exception  {
         if (!mdcEnabled) {
             return callable.call();
@@ -81,7 +89,25 @@ public class MDCHandler {
         }
     }
 
-    private <T> T putUserAndCall(final Callable<T> callable) throws WrappedException {
+    /**
+     * With logging throwing Runtime Exception (wihtLoggingRE). Calls the {@link #withLogging(Callable)} method and
+     * wraps any catchable exception into a {@link RuntimeException}.
+     *
+     * @param <T> the return type
+     * @param callable the callable to execute
+     * @return the result
+     */
+    public <T> T withLoggingRE(final Callable<T> callable)  {
+        try {
+            return withLogging(callable);
+        } catch (final RuntimeException re) {
+            throw re;
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private <T> T putUserAndCall(final Callable<T> callable) throws Exception {
         final String user = springSecurityAuditorAware
                 .getCurrentAuditor()
                 .filter(username -> !username.equals("system")) // null and system are the same - system user
@@ -89,21 +115,15 @@ public class MDCHandler {
                 .orElse(null);
 
         final String currentUser = MDC.get(MDC_KEY_USER);
-        try {
-            if (Objects.equals(currentUser, user)) {
+        if (Objects.equals(currentUser, user)) {
+            return callable.call();
+        } else {
+            put(MDC_KEY_USER, user);
+            try {
                 return callable.call();
-            } else {
-                put(MDC_KEY_USER, user);
-                try {
-                    return callable.call();
-                } finally {
-                    put(MDC_KEY_USER, currentUser);
-                }
+            } finally {
+                put(MDC_KEY_USER, currentUser);
             }
-        } catch (final RuntimeException e) {
-            throw e;
-        } catch (final Exception e) {
-            throw new WrappedException(e);
         }
     }
 
@@ -112,18 +132,6 @@ public class MDCHandler {
             MDC.remove(key);
         } else {
             MDC.put(key, value);
-        }
-    }
-
-    // Wraps catchable exceptions to rethrow
-    public static class WrappedException extends Exception {
-
-        public WrappedException(final Throwable cause) {
-            super(cause);
-        }
-
-        public RuntimeException toRuntimeException() {
-            return new RuntimeException(getCause() == null ? this : getCause());
         }
     }
 
@@ -144,19 +152,9 @@ public class MDCHandler {
                             filterChain.doFilter(request, response);
                             return null;
                         });
-                    } catch (final RuntimeException re) {
-                        throw re;
-                    } catch (final WrappedException we) {
-                        final Throwable cause = we.getCause();
-                        if (cause instanceof ServletException se) {
-                            throw se;
-                        } else if (cause instanceof IOException ioe) {
-                            throw ioe;
-                        } else {
-                            throw we.toRuntimeException();
-                        }
+                    } catch (final ServletException | IOException | RuntimeException e) {
+                        throw e;
                     } catch (final Exception e) {
-                        // should never be here - if mdc is handler is enabled non-runtime exceptions are always wrapped
                         throw new RuntimeException(e);
                     }
                 }
