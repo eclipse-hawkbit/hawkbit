@@ -32,16 +32,6 @@ Every node has multiple schedulers which run after a defined period of time. All
 
 ## Known constraints
 
-### UI sessions
-As of today hawkBit is not storing user sessions in a shared, cluster wide cache. Session is only bound to the node where the login took place. If this node is going down for whatever reason, the session is lost and the user is forced to login again.
-In case that's not an option, you can help yourself by introducing a shared session cache based on e.g. Redis.
-Furthermore hawkBit is not supporting session stickiness out of the box either. However most of the well known load balancer out there can solve this issue.
-
-### Caching of download IDs
-The downloadId is generated and stored in the DownloadIdCache. It is used for downloading an artifact.
-In hawkBit exists an interface called "[DownloadIdCache](https://github.com/eclipse/hawkbit/blob/master/hawkbit-core/src/main/java/org/eclipse/hawkbit/cache/DownloadIdCache.java)" and one implementation of it: "DefaultDownloadIdCache". This default implementation can't be used within a cluster. Its containing data is only available inside one node and can't be shared with other nodes. E.g. the downloadId which is stored in this cache after authentication on node A can only be used for downloading the artifact by node A.
-In a cluster-capable environment this fact can lead to issues as it could happen, that the downloadId is stored on node A and node B would like to download the artifact by means of the downloadId which is not available on node B. To solve this issue you can use a cluster-shared cache e.g. Redis or create a new cluster-aware implementation of the interface "DownloadIdCache".
-
 ### Denial-of-Service (DoS) filter
 hawkBit owns the feature of guarding itself from DoS attacks, a [DoS filter](https://github.com/eclipse/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DosFilter.java). It reduces the maximum number of requests per seconds which can be configured for read and write requests.
 This mechanism is only working for every node separately, i.e. in a cluster environment the worst-case behaviour would be that the maximum number of requests per seconds will be increased to its product if every request is handled by a different node.

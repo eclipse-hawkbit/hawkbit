@@ -24,8 +24,6 @@ import org.eclipse.hawkbit.api.PropertyBasedArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
 import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemRepository;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
-import org.eclipse.hawkbit.cache.DefaultDownloadIdCache;
-import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
 import org.eclipse.hawkbit.im.authentication.SpRole;
@@ -148,18 +146,6 @@ public class TestConfiguration implements AsyncConfigurer {
     @Bean
     TenantAwareCacheManager cacheManager(final TenantAware tenantAware) {
         return new TenantAwareCacheManager(new CaffeineCacheManager(), tenantAware);
-    }
-
-    /**
-     * Bean for the download id cache.
-     *
-     * @param cacheManager
-     *              The {@link CacheManager}
-     * @return the cache
-     */
-    @Bean
-    DownloadIdCache downloadIdCache(final CacheManager cacheManager) {
-        return new DefaultDownloadIdCache(cacheManager);
     }
 
     @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)

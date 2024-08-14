@@ -1,5 +1,4 @@
 org.eclipse.hawkbit.autoconfigure.cache.CacheAutoConfiguration
-org.eclipse.hawkbit.autoconfigure.cache.DownloadIdCacheAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.ddi.DDiApiAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.dmf.amqp.DmfApiAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.mgmt.MgmtApiAutoConfiguration

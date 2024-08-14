@@ -17,11 +17,9 @@ import java.util.ListIterator;
 import org.springframework.hateoas.RepresentationModel;
 
 /**
- * List that extends ResourceSupport to ensure that links in content are in HAL
- * format.
+ * List that extends RepresentationModel to ensure that links in content are in HAL format.
  * 
- * @param <T>
- *            of the response content
+ * @param <T> of the response content
  */
 public class ResponseList<T> extends RepresentationModel<ResponseList<T>> implements List<T> {
 

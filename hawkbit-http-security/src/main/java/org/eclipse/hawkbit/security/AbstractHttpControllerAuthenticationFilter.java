@@ -22,9 +22,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.util.UrlUtils;
 import org.slf4j.Logger;
@@ -159,8 +157,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
 
     private DmfTenantSecurityToken createTenantSecurityTokenVariables(final HttpServletRequest request,
                                                                       final String tenant, final String controllerId) {
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(tenant, null, controllerId, null,
-                FileResource.createFileResourceBySha1(""));
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(tenant, null, controllerId, null);
 
         Collections.list(request.getHeaderNames())
                 .forEach(header -> securityToken.putHeader(header, request.getHeader(header)));

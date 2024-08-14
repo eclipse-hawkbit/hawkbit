@@ -22,15 +22,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.api.HostnameResolver;
-import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
-import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -39,9 +34,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfAutoConfirmation;
 import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
-import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
-import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -54,19 +47,14 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
-import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
-import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.security.SecurityContextSerializer;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,7 +70,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.http.HttpStatus;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -97,15 +84,10 @@ public class AmqpMessageHandlerServiceTest {
     private static final String FAIL_MESSAGE_AMQP_REJECT_REASON = AmqpRejectAndDontRequeueException.class
             .getSimpleName() + " was expected, ";
 
-    private static final String SHA1 = "12345";
     private static final String VIRTUAL_HOST = "vHost";
     private static final String TENANT = "DEFAULT";
-    private static final Long TENANT_ID = 123L;
-    private static final String CONTROLLER_ID = "123";
-    private static final Long TARGET_ID = 123L;
 
     private AmqpMessageHandlerService amqpMessageHandlerService;
-    private AmqpAuthenticationMessageHandler amqpAuthenticationMessageHandlerService;
 
     private MessageConverter messageConverter;
 
@@ -117,67 +99,37 @@ public class AmqpMessageHandlerServiceTest {
 
     @Mock
     private ConfirmationManagement confirmationManagementMock;
-
     @Mock
     private EntityFactory entityFactoryMock;
-
-    @Mock
-    private ArtifactManagement artifactManagementMock;
-
     @Mock
     private TenantConfigurationManagement tenantConfigurationManagement;
-
-    @Mock
-    private AmqpControllerAuthentication authenticationManagerMock;
-
-    @Mock
-    private ArtifactRepository artifactRepositoryMock;
-
-    @Mock
-    private DownloadIdCache downloadIdCache;
-
-    @Mock
-    private HostnameResolver hostnameResolverMock;
-
     @Mock
     private RabbitTemplate rabbitTemplate;
-
-    @Mock
-    private TenantAware tenantAwareMock;
-
     @Mock
     private UserAuthoritiesResolver authoritiesResolver;
-
     @Mock
     private SecurityContextSerializer securityContextSerializer;
 
     @Captor
     private ArgumentCaptor<Map<String, String>> attributesCaptor;
-
     @Captor
     private ArgumentCaptor<String> targetIdCaptor;
-
     @Captor
     private ArgumentCaptor<String> initiatorCaptor;
-
     @Captor
     private ArgumentCaptor<String> remarkCaptor;
-
     @Captor
     private ArgumentCaptor<String> targetNameCaptor;
-
     @Captor
     private ArgumentCaptor<String> targetTypeNameCaptor;
-
     @Captor
     private ArgumentCaptor<URI> uriCaptor;
-
     @Captor
     private ArgumentCaptor<UpdateMode> modeCaptor;
 
     @BeforeEach
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void before() throws Exception {
+    public void before() {
         messageConverter = new Jackson2JsonMessageConverter();
         lenient().when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
         final TenantConfigurationValue multiAssignmentConfig = TenantConfigurationValue.builder().value(Boolean.FALSE)
@@ -191,9 +143,6 @@ public class AmqpMessageHandlerServiceTest {
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
                 controllerManagementMock, entityFactoryMock, systemSecurityContext, tenantConfigurationManagement,
                 confirmationManagementMock);
-        amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
-                authenticationManagerMock, artifactManagementMock, downloadIdCache, hostnameResolverMock,
-                controllerManagementMock, tenantAwareMock);
     }
 
     @Test
@@ -550,84 +499,11 @@ public class AmqpMessageHandlerServiceTest {
     }
 
     @Test
-    @Description("Tests that an download request is denied for an artifact which does not exists")
-    public void authenticationRequestDeniedForArtifactWhichDoesNotExists() {
-        final MessageProperties messageProperties = createMessageProperties(null);
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
-                TARGET_ID, FileResource.createFileResourceBySha1("12345"));
-        final Message message = createMessage(securityToken, messageProperties);
-
-        // test
-        final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
-
-        // verify
-        final DmfDownloadResponse downloadResponse = (DmfDownloadResponse) messageConverter.fromMessage(onMessage);
-        assertThat(downloadResponse).as("Message body should not null").isNotNull();
-        assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
-                .isEqualTo(HttpStatus.NOT_FOUND.value());
-    }
-
-    @Test
-    @Description("Tests that an download request is denied for an artifact which is not assigned to the requested target")
-    public void authenticationRequestDeniedForArtifactWhichIsNotAssignedToTarget() {
-        final MessageProperties messageProperties = createMessageProperties(null);
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
-                TARGET_ID, FileResource.createFileResourceBySha1("12345"));
-        final Message message = createMessage(securityToken, messageProperties);
-
-        final Artifact localArtifactMock = mock(Artifact.class);
-        when(artifactManagementMock.findFirstBySHA1(anyString())).thenReturn(Optional.of(localArtifactMock));
-
-        // test
-        final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
-
-        // verify
-        final DmfDownloadResponse downloadResponse = (DmfDownloadResponse) messageConverter.fromMessage(onMessage);
-        assertThat(downloadResponse).as("Message body should not null").isNotNull();
-        assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
-                .isEqualTo(HttpStatus.NOT_FOUND.value());
-    }
-
-    @Test
-    @Description("Tests that an download request is allowed for an artifact which exists and assigned to the requested target")
-    public void authenticationRequestAllowedForArtifactWhichExistsAndAssignedToTarget() throws MalformedURLException {
-        final MessageProperties messageProperties = createMessageProperties(null);
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
-                TARGET_ID, FileResource.createFileResourceBySha1("12345"));
-        final Message message = createMessage(securityToken, messageProperties);
-
-        // mock
-        final Artifact localArtifactMock = mock(Artifact.class);
-        when(localArtifactMock.getSha1Hash()).thenReturn(SHA1);
-        when(localArtifactMock.getMd5Hash()).thenReturn("md5");
-        when(localArtifactMock.getSize()).thenReturn(1L);
-
-        when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.of(localArtifactMock));
-        when(controllerManagementMock.hasTargetArtifactAssigned(securityToken.getControllerId(), SHA1))
-                .thenReturn(true);
-        when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
-
-        // test
-        final Message onMessage = amqpAuthenticationMessageHandlerService.onAuthenticationRequest(message);
-
-        // verify
-        final DmfDownloadResponse downloadResponse = (DmfDownloadResponse) messageConverter.fromMessage(onMessage);
-        assertThat(downloadResponse).as("Message body should not null").isNotNull();
-        assertThat(downloadResponse.getResponseCode()).as("Message body response code is wrong")
-                .isEqualTo(HttpStatus.OK.value());
-        assertThat(downloadResponse.getArtifact().getSize()).as("Wrong artifact size in message body").isEqualTo(1L);
-        assertThat(downloadResponse.getArtifact().getHashes().getSha1()).as("Wrong sha1 hash").isEqualTo(SHA1);
-        assertThat(downloadResponse.getArtifact().getHashes().getMd5()).as("Wrong md5 hash").isEqualTo("md5");
-        assertThat(downloadResponse.getDownloadUrl()).as("download url is wrong")
-                .startsWith("http://localhost/api/v1/downloadserver/downloadId/");
-    }
-
-    @Test
     @Description("Test next update is provided on finished action")
     public void lookupNextUpdateActionAfterFinished() throws IllegalAccessException {
 
         // Mock
-        final Action action = createActionWithTarget(22L, Status.FINISHED);
+        final Action action = createActionWithTarget(22L);
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
         when(controllerManagementMock.addUpdateActionStatus(any())).thenReturn(action);
         final ActionStatusBuilder builder = mock(ActionStatusBuilder.class);
@@ -650,8 +526,8 @@ public class AmqpMessageHandlerServiceTest {
         final ArgumentCaptor<ActionProperties> actionPropertiesCaptor = ArgumentCaptor.forClass(ActionProperties.class);
         final ArgumentCaptor<Target> targetCaptor = ArgumentCaptor.forClass(Target.class);
 
-        verify(amqpMessageDispatcherServiceMock, times(1)).sendUpdateMessageToTarget(actionPropertiesCaptor.capture(),
-                targetCaptor.capture(), any(Map.class));
+        verify(amqpMessageDispatcherServiceMock, times(1))
+                .sendUpdateMessageToTarget(actionPropertiesCaptor.capture(), targetCaptor.capture(), any(Map.class));
         final ActionProperties actionProperties = actionPropertiesCaptor.getValue();
         assertThat(actionProperties).isNotNull();
         assertThat(actionProperties.getTenant()).as("event has tenant").isEqualTo("DEFAULT");
@@ -664,7 +540,7 @@ public class AmqpMessageHandlerServiceTest {
     public void feedBackCodeIsPersistedInMessages() throws IllegalAccessException {
 
         // Mock
-        final Action action = createActionWithTarget(22L, Status.FINISHED);
+        final Action action = createActionWithTarget(22L);
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
         when(controllerManagementMock.addUpdateActionStatus(any())).thenReturn(action);
         final ActionStatusBuilder builder = new JpaActionStatusBuilder();
@@ -770,7 +646,7 @@ public class AmqpMessageHandlerServiceTest {
         return messageProperties;
     }
 
-    private Action createActionWithTarget(final Long targetId, final Status status) throws IllegalAccessException {
+    private Action createActionWithTarget(final Long targetId) throws IllegalAccessException {
         // is needed for the creation of targets
         initializeSecurityTokenGenerator();
 
