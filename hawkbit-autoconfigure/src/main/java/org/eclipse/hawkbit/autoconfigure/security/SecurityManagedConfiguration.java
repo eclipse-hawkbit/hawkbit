@@ -16,7 +16,6 @@ import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiApiConfiguration;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
@@ -34,7 +33,6 @@ import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateAnonymousDownlo
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateSecurityTokenFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedGatewaySecurityTokenFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedSecurityHeaderFilter;
-import org.eclipse.hawkbit.security.HttpDownloadAuthenticationFilter;
 import org.eclipse.hawkbit.security.MDCHandler;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -76,8 +74,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
- * All configurations related to HawkBit's authentication and authorization
- * layer.
+ * All configurations related to HawkBit's authentication and authorization layer.
  */
 @Slf4j
 @Configuration
@@ -360,40 +357,6 @@ public class SecurityManagedConfiguration {
     }
 
     /**
-     * Security config to handle and filter the download ids.
-     */
-    @Configuration
-    @EnableWebSecurity
-    @ConditionalOnClass(MgmtApiConfiguration.class)
-    public static class IdRestSecurityConfigurationAdapter {
-
-        @Bean
-        @Order(320)
-        protected SecurityFilterChain filterChainDLID(
-                final HttpSecurity http,
-                final DdiSecurityProperties ddiSecurityConfiguration, final DownloadIdCache downloadIdCache)
-                throws Exception {
-            final AuthenticationManager authenticationManager = setAuthenticationManager(http, ddiSecurityConfiguration);
-
-            final HttpDownloadAuthenticationFilter downloadIdAuthenticationFilter = new HttpDownloadAuthenticationFilter(
-                    downloadIdCache);
-            downloadIdAuthenticationFilter.setAuthenticationManager(authenticationManager);
-
-            http
-                    .securityMatcher(MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE + "/downloadId/*/*")
-                    .authorizeHttpRequests(armrRepository -> armrRepository.anyRequest().authenticated())
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .anonymous(AbstractHttpConfigurer::disable)
-                    .addFilterBefore(downloadIdAuthenticationFilter, AuthorizationFilter.class)
-                    .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-            MDCHandler.Filter.addLoggingFilter(http);
-
-            return http.build();
-        }
-    }
-
-    /**
      * Security configuration for the REST management API.
      */
     @Configuration
@@ -420,8 +383,7 @@ public class SecurityManagedConfiguration {
                     securityProperties.getDos().getFilter(), securityProperties.getClients());
             filterRegBean.setUrlPatterns(List.of(
                     MgmtRestConstants.BASE_REST_MAPPING + "/*",
-                    MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/*",
-                    MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE + "/*"));
+                    MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/*"));
             filterRegBean.setOrder(DOS_FILTER_ORDER);
             filterRegBean.setName("dosMgmtFilter");
 

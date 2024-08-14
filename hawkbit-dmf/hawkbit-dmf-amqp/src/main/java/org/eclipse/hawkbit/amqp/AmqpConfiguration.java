@@ -11,10 +11,7 @@ package org.eclipse.hawkbit.amqp;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
-import org.eclipse.hawkbit.api.HostnameResolver;
-import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
-import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -24,9 +21,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
@@ -282,20 +277,6 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Create AMQP handler service bean for authentication messages.
-     * 
-     * @return handler service bean
-     */
-    @Bean
-    AmqpAuthenticationMessageHandler amqpAuthenticationMessageHandler(final RabbitTemplate rabbitTemplate,
-            final AmqpControllerAuthentication authenticationManager, final ArtifactManagement artifactManagement,
-            final DownloadIdCache downloadIdCache, final HostnameResolver hostnameResolver,
-            final ControllerManagement controllerManagement, final TenantAware tenantAware) {
-        return new AmqpAuthenticationMessageHandler(rabbitTemplate, authenticationManager, artifactManagement,
-                downloadIdCache, hostnameResolver, controllerManagement, tenantAware);
-    }
-
-    /**
      * Create default amqp sender service bean.
      *
      * @return the default amqp sender service bean
@@ -320,33 +301,6 @@ public class AmqpConfiguration {
                 amqpProperties.isMissingQueuesFatal(), amqpProperties.getDeclarationRetries(), errorHandler);
         configurer.configure(factory, rabbitConnectionFactory);
         return factory;
-    }
-
-    /**
-     * create the authentication bean for controller over amqp.
-     *
-     * @param systemManagement
-     *            the systemManagement
-     * @param controllerManagement
-     *            the controllerManagement
-     * @param tenantConfigurationManagement
-     *            the tenantConfigurationManagement
-     * @param tenantAware
-     *            the tenantAware
-     * @param ddiSecruityProperties
-     *            the ddiSecruityProperties
-     * @param systemSecurityContext
-     *            the systemSecurityContext
-     * @return the bean
-     */
-    @Bean
-    @ConditionalOnMissingBean(AmqpControllerAuthentication.class)
-    public AmqpControllerAuthentication amqpControllerAuthentication(final SystemManagement systemManagement,
-            final ControllerManagement controllerManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
-            final DdiSecurityProperties ddiSecruityProperties, final SystemSecurityContext systemSecurityContext) {
-        return new AmqpControllerAuthentication(systemManagement, controllerManagement, tenantConfigurationManagement,
-                tenantAware, ddiSecruityProperties, systemSecurityContext);
     }
 
     @Bean

@@ -53,10 +53,6 @@ public final class MgmtRestConstants {
      */
     public static final String SOFTWAREMODULE_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/softwaremodules";
 
-    public static final String DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE = "/api/" + API_VERSION + "/downloadserver";
-
-    public static final String DOWNLOAD_ID_V1_REQUEST_MAPPING = "/downloadId/{tenant}/{downloadId}";
-
     /**
      * The base URL mapping for the spring acuator management context path.
      */
