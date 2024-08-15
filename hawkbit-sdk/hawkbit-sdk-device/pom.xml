@@ -35,5 +35,11 @@
          <artifactId>hawkbit-ddi-api</artifactId>
          <version>${project.version}</version>
       </dependency>
+
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-mgmt-api</artifactId>
+         <version>${project.version}</version>
+      </dependency>
    </dependencies>
 </project>

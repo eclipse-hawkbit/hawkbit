@@ -103,7 +103,7 @@ public class VHost extends DmfSender implements MessageListener {
         final String controllerId = (String)message.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID);
         final String type = (String)message.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE);
 
-        log.info("Message received for target {}, value : {}", controllerId, message.toString());
+        log.info("Message received for target {}, value : {}", controllerId, message);
         switch (MessageType.valueOf(type)) {
             case EVENT: {
                 checkContentTypeJson(message);
@@ -112,7 +112,7 @@ public class VHost extends DmfSender implements MessageListener {
             }
             case THING_DELETED: {
                 checkContentTypeJson(message);
-                Optional.ofNullable(dmfTenants.get(tenantId)).ifPresent(dmfTenant -> dmfTenant.remove(controllerId));
+                Optional.ofNullable(dmfTenants.get(tenantId)).ifPresent(dmfTenant -> dmfTenant.handleThingDeleted(controllerId));
                 break;
             }
             case PING_RESPONSE: {

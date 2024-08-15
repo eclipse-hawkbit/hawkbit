@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.sdk.demo;
+package org.eclipse.hawkbit.sdk.device;
 
 import feign.FeignException;
 import lombok.AccessLevel;

@@ -9,17 +9,6 @@
  */
 package org.eclipse.hawkbit.sdk.device;
 
-import java.time.LocalTime;
-import java.time.temporal.ChronoField;
-import java.util.AbstractMap;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -38,6 +27,17 @@ import org.eclipse.hawkbit.sdk.Tenant;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.time.LocalTime;
+import java.time.temporal.ChronoField;
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class representing DDI device connecting directly to hawkBit.
@@ -84,7 +84,7 @@ public class DdiController {
      *                      for communication to hawkBit
      */
     public DdiController(final Tenant tenant, final Controller controller,
-            final UpdateHandler updateHandler, final HawkbitClient hawkbitClient) {
+                         final UpdateHandler updateHandler, final HawkbitClient hawkbitClient) {
         this.tenantId = tenant.getTenantId();
         gatewayToken = tenant.getGatewayToken();
         downloadAuthenticationEnabled = tenant.isDownloadAuthenticationEnabled();

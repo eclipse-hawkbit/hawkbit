@@ -73,9 +73,9 @@ public class DmfController {
         log.debug(LOG_PREFIX + "Done. Create thing sent.", getTenantId(), getControllerId());
     }
 
-    public void poll() {
-        log.debug(LOG_PREFIX + "Polling ..", getTenantId(), getControllerId());
-        dmfSender.createOrUpdateThing(getTenantId(), getControllerId());
+    public void remove() {
+        log.debug(LOG_PREFIX + "Removing Controller...", getTenantId(), getControllerId());
+        dmfSender.removeThing(getTenantId(), getControllerId());
         log.debug(LOG_PREFIX + "Done. Create thing sent.", getTenantId(), getControllerId());
     }
 

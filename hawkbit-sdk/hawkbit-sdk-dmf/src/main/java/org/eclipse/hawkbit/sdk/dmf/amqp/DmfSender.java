@@ -51,8 +51,16 @@ public class DmfSender {
     }
 
     public void createOrUpdateThing(final String tenant, final String controllerId) {
+        sendThingMessage(tenant, controllerId, MessageType.THING_CREATED.name());
+    }
+
+    public void removeThing(final String tenant, final String controllerId) {
+        sendThingMessage(tenant, controllerId, MessageType.THING_REMOVED.name());
+    }
+
+    public void sendThingMessage(final String tenant, final String controllerId, String thingStatusChange) {
         final MessageProperties messagePropertiesForSP = new MessageProperties();
-        messagePropertiesForSP.setHeader(MessageHeaderKey.TYPE, MessageType.THING_CREATED.name());
+        messagePropertiesForSP.setHeader(MessageHeaderKey.TYPE, thingStatusChange);
         messagePropertiesForSP.setHeader(MessageHeaderKey.TENANT, tenant);
         messagePropertiesForSP.setHeader(MessageHeaderKey.THING_ID, controllerId);
         messagePropertiesForSP.setHeader(MessageHeaderKey.SENDER, "hawkBit-sdk");

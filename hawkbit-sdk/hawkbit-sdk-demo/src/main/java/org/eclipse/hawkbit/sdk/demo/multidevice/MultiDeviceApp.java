@@ -15,24 +15,20 @@ import feign.codec.Decoder;
 import feign.codec.Encoder;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.sdk.Controller;
-import org.eclipse.hawkbit.sdk.HawkbitServer;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
-import org.eclipse.hawkbit.sdk.HawkbitSDKConfigurtion;
+import org.eclipse.hawkbit.sdk.HawkbitServer;
 import org.eclipse.hawkbit.sdk.Tenant;
-import org.eclipse.hawkbit.sdk.demo.SetupHelper;
 import org.eclipse.hawkbit.sdk.device.DdiController;
+import org.eclipse.hawkbit.sdk.device.DdiTenant;
 import org.eclipse.hawkbit.sdk.device.UpdateHandler;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -54,66 +50,60 @@ public class MultiDeviceApp {
         return new HawkbitClient(hawkBitServer, client, encoder, decoder, contract);
     }
 
+    @Bean
+    DdiTenant ddiTenant(final Tenant defaultTenant,
+                        final HawkbitClient hawkbitClient) {
+        return new DdiTenant(defaultTenant, hawkbitClient);
+    }
+
     @ShellComponent
     public static class Shell {
 
-        private final Tenant tenant;
+        private final DdiTenant ddiTenant;
         private final UpdateHandler updateHandler;
-        private final HawkbitClient hawkbitClient;
-        private final Map<String, DdiController> devices = new ConcurrentHashMap<>();
 
         private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         private boolean setup;
 
-        Shell(final Tenant tenant, final Optional<UpdateHandler> updateHandler, final HawkbitClient hawkbitClient) {
-            this.tenant = tenant;
+        Shell(final DdiTenant ddiTenant, final Optional<UpdateHandler> updateHandler) {
+            this.ddiTenant = ddiTenant;
             this.updateHandler = updateHandler.orElse(null);
-            this.hawkbitClient = hawkbitClient;
         }
 
         @ShellMethod(key = "setup")
         public void setup() {
-            SetupHelper.setupTargetAuthentication(hawkbitClient, tenant);
+            ddiTenant.resetTargetAuthentication();
             setup = true;
         }
 
         @ShellMethod(key = "start-one")
         public void startOne(@ShellOption("--id") final String controllerId) {
-            DdiController device = devices.get(controllerId);
             final String securityTargetToken;
             if (setup) {
-                securityTargetToken = SetupHelper.setupTargetToken(
-                        controllerId, null, hawkbitClient, tenant);
+                securityTargetToken = ddiTenant.registerOrUpdateToken(controllerId, null);
             } else {
                 securityTargetToken = null;
             }
-            if (device == null) {
-                device = new DdiController(
-                        tenant,
-                        Controller.builder()
+            // Create device with security token if not yet registered in this execution
+            // if already created in this execution of app, just start the poll
+            ddiTenant.getController(controllerId).ifPresentOrElse(
+                    ddiController -> ddiController.start(scheduler),
+                    () -> ddiTenant.createController(Controller.builder()
                                 .controllerId(controllerId)
                                 .securityToken(securityTargetToken)
-                                .build(),
-                        updateHandler,
-                        hawkbitClient).setOverridePollMillis(10_000);
-                final DdiController oldDevice = devices.putIfAbsent(controllerId, device);
-                if (oldDevice != null) {
-                    device = oldDevice; // reuse existing
-                }
-            }
-
-            device.start(scheduler);
+                                .build(),updateHandler)
+                            .setOverridePollMillis(10_000)
+                            .start(scheduler)
+                    );
         }
 
         @ShellMethod(key = "stop-one")
         public void stopOne(@ShellOption("--id") final String controllerId) {
-            final DdiController device = devices.get(controllerId);
-            if (device == null) {
-                throw new IllegalArgumentException("Controller with id " + controllerId + " not found!");
-            } else {
-                device.stop();
-            }
+            ddiTenant.getController(controllerId).ifPresentOrElse(
+                    DdiController::stop,
+                    () -> log.error("Controller with id " + controllerId + " not found!"));
+
         }
 
         @ShellMethod(key = "start")
