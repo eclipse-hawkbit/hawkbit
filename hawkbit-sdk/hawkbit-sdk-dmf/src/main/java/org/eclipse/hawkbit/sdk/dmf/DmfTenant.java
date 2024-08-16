@@ -46,7 +46,7 @@ public class DmfTenant {
     }
 
     public void destroy() {
-        controllers.values().forEach(DmfController::remove);
+        controllers.values().forEach(DmfController::unregisterThing);
         controllers.clear();
     }
 
@@ -57,7 +57,7 @@ public class DmfTenant {
     }
 
     public void removeController(final String controllerId) {
-        Optional.ofNullable(controllers.remove(controllerId)).ifPresent(DmfController::remove);
+        Optional.ofNullable(controllers.remove(controllerId)).ifPresent(DmfController::unregisterThing);
     }
 
     public void handleThingDeleted(final String controllerId) {

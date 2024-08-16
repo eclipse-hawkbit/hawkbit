@@ -23,10 +23,7 @@
    <name>hawkBit :: SDK :: Commons</name>
    <description>SDK commons</description>
 
-   <properties>
-      <spring-cloud-starter-openfeign.version>4.1.0</spring-cloud-starter-openfeign.version>
-      <openfeign-hc5.version>13.2.1</openfeign-hc5.version>
-   </properties>
+
 
    <dependencies>
       <dependency>
@@ -39,7 +36,6 @@
          <artifactId>feign-hc5</artifactId>
          <version>${openfeign-hc5.version}</version>
       </dependency>
-
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-starter-hateoas</artifactId>

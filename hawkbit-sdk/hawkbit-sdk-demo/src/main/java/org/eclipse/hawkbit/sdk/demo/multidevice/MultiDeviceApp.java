@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.sdk.Tenant;
 import org.eclipse.hawkbit.sdk.device.DdiController;
 import org.eclipse.hawkbit.sdk.device.DdiTenant;
 import org.eclipse.hawkbit.sdk.device.UpdateHandler;
+import org.eclipse.hawkbit.sdk.mgmt.MgmtApi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -55,22 +56,29 @@ public class MultiDeviceApp {
         return new DdiTenant(defaultTenant, hawkbitClient);
     }
 
+    @Bean
+    MgmtApi mgmtApi(final Tenant defaultTenant, final HawkbitClient hawkbitClient) {
+        return new MgmtApi(defaultTenant, hawkbitClient);
+    }
+
     @ShellComponent
     public static class Shell {
 
         private final DdiTenant ddiTenant;
+        private final MgmtApi mgmtApi;
         private final UpdateHandler updateHandler;
 
         private boolean setup;
 
-        Shell(final DdiTenant ddiTenant, final Optional<UpdateHandler> updateHandler) {
+        Shell(final DdiTenant ddiTenant, final MgmtApi mgmtApi, final Optional<UpdateHandler> updateHandler) {
             this.ddiTenant = ddiTenant;
+            this.mgmtApi = mgmtApi;
             this.updateHandler = updateHandler.orElse(null);
         }
 
         @ShellMethod(key = "setup")
         public void setup() {
-            ddiTenant.resetTargetAuthentication();
+            mgmtApi.setupTargetAuthentication();
             setup = true;
         }
 
@@ -78,7 +86,7 @@ public class MultiDeviceApp {
         public void startOne(@ShellOption("--id") final String controllerId) {
             final String securityTargetToken;
             if (setup) {
-                securityTargetToken = ddiTenant.registerOrUpdateToken(controllerId, null);
+                securityTargetToken = mgmtApi.setupTargetToken(controllerId,null);
             } else {
                 securityTargetToken = null;
             }

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.eclipse.hawkbit</groupId>
+        <artifactId>hawkbit-sdk</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>hawkbit-sdk-mgmt</artifactId>
+
+    <name>hawkBit :: SDK :: Management Api SDK</name>
+    <description>Management Api SDK</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-sdk-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-mgmt-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>${spring-cloud-starter-openfeign.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.openfeign</groupId>
+            <artifactId>feign-hc5</artifactId>
+            <version>${openfeign-hc5.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.sdk.device;
 
 import lombok.Getter;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.sdk.Controller;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.Tenant;
@@ -28,8 +27,9 @@ public class DdiTenant {
     @Getter
     private final Tenant tenant;
 
-    private final Map<String, DdiController> controllers = new ConcurrentHashMap<>();
+    @Getter
     private final HawkbitClient hawkbitClient;
+    private final Map<String, DdiController> controllers = new ConcurrentHashMap<>();
 
     public DdiTenant(final Tenant tenant, final HawkbitClient hawkbitClient) {
         this.tenant = tenant;
@@ -47,20 +47,8 @@ public class DdiTenant {
         return ddiController;
     }
 
-    public void deleteController(final String controllerId) {
-        Optional.ofNullable(controllers.remove(controllerId)).ifPresent(removedController -> hawkbitClient.mgmtService(MgmtTargetRestApi.class, tenant).deleteTarget(removedController.getControllerId()));
-    }
-
     public Optional<DdiController> getController(final String controllerId) {
         return Optional.ofNullable(controllers.get(controllerId));
-    }
-
-    public void resetTargetAuthentication() {
-        SetupHelper.setupTargetAuthentication(hawkbitClient, tenant);
-    }
-
-    public String registerOrUpdateToken(final String controllerId, String securityTargetToken) {
-        return SetupHelper.setupTargetToken(controllerId, securityTargetToken, hawkbitClient, tenant);
     }
 
 }
