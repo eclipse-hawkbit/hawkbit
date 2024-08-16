@@ -96,13 +96,17 @@ public class DdiController {
 
     // expects single threaded {@link java.util.concurrent.ScheduledExecutorService}
     public void start(final ScheduledExecutorService executorService) {
-        Objects.requireNonNull(executorService, "Require non null executor!");
+        stop();
 
+        Objects.requireNonNull(executorService, "Require non null executor!");
         this.executorService = executorService;
         executorService.submit(this::poll);
     }
 
     public void stop() {
+        if (executorService != null) {
+            executorService.shutdown();
+        }
         executorService = null;
         lastActionId = null;
         currentActionId = null;

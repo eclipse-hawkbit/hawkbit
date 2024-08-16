@@ -27,6 +27,7 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 import java.util.Optional;
+import java.util.concurrent.Executors;
 
 /**
  * Abstract class representing DDI device connecting directly to hawkVit.
@@ -64,9 +65,9 @@ public class DmfApp {
         @ShellMethod(key = "start-one")
         public void startOne(@ShellOption("--id") final String controllerId) {
             dmfTenant.getController(controllerId).ifPresentOrElse(
-                    DmfController::connect,
+                    dmfController -> dmfController.start(Executors.newSingleThreadScheduledExecutor()),
                     () -> dmfTenant.createController(Controller.builder().controllerId(controllerId).build(), updateHandler)
-                            .connect());
+                            .start(Executors.newSingleThreadScheduledExecutor()));
         }
 
         @ShellMethod(key = "stop-one")

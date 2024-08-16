@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.sdk.dmf.amqp.DmfSender;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Class representing DMF device twin connecting to hawkBit via DMF.
@@ -50,6 +51,9 @@ public class DmfController {
 
     private volatile Long lastActionId;
 
+    @SuppressWarnings("java:S3077") // volatile used only for the reference as expected
+    private volatile ScheduledExecutorService executorService;
+
     /**
      * Creates a new device instance.
      *
@@ -67,7 +71,9 @@ public class DmfController {
         this.dmfSender = dmfSender;
     }
 
-    public void connect() {
+    public void start(ScheduledExecutorService executorService) {
+        stop();
+        this.executorService = executorService;
         log.debug(LOG_PREFIX + "Connecting/Polling ...", getTenantId(), getControllerId());
         dmfSender.createOrUpdateThing(getTenantId(), getControllerId());
         log.debug(LOG_PREFIX + "Done. Create thing sent.", getTenantId(), getControllerId());
@@ -80,13 +86,17 @@ public class DmfController {
     }
 
     public void stop() {
+        if (executorService != null) {
+            executorService.shutdown();
+        }
+        executorService = null;
         lastActionId = null;
         currentActionId = null;
     }
 
     public void processUpdate(final EventTopic actionType, final DmfDownloadAndUpdateRequest updateRequest) {
         log.info(LOG_PREFIX + "Processing update for action {} .", getTenantId(), controllerId, updateRequest.getActionId());
-        updateHandler.getUpdateProcessor(this, actionType, updateRequest).run();
+        executorService.submit(updateHandler.getUpdateProcessor(this, actionType, updateRequest));
     }
 
     public void sendFeedback(final UpdateStatus updateStatus) {

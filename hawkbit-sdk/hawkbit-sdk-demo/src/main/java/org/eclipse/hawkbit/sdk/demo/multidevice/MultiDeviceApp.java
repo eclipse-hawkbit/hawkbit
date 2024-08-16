@@ -30,7 +30,6 @@ import org.springframework.shell.standard.ShellOption;
 
 import java.util.Optional;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Abstract class representing DDI device connecting directly to hawkVit.
@@ -62,8 +61,6 @@ public class MultiDeviceApp {
         private final DdiTenant ddiTenant;
         private final UpdateHandler updateHandler;
 
-        private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-
         private boolean setup;
 
         Shell(final DdiTenant ddiTenant, final Optional<UpdateHandler> updateHandler) {
@@ -87,14 +84,15 @@ public class MultiDeviceApp {
             }
             // Create device with security token if not yet registered in this execution
             // if already created in this execution of app, just start the poll
+            // for each new device - separate ThreadScheduler
             ddiTenant.getController(controllerId).ifPresentOrElse(
-                    ddiController -> ddiController.start(scheduler),
+                    ddiController -> ddiController.start(Executors.newSingleThreadScheduledExecutor()),
                     () -> ddiTenant.createController(Controller.builder()
                                 .controllerId(controllerId)
                                 .securityToken(securityTargetToken)
                                 .build(),updateHandler)
                             .setOverridePollMillis(10_000)
-                            .start(scheduler)
+                            .start(Executors.newSingleThreadScheduledExecutor())
                     );
         }
 

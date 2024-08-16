@@ -18,9 +18,9 @@ import org.eclipse.hawkbit.sdk.Controller;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.HawkbitServer;
 import org.eclipse.hawkbit.sdk.Tenant;
-import org.eclipse.hawkbit.sdk.device.SetupHelper;
 import org.eclipse.hawkbit.sdk.device.DdiController;
 import org.eclipse.hawkbit.sdk.device.DdiTenant;
+import org.eclipse.hawkbit.sdk.device.SetupHelper;
 import org.eclipse.hawkbit.sdk.device.UpdateHandler;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -31,7 +31,6 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.Optional;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Abstract class representing DDI device connecting directly to hawkVit.
@@ -64,7 +63,6 @@ public class DeviceApp {
 
         private final DdiController device;
 
-        private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         Shell(final DdiTenant ddiTenant, final Optional<UpdateHandler> updateHandler) {
             this.ddiTenant = ddiTenant;
@@ -88,7 +86,7 @@ public class DeviceApp {
 
         @ShellMethod(key = "start")
         public void start() {
-            device.start(scheduler);
+            device.start(Executors.newSingleThreadScheduledExecutor());
         }
 
         @ShellMethod(key = "stop")

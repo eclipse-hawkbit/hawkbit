@@ -237,7 +237,7 @@ public class VHost extends DmfSender implements MessageListener {
         final String tenant = getTenant(message);
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(message,
                 DmfDownloadAndUpdateRequest.class);
-        dmfTenants.get(tenant).getController(controllerId).get().setCurrentActionId(downloadAndUpdateRequest.getActionId());
+        dmfTenants.get(tenant).getController(controllerId).ifPresent(controller -> controller.setCurrentActionId(downloadAndUpdateRequest.getActionId()));
         processUpdate(tenant, controllerId, actionType, downloadAndUpdateRequest);
     }
 
