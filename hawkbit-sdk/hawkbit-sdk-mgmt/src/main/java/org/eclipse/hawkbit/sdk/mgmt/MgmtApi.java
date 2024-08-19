@@ -118,7 +118,7 @@ public class MgmtApi {
         return securityTargetToken;
     }
 
-    public void deleteController(final HawkbitClient hawkbitClient, final Tenant tenant, final String controllerId) {
+    public void deleteController(final String controllerId) {
         hawkbitClient.mgmtService(MgmtTargetRestApi.class, tenant).deleteTarget(controllerId);
     }
 
