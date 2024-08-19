@@ -27,6 +27,7 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 import java.util.Optional;
+import java.util.concurrent.Executors;
 
 /**
  * Abstract class representing DDI device connecting directly to hawkVit.
@@ -45,33 +46,35 @@ public class DmfApp {
         return new Amqp(rabbitProperties, amqpProperties);
     }
 
+    @Bean
+    DmfTenant dmfTenant(Tenant tenant, Amqp amqp) {
+        return new DmfTenant(tenant, amqp);
+    }
+
     @ShellComponent
     public static class Shell {
 
-        private final UpdateHandler updateHandler;
         private final DmfTenant dmfTenant;
+        private final UpdateHandler updateHandler;
 
-        Shell(final Tenant tenant, final Optional<UpdateHandler> updateHandler, final Amqp amqp) {
+        Shell(final DmfTenant dmfTenant, final Optional<UpdateHandler> updateHandler) {
+            this.dmfTenant = dmfTenant;
             this.updateHandler = updateHandler.orElse(null);
-            dmfTenant = new DmfTenant(tenant, amqp);
         }
 
         @ShellMethod(key = "start-one")
         public void startOne(@ShellOption("--id") final String controllerId) {
-            if (dmfTenant.getController(controllerId).isEmpty()) {
-                dmfTenant.create(
-                        Controller.builder().controllerId(controllerId).build(),
-                        updateHandler).connect();
-            }
+            dmfTenant.getController(controllerId).ifPresentOrElse(
+                    dmfController -> dmfController.start(Executors.newSingleThreadScheduledExecutor()),
+                    () -> dmfTenant.createController(Controller.builder().controllerId(controllerId).build(), updateHandler)
+                            .start(Executors.newSingleThreadScheduledExecutor()));
         }
 
         @ShellMethod(key = "stop-one")
         public void stopOne(@ShellOption("--id") final String controllerId) {
             dmfTenant.getController(controllerId).ifPresentOrElse(
                     DmfController::stop,
-                    () -> {
-                        throw new IllegalArgumentException("Controller with id " + controllerId + " not found!");
-                    });
+                    () -> log.error("Controller with id " + controllerId + " not found!"));
         }
 
         @ShellMethod(key = "start")

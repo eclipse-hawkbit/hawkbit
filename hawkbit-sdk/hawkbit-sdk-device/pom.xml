@@ -35,5 +35,6 @@
          <artifactId>hawkbit-ddi-api</artifactId>
          <version>${project.version}</version>
       </dependency>
+
    </dependencies>
 </project>

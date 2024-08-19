@@ -7,11 +7,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.sdk.demo;
+package org.eclipse.hawkbit.sdk.mgmt;
+
 
 import feign.FeignException;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
@@ -29,21 +30,28 @@ import java.util.Objects;
 import java.util.Random;
 
 /**
- * Abstract class representing DDI device connecting directly to hawkVit.
+ * Management Api Interface
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
-public class SetupHelper {
+@AllArgsConstructor
+public class MgmtApi {
 
     private static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY = "authentication.gatewaytoken.key";
     private static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED = "authentication.gatewaytoken.enabled";
     private static final String AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED = "authentication.targettoken.enabled";
 
+
+    @NonNull
+    private final Tenant tenant;
+    @NonNull
+    private final HawkbitClient hawkbitClient;
+
+
     // if gateway toke is configured then the gateway auth is enabled key is set
     // so all devices use gateway token authentication
     // otherwise target token authentication is enabled. Then all devices shall be registerd
     // and the target token shall be set to the one from the DDI controller instance
-    public static void setupTargetAuthentication(final HawkbitClient hawkbitClient, final Tenant tenant) {
+    public void setupTargetAuthentication() {
         final MgmtTenantManagementRestApi mgmtTenantManagementRestApi =
                 hawkbitClient.mgmtService(MgmtTenantManagementRestApi.class, tenant);
         final String gatewayToken = tenant.getGatewayToken();
@@ -75,9 +83,7 @@ public class SetupHelper {
     }
 
     // returns target token
-    public static String setupTargetToken(
-            final String controllerId, String securityTargetToken,
-            final HawkbitClient hawkbitClient, final Tenant tenant) {
+    public String setupTargetToken(final String controllerId, String securityTargetToken) {
         if (ObjectUtils.isEmpty(tenant.getGatewayToken())) {
             final MgmtTargetRestApi mgmtTargetRestApi = hawkbitClient.mgmtService(MgmtTargetRestApi.class, tenant);
             try {
@@ -110,6 +116,10 @@ public class SetupHelper {
         }
 
         return securityTargetToken;
+    }
+
+    public void deleteController(final String controllerId) {
+        hawkbitClient.mgmtService(MgmtTargetRestApi.class, tenant).deleteTarget(controllerId);
     }
 
     private static final Random RND = new SecureRandom();

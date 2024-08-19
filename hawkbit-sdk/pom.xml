@@ -22,8 +22,14 @@
     <artifactId>hawkbit-sdk</artifactId>
     <packaging>pom</packaging>
 
+    <properties>
+        <spring-cloud-starter-openfeign.version>4.1.0</spring-cloud-starter-openfeign.version>
+        <openfeign-hc5.version>13.2.1</openfeign-hc5.version>
+    </properties>
+
     <modules>
         <module>hawkbit-sdk-commons</module>
+        <module>hawkbit-sdk-mgmt</module>
         <module>hawkbit-sdk-device</module>
         <module>hawkbit-sdk-dmf</module>
         <module>hawkbit-sdk-demo</module>

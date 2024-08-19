@@ -42,7 +42,7 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-mgmt-api</artifactId>
+         <artifactId>hawkbit-sdk-mgmt</artifactId>
          <version>${project.version}</version>
       </dependency>
 

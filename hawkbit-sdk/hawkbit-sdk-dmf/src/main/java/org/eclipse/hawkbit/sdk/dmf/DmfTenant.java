@@ -46,17 +46,21 @@ public class DmfTenant {
     }
 
     public void destroy() {
-        controllers.values().forEach(DmfController::stop);
+        controllers.values().forEach(DmfController::unregisterThing);
         controllers.clear();
     }
 
-    public DmfController create(final Controller controller, final UpdateHandler updateHandler) {
+    public DmfController createController(final Controller controller, final UpdateHandler updateHandler) {
         final DmfController dmfController = new DmfController(tenant, controller, updateHandler, vHost);
         controllers.put(controller.getControllerId(), dmfController);
         return dmfController;
     }
 
-    public void remove(final String controllerId) {
+    public void removeController(final String controllerId) {
+        Optional.ofNullable(controllers.remove(controllerId)).ifPresent(DmfController::unregisterThing);
+    }
+
+    public void handleThingDeleted(final String controllerId) {
         Optional.ofNullable(controllers.remove(controllerId)).ifPresent(DmfController::stop);
     }
 
