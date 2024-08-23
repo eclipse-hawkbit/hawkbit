@@ -1203,6 +1203,16 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         return target;
     }
 
+    private Target createTargetWithTargetTypeAndMetadata(final String controllerId, final long targetTypeId, final int count) {
+        final Target target = testdataFactory.createTarget(controllerId, controllerId, targetTypeId);
+
+        for (int index = 1; index <= count; index++) {
+            insertTargetMetadata("key" + index, controllerId + "-value" + index, target);
+        }
+
+        return target;
+    }
+
     @Test
     @WithUser(allSpPermissions = true)
     @Description("Checks that target type is not assigned to target if invalid.")
@@ -1276,6 +1286,24 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         validateFoundTargetsByRsql(rsqlOrControllerIdFilter, controllerId1, controllerId2);
         validateFoundTargetsByRsql(rsqlOrControllerIdWithWrongKeyFilter, controllerId2);
         validateFoundTargetsByRsql(rsqlOrControllerIdNotEqualFilter, controllerId1, controllerId2);
+    }
+
+    @Test
+    @Description("Test that RSQL filter finds targets with tag and metadata.")
+    void findTargetsByRsqlWithTypeAndMetadata() {
+        final String controllerId1 = "target1";
+        final String controllerId2 = "target2";
+        createTargetWithMetadata(controllerId1, 2);
+        final TargetType type = testdataFactory.createTargetType("type1", Collections.emptyList());
+        createTargetWithTargetTypeAndMetadata(controllerId2, type.getId(), 2);
+
+        assertThat(targetManagement.count()).as("Total targets").isEqualTo(2);
+
+        final String rsqlAndByBoth = "targettype.key==type1 or metadata.key1==target1-value1";
+        validateFoundTargetsByRsql(rsqlAndByBoth, controllerId1, controllerId2);
+
+        final String rsqlAndControllerIdFilter = "targettype.key==type1 and metadata.key1==target1-value1";
+        validateFoundTargetsByRsql(rsqlAndControllerIdFilter);
     }
 
     @Test
