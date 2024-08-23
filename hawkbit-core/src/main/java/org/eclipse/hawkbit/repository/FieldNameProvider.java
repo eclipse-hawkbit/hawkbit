@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * An interface for declaring the name of the field described in the database
@@ -29,6 +29,7 @@ public interface FieldNameProvider {
      * Separator for the sub attributes
      */
     String SUB_ATTRIBUTE_SEPARATOR = ".";
+    String SUB_ATTRIBUTE_SPLIT_REGEX = "\\" + SUB_ATTRIBUTE_SEPARATOR;
 
     /**
      * @return the string representation of the underlying persistence field
@@ -39,39 +40,36 @@ public interface FieldNameProvider {
     /**
      * Returns the sub attributes
      *
-     * @param propertyFieldName
-     *            the given field
+     * @param propertyFieldName the given field
      * @return array consisting of sub attributes
      */
     default String[] getSubAttributes(final String propertyFieldName) {
         if (isMap()) {
-            final String[] subAttributes = propertyFieldName.split("\\" + SUB_ATTRIBUTE_SEPARATOR, 2);
-            // [0] fieldname |[1] keyname
+            final String[] subAttributes = propertyFieldName.split(SUB_ATTRIBUTE_SPLIT_REGEX, 2);
+            // [0] field name | [1] key name
             final String mapKeyName = subAttributes.length == 2 ? subAttributes[1] : null;
-            if (StringUtils.isEmpty(mapKeyName)) {
+            if (ObjectUtils.isEmpty(mapKeyName)) {
                 return new String[] { getFieldName() };
             }
             return new String[] { getFieldName(), mapKeyName };
         }
-        return propertyFieldName.split("\\" + SUB_ATTRIBUTE_SEPARATOR);
+        return propertyFieldName.split(SUB_ATTRIBUTE_SPLIT_REGEX);
     }
 
     /**
      * Contains the sub entity the given field.
      *
-     * @param propertyField
-     *            the given field
+     * @param propertyField the given field
      * @return <code>true</code> contains <code>false</code> contains not
      */
     default boolean containsSubEntityAttribute(final String propertyField) {
-
         final List<String> subEntityAttributes = getSubEntityAttributes();
         if (subEntityAttributes.contains(propertyField)) {
             return true;
         }
-        for (final String attribute : subEntityAttributes) {
-            final String[] graph = attribute.split("\\" + SUB_ATTRIBUTE_SEPARATOR);
 
+        for (final String attribute : subEntityAttributes) {
+            final String[] graph = attribute.split(SUB_ATTRIBUTE_SPLIT_REGEX);
             for (final String subAttribute : graph) {
                 if (subAttribute.equalsIgnoreCase(propertyField)) {
                     return true;
@@ -102,7 +100,7 @@ public interface FieldNameProvider {
      * @return <code>true</code> is a map <code>false</code> is not a map
      */
     default boolean isMap() {
-        return false;
+        return getSubEntityMapTuple().isPresent();
     }
 
     /**

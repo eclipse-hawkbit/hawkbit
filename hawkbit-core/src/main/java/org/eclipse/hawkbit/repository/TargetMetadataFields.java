@@ -9,30 +9,21 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import lombok.Getter;
+
 /**
  * Sort fields for TargetMetadata.
- *
  */
+@Getter
 public enum TargetMetadataFields implements FieldNameProvider {
 
-    /**
-     * The value field.
-     */
-    VALUE("value"),
-    /**
-     * The key field.
-     */
-    KEY("key");
+    KEY("key"),
+    VALUE("value");
 
     private final String fieldName;
 
-    private TargetMetadataFields(final String fieldName) {
+    TargetMetadataFields(final String fieldName) {
         this.fieldName = fieldName;
-    }
-
-    @Override
-    public String getFieldName() {
-        return fieldName;
     }
 
     @Override

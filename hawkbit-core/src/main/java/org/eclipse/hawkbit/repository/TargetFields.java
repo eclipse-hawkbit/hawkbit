@@ -9,8 +9,9 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import lombok.Getter;
+
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
@@ -19,112 +20,46 @@ import java.util.Optional;
 /**
  * Describing the fields of the Target model which can be used in the REST API
  * e.g. for sorting etc.
- *
  */
+@Getter
 public enum TargetFields implements FieldNameProvider {
 
-    /**
-     * The controllerId field.
-     */
     ID("controllerId"),
-
-    /**
-     * The name field.
-     */
     NAME("name"),
-    /**
-     * The description field.
-     */
     DESCRIPTION("description"),
-    /**
-     * The createdAt field.
-     */
     CREATEDAT("createdAt"),
-    /**
-     * The createdAt field.
-     */
     LASTMODIFIEDAT("lastModifiedAt"),
-    /**
-     * The controllerId field.
-     */
     CONTROLLERID("controllerId"),
-    /**
-     * The updateStatus field.
-     */
     UPDATESTATUS("updateStatus"),
-
-    /**
-     * The ip-address field.
-     */
     IPADDRESS("address"),
-
-    /**
-     * The attribute map of target info.
-     */
-    ATTRIBUTE("controllerAttributes", true),
-
-    /**
-     * distribution sets which is assigned to the target.
-     */
+    ATTRIBUTE("controllerAttributes"),
     ASSIGNEDDS("assignedDistributionSet", "name", "version"),
-
-    /**
-     * distribution sets which is installed on the target.
-     */
     INSTALLEDDS("installedDistributionSet", "name", "version"),
-
-    /**
-     * The tags field.
-     */
     TAG("tags.name"),
-
-    /**
-     * Last time the DDI or DMF client polled.
-     */
     LASTCONTROLLERREQUESTAT("lastTargetQuery"),
-
-    /**
-     * The metadata.
-     */
     METADATA("metadata", new SimpleImmutableEntry<>("key", "value")),
-
-    /**
-     * The target type.
-     */
     TARGETTYPE("targetType", TargetTypeFields.KEY.getFieldName(), TargetTypeFields.NAME.getFieldName());
 
     private final String fieldName;
-    private List<String> subEntityAttribues;
-    private boolean mapField;
-    private Entry<String, String> subEntityMapTuple;
+    private final List<String> subEntityAttributes;
+    private final Entry<String, String> subEntityMapTuple;
 
-    private TargetFields(final String fieldName) {
-        this(fieldName, false, Collections.emptyList(), null);
+    TargetFields(final String fieldName) {
+        this(fieldName, Collections.emptyList(), null);
     }
 
-    private TargetFields(final String fieldName, final boolean isMapField) {
-        this(fieldName, isMapField, Collections.emptyList(), null);
+    TargetFields(final String fieldName, final String... subEntityAttributes) {
+        this(fieldName, List.of(subEntityAttributes), null);
     }
 
-    private TargetFields(final String fieldName, final String... subEntityAttribues) {
-        this(fieldName, false, Arrays.asList(subEntityAttribues), null);
+    TargetFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
+        this(fieldName, Collections.emptyList(), subEntityMapTuple);
     }
 
-    private TargetFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
-        this(fieldName, true, Collections.emptyList(), subEntityMapTuple);
-    }
-
-    private TargetFields(final String fieldName, final boolean mapField, final List<String> subEntityAttribues,
-            final Entry<String, String> subEntityMapTuple) {
+    TargetFields(final String fieldName, final List<String> subEntityAttributes, final Entry<String, String> subEntityMapTuple) {
         this.fieldName = fieldName;
-        this.mapField = mapField;
-        this.subEntityAttribues = subEntityAttribues;
+        this.subEntityAttributes = subEntityAttributes;
         this.subEntityMapTuple = subEntityMapTuple;
-    }
-
-    @Override
-    public List<String> getSubEntityAttributes() {
-        return subEntityAttribues;
     }
 
     @Override
@@ -134,11 +69,6 @@ public enum TargetFields implements FieldNameProvider {
 
     @Override
     public boolean isMap() {
-        return mapField;
-    }
-
-    @Override
-    public String getFieldName() {
-        return fieldName;
+        return this == ATTRIBUTE || getSubEntityMapTuple().isPresent();
     }
 }

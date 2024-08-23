@@ -9,39 +9,23 @@
  */
 package org.eclipse.hawkbit.repository;
 
-/**
- * Describing the fields of the Tag model which can be used in the REST API e.g.
- * for sorting etc.
- * Additionally, here were added fields for Target in order
- * filtering over target fields also.
- */
-public enum TargetTagFields implements FieldNameProvider {
-  /**
-   * The id field.
-   */
-  ID(TagFields.ID.getFieldName()),
+import lombok.Getter;
 
-  /**
-   * The name field.
-   */
+/**
+ * Describing the fields of the Tag model which can be used in the REST API e.g. for sorting etc.
+ * Additionally, here were added fields for Target in order filtering over target fields also.
+ */
+@Getter
+public enum TargetTagFields implements FieldNameProvider {
+
+  ID(TagFields.ID.getFieldName()),
   NAME(TagFields.NAME.getFieldName()),
-  /**
-   * The description field.
-   */
   DESCRIPTION(TagFields.DESCRIPTION.getFieldName()),
-  /**
-   * The controllerId field.
-   */
   COLOUR(TagFields.COLOUR.getFieldName());
 
   private final String fieldName;
 
   TargetTagFields(final String fieldName) {
     this.fieldName = fieldName;
-  }
-
-  @Override
-  public String getFieldName() {
-    return fieldName;
   }
 }

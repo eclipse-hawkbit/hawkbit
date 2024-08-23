@@ -9,33 +9,21 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import lombok.Getter;
+
 /**
  * Sort fields for DistributionSetMetadata.
- *
- *
- *
- *
  */
+@Getter
 public enum DistributionSetMetadataFields implements FieldNameProvider {
 
-    /**
-     * The value field.
-     */
-    VALUE("value"),
-    /**
-     * The key field.
-     */
-    KEY("key");
+    KEY("key"),
+    VALUE("value");
 
     private final String fieldName;
 
-    private DistributionSetMetadataFields(final String fieldName) {
+    DistributionSetMetadataFields(final String fieldName) {
         this.fieldName = fieldName;
-    }
-
-    @Override
-    public String getFieldName() {
-        return fieldName;
     }
 
     @Override

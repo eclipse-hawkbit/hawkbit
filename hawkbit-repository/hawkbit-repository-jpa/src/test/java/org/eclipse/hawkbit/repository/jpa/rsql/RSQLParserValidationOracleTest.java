@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
+import org.eclipse.hawkbit.repository.rsql.SuggestToken;
 import org.eclipse.hawkbit.repository.rsql.ValidationOracleContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class RSQLParserValidationOracleTest extends AbstractJpaIntegrationTest {
     private static final String[] OP_SUGGESTIONS = new String[] { "==", "!=", "=ge=", "=le=", "=gt=", "=lt=", "=in=",
             "=out=" };
     private static final String[] FIELD_SUGGESTIONS = Arrays.stream(TargetFields.values())
-            .map(field -> field.name().toLowerCase()).toArray(size -> new String[size]);
+            .map(field -> field.name().toLowerCase()).toArray(String[]::new);
     private static final String[] AND_OR_SUGGESTIONS = new String[] { "and", "or" };
     private static final String[] NAME_VERSION_SUGGESTIONS = new String[] { "name", "version" };
 
@@ -73,10 +74,9 @@ public class RSQLParserValidationOracleTest extends AbstractJpaIntegrationTest {
     }
 
     private List<String> getSuggestions(final String rsqlQuery) {
-        final ValidationOracleContext suggest = rsqlValidationOracle.suggest(rsqlQuery, -1);
-        final List<String> currentSuggestions = suggest.getSuggestionContext().getSuggestions().stream()
-                .map(suggestion -> suggestion.getSuggestion()).collect(Collectors.toList());
-        return currentSuggestions;
+        return rsqlValidationOracle
+                .suggest(rsqlQuery, -1).getSuggestionContext().getSuggestions().stream()
+                .map(SuggestToken::getSuggestion)
+                .collect(Collectors.toList());
     }
-
 }
