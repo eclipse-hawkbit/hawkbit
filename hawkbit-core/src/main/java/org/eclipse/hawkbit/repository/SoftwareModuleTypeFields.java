@@ -9,44 +9,23 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import lombok.Getter;
+
 /**
- * Describing the fields of the SoftwareModuleType model which can be used in
- * the REST API e.g. for sorting etc.
- *
- *
- *
- *
+ * Describing the fields of the SoftwareModuleType model which can be used in the REST API e.g. for sorting etc.
  */
+@Getter
 public enum SoftwareModuleTypeFields implements FieldNameProvider {
-    /**
-     * The name field.
-     */
-    NAME("name"),
-    /**
-     * The description field.
-     */
-    DESCRIPTION("description"),
-    /**
-     * The type key field.
-     */
-    KEY("key"),
-    /**
-     * The id field.
-     */
+
     ID("id"),
-    /**
-     * The max ds assignments field.
-     */
+    KEY("key"),
+    NAME("name"),
+    DESCRIPTION("description"),
     MAXASSIGNMENTS("maxAssignments");
 
     private final String fieldName;
 
-    private SoftwareModuleTypeFields(final String fieldName) {
+    SoftwareModuleTypeFields(final String fieldName) {
         this.fieldName = fieldName;
-    }
-
-    @Override
-    public String getFieldName() {
-        return fieldName;
     }
 }

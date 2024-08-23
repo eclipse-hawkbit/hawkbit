@@ -9,37 +9,22 @@
  */
 package org.eclipse.hawkbit.repository;
 
-/**
- * Describing the fields of the TargetType model which can be used in
- * the REST API
- */
-public enum TargetTypeFields implements FieldNameProvider {
-    /**
-     * The name field.
-     */
-    KEY("key"),
-    /**
-     * The name field.
-     */
-    NAME("name"),
-    /**
-     * The description field.
-     */
-    DESCRIPTION("description"),
+import lombok.Getter;
 
-    /**
-     * The id field.
-     */
-    ID("id");
+/**
+ * Describing the fields of the TargetType model which can be used in the REST API
+ */
+@Getter
+public enum TargetTypeFields implements FieldNameProvider {
+
+    ID("id"),
+    KEY("key"),
+    NAME("name"),
+    DESCRIPTION("description");
 
     private final String fieldName;
 
     TargetTypeFields(final String fieldName) {
         this.fieldName = fieldName;
-    }
-
-    @Override
-    public String getFieldName() {
-        return fieldName;
     }
 }

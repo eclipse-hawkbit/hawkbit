@@ -9,38 +9,22 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import lombok.Getter;
+
 /**
  * Sort fields for SoftwareModuleMetadata.
- *
- *
- *
- *
  */
+@Getter
 public enum SoftwareModuleMetadataFields implements FieldNameProvider {
 
-    /**
-     * The value field.
-     */
-    VALUE("value"),
-    /**
-     * The key field.
-     */
     KEY("key"),
-
-    /**
-     * The target visible field.
-     */
+    VALUE("value"),
     TARGETVISIBLE("targetVisible");
 
     private final String fieldName;
 
-    private SoftwareModuleMetadataFields(final String fieldName) {
+    SoftwareModuleMetadataFields(final String fieldName) {
         this.fieldName = fieldName;
-    }
-
-    @Override
-    public String getFieldName() {
-        return fieldName;
     }
 
     @Override

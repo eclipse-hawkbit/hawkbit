@@ -56,7 +56,6 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
 
     @Override
     public ValidationOracleContext suggest(final String rsqlQuery, final int cursorPosition) {
-
         final List<SuggestToken> expectedTokens = new ArrayList<>();
         final ValidationOracleContext context = new ValidationOracleContext();
         context.setSyntaxError(true);
@@ -92,8 +91,8 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
             final Collection<String> tokenImages = TokenDescription.getTokenImage(TokenDescription.LOGICAL_OP);
             final List<SuggestToken> logicalOps = new ArrayList<>(tokenImages.size());
             for (final String tokenImage : tokenImages) {
-                logicalOps.add(new SuggestToken(currentQueryLength, currentQueryLength + tokenImage.length(), null,
-                        tokenImage));
+                logicalOps.add(
+                        new SuggestToken(currentQueryLength, currentQueryLength + tokenImage.length(), null, tokenImage));
             }
             return logicalOps;
         }
