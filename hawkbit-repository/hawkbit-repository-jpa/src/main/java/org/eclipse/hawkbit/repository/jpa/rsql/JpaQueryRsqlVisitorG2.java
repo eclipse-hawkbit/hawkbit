@@ -12,25 +12,16 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
-import jakarta.persistence.criteria.From;
-import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.MapJoin;
 import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.PluralJoin;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
@@ -41,6 +32,9 @@ import cz.jirutka.rsql.parser.ast.LogicalNode;
 import cz.jirutka.rsql.parser.ast.Node;
 import cz.jirutka.rsql.parser.ast.OrNode;
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.metamodel.Type;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
@@ -58,15 +52,11 @@ import org.springframework.util.ObjectUtils;
  * An implementation of the {@link RSQLVisitor} to visit the parsed tokens and
  * build JPA where clauses.
  *
- * @deprecated Old implementation of RSQL Visitor. Deprecated in favour of next gen implementation - {@link JpaQueryRsqlVisitorG2}.
- *     It will be kept for some time in order to keep backward compatibility and to allow for a smooth transition. Also, in case of
- *     problems with the new implementation, this one can be used as a fallback.
  * @param <A> the enum for providing the field name of the entity field to filter on.
  * @param <T> the entity type referenced by the root
  */
-@Deprecated(forRemoval = true)
 @Slf4j
-public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> extends AbstractFieldNameRSQLVisitor<A>
+public class JpaQueryRsqlVisitorG2<A extends Enum<A> & FieldNameProvider, T> extends AbstractFieldNameRSQLVisitor<A>
         implements RSQLVisitor<List<Predicate>, String> {
 
     public static final Character LIKE_WILDCARD = '*';
@@ -74,143 +64,80 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
     private static final List<String> NO_JOINS_OPERATOR = List.of("!=", "=out=");
     private static final String ESCAPE_CHAR_WITH_ASTERISK = ESCAPE_CHAR +"*";
 
-    private final Map<Integer, Set<Join<Object, Object>>> joinsInLevel = new HashMap<>(3);
-
-    private final CriteriaBuilder cb;
-    private final CriteriaQuery<?> query;
-    private final Database database;
-    private final boolean ensureIgnoreCase;
     private final Root<T> root;
-    private final SimpleTypeConverter simpleTypeConverter;
+    private final CriteriaQuery<?> query;
+    private final CriteriaBuilder cb;
+    private final Database database;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
+    private final boolean ensureIgnoreCase;
 
-    private int level;
-    private boolean isOrLevel;
+    private final SimpleTypeConverter simpleTypeConverter = new SimpleTypeConverter();
+
     private boolean joinsNeeded;
 
-    public JpaQueryRsqlVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
-            final CriteriaQuery<?> query, final boolean ensureIgnoreCase) {
+    public JpaQueryRsqlVisitorG2(final Class<A> enumType,
+            final Root<T> root, final CriteriaQuery<?> query, final CriteriaBuilder cb,
+            final Database database, final VirtualPropertyReplacer virtualPropertyReplacer, final boolean ensureIgnoreCase) {
         super(enumType);
         this.root = root;
         this.cb = cb;
         this.query = query;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
-        this.simpleTypeConverter = new SimpleTypeConverter();
         this.database = database;
         this.ensureIgnoreCase = ensureIgnoreCase;
     }
 
-    private void beginLevel(final boolean isOr) {
-        level++;
-        isOrLevel = isOr;
-        joinsInLevel.put(level, new HashSet<>(2));
-    }
-
-    private void endLevel() {
-        joinsInLevel.remove(level);
-        level--;
-        isOrLevel = false;
-    }
-
-    private Set<Join<Object, Object>> getCurrentJoins() {
-        if (level > 0) {
-            return joinsInLevel.get(level);
-        }
-        return Collections.emptySet();
-    }
-
-    private Optional<Join<Object, Object>> findCurrentJoinOfType(final Class<?> type) {
-        return getCurrentJoins().stream().filter(j -> type.equals(j.getJavaType())).findAny();
-    }
-
-    private void addCurrentJoin(final Join<Object, Object> join) {
-        if (level > 0) {
-            getCurrentJoins().add(join);
-        }
-    }
-
     @Override
     public List<Predicate> visit(final AndNode node, final String param) {
-        beginLevel(false);
-        final List<Predicate> childs = acceptChildren(node);
-        endLevel();
-        if (!childs.isEmpty()) {
-            return toSingleList(cb.and(childs.toArray(new Predicate[0])));
+        final List<Predicate> children = acceptChildren(node);
+        if (children.isEmpty()) {
+            return toSingleList(cb.conjunction());
+        } else {
+            return toSingleList(cb.and(children.toArray(new Predicate[0])));
         }
-        return toSingleList(cb.conjunction());
     }
 
     @Override
     public List<Predicate> visit(final OrNode node, final String param) {
-        beginLevel(true);
-        final List<Predicate> childs = acceptChildren(node);
-        endLevel();
-        if (!childs.isEmpty()) {
-            return toSingleList(cb.or(childs.toArray(new Predicate[0])));
+        final List<Predicate> children = acceptChildren(node);
+        if (children.isEmpty()) {
+            return toSingleList(cb.conjunction());
+        } else {
+            return toSingleList(cb.or(children.toArray(new Predicate[0])));
         }
-        return toSingleList(cb.conjunction());
     }
 
     private static List<Predicate> toSingleList(final Predicate predicate) {
         return Collections.singletonList(predicate);
     }
 
-    /**
-     * Resolves the Path for a field in the persistence layer and joins the
-     * required models. This operation is part of a tree traversal through an
-     * RSQL expression. It creates for every field that is not part of the root
-     * model a join to the foreign model. This behavior is optimized when
-     * several joins happen directly under an OR node in the traversed tree. The
-     * same foreign model is only joined once.
-     *
-     * Example: tags.name==M;(tags.name==A,tags.name==B,tags.name==C) This
-     * example joins the tags model only twice, because for the OR node in
-     * brackets only one join is used.
-     *
-     * @param enumField
-     *            field from a FieldNameProvider to resolve on the persistence
-     *            layer
-     * @param finalProperty
-     *            dot notated field path
-     * @return the Path for a field
-     */
-    @SuppressWarnings("unchecked")
-    private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
-        return (Path<Object>) getFieldPath(root, enumField.getSubAttributes(finalProperty), enumField.isMap(),
-                this::getJoinFieldPath).orElseThrow(
-                        () -> new RSQLParameterUnsupportedFieldException("RSQL field path cannot be empty", null));
-    }
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private Path<?> getJoinFieldPath(final Path<?> fieldPath, final String fieldNameSplit) {
-        if (fieldPath instanceof PluralJoin join) {
-            final From joinParent = join.getParent();
-            final Optional<Join<Object, Object>> currentJoinOfType = findCurrentJoinOfType(join.getJavaType());
-            if (currentJoinOfType.isPresent() && isOrLevel) {
-                // remove the additional join and use the existing one
-                joinParent.getJoins().remove(join);
-                return currentJoinOfType.get();
-            } else {
-                final Join newJoin = joinParent.join(fieldNameSplit, JoinType.LEFT);
-                addCurrentJoin(newJoin);
-                return newJoin;
-            }
+    private static Path<Object> getFieldPath(
+            final Root<?> root, final String[] split, final boolean isMapKeyField) {
+        Path<Object> fieldPath = null;
+        for (int i = 0, end = isMapKeyField ? split.length - 1 : split.length; i < end; i++) {
+            final String fieldNameSplit = split[i];
+            fieldPath = fieldPath == null ?
+                    // if root.get creates a join we call join directly in order to specify LEFT JOIN type,
+                    // to include rows for missing in particular table / criteria (root.get creates INNER JOIN)
+                    // (see org.eclipse.persistence.internal.jpa.querydef.FromImpl implementation for more details)
+                    // otherwise delegate to root.get
+                    (isJoin(root, fieldNameSplit) ? root.join(fieldNameSplit, JoinType.LEFT) : root.get(fieldNameSplit)) :
+                    fieldPath.get(fieldNameSplit);
+        }
+        if (fieldPath == null) {
+            throw new RSQLParameterUnsupportedFieldException("RSQL field path cannot be empty", null);
         }
         return fieldPath;
     }
-
-    private static Optional<Path<?>> getFieldPath(final Root<?> root, final String[] split, final boolean isMapKeyField,
-            final BiFunction<Path<?>, String, Path<?>> joinFieldPathProvider) {
-        Path<?> fieldPath = null;
-        for (int i = 0; i < split.length; i++) {
-            if (!(isMapKeyField && i == (split.length - 1))) {
-                final String fieldNameSplit = split[i];
-                fieldPath = (fieldPath != null) ? fieldPath.get(fieldNameSplit) : root.get(fieldNameSplit);
-                fieldPath = joinFieldPathProvider.apply(fieldPath, fieldNameSplit);
-            }
-        }
-        return Optional.ofNullable(fieldPath);
+    private static boolean isJoin(final Root<?> root, final String fieldNameSplit) {
+        // see org.eclipse.persistence.internal.jpa.querydef.FromImpl implementation for more details
+        // when root.get creates a join
+        final Attribute<?, ?> attribute = root.getModel().getAttribute(fieldNameSplit);
+        if (!attribute.isCollection()) {
+            // it is a SingularAttribute and not join if it is of basic persistent type
+            return !((SingularAttribute<?, ?>) attribute).getType().getPersistenceType().equals(Type.PersistenceType.BASIC);
+        } // if a collection - it is join
+        return true;
     }
 
     @Override
@@ -223,7 +150,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
 
         final List<String> values = node.getArguments();
         final List<Object> transformedValues = new ArrayList<>();
-        final Path<Object> fieldPath = getFieldPath(fieldName, finalProperty);
+        final Path<Object> fieldPath = getFieldPath(root, fieldName.getSubAttributes(finalProperty), fieldName.isMap());
 
         for (final String value : values) {
             transformedValues.add(convertValueIfNecessary(node, fieldName, value, fieldPath));
@@ -309,12 +236,8 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
     private List<Predicate> mapToPredicate(final ComparisonNode node, final Path<Object> fieldPath,
             final List<String> values, final List<Object> transformedValues, final A enumField,
             final String finalProperty) {
-
-        String value = values.get(0);
         // if lookup is available, replace macros ...
-        if (virtualPropertyReplacer != null) {
-            value = virtualPropertyReplacer.replace(value);
-        }
+        final String value = virtualPropertyReplacer == null ? values.get(0) : virtualPropertyReplacer.replace(values.get(0));
 
         final Predicate mapPredicate = mapToMapPredicate(node, fieldPath, enumField);
 
@@ -326,34 +249,22 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
 
     private Predicate addOperatorPredicate(final ComparisonNode node, final Path<Object> fieldPath,
             final List<Object> transformedValues, final String value, final String finalProperty, final A enumField) {
-
-        // only 'equal' and 'notEqual' can handle transformed value like
-        // enums. The JPA API cannot handle object types for greaterThan etc
-        // methods.
+        // only 'equal' and 'notEqual' can handle transformed value like enums.
+        // The JPA API cannot handle object types for greaterThan etc methods.
         final Object transformedValue = transformedValues.get(0);
         final String operator = node.getOperator().getSymbol();
-
-        switch (operator) {
-        case "==":
-            return getEqualToPredicate(transformedValue, fieldPath);
-        case "!=":
-            return getNotEqualToPredicate(transformedValue, fieldPath, finalProperty, enumField);
-        case "=gt=":
-            return cb.greaterThan(pathOfString(fieldPath), value);
-        case "=ge=":
-            return cb.greaterThanOrEqualTo(pathOfString(fieldPath), value);
-        case "=lt=":
-            return cb.lessThan(pathOfString(fieldPath), value);
-        case "=le=":
-            return cb.lessThanOrEqualTo(pathOfString(fieldPath), value);
-        case "=in=":
-            return in(pathOfString(fieldPath), transformedValues);
-        case "=out=":
-            return getOutPredicate(transformedValues, finalProperty, enumField, fieldPath);
-        default:
-            throw new RSQLParameterSyntaxException(
-                    "operator symbol {" + operator + "} is either not supported or not implemented");
-        }
+        return switch (operator) {
+            case "==" -> getEqualToPredicate(transformedValue, fieldPath);
+            case "!=" -> getNotEqualToPredicate(transformedValue, fieldPath, finalProperty, enumField);
+            case "=gt=" -> cb.greaterThan(pathOfString(fieldPath), value);
+            case "=ge=" -> cb.greaterThanOrEqualTo(pathOfString(fieldPath), value);
+            case "=lt=" -> cb.lessThan(pathOfString(fieldPath), value);
+            case "=le=" -> cb.lessThanOrEqualTo(pathOfString(fieldPath), value);
+            case "=in=" -> in(pathOfString(fieldPath), transformedValues);
+            case "=out=" -> getOutPredicate(transformedValues, finalProperty, enumField, fieldPath);
+            default -> throw new RSQLParameterSyntaxException(
+                    "Operator symbol {" + operator + "} is either not supported or not implemented");
+        };
     }
 
     private Predicate getOutPredicate(
@@ -445,11 +356,11 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
 
             clearOuterJoinsIfNotNeeded();
 
-            if (isPattern(transformedValueStr)) { // a pattern, use like
-                return toNotExistsSubQueryPredicate(fieldNames, enumField, expressionToCompare -> like(expressionToCompare, toSQL(transformedValueStr)));
-            } else {
-                return toNotExistsSubQueryPredicate(fieldNames, enumField, expressionToCompare -> equal(expressionToCompare, transformedValueStr));
-            }
+            return toNotExistsSubQueryPredicate(
+                    fieldNames, enumField, expressionToCompare ->
+                            isPattern(transformedValueStr) ? // a pattern, use like
+                                    like(expressionToCompare, toSQL(transformedValueStr)) :
+                                    equal(expressionToCompare, transformedValueStr));
         }
 
         return toNullOrNotEqualPredicate(fieldPath, transformedValue);
@@ -477,8 +388,8 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
         final Root subqueryRoot = subquery.from(javaType);
         final Predicate equalPredicate = cb.equal(root.get(enumField.identifierFieldName()),
                 subqueryRoot.get(enumField.identifierFieldName()));
-        final Path innerFieldPath = getInnerFieldPath(subqueryRoot, fieldNames, enumField.isMap());
-        final Expression<String> expressionToCompare = getExpressionToCompare(innerFieldPath, enumField);
+        final Expression<String> expressionToCompare = getExpressionToCompare(
+                getFieldPath(subqueryRoot, fieldNames, enumField.isMap()), enumField);
         final Predicate subQueryPredicate = subQueryPredicateProvider.apply(expressionToCompare);
         subquery.select(subqueryRoot).where(cb.and(equalPredicate, subQueryPredicate));
         return cb.not(cb.exists(subquery));
@@ -489,34 +400,18 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Expression<String> getExpressionToCompare(final Path innerFieldPath, final A enumField) {
+    private Expression<String> getExpressionToCompare(final Path fieldPath, final A enumField) {
         if (!enumField.isMap()) {
-            return pathOfString(innerFieldPath);
+            return pathOfString(fieldPath);
         }
-        if (innerFieldPath instanceof MapJoin) {
+        if (fieldPath instanceof MapJoin) {
             // Currently we support only string key. So below cast is safe.
-            return (Expression<String>) (((MapJoin<?, ?, ?>) pathOfString(innerFieldPath)).value());
+            return (Expression<String>) (((MapJoin<?, ?, ?>) pathOfString(fieldPath)).value());
         }
         final String valueFieldName = enumField.getSubEntityMapTuple().map(Entry::getValue)
                 .orElseThrow(() -> new UnsupportedOperationException(
                         "For the fields, defined as Map, only Map java type or tuple in the form of SimpleImmutableEntry are allowed. Neither of those could be found!"));
-        return pathOfString(innerFieldPath).get(valueFieldName);
-    }
-
-    private static Path<?> getInnerFieldPath(final Root<?> subqueryRoot, final String[] split,
-            final boolean isMapKeyField) {
-        return getFieldPath(subqueryRoot, split, isMapKeyField,
-                (fieldPath, fieldNameSplit) -> getInnerJoinFieldPath(subqueryRoot, fieldPath, fieldNameSplit))
-                        .orElseThrow(() -> new RSQLParameterUnsupportedFieldException("RSQL field path cannot be empty",
-                                null));
-    }
-
-    private static Path<?> getInnerJoinFieldPath(final Root<?> subqueryRoot, final Path<?> fieldPath,
-            final String fieldNameSplit) {
-        if (fieldPath instanceof Join) {
-            return subqueryRoot.join(fieldNameSplit, JoinType.INNER);
-        }
-        return fieldPath;
+        return pathOfString(fieldPath).get(valueFieldName);
     }
 
     private static boolean isPattern(final String transformedValue) {
@@ -555,17 +450,16 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
     }
 
     private List<Predicate> acceptChildren(final LogicalNode node) {
-        final List<Node> children = node.getChildren();
-        final List<Predicate> childs = new ArrayList<>();
-        for (final Node node2 : children) {
-            final List<Predicate> accept = node2.accept(this);
+        final List<Predicate> children = new ArrayList<>();
+        for (final Node child : node.getChildren()) {
+            final List<Predicate> accept = child.accept(this);
             if (!CollectionUtils.isEmpty(accept)) {
-                childs.addAll(accept);
+                children.addAll(accept);
             } else {
-                log.debug("visit logical node children but could not parse it, ignoring {}", node2);
+                log.debug("visit logical node children but could not parse it, ignoring {}", child);
             }
         }
-        return childs;
+        return children;
     }
 
     private Predicate equal(final Expression<String> expressionToCompare, final String sqlValue) {

@@ -150,9 +150,17 @@ public final class RSQLUtility {
             final Node rootNode = parseRsql(rsql);
             query.distinct(true);
 
-            final JpaQueryRsqlVisitor<A, T> jpqQueryRSQLVisitor = new JpaQueryRsqlVisitor<>(enumType, root, query, cb,
-                    database, virtualPropertyReplacer,
-                    !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase());
+            final RSQLVisitor<List<Predicate>, String> jpqQueryRSQLVisitor =
+                    RsqlConfigHolder.getInstance().isLegacyRsqlVisitor() ?
+                            new JpaQueryRsqlVisitor<>(
+                                    root, cb, enumType,
+                                    virtualPropertyReplacer, database, query,
+                                    !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase())
+                            :
+                            new JpaQueryRsqlVisitorG2<>(
+                                    enumType, root, query, cb,
+                                    database, virtualPropertyReplacer,
+                                    !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase());
             final List<Predicate> accept = rootNode.accept(jpqQueryRSQLVisitor);
 
             if (CollectionUtils.isEmpty(accept)) {

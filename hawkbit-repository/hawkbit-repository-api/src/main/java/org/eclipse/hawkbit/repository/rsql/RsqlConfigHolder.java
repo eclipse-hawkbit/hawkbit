@@ -42,6 +42,10 @@ public final class RsqlConfigHolder {
     @Autowired
     private RsqlVisitorFactory rsqlVisitorFactory;
 
+    @Deprecated
+    @Value("${hawkbit.rsql.legacyRsqlVisitor:false}")
+    private boolean legacyRsqlVisitor;
+
     /**
      * @return The holder singleton instance.
      */
