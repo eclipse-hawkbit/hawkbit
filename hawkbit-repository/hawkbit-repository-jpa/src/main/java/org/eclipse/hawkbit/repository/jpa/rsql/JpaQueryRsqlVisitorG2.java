@@ -107,43 +107,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & FieldNameProvider, T> ext
         }
     }
 
-    private static List<Predicate> toSingleList(final Predicate predicate) {
-        return Collections.singletonList(predicate);
-    }
-
-    private static Path<Object> getFieldPath(
-            final Root<?> root, final String[] split, final boolean isMapKeyField) {
-        Path<Object> fieldPath = null;
-        for (int i = 0, end = isMapKeyField ? split.length - 1 : split.length; i < end; i++) {
-            final String fieldNameSplit = split[i];
-            fieldPath = fieldPath == null ?
-                    // if root.get creates a join we call join directly in order to specify LEFT JOIN type,
-                    // to include rows for missing in particular table / criteria (root.get creates INNER JOIN)
-                    // (see org.eclipse.persistence.internal.jpa.querydef.FromImpl implementation for more details)
-                    // otherwise delegate to root.get
-                    (isJoin(root, fieldNameSplit) ? root.join(fieldNameSplit, JoinType.LEFT) : root.get(fieldNameSplit)) :
-                    fieldPath.get(fieldNameSplit);
-        }
-        if (fieldPath == null) {
-            throw new RSQLParameterUnsupportedFieldException("RSQL field path cannot be empty", null);
-        }
-        return fieldPath;
-    }
-    private static boolean isJoin(final Root<?> root, final String fieldNameSplit) {
-        // see org.eclipse.persistence.internal.jpa.querydef.FromImpl implementation for more details
-        // when root.get creates a join
-        final Attribute<?, ?> attribute = root.getModel().getAttribute(fieldNameSplit);
-        if (!attribute.isCollection()) {
-            // it is a SingularAttribute and not join if it is of basic persistent type
-            return !((SingularAttribute<?, ?>) attribute).getType().getPersistenceType().equals(Type.PersistenceType.BASIC);
-        } // if a collection - it is join
-        return true;
-    }
-
     @Override
-    // Exception squid:S2095 - see
-    // https://jira.sonarsource.com/browse/SONARJAVA-1478
-    @SuppressWarnings({ "squid:S2095" })
     public List<Predicate> visit(final ComparisonNode node, final String param) {
         final A fieldName = getFieldEnumByName(node);
         final String finalProperty = getAndValidatePropertyFieldName(fieldName, node);
@@ -161,78 +125,6 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & FieldNameProvider, T> ext
         return mapToPredicate(node, fieldPath, node.getArguments(), transformedValues, fieldName, finalProperty);
     }
 
-    private static boolean areJoinsNeeded(final ComparisonNode node) {
-        return !NO_JOINS_OPERATOR.contains(node.getOperator().getSymbol());
-    }
-
-    private Object convertValueIfNecessary(final ComparisonNode node, final A fieldName, final String value,
-            final Path<Object> fieldPath) {
-        // in case the value of an RSQL query e.g. type==application is an
-        // enum we need to handle it separately because JPA needs the
-        // correct java-type to build an expression. So String and numeric
-        // values JPA can do it by it's own but not for classes like enums.
-        // So we need to transform the given value string into the enum
-        // class.
-        final Class<?> javaType = fieldPath.getJavaType();
-        if (javaType != null && javaType.isEnum()) {
-            return transformEnumValue(node, value, javaType);
-        }
-        if (fieldName instanceof FieldValueConverter) {
-            return convertFieldConverterValue(node, fieldName, value);
-        }
-
-        if (Boolean.TYPE.equals(javaType)) {
-            return convertBooleanValue(node, value, javaType);
-        }
-
-        return value;
-    }
-
-    private Object convertBooleanValue(final ComparisonNode node, final String value, final Class<?> javaType) {
-        try {
-            return simpleTypeConverter.convertIfNecessary(value, javaType);
-        } catch (final TypeMismatchException e) {
-            throw new RSQLParameterSyntaxException(
-                    "The value of the given search parameter field {" + node.getSelector()
-                            + "} is not well formed. Only a boolean (true or false) value will be expected {",
-                    e);
-        }
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Object convertFieldConverterValue(final ComparisonNode node, final A fieldName, final String value) {
-        final Object convertedValue = ((FieldValueConverter) fieldName).convertValue(fieldName, value);
-        if (convertedValue == null) {
-            throw new RSQLParameterUnsupportedFieldException(
-                    "field {" + node.getSelector() + "} must be one of the following values {"
-                            + Arrays.toString(((FieldValueConverter) fieldName).possibleValues(fieldName)) + "}",
-                    null);
-        } else {
-            return convertedValue;
-        }
-    }
-
-    // Exception squid:S2095 - see
-    // https://jira.sonarsource.com/browse/SONARJAVA-1478
-    @SuppressWarnings({ "rawtypes", "unchecked", "squid:S2095" })
-    private static Object transformEnumValue(final ComparisonNode node, final String value, final Class<?> javaType) {
-        final Class<? extends Enum> tmpEnumType = (Class<? extends Enum>) javaType;
-        try {
-            return Enum.valueOf(tmpEnumType, value.toUpperCase());
-        } catch (final IllegalArgumentException e) {
-            // we could not transform the given string value into the enum
-            // type, so ignore it and return null and do not filter
-            log.info("given value {} cannot be transformed into the correct enum type {}", value.toUpperCase(),
-                    javaType);
-            log.debug("value cannot be transformed to an enum", e);
-
-            throw new RSQLParameterUnsupportedFieldException("field {" + node.getSelector()
-                    + "} must be one of the following values {" + Arrays.stream(tmpEnumType.getEnumConstants())
-                            .map(v -> v.name().toLowerCase()).toList()
-                    + "}", e);
-        }
-    }
-
     private List<Predicate> mapToPredicate(final ComparisonNode node, final Path<Object> fieldPath,
             final List<String> values, final List<Object> transformedValues, final A enumField,
             final String finalProperty) {
@@ -245,50 +137,6 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & FieldNameProvider, T> ext
                 transformedValues, value, finalProperty, enumField);
 
         return toSingleList(mapPredicate != null ? cb.and(mapPredicate, valuePredicate) : valuePredicate);
-    }
-
-    private Predicate addOperatorPredicate(final ComparisonNode node, final Path<Object> fieldPath,
-            final List<Object> transformedValues, final String value, final String finalProperty, final A enumField) {
-        // only 'equal' and 'notEqual' can handle transformed value like enums.
-        // The JPA API cannot handle object types for greaterThan etc methods.
-        final Object transformedValue = transformedValues.get(0);
-        final String operator = node.getOperator().getSymbol();
-        return switch (operator) {
-            case "==" -> getEqualToPredicate(transformedValue, fieldPath);
-            case "!=" -> getNotEqualToPredicate(transformedValue, fieldPath, finalProperty, enumField);
-            case "=gt=" -> cb.greaterThan(pathOfString(fieldPath), value);
-            case "=ge=" -> cb.greaterThanOrEqualTo(pathOfString(fieldPath), value);
-            case "=lt=" -> cb.lessThan(pathOfString(fieldPath), value);
-            case "=le=" -> cb.lessThanOrEqualTo(pathOfString(fieldPath), value);
-            case "=in=" -> in(pathOfString(fieldPath), transformedValues);
-            case "=out=" -> getOutPredicate(transformedValues, finalProperty, enumField, fieldPath);
-            default -> throw new RSQLParameterSyntaxException(
-                    "Operator symbol {" + operator + "} is either not supported or not implemented");
-        };
-    }
-
-    private Predicate getOutPredicate(
-            final List<Object> transformedValues, final String finalProperty,
-            final A enumField, final Path<Object> fieldPath) {
-        final String[] fieldNames = enumField.getSubAttributes(finalProperty);
-
-        if (isSimpleField(fieldNames, enumField.isMap())) {
-            final Path<String> pathOfString = pathOfString(fieldPath);
-            return cb.or(cb.isNull(pathOfString), cb.not(in(pathOfString, transformedValues)));
-        }
-
-        clearOuterJoinsIfNotNeeded();
-
-        return toNotExistsSubQueryPredicate(fieldNames, enumField, expressionToCompare -> in(expressionToCompare, transformedValues));
-    }
-
-    private Path<Object> getMapValueFieldPath(final A enumField, final Path<Object> fieldPath) {
-        final String valueFieldNameFromSubEntity = enumField.getSubEntityMapTuple().map(Entry::getValue).orElse(null);
-
-        if (!enumField.isMap() || valueFieldNameFromSubEntity == null) {
-            return fieldPath;
-        }
-        return fieldPath.get(valueFieldNameFromSubEntity);
     }
 
     @SuppressWarnings("unchecked")
@@ -310,6 +158,26 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & FieldNameProvider, T> ext
                         "For the fields, defined as Map, only Map java type or tuple in the form of " +
                                 "SimpleImmutableEntry are allowed. Neither of those could be found!"));
         return equal(fieldPath.get(keyFieldName), keyValue);
+    }
+
+    private Predicate addOperatorPredicate(final ComparisonNode node, final Path<Object> fieldPath,
+            final List<Object> transformedValues, final String value, final String finalProperty, final A enumField) {
+        // only 'equal' and 'notEqual' can handle transformed value like enums.
+        // The JPA API cannot handle object types for greaterThan etc. methods.
+        final Object transformedValue = transformedValues.get(0);
+        final String operator = node.getOperator().getSymbol();
+        return switch (operator) {
+            case "==" -> getEqualToPredicate(transformedValue, fieldPath);
+            case "!=" -> getNotEqualToPredicate(transformedValue, fieldPath, finalProperty, enumField);
+            case "=gt=" -> cb.greaterThan(pathOfString(fieldPath), value);
+            case "=ge=" -> cb.greaterThanOrEqualTo(pathOfString(fieldPath), value);
+            case "=lt=" -> cb.lessThan(pathOfString(fieldPath), value);
+            case "=le=" -> cb.lessThanOrEqualTo(pathOfString(fieldPath), value);
+            case "=in=" -> in(pathOfString(fieldPath), transformedValues);
+            case "=out=" -> getOutPredicate(transformedValues, finalProperty, enumField, fieldPath);
+            default -> throw new RSQLParameterSyntaxException(
+                    "Operator symbol {" + operator + "} is either not supported or not implemented");
+        };
     }
 
     private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
@@ -366,6 +234,122 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & FieldNameProvider, T> ext
         return toNullOrNotEqualPredicate(fieldPath, transformedValue);
     }
 
+    private Predicate getOutPredicate(
+            final List<Object> transformedValues, final String finalProperty,
+            final A enumField, final Path<Object> fieldPath) {
+        final String[] fieldNames = enumField.getSubAttributes(finalProperty);
+
+        if (isSimpleField(fieldNames, enumField.isMap())) {
+            final Path<String> pathOfString = pathOfString(fieldPath);
+            return cb.or(cb.isNull(pathOfString), cb.not(in(pathOfString, transformedValues)));
+        }
+
+        clearOuterJoinsIfNotNeeded();
+
+        return toNotExistsSubQueryPredicate(fieldNames, enumField, expressionToCompare -> in(expressionToCompare, transformedValues));
+    }
+
+    private static Path<Object> getFieldPath(
+            final Root<?> root, final String[] split, final boolean isMapKeyField) {
+        Path<Object> fieldPath = null;
+        for (int i = 0, end = isMapKeyField ? split.length - 1 : split.length; i < end; i++) {
+            final String fieldNameSplit = split[i];
+            fieldPath = fieldPath == null ?
+                    // if root.get creates a join we call join directly in order to specify LEFT JOIN type,
+                    // to include rows for missing in particular table / criteria (root.get creates INNER JOIN)
+                    // (see org.eclipse.persistence.internal.jpa.querydef.FromImpl implementation for more details)
+                    // otherwise delegate to root.get
+                    (isJoin(root, fieldNameSplit) ? root.join(fieldNameSplit, JoinType.LEFT) : root.get(fieldNameSplit)) :
+                    fieldPath.get(fieldNameSplit);
+        }
+        if (fieldPath == null) {
+            throw new RSQLParameterUnsupportedFieldException("RSQL field path cannot be empty", null);
+        }
+        return fieldPath;
+    }
+    private static boolean isJoin(final Root<?> root, final String fieldNameSplit) {
+        // see org.eclipse.persistence.internal.jpa.querydef.FromImpl implementation for more details
+        // when root.get creates a join
+        final Attribute<?, ?> attribute = root.getModel().getAttribute(fieldNameSplit);
+        if (!attribute.isCollection()) {
+            // it is a SingularAttribute and not join if it is of basic persistent type
+            return !((SingularAttribute<?, ?>) attribute).getType().getPersistenceType().equals(Type.PersistenceType.BASIC);
+        } // if a collection - it is a join
+        return true;
+    }
+
+    private Object convertValueIfNecessary(final ComparisonNode node, final A fieldName, final String value,
+            final Path<Object> fieldPath) {
+        // in case the value of an RSQL query e.g. type==application is an
+        // enum we need to handle it separately because JPA needs the
+        // correct java-type to build an expression. So String and numeric
+        // values JPA can do it by its own but not for classes like enums.
+        // So we need to transform the given value string into the enum
+        // class.
+        final Class<?> javaType = fieldPath.getJavaType();
+        if (javaType != null && javaType.isEnum()) {
+            return transformEnumValue(node, value, javaType);
+        }
+        if (fieldName instanceof FieldValueConverter) {
+            return convertFieldConverterValue(node, fieldName, value);
+        }
+
+        if (Boolean.TYPE.equals(javaType)) {
+            return convertBooleanValue(node, value, javaType);
+        }
+
+        return value;
+    }
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private static Object transformEnumValue(final ComparisonNode node, final String value, final Class<?> javaType) {
+        final Class<? extends Enum> tmpEnumType = (Class<? extends Enum>) javaType;
+        try {
+            return Enum.valueOf(tmpEnumType, value.toUpperCase());
+        } catch (final IllegalArgumentException e) {
+            // we could not transform the given string value into the enum
+            // type, so ignore it and return null and do not filter
+            log.info("given value {} cannot be transformed into the correct enum type {}", value.toUpperCase(),
+                    javaType);
+            log.debug("value cannot be transformed to an enum", e);
+
+            throw new RSQLParameterUnsupportedFieldException("field {" + node.getSelector()
+                    + "} must be one of the following values {" + Arrays.stream(tmpEnumType.getEnumConstants())
+                    .map(v -> v.name().toLowerCase()).toList()
+                    + "}", e);
+        }
+    }
+    private Object convertBooleanValue(final ComparisonNode node, final String value, final Class<?> javaType) {
+        try {
+            return simpleTypeConverter.convertIfNecessary(value, javaType);
+        } catch (final TypeMismatchException e) {
+            throw new RSQLParameterSyntaxException(
+                    "The value of the given search parameter field {" + node.getSelector()
+                            + "} is not well formed. Only a boolean (true or false) value will be expected {",
+                    e);
+        }
+    }
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private Object convertFieldConverterValue(final ComparisonNode node, final A fieldName, final String value) {
+        final Object convertedValue = ((FieldValueConverter) fieldName).convertValue(fieldName, value);
+        if (convertedValue == null) {
+            throw new RSQLParameterUnsupportedFieldException(
+                    "field {" + node.getSelector() + "} must be one of the following values {"
+                            + Arrays.toString(((FieldValueConverter) fieldName).possibleValues(fieldName)) + "}",
+                    null);
+        } else {
+            return convertedValue;
+        }
+    }
+
+    private Path<Object> getMapValueFieldPath(final A enumField, final Path<Object> fieldPath) {
+        final String valueFieldNameFromSubEntity = enumField.getSubEntityMapTuple().map(Entry::getValue).orElse(null);
+
+        if (!enumField.isMap() || valueFieldNameFromSubEntity == null) {
+            return fieldPath;
+        }
+        return fieldPath.get(valueFieldNameFromSubEntity);
+    }
+
     private void clearOuterJoinsIfNotNeeded() {
         if (!joinsNeeded) {
             root.getJoins().clear();
@@ -394,11 +378,6 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & FieldNameProvider, T> ext
         subquery.select(subqueryRoot).where(cb.and(equalPredicate, subQueryPredicate));
         return cb.not(cb.exists(subquery));
     }
-
-    private static boolean isSimpleField(final String[] split, final boolean isMapKeyField) {
-        return split.length == 1 || (split.length == 2 && isMapKeyField);
-    }
-
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private Expression<String> getExpressionToCompare(final Path fieldPath, final A enumField) {
         if (!enumField.isMap()) {
@@ -414,17 +393,8 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & FieldNameProvider, T> ext
         return pathOfString(fieldPath).get(valueFieldName);
     }
 
-    private static boolean isPattern(final String transformedValue) {
-        if (transformedValue.contains(ESCAPE_CHAR_WITH_ASTERISK)) {
-            return transformedValue.replace(ESCAPE_CHAR_WITH_ASTERISK, "$").indexOf(LIKE_WILDCARD) != -1;
-        } else {
-            return transformedValue.indexOf(LIKE_WILDCARD) != -1;
-        }
-    }
-
     private String toSQL(final String transformedValue) {
         final String escaped;
-
         if (database == Database.SQL_SERVER) {
             escaped = transformedValue.replace("%", "[%]").replace("_", "[_]");
         } else {
@@ -432,7 +402,6 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & FieldNameProvider, T> ext
         }
         return replaceIfRequired(escaped);
     }
-
     private String replaceIfRequired(final String escapedValue) {
         final String finalizedValue;
         if (escapedValue.contains(ESCAPE_CHAR_WITH_ASTERISK)) {
@@ -442,11 +411,6 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & FieldNameProvider, T> ext
             finalizedValue = escapedValue.replace(LIKE_WILDCARD, '%');
         }
         return finalizedValue;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <Y> Path<Y> pathOfString(final Path<?> path) {
-        return (Path<Y>) path;
     }
 
     private List<Predicate> acceptChildren(final LogicalNode node) {
@@ -485,5 +449,30 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & FieldNameProvider, T> ext
     }
     private String caseWise(final String str) {
         return ensureIgnoreCase ? str.toUpperCase() : str;
+    }
+
+    private static boolean isSimpleField(final String[] split, final boolean isMapKeyField) {
+        return split.length == 1 || (split.length == 2 && isMapKeyField);
+    }
+
+    private static List<Predicate> toSingleList(final Predicate predicate) {
+        return Collections.singletonList(predicate);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <Y> Path<Y> pathOfString(final Path<?> path) {
+        return (Path<Y>) path;
+    }
+
+    private static boolean isPattern(final String transformedValue) {
+        if (transformedValue.contains(ESCAPE_CHAR_WITH_ASTERISK)) {
+            return transformedValue.replace(ESCAPE_CHAR_WITH_ASTERISK, "$").indexOf(LIKE_WILDCARD) != -1;
+        } else {
+            return transformedValue.indexOf(LIKE_WILDCARD) != -1;
+        }
+    }
+
+    private static boolean areJoinsNeeded(final ComparisonNode node) {
+        return !NO_JOINS_OPERATOR.contains(node.getOperator().getSymbol());
     }
 }
