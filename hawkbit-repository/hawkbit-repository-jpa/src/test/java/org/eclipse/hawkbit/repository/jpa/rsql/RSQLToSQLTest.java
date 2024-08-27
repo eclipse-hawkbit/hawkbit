@@ -46,6 +46,7 @@ public class RSQLToSQLTest {
 
     @Test
     public void print() {
+        print(JpaTarget.class, TargetFields.class, "tag==tag1 and tag==tag2");
         print(JpaTarget.class, TargetFields.class, "tag==tag1 or tag==tag2 or tag==tag3");
         print(JpaTarget.class, TargetFields.class, "targettype.key==type1 and metadata.key1==target1-value1");
         print(JpaTarget.class, TargetFields.class, "(tag!=TAG1 or tag !=TAG2)");
@@ -54,8 +55,8 @@ public class RSQLToSQLTest {
     private <T, A extends Enum<A> & FieldNameProvider> void print(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
         System.out.println(rsql);
         System.out.println("\tlegacy:\n" +
-                "\t\t" + rsqlToSQL.toSQL(JpaTarget.class, TargetFields.class, rsql, true));
+                "\t\t" + rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, true));
         System.out.println("\tG2:\n" +
-                "\t\t" + rsqlToSQL.toSQL(JpaTarget.class, TargetFields.class, rsql, false));
+                "\t\t" + rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, false));
     }
 }
