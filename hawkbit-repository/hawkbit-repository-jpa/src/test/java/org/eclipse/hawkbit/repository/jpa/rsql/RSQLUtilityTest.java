@@ -34,6 +34,9 @@ import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.Attribute;
 
+import jakarta.persistence.metamodel.EntityType;
+import jakarta.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.metamodel.Type;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
@@ -51,6 +54,7 @@ import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -125,6 +129,12 @@ public class RSQLUtilityTest {
             .<String> builder().value("00:05:00").build();
     private static final TenantConfigurationValue<String> TEST_POLLING_OVERDUE_TIME_INTERVAL = TenantConfigurationValue
             .<String> builder().value("00:07:37").build();
+
+    @BeforeEach
+    public void beforeEach() {
+        setupRoot(baseSoftwareModuleRootMock);
+        setupRoot(subqueryRootMock);
+    }
 
     @Test
     @Description("Testing throwing exception in case of not allowed RSQL key")
@@ -264,7 +274,7 @@ public class RSQLUtilityTest {
 
     @Test
     public <T> void correctRsqlBuildsPredicate() {
-        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name==abc;version==1.2";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.get("version")).thenReturn(baseSoftwareModuleRootMock);
@@ -285,7 +295,7 @@ public class RSQLUtilityTest {
 
     @Test
     public void correctRsqlBuildsSimpleNotEqualPredicate() {
-        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name!=abc";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
@@ -309,7 +319,7 @@ public class RSQLUtilityTest {
 
     @Test
     public void correctRsqlBuildsSimpleNotLikePredicate() {
-        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name!=abc*";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
@@ -333,7 +343,7 @@ public class RSQLUtilityTest {
 
     @Test
     public void correctRsqlBuildsNotSimpleNotLikePredicate() {
-        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         // with this query a subquery has to be made, so it is no simple query
         final String correctRsql = "type!=abc";
         when(baseSoftwareModuleRootMock.get(anyString())).thenReturn(baseSoftwareModuleRootMock);
@@ -360,7 +370,7 @@ public class RSQLUtilityTest {
 
     @Test
     public void correctRsqlBuildsEqualPredicateWithPercentage() {
-        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name==a%";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
@@ -381,7 +391,7 @@ public class RSQLUtilityTest {
 
     @Test
     public void correctRsqlBuildsLikePredicateWithPercentage() {
-        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name==a%*";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
@@ -402,7 +412,7 @@ public class RSQLUtilityTest {
 
     @Test
     public void correctRsqlBuildsLikePredicateWithPercentageSQLServer() {
-        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name==a%*";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
@@ -424,7 +434,7 @@ public class RSQLUtilityTest {
 
     @Test
     public void correctRsqlBuildsLessThanPredicate() {
-        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name=lt=abc";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
@@ -442,7 +452,7 @@ public class RSQLUtilityTest {
 
     @Test
     public void correctRsqlWithEnumValue() {
-        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "testfield==bumlux";
         when(baseSoftwareModuleRootMock.get("testfield")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) TestValueEnum.class);
@@ -459,7 +469,7 @@ public class RSQLUtilityTest {
 
     @Test
     public void wrongRsqlWithWrongEnumValue() {
-        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "testfield==unknownValue";
         when(baseSoftwareModuleRootMock.get("testfield")).thenReturn(baseSoftwareModuleRootMock);
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) TestValueEnum.class);
@@ -478,7 +488,7 @@ public class RSQLUtilityTest {
     @Test
     @Description("Tests the resolution of overdue_ts placeholder in context of a RSQL expression.")
     public void correctRsqlWithOverdueMacro() {
-        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String overdueProp = "overdue_ts";
         final String overduePropPlaceholder = "${" + overdueProp + "}";
         final String correctRsql = "testfield=le=" + overduePropPlaceholder;
@@ -506,7 +516,7 @@ public class RSQLUtilityTest {
     @Test
     @Description("Tests RSQL expression with an unknown placeholder.")
     public void correctRsqlWithUnknownMacro() {
-        reset(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
+        reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String overdueProp = "unknown";
         final String overduePropPlaceholder = "${" + overdueProp + "}";
         final String correctRsql = "testfield=le=" + overduePropPlaceholder;
@@ -573,6 +583,28 @@ public class RSQLUtilityTest {
     private void validateRsqlForTestFields(final String rsql) {
         when(rsqlVisitorFactory.validationRsqlVisitor(eq(TestFieldEnum.class))).thenReturn(new FieldValidationRsqlVisitor<>(TestFieldEnum.class));
         RSQLUtility.validateRsqlFor(rsql, TestFieldEnum.class);
+    }
+
+    private void reset0(final Object... mocks) {
+        reset(mocks);
+        if (Arrays.asList(mocks).contains(baseSoftwareModuleRootMock)) {
+            setupRoot(baseSoftwareModuleRootMock);
+        }
+        if (Arrays.asList(mocks).contains(subqueryRootMock)) {
+            setupRoot(subqueryRootMock);
+        }
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void setupRoot(final Root<?> root) {
+        final Type type = Mockito.mock(Type.class);
+        when(type.getPersistenceType()).thenReturn(Type.PersistenceType.BASIC);
+        final SingularAttribute singularAttribute = Mockito.mock(SingularAttribute.class);
+        when(singularAttribute.getType()).thenReturn(type);
+        final EntityType entityType = Mockito.mock(EntityType.class);
+        when(entityType.getAttribute(any())).thenReturn(singularAttribute);
+        when(entityType.getPersistenceType()).thenReturn(Type.PersistenceType.BASIC);
+        when(root.getModel()).thenReturn(entityType);
     }
 
     private enum TestValueEnum {

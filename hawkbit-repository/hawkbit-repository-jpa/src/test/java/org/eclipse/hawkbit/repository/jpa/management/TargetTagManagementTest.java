@@ -273,7 +273,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
+    @Description("Ensures that a tag cannot be created if one exists already with that name (expects EntityAlreadyExistsException).")
     void failedDuplicateTargetTagNameException() {
         targetTagManagement.create(entityFactory.tag().create().name("A"));
         assertThatExceptionOfType(EntityAlreadyExistsException.class)
@@ -281,7 +281,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).")
+    @Description("Ensures that a tag cannot be updated to a name that already exists on another tag (expects EntityAlreadyExistsException).")
     void failedDuplicateTargetTagNameExceptionAfterUpdate() {
         targetTagManagement.create(entityFactory.tag().create().name("A"));
         final TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("B"));
