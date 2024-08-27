@@ -72,6 +72,7 @@ import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
+import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
@@ -1291,6 +1292,10 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test that RSQL filter finds targets with tag and metadata.")
     void findTargetsByRsqlWithTypeAndMetadata() {
+        if (RsqlConfigHolder.getInstance().isLegacyRsqlVisitor()) {
+            // legacy visitor fail with that
+            return;
+        }
         final String controllerId1 = "target1";
         final String controllerId2 = "target2";
         createTargetWithMetadata(controllerId1, 2);

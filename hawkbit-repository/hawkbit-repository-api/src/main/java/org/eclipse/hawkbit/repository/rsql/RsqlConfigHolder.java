@@ -42,8 +42,11 @@ public final class RsqlConfigHolder {
     @Autowired
     private RsqlVisitorFactory rsqlVisitorFactory;
 
+    /**
+     * @deprecated in favour of G2 RSQL visitor.
+     */
     @Deprecated
-    @Value("${hawkbit.rsql.legacyRsqlVisitor:false}")
+    @Value("${hawkbit.rsql.legacyRsqlVisitor:true}")
     private boolean legacyRsqlVisitor;
 
     /**
