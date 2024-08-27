@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -27,6 +28,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment=NONE, properties = {
+        "hawkbit.rsql.caseInsensitiveDB=true",
         "spring.main.allow-bean-definition-overriding=true",
         "spring.main.banner-mode=off",
         "logging.level.root=ERROR" })
@@ -44,18 +46,16 @@ public class RSQLToSQLTest {
 
     @Test
     public void print() {
-        String rsql = "tag==tag1 or tag==tag2 or tag==tag3";
-        System.out.println(rsql + "\n" +
-                "\tlegacy:\n" +
-                "\t\t" + rsqlToSQL.toSQL(JpaTarget.class, TargetFields.class, rsql, true) + "\n" +
-                "\tG2:\n" +
-                "\t\t" + rsqlToSQL.toSQL(JpaTarget.class, TargetFields.class, rsql, false));
+        print(JpaTarget.class, TargetFields.class, "tag==tag1 or tag==tag2 or tag==tag3");
+        print(JpaTarget.class, TargetFields.class, "targettype.key==type1 and metadata.key1==target1-value1");
+        print(JpaTarget.class, TargetFields.class, "(tag!=TAG1 or tag !=TAG2)");
+    }
 
-        rsql = "targettype.key==type1 and metadata.key1==target1-value1";
-        System.out.println(rsql + "\n" +
-                "\tlegacy:\n" +
-                "\t\t" + rsqlToSQL.toSQL(JpaTarget.class, TargetFields.class, rsql, true) + "\n" +
-                "\tG2:\n" +
+    private <T, A extends Enum<A> & FieldNameProvider> void print(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
+        System.out.println(rsql);
+        System.out.println("\tlegacy:\n" +
+                "\t\t" + rsqlToSQL.toSQL(JpaTarget.class, TargetFields.class, rsql, true));
+        System.out.println("\tG2:\n" +
                 "\t\t" + rsqlToSQL.toSQL(JpaTarget.class, TargetFields.class, rsql, false));
     }
 }
