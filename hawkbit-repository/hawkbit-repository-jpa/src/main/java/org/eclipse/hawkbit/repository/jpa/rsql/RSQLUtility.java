@@ -22,7 +22,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.text.StrLookup;
-import org.eclipse.hawkbit.repository.FieldNameProvider;
+import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
@@ -82,7 +82,7 @@ public final class RSQLUtility {
      * given RSQL query.
      *
      * @param rsql the rsql query to be parsed
-     * @param fieldNameProvider the enum class type which implements the {@link FieldNameProvider}
+     * @param fieldNameProvider the enum class type which implements the {@link RsqlQueryField}
      * @param virtualPropertyReplacer holds the logic how the known macros have to be resolved; may be <code>null</code>
      * @param database database in use
      *
@@ -91,7 +91,7 @@ public final class RSQLUtility {
      *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
-    public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> buildRsqlSpecification(
+    public static <A extends Enum<A> & RsqlQueryField, T> Specification<T> buildRsqlSpecification(
             final String rsql, final Class<A> fieldNameProvider,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
         return new RSQLSpecification<>(rsql, fieldNameProvider, virtualPropertyReplacer, database);
@@ -106,7 +106,7 @@ public final class RSQLUtility {
      * @throws RSQLParserException if RSQL syntax is invalid
      * @throws RSQLParameterUnsupportedFieldException if RSQL key is not allowed
      */
-    public static <A extends Enum<A> & FieldNameProvider> void validateRsqlFor(
+    public static <A extends Enum<A> & RsqlQueryField> void validateRsqlFor(
             final String rsql, final Class<A> fieldNameProvider) {
         final RSQLVisitor<Void, String> visitor =
                 RsqlConfigHolder.getInstance().getRsqlVisitorFactory().validationRsqlVisitor(fieldNameProvider);
@@ -127,7 +127,7 @@ public final class RSQLUtility {
         }
     }
 
-    private static final class RSQLSpecification<A extends Enum<A> & FieldNameProvider, T> implements Specification<T> {
+    private static final class RSQLSpecification<A extends Enum<A> & RsqlQueryField, T> implements Specification<T> {
 
         @Serial
         private static final long serialVersionUID = 1L;

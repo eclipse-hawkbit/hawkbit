@@ -22,7 +22,7 @@ import java.util.Optional;
  * e.g. for sorting etc.
  */
 @Getter
-public enum TargetFields implements FieldNameProvider {
+public enum TargetFields implements RsqlQueryField {
 
     ID("controllerId"),
     NAME("name"),
@@ -38,26 +38,26 @@ public enum TargetFields implements FieldNameProvider {
     TAG("tags.name"),
     LASTCONTROLLERREQUESTAT("lastTargetQuery"),
     METADATA("metadata", new SimpleImmutableEntry<>("key", "value")),
-    TARGETTYPE("targetType", TargetTypeFields.KEY.getFieldName(), TargetTypeFields.NAME.getFieldName());
+    TARGETTYPE("targetType", TargetTypeFields.KEY.getJpaEntityFieldName(), TargetTypeFields.NAME.getJpaEntityFieldName());
 
-    private final String fieldName;
+    private final String jpaEntityFieldName;
     private final List<String> subEntityAttributes;
     private final Entry<String, String> subEntityMapTuple;
 
-    TargetFields(final String fieldName) {
-        this(fieldName, Collections.emptyList(), null);
+    TargetFields(final String jpaEntityFieldName) {
+        this(jpaEntityFieldName, Collections.emptyList(), null);
     }
 
-    TargetFields(final String fieldName, final String... subEntityAttributes) {
-        this(fieldName, List.of(subEntityAttributes), null);
+    TargetFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
+        this(jpaEntityFieldName, List.of(subEntityAttributes), null);
     }
 
-    TargetFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
-        this(fieldName, Collections.emptyList(), subEntityMapTuple);
+    TargetFields(final String jpaEntityFieldName, final Entry<String, String> subEntityMapTuple) {
+        this(jpaEntityFieldName, Collections.emptyList(), subEntityMapTuple);
     }
 
-    TargetFields(final String fieldName, final List<String> subEntityAttributes, final Entry<String, String> subEntityMapTuple) {
-        this.fieldName = fieldName;
+    TargetFields(final String jpaEntityFieldName, final List<String> subEntityAttributes, final Entry<String, String> subEntityMapTuple) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
         this.subEntityAttributes = subEntityAttributes;
         this.subEntityMapTuple = subEntityMapTuple;
     }

@@ -18,25 +18,25 @@ import java.util.List;
  * Describing the fields of the Target model which can be used in the REST API e.g. for sorting etc.
  */
 @Getter
-public enum TargetFilterQueryFields implements FieldNameProvider {
+public enum TargetFilterQueryFields implements RsqlQueryField {
 
     ID("id"),
     NAME("name"),
     AUTOASSIGNDISTRIBUTIONSET("autoAssignDistributionSet", "name", "version");
 
-    private final String fieldName;
+    private final String jpaEntityFieldName;
     private List<String> subEntityAttributes;
 
-    TargetFilterQueryFields(final String fieldName) {
-        this(fieldName, Collections.emptyList());
+    TargetFilterQueryFields(final String jpaEntityFieldName) {
+        this(jpaEntityFieldName, Collections.emptyList());
     }
 
-    TargetFilterQueryFields(final String fieldName, final String... subEntityAttribues) {
-        this(fieldName, List.of(subEntityAttribues));
+    TargetFilterQueryFields(final String jpaEntityFieldName, final String... subEntityAttribues) {
+        this(jpaEntityFieldName, List.of(subEntityAttribues));
     }
 
-    TargetFilterQueryFields(final String fieldName, final List<String> subEntityAttribues) {
-        this.fieldName = fieldName;
+    TargetFilterQueryFields(final String jpaEntityFieldName, final List<String> subEntityAttribues) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
         this.subEntityAttributes = subEntityAttribues;
     }
 }

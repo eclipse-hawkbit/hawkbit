@@ -19,7 +19,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import org.eclipse.hawkbit.repository.FieldNameProvider;
+import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
@@ -39,11 +39,11 @@ public class RSQLToSQL {
         this.entityManager = entityManager;
     }
 
-    public <T, A extends Enum<A> & FieldNameProvider> String toSQL(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql, final boolean legacyRsqlVisitor) {
+    public <T, A extends Enum<A> & RsqlQueryField> String toSQL(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql, final boolean legacyRsqlVisitor) {
         return createDbQuery(domainClass, fieldsClass, rsql, legacyRsqlVisitor).getSQLString();
     }
 
-    public <T, A extends Enum<A> & FieldNameProvider> DatabaseQuery createDbQuery(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql, final boolean legacyRsqlVisitor) {
+    public <T, A extends Enum<A> & RsqlQueryField> DatabaseQuery createDbQuery(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql, final boolean legacyRsqlVisitor) {
         final CriteriaQuery<T> query = createQuery(domainClass, fieldsClass, rsql, legacyRsqlVisitor);
         final TypedQuery<?> typedQuery = entityManager.createQuery(query);
         // executes the query - otherwise the SQL string is not generated
@@ -52,7 +52,7 @@ public class RSQLToSQL {
         return typedQuery.unwrap(JpaQuery.class).getDatabaseQuery();
     }
 
-    private <T, A extends Enum<A> & FieldNameProvider> CriteriaQuery<T> createQuery(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql, final  boolean legacyRsqlVisitor) {
+    private <T, A extends Enum<A> & RsqlQueryField> CriteriaQuery<T> createQuery(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql, final  boolean legacyRsqlVisitor) {
         final CriteriaQuery<T> query = entityManager.getCriteriaBuilder().createQuery(domainClass);
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         return query.where(
@@ -65,7 +65,7 @@ public class RSQLToSQL {
         );
     }
 
-    private <T, A extends Enum<A> & FieldNameProvider> Predicate toPredicate(
+    private <T, A extends Enum<A> & RsqlQueryField> Predicate toPredicate(
             final String rsql,
             final Class<A> fieldsClass, final VirtualPropertyReplacer virtualPropertyReplacer,
             final Root<T> root, final CriteriaQuery<?> query, final CriteriaBuilder cb,

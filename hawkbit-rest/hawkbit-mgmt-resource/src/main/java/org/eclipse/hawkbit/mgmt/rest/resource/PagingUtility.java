@@ -58,7 +58,7 @@ public final class PagingUtility {
     static Sort sanitizeTargetSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return Sort.by(Direction.ASC, TargetFields.CONTROLLERID.getFieldName());
+            return Sort.by(Direction.ASC, TargetFields.CONTROLLERID.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(TargetFields.class, sortParam));
     }
@@ -66,7 +66,7 @@ public final class PagingUtility {
     static Sort sanitizeTargetTypeSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return Sort.by(Direction.ASC, TargetTypeFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, TargetTypeFields.ID.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(TargetTypeFields.class, sortParam));
     }
@@ -74,7 +74,7 @@ public final class PagingUtility {
     static Sort sanitizeTagSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return Sort.by(Direction.ASC, TagFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, TagFields.ID.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(TagFields.class, sortParam));
     }
@@ -82,7 +82,7 @@ public final class PagingUtility {
     static Sort sanitizeTargetFilterQuerySortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return Sort.by(Direction.ASC, TargetFilterQueryFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, TargetFilterQueryFields.ID.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(TargetFilterQueryFields.class, sortParam));
     }
@@ -90,7 +90,7 @@ public final class PagingUtility {
     static Sort sanitizeSoftwareModuleSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return Sort.by(Direction.ASC, SoftwareModuleFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, SoftwareModuleFields.ID.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(SoftwareModuleFields.class, sortParam));
     }
@@ -98,7 +98,7 @@ public final class PagingUtility {
     static Sort sanitizeSoftwareModuleTypeSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return Sort.by(Direction.ASC, SoftwareModuleTypeFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, SoftwareModuleTypeFields.ID.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(SoftwareModuleTypeFields.class, sortParam));
     }
@@ -106,7 +106,7 @@ public final class PagingUtility {
     static Sort sanitizeDistributionSetSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return Sort.by(Direction.ASC, DistributionSetFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, DistributionSetFields.ID.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(DistributionSetFields.class, sortParam));
     }
@@ -114,7 +114,7 @@ public final class PagingUtility {
     static Sort sanitizeDistributionSetTypeSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return Sort.by(Direction.ASC, DistributionSetTypeFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, DistributionSetTypeFields.ID.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(DistributionSetTypeFields.class, sortParam));
     }
@@ -123,7 +123,7 @@ public final class PagingUtility {
         if (sortParam == null) {
             // default sort is DESC in case of action to match behavior
             // of management UI (last entry on top)
-            return Sort.by(Direction.DESC, ActionFields.ID.getFieldName());
+            return Sort.by(Direction.DESC, ActionFields.ID.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(ActionFields.class, sortParam));
     }
@@ -132,7 +132,7 @@ public final class PagingUtility {
         if (sortParam == null) {
             // default sort is DESC in case of action status to match behavior
             // of management UI (last entry on top)
-            return Sort.by(Direction.DESC, ActionStatusFields.ID.getFieldName());
+            return Sort.by(Direction.DESC, ActionStatusFields.ID.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(ActionStatusFields.class, sortParam));
     }
@@ -140,7 +140,7 @@ public final class PagingUtility {
     static Sort sanitizeDistributionSetMetadataSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return Sort.by(Direction.ASC, DistributionSetMetadataFields.KEY.getFieldName());
+            return Sort.by(Direction.ASC, DistributionSetMetadataFields.KEY.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(DistributionSetMetadataFields.class, sortParam));
     }
@@ -148,7 +148,7 @@ public final class PagingUtility {
     static Sort sanitizeSoftwareModuleMetadataSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return Sort.by(Direction.ASC, SoftwareModuleMetadataFields.KEY.getFieldName());
+            return Sort.by(Direction.ASC, SoftwareModuleMetadataFields.KEY.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(SoftwareModuleMetadataFields.class, sortParam));
     }
@@ -156,7 +156,7 @@ public final class PagingUtility {
     static Sort sanitizeRolloutSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return Sort.by(Direction.ASC, RolloutFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, RolloutFields.ID.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(RolloutFields.class, sortParam));
     }
@@ -164,7 +164,7 @@ public final class PagingUtility {
     static Sort sanitizeRolloutGroupSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return Sort.by(Direction.ASC, RolloutGroupFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, RolloutGroupFields.ID.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(RolloutGroupFields.class, sortParam));
     }

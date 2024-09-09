@@ -21,25 +21,25 @@ import java.util.List;
  * filtering over distribution set fields also.
  */
 @Getter
-public enum DistributionSetTagFields implements FieldNameProvider {
+public enum DistributionSetTagFields implements RsqlQueryField {
 
-  ID(TagFields.ID.getFieldName()),
-  NAME(TagFields.NAME.getFieldName()),
-  DESCRIPTION(TagFields.DESCRIPTION.getFieldName()),
-  COLOUR(TagFields.COLOUR.getFieldName()),
+  ID(TagFields.ID.getJpaEntityFieldName()),
+  NAME(TagFields.NAME.getJpaEntityFieldName()),
+  DESCRIPTION(TagFields.DESCRIPTION.getJpaEntityFieldName()),
+  COLOUR(TagFields.COLOUR.getJpaEntityFieldName()),
   DISTRIBUTIONSET("assignedToDistributionSet",
-      DistributionSetFields.ID.getFieldName(), DistributionSetFields.NAME.getFieldName());
+      DistributionSetFields.ID.getJpaEntityFieldName(), DistributionSetFields.NAME.getJpaEntityFieldName());
 
-  private final String fieldName;
+  private final String jpaEntityFieldName;
   private final List<String> subEntityAttributes;
 
-  DistributionSetTagFields(final String fieldName) {
-    this.fieldName = fieldName;
+  DistributionSetTagFields(final String jpaEntityFieldName) {
+    this.jpaEntityFieldName = jpaEntityFieldName;
     this.subEntityAttributes = Collections.emptyList();
   }
 
-  DistributionSetTagFields(final String fieldName, final String... subEntityAttributes) {
-    this.fieldName = fieldName;
+  DistributionSetTagFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
+    this.jpaEntityFieldName = jpaEntityFieldName;
     this.subEntityAttributes = List.of(subEntityAttributes);
   }
 }

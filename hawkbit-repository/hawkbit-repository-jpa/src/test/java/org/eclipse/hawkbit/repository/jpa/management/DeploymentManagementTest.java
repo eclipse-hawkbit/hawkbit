@@ -1196,7 +1196,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             + "from target/controller. Expected behaviour is that in case of OK finished update the target will go to "
             + "IN_SYNC status and installed DS is set to the assigned DS entry.")
     void assignDistributionSetAndAddFinishedActionStatus() {
-        final PageRequest pageRequest = PageRequest.of(0, 100, Direction.ASC, ActionStatusFields.ID.getFieldName());
+        final PageRequest pageRequest = PageRequest.of(0, 100, Direction.ASC, ActionStatusFields.ID.getJpaEntityFieldName());
 
         final DeploymentResult deployResWithDsA = prepareComplexRepo("undep-A-T", 2, "dep-A-T", 4, 1, "dsA");
         final DeploymentResult deployResWithDsB = prepareComplexRepo("undep-B-T", 3, "dep-B-T", 5, 1, "dsB");

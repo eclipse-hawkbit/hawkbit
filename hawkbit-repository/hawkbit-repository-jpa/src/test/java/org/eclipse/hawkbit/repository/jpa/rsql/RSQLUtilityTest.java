@@ -38,7 +38,7 @@ import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.SingularAttribute;
 import jakarta.persistence.metamodel.Type;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
-import org.eclipse.hawkbit.repository.FieldNameProvider;
+import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -554,7 +554,7 @@ public class RSQLUtilityTest {
         return (Path<Y>) path;
     }
 
-    private enum TestFieldEnum implements FieldNameProvider {
+    private enum TestFieldEnum implements RsqlQueryField {
         TESTFIELD("testfield"), TESTFIELD_WITH_SUB_ENTITIES("testfieldWithSubEntities", "subentity11", "subentity22");
 
         private final String fieldName;
@@ -570,7 +570,7 @@ public class RSQLUtilityTest {
         }
 
         @Override
-        public String getFieldName() {
+        public String getJpaEntityFieldName() {
             return this.fieldName;
         }
 

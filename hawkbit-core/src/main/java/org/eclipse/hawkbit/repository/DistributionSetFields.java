@@ -22,7 +22,7 @@ import java.util.Optional;
  * REST API e.g. for sorting etc.
  */
 @Getter
-public enum DistributionSetFields implements FieldNameProvider {
+public enum DistributionSetFields implements RsqlQueryField {
 
     ID("id"),
     TYPE("type.key"),
@@ -32,29 +32,29 @@ public enum DistributionSetFields implements FieldNameProvider {
     LASTMODIFIEDAT("lastModifiedAt"),
     VERSION("version"),
     COMPLETE("complete"),
-    MODULE("modules", SoftwareModuleFields.ID.getFieldName(), SoftwareModuleFields.NAME.getFieldName()),
+    MODULE("modules", SoftwareModuleFields.ID.getJpaEntityFieldName(), SoftwareModuleFields.NAME.getJpaEntityFieldName()),
     TAG("tags.name"),
     METADATA("metadata", new SimpleImmutableEntry<>("key", "value")),
     VALID("valid");
 
-    private final String fieldName;
+    private final String jpaEntityFieldName;
     private final Entry<String, String> subEntityMapTuple;
     private final List<String> subEntityAttributes;
 
-    DistributionSetFields(final String fieldName) {
-        this(fieldName, null, Collections.emptyList());
+    DistributionSetFields(final String jpaEntityFieldName) {
+        this(jpaEntityFieldName, null, Collections.emptyList());
     }
 
-    DistributionSetFields(final String fieldName, final String... subEntityAttributes) {
-        this(fieldName, null, List.of(subEntityAttributes));
+    DistributionSetFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
+        this(jpaEntityFieldName, null, List.of(subEntityAttributes));
     }
 
-    DistributionSetFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
-        this(fieldName, subEntityMapTuple, Collections.emptyList());
+    DistributionSetFields(final String jpaEntityFieldName, final Entry<String, String> subEntityMapTuple) {
+        this(jpaEntityFieldName, subEntityMapTuple, Collections.emptyList());
     }
 
-    DistributionSetFields(final String fieldName, final Entry<String, String> subEntityMapTuple, List<String> subEntityAttributes) {
-        this.fieldName = fieldName;
+    DistributionSetFields(final String jpaEntityFieldName, final Entry<String, String> subEntityMapTuple, List<String> subEntityAttributes) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
         this.subEntityMapTuple = subEntityMapTuple;
         this.subEntityAttributes = subEntityAttributes;
     }

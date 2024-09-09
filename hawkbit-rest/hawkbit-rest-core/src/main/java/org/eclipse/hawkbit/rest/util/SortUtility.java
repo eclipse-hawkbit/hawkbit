@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.eclipse.hawkbit.repository.FieldNameProvider;
+import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.rest.exception.SortParameterSyntaxErrorException;
 import org.eclipse.hawkbit.rest.exception.SortParameterUnsupportedDirectionException;
 import org.eclipse.hawkbit.rest.exception.SortParameterUnsupportedFieldException;
@@ -53,11 +53,11 @@ public final class SortUtility {
      *            should be related to.
      * @param <T>
      *            the type of the enumeration which must be derived from
-     *            {@link FieldNameProvider}
+     *            {@link RsqlQueryField}
      * @param sortString
      *            the string representation of the query parameters. Might be
      *            {@code null} or an empty string.
-     * @return a list which holds the {@link FieldNameProvider} and the specific
+     * @return a list which holds the {@link RsqlQueryField} and the specific
      *         {@link Direction} for them as a tuple. Never {@code null}. In
      *         case of no sorting parameters an empty map will be returned.
      * @throws SortParameterSyntaxErrorException
@@ -67,7 +67,7 @@ public final class SortUtility {
      * @throws SortParameterUnsupportedDirectionException
      *             if the given direction is not "ASC" or "DESC"
      */
-    public static <T extends Enum<T> & FieldNameProvider> List<Order> parse(final Class<T> enumType,
+    public static <T extends Enum<T> & RsqlQueryField> List<Order> parse(final Class<T> enumType,
             final String sortString) throws SortParameterSyntaxErrorException {
         final List<Order> parsedSortings = new ArrayList<>();
         // scan the sort tuples e.g. field:direction
@@ -84,7 +84,7 @@ public final class SortUtility {
                     final T identifier = getAttributeIdentifierByName(enumType, fieldName);
 
                     final Direction sortDirection = getDirection(sortDirectionStr);
-                    parsedSortings.add(new Order(sortDirection, identifier.getFieldName()));
+                    parsedSortings.add(new Order(sortDirection, identifier.getJpaEntityFieldName()));
                 } else {
                     throw new SortParameterSyntaxErrorException();
                 }
@@ -103,12 +103,12 @@ public final class SortUtility {
      *            the name of the enum
      * @param <T>
      *            the type of the enumeration which must be derived from
-     *            {@link FieldNameProvider}
+     *            {@link RsqlQueryField}
      * @return the corresponding enum
      * @throws SortParameterUnsupportedFieldException
      *             if there is no matching enum for the specified name
      */
-    private static <T extends Enum<T> & FieldNameProvider> T getAttributeIdentifierByName(final Class<T> enumType,
+    private static <T extends Enum<T> & RsqlQueryField> T getAttributeIdentifierByName(final Class<T> enumType,
             final String name) {
         try {
             return Enum.valueOf(enumType, name.toUpperCase());

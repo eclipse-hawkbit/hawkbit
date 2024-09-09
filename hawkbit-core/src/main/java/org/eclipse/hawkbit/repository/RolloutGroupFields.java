@@ -15,15 +15,15 @@ import lombok.Getter;
  * Describing the fields of the RolloutGroup model which can be used in the REST API e.g. for sorting etc.
  */
 @Getter
-public enum RolloutGroupFields implements FieldNameProvider {
+public enum RolloutGroupFields implements RsqlQueryField {
 
     ID("id"),
     NAME("name"),
     DESCRIPTION("description");
 
-    private final String fieldName;
+    private final String jpaEntityFieldName;
 
-    RolloutGroupFields(final String fieldName) {
-        this.fieldName = fieldName;
+    RolloutGroupFields(final String jpaEntityFieldName) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
     }
 }

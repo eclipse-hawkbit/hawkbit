@@ -27,16 +27,16 @@ public class FileNameFieldsTest {
     public void repositoryManagementMethodsArePreAuthorizedAnnotated() {
         final String packageName = getClass().getPackage().getName();
         try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {
-            final List<? extends Class<? extends FieldNameProvider>> matchingClasses = scanResult.getAllClasses()
+            final List<? extends Class<? extends RsqlQueryField>> matchingClasses = scanResult.getAllClasses()
                     .stream()
-                    .filter(classInPackage -> classInPackage.implementsInterface(FieldNameProvider.class))
+                    .filter(classInPackage -> classInPackage.implementsInterface(RsqlQueryField.class))
                     .map(ClassInfo::loadClass)
-                    .map(clazz -> (Class<? extends FieldNameProvider>) clazz)
+                    .map(clazz -> (Class<? extends RsqlQueryField>) clazz)
                     .toList();
             assertThat(matchingClasses).isNotEmpty();
             matchingClasses.forEach(providerClass -> {
                 assertThat(providerClass.getEnumConstants()).isNotEmpty();
-                for (final FieldNameProvider provider : providerClass.getEnumConstants()) {
+                for (final RsqlQueryField provider : providerClass.getEnumConstants()) {
                     if (provider.isMap() && !provider.getSubEntityAttributes().isEmpty()) {
                         throw new UnsupportedOperationException(
                                 "Currently sub-entity attributes for maps are not supported, alternatively you could use the key/value tuple, defined by SimpleImmutableEntry class");

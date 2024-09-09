@@ -19,7 +19,7 @@ import java.util.Optional;
  * Describing the fields of the SoftwareModule model which can be used in the REST API e.g. for sorting etc.
  */
 @Getter
-public enum SoftwareModuleFields implements FieldNameProvider {
+public enum SoftwareModuleFields implements RsqlQueryField {
 
     ID("id"),
     TYPE("type.key"),
@@ -28,15 +28,15 @@ public enum SoftwareModuleFields implements FieldNameProvider {
     VERSION("version"),
     METADATA("metadata", new SimpleImmutableEntry<>("key", "value"));
 
-    private final String fieldName;
+    private final String jpaEntityFieldName;
     private Entry<String, String> subEntityMapTuple;
 
-    SoftwareModuleFields(final String fieldName) {
-        this(fieldName, null);
+    SoftwareModuleFields(final String jpaEntityFieldName) {
+        this(jpaEntityFieldName, null);
     }
 
-    SoftwareModuleFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
-        this.fieldName = fieldName;
+    SoftwareModuleFields(final String jpaEntityFieldName, final Entry<String, String> subEntityMapTuple) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
         this.subEntityMapTuple = subEntityMapTuple;
     }
 

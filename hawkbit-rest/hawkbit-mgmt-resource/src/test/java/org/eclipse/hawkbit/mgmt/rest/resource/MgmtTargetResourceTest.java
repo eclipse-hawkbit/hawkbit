@@ -155,7 +155,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(actions).hasSize(2);
         updateActionStatus(actions.get(0), Status.FINISHED, null, "test");
 
-        final PageRequest pageRequest = PageRequest.of(0, 1000, Direction.ASC, ActionFields.ID.getFieldName());
+        final PageRequest pageRequest = PageRequest.of(0, 1000, Direction.ASC, ActionFields.ID.getJpaEntityFieldName());
         final Action action = deploymentManagement.findActionsByTarget(knownTargetId, pageRequest).getContent().get(0);
 
         final ActionStatus status = deploymentManagement.findActionStatusByAction(PAGE, action.getId()).getContent()
