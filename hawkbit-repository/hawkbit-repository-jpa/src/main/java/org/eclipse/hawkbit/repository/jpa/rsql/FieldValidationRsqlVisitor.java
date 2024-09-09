@@ -21,8 +21,7 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
  * {@link RSQLVisitor} implementation which validates the nodes (fields) based
  * on a given {@link RsqlQueryField} for a given entity type.
  *
- * @param <A>
- *            The type the {@link RsqlQueryField} refers to.
+ * @param <A> The type the {@link RsqlQueryField} refers to.
  */
 public class FieldValidationRsqlVisitor<A extends Enum<A> & RsqlQueryField> extends AbstractRSQLVisitor<A>
         implements RSQLVisitor<Void, String> {
@@ -30,8 +29,7 @@ public class FieldValidationRsqlVisitor<A extends Enum<A> & RsqlQueryField> exte
     /**
      * Constructs the visitor and initializes it.
      * 
-     * @param fieldNameProvider
-     *            The {@link RsqlQueryField} to use for validation.
+     * @param fieldNameProvider The {@link RsqlQueryField} to use for validation.
      */
     public FieldValidationRsqlVisitor(final Class<A> fieldNameProvider) {
         super(fieldNameProvider);
@@ -58,5 +56,4 @@ public class FieldValidationRsqlVisitor<A extends Enum<A> & RsqlQueryField> exte
         node.getChildren().forEach(child -> child.accept(this, param));
         return null;
     }
-
 }

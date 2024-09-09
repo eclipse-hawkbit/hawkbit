@@ -25,10 +25,10 @@ import cz.jirutka.rsql.parser.ast.ComparisonNode;
 @Slf4j
 public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
 
-    private final Class<A> fieldNameProvider;
+    private final Class<A> rsqlQueryFieldType;
 
     @Value
-    public class RsqlField {
+    protected class RsqlField {
 
         A enumValue;
         String[] subAttributes;
@@ -39,22 +39,22 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
         }
     }
 
-    protected AbstractRSQLVisitor(final Class<A> fieldNameProvider) {
-        this.fieldNameProvider = fieldNameProvider;
+    protected AbstractRSQLVisitor(final Class<A> rsqlQueryFieldType) {
+        this.rsqlQueryFieldType = rsqlQueryFieldType;
     }
 
     protected RsqlField getRsqlField(final ComparisonNode node) {
         final String[] graph = node.getSelector().split(RsqlQueryField.SUB_ATTRIBUTE_SPLIT_REGEX);
         final String enumName = graph.length == 0 ? node.getSelector() : graph[0];
-        log.debug("get field identifier by name {} of enum type {}", enumName, fieldNameProvider);
+        log.debug("get field identifier by name {} of enum type {}", enumName, rsqlQueryFieldType);
 
         try {
-            final A enumValue = Enum.valueOf(fieldNameProvider, enumName.toUpperCase());
+            final A enumValue = Enum.valueOf(rsqlQueryFieldType, enumName.toUpperCase());
             final String[] subAttributes = enumValue.getSubAttributes(node.getSelector());
 
             // validate
             if (enumValue.isMap()) {
-                // enum.key
+                // <enum>.<key>
                 if (subAttributes.length != 2) {
                     throw new RSQLParameterUnsupportedFieldException(
                             "The syntax of the given map search parameter field {" + node.getSelector() + "} is wrong. Syntax is: <enum name>.<key name>");
@@ -92,8 +92,7 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
      * @return Exception with prepared message extracted from the comparison node.
      */
     private RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(
-            @NotNull final ComparisonNode node,
-            final Exception rootException) {
+            @NotNull final ComparisonNode node, final Exception rootException) {
         return new RSQLParameterUnsupportedFieldException(String.format(
                 "The given search parameter field {%s} does not exist, must be one of the following fields %s",
                 node.getSelector(), getExpectedFieldList()), rootException);
@@ -106,7 +105,7 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
     }
 
     private List<String> getExpectedFieldList() {
-        final List<String> expectedFieldList = Arrays.stream(fieldNameProvider.getEnumConstants())
+        final List<String> expectedFieldList = Arrays.stream(rsqlQueryFieldType.getEnumConstants())
                 .filter(enumField -> enumField.getSubEntityAttributes().isEmpty()).map(enumField -> {
                     final String enumFieldName = enumField.name().toLowerCase();
                     if (enumField.isMap()) {
@@ -116,7 +115,7 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
                     }
                 }).collect(Collectors.toList());
 
-        final List<String> expectedSubFieldList = Arrays.stream(fieldNameProvider.getEnumConstants())
+        final List<String> expectedSubFieldList = Arrays.stream(rsqlQueryFieldType.getEnumConstants())
                 .filter(enumField -> !enumField.getSubEntityAttributes().isEmpty()).flatMap(enumField -> {
                     final List<String> subEntity = enumField
                             .getSubEntityAttributes().stream().map(fieldName -> enumField.name().toLowerCase()
