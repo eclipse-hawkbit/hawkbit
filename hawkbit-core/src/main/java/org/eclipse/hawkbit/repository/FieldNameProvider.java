@@ -46,14 +46,12 @@ public interface FieldNameProvider {
     default String[] getSubAttributes(final String propertyFieldName) {
         if (isMap()) {
             final String[] subAttributes = propertyFieldName.split(SUB_ATTRIBUTE_SPLIT_REGEX, 2);
-            // [0] field name | [1] key name
+            // [0] field name | [1] key name (could miss, e.g. for target attributes)
             final String mapKeyName = subAttributes.length == 2 ? subAttributes[1] : null;
-            if (ObjectUtils.isEmpty(mapKeyName)) {
-                return new String[] { getFieldName() };
-            }
-            return new String[] { getFieldName(), mapKeyName };
+            return ObjectUtils.isEmpty(mapKeyName) ? new String[] { getFieldName() } : new String[] { getFieldName(), mapKeyName };
+        } else {
+            return propertyFieldName.split(SUB_ATTRIBUTE_SPLIT_REGEX);
         }
-        return propertyFieldName.split(SUB_ATTRIBUTE_SPLIT_REGEX);
     }
 
     /**
