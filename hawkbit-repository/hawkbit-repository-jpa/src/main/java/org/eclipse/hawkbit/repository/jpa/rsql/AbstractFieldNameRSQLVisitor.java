@@ -43,46 +43,34 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
 
     protected String getAndValidatePropertyFieldName(final A propertyEnum, final ComparisonNode node) {
         final String[] subAttributes = propertyEnum.getSubAttributes(node.getSelector());
-        validateMapParameter(propertyEnum, node, subAttributes);
 
-        // sub entity need minimum 1 dot
-        if (!propertyEnum.getSubEntityAttributes().isEmpty() && subAttributes.length < 2) {
-            throw createRSQLParameterUnsupportedException(node, null);
-        }
-
-        final StringBuilder fieldNameBuilder = new StringBuilder(propertyEnum.getFieldName());
-        for (int i = 1; i < subAttributes.length; i++) {
-            final String propertyField = getFormattedSubEntityAttribute(propertyEnum ,subAttributes[i]);
-            fieldNameBuilder.append(FieldNameProvider.SUB_ATTRIBUTE_SEPARATOR).append(propertyField);
-
-            // the key of map is not in the graph
-            if (propertyEnum.isMap() && subAttributes.length == (i + 1)) {
-                continue;
+        if (propertyEnum.isMap()) {
+            // enum.key
+            if (subAttributes.length != 2) {
+                throw new RSQLParameterUnsupportedFieldException(
+                        "The syntax of the given map search parameter field {" + node.getSelector() + "} is wrong. Syntax is: <enum name>.<key name>");
             }
-
-            if (!propertyEnum.containsSubEntityAttribute(propertyField)) {
+        } else {
+            // sub entity need minimum 1 dot
+            if (!propertyEnum.getSubEntityAttributes().isEmpty() && subAttributes.length < 2) {
                 throw createRSQLParameterUnsupportedException(node, null);
             }
         }
 
+        final StringBuilder fieldNameBuilder = new StringBuilder(propertyEnum.getFieldName());
+        for (int i = 1; i < subAttributes.length; i++) {
+            final String propertyField = getFormattedSubEntityAttribute(propertyEnum, subAttributes[i]);
+
+            if (!propertyEnum.containsSubEntityAttribute(propertyField)) {
+                if (i != subAttributes.length - 1 || !propertyEnum.isMap()) {
+                    throw createRSQLParameterUnsupportedException(node, null);
+                } // otherwise - the key of map is not in the sub entity attributes
+            }
+
+            fieldNameBuilder.append(FieldNameProvider.SUB_ATTRIBUTE_SEPARATOR).append(propertyField);
+        }
+
         return fieldNameBuilder.toString();
-    }
-
-    private void validateMapParameter(final A propertyEnum, final ComparisonNode node, final String[] subAttributes) {
-        if (!propertyEnum.isMap()) {
-            return;
-        }
-
-        if (!propertyEnum.getSubEntityAttributes().isEmpty()) {
-            throw new UnsupportedOperationException(
-                    "Currently sub-entity attributes for maps are not supported, alternatively you could use the key/value tuple, defined by SimpleImmutableEntry class");
-        }
-
-        // enum.key
-        if (subAttributes.length != 2) {
-            throw new RSQLParameterUnsupportedFieldException("The syntax of the given map search parameter field {" +
-                    node.getSelector() + "} is wrong. Syntax is: <enum name>.<key name>");
-        }
     }
 
     /**
