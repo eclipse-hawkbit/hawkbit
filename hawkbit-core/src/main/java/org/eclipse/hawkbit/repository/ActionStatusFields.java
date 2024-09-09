@@ -15,14 +15,14 @@ import lombok.Getter;
  * Sort and search fields for action status.
  */
 @Getter
-public enum ActionStatusFields implements FieldNameProvider {
+public enum ActionStatusFields implements RsqlQueryField {
 
     ID("id"),
     REPORTEDAT("createdAt");
 
-    private final String fieldName;
+    private final String jpaEntityFieldName;
 
-    ActionStatusFields(final String fieldName) {
-        this.fieldName = fieldName;
+    ActionStatusFields(final String jpaEntityFieldName) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
     }
 }

@@ -15,15 +15,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import jakarta.validation.constraints.NotNull;
 import org.springframework.util.ObjectUtils;
 
 /**
- * An interface for declaring the name of the field described in the database
- * which is used as string representation of the field, e.g. for sorting the
- * fields over REST.
+ * An RSQL query field interface extended by all the fields that could be used in RSQL queries.
  */
-@FunctionalInterface
-public interface FieldNameProvider {
+public interface RsqlQueryField {
 
     /**
      * Separator for the sub attributes
@@ -32,10 +30,10 @@ public interface FieldNameProvider {
     String SUB_ATTRIBUTE_SPLIT_REGEX = "\\" + SUB_ATTRIBUTE_SEPARATOR;
 
     /**
-     * @return the string representation of the underlying persistence field
-     *         name e.g. in case of sorting. Never {@code null}.
+     * @return the string representation of the underlying persistence field name e.g. in case of sorting.
      */
-    String getFieldName();
+    @NotNull
+    String getJpaEntityFieldName();
 
     /**
      * Returns the sub attributes
@@ -48,7 +46,7 @@ public interface FieldNameProvider {
             final String[] subAttributes = propertyFieldName.split(SUB_ATTRIBUTE_SPLIT_REGEX, 2);
             // [0] field name | [1] key name (could miss, e.g. for target attributes)
             final String mapKeyName = subAttributes.length == 2 ? subAttributes[1] : null;
-            return ObjectUtils.isEmpty(mapKeyName) ? new String[] { getFieldName() } : new String[] { getFieldName(), mapKeyName };
+            return ObjectUtils.isEmpty(mapKeyName) ? new String[] { getJpaEntityFieldName() } : new String[] { getJpaEntityFieldName(), mapKeyName };
         } else {
             return propertyFieldName.split(SUB_ATTRIBUTE_SPLIT_REGEX);
         }

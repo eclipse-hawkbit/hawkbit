@@ -16,16 +16,16 @@ import lombok.Getter;
  * the REST API e.g. for sorting etc.
  */
 @Getter
-public enum DistributionSetTypeFields implements FieldNameProvider {
+public enum DistributionSetTypeFields implements RsqlQueryField {
 
     ID("id"),
     KEY("key"),
     NAME("name"),
     DESCRIPTION("description");
 
-    private final String fieldName;
+    private final String jpaEntityFieldName;
 
-    DistributionSetTypeFields(final String fieldName) {
-        this.fieldName = fieldName;
+    DistributionSetTypeFields(final String jpaEntityFieldName) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
     }
 }

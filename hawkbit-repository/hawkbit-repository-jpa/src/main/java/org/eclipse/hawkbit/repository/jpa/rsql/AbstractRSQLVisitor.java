@@ -15,62 +15,75 @@ import java.util.stream.Collectors;
 
 import jakarta.validation.constraints.NotNull;
 
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.repository.FieldNameProvider;
+import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
 
 @Slf4j
-public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldNameProvider> {
+public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
 
     private final Class<A> fieldNameProvider;
 
-    protected AbstractFieldNameRSQLVisitor(final Class<A> fieldNameProvider) {
+    @Value
+    public class RsqlField {
+
+        A enumValue;
+        String[] subAttributes;
+
+        private RsqlField(final A enumValue, final String[] subAttributes) {
+            this.enumValue = enumValue;
+            this.subAttributes = subAttributes;
+        }
+    }
+
+    protected AbstractRSQLVisitor(final Class<A> fieldNameProvider) {
         this.fieldNameProvider = fieldNameProvider;
     }
 
-    protected A getFieldEnumByName(final ComparisonNode node) {
-        final String[] graph = node.getSelector().split(FieldNameProvider.SUB_ATTRIBUTE_SPLIT_REGEX);
+    protected RsqlField getRsqlField(final ComparisonNode node) {
+        final String[] graph = node.getSelector().split(RsqlQueryField.SUB_ATTRIBUTE_SPLIT_REGEX);
         final String enumName = graph.length == 0 ? node.getSelector() : graph[0];
         log.debug("get field identifier by name {} of enum type {}", enumName, fieldNameProvider);
+
         try {
-            return Enum.valueOf(fieldNameProvider, enumName.toUpperCase());
+            final A enumValue = Enum.valueOf(fieldNameProvider, enumName.toUpperCase());
+            final String[] subAttributes = enumValue.getSubAttributes(node.getSelector());
+
+            // validate
+            if (enumValue.isMap()) {
+                // enum.key
+                if (subAttributes.length != 2) {
+                    throw new RSQLParameterUnsupportedFieldException(
+                            "The syntax of the given map search parameter field {" + node.getSelector() + "} is wrong. Syntax is: <enum name>.<key name>");
+                }
+            } else {
+                // sub entity need minimum 1 dot
+                if (!enumValue.getSubEntityAttributes().isEmpty() && subAttributes.length < 2) {
+                    throw createRSQLParameterUnsupportedException(node, null);
+                }
+            }
+
+            // build property and validate sub attributes
+            final StringBuilder fieldNameBuilder = new StringBuilder(enumValue.getJpaEntityFieldName());
+            for (int i = 1; i < subAttributes.length; i++) {
+                final String propertyField = getFormattedSubEntityAttribute(enumValue, subAttributes[i]);
+
+                if (!enumValue.containsSubEntityAttribute(propertyField)) {
+                    if (i != subAttributes.length - 1 || !enumValue.isMap()) {
+                        throw createRSQLParameterUnsupportedException(node, null);
+                    } // otherwise - the key of map is not in the sub entity attributes
+                }
+
+                fieldNameBuilder.append(RsqlQueryField.SUB_ATTRIBUTE_SEPARATOR).append(propertyField);
+            }
+
+            return new RsqlField(enumValue, enumValue.getSubAttributes(fieldNameBuilder.toString()));
         } catch (final IllegalArgumentException e) {
             throw createRSQLParameterUnsupportedException(node, e);
         }
-    }
-
-    protected String getAndValidatePropertyFieldName(final A propertyEnum, final ComparisonNode node) {
-        final String[] subAttributes = propertyEnum.getSubAttributes(node.getSelector());
-
-        if (propertyEnum.isMap()) {
-            // enum.key
-            if (subAttributes.length != 2) {
-                throw new RSQLParameterUnsupportedFieldException(
-                        "The syntax of the given map search parameter field {" + node.getSelector() + "} is wrong. Syntax is: <enum name>.<key name>");
-            }
-        } else {
-            // sub entity need minimum 1 dot
-            if (!propertyEnum.getSubEntityAttributes().isEmpty() && subAttributes.length < 2) {
-                throw createRSQLParameterUnsupportedException(node, null);
-            }
-        }
-
-        final StringBuilder fieldNameBuilder = new StringBuilder(propertyEnum.getFieldName());
-        for (int i = 1; i < subAttributes.length; i++) {
-            final String propertyField = getFormattedSubEntityAttribute(propertyEnum, subAttributes[i]);
-
-            if (!propertyEnum.containsSubEntityAttribute(propertyField)) {
-                if (i != subAttributes.length - 1 || !propertyEnum.isMap()) {
-                    throw createRSQLParameterUnsupportedException(node, null);
-                } // otherwise - the key of map is not in the sub entity attributes
-            }
-
-            fieldNameBuilder.append(FieldNameProvider.SUB_ATTRIBUTE_SEPARATOR).append(propertyField);
-        }
-
-        return fieldNameBuilder.toString();
     }
 
     /**
@@ -78,7 +91,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
      * @param rootException in case there is a cause otherwise {@code null}
      * @return Exception with prepared message extracted from the comparison node.
      */
-    protected RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(
+    private RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(
             @NotNull final ComparisonNode node,
             final Exception rootException) {
         return new RSQLParameterUnsupportedFieldException(String.format(
@@ -97,7 +110,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
                 .filter(enumField -> enumField.getSubEntityAttributes().isEmpty()).map(enumField -> {
                     final String enumFieldName = enumField.name().toLowerCase();
                     if (enumField.isMap()) {
-                        return enumFieldName + FieldNameProvider.SUB_ATTRIBUTE_SEPARATOR + "keyName";
+                        return enumFieldName + RsqlQueryField.SUB_ATTRIBUTE_SEPARATOR + "keyName";
                     } else {
                         return enumFieldName;
                     }
@@ -107,7 +120,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
                 .filter(enumField -> !enumField.getSubEntityAttributes().isEmpty()).flatMap(enumField -> {
                     final List<String> subEntity = enumField
                             .getSubEntityAttributes().stream().map(fieldName -> enumField.name().toLowerCase()
-                                    + FieldNameProvider.SUB_ATTRIBUTE_SEPARATOR + fieldName)
+                                    + RsqlQueryField.SUB_ATTRIBUTE_SEPARATOR + fieldName)
                             .toList();
 
                     return subEntity.stream();

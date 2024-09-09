@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.eclipse.hawkbit.repository.FieldNameProvider;
+import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -52,7 +52,7 @@ public class RSQLToSQLTest {
         print(JpaTarget.class, TargetFields.class, "(tag!=TAG1 or tag !=TAG2)");
     }
 
-    private <T, A extends Enum<A> & FieldNameProvider> void print(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
+    private <T, A extends Enum<A> & RsqlQueryField> void print(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
         System.out.println(rsql);
         System.out.println("\tlegacy:\n" +
                 "\t\t" + rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, true));

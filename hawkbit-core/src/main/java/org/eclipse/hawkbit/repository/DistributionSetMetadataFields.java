@@ -15,19 +15,19 @@ import lombok.Getter;
  * Sort fields for DistributionSetMetadata.
  */
 @Getter
-public enum DistributionSetMetadataFields implements FieldNameProvider {
+public enum DistributionSetMetadataFields implements RsqlQueryField {
 
     KEY("key"),
     VALUE("value");
 
-    private final String fieldName;
+    private final String jpaEntityFieldName;
 
-    DistributionSetMetadataFields(final String fieldName) {
-        this.fieldName = fieldName;
+    DistributionSetMetadataFields(final String jpaEntityFieldName) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
     }
 
     @Override
     public String identifierFieldName() {
-        return KEY.getFieldName();
+        return KEY.getJpaEntityFieldName();
     }
 }
