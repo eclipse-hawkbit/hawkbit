@@ -63,7 +63,6 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
     public static final Character LIKE_WILDCARD = '*';
     private static final char ESCAPE_CHAR = '\\';
     private static final String ESCAPE_CHAR_WITH_ASTERISK = ESCAPE_CHAR +"*";
-    private static final List<String> NO_JOINS_OPERATOR = List.of("!=", "=out=");
 
     private final Root<T> root;
     private final CriteriaQuery<?> query;
@@ -76,7 +75,6 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
 
     private boolean inOr;
     private final Map<Class<?>, Path<Object>> javaTypeToPath = new HashMap<>();
-    private boolean joinsNeeded;
 
     public JpaQueryRsqlVisitorG2(final Class<A> enumType,
             final Root<T> root, final CriteriaQuery<?> query, final CriteriaBuilder cb,
@@ -119,8 +117,6 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         for (final String value : values) {
             transformedValues.add(convertValueIfNecessary(node, queryField.getEnumValue(), fieldPath, value));
         }
-
-        this.joinsNeeded = this.joinsNeeded || areJoinsNeeded(node);
 
         return mapToPredicate(node, queryField, fieldPath, node.getArguments(), transformedValues);
     }
@@ -219,8 +215,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
                 }
             }
 
-            clearJoinsIfNotNeeded();
-            return toNotExistsSubQueryPredicate(queryField, expressionToCompare ->
+            return toNotExistsSubQueryPredicate(queryField, fieldPath, expressionToCompare ->
                             isPattern(transformedValueStr) ? // a pattern, use like
                                     like(expressionToCompare, toSQL(transformedValueStr)) :
                                     equal(expressionToCompare, transformedValueStr));
@@ -237,8 +232,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
             return cb.or(cb.isNull(fieldPath), cb.not(in(pathOfString(fieldPath), transformedValues)));
         }
 
-        clearJoinsIfNotNeeded();
-        return toNotExistsSubQueryPredicate(queryField, expressionToCompare -> in(expressionToCompare, transformedValues));
+        return toNotExistsSubQueryPredicate(queryField, fieldPath, expressionToCompare -> in(expressionToCompare, transformedValues));
     }
 
     private Path<Object> getFieldPath(final Root<?> root, final QuertPath queryField) {
@@ -267,9 +261,8 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
                 return root.get(fieldNameSplit);
             }
         } // if a collection - it is a join
-        if (inOr && root == this.root) { // try to reuse join of the same or level and no subquery
-            final Class<?> objectClass = attribute.getJavaType();
-            return javaTypeToPath.computeIfAbsent(objectClass, k -> root.join(fieldNameSplit, JoinType.LEFT));
+        if (inOr && root == this.root) { // try to reuse join of the same "or" level and no subquery
+            return javaTypeToPath.computeIfAbsent(attribute.getJavaType(), k -> root.join(fieldNameSplit, JoinType.LEFT));
         } else {
             return root.join(fieldNameSplit, JoinType.LEFT);
         }
@@ -338,12 +331,6 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         }
     }
 
-    private void clearJoinsIfNotNeeded() {
-        if (!joinsNeeded) {
-            root.getJoins().clear();
-        }
-    }
-
     private Predicate toNullOrNotEqualPredicate(final Path<Object> fieldPath, final Object transformedValue) {
         return cb.or(
                 cb.isNull(fieldPath),
@@ -353,7 +340,13 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private Predicate toNotExistsSubQueryPredicate(final QuertPath queryField, final Function<Expression<String>, Predicate> subQueryPredicateProvider) {
+    private Predicate toNotExistsSubQueryPredicate(final QuertPath queryField, final Path<Object> fieldPath, final Function<Expression<String>, Predicate> subQueryPredicateProvider) {
+        // if a subquery the field's parent joins are not actually used
+        if (!inOr) {
+            // so, if not in or (hence not reused) we remove them
+            root.getJoins().remove(fieldPath.getParentPath());
+        }
+
         final Class<?> javaType = root.getJavaType();
         final Subquery<?> subquery = query.subquery(javaType);
         final Root subqueryRoot = subquery.from(javaType);
@@ -453,9 +446,5 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         } else {
             return transformedValue.indexOf(LIKE_WILDCARD) != -1;
         }
-    }
-
-    private static boolean areJoinsNeeded(final ComparisonNode node) {
-        return !NO_JOINS_OPERATOR.contains(node.getOperator().getSymbol());
     }
 }

@@ -52,11 +52,28 @@ public class RSQLToSQLTest {
         print(JpaTarget.class, TargetFields.class, "(tag!=TAG1 or tag !=TAG2)");
     }
 
+    @Test
+    public void printPG() {
+        printFrom(JpaTarget.class, TargetFields.class, "tag!=TAG1 and tag==TAG2");
+        printFrom(JpaTarget.class, TargetFields.class, "tag==TAG1 and tag!=TAG2");
+    }
+
     private <T, A extends Enum<A> & RsqlQueryField> void print(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
         System.out.println(rsql);
         System.out.println("\tlegacy:\n" +
                 "\t\t" + rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, true));
         System.out.println("\tG2:\n" +
                 "\t\t" + rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, false));
+    }
+
+    private <T, A extends Enum<A> & RsqlQueryField> void printFrom(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
+        System.out.println(rsql);
+        System.out.println("\tlegacy:\n" +
+                "\t\t" + from(rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, true)));
+        System.out.println("\tG2:\n" +
+                "\t\t" + from(rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, false)));
+    }
+    private static String from(final String sql) {
+        return sql.substring(sql.indexOf("FROM"));
     }
 }
