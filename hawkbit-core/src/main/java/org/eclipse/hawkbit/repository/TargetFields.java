@@ -35,7 +35,7 @@ public enum TargetFields implements RsqlQueryField {
     ATTRIBUTE("controllerAttributes"),
     ASSIGNEDDS("assignedDistributionSet", "name", "version"),
     INSTALLEDDS("installedDistributionSet", "name", "version"),
-    TAG("tags.name"),
+    TAG("tags", "name"),
     LASTCONTROLLERREQUESTAT("lastTargetQuery"),
     METADATA("metadata", new SimpleImmutableEntry<>("key", "value")),
     TARGETTYPE("targetType", TargetTypeFields.KEY.getJpaEntityFieldName(), TargetTypeFields.NAME.getJpaEntityFieldName());

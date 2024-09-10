@@ -36,23 +36,6 @@ public interface RsqlQueryField {
     String getJpaEntityFieldName();
 
     /**
-     * Returns the sub attributes
-     *
-     * @param propertyFieldName the given field
-     * @return array consisting of sub attributes
-     */
-    default String[] getSubAttributes(final String propertyFieldName) {
-        if (isMap()) {
-            final String[] subAttributes = propertyFieldName.split(SUB_ATTRIBUTE_SPLIT_REGEX, 2);
-            // [0] field name | [1] key name (could miss, e.g. for target attributes)
-            final String mapKeyName = subAttributes.length == 2 ? subAttributes[1] : null;
-            return ObjectUtils.isEmpty(mapKeyName) ? new String[] { getJpaEntityFieldName() } : new String[] { getJpaEntityFieldName(), mapKeyName };
-        } else {
-            return propertyFieldName.split(SUB_ATTRIBUTE_SPLIT_REGEX);
-        }
-    }
-
-    /**
      * Contains the sub entity the given field.
      *
      * @param propertyField the given field
