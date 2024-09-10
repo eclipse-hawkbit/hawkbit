@@ -45,26 +45,16 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
     }
 
     protected QuertPath getQuertPath(final ComparisonNode node) {
-        final String[] path = node.getSelector().split(RsqlQueryField.SUB_ATTRIBUTE_SPLIT_REGEX);
-        if (path.length == 0) {
-            throw createRSQLParameterUnsupportedException(node, null);
-        }
-
-        final String enumName = path[0].toUpperCase();
-        log.debug("get field identifier by name {} of enum type {}", enumName, rsqlQueryFieldType);
+        final int firstSeparatorIndex = node.getSelector().indexOf(RsqlQueryField.SUB_ATTRIBUTE_SEPARATOR);
+        final String enumName = (firstSeparatorIndex == -1 ? node.getSelector() : node.getSelector().substring(0, firstSeparatorIndex)).toUpperCase();
+        log.debug("Get field identifier by name {} of enum type {}", enumName, rsqlQueryFieldType);
 
         try {
             final A enumValue = Enum.valueOf(rsqlQueryFieldType, enumName);
             String[] split = getSplit(enumValue, node.getSelector());
 
             // validate
-            if (enumValue.isMap()) {
-                // <enum>.<key>
-                if (split.length != 2) {
-                    throw new RSQLParameterUnsupportedFieldException(
-                            "The syntax of the given map search parameter field {" + node.getSelector() + "} is wrong. Syntax is: <enum name>.<key name>");
-                }
-            } else {
+            if (!enumValue.isMap()) {
                 // sub entity need minimum 1 dot
                 if (!enumValue.getSubEntityAttributes().isEmpty() && split.length < 2) {
                     if (enumValue.getSubEntityAttributes().size() == 1) { // single sub attribute - so default
@@ -93,20 +83,14 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
         }
     }
 
-    /**
-     * Returns the sub attributes
-     *
-     * @param rsqlFieldName the given field
-     * @return array consisting of sub attributes
-     */
     private String[] getSplit(final A enumValue, final String rsqlFieldName) {
         if (enumValue.isMap()) {
-            final String[] subAttributes = rsqlFieldName.split(RsqlQueryField.SUB_ATTRIBUTE_SPLIT_REGEX, 2);
-            // [0] field name | [1] key name (could miss, e.g. for target attributes)
-            final String mapKeyName = subAttributes.length == 2 ? subAttributes[1] : null;
-            return ObjectUtils.isEmpty(mapKeyName) ?
-                    new String[] { enumValue.getJpaEntityFieldName() } :
-                    new String[] { enumValue.getJpaEntityFieldName(), mapKeyName };
+            final String[] split = rsqlFieldName.split(RsqlQueryField.SUB_ATTRIBUTE_SPLIT_REGEX, 2);
+            if (split.length != 2 || ObjectUtils.isEmpty(split[1])) {
+                throw new RSQLParameterUnsupportedFieldException(
+                        "The syntax of the given map search parameter field {" + rsqlFieldName + "} is wrong. Syntax is: <enum name>.<key name>");
+            }
+            return split;
         } else {
             return rsqlFieldName.split(RsqlQueryField.SUB_ATTRIBUTE_SPLIT_REGEX);
         }
