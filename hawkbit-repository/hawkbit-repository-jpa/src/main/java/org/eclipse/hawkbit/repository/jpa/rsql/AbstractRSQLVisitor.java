@@ -57,7 +57,7 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
             if (!enumValue.isMap()) {
                 // sub entity need minimum 1 dot
                 if (!enumValue.getSubEntityAttributes().isEmpty() && split.length < 2) {
-                    if (enumValue.getSubEntityAttributes().size() == 1) { // single sub attribute - so default
+                    if (enumValue.getSubEntityAttributes().size() == 1) { // single sub attribute - so add is as a default
                         split = new String[] { split[0], enumValue.getSubEntityAttributes().get(0) };
                     } else {
                         throw createRSQLParameterUnsupportedException(node, null);
