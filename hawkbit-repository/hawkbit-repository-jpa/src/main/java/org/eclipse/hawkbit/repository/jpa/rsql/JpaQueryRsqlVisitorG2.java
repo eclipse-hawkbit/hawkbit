@@ -343,7 +343,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
     private Predicate toNotExistsSubQueryPredicate(final QuertPath queryField, final Path<Object> fieldPath, final Function<Expression<String>, Predicate> subQueryPredicateProvider) {
         // if a subquery the field's parent joins are not actually used
         if (!inOr) {
-            // so, if not in or (hence not reused) we remove them
+            // so, if not in or (hence not reused) we remove them. Parent shall be a Join
             root.getJoins().remove(fieldPath.getParentPath());
         }
 
@@ -365,7 +365,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         }
         if (fieldPath instanceof MapJoin) {
             // Currently we support only string key. So below cast is safe.
-            return (Expression<String>) (((MapJoin<?, ?, ?>) pathOfString(fieldPath)).value());
+            return (Expression<String>) (((MapJoin<?, ?, ?>) fieldPath).value());
         }
         final String valueFieldName = enumField.getSubEntityMapTuple().map(Entry::getValue)
                 .orElseThrow(() -> new UnsupportedOperationException(
