@@ -48,7 +48,7 @@ public class FieldValidationRsqlVisitor<A extends Enum<A> & RsqlQueryField> exte
     @Override
     public Void visit(final ComparisonNode node, final String param) {
         // get AND validates
-        getRsqlField(node);
+        getQuertPath(node);
         return null;
     }
 

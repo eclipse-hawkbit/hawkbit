@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.repository;
 import lombok.Getter;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 
@@ -22,22 +24,31 @@ import java.util.Optional;
 public enum SoftwareModuleFields implements RsqlQueryField {
 
     ID("id"),
-    TYPE("type.key"),
+    TYPE("type", "key"),
     NAME("name"),
     DESCRIPTION("description"),
     VERSION("version"),
     METADATA("metadata", new SimpleImmutableEntry<>("key", "value"));
 
     private final String jpaEntityFieldName;
-    private Entry<String, String> subEntityMapTuple;
+    private final List<String> subEntityAttributes;
+    private final Entry<String, String> subEntityMapTuple;
 
     SoftwareModuleFields(final String jpaEntityFieldName) {
-        this(jpaEntityFieldName, null);
+        this(jpaEntityFieldName, Collections.emptyList(), null);
     }
 
+    SoftwareModuleFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
+        this(jpaEntityFieldName, List.of(subEntityAttributes), null);
+    }
     SoftwareModuleFields(final String jpaEntityFieldName, final Entry<String, String> subEntityMapTuple) {
+        this(jpaEntityFieldName, Collections.emptyList(), subEntityMapTuple);
+    }
+
+    SoftwareModuleFields(final String jpaEntityFieldName, List<String> subEntityAttributes, final Entry<String, String> subEntityMapTuple) {
         this.jpaEntityFieldName = jpaEntityFieldName;
         this.subEntityMapTuple = subEntityMapTuple;
+        this.subEntityAttributes = subEntityAttributes;
     }
 
     @Override
