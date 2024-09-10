@@ -350,13 +350,13 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         final Class<?> javaType = root.getJavaType();
         final Subquery<?> subquery = query.subquery(javaType);
         final Root subqueryRoot = subquery.from(javaType);
-        final Predicate equalPredicate = cb.equal(root.get(queryField.getEnumValue().identifierFieldName()),
-                subqueryRoot.get(queryField.getEnumValue().identifierFieldName()));
-        final Expression<String> expressionToCompare = getExpressionToCompare(queryField.getEnumValue(),
-                getFieldPath(subqueryRoot, queryField));
-        final Predicate subQueryPredicate = subQueryPredicateProvider.apply(expressionToCompare);
-        subquery.select(subqueryRoot).where(cb.and(equalPredicate, subQueryPredicate));
-        return cb.not(cb.exists(subquery));
+        return cb.not(cb.exists(
+                subquery.select(subqueryRoot)
+                        .where(cb.and(
+                                cb.equal(root.get(queryField.getEnumValue().identifierFieldName()),
+                                        subqueryRoot.get(queryField.getEnumValue().identifierFieldName())),
+                                subQueryPredicateProvider.apply(getExpressionToCompare(queryField.getEnumValue(),
+                                        getFieldPath(subqueryRoot, queryField)))))));
     }
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private Expression<String> getExpressionToCompare(final A enumField, final Path fieldPath) {
@@ -367,10 +367,11 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
             // Currently we support only string key. So below cast is safe.
             return (Expression<String>) (((MapJoin<?, ?, ?>) fieldPath).value());
         }
-        final String valueFieldName = enumField.getSubEntityMapTuple().map(Entry::getValue)
+        return enumField.getSubEntityMapTuple()
+                .map(Entry::getValue)
+                .map(valueFieldName -> fieldPath.<String>get(valueFieldName))
                 .orElseThrow(() -> new UnsupportedOperationException(
                         "For the fields, defined as Map, only Map java type or tuple in the form of SimpleImmutableEntry are allowed. Neither of those could be found!"));
-        return pathOfString(fieldPath).get(valueFieldName);
     }
 
     private String toSQL(final String transformedValue) {
@@ -436,8 +437,8 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
     }
 
     @SuppressWarnings("unchecked")
-    private static <Y> Path<Y> pathOfString(final Path<?> path) {
-        return (Path<Y>) path;
+    private static Path<String> pathOfString(final Path<?> path) {
+        return (Path<String>) path;
     }
 
     private static boolean isPattern(final String transformedValue) {
