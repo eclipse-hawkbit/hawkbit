@@ -359,6 +359,7 @@ public class RSQLUtilityTest {
 
         when(subqueryMock.from(SoftwareModule.class)).thenReturn(subqueryRootMock);
         when(subqueryMock.select(subqueryRootMock)).thenReturn(subqueryMock);
+        when(subqueryMock.where(any(Expression.class))).thenReturn(subqueryMock);
 
         // test
         RSQLUtility.buildRsqlSpecification(correctRsql, SoftwareModuleFields.class, null, testDb)
