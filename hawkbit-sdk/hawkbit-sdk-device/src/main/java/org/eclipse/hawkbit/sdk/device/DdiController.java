@@ -105,7 +105,7 @@ public class DdiController {
 
     public void stop() {
         if (executorService != null) {
-            executorService.shutdown();
+            executorService.shutdownNow();
         }
         executorService = null;
         lastActionId = null;
@@ -113,6 +113,7 @@ public class DdiController {
     }
 
     private void poll() {
+        log.debug(LOG_PREFIX + " Polling ...", tenantId, controllerId);
         Optional.ofNullable(executorService).ifPresent(executor ->
             getControllerBase().ifPresentOrElse(
                     controllerBase -> {
