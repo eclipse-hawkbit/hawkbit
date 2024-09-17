@@ -569,6 +569,9 @@ public class JpaTargetManagement implements TargetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<Target> assignTag(final Collection<String> controllerIds, final long tagId) {
+        final JpaTargetTag tag = targetTagRepository.findById(tagId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagId));
+
         final List<JpaTarget> allTargets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
         if (allTargets.size() < controllerIds.size()) {
@@ -578,9 +581,6 @@ public class JpaTargetManagement implements TargetManagement {
 
         targetRepository.getAccessController()
                 .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, allTargets));
-
-        final JpaTargetTag tag = targetTagRepository.findById(tagId)
-                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagId));
 
         allTargets.forEach(target -> target.addTag(tag));
 

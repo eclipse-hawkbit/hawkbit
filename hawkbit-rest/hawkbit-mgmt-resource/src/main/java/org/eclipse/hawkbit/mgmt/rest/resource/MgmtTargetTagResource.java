@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtAssignedTargetRequestBody;
@@ -178,9 +179,19 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
+    public ResponseEntity<Void> assignTargetsByControllerIds(
+            @PathVariable("targetTagId") Long targetTagId,
+            @Schema(description = "List of controller ids to be assigned", example = "[\"controllerId1\", \"controllerId2\"]")
+            @RequestBody List<String> assignedTargetControlIds) {
+        log.debug("Assign {} targets for target tag {}", assignedTargetControlIds.size(), targetTagId);
+        this.targetManagement.assignTag(assignedTargetControlIds, targetTagId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
     public ResponseEntity<List<MgmtTarget>> assignTargets(@PathVariable("targetTagId") final Long targetTagId,
             @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
-        log.debug("Assign Targets {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
+        log.debug("Assign targets {} for target tag {}", assignedTargetRequestBodies, targetTagId);
         final List<Target> assignedTarget = this.targetManagement
                 .assignTag(findTargetControllerIds(assignedTargetRequestBodies), targetTagId);
         return ResponseEntity.ok(MgmtTargetMapper.toResponse(assignedTarget, tenantConfigHelper));
@@ -204,5 +215,4 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         return assignedTargetRequestBodies.stream().map(MgmtAssignedTargetRequestBody::getControllerId)
                 .collect(Collectors.toList());
     }
-
 }
