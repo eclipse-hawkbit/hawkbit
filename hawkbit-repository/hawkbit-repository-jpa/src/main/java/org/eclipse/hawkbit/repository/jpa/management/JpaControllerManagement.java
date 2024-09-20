@@ -9,37 +9,12 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
-import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
-import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
-import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
-
-import java.net.URI;
-import java.time.Duration;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.validation.constraints.NotEmpty;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
@@ -114,6 +89,30 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
+
+import java.net.URI;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
+import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
+import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
+import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
 
 /**
  * JPA based {@link ControllerManagement} implementation.
@@ -613,7 +612,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             break;
         default:
             // information status entry - check for a potential DOS attack
-            assertActionStatusQuota(action);
+            assertActionStatusQuota(actionStatus, action);
             assertActionStatusMessageQuota(actionStatus);
             break;
         }
@@ -891,7 +890,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         final JpaActionStatus statusMessage = create.build();
         statusMessage.setAction(action);
 
-        assertActionStatusQuota(action);
+        assertActionStatusQuota(statusMessage, action);
         assertActionStatusMessageQuota(statusMessage);
 
         return actionStatusRepository.save(statusMessage);
