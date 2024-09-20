@@ -9,11 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -31,6 +26,11 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
@@ -158,8 +158,11 @@ public class JpaActionManagement {
     }
     
     protected void assertActionStatusQuota(final JpaAction action) {
-        QuotaHelper.assertAssignmentQuota(action.getId(), 1, quotaManagement.getMaxStatusEntriesPerAction(),
-                ActionStatus.class, Action.class, actionStatusRepository::countByActionId);
+        final boolean intermediateStatus = FINISHED != action.getStatus() && Action.Status.ERROR != action.getStatus();
+        if (intermediateStatus) {// check for quota only for intermediate statuses
+            QuotaHelper.assertAssignmentQuota(action.getId(), 1, quotaManagement.getMaxStatusEntriesPerAction(),
+                    ActionStatus.class, Action.class, actionStatusRepository::countByActionId);
+        }
     }
 
     protected void assertActionStatusMessageQuota(final JpaActionStatus actionStatus) {
