@@ -112,15 +112,18 @@ public class JpaActionManagement {
      */
     private boolean isUpdatingActionStatusAllowed(final JpaAction action, final JpaActionStatus actionStatus) {
 
-        final boolean isIntermediateFeedback = (FINISHED != actionStatus.getStatus())
-                && (ERROR != actionStatus.getStatus());
+        final boolean intermediateStatus = isIntermediateStatus(actionStatus);
 
-        final boolean isAllowedByRepositoryConfiguration = !repositoryProperties.isRejectActionStatusForClosedAction()
-                && isIntermediateFeedback;
+        final boolean isAllowedByRepositoryConfiguration = intermediateStatus && !repositoryProperties.isRejectActionStatusForClosedAction();
 
-        final boolean isAllowedForDownloadOnlyActions = isDownloadOnly(action) && !isIntermediateFeedback;
+        //in case of download_only action Status#DOWNLOADED is treated as 'final' already, so we accept one final status from device in case it sends
+        final boolean isAllowedForDownloadOnlyActions = isDownloadOnly(action) && action.getStatus() == Action.Status.DOWNLOADED && !intermediateStatus;
 
         return action.isActive() || isAllowedByRepositoryConfiguration || isAllowedForDownloadOnlyActions;
+    }
+
+    private boolean isIntermediateStatus(final JpaActionStatus actionStatus) {
+        return FINISHED != actionStatus.getStatus() && ERROR != actionStatus.getStatus();
     }
 
     public int getWeightConsideringDefault(final Action action) {
@@ -159,8 +162,7 @@ public class JpaActionManagement {
     }
     
     protected void assertActionStatusQuota(final JpaActionStatus newActionStatus, final JpaAction action) {
-        final boolean intermediateStatus = FINISHED != newActionStatus.getStatus() && ERROR != newActionStatus.getStatus();
-        if (intermediateStatus) {// check for quota only for intermediate statuses
+        if (isIntermediateStatus(newActionStatus)) {// check for quota only for intermediate statuses
             QuotaHelper.assertAssignmentQuota(action.getId(), 1, quotaManagement.getMaxStatusEntriesPerAction(),
                     ActionStatus.class, Action.class, actionStatusRepository::countByActionId);
         }
