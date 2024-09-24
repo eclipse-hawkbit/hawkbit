@@ -9,33 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.IS_CONTROLLER;
-import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
-import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
-import static org.eclipse.hawkbit.repository.test.util.TestdataFactory.DEFAULT_CONTROLLER_ID;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.ByteArrayInputStream;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import jakarta.validation.ConstraintViolationException;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.assertj.core.api.Assertions;
@@ -55,8 +33,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdated
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -80,19 +58,38 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.eclipse.hawkbit.repository.test.util.TargetTestData;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
+import org.eclipse.hawkbit.repository.test.util.TargetTestData;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
+import java.io.ByteArrayInputStream;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
+import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
+import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
+import static org.eclipse.hawkbit.repository.test.util.TestdataFactory.DEFAULT_CONTROLLER_ID;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @Feature("Component Tests - Repository")
 @Story("Controller Management")
@@ -1455,9 +1452,9 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 2),
-            @Expect(type = TargetAttributesRequestedEvent.class, count = 9),
-            @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 3),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 10),
+            @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
     void quotaExceededExceptionWhenControllerReportsTooManyUpdateActionStatusMessagesForDownloadOnlyAction() {
         final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
@@ -1465,20 +1462,32 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
         assertThat(actionId).isNotNull();
 
+        //assert that too many intermediate statuses will throw quota exception
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates").isThrownBy(
                         () -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement.addUpdateActionStatus(
                                 entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
 
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .as("No QuotaExceededException thrown for too many ERROR updateActionStatus updates")
-                .isThrownBy(() -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
-                        .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR))));
 
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .as("No QuotaExceededException thrown for too many FINISHED updateActionStatus updates")
-                .isThrownBy(() -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
-                        .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED))));
+        //assert that Final result is accepted even if quota is reached
+        assertThatNoException().isThrownBy(() -> {
+            Action updatedAction = controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED));
+            // check if action really finished
+            assertThat(updatedAction.isActive()).isFalse();
+            // check if final status is updated accordingly
+            assertThat(updatedAction.getStatus()).isEqualTo(Status.FINISHED);
+        });
+
+
+        //assert that additional final result is not accepted
+        assertThatNoException().isThrownBy(() -> {
+            Action updatedAction = controllerManagement
+                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR));
+            // check if action really finished
+            assertThat(updatedAction.isActive()).isFalse();
+            // check if final status is not changed - e.g. ERROR is not updated because action has already finished
+            assertThat(updatedAction.getStatus()).isEqualTo(Status.FINISHED);
+        });
     }
 
     @Test
@@ -1488,27 +1497,43 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
     void quotaExceededExceptionWhenControllerReportsTooManyUpdateActionStatusMessagesForForced() {
         final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
         final Long actionId = createTargetAndAssignDs();
         assertThat(actionId).isNotNull();
 
+        //assert that too many intermediate statuses will throw quota exception
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates").isThrownBy(
                         () -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement.addUpdateActionStatus(
                                 entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
 
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .as("No QuotaExceededException thrown for too many ERROR updateActionStatus updates")
-                .isThrownBy(() -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
-                        .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR))));
 
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .as("No QuotaExceededException thrown for too many FINISHED updateActionStatus updates")
-                .isThrownBy(() -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement
-                        .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED))));
+        //assert that Final result is accepted even if quota is reached
+        assertThatNoException().isThrownBy(() -> {
+            Action updatedAction = controllerManagement
+                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED));
+            // check if action really finished
+            assertThat(updatedAction.isActive()).isFalse();
+            // check if final status is updated accordingly
+            assertThat(updatedAction.getStatus()).isEqualTo(Status.FINISHED);
+        });
+
+
+        //assert that additional final result is not accepted
+        assertThatNoException().isThrownBy(() -> {
+            Action updatedAction = controllerManagement
+                    .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR));
+            // check if action really finished
+            assertThat(updatedAction.isActive()).isFalse();
+            // check if final status is not changed - e.g. ERROR is not updated because action has already finished
+            assertThat(updatedAction.getStatus()).isEqualTo(Status.FINISHED);
+        });
     }
 
     @Test

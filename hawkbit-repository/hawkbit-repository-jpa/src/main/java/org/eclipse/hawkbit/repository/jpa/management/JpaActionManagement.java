@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
+import static org.eclipse.hawkbit.repository.model.Action.Status.ERROR;
 import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
 
 /**
@@ -111,13 +112,12 @@ public class JpaActionManagement {
      */
     private boolean isUpdatingActionStatusAllowed(final JpaAction action, final JpaActionStatus actionStatus) {
 
-        final boolean isIntermediateFeedback = (FINISHED != actionStatus.getStatus())
-                && (Action.Status.ERROR != actionStatus.getStatus());
+        final boolean intermediateStatus = isIntermediateStatus(actionStatus);
 
-        final boolean isAllowedByRepositoryConfiguration = !repositoryProperties.isRejectActionStatusForClosedAction()
-                && isIntermediateFeedback;
+        final boolean isAllowedByRepositoryConfiguration = intermediateStatus && !repositoryProperties.isRejectActionStatusForClosedAction();
 
-        final boolean isAllowedForDownloadOnlyActions = isDownloadOnly(action) && !isIntermediateFeedback;
+        //in case of download_only action Status#DOWNLOADED is treated as 'final' already, so we accept one final status from device in case it sends
+        final boolean isAllowedForDownloadOnlyActions = isDownloadOnly(action) && action.getStatus() == Action.Status.DOWNLOADED && !intermediateStatus;
 
         return action.isActive() || isAllowedByRepositoryConfiguration || isAllowedForDownloadOnlyActions;
     }
@@ -141,7 +141,7 @@ public class JpaActionManagement {
      */
     private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
         // information status entry - check for a potential DOS attack
-        assertActionStatusQuota(action);
+        assertActionStatusQuota(actionStatus, action);
         assertActionStatusMessageQuota(actionStatus);
         actionStatus.setAction(action);
 
@@ -157,9 +157,8 @@ public class JpaActionManagement {
      // can be overwritten to intercept the persistence of the action status
     }
     
-    protected void assertActionStatusQuota(final JpaAction action) {
-        final boolean intermediateStatus = FINISHED != action.getStatus() && Action.Status.ERROR != action.getStatus();
-        if (intermediateStatus) {// check for quota only for intermediate statuses
+    protected void assertActionStatusQuota(final JpaActionStatus newActionStatus, final JpaAction action) {
+        if (isIntermediateStatus(newActionStatus)) {// check for quota only for intermediate statuses
             QuotaHelper.assertAssignmentQuota(action.getId(), 1, quotaManagement.getMaxStatusEntriesPerAction(),
                     ActionStatus.class, Action.class, actionStatusRepository::countByActionId);
         }
@@ -168,5 +167,9 @@ public class JpaActionManagement {
     protected void assertActionStatusMessageQuota(final JpaActionStatus actionStatus) {
         QuotaHelper.assertAssignmentQuota(actionStatus.getId(), actionStatus.getMessages().size(),
                 quotaManagement.getMaxMessagesPerActionStatus(), "Message", ActionStatus.class.getSimpleName(), null);
+    }
+
+    private static boolean isIntermediateStatus(final JpaActionStatus actionStatus) {
+        return FINISHED != actionStatus.getStatus() && ERROR != actionStatus.getStatus();
     }
 }
