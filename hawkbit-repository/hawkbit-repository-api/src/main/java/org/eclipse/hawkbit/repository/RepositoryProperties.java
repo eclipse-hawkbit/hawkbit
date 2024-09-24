@@ -9,12 +9,13 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import lombok.Data;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import lombok.Data;
+import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
+import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Configuration properties for the repository.

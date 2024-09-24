@@ -122,10 +122,6 @@ public class JpaActionManagement {
         return action.isActive() || isAllowedByRepositoryConfiguration || isAllowedForDownloadOnlyActions;
     }
 
-    private boolean isIntermediateStatus(final JpaActionStatus actionStatus) {
-        return FINISHED != actionStatus.getStatus() && ERROR != actionStatus.getStatus();
-    }
-
     public int getWeightConsideringDefault(final Action action) {
         return action.getWeight().orElse(repositoryProperties.getActionWeightIfAbsent());
     }
@@ -171,5 +167,9 @@ public class JpaActionManagement {
     protected void assertActionStatusMessageQuota(final JpaActionStatus actionStatus) {
         QuotaHelper.assertAssignmentQuota(actionStatus.getId(), actionStatus.getMessages().size(),
                 quotaManagement.getMaxMessagesPerActionStatus(), "Message", ActionStatus.class.getSimpleName(), null);
+    }
+
+    private static boolean isIntermediateStatus(final JpaActionStatus actionStatus) {
+        return FINISHED != actionStatus.getStatus() && ERROR != actionStatus.getStatus();
     }
 }
