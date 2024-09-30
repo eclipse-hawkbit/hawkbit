@@ -157,9 +157,7 @@ public class SecurityAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     static RoleHierarchy roleHierarchy() {
-        final RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
-        hierarchy.setHierarchy(SpRole.DEFAULT_ROLE_HIERARCHY);
-        return hierarchy;
+        return RoleHierarchyImpl.fromHierarchy(SpRole.DEFAULT_ROLE_HIERARCHY);
     }
 
     // and, if using method security also add
