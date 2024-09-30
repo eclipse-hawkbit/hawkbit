@@ -26,7 +26,7 @@ import lombok.experimental.Accessors;
 public abstract class MgmtTypeEntity extends MgmtNamedEntity {
 
     @JsonProperty(required = true)
-    @Schema(name = "Key that can be interpreted by the target", example = "id.t23")
+    @Schema(description = "Key that can be interpreted by the target", example = "id.t23")
     private String key;
 
     @JsonProperty
