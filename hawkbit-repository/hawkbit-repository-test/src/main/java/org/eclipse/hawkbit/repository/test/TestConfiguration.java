@@ -106,9 +106,7 @@ public class TestConfiguration implements AsyncConfigurer {
 
     @Bean
     SystemSecurityContext systemSecurityContext(final TenantAware tenantAware) {
-        final RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
-        hierarchy.setHierarchy(SpRole.DEFAULT_ROLE_HIERARCHY);
-        return new SystemSecurityContext(tenantAware, hierarchy);
+        return new SystemSecurityContext(tenantAware, RoleHierarchyImpl.fromHierarchy(SpRole.DEFAULT_ROLE_HIERARCHY));
     }
 
     @Bean
