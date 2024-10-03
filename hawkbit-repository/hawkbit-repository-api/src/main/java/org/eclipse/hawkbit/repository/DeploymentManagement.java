@@ -360,20 +360,6 @@ public interface DeploymentManagement {
     Page<String> findMessagesByActionStatusId(@NotNull Pageable pageable, long actionStatusId);
 
     /**
-     * Counts all messages for an {@link ActionStatus}.
-     * <p/>
-     * No access control applied.
-     *
-     * @deprecated Used by UI only. With future removal of UI it could be removed.
-     * @param actionStatusId
-     *            the id of {@link ActionStatus} to count the messages from
-     * @return count of messages by a specific {@link ActionStatus} id
-     */
-    @Deprecated(forRemoval = true)
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countMessagesByActionStatusId(long actionStatusId);
-
-    /**
      * Get the {@link Action} entity for given actionId with all lazy attributes
      * (i.e. distributionSet, target, target.assignedDs).
      *
@@ -498,7 +484,7 @@ public interface DeploymentManagement {
      * @return the amount of started actions
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long startScheduledActionsByRolloutGroupParent(long rolloutId, long distributionSetId, Long rolloutGroupParentId);
+    void startScheduledActionsByRolloutGroupParent(long rolloutId, long distributionSetId, Long rolloutGroupParentId);
 
     /**
      * Handles the target assignments. Shall be part of same group

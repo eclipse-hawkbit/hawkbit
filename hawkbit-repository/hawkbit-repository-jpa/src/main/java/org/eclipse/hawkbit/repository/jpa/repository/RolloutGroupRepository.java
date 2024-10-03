@@ -121,7 +121,7 @@ public interface RolloutGroupRepository
     @Modifying
     @Transactional
     @Query("UPDATE JpaRolloutGroup g SET g.status = :status WHERE g.parent = :parent")
-    void setStatusForCildren(@Param("status") RolloutGroupStatus status, @Param("parent") RolloutGroup parent);
+    void setStatusForChildren(@Param("status") RolloutGroupStatus status, @Param("parent") RolloutGroup parent);
 
     /**
      * Retrieves all {@link RolloutGroup} for a specific rollout and status not
