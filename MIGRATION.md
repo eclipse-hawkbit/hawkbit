@@ -39,15 +39,15 @@
 
 ## Upgrade from Master Branch (after 0.3.0M6) to 0.3.0M7
 
-Due to changes in the DB migration scripts within PR [#1017](https://github.com/eclipse/hawkbit/pull/1017) the Hawkbit will not start up if one of the following cases is true:
+Due to changes in the DB migration scripts within PR [#1017](https://github.com/eclipse-hawkbit/hawkbit/pull/1017) the Hawkbit will not start up if one of the following cases is true:
 
 - DB2 database is used
 - MSSQL database is used and the `sp_action` table is not empty
 - PostgreSql database is used and the `sp_action` table is not empty
 
-The script was fixed with PR [#1061](https://github.com/eclipse/hawkbit/pull/1061).
+The script was fixed with PR [#1061](https://github.com/eclipse-hawkbit/hawkbit/pull/1061).
 
-In case you upgrade from 0.3.0M6 to 0.3.0M7 there is no issue. But if you have built the Hawkbit from the master branch between PR [#1017](https://github.com/eclipse/hawkbit/pull/1017) and PR [#1061](https://github.com/eclipse/hawkbit/pull/1061), use PostgreSQL or MSSQL and upgrade to 0.3.0M7, it will fail at startup with the message: `Validate failed: Migration checksum mismatch for migration version 1.12.16`
+In case you upgrade from 0.3.0M6 to 0.3.0M7 there is no issue. But if you have built the Hawkbit from the master branch between PR [#1017](https://github.com/eclipse-hawkbit/hawkbit/pull/1017) and PR [#1061](https://github.com/eclipse-hawkbit/hawkbit/pull/1061), use PostgreSQL or MSSQL and upgrade to 0.3.0M7, it will fail at startup with the message: `Validate failed: Migration checksum mismatch for migration version 1.12.16`
 
 This can be fixed by adapting the schema_version table of the database. The checksum field of the entry with the version 1.12.16 has to be changed (mind the minus):
 

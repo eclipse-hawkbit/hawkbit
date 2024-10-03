@@ -59,8 +59,8 @@ Microsoft's SQL Server which is also available in production grade, as well as, 
 
 ### Open Sourced REST docs
 
-A huge benefit for the community is the recently open sourced REST docs of hawkBit. This has been an [open request](https://github.com/eclipse/hawkbit/issues/480) 
-for some time, which we were happy to meet. The documentation is generated using [Spring REST docs](https://spring.io/projects/spring-restdocs), based on unit-tests. These tests, with the respective documentation, are now available in the [code base](https://github.com/eclipse/hawkbit/pull/688).
+A huge benefit for the community is the recently open sourced REST docs of hawkBit. This has been an [open request](https://github.com/eclipse-hawkbit/hawkbit/issues/480) 
+for some time, which we were happy to meet. The documentation is generated using [Spring REST docs](https://spring.io/projects/spring-restdocs), based on unit-tests. These tests, with the respective documentation, are now available in the [code base](https://github.com/eclipse-hawkbit/hawkbit/pull/688).
  Furthermore, the API documentation will be hosted on our new [website](https://www.eclipse.org/hawkbit/) (coming soon). 
 
 
@@ -70,7 +70,7 @@ In order to enable interested parties to get started with hawkBit conveniently, 
 [Update Server as a Docker image](https://hub.docker.com/r/hawkbit/hawkbit-update-server/) on Docker Hub. The image comes 
 in two flavors: The default image uses the internal H2 database, while the images with a `-mysql` suffix contain the MySQL 
 driver to allow connecting a MySQL database. In addition to the Docker image, the hawkBit repository contains a 
-[docker-compose.yml](https://github.com/eclipse/hawkbit/blob/master/hawkbit-runtime/hawkbit-update-server/docker/docker-compose.yml) 
+[docker-compose.yml](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-runtime/hawkbit-update-server/docker/docker-compose.yml) 
 that not only starts the Update Server, but further includes a MySQL database and a RabbitMQ message broker so you're 
 able to use Device Management Federation (DMF) as well. 
 

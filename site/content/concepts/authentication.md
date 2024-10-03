@@ -30,7 +30,7 @@ Authorization: TargetToken bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY
 
 The target security token is provided in [DMF API](../../apis/dmf_api/) as part of the update message in order to allow DMF clients to leverage the feature or can it be manually retrieved per target by [Management API](../../apis/management_api/) or in the [Management UI](../../ui) in the target details.
 
-Note: needs to be enabled in your hawkBit installation **and** in the tenant configuration. That allows both the operator as well as the individual customer (if run in a multi-tenant setup) to enable this access method. See [DdiSecurityProperties](https://github.com/eclipse/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java) for system wide enablement.
+Note: needs to be enabled in your hawkBit installation **and** in the tenant configuration. That allows both the operator as well as the individual customer (if run in a multi-tenant setup) to enable this access method. See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java) for system wide enablement.
 
 The additional activation for the individual tenant:
 
@@ -47,14 +47,14 @@ Host: your.hawkBit.server
 Authorization: GatewayToken 3nkswAZhX81oDtktq0FF9Pn0Tc0UGXPW
 ```
 
-Note: needs to be enabled in your hawkBit installation **and** in the tenant configuration. That allows both the operator as well as the individual customer (if run in a multi-tenant setup) to enable this access method. See [DdiSecurityProperties](https://github.com/eclipse/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java) for system wide enablement.
+Note: needs to be enabled in your hawkBit installation **and** in the tenant configuration. That allows both the operator as well as the individual customer (if run in a multi-tenant setup) to enable this access method. See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java) for system wide enablement.
 
 The additional activation for the individual tenant:
 
 ![Enable Gateway Token](../../images/security/gatewayToken.png)
 
 #### Anonymous access
-Here we offer general anonymous access for all targets (see [DdiSecurityProperties](https://github.com/eclipse/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java)) which we consider not really sufficient for a production system but it might come in handy to get a project started in the beginning.
+Here we offer general anonymous access for all targets (see [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java)) which we consider not really sufficient for a production system but it might come in handy to get a project started in the beginning.
 
 However, anonymous download on the other side might be interesting even in production for scenarios where the artifact itself is already encrypted.
 

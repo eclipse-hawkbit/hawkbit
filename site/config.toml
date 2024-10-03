@@ -35,7 +35,7 @@ canonifyurls = false
 
 	# Repository
 	provider = "GitHub"
-	repo_url = "https://github.com/eclipse/hawkbit"
+	repo_url = "https://github.com/eclipse-hawkbit/hawkbit"
 
 	permalink = "#"
 

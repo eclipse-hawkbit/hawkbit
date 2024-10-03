@@ -90,8 +90,8 @@
 
       <!-- Release - START -->
       <release.scm.connection>scm:git:git@github.com:eclipse/hawkbit.git</release.scm.connection>
-      <release.scm.developerConnection>scm:git:https://github.com/eclipse/hawkbit.git</release.scm.developerConnection>
-      <release.scm.url>https://github.com/eclipse/hawkbit.git</release.scm.url>
+      <release.scm.developerConnection>scm:git:https://github.com/eclipse-hawkbit/hawkbit.git</release.scm.developerConnection>
+      <release.scm.url>https://github.com/eclipse-hawkbit/hawkbit.git</release.scm.url>
       <!-- Release - END -->
 
       <!-- Sonar - START -->
