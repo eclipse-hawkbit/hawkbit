@@ -102,7 +102,7 @@
       <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
       <sonar.qualitygate.timeout>600</sonar.qualitygate.timeout>
       <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
-      <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
+      <sonar.links.ci>https://github.com/eclipse-hawkbit/hawkbit/actions</sonar.links.ci>
       <sonar.exclusions>
          **/target/generated-sources/apt/**,**/src/test/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**
       </sonar.exclusions>
