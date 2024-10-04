@@ -87,29 +87,6 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
             @Param("active") boolean active, @Param("currentStatus") Action.Status currentStatus);
 
     /**
-     *
-     * Retrieves all IDs for {@link Action}s referring to the given target IDs,
-     * active flag, current status and distribution set not requiring migration
-     * step.
-     * <p/>
-     * No access control applied
-     *
-     * @deprecated will be removed
-     * @param targetIds
-     *            the IDs of targets for the actions
-     * @param active
-     *            flag to indicate active/inactive actions
-     * @param currentStatus
-     *            the current status of the actions
-     * @return the found list of {@link Action} IDs
-     */
-    @Deprecated(forRemoval = true)
-    @Query("SELECT a.id FROM JpaAction a WHERE a.target IN :targetsIds AND a.active = :active AND a.status = :currentStatus AND a.distributionSet.requiredMigrationStep = false")
-    List<Long> findByTargetIdInAndIsActiveAndActionStatusAndDistributionSetNotRequiredMigrationStep(
-            @Param("targetsIds") List<Long> targetIds, @Param("active") boolean active,
-            @Param("currentStatus") Action.Status currentStatus);
-
-    /**
      * Retrieves an {@link Action} that matches the queried externalRef.
      *
      * @param externalRef
@@ -117,31 +94,6 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * @return the found {@link Action}
      */
     Optional<Action> findByExternalRef(@Param("externalRef") String externalRef);
-
-    /**
-     * Switches the status of actions from one specific status into another for
-     * given actions IDs, active flag and current status
-     * <p/>
-     * No access control applied
-     *
-     * @deprecated will be removed
-     * @param statusToSet
-     *            the new status the actions should get
-     * @param actionIds
-     *            the IDs of the actions which are affected
-     * @param active
-     *            flag to indicate active/inactive actions
-     * @param currentStatus
-     *            the current status of the actions
-     * @return the amount of updated actions
-     */
-    @Deprecated(forRemoval = true)
-    @Modifying
-    @Transactional
-    @Query("UPDATE JpaAction a SET a.status = :statusToSet WHERE a.id IN :actionIds AND a.active = :active AND a.status = :currentStatus")
-    int switchStatusForActionIdInAndIsActiveAndActionStatus(@Param("statusToSet") Action.Status statusToSet,
-            @Param("actionIds") List<Long> actionIds, @Param("active") boolean active,
-            @Param("currentStatus") Action.Status currentStatus);
 
     /**
      * Counts all {@link Action}s referring to the given target.
