@@ -1,4 +1,4 @@
-name: build
+name: verify (license, test and scan)
 
 on:
   push:
@@ -11,6 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
+    services:
+      rabbitmq:
+        image: rabbitmq:3-management-alpine
+        env:
+          RABBITMQ_DEFAULT_VHOST: /
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: guest
+        ports:
+          - 15672:15672
+          - 5672:5672
 
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +36,7 @@ jobs:
       - name: Check license
         run: mvn license:check --batch-mode
 
-      - name: Build with Maven
+      - name: Run Tests & javadoc
         run: mvn verify javadoc:javadoc --batch-mode
 #
 #      - name: Scan
