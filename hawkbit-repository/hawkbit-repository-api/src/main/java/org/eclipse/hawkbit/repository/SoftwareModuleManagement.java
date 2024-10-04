@@ -45,23 +45,6 @@ public interface SoftwareModuleManagement
         extends RepositoryManagement<SoftwareModule, SoftwareModuleCreate, SoftwareModuleUpdate> {
 
     /**
-     * Counts {@link SoftwareModule}s with given
-     * {@link SoftwareModule#getName()} or {@link SoftwareModule#getVersion()}
-     * and {@link SoftwareModule#getType()} that are not marked as deleted.
-     *
-     * @param searchText
-     *            to search for in name and version
-     * @param typeId
-     *            to filter the result by type
-     * @return number of found {@link SoftwareModule}s
-     *
-     * @throws EntityNotFoundException
-     *             if software module type with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    long countByTextAndType(String searchText, Long typeId);
-
-    /**
      * Creates a list of software module meta data entries.
      *
      * @param metadata
@@ -280,37 +263,6 @@ public interface SoftwareModuleManagement
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<SoftwareModuleMetadata> findMetaDataByRsql(@NotNull Pageable pageable, long id,
             @NotNull String rsqlParam);
-
-    /**
-     * Filter {@link SoftwareModule}s with given
-     * {@link SoftwareModule#getName()} or {@link SoftwareModule#getVersion()}
-     * search text and {@link SoftwareModule#getType()} that are not marked as
-     * deleted and sort them by means of given distribution set related modules
-     * on top of the list.
-     *
-     * After that the modules are sorted by by default by
-     * {@link SoftwareModule#getName()} and {@link SoftwareModule#getVersion()}
-     * in ascending order if no other sorting is provided in {@link Pageable}.
-     * If sorting is provided in {@link Pageable} parameter the provided sorting
-     * is used.
-     *
-     * @param pageable
-     *            page parameter
-     * @param orderByDistributionSetId
-     *            the ID of distribution set to be ordered on top
-     * @param searchText
-     *            filtered as "like" on {@link SoftwareModule#getName()}
-     * @param typeId
-     *            filtered as "equal" on {@link SoftwareModule#getType()}
-     *
-     * @return the page of found {@link SoftwareModule}
-     *
-     * @throws EntityNotFoundException
-     *             if given software module type does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Slice<AssignedSoftwareModule> findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
-            @NotNull Pageable pageable, long orderByDistributionSetId, String searchText, Long typeId);
 
     /**
      * Retrieves the {@link SoftwareModule}s by their {@link SoftwareModuleType}

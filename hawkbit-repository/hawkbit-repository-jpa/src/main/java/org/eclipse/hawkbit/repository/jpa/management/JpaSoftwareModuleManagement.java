@@ -93,7 +93,6 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * JPA implementation of {@link SoftwareModuleManagement}.
- *
  */
 @Transactional(readOnly = true)
 @Validated
@@ -330,129 +329,6 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
                 .getFilterNameAndVersionEntries(searchText.trim());
         return SoftwareModuleSpecification.likeNameAndVersion(smFilterNameAndVersionEntries[0],
                 smFilterNameAndVersionEntries[1]);
-    }
-
-    /**
-     *  @deprecated Used only in UI which is to be removed
-     */
-    @Deprecated(forRemoval = true)
-    @Override
-    // In the interface org.springframework.data.domain.Pageable.getSort the
-    // return value is not guaranteed to be non-null, therefore a null check is
-    // necessary otherwise we rely on the implementation but this could change.
-    @SuppressWarnings({ "squid:S2583", "squid:S2589" })
-    public Slice<AssignedSoftwareModule> findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
-            final Pageable pageable, final long orderByDistributionSetId, final String searchText, final Long typeId) {
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<Tuple> query = cb.createTupleQuery();
-        final Root<JpaSoftwareModule> smRoot = query.from(JpaSoftwareModule.class);
-
-        final ListJoin<JpaSoftwareModule, JpaDistributionSet> assignedDsList = smRoot
-                .join(JpaSoftwareModule_.assignedTo, JoinType.LEFT);
-
-        final Expression<Integer> assignedCaseMax = cb.max(
-                cb.<Long, Integer> selectCase(assignedDsList.get(JpaDistributionSet_.id)).when(orderByDistributionSetId, 1).otherwise(0));
-
-        query.multiselect(smRoot.alias("sm"), assignedCaseMax.alias("assigned"));
-
-        final Predicate[] specPredicate = specificationsToPredicate(buildSpecificationList(searchText, typeId),
-                smRoot, query, cb);
-
-        if (specPredicate.length > 0) {
-            query.where(specPredicate);
-        }
-
-        query.groupBy(smRoot);
-
-        final Sort sort = pageable.getSort();
-        final List<Order> orders = new ArrayList<>();
-        orders.add(cb.desc(assignedCaseMax));
-        if (sort == null || sort.isEmpty()) {
-            orders.add(cb.asc(smRoot.get(JpaSoftwareModule_.name)));
-            orders.add(cb.asc(smRoot.get(JpaSoftwareModule_.version)));
-        } else {
-            orders.addAll(QueryUtils.toOrders(sort, smRoot, cb));
-        }
-        query.orderBy(orders);
-
-        final int pageSize = pageable.getPageSize();
-        final List<Tuple> smWithAssignedFlagList = entityManager.createQuery(query)
-                .setFirstResult((int) pageable.getOffset()).setMaxResults(pageSize).getResultList();
-        final boolean hasNext = smWithAssignedFlagList.size() > pageSize;
-
-        final List<AssignedSoftwareModule> resultList = new ArrayList<>();
-
-        smWithAssignedFlagList.forEach(smWithAssignedFlag -> {
-            final JpaSoftwareModule softwareModule = smWithAssignedFlag.get("sm", JpaSoftwareModule.class);
-            try {
-                // check read access
-                if (softwareModuleRepository.getAccessController().map(accessController -> {
-                    try {
-                        accessController.assertOperationAllowed(AccessController.Operation.READ, softwareModule);
-                        return true;
-                    } catch (final InsufficientPermissionException e) {
-                        return false;
-                    }
-                }).orElse(true)) {
-                    resultList.add(new AssignedSoftwareModule(softwareModule,
-                            smWithAssignedFlag.get("assigned", Number.class).longValue() == 1));
-                }
-            } catch (final InsufficientPermissionException e) {
-                // skip the entry
-            }
-        });
-
-        return new SliceImpl<>(Collections.unmodifiableList(resultList), pageable, hasNext);
-    }
-
-    private List<Specification<JpaSoftwareModule>> buildSpecificationList(final String searchText, final Long typeId) {
-        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(3);
-        if (!ObjectUtils.isEmpty(searchText)) {
-            specList.add(buildSmSearchQuerySpec(searchText));
-        }
-
-        if (typeId != null) {
-            assertSoftwareModuleTypeExists(typeId);
-
-            specList.add(SoftwareModuleSpecification.equalType(typeId));
-        }
-        specList.add(SoftwareModuleSpecification.isNotDeleted());
-        return specList;
-    }
-
-    private Predicate[] specificationsToPredicate(final List<Specification<JpaSoftwareModule>> specifications,
-            final Root<JpaSoftwareModule> root, final CriteriaQuery<?> query, final CriteriaBuilder cb,
-            final Predicate... additionalPredicates) {
-
-        return Stream.concat(specifications.stream().map(spec -> spec.toPredicate(root, query, cb)),
-                Arrays.stream(additionalPredicates)).toArray(Predicate[]::new);
-    }
-
-    /**
-     * No access control applied
-     *
-     * @deprecated Used only in UI which is to be removed
-     */
-    @Deprecated(forRemoval = true)
-    @Override
-    public long countByTextAndType(final String searchText, final Long typeId) {
-        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(3);
-
-        Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isNotDeleted();
-        specList.add(spec);
-
-        if (!ObjectUtils.isEmpty(searchText)) {
-            specList.add(buildSmSearchQuerySpec(searchText));
-        }
-
-        if (null != typeId) {
-            assertSoftwareModuleTypeExists(typeId);
-
-            spec = SoftwareModuleSpecification.equalType(typeId);
-            specList.add(spec);
-        }
-
-        return JpaManagementHelper.countBySpec(softwareModuleRepository, specList);
     }
 
     @Override
