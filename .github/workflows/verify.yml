@@ -14,11 +14,13 @@ jobs:
 
     services:
       rabbitmq:
-        image: rabbitmq:3.8
+        image: rabbitmq:3-management-alpine
         env:
+          RABBITMQ_DEFAULT_VHOST: /
           RABBITMQ_DEFAULT_USER: guest
           RABBITMQ_DEFAULT_PASS: guest
         ports:
+          - 15672:15672
           - 5672:5672
 
     steps:
@@ -34,7 +36,7 @@ jobs:
       - name: Check license
         run: mvn license:check --batch-mode
 
-      - name: Test
+      - name: Run Tests & javadoc
         run: mvn verify javadoc:javadoc --batch-mode
 #
 #      - name: Scan
