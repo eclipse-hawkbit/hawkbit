@@ -20,7 +20,6 @@ run org.eclipse.hawkbit.doc.Start
 
 ### Usage
 
-The Management UI can be accessed via http://localhost:8080/UI
 The Management API can be accessed via http://localhost:8080/rest/v1
 
 ## Enable Clustering (experimental)

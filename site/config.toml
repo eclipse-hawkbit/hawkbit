@@ -90,11 +90,6 @@ canonifyurls = false
 	weight = 60
 
 [[menu.main]]
-	name   = "Management UI"
-	url    = "/ui/"
-	weight = 70
-
-[[menu.main]]
 	name   = "APIs"
 	url    = "/apis/"
 	weight = 80
