@@ -11,23 +11,11 @@ weight: 40
 - Support for pre-commission devices in the repository and plug and play, i.e. device is created if it is authenticated for the first time.
 
 ## Update Management
-- Directly deploy a defined software distribution to a device (by Management UI or API).
+- Directly deploy a defined software distribution to a device (by Management API).
 - Update handling is independent of the device type, integration approach or connectivity.
 - Optional user consent flow, download and install updates only after respective end user has confirmed it. 
 - Mass cancel the distribution of an update by invalidating the distribution set.
-- Use action status codes for easier analysis. 
-
-## Management UI
-- Create/Read/Update/Delete operations for provisioning targets (i.e. devices) and repository content (i.e. software).
-- Manage and monitor software update operations.
-- Optimized for professional users, e.g. administrators, developers and 2nd/3rd level support staff.
-- Ease of use drag-and-drop paradigm.
-- Flexible grouping of data.
-- Flexible filters for data browsing.
-- Responsive to resolution.
-- Lazy loading of data.
-- All information on one page.
-- Deep-linking for Targets to improve navigation.
+- Use action status codes for easier analysis.
 
 ## Artifact Content Delivery
 - Partial downloads supported.

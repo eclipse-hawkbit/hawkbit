@@ -93,7 +93,7 @@ see [update server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkb
 
 ### Compile & Run example scenario [creation script](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator) (optional)
 
-This has to be done before the device simulator is started. hawkBit creates the mandatory tenant metadata with first login into either _Management UI_ or API (which is done by this client).
+This has to be done before the device simulator is started. hawkBit creates the mandatory tenant metadata with first login into either Management API (which is done by this client).
 
 However, this is not done by _DMF_ which is in fact used by the device simulator, i.e. without calling _Management API_ first hawkBit would drop all _DMF_ messages as the tenant is unknown.
 
@@ -102,5 +102,3 @@ However, this is not done by _DMF_ which is in fact used by the device simulator
 see [device simulator](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-device-simulator)
 
 # Enjoy hawkBit with a real database, artifact storage and all [interfaces](../../apis/) available
-
-![](../../images/hawkbit_ui.png)

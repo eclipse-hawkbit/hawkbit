@@ -121,7 +121,6 @@ First Eclipse hawkBit release including:
 
 * **Core features:**
   * Device and Software Repository
-  * Update Management Management UI/Console
   * Artifact Content Delivery
   * Rollout/Campaign Management
 

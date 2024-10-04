@@ -58,7 +58,6 @@ Examples for hawkBit components:
 * Management API
 * Direct Device Integration API
 * Device Management Federation API
-* Management UI
 * Repository
 * Security
 

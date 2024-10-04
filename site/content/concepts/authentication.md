@@ -9,7 +9,6 @@ A hawkBit update server can be accessed in four different ways:
 - _Direct Device Integration (DDI) API_ by **targets**.
 - _Management API_ by 3rd party **applications**.
 - _Device Management Federation (DMF) API_ by 3rd party **applications** through AMQP.
-- _Management UI_ by **users**.
 <!--more-->
 
 
@@ -261,8 +260,3 @@ Authentication is provided by _RabbitMQ_ [vhost and user credentials](https://ww
 
 ## Management API
 - Basic Auth
-
-## Management UI
-- Login Dialog
-- OpenID Connect
-

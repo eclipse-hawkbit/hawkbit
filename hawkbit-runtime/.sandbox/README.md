@@ -3,7 +3,6 @@ hawkBit Sandbox
 
 ## Try out the update server in our hawkBit sandbox
 
-- try out Management UI https://hawkbit.eclipseprojects.io (username: demo, passwd: demo)
 - try out Management API https://hawkbit.eclipseprojects.io/rest/v1/targets (don't forget basic auth header; username: demo, passwd: demo)
 - try out DDI API https://hawkbit.eclipseprojects.io/DEFAULT/controller/v1/MYTESTDEVICE 
 
