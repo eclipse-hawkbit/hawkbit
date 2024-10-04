@@ -95,7 +95,7 @@ import org.springframework.test.context.TestPropertySource;
 @ActiveProfiles({ "test" })
 @ExtendWith({ JUnitTestLoggerExtension.class , SharedSqlTestDatabaseExtension.class })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ContextConfiguration(classes = { TestConfiguration.class})
 @Import(TestChannelBinderConfiguration.class)
 // destroy the context after each test class because otherwise we get problem

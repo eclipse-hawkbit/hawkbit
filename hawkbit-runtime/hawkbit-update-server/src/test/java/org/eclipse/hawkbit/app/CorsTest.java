@@ -27,14 +27,15 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
-@SpringBootTest(properties = {
-        "hawkbit.dmf.rabbitmq.enabled=false",
-        "hawkbit.server.security.cors.enabled=true",
-        "hawkbit.server.security.cors.allowedOrigins="
-                + CorsTest.ALLOWED_ORIGIN_FIRST + ","
-                + CorsTest.ALLOWED_ORIGIN_SECOND,
-        "hawkbit.server.security.cors.exposedHeaders="
-                + HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN})
+@SpringBootTest(
+        properties = {
+                "hawkbit.dmf.rabbitmq.enabled=false",
+                "hawkbit.server.security.cors.enabled=true",
+                "hawkbit.server.security.cors.allowedOrigins=" +
+                        CorsTest.ALLOWED_ORIGIN_FIRST + "," +
+                        CorsTest.ALLOWED_ORIGIN_SECOND,
+                "hawkbit.server.security.cors.exposedHeaders=" +
+                        HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN})
 @Feature("Integration Test - Security")
 @Story("CORS")
 public class CorsTest extends AbstractSecurityTest {
