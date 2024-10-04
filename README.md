@@ -19,12 +19,8 @@ see [hawkBit Documentation](https://www.eclipse.dev/hawkbit/)
 
 - Having questions about hawkBit? Check [Stack Overflow](https://stackoverflow.com/questions/tagged/eclipse-hawkbit)
 - Want to chat with the team behind hawkBit? [![Join the chat at https://gitter.im/eclipse/hawkbit](https://badges.gitter.im/eclipse/hawkbit.svg)](https://gitter.im/eclipse/hawkbit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-- Having issues with hawkBit? Open a [GitHub issue](https://github.com/eclipse/hawkbit/issues).
+- Having issues with hawkBit? Open a [GitHub issue](https://github.com/eclipse-hawkbit/hawkbit/issues).
 - You can also check out our [Project Homepage](https://www.eclipse.dev/hawkbit) for further contact options.
-
-# Examples and Extensions
-
-Next to the hawkBit core hosted here the project maintains as well [examples](https://github.com/eclipse/hawkbit-examples) and [extension](https://github.com/eclipse/hawkbit-extensions) repositories.
 
 # hawkBit sandbox
 
@@ -106,16 +102,16 @@ Next to the [Update Server](hawkbit-runtime/hawkbit-update-server) we are also p
 ## Build and start hawkBit [Update Server](hawkbit-runtime/hawkbit-update-server)
 
 ```bash
-git clone https://github.com/eclipse/hawkbit.git
+git clone https://github.com/eclipse-hawkbit/hawkbit.git
 cd hawkbit
 mvn clean install
 java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-#version#.jar
 ```
 
-## Start hawkBit [Device Simulator](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-device-simulator) (optional)
+## Start hawkBit [Device Simulator](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-device-simulator) (optional)
 
 ```bash
-git clone https://github.com/eclipse/hawkbit-examples.git
+git clone https://github.com/eclipse-hawkbit/hawkbit-examples.git
 cd hawkbit-examples
 mvn clean install
 ```
@@ -124,7 +120,7 @@ mvn clean install
 java -jar ./hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
 ```
 
-## Generate getting started data with the [Management API example](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator) (optional)
+## Generate getting started data with the [Management API example](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator) (optional)
 
 ```bash
 java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#-exec.jar
@@ -132,8 +128,8 @@ java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator
 
 # Status and API stability
 
-hawkBit is currently in '0.X' semantic version. That is due to the need that there is still content in hawkBit that is in need for refactoring. That includes the maven module structure, Spring Boot Properties, Spring Boot auto configuration as well as internal Java APIs (e.g. the [repository API](https://github.com/eclipse/hawkbit/issues/197) ).
+hawkBit is currently in '0.X' semantic version. That is due to the need that there is still content in hawkBit that is in need for refactoring. That includes the maven module structure, Spring Boot Properties, Spring Boot auto configuration as well as internal Java APIs (e.g. the [repository API](https://github.com/eclipse-hawkbit/hawkbit/issues/197) ).
 
-However, the device facing [DDI API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-rest/hawkbit-ddi-api) is on major version 'v1' and will be kept stable.
+However, the device facing [DDI API](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-rest/hawkbit-ddi-api) is on major version 'v1' and will be kept stable.
 
-Server facing and [DMF API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api) are [Management API](https://github.com/eclipse/hawkbit/tree/master/hawkbit-rest/hawkbit-mgmt-api) are on v1 as well. However, we cannot fully guarantee the same stability during hawkBit's 0.X development but we will try as best we can.
+Server facing and [DMF API](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api) are [Management API](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-rest/hawkbit-mgmt-api) are on v1 as well. However, we cannot fully guarantee the same stability during hawkBit's 0.X development but we will try as best we can.

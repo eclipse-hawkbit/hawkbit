@@ -4,7 +4,7 @@ parent: APIs
 weight: 82
 ---
 
-The hawkBit [update server](https://github.com/eclipse/hawkbit) provides REST resources which are consumed by the device to retrieve software update tasks.
+The hawkBit [update server](https://github.com/eclipse-hawkbit/hawkbit) provides REST resources which are consumed by the device to retrieve software update tasks.
 This API is based on HTTP standards and a polling mechanism.
 <!--more-->
 

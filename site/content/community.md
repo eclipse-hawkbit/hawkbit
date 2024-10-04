@@ -38,8 +38,8 @@ A great way to stay up to date with hawkBit activity is to subscribe to the Mail
 
 ## Issue Tracker
 
-Issues and bugs related to hawkBit are tracked with the Github Issue tracking system. If you find any issues, please report them [here](https://github.com/eclipse/hawkbit/issues).
+Issues and bugs related to hawkBit are tracked with the Github Issue tracking system. If you find any issues, please report them [here](https://github.com/eclipse-hawkbit/hawkbit/issues).
 
 ## Contributing
 
-An overview of the contribution process is [here](https://wiki.eclipse.org/Development_Resources/Contributing_via_Git). Checkout the [Contribution Guidelines](https://github.com/eclipse/hawkbit/blob/master/CONTRIBUTING.md) on the Eclipse hawkBit GitHub Repository.
+An overview of the contribution process is [here](https://wiki.eclipse.org/Development_Resources/Contributing_via_Git). Checkout the [Contribution Guidelines](https://github.com/eclipse-hawkbit/hawkbit/blob/master/CONTRIBUTING.md) on the Eclipse hawkBit GitHub Repository.

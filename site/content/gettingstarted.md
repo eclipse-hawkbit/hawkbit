@@ -43,7 +43,7 @@ $ docker run -p 8080:8080 hawkbit/hawkbit-update-server:latest
 Start the hawkBit Update Server together with an MySQL and RabbitMQ instance as containers
 
 ```bash
-$ git clone https://github.com/eclipse/hawkbit.git
+$ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/hawkbit-runtime/docker
 $ docker-compose -f docker-compose-monolith-mysql.yml up -d
 ```
@@ -53,7 +53,7 @@ $ docker-compose -f docker-compose-monolith-mysql.yml up -d
 Start the hawkBit Update Server together with an MySQL and RabbitMQ instance as containers
 
 ```bash
-$ git clone https://github.com/eclipse/hawkbit.git
+$ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/hawkbit-runtime/docker
 $ docker-compose -f docker-compose-micro-service-mysql.yml up -d
 ```
@@ -62,12 +62,12 @@ $ docker-compose -f docker-compose-micro-service-mysql.yml up -d
 
 ### 1: Clone and build hawkBit
 ```sh
-$ git clone https://github.com/eclipse/hawkbit.git
+$ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit
 $ mvn clean install
 ```
 
-### 2: Start hawkBit [update server](https://github.com/eclipse/hawkbit/tree/master/hawkbit-runtime/hawkbit-update-server) (Monolith)
+### 2: Start hawkBit [update server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-runtime/hawkbit-update-server) (Monolith)
 
 ```sh
 $ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-#version#-SNAPSHOT.jar
@@ -76,17 +76,17 @@ $ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server
 ### 3: Build hawkBit examples
 
 ```sh
-$ git clone https://github.com/eclipse/hawkbit-examples.git
+$ git clone https://github.com/eclipse-hawkbit/hawkbit-examples.git
 $ cd hawkbit-examples
 $ mvn clean install
 ```
 
-### 4: Start hawkBit [Device Simulator](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-device-simulator)
+### 4: Start hawkBit [Device Simulator](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-device-simulator)
 ```sh
 $ java -jar ./hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
 ```
 
-### 5: Generate Getting Started data with [Example Management API Client](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator)
+### 5: Generate Getting Started data with [Example Management API Client](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator)
 
 ```sh
 $ java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#.jar

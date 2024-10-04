@@ -15,7 +15,7 @@ We believe it is not a good practice to keep an out of free support library in a
 There is another critical obstacle with keeping Vaadin 8 UI. At the moment hawkBit uses Spring Boot 2.7. According to [Spring Boot EOL](https://endoflife.date/spring-boot) Spring Boot 2.7 stream will reach end of support 24th Nov 2023. So, hawkBit shall be migrated to Spring Boot 3.0+. Since Vaadin 8 seem to be incompatible with Spring Boot 3 (they added support for Spring Boot 3 in Vaadin 24 ([Vaadin 24 pre release](https://vaadin.com/blog/vaadin-24-pre-release-available-for-spring-boot-3.0)) we shall drop Vaadin UI 8 anyway.
 
 Many months ago we asked for community help to migrate hawkBit UI to newer Vaadin versions - [Urgent migration needed to a newer Vaadin version
-](https://github.com/eclipse/hawkbit/issues/1376) and gitter channel. However, there was no volunteer found to do the migration.
+](https://github.com/eclipse-hawkbit/hawkbit/issues/1376) and gitter channel. However, there was no volunteer found to do the migration.
 
 All this being said, unfortunately, we've come to the decision to drop the Vaadin 8 UI from the Eclipse hawkBit and the latest hawkBit release 0.3.0 is the last version of hawkBit that includes it. For the next 0.4.0 release we plan to remove this Vaadin 8 UI. Thus the hawkBit may become an UI-less project.
 

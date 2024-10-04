@@ -143,7 +143,7 @@ Payload Template:
 }
 ```
 
-The "mode" property specifies the update mode that should be applied. This property is optional. Possible [mode](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfUpdateMode.java) values:
+The "mode" property specifies the update mode that should be applied. This property is optional. Possible [mode](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfUpdateMode.java) values:
 
 | Value   | Description                                                                                                                                                                         |
 |---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -165,7 +165,7 @@ Message to send an action status event to hawkBit.
 |--------------------|---------------------------------|--------|-----------|
 | content_type       | The content type of the payload | String | true      |
 
-Payload Template (the Java representation is [ActionUpdateStatus](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfActionUpdateStatus.java)):
+Payload Template (the Java representation is [ActionUpdateStatus](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfActionUpdateStatus.java)):
 
 ```json
 {
@@ -176,7 +176,7 @@ Payload Template (the Java representation is [ActionUpdateStatus](https://github
 }
 ```
 
-Possible [actionStatus](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfActionStatus.java) values:
+Possible [actionStatus](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfActionStatus.java) values:
 
 | Value           | Description                             |
 |-----------------|-----------------------------------------|
@@ -303,7 +303,7 @@ Message sent by hawkBit to initialize an update or download task. Note: in case 
 |--------------------|---------------------------------|--------|-----------|
 | content_type       | The content type of the payload | String | true      |
 
-Payload Template (the Java representation is [DmfDownloadAndUpdateRequest](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfDownloadAndUpdateRequest.java)):
+Payload Template (the Java representation is [DmfDownloadAndUpdateRequest](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfDownloadAndUpdateRequest.java)):
 
 ```json
 {
@@ -394,7 +394,7 @@ If `multi.assignments.enabled` is enabled, this message is sent instead of DOWNL
 |--------------------|---------------------------------|--------|-----------|
 | content_type       | The content type of the payload | String | true      |
 
-Payload Template (the Java representation is [DmfMultiActionRequest](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfMultiActionRequest.java)):
+Payload Template (the Java representation is [DmfMultiActionRequest](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfMultiActionRequest.java)):
 
 ```json
 [{
