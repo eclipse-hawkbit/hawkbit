@@ -374,15 +374,12 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 successCondition, errorCondition);
 
         finishActionAndDeleteTargetsOfFirstRunningGroup(createdRollout);
-
         checkSecondGroupStatusIsRunning(createdRollout);
 
         finishActionAndDeleteTargetsOfSecondRunningGroup(createdRollout);
-
         deleteAllTargetsFromThirdGroup(createdRollout);
-
+        rolloutHandler.handleAll(); // one more time to finish the second group
         verifyRolloutAndAllGroupsAreFinished(createdRollout);
-
     }
 
     @Step("Finish three actions of the rollout group and delete two targets")

@@ -645,40 +645,38 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    public long startScheduledActionsByRolloutGroupParent(final long rolloutId, final long distributionSetId,
+    public void startScheduledActionsByRolloutGroupParent(final long rolloutId, final long distributionSetId,
             final Long rolloutGroupParentId) {
-        long totalActionsCount = 0L;
-        long lastStartedActionsCount;
-        do {
-            lastStartedActionsCount = DeploymentHelper.runInNewTransaction(
+        while (DeploymentHelper.runInNewTransaction(
                     txManager,
                     "startScheduledActions-" + rolloutId,
                     status -> {
-                        final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(
-                                rolloutId, rolloutGroupParentId, ACTION_PAGE_LIMIT);
-
-                        if (rolloutGroupActions.getContent().isEmpty()) {
-                            return 0L;
+                        final PageRequest pageRequest = PageRequest.of(0, ACTION_PAGE_LIMIT);
+                        final Page<Action> groupScheduledActions;
+                        if (rolloutGroupParentId == null) {
+                            groupScheduledActions = actionRepository.findByRolloutIdAndRolloutGroupParentIsNullAndStatus(pageRequest, rolloutId, Action.Status.SCHEDULED);
+                        } else {
+                            groupScheduledActions = actionRepository.findByRolloutIdAndRolloutGroupParentIdAndStatus(pageRequest, rolloutId, rolloutGroupParentId, Action.Status.SCHEDULED);
                         }
 
-                        // self invocation won't check @PreAuthorize but it is already checked for the method
-                        startScheduledActions(rolloutGroupActions.getContent());
-
-                        return rolloutGroupActions.getTotalElements();
-                    });
-            totalActionsCount += lastStartedActionsCount;
-        } while (lastStartedActionsCount > 0);
-
-        return totalActionsCount;
+                        if (groupScheduledActions.getContent().isEmpty()) {
+                            return 0L;
+                        } else {
+                            // self invocation won't check @PreAuthorize but it is already checked for the method
+                            startScheduledActions(groupScheduledActions.getContent());
+                            return groupScheduledActions.getTotalElements();
+                        }
+                    }) > 0);
     }
-
 
     @Override
     public void startScheduledActions(final List<Action> rolloutGroupActions) {
         // Close actions already assigned and collect pending assignments
         final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.stream()
-                .map(JpaAction.class::cast).map(this::closeActionIfSetWasAlreadyAssigned).filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .map(JpaAction.class::cast)
+                .map(this::closeActionIfSetWasAlreadyAssigned)
+                .filter(Objects::nonNull)
+                .toList();
         if (pendingTargetAssignments.isEmpty()) {
             return;
         }
@@ -689,21 +687,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }
     }
 
-    private Page<Action> findActionsByRolloutAndRolloutGroupParent(final Long rolloutId,
-            final Long rolloutGroupParentId, final int limit) {
-
-        final PageRequest pageRequest = PageRequest.of(0, limit);
-        if (rolloutGroupParentId == null) {
-            return actionRepository.findByRolloutIdAndRolloutGroupParentIsNullAndStatus(pageRequest, rolloutId,
-                    Action.Status.SCHEDULED);
-        } else {
-            return actionRepository.findByRolloutIdAndRolloutGroupParentIdAndStatus(pageRequest, rolloutId,
-                    rolloutGroupParentId, Action.Status.SCHEDULED);
-        }
-    }
-
     private JpaAction closeActionIfSetWasAlreadyAssigned(final JpaAction action) {
-
         if (isMultiAssignmentsEnabled()) {
             return action;
         }
@@ -897,19 +881,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .setFirstResult((int) pageable.getOffset()).setMaxResults(pageable.getPageSize()).getResultList());
 
         return new PageImpl<>(result, pageable, result.size());
-    }
-
-    @Override
-    public long countMessagesByActionStatusId(final long actionStatusId) {
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-
-        final CriteriaQuery<Long> countMsgQuery = cb.createQuery(Long.class);
-        final Root<JpaActionStatus> countMsgQueryFrom = countMsgQuery.distinct(true).from(JpaActionStatus.class);
-        final ListJoin<JpaActionStatus, String> cJoin = countMsgQueryFrom.joinList("messages", JoinType.LEFT);
-        countMsgQuery.select(cb.count(cJoin))
-                .where(cb.equal(countMsgQueryFrom.get(JpaActionStatus_.id), actionStatusId));
-
-        return entityManager.createQuery(countMsgQuery).getSingleResult();
     }
 
     @Override

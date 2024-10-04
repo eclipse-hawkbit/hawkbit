@@ -267,8 +267,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         deleteScheduledActions(rollout, scheduledActions);
 
         // avoid another scheduler round and re-check if all scheduled actions
-        // has been cleaned up. we flush first to ensure that the we include the
-        // deletion above
+        // has been cleaned up. we flush first to ensure that will include the deletion above
         entityManager.flush();
         final boolean hasScheduledActionsLeft = actionRepository.countByRolloutIdAndStatus(rollout.getId(),
                 Status.SCHEDULED) > 0;
@@ -354,21 +353,19 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             }
         }
 
-        final List<JpaRolloutGroup> rolloutGroupsRunning =
+        final List<JpaRolloutGroup> runningGroups =
                 rollout.getRolloutGroups().stream()
                         .filter(group -> group.getStatus() == RolloutGroupStatus.RUNNING)
                         .map(JpaRolloutGroup.class::cast)
                         .toList();
 
-        if (rolloutGroupsRunning.isEmpty()) {
-            // no running rollouts, probably there was an error
-            // somewhere at the latest group. And the latest group has
-            // been switched from running into error state. So we need
-            // to find the latest group which
+        if (runningGroups.isEmpty()) {
+            // no running rollouts, probably there was an error somewhere at the latest group. And the latest group has
+            // been switched from running into error state. So we need to find the latest group which
             executeLatestRolloutGroup(rollout);
         } else {
-            log.debug("Rollout {} has {} running groups", rollout.getId(), rolloutGroupsRunning.size());
-            executeRolloutGroups(rollout, rolloutGroupsRunning, rollout.getRolloutGroups().get(rollout.getRolloutGroups().size() - 1));
+            log.debug("Rollout {} has {} running groups", rollout.getId(), runningGroups.size());
+            executeRunningGroups(rollout, runningGroups, rollout.getRolloutGroups().get(rollout.getRolloutGroups().size() - 1));
         }
 
         if (isRolloutComplete(rollout)) {
@@ -458,26 +455,24 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         }
     }
 
-    private void executeRolloutGroups(final JpaRollout rollout, final List<JpaRolloutGroup> rolloutGroups, final RolloutGroup lastRolloutGroup) {
-        for (final JpaRolloutGroup rolloutGroup : rolloutGroups) {
+    private void executeRunningGroups(final JpaRollout rollout, final List<JpaRolloutGroup> runningGroups, final RolloutGroup lastGroup) {
+        for (final JpaRolloutGroup rolloutGroup : runningGroups) {
             final long targetCount = countTargetsFrom(rolloutGroup);
             if (rolloutGroup.getTotalTargets() != targetCount) {
                 updateTotalTargetCount(rolloutGroup, targetCount);
             }
 
-            final RolloutGroup evalProxy = rolloutGroup == rolloutGroups.get(rolloutGroups.size() - 1) ?
+            final RolloutGroup evalProxy = rolloutGroup == runningGroups.get(runningGroups.size() - 1) ?
                     evalProxy(rolloutGroup) : rolloutGroup;
-            // error state check, do we need to stop the whole
-            // rollout because of error?
+            // error state check, do we need to stop the whole rollout because of error?
             final boolean isError = checkErrorState(rollout, evalProxy);
             if (isError) {
                 log.info("Rollout {} {} has error, calling error action", rollout.getName(), rollout.getId());
                 callErrorAction(rollout, rolloutGroup);
             } else {
-                // not in error so check finished state, do we need to
-                // start the next group?
+                // not in error so check finished state, do we need to start the next group?
                 checkSuccessCondition(rollout, rolloutGroup, evalProxy, rolloutGroup.getSuccessCondition());
-                if (!(rolloutGroup == lastRolloutGroup && rolloutGroup.isDynamic()) && isRolloutGroupComplete(rollout, rolloutGroup)) {
+                if (!(rolloutGroup == lastGroup && rolloutGroup.isDynamic()) && isRolloutGroupComplete(rollout, rolloutGroup)) {
                     rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
                     rolloutGroupRepository.save(rolloutGroup);
                 }
@@ -757,6 +752,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             }
             return;
         }
+
         final JpaRolloutGroup group = new JpaRolloutGroup();
         final String lastGroupWithoutSuffix = "group-" + groupCount;
         final String suffix = lastGroup.getName().startsWith(lastGroupWithoutSuffix) ? lastGroup.getName().substring(lastGroupWithoutSuffix.length()) : "";
