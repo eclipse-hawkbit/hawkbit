@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.rest.filter.ExcludePathAwareShallowETagFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
@@ -29,10 +30,11 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 /**
  * Abstract Test for Rest tests.
  */
-@WebAppConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ContextConfiguration(classes = {
         RestConfiguration.class, RepositoryApplicationConfiguration.class, TestConfiguration.class})
 @Import(TestChannelBinderConfiguration.class)
+@WebAppConfiguration
 @AutoConfigureMockMvc
 public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTest {
 

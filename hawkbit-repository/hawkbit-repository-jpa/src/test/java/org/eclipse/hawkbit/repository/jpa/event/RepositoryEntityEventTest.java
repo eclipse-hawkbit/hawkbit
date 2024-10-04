@@ -50,7 +50,7 @@ import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("Entity Events")
-@SpringBootTest(classes = { RepositoryTestConfiguration.class })
+@SpringBootTest(classes = { RepositoryTestConfiguration.class }, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Autowired

@@ -69,7 +69,7 @@ import io.qameta.allure.Story;
 @ActiveProfiles({ "test" })
 @Feature("Component Tests - Device Management Federation API")
 @Story("AmqpMessage Dispatcher Service Test")
-@SpringBootTest(classes = { RepositoryApplicationConfiguration.class })
+@SpringBootTest(classes = { RepositoryApplicationConfiguration.class }, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private static final String TENANT = "default";
