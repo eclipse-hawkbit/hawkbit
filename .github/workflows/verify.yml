@@ -9,8 +9,6 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    env:
-      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
     services:
       rabbitmq:
@@ -36,9 +34,10 @@ jobs:
       - name: Check file license headers
         run: mvn license:check --batch-mode
 
-      - name: Run tests & javadoc
-        run: mvn verify javadoc:javadoc --batch-mode
-#
-#      - name: Scan (Sonar)
-#        if: ${{ BRANCH_NAME == 'master' }}
-#        run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.branch.name=eclipse-master -Dsonar.login=$SONAR_ACCESS_TOKEN --batch-mode
+      - name: Run tests & javadoc & Sonar Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: | 
+          mvn verify javadoc:javadoc --batch-mode \
+          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          -Dsonar.organization=bosch-iot-rollouts -Dsonar.projectKey=bir-eclipse-hawkbit 
