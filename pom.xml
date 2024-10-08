@@ -96,8 +96,6 @@
 
       <!-- Sonar - START -->
       <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-      <sonar.organization>bosch-iot-rollouts</sonar.organization>
-      <sonar.projectKey>${project.groupId}:${project.artifactId}</sonar.projectKey>
       <sonar.branch.name>LOCAL_SCAN</sonar.branch.name>
       <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
       <sonar.qualitygate.timeout>600</sonar.qualitygate.timeout>
