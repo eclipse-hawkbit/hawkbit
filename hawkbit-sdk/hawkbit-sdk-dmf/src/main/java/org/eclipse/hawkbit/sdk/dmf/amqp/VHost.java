@@ -99,7 +99,7 @@ public class VHost extends DmfSender implements MessageListener {
 
     @Override
     public void onMessage(final Message message) {
-        final String tenantId = (String)message.getMessageProperties().getHeaders().get(MessageHeaderKey.TENANT);
+        final String tenantId = getTenant(message);
         final String controllerId = (String)message.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID);
         final String type = (String)message.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE);
 
@@ -218,7 +218,7 @@ public class VHost extends DmfSender implements MessageListener {
     private static String getTenant(final Message message) {
         final MessageProperties messageProperties = message.getMessageProperties();
         final Map<String, Object> headers = messageProperties.getHeaders();
-        return ((String) headers.get(MessageHeaderKey.TENANT)).toLowerCase();
+        return (String) headers.get(MessageHeaderKey.TENANT);
     }
 
     protected void handleCancelDownloadAction(final Message message, final String thingId) {
