@@ -179,9 +179,24 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
+    public ResponseEntity<Void> assignTarget(final Long targetTagId, final String controllerId) {
+        log.debug("Assign target {} for target tag {}", controllerId, targetTagId);
+        this.targetManagement.assignTag(List.of(controllerId), targetTagId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
     public ResponseEntity<Void> assignTargets(final Long targetTagId, final List<String> controllerIds) {
         log.debug("Assign {} targets for target tag {}", controllerIds.size(), targetTagId);
         this.targetManagement.assignTag(controllerIds, targetTagId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> unassignTarget(@PathVariable("targetTagId") final Long targetTagId,
+            @PathVariable("controllerId") final String controllerId) {
+        log.debug("Unassign target {} for target tag {}", controllerId, targetTagId);
+        this.targetManagement.unassignTag(controllerId, targetTagId);
         return ResponseEntity.ok().build();
     }
 
@@ -199,14 +214,6 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         final List<Target> assignedTarget = this.targetManagement
                 .assignTag(findTargetControllerIds(assignedTargetRequestBodies), targetTagId);
         return ResponseEntity.ok(MgmtTargetMapper.toResponse(assignedTarget, tenantConfigHelper));
-    }
-
-    @Override
-    public ResponseEntity<Void> unassignTarget(@PathVariable("targetTagId") final Long targetTagId,
-            @PathVariable("controllerId") final String controllerId) {
-        log.debug("Unassign target {} for target tag {}", controllerId, targetTagId);
-        this.targetManagement.unassignTag(controllerId, targetTagId);
-        return ResponseEntity.ok().build();
     }
 
     private TargetTag findTargetTagById(final Long targetTagId) {

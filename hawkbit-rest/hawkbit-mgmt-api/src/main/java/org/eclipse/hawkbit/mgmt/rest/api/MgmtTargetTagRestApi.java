@@ -326,6 +326,39 @@ public interface MgmtTargetTagRestApi {
      * Handles the PUT request to assign targets to the given tag id.
      *
      * @param targetTagId the ID of the target tag to retrieve
+     * @param controllerId stream of controller ids to be assigned
+     *
+     * @return the list of assigned targets.
+     */
+    @Operation(summary = "Assign target(s) to given tagId",
+            description = "Handles the POST request of target assignment. Already assigned target will be ignored.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully assigned"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
+                    "changed (i.e. read-only) or data volume restriction applies."),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
+                    "user in another request at the same time. You may retry your modification request."),
+            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
+                    "supported by the server for this resource."),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.")
+    })
+    @PostMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING +
+                    MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING + "/{controllerId}",
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE } )
+    ResponseEntity<Void> assignTarget(
+            @PathVariable("targetTagId") Long targetTagId,
+            @PathVariable("controllerId") String controllerId);
+
+    /**
+     * Handles the PUT request to assign targets to the given tag id.
+     *
+     * @param targetTagId the ID of the target tag to retrieve
      * @param controllerIds stream of controller ids to be assigned
      *
      * @return the list of assigned targets.
@@ -355,6 +388,36 @@ public interface MgmtTargetTagRestApi {
             @PathVariable("targetTagId") Long targetTagId,
             @Schema(description = "List of controller ids to be assigned", example = "[\"controllerId1\", \"controllerId2\"]")
             @RequestBody List<String> controllerIds);
+
+    /**
+     * Handles the DELETE request to unassign one target from the given tag id.
+     *
+     * @param targetTagId the ID of the target tag
+     * @param controllerId the ID of the target to unassign
+     * @return http status code
+     */
+    @Operation(summary = "Unassign target from a given tagId",
+            description = "Handles the DELETE request to unassign the given target.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
+                    "changed (i.e. read-only) or data volume restriction applies."),
+            @ApiResponse(responseCode = "404", description = "Target not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.")
+    })
+    @DeleteMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING +
+            MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING + "/{controllerId}")
+    ResponseEntity<Void> unassignTarget(
+            @PathVariable("targetTagId") Long targetTagId,
+            @PathVariable("controllerId") String controllerId);
+
     /**
      * Handles the DELETE request to unassign one target from the given tag id.
      *
@@ -417,32 +480,4 @@ public interface MgmtTargetTagRestApi {
     @Deprecated(forRemoval = true)
     ResponseEntity<List<MgmtTarget>> assignTargetsByRequestBody(@PathVariable("targetTagId") Long targetTagId,
             List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
-
-    /**
-     * Handles the DELETE request to unassign one target from the given tag id.
-     *
-     * @param targetTagId the ID of the target tag
-     * @param controllerId the ID of the target to unassign
-     * @return http status code
-     */
-    @Operation(summary = "Unassign target from a given tagId",
-            description = "Handles the DELETE request to unassign the given target.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
-        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
-                "changed (i.e. read-only) or data volume restriction applies."),
-        @ApiResponse(responseCode = "404", description = "Target not found.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                "and the client has to wait another second.")
-    })
-    @DeleteMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING
-            + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING + "/{controllerId}")
-    ResponseEntity<Void> unassignTarget(@PathVariable("targetTagId") Long targetTagId,
-            @PathVariable("controllerId") String controllerId);
 }
