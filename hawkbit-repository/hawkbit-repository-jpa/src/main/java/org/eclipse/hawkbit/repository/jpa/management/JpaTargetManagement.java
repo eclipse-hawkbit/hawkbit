@@ -482,43 +482,6 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public TargetTagAssignmentResult toggleTagAssignment(final Collection<String> controllerIds, final String tagName) {
-        final TargetTag tag = targetTagRepository
-                .findByNameEquals(tagName)
-                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagName));
-        final List<JpaTarget> allTargets = targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
-        if (allTargets.size() < controllerIds.size()) {
-            throw new EntityNotFoundException(Target.class, controllerIds,
-                    allTargets.stream().map(Target::getControllerId).toList());
-        }
-
-        final List<JpaTarget> alreadyAssignedTargets = targetRepository.findAll(
-                TargetSpecifications.hasTagName(tagName).and(TargetSpecifications.hasControllerIdIn(controllerIds)));
-
-        // all are already assigned -> unassign
-        if (alreadyAssignedTargets.size() == allTargets.size()) {
-
-            alreadyAssignedTargets.forEach(target -> target.removeTag(tag));
-            return new TargetTagAssignmentResult(0, Collections.emptyList(),
-                    Collections.unmodifiableList(alreadyAssignedTargets), tag);
-        }
-
-        allTargets.removeAll(alreadyAssignedTargets);
-        // some or none are assigned -> assign
-        allTargets.forEach(target -> target.addTag(tag));
-        final TargetTagAssignmentResult result = new TargetTagAssignmentResult(alreadyAssignedTargets.size(),
-                targetRepository.saveAll(allTargets), Collections.emptyList(), tag);
-
-        // no reason to persist the tag
-        entityManager.detach(tag);
-        return result;
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetTypeAssignmentResult assignType(final Collection<String> controllerIds, final Long typeId) {
         final JpaTargetType type = targetTypeRepository.findById(typeId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetType.class, typeId));
@@ -613,25 +576,6 @@ public class JpaTargetManagement implements TargetManagement {
         allTargets.forEach(target -> target.removeTag(tag));
 
         final List<Target> result = allTargets.stream().map(targetRepository::save).map(Target.class::cast).toList();
-
-        // No reason to save the tag
-        entityManager.detach(tag);
-        return result;
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target unassignTag(final String controllerId, final long targetTagId) {
-        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
-
-        final TargetTag tag = targetTagRepository.findById(targetTagId)
-                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
-
-        target.removeTag(tag);
-
-        final Target result = targetRepository.save(target);
 
         // No reason to save the tag
         entityManager.detach(tag);
@@ -973,5 +917,61 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findByControllerAttributesRequested(final Pageable pageReq) {
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageReq,
                 List.of(TargetSpecifications.hasRequestControllerAttributesTrue()));
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public TargetTagAssignmentResult toggleTagAssignment(final Collection<String> controllerIds, final String tagName) {
+        final TargetTag tag = targetTagRepository
+                .findByNameEquals(tagName)
+                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagName));
+        final List<JpaTarget> allTargets = targetRepository
+                .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
+        if (allTargets.size() < controllerIds.size()) {
+            throw new EntityNotFoundException(Target.class, controllerIds,
+                    allTargets.stream().map(Target::getControllerId).toList());
+        }
+
+        final List<JpaTarget> alreadyAssignedTargets = targetRepository.findAll(
+                TargetSpecifications.hasTagName(tagName).and(TargetSpecifications.hasControllerIdIn(controllerIds)));
+
+        // all are already assigned -> unassign
+        if (alreadyAssignedTargets.size() == allTargets.size()) {
+
+            alreadyAssignedTargets.forEach(target -> target.removeTag(tag));
+            return new TargetTagAssignmentResult(0, Collections.emptyList(),
+                    Collections.unmodifiableList(alreadyAssignedTargets), tag);
+        }
+
+        allTargets.removeAll(alreadyAssignedTargets);
+        // some or none are assigned -> assign
+        allTargets.forEach(target -> target.addTag(tag));
+        final TargetTagAssignmentResult result = new TargetTagAssignmentResult(alreadyAssignedTargets.size(),
+                targetRepository.saveAll(allTargets), Collections.emptyList(), tag);
+
+        // no reason to persist the tag
+        entityManager.detach(tag);
+        return result;
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Target unassignTag(final String controllerId, final long targetTagId) {
+        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
+
+        final TargetTag tag = targetTagRepository.findById(targetTagId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
+
+        target.removeTag(tag);
+
+        final Target result = targetRepository.save(target);
+
+        // No reason to save the tag
+        entityManager.detach(tag);
+        return result;
     }
 }

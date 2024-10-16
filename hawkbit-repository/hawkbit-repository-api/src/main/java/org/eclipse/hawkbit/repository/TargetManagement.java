@@ -633,22 +633,6 @@ public interface TargetManagement {
     Page<Target> findByRsqlAndTag(@NotNull Pageable pageable, @NotNull String rsqlParam, long tagId);
 
     /**
-     * Toggles {@link TargetTag} assignment to given {@link Target}s by means that
-     * if some (or all) of the targets in the list have the {@link Tag} not yet
-     * assigned, they will be. Only if all of them have the tag already assigned
-     * they will be removed instead.
-     *
-     * @deprecated since 0.6.0 - not very usable with very unclear logic
-     * @param controllerIds to toggle for
-     * @param tagName to toggle
-     * @return TagAssigmentResult with all metadata of the assignment outcome.
-     * @throws EntityNotFoundException if tag with given name does not exist
-     */
-    @Deprecated
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
-
-    /**
      * Initiates {@link TargetType} assignment to given {@link Target}s. If some
      * targets in the list have the {@link TargetType} not yet assigned, they will
      * get assigned. If all targets are already of that type, there will be no
@@ -704,19 +688,6 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     List<Target> unassignTag(@NotEmpty List<String> controllerIds, long targetTagId);
-
-    /**
-     * Un-assign a {@link TargetTag} assignment to given {@link Target}.
-     *
-     * @deprecated since 0.6.0 - use {@link #unassignTag(List, long)} instead
-     * @param controllerId to un-assign for
-     * @param targetTagId to un-assign
-     * @return the unassigned target or <null> if no target is unassigned
-     * @throws EntityNotFoundException if TAG with given ID does not exist
-     */
-    @Deprecated(forRemoval = true)
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Target unassignTag(@NotEmpty String controllerId, long targetTagId);
 
     /**
      * Un-assign a {@link TargetType} assignment to given {@link Target}.
@@ -991,4 +962,33 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     TargetMetadata updateMetadata(@NotEmpty String controllerId, @NotNull MetaData metadata);
+
+    /**
+     * Toggles {@link TargetTag} assignment to given {@link Target}s by means that
+     * if some (or all) of the targets in the list have the {@link Tag} not yet
+     * assigned, they will be. Only if all of them have the tag already assigned
+     * they will be removed instead.
+     *
+     * @deprecated since 0.6.0 - not very usable with very unclear logic
+     * @param controllerIds to toggle for
+     * @param tagName to toggle
+     * @return TagAssigmentResult with all metadata of the assignment outcome.
+     * @throws EntityNotFoundException if tag with given name does not exist
+     */
+    @Deprecated
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
+
+    /**
+     * Un-assign a {@link TargetTag} assignment to given {@link Target}.
+     *
+     * @deprecated since 0.6.0 - use {@link #unassignTag(List, long)} instead
+     * @param controllerId to un-assign for
+     * @param targetTagId to un-assign
+     * @return the unassigned target or <null> if no target is unassigned
+     * @throws EntityNotFoundException if TAG with given ID does not exist
+     */
+    @Deprecated(forRemoval = true)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    Target unassignTag(@NotEmpty String controllerId, long targetTagId);
 }

@@ -287,42 +287,6 @@ public interface MgmtTargetTagRestApi {
             String rsqlParam);
 
     /**
-     * Handles the POST request to toggle the assignment of targets by the given
-     * tag id.
-     *
-     * @deprecated since 0.6.0 - not very usable with very unclear logic
-     * @param targetTagId
-     *            the ID of the target tag to retrieve
-     * @param assignedTargetRequestBodies
-     *            list of controller ids to be toggled
-     * @return the list of assigned targets and unassigned targets.
-     */
-    @Operation(summary = "Toggles target tag assignment", description = "Handles the POST request of toggle target " +
-            "assignment. The request body must always be a list of controller ids.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
-        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
-                "changed (i.e. read-only) or data volume restriction applies."),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
-        @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                "user in another request at the same time. You may retry your modification request."),
-        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                "supported by the server for this resource."),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
-    })
-    @PostMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING
-            + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING + "/toggleTagAssignment", consumes = {
-                    MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
-                            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    @Deprecated(forRemoval = true)
-    ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(@PathVariable("targetTagId") Long targetTagId,
-            List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
-
-    /**
      * Handles the PUT request to assign targets to the given tag id.
      *
      * @param targetTagId the ID of the target tag to retrieve
@@ -448,6 +412,42 @@ public interface MgmtTargetTagRestApi {
             @RequestBody List<String> controllerId);
 
     /**
+     * Handles the POST request to toggle the assignment of targets by the given
+     * tag id.
+     *
+     * @deprecated since 0.6.0 - not very usable with very unclear logic
+     * @param targetTagId
+     *            the ID of the target tag to retrieve
+     * @param assignedTargetRequestBodies
+     *            list of controller ids to be toggled
+     * @return the list of assigned targets and unassigned targets.
+     */
+    @Operation(summary = "[DEPRECATED] Toggles target tag assignment", description = "Handles the POST request of toggle target " +
+            "assignment. The request body must always be a list of controller ids.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
+                    "changed (i.e. read-only) or data volume restriction applies."),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
+                    "user in another request at the same time. You may retry your modification request."),
+            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
+                    "supported by the server for this resource."),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
+    @PostMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING
+            + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING + "/toggleTagAssignment", consumes = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @Deprecated(forRemoval = true)
+    ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(@PathVariable("targetTagId") Long targetTagId,
+            List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
+
+    /**
      * Handles the POST request to assign targets to the given tag id.
      *
      * @deprecated since 0.6.0 in favour of {@link #assignTargets}
@@ -455,7 +455,7 @@ public interface MgmtTargetTagRestApi {
      * @param assignedTargetRequestBodies list of controller ids to be assigned
      * @return the list of assigned targets.
      */
-    @Operation(summary = "Assign target(s) to given tagId and return targets",
+    @Operation(summary = "[DEPRECATED] Assign target(s) to given tagId and return targets",
             description = "Handles the POST request of target assignment. Already assigned target will be ignored.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully assigned"),
