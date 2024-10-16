@@ -163,6 +163,57 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
+    public ResponseEntity<Void> assignTag(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            @PathVariable("distributionsetId") final Long distributionsetId) {
+        log.debug("Assign ds {} for ds tag {}", distributionsetId, distributionsetTagId);
+        this.distributionSetManagement.assignTag(List.of(distributionsetId), distributionsetTagId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<List<MgmtDistributionSet>> assignTag(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            @RequestBody final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
+        log.debug("Assign DistributionSet {} for ds tag {}", assignedDSRequestBodies.size(), distributionsetTagId);
+        final List<DistributionSet> assignedDs = this.distributionSetManagement
+                .assignTag(findDistributionSetIds(assignedDSRequestBodies), distributionsetTagId);
+        log.debug("Assigned DistributionSet {}", assignedDs.size());
+        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDistributionSets(assignedDs));
+    }
+
+    @Override
+    public ResponseEntity<Void> unassignTag(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            @PathVariable("distributionsetId") final Long distributionsetId) {
+        log.debug("Unassign ds {} for ds tag {}", distributionsetId, distributionsetTagId);
+        this.distributionSetManagement.unassignTag(List.of(distributionsetId), distributionsetTagId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> unassignTag(
+            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
+            @RequestBody final List<Long> distributionsetIds) {
+        log.debug("Unassign DistributionSet {} for ds tag {}", distributionsetIds.size(), distributionsetTagId);
+        final List<DistributionSet> assignedDs = this.distributionSetManagement
+                .unassignTag(distributionsetIds, distributionsetTagId);
+        log.debug("Unassigned DistributionSet {}", assignedDs.size());
+        return ResponseEntity.ok().build();
+    }
+
+    private DistributionSetTag findDistributionTagById(final Long distributionsetTagId) {
+        return distributionSetTagManagement.get(distributionsetTagId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, distributionsetTagId));
+    }
+
+    private static List<Long> findDistributionSetIds(
+            final List<MgmtAssignedDistributionSetRequestBody> assignedDistributionSetRequestBodies) {
+        return assignedDistributionSetRequestBodies.stream()
+                .map(MgmtAssignedDistributionSetRequestBody::getDistributionSetId).collect(Collectors.toList());
+    }
+
+    @Override
     public ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignment(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             @RequestBody final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
@@ -184,36 +235,5 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
                 assigmentResult.getUnassigned());
 
         return ResponseEntity.ok(tagAssigmentResultRest);
-    }
-
-    @Override
-    public ResponseEntity<List<MgmtDistributionSet>> assignDistributionSets(
-            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
-            @RequestBody final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
-        log.debug("Assign DistributionSet {} for ds tag {}", assignedDSRequestBodies.size(), distributionsetTagId);
-        final List<DistributionSet> assignedDs = this.distributionSetManagement
-                .assignTag(findDistributionSetIds(assignedDSRequestBodies), distributionsetTagId);
-        log.debug("Assigned DistributionSet {}", assignedDs.size());
-        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDistributionSets(assignedDs));
-    }
-
-    @Override
-    public ResponseEntity<Void> unassignDistributionSet(
-            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
-            @PathVariable("distributionsetId") final Long distributionsetId) {
-        log.debug("Unassign ds {} for ds tag {}", distributionsetId, distributionsetTagId);
-        this.distributionSetManagement.unassignTag(distributionsetId, distributionsetTagId);
-        return ResponseEntity.ok().build();
-    }
-
-    private DistributionSetTag findDistributionTagById(final Long distributionsetTagId) {
-        return distributionSetTagManagement.get(distributionsetTagId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, distributionsetTagId));
-    }
-
-    private static List<Long> findDistributionSetIds(
-            final List<MgmtAssignedDistributionSetRequestBody> assignedDistributionSetRequestBodies) {
-        return assignedDistributionSetRequestBodies.stream()
-                .map(MgmtAssignedDistributionSetRequestBody::getDistributionSetId).collect(Collectors.toList());
     }
 }

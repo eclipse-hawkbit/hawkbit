@@ -97,6 +97,17 @@ public interface DistributionSetManagement
     List<DistributionSet> assignTag(@NotEmpty Collection<Long> ids, long tagId);
 
     /**
+     * Unassign a {@link DistributionSetTag} assignment to given {@link DistributionSet}s.
+     *
+     * @param ids to assign for
+     * @param tagId to assign
+     * @return list of assigned ds
+     * @throws EntityNotFoundException if tag with given ID does not exist or (at least one) of the distribution sets.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    List<DistributionSet> unassignTag(@NotEmpty Collection<Long> ids, long tagId);
+
+    /**
      * Creates a list of distribution set meta data entries.
      *
      * @param id
@@ -453,25 +464,6 @@ public interface DistributionSetManagement
     boolean isInUse(long id);
 
     /**
-     * Toggles {@link DistributionSetTag} assignment to given
-     * {@link DistributionSet}s by means that if some (or all) of the targets in
-     * the list have the {@link Tag} not yet assigned, they will be. Only if all
-     * of theme have the tag already assigned they will be removed instead.
-     *
-     * @param ids
-     *            to toggle for
-     * @param tagName
-     *            to toggle
-     * @return {@link DistributionSetTagAssignmentResult} with all meta data of
-     *         the assignment outcome.
-     *
-     * @throws EntityNotFoundException
-     *             if given tag does not exist or (at least one) module
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<Long> ids, @NotNull String tagName);
-
-    /**
      * Unassigns a {@link SoftwareModule} form an existing
      * {@link DistributionSet}.
      *
@@ -490,22 +482,6 @@ public interface DistributionSetManagement
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSet unassignSoftwareModule(long id, long moduleId);
-
-    /**
-     * Unassign a {@link DistributionSetTag} assignment to given
-     * {@link DistributionSet}.
-     *
-     * @param id
-     *            to unassign for
-     * @param tagId
-     *            to unassign
-     * @return the unassigned ds or <null> if no ds is unassigned
-     *
-     * @throws EntityNotFoundException
-     *             if set or tag with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSet unassignTag(long id, long tagId);
 
     /**
      * Updates a distribution set meta data value if corresponding entry exists.
@@ -585,4 +561,34 @@ public interface DistributionSetManagement
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     void invalidate(DistributionSet distributionSet);
+
+    /**
+     * Toggles {@link DistributionSetTag} assignment to given
+     * {@link DistributionSet}s by means that if some (or all) of the targets in
+     * the list have the {@link Tag} not yet assigned, they will be. Only if all
+     * of theme have the tag already assigned they will be removed instead.
+     *
+     * @deprecated since 0.6.0 in favor of assign/unassign
+     * @param ids to toggle for
+     * @param tagName to toggle
+     * @return {@link DistributionSetTagAssignmentResult} with all meta data of the assignment outcome.
+     * @throws EntityNotFoundException if given tag does not exist or (at least one) module
+     */
+    @Deprecated(forRemoval = true)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    DistributionSetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<Long> ids, @NotNull String tagName);
+
+
+    /**
+     * Unassign a {@link DistributionSetTag} assignment to given {@link DistributionSet}.
+     *
+     * @deprecated since 0.6.0 in favor of unassignTag(List<Long>, long)
+     * @param id to unassign for
+     * @param tagId to unassign
+     * @return the unassigned ds or <null> if no ds is unassigned
+     * @throws EntityNotFoundException if set or tag with given ID does not exist
+     */
+    @Deprecated(forRemoval = true)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    DistributionSet unassignTag(long id, long tagId);
 }
