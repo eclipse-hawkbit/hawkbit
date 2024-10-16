@@ -345,7 +345,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2) })
-    public void assignTag() throws Exception {
+    public void assignDistributionSets() throws Exception {
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final int setsAssigned = 2;
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
