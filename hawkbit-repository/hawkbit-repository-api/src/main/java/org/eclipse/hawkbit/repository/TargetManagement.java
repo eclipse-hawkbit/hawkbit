@@ -53,21 +53,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface TargetManagement {
 
     /**
-     * Assign a {@link TargetTag} assignment to given {@link Target}s.
-     *
-     * @param controllerIds
-     *            to assign for
-     * @param tagId
-     *            to assign
-     * @return list of assigned targets
-     * 
-     * @throws EntityNotFoundException
-     *             if given tagId or at least one of the targets do not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long tagId);
-
-    /**
      * Counts number of targets with the given distribution set assigned.
      *
      * @param distributionSetId
@@ -653,14 +638,13 @@ public interface TargetManagement {
      * assigned, they will be. Only if all of them have the tag already assigned
      * they will be removed instead.
      *
-     * @param controllerIds
-     *            to toggle for
-     * @param tagName
-     *            to toggle
+     * @deprecated since 0.6.0 - not very usable with very unclear logic
+     * @param controllerIds to toggle for
+     * @param tagName to toggle
      * @return TagAssigmentResult with all metadata of the assignment outcome.
-     * @throws EntityNotFoundException
-     *             if tag with given name does not exist
+     * @throws EntityNotFoundException if tag with given name does not exist
      */
+    @Deprecated
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
 
@@ -696,25 +680,48 @@ public interface TargetManagement {
     TargetTypeAssignmentResult unassignType(@NotEmpty Collection<String> controllerIds);
 
     /**
+     * Assign a {@link TargetTag} assignment to given {@link Target}s.
+     *
+     * @param controllerIds
+     *            to assign for
+     * @param targetTagId
+     *            to assign
+     * @return list of assigned targets
+     *
+     * @throws EntityNotFoundException
+     *             if given tagId or at least one of the targets do not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId);
+
+    /**
+     * Un-assign a {@link TargetTag} assignment to given {@link Target}s.
+     *
+     * @param controllerIds to un-assign for
+     * @param targetTagId to un-assign
+     * @return the unassigned target or <null> if no target is unassigned
+     * @throws EntityNotFoundException if Tag with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    List<Target> unassignTag(@NotEmpty List<String> controllerIds, long targetTagId);
+
+    /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}.
      *
-     * @param controllerId
-     *            to un-assign for
-     * @param targetTagId
-     *            to un-assign
+     * @deprecated since 0.6.0 - use {@link #unassignTag(List, long)} instead
+     * @param controllerId to un-assign for
+     * @param targetTagId to un-assign
      * @return the unassigned target or <null> if no target is unassigned
-     * 
-     * @throws EntityNotFoundException
-     *             if TAG with given ID does not exist
+     * @throws EntityNotFoundException if TAG with given ID does not exist
      */
+    @Deprecated(forRemoval = true)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     Target unassignTag(@NotEmpty String controllerId, long targetTagId);
 
     /**
      * Un-assign a {@link TargetType} assignment to given {@link Target}.
      *
-     * @param controllerId
-     *            to un-assign for
+     * @param controllerId to un-assign for
      * @return the unassigned target
      *
      */

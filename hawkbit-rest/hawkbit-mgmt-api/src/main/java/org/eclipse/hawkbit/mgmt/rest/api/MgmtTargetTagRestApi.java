@@ -290,11 +290,11 @@ public interface MgmtTargetTagRestApi {
      * Handles the POST request to toggle the assignment of targets by the given
      * tag id.
      *
+     * @deprecated since 0.6.0 - not very usable with very unclear logic
      * @param targetTagId
      *            the ID of the target tag to retrieve
      * @param assignedTargetRequestBodies
      *            list of controller ids to be toggled
-     *
      * @return the list of assigned targets and unassigned targets.
      */
     @Operation(summary = "Toggles target tag assignment", description = "Handles the POST request of toggle target " +
@@ -318,6 +318,7 @@ public interface MgmtTargetTagRestApi {
             + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING + "/toggleTagAssignment", consumes = {
                     MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
                             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @Deprecated(forRemoval = true)
     ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(@PathVariable("targetTagId") Long targetTagId,
             List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
 
@@ -325,7 +326,7 @@ public interface MgmtTargetTagRestApi {
      * Handles the PUT request to assign targets to the given tag id.
      *
      * @param targetTagId the ID of the target tag to retrieve
-     * @param assignedTargetControlIdsStream stream of controller ids to be assigned
+     * @param controllerIds stream of controller ids to be assigned
      *
      * @return the list of assigned targets.
      */
@@ -350,17 +351,45 @@ public interface MgmtTargetTagRestApi {
     @PutMapping(
             value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE } )
-    ResponseEntity<Void> assignTargetsByControllerIds(
+    ResponseEntity<Void> assignTargets(
             @PathVariable("targetTagId") Long targetTagId,
             @Schema(description = "List of controller ids to be assigned", example = "[\"controllerId1\", \"controllerId2\"]")
-            @RequestBody List<String> assignedTargetControlIds);
+            @RequestBody List<String> controllerIds);
+    /**
+     * Handles the DELETE request to unassign one target from the given tag id.
+     *
+     * @param targetTagId the ID of the target tag
+     * @param controllerId the ID of the target to unassign
+     * @return http status code
+     */
+    @Operation(summary = "Unassign targets from a given tagId",
+            description = "Handles the DELETE request to unassign the given targets.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
+                    "changed (i.e. read-only) or data volume restriction applies."),
+            @ApiResponse(responseCode = "404", description = "Target not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.")
+    })
+    @DeleteMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING)
+    ResponseEntity<Void> unassignTargets(
+            @PathVariable("targetTagId") Long targetTagId,
+            @Schema(description = "List of controller ids to be unassigned", example = "[\"controllerId1\", \"controllerId2\"]")
+            @RequestBody List<String> controllerId);
 
     /**
      * Handles the POST request to assign targets to the given tag id.
      *
+     * @deprecated since 0.6.0 in favour of {@link #assignTargets}
      * @param targetTagId the ID of the target tag to retrieve
      * @param assignedTargetRequestBodies list of controller ids to be assigned
-     *
      * @return the list of assigned targets.
      */
     @Operation(summary = "Assign target(s) to given tagId and return targets",
@@ -385,16 +414,15 @@ public interface MgmtTargetTagRestApi {
             + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING, consumes = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtTarget>> assignTargets(@PathVariable("targetTagId") Long targetTagId,
+    @Deprecated(forRemoval = true)
+    ResponseEntity<List<MgmtTarget>> assignTargetsByRequestBody(@PathVariable("targetTagId") Long targetTagId,
             List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
 
     /**
      * Handles the DELETE request to unassign one target from the given tag id.
      *
-     * @param targetTagId
-     *            the ID of the target tag
-     * @param controllerId
-     *            the ID of the target to unassign
+     * @param targetTagId the ID of the target tag
+     * @param controllerId the ID of the target to unassign
      * @return http status code
      */
     @Operation(summary = "Unassign target from a given tagId",
