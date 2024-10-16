@@ -304,7 +304,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     @Description("Verfies that tag assignments done through tag API command are correctly stored in the repository.")
     @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 2) })
-    public void assignTargets() throws Exception {
+    public void assignTargetsByRequestBody() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
         final int targetsAssigned = 2;
         final List<Target> targets = testdataFactory.createTargets(targetsAssigned);

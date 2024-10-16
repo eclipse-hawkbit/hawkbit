@@ -179,17 +179,21 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> assignTargetsByControllerIds(
-            @PathVariable("targetTagId") Long targetTagId,
-            @Schema(description = "List of controller ids to be assigned", example = "[\"controllerId1\", \"controllerId2\"]")
-            @RequestBody List<String> assignedTargetControlIds) {
-        log.debug("Assign {} targets for target tag {}", assignedTargetControlIds.size(), targetTagId);
-        this.targetManagement.assignTag(assignedTargetControlIds, targetTagId);
+    public ResponseEntity<Void> assignTargets(final Long targetTagId, final List<String> controllerIds) {
+        log.debug("Assign {} targets for target tag {}", controllerIds.size(), targetTagId);
+        this.targetManagement.assignTag(controllerIds, targetTagId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<List<MgmtTarget>> assignTargets(@PathVariable("targetTagId") final Long targetTagId,
+    public ResponseEntity<Void> unassignTargets(final Long targetTagId, final List<String> controllerIds) {
+        log.debug("Unassign {} targets for target tag {}", controllerIds.size(), targetTagId);
+        this.targetManagement.unassignTag(controllerIds, targetTagId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<List<MgmtTarget>> assignTargetsByRequestBody(@PathVariable("targetTagId") final Long targetTagId,
             @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
         log.debug("Assign targets {} for target tag {}", assignedTargetRequestBodies, targetTagId);
         final List<Target> assignedTarget = this.targetManagement
