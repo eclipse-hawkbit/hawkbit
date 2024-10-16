@@ -23,14 +23,16 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * * A json annotated rest model for TargetTagAssigmentResult to RESTful API
- * representation.
+ * A json annotated rest model for TargetTagAssigmentResult to RESTful API representation.
+ *
+ * @deprecated since 0.6.0 with deprecation of toggle assignments
  */
 @Data
 @Accessors(chain = true)
 @ToString
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Deprecated(forRemoval = true)
 public class MgmtTargetTagAssigmentResult {
 
     @JsonProperty
