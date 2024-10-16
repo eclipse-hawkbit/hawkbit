@@ -62,7 +62,6 @@ import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
-import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -85,7 +84,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -191,43 +189,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<Long> ids, final String tagName) {
-        return updateTags(
-                ids,
-                () -> distributionSetTagManagement
-                        .getByName(tagName)
-                        .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName)),
-                (allDs, distributionSetTag) -> {
-                    final List<JpaDistributionSet> toBeChangedDSs = allDs.stream().filter(set -> set.addTag(distributionSetTag))
-                            .collect(Collectors.toList());
-
-                    final DistributionSetTagAssignmentResult result;
-                    // un-assignment case
-                    if (toBeChangedDSs.isEmpty()) {
-                        for (final JpaDistributionSet set : allDs) {
-                            if (set.removeTag(distributionSetTag)) {
-                                toBeChangedDSs.add(set);
-                            }
-                        }
-                        result = new DistributionSetTagAssignmentResult(ids.size() - toBeChangedDSs.size(),
-                                Collections.emptyList(),
-                                Collections.unmodifiableList(
-                                        toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
-                                distributionSetTag);
-                    } else {
-                        result = new DistributionSetTagAssignmentResult(ids.size() - toBeChangedDSs.size(),
-                                Collections.unmodifiableList(
-                                        toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
-                                Collections.emptyList(), distributionSetTag);
-                    }
-                    return result;
-                });
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSet> assignTag(final Collection<Long> ids, final long dsTagId) {
         return updateTags(
                 ids,
@@ -238,13 +199,28 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                 });
     }
 
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public List<DistributionSet> unassignTag(final Collection<Long> ids, final long dsTagId) {
+        return updateTags(
+                ids,
+                () -> distributionSetTagManagement.get(dsTagId).orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId)),
+                (allDs, distributionSetTag) -> {
+                    allDs.forEach(ds -> ds.removeTag(distributionSetTag));
+                    return Collections.unmodifiableList(distributionSetRepository.saveAll(allDs));
+                });
+    }
+
     private <T> T updateTags(
             final Collection<Long> dsIds, final Supplier<DistributionSetTag> tagSupplier,
             final BiFunction<List<JpaDistributionSet>, DistributionSetTag, T> updater) {
-        final List<JpaDistributionSet> allDs = findDistributionSetListWithDetails(dsIds);
+        final List<JpaDistributionSet> allDs =  dsIds.size() == 1 ?
+                distributionSetRepository.findById(dsIds.iterator().next()).map(List::of).orElseGet(Collections::emptyList) :
+                distributionSetRepository.findAll(DistributionSetSpecification.byIds(dsIds));
         if (allDs.size() < dsIds.size()) {
-            throw new EntityNotFoundException(DistributionSet.class, dsIds,
-                    allDs.stream().map(DistributionSet::getId).toList());
+            throw new EntityNotFoundException(DistributionSet.class, dsIds, allDs.stream().map(DistributionSet::getId).toList());
         }
 
         final DistributionSetTag distributionSetTag = tagSupplier.get();
@@ -254,10 +230,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             // No reason to save the tag
             entityManager.detach(distributionSetTag);
         }
-    }
-
-    private List<JpaDistributionSet> findDistributionSetListWithDetails(final Collection<Long> distributionIdSet) {
-        return distributionSetRepository.findAll(DistributionSetSpecification.byIds(distributionIdSet));
     }
 
     @Override
@@ -663,25 +635,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSet unassignTag(final long id, final long dsTagId) {
-        final JpaDistributionSet set = (JpaDistributionSet) getWithDetails(id)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, id));
-
-        final DistributionSetTag distributionSetTag = distributionSetTagManagement.get(dsTagId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));
-        set.removeTag(distributionSetTag);
-
-        final JpaDistributionSet result = distributionSetRepository.save(set);
-
-        // No reason to save the tag
-        entityManager.detach(distributionSetTag);
-        return result;
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void lock(final long id) {
         final JpaDistributionSet distributionSet = getById(id);
         if (!distributionSet.isLocked()) {
@@ -864,5 +817,61 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         if (!distributionSetTagRepository.existsById(tagId)) {
             throw new EntityNotFoundException(DistributionSetTag.class, tagId);
         }
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<Long> ids, final String tagName) {
+        return updateTags(
+                ids,
+                () -> distributionSetTagManagement
+                        .getByName(tagName)
+                        .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName)),
+                (allDs, distributionSetTag) -> {
+                    final List<JpaDistributionSet> toBeChangedDSs = allDs.stream().filter(set -> set.addTag(distributionSetTag))
+                            .collect(Collectors.toList());
+
+                    final DistributionSetTagAssignmentResult result;
+                    // un-assignment case
+                    if (toBeChangedDSs.isEmpty()) {
+                        for (final JpaDistributionSet set : allDs) {
+                            if (set.removeTag(distributionSetTag)) {
+                                toBeChangedDSs.add(set);
+                            }
+                        }
+                        result = new DistributionSetTagAssignmentResult(ids.size() - toBeChangedDSs.size(),
+                                Collections.emptyList(),
+                                Collections.unmodifiableList(
+                                        toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
+                                distributionSetTag);
+                    } else {
+                        result = new DistributionSetTagAssignmentResult(ids.size() - toBeChangedDSs.size(),
+                                Collections.unmodifiableList(
+                                        toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
+                                Collections.emptyList(), distributionSetTag);
+                    }
+                    return result;
+                });
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public DistributionSet unassignTag(final long id, final long dsTagId) {
+        final JpaDistributionSet set = (JpaDistributionSet) getWithDetails(id)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, id));
+
+        final DistributionSetTag distributionSetTag = distributionSetTagManagement.get(dsTagId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));
+        set.removeTag(distributionSetTag);
+
+        final JpaDistributionSet result = distributionSetRepository.save(set);
+
+        // No reason to save the tag
+        entityManager.detach(distributionSetTag);
+        return result;
     }
 }
