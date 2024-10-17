@@ -194,7 +194,7 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         final List<Long> missing = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             while (true) {
-                final Long id = RND.nextLong();
+                final Long id = Math.abs(RND.nextLong());
                 if (!group.contains(id)) {
                     missing.add(id);
                     break;

@@ -399,6 +399,8 @@ public interface MgmtDistributionSetTagRestApi {
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                             "data volume restriction applies.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Not Found - e.g. a distribution set or tags are not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
@@ -475,8 +477,8 @@ public interface MgmtDistributionSetTagRestApi {
                     description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                             "data volume restriction applies.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Not Found - e.g. a distribution set or tags are not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
@@ -489,7 +491,7 @@ public interface MgmtDistributionSetTagRestApi {
             MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING)
     ResponseEntity<Void> unassignDistributionSets(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
-            List<Long> distributionsetId);
+            @RequestBody List<Long> distributionsetId);
 
    /**
      * Handles the POST request to toggle the assignment of distribution sets by

@@ -335,8 +335,7 @@ public interface MgmtTargetTagRestApi {
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
                     "changed (i.e. read-only) or data volume restriction applies."),
-            @ApiResponse(responseCode = "404", description = "Not Found - e.g. target tag not found. If targets not found - " +
-                    "the body contains a list of ",
+            @ApiResponse(responseCode = "404", description = "Not Found - e.g. target tag not found. Contains info about not found.",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
             @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
@@ -400,8 +399,8 @@ public interface MgmtTargetTagRestApi {
             @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
             @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
                     "changed (i.e. read-only) or data volume restriction applies."),
-            @ApiResponse(responseCode = "404", description = "Target not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Not Found - e.g. target tag not found. Contains info about not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
             @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
             @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +

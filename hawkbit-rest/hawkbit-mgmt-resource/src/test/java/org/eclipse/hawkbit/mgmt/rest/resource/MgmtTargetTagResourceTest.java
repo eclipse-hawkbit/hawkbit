@@ -319,7 +319,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final List<String> missing = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             while (true) {
-                final String id = String.valueOf(RND.nextLong());
+                final String id = String.valueOf(Math.abs(RND.nextLong()));
                 if (!targets.contains(id)) {
                     missing.add(id);
                     break;
