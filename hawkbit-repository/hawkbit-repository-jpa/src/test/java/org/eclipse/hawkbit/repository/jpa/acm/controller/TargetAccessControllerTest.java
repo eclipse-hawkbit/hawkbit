@@ -148,16 +148,20 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
         assertThat(targetManagement.findByRsqlAndTag(Pageable.unpaged(), "id==*", myTag.getId()).get()
                 .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId(), readOnlyTarget.getId());
 
-        // verify targetManagement#toggleTagAssignment on permitted target
+        // verify targetManagement#assignTag on permitted target
         assertThat(targetManagement
-                .toggleTagAssignment(Collections.singletonList(permittedTarget.getControllerId()), myTag.getName())
-                .getUnassigned()).isEqualTo(1);
+                .assignTag(Collections.singletonList(permittedTarget.getControllerId()), myTag.getId())
+                .size()).isEqualTo(1);
+        // verify targetManagement#unassignTag on permitted target
+        assertThat(targetManagement
+                .unassignTag(Collections.singletonList(permittedTarget.getControllerId()), myTag.getId())
+                .size()).isEqualTo(1);
         // verify targetManagement#assignTag on permitted target
         assertThat(
                 targetManagement.assignTag(Collections.singletonList(permittedTarget.getControllerId()), myTag.getId()))
                 .hasSize(1);
         // verify targetManagement#unAssignTag on permitted target
-        assertThat(targetManagement.unassignTag(permittedTarget.getControllerId(), myTag.getId()).getControllerId())
+        assertThat(targetManagement.unassignTag(List.of(permittedTarget.getControllerId()), myTag.getId()).get(0).getControllerId())
                 .isEqualTo(permittedTarget.getControllerId());
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
@@ -177,15 +181,15 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
         assertThatThrownBy(() -> {
-            targetManagement.unassignTag(readOnlyTarget.getControllerId(), myTag.getId());
+            targetManagement.unassignTag(List.of(readOnlyTarget.getControllerId()), myTag.getId());
         }).as("Missing update permissions for target to toggle tag assignment.")
                 .isInstanceOf(InsufficientPermissionException.class);
 
         // assignment is denied for hiddenTarget since it's hidden
         assertThatThrownBy(() -> {
             targetManagement
-                    .toggleTagAssignment(Collections.singletonList(hiddenTarget.getControllerId()), myTag.getName())
-                    .getUnassigned();
+                    .assignTag(Collections.singletonList(hiddenTarget.getControllerId()), myTag.getId())
+                    .size();
         }).as("Missing update permissions for target to toggle tag assignment.")
                 .isInstanceOf(EntityNotFoundException.class);
 

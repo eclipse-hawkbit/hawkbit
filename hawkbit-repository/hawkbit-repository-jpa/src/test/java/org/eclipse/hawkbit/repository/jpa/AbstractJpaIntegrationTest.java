@@ -10,8 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +27,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
@@ -46,7 +43,6 @@ import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TenantMetaDataRepository;
-import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -159,9 +155,13 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
                 .withMessageContaining(NOT_EXIST_ID).withMessageContaining(objectType);
     }
 
-    protected TargetTagAssignmentResult toggleTagAssignment(final Collection<Target> targets, final TargetTag tag) {
-        return targetManagement.toggleTagAssignment(
-                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getName());
+    protected List<Target> assignTag(final Collection<Target> targets, final TargetTag tag) {
+        return targetManagement.assignTag(
+                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
+    }
+    protected List<Target> unassignTag(final Collection<Target> targets, final TargetTag tag) {
+        return targetManagement.unassignTag(
+                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
     }
 
     public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<DistributionSet> sets,

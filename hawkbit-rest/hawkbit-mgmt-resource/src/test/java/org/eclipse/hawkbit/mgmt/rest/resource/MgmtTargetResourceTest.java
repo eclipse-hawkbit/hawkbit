@@ -1912,7 +1912,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final List<TargetTag> targetTags = testdataFactory.createTargetTags(2, "tag_getControllerTagReturnsTagWithOk");
         final List<String> tagNames = new ArrayList<>();
         for (final TargetTag targetTag : targetTags) {
-            targetManagement.toggleTagAssignment(Collections.singletonList(target.getControllerId()), targetTag.getName());
+            targetManagement.assignTag(Collections.singletonList(target.getControllerId()), targetTag.getId());
             tagNames.add(targetTag.getName());
         }
 
