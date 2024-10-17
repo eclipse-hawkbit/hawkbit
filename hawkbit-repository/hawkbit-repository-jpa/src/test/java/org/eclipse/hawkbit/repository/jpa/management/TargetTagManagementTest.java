@@ -203,7 +203,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
                 .matches(e -> {
                     if (e instanceof EntityNotFoundException enfe) {
                         if (enfe.getInfo().get(EntityNotFoundException.TYPE).equals(Target.class.getSimpleName())) {
-                            if (enfe.getInfo().get(EntityNotFoundException.TYPE) instanceof Collection entityId) {
+                            if (enfe.getInfo().get(EntityNotFoundException.ENTITY_ID) instanceof Collection entityId) {
                                 return entityId.stream().sorted().toList().equals(missing);
                             }
                         }
