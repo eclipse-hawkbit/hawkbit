@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Tag;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.jupiter.api.Test;
@@ -39,10 +40,10 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
+import org.springframework.data.domain.Pageable;
 
 /**
  * {@link DistributionSetTagManagement} tests.
- *
  */
 @Feature("Component Tests - Repository")
 @Story("DistributionSet Tag Management")
@@ -64,10 +65,8 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
             @Expect(type = TargetTagUpdatedEvent.class, count = 0) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         verifyThrownExceptionBy(() -> distributionSetTagManagement.delete(NOT_EXIST_ID), "DistributionSetTag");
-
         verifyThrownExceptionBy(() -> distributionSetTagManagement.findByDistributionSet(PAGE, NOT_EXIST_IDL),
                 "DistributionSet");
-
         verifyThrownExceptionBy(() -> distributionSetTagManagement.update(entityFactory.tag().update(NOT_EXIST_IDL)),
                 "DistributionSetTag");
     }
@@ -160,18 +159,24 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         assertThat(result).size().isEqualTo(20);
         assertThat(result).containsAll(distributionSetManagement
                 .get(groupA.stream().map(DistributionSet::getId).collect(Collectors.toList())));
+        assertThat(distributionSetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent().stream().map(DistributionSet::getId).sorted().toList())
+                .isEqualTo(groupA.stream().map(DistributionSet::getId).sorted().toList());
 
+        final Collection<DistributionSet> groupAB = concat(groupA, groupB);
         // toggle A+B -> A is still assigned and B is assigned as well
-        result = assignTag(concat(groupA, groupB), tag);
+        result = assignTag(groupAB, tag);
         assertThat(result).size().isEqualTo(40);
         assertThat(result).containsAll(distributionSetManagement
-                .get(concat(groupA, groupB).stream().map(DistributionSet::getId).collect(Collectors.toList())));
+                .get(groupAB.stream().map(DistributionSet::getId).collect(Collectors.toList())));
+        assertThat(distributionSetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent().stream().map(DistributionSet::getId).sorted().toList())
+                .isEqualTo(groupAB.stream().map(DistributionSet::getId).sorted().toList());
 
         // toggle A+B -> both unassigned
         result = unassignTag(concat(groupA, groupB), tag);
         assertThat(result).size().isEqualTo(40);
         assertThat(result).containsAll(distributionSetManagement
                 .get(concat(groupB, groupA).stream().map(DistributionSet::getId).collect(Collectors.toList())));
+        assertThat(distributionSetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent()).isEmpty();
     }
 
     @Test
@@ -239,16 +244,12 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Tests the name update of a target tag.")
     public void updateDistributionSetTag() {
-
         // create test data
         final List<DistributionSetTag> tags = createDsSetsWithTags();
-
         // change data
         final DistributionSetTag savedAssigned = tags.iterator().next();
-
         // persist
         distributionSetTagManagement.update(entityFactory.tag().update(savedAssigned.getId()).name("test123"));
-
         // check data
         assertThat(distributionSetTagManagement.findAll(PAGE).getContent()).as("Wrong size of ds tags")
                 .hasSize(tags.size());
@@ -271,12 +272,10 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
     @Description("Ensures that a created tags are persisted in the repository as defined.")
     public void createDistributionSetTags() {
         final List<DistributionSetTag> tags = createDsSetsWithTags();
-
         assertThat(distributionSetTagRepository.findAll()).as("Wrong size of tags created").hasSize(tags.size());
     }
 
     private List<DistributionSetTag> createDsSetsWithTags() {
-
         final Collection<DistributionSet> sets = testdataFactory.createDistributionSets(20);
         final Iterable<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(20);
 
@@ -290,10 +289,9 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
     }
 
     @SafeVarargs
-    private final <T> Collection<T> concat(final Collection<T>... targets) {
+    private <T> Collection<T> concat(final Collection<T>... targets) {
         final List<T> result = new ArrayList<>();
         Arrays.asList(targets).forEach(result::addAll);
         return result;
     }
-
 }

@@ -97,9 +97,7 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
 /**
- * Test class testing the functionality of triggering a deployment of
- * {@link DistributionSet}s to {@link Target}s.
- *
+ * Test class testing the functionality of triggering a deployment of {@link DistributionSet}s to {@link Target}s.
  */
 @Feature("Component Tests - Repository")
 @Story("Deployment Management")
@@ -109,8 +107,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     private static final boolean STATE_INACTIVE = false;
 
     @Test
-    @Description("Verifies that management get access react as specified on calls for non existing entities by means "
-            + "of Optional not present.")
+    @Description("Verifies that management get access react as specified on calls for non existing entities by means " +
+            "of Optional not present.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(deploymentManagement.findAction(1234L)).isNotPresent();
@@ -118,8 +116,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that management queries react as specified on calls for non existing entities "
-            + " by means of throwing EntityNotFoundException.")
+    @Description("Verifies that management queries react as specified on calls for non existing entities " +
+            " by means of throwing EntityNotFoundException.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         final Target target = testdataFactory.createTarget();
@@ -146,7 +144,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Description("Test verifies that the repistory retrieves the action including all defined (lazy) details.")
     void findActionWithLazyDetails() {
         final DistributionSet testDs = testdataFactory.createDistributionSet("TestDs", "1.0",
-                new ArrayList<DistributionSetTag>());
+                new ArrayList<>());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
@@ -163,7 +161,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Description("Test verifies that actions of a target are found by using id-based search.")
     void findActionByTargetId() {
         final DistributionSet testDs = testdataFactory.createDistributionSet("TestDs", "1.0",
-                new ArrayList<DistributionSetTag>());
+                new ArrayList<>());
         final List<Target> testTarget = testdataFactory.createTargets(1);
         // one action with one action status is generated
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
@@ -247,8 +245,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final String expectedMsg = actionStatusWithMessage.getMessages().get(0);
 
         // act
-        final Page<String> messages = deploymentManagement.findMessagesByActionStatusId(PAGE,
-                actionStatusWithMessage.getId());
+        final Page<String> messages = deploymentManagement.findMessagesByActionStatusId(PAGE, actionStatusWithMessage.getId());
 
         assertThat(actionStates.getTotalElements()).as("Two action-states in total").isEqualTo(2L);
         assertThat(messages.getContent().get(0)).as("Message of action-status").isEqualTo(expectedMsg);
