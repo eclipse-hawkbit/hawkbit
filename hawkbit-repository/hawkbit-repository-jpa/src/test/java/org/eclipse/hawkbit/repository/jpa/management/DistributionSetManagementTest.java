@@ -138,10 +138,10 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 "DistributionSetTag");
 
         verifyThrownExceptionBy(
-                () -> distributionSetManagement.toggleTagAssignment(singletonList(NOT_EXIST_IDL), dsTag.getName()),
+                () -> distributionSetManagement.assignTag(singletonList(NOT_EXIST_IDL), dsTag.getId()),
                 "DistributionSet");
         verifyThrownExceptionBy(
-                () -> distributionSetManagement.toggleTagAssignment(singletonList(set.getId()), NOT_EXIST_ID),
+                () -> distributionSetManagement.assignTag(singletonList(set.getId()), Long.parseLong(NOT_EXIST_ID)),
                 "DistributionSetTag");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.unassignTag(set.getId(), NOT_EXIST_IDL),
@@ -741,11 +741,11 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.delete(dsDeleted.getId());
         dsDeleted = getOrThrow(distributionSetManagement.get(dsDeleted.getId()));
 
-        dsGroup1 = toggleTagAssignment(dsGroup1, dsTagA).getAssignedEntity();
+        dsGroup1 = assignTag(dsGroup1, dsTagA);
         dsTagA = getOrThrow(distributionSetTagRepository.findByNameEquals(dsTagA.getName()));
-        dsGroup1 = toggleTagAssignment(dsGroup1, dsTagB).getAssignedEntity();
+        dsGroup1 = assignTag(dsGroup1, dsTagB);
         dsTagA = getOrThrow(distributionSetTagRepository.findByNameEquals(dsTagA.getName()));
-        dsGroup2 = toggleTagAssignment(dsGroup2, dsTagA).getAssignedEntity();
+        dsGroup2 = assignTag(dsGroup2, dsTagA);
         dsTagA = getOrThrow(distributionSetTagRepository.findByNameEquals(dsTagA.getName()));
 
         final List<DistributionSet> allDistributionSets = Stream

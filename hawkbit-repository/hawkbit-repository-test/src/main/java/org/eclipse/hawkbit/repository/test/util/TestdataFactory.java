@@ -400,15 +400,10 @@ public class TestdataFactory {
      *
      * @return {@link DistributionSet} entity.
      */
-    public DistributionSet createDistributionSet(final String prefix, final String version,
-            final Collection<DistributionSetTag> tags) {
-
+    public DistributionSet createDistributionSet(final String prefix, final String version, final Collection<DistributionSetTag> tags) {
         final DistributionSet set = createDistributionSet(prefix, version, false);
-
-        tags.forEach(tag -> distributionSetManagement.toggleTagAssignment(Arrays.asList(set.getId()), tag.getName()));
-
+        tags.forEach(tag -> distributionSetManagement.assignTag(List.of(set.getId()), tag.getId()));
         return distributionSetManagement.get(set.getId()).get();
-
     }
 
     /**

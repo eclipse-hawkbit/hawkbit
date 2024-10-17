@@ -89,22 +89,22 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         final DistributionSetTag tagX = distributionSetTagManagement.create(entityFactory.tag().create().name("X"));
         final DistributionSetTag tagY = distributionSetTagManagement.create(entityFactory.tag().create().name("Y"));
 
-        toggleTagAssignment(dsAs, tagA);
-        toggleTagAssignment(dsBs, tagB);
-        toggleTagAssignment(dsCs, tagC);
+        assignTag(dsAs, tagA);
+        assignTag(dsBs, tagB);
+        assignTag(dsCs, tagC);
 
-        toggleTagAssignment(dsABs, distributionSetTagManagement.getByName(tagA.getName()).get());
-        toggleTagAssignment(dsABs, distributionSetTagManagement.getByName(tagB.getName()).get());
+        assignTag(dsABs, distributionSetTagManagement.getByName(tagA.getName()).get());
+        assignTag(dsABs, distributionSetTagManagement.getByName(tagB.getName()).get());
 
-        toggleTagAssignment(dsACs, distributionSetTagManagement.getByName(tagA.getName()).get());
-        toggleTagAssignment(dsACs, distributionSetTagManagement.getByName(tagC.getName()).get());
+        assignTag(dsACs, distributionSetTagManagement.getByName(tagA.getName()).get());
+        assignTag(dsACs, distributionSetTagManagement.getByName(tagC.getName()).get());
 
-        toggleTagAssignment(dsBCs, distributionSetTagManagement.getByName(tagB.getName()).get());
-        toggleTagAssignment(dsBCs, distributionSetTagManagement.getByName(tagC.getName()).get());
+        assignTag(dsBCs, distributionSetTagManagement.getByName(tagB.getName()).get());
+        assignTag(dsBCs, distributionSetTagManagement.getByName(tagC.getName()).get());
 
-        toggleTagAssignment(dsABCs, distributionSetTagManagement.getByName(tagA.getName()).get());
-        toggleTagAssignment(dsABCs, distributionSetTagManagement.getByName(tagB.getName()).get());
-        toggleTagAssignment(dsABCs, distributionSetTagManagement.getByName(tagC.getName()).get());
+        assignTag(dsABCs, distributionSetTagManagement.getByName(tagA.getName()).get());
+        assignTag(dsABCs, distributionSetTagManagement.getByName(tagB.getName()).get());
+        assignTag(dsABCs, distributionSetTagManagement.getByName(tagC.getName()).get());
 
         // search for not deleted
         final DistributionSetFilter.DistributionSetFilterBuilder distributionSetFilterBuilder = getDistributionSetFilterBuilder()
@@ -156,35 +156,22 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
                 .create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
 
         // toggle A only -> A is now assigned
-        DistributionSetTagAssignmentResult result = toggleTagAssignment(groupA, tag);
-        assertThat(result.getAlreadyAssigned()).isZero();
-        assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedEntity()).containsAll(distributionSetManagement
+        List<DistributionSet> result = assignTag(groupA, tag);
+        assertThat(result).size().isEqualTo(20);
+        assertThat(result).containsAll(distributionSetManagement
                 .get(groupA.stream().map(DistributionSet::getId).collect(Collectors.toList())));
-        assertThat(result.getUnassigned()).isZero();
-        assertThat(result.getUnassignedEntity()).isEmpty();
-        assertThat(result.getDistributionSetTag()).isEqualTo(tag);
 
         // toggle A+B -> A is still assigned and B is assigned as well
-        result = toggleTagAssignment(concat(groupA, groupB), tag);
-        assertThat(result.getAlreadyAssigned()).isEqualTo(20);
-        assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedEntity()).containsAll(distributionSetManagement
-                .get(groupB.stream().map(DistributionSet::getId).collect(Collectors.toList())));
-        assertThat(result.getUnassigned()).isZero();
-        assertThat(result.getUnassignedEntity()).isEmpty();
-        assertThat(result.getDistributionSetTag()).isEqualTo(tag);
+        result = assignTag(concat(groupA, groupB), tag);
+        assertThat(result).size().isEqualTo(40);
+        assertThat(result).containsAll(distributionSetManagement
+                .get(concat(groupA, groupB).stream().map(DistributionSet::getId).collect(Collectors.toList())));
 
         // toggle A+B -> both unassigned
-        result = toggleTagAssignment(concat(groupA, groupB), tag);
-        assertThat(result.getAlreadyAssigned()).isZero();
-        assertThat(result.getAssigned()).isZero();
-        assertThat(result.getAssignedEntity()).isEmpty();
-        assertThat(result.getUnassigned()).isEqualTo(40);
-        assertThat(result.getUnassignedEntity()).containsAll(distributionSetManagement
+        result = unassignTag(concat(groupA, groupB), tag);
+        assertThat(result).size().isEqualTo(40);
+        assertThat(result).containsAll(distributionSetManagement
                 .get(concat(groupB, groupA).stream().map(DistributionSet::getId).collect(Collectors.toList())));
-        assertThat(result.getDistributionSetTag()).isEqualTo(tag);
-
     }
 
     @Test
@@ -293,7 +280,7 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         final Collection<DistributionSet> sets = testdataFactory.createDistributionSets(20);
         final Iterable<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(20);
 
-        tags.forEach(tag -> toggleTagAssignment(sets, tag));
+        tags.forEach(tag -> assignTag(sets, tag));
 
         return distributionSetTagManagement.findAll(PAGE).getContent();
     }

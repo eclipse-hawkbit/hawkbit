@@ -168,7 +168,7 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
         // No exception has been thrown - because no real change is done
 //        assertThatThrownBy(() -> {
 //            targetManagement
-//                    .toggleTagAssignment(List.of(readOnlyTarget.getControllerId()), myTag.getName())
+//                    .assignTag(List.of(readOnlyTarget.getControllerId()), myTag.getId())
 //                    .getUnassigned();
 //        }).as("Missing update permissions for target to toggle tag assignment.")
 //                .isInstanceOf(InsufficientPermissionException.class);

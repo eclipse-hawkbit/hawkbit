@@ -95,8 +95,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
         final DistributionSet distributionSet1 = testdataFactory.createDistributionSet();
         final DistributionSet distributionSet2 = testdataFactory.createDistributionSet();
-        distributionSetManagement.toggleTagAssignment(List.of(distributionSet1.getId(), distributionSet2.getId()), tag1.getName());
-        distributionSetManagement.toggleTagAssignment(List.of(distributionSet1.getId()), tag2.getName());
+        distributionSetManagement.assignTag(List.of(distributionSet1.getId(), distributionSet2.getId()), tag1.getId());
+        distributionSetManagement.assignTag(List.of(distributionSet1.getId()), tag2.getId());
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING)
                 .queryParam(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "distributionset.id==" + distributionSet1.getId())
@@ -132,8 +132,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
         final DistributionSet distributionSet1 = testdataFactory.createDistributionSet();
         final DistributionSet distributionSet2 = testdataFactory.createDistributionSet();
-        distributionSetManagement.toggleTagAssignment(List.of(distributionSet1.getId(), distributionSet2.getId()), tag1.getName());
-        distributionSetManagement.toggleTagAssignment(List.of(distributionSet1.getId()), tag2.getName());
+        distributionSetManagement.assignTag(List.of(distributionSet1.getId(), distributionSet2.getId()), tag1.getId());
+        distributionSetManagement.assignTag(List.of(distributionSet1.getId()), tag2.getId());
 
         // pass here q directly as a pure string because .queryParam method delimiters the parameters in q with ,
         // which is logical OR, we want AND here
@@ -243,8 +243,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final int setsAssigned = 5;
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
-        distributionSetManagement.toggleTagAssignment(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()),
-                tag.getName());
+        distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -263,8 +262,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         final int setsAssigned = 5;
         final int limitSize = 1;
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
-        distributionSetManagement.toggleTagAssignment(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()),
-                tag.getName());
+        distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                 .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
@@ -286,8 +284,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         final int expectedSize = setsAssigned - offsetParam;
 
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
-        distributionSetManagement.toggleTagAssignment(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()),
-                tag.getName());
+        distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                 .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
@@ -380,8 +377,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         final DistributionSet assigned = sets.get(0);
         final DistributionSet unassigned = sets.get(1);
 
-        distributionSetManagement.toggleTagAssignment(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()),
-                tag.getName());
+        distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()), tag.getId());
 
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/"
                 + unassigned.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
