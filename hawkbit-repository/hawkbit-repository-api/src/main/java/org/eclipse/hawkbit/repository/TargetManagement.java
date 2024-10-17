@@ -52,6 +52,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface TargetManagement {
 
+    enum OnNotFoundPolicy {
+        FAIL, // default
+        TAG_AND_SUCCESS,
+        TAG_AND_ERROR
+    }
+
     /**
      * Counts number of targets with the given distribution set assigned.
      *
@@ -668,11 +674,37 @@ public interface TargetManagement {
      *
      * @param controllerIds to assign for
      * @param targetTagId to assign
+     * @param onNotFoundPolicy what to do if there are targets that are not found
      * @return list of assigned targets
      * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId);
+    List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId, final OnNotFoundPolicy onNotFoundPolicy);
+
+    /**
+     * Assign a {@link TargetTag} assignment to given {@link Target}s.
+     *
+     * @param controllerIds to assign for
+     * @param targetTagId to assign
+     * @return list of assigned targets
+     * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    default List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId) {
+        return assignTag(controllerIds, targetTagId, OnNotFoundPolicy.FAIL);
+    }
+
+    /**
+     * Un-assign a {@link TargetTag} assignment to given {@link Target}s.
+     *
+     * @param controllerIds to un-assign for
+     * @param targetTagId to un-assign
+     * @param onNotFoundPolicy what to do if there are targets that are not found
+     * @return list of unassigned targets
+     * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    List<Target> unassignTag(@NotEmpty Collection<String> controllerIds, long targetTagId, final OnNotFoundPolicy onNotFoundPolicy);
 
     /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}s.
@@ -683,7 +715,9 @@ public interface TargetManagement {
      * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    List<Target> unassignTag(@NotEmpty Collection<String> controllerIds, long targetTagId);
+    default List<Target> unassignTag(@NotEmpty Collection<String> controllerIds, long targetTagId) {
+        return unassignTag(controllerIds, targetTagId, OnNotFoundPolicy.FAIL);
+    }
 
     /**
      * Un-assign a {@link TargetType} assignment to given {@link Target}.
@@ -978,7 +1012,7 @@ public interface TargetManagement {
     /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}.
      *
-     * @deprecated since 0.6.0 - use {@link #unassignTag(List, long)} instead
+     * @deprecated since 0.6.0 - use {@link #unassigнnTag(List, long)} instead
      * @param controllerId to un-assign for
      * @param targetTagId to un-assign
      * @return the unassigned target or <null> if no target is unassigned
