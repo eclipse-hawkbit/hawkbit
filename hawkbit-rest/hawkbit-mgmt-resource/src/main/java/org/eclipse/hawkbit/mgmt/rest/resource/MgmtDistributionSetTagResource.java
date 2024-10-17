@@ -223,7 +223,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
 
         final DistributionSetTagAssignmentResult assigmentResult = this.distributionSetManagement
-                .assignTag(findDistributionSetIds(assignedDSRequestBodies), tag.getName());
+                .toggleTagAssignment(findDistributionSetIds(assignedDSRequestBodies), tag.getName());
 
         final MgmtDistributionSetTagAssigmentResult tagAssigmentResultRest = new MgmtDistributionSetTagAssigmentResult();
         tagAssigmentResultRest.setAssignedDistributionSets(
