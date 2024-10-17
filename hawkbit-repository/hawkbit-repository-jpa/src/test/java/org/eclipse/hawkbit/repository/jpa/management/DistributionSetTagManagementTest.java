@@ -11,11 +11,14 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,6 +28,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpda
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
@@ -145,8 +149,7 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
     }
 
     @Test
-    @Description("Verifies the toogle mechanism by means on assigning tag if at least on DS in the list does not have"
-            + "the tag yet. Unassign if all of them have the tag already.")
+    @Description("Verifies assign/unassign.")
     public void assignAndUnassignDistributionSetTags() {
         final Collection<DistributionSet> groupA = testdataFactory.createDistributionSets(20);
         final Collection<DistributionSet> groupB = testdataFactory.createDistributionSets("unassigned", 20);
@@ -177,6 +180,40 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         assertThat(result).containsAll(distributionSetManagement
                 .get(concat(groupB, groupA).stream().map(DistributionSet::getId).collect(Collectors.toList())));
         assertThat(distributionSetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent()).isEmpty();
+    }
+
+    private static final Random RND = new Random();
+    @Test
+    @Description("Verifies that tagging of set containing missing DS throws meaningful and correct exception.")
+    public void failOnMissingDs() {
+        final Collection<Long> group = testdataFactory.createDistributionSets(5).stream()
+                .map(DistributionSet::getId)
+                .collect(Collectors.toList());
+        final DistributionSetTag tag = distributionSetTagManagement
+                .create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
+        final List<Long> missing = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            while (true) {
+                final Long id = RND.nextLong();
+                if (!group.contains(id)) {
+                    missing.add(id);
+                    break;
+                }
+            }
+        }
+        Collections.sort(missing);
+        final Collection<Long> withMissing = concat(group, missing);
+        assertThatThrownBy(() -> distributionSetManagement.assignTag(withMissing, tag.getId()))
+                .matches(e -> {
+                    if (e instanceof EntityNotFoundException enfe) {
+                        if (enfe.getType().equals(DistributionSet.class)) {
+                            if (enfe.getEntityId() instanceof Collection entityId) {
+                                return entityId.stream().sorted().toList().equals(missing);
+                            }
+                        }
+                    }
+                    return false;
+                });
     }
 
     @Test

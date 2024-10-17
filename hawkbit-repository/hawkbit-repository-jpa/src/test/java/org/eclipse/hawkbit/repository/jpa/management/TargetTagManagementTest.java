@@ -11,11 +11,14 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import jakarta.validation.ConstraintViolationException;
@@ -26,8 +29,11 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpda
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -140,8 +146,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies the toogle mechanism by means on assigning tag if at least on target in the list does not have"
-            + "the tag yet. Unassign if all of them have the tag already.")
+    @Description("Verifies assign/unassign.")
     void assignAndUnassignTargetTags() {
         final List<Target> groupA = testdataFactory.createTargets(20);
         final List<Target> groupB = testdataFactory.createTargets(20, "groupb", "groupb");
