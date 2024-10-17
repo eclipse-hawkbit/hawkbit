@@ -178,6 +178,40 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent()).isEmpty();
     }
 
+    private static final Random RND = new Random();
+    @Test
+    @Description("Verifies that tagging of set containing missing DS throws meaningful and correct exception.")
+    public void failOnMissingDs() {
+        final Collection<String> group = testdataFactory.createTargets(5).stream()
+                .map(Target::getControllerId)
+                .collect(Collectors.toList());
+        final TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
+
+        final List<String> missing = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            while (true) {
+                final String id = String.valueOf(RND.nextLong());
+                if (!group.contains(id)) {
+                    missing.add(id);
+                    break;
+                }
+            }
+        }
+        Collections.sort(missing);
+        final Collection<String> withMissing = concat(group, missing);
+        assertThatThrownBy(() -> targetManagement.assignTag(withMissing, tag.getId()))
+                .matches(e -> {
+                    if (e instanceof EntityNotFoundException enfe) {
+                        if (enfe.getType().equals(Target.class)) {
+                            if (enfe.getEntityId() instanceof Collection entityId) {
+                                return entityId.stream().sorted().toList().equals(missing);
+                            }
+                        }
+                    }
+                    return false;
+                });
+    }
+
     @SafeVarargs
     private <T> Collection<T> concat(final Collection<T>... targets) {
         final List<T> result = new ArrayList<>();
