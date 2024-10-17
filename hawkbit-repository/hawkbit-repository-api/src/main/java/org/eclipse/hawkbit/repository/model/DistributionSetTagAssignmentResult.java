@@ -16,7 +16,9 @@ import java.util.List;
 /**
  * Result object for {@link DistributionSetTag} assignments.
  *
+ * @deprecated since 0.6.0 with toggle deprecation
  */
+@Deprecated(forRemoval = true)
 @Data
 public class DistributionSetTagAssignmentResult extends AbstractAssignmentResult<DistributionSet> {
 
