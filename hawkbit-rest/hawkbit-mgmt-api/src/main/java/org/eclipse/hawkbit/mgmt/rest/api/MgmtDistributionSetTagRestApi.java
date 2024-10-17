@@ -494,6 +494,7 @@ public interface MgmtDistributionSetTagRestApi {
      * Handles the POST request to toggle the assignment of distribution sets by
      * the given tag id.
      *
+     * @deprecated since 0.6.0 with toggle assigment deprecation
      * @param distributionsetTagId
      *            the ID of the distribution set tag to retrieve
      * @param assignedDSRequestBodies
