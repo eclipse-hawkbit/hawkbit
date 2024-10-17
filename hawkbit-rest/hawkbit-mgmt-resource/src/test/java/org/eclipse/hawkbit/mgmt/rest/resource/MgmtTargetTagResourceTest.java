@@ -30,13 +30,13 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -344,6 +344,82 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                     Collections.sort(notFound);
                     assertThat(notFound).isEqualTo(missing);
                 });
+        assertThat(targetManagement.findByTag(PAGE, tag.getId()).getContent()).isEmpty();
+    }
+
+    @Test
+    @Description("Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({
+            @Expect(type = TargetTagCreatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 2)})
+    public void assignTargetsNotFoundTagAndFail() throws Exception {
+        final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
+        final List<String> targets = testdataFactory.createTargets(2).stream().map(Target::getControllerId).toList();
+        final List<String> missing = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            while (true) {
+                final String id = String.valueOf(Math.abs(RND.nextLong()));
+                if (!targets.contains(id)) {
+                    missing.add(id);
+                    break;
+                }
+            }
+        }
+        Collections.sort(missing);
+        final List<String> withMissing = new ArrayList<>(targets);
+        withMissing.addAll(missing);
+
+        mvc.perform(put(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                        .param("onNotFoundPolicy", MgmtTargetTagRestApi.OnNotFoundPolicy.ON_WHAT_FOUND_AND_FAIL.name())
+                        .content(JsonBuilder.toArray(withMissing))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound())
+                .andExpect(handler -> {
+                    final ExceptionInfo exceptionInfo = ResourceUtility.convertException(handler.getResponse().getContentAsString());
+                    final Map<String, Object> info = exceptionInfo.getInfo();
+                    assertThat(info).isNotNull();
+                    assertThat(info.get(EntityNotFoundException.TYPE)).isEqualTo(Target.class.getSimpleName());
+                    final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
+                    Collections.sort(notFound);
+                    assertThat(notFound).isEqualTo(missing);
+                });
+        assertThat(targetManagement.findByTag(PAGE, tag.getId()).getContent().stream().map(Target::getControllerId).sorted().toList())
+                .isEqualTo(targets.stream().sorted().toList());
+    }
+
+    @Test
+    @Description("Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({
+            @Expect(type = TargetTagCreatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 2)})
+    public void assignTargetsNotFoundTagAndSuccess() throws Exception {
+        final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
+        final List<String> targets = testdataFactory.createTargets(2).stream().map(Target::getControllerId).toList();
+        final List<String> missing = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            while (true) {
+                final String id = String.valueOf(Math.abs(RND.nextLong()));
+                if (!targets.contains(id)) {
+                    missing.add(id);
+                    break;
+                }
+            }
+        }
+        Collections.sort(missing);
+        final List<String> withMissing = new ArrayList<>(targets);
+        withMissing.addAll(missing);
+
+        mvc.perform(put(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                        .param("onNotFoundPolicy", MgmtTargetTagRestApi.OnNotFoundPolicy.ON_WHAT_FOUND_AND_SUCCESS.name())
+                        .content(JsonBuilder.toArray(withMissing))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+        assertThat(targetManagement.findByTag(PAGE, tag.getId()).getContent().stream().map(Target::getControllerId).sorted().toList())
+                .isEqualTo(targets.stream().sorted().toList());
     }
 
     @Test
@@ -392,6 +468,126 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
         assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
                 .containsOnly(assigned.getControllerId());
+    }
+
+    @Test
+    @Description("Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({
+            @Expect(type = TargetTagCreatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 2)})
+    public void unassignTargetsNotFound() throws Exception {
+        final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
+        final List<String> targets = testdataFactory.createTargets(2).stream().map(Target::getControllerId).toList();
+        final List<String> missing = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            while (true) {
+                final String id = String.valueOf(Math.abs(RND.nextLong()));
+                if (!targets.contains(id)) {
+                    missing.add(id);
+                    break;
+                }
+            }
+        }
+        Collections.sort(missing);
+        final List<String> withMissing = new ArrayList<>(targets);
+        withMissing.addAll(missing);
+
+        targetManagement.assignTag(targets, tag.getId());
+
+        mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                        .content(JsonBuilder.toArray(withMissing))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound())
+                .andExpect(handler -> {
+                    final ExceptionInfo exceptionInfo = ResourceUtility.convertException(handler.getResponse().getContentAsString());
+                    final Map<String, Object> info = exceptionInfo.getInfo();
+                    assertThat(info).isNotNull();
+                    assertThat(info.get(EntityNotFoundException.TYPE)).isEqualTo(Target.class.getSimpleName());
+                    final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
+                    Collections.sort(notFound);
+                    assertThat(notFound).isEqualTo(missing);
+                });
+        assertThat(targetManagement.findByTag(PAGE, tag.getId()).getContent().stream().map(Target::getControllerId).sorted().toList())
+                .isEqualTo(targets.stream().sorted().toList());
+    }
+
+    @Test
+    @Description("Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({
+            @Expect(type = TargetTagCreatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 4)})
+    public void unassignTargetsNotFoundUntagAndFail() throws Exception {
+        final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
+        final List<String> targets = testdataFactory.createTargets(2).stream().map(Target::getControllerId).toList();
+        final List<String> missing = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            while (true) {
+                final String id = String.valueOf(Math.abs(RND.nextLong()));
+                if (!targets.contains(id)) {
+                    missing.add(id);
+                    break;
+                }
+            }
+        }
+        Collections.sort(missing);
+        final List<String> withMissing = new ArrayList<>(targets);
+        withMissing.addAll(missing);
+
+        targetManagement.assignTag(targets, tag.getId());
+
+        mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                        .param("onNotFoundPolicy", MgmtTargetTagRestApi.OnNotFoundPolicy.ON_WHAT_FOUND_AND_FAIL.name())
+                        .content(JsonBuilder.toArray(withMissing))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound())
+                .andExpect(handler -> {
+                    final ExceptionInfo exceptionInfo = ResourceUtility.convertException(handler.getResponse().getContentAsString());
+                    final Map<String, Object> info = exceptionInfo.getInfo();
+                    assertThat(info).isNotNull();
+                    assertThat(info.get(EntityNotFoundException.TYPE)).isEqualTo(Target.class.getSimpleName());
+                    final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
+                    Collections.sort(notFound);
+                    assertThat(notFound).isEqualTo(missing);
+                });
+        assertThat(targetManagement.findByTag(PAGE, tag.getId()).getContent()).isEmpty();
+    }
+
+    @Test
+    @Description("Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({
+            @Expect(type = TargetTagCreatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 4)})
+    public void unassignTargetsNotFoundUntagAndSuccess() throws Exception {
+        final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
+        final List<String> targets = testdataFactory.createTargets(2).stream().map(Target::getControllerId).toList();
+        final List<String> missing = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            while (true) {
+                final String id = String.valueOf(Math.abs(RND.nextLong()));
+                if (!targets.contains(id)) {
+                    missing.add(id);
+                    break;
+                }
+            }
+        }
+        Collections.sort(missing);
+        final List<String> withMissing = new ArrayList<>(targets);
+        withMissing.addAll(missing);
+
+        targetManagement.assignTag(targets, tag.getId());
+
+        mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                        .param("onNotFoundPolicy", MgmtTargetTagRestApi.OnNotFoundPolicy.ON_WHAT_FOUND_AND_SUCCESS.name())
+                        .content(JsonBuilder.toArray(withMissing))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+        assertThat(targetManagement.findByTag(PAGE, tag.getId()).getContent()).isEmpty();
     }
 
     // DEPRECATED scenarios

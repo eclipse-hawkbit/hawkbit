@@ -42,6 +42,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Tag(name = "Target Tags", description = "REST API for Target Tag CRUD operations.")
 public interface MgmtTargetTagRestApi {
 
+    enum OnNotFoundPolicy {
+        FAIL, // default
+        ON_WHAT_FOUND_AND_FAIL,
+        ON_WHAT_FOUND_AND_SUCCESS
+    }
+
     /**
      * Handles the GET request of retrieving all target tags.
      *
@@ -351,6 +357,7 @@ public interface MgmtTargetTagRestApi {
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE } )
     ResponseEntity<Void> assignTargets(
             @PathVariable("targetTagId") Long targetTagId,
+            @RequestParam(value = "onNotFoundPolicy", required = false, defaultValue = "FAIL") OnNotFoundPolicy onNotFoundPolicy,
             @Schema(description = "List of controller ids to be assigned", example = "[\"controllerId1\", \"controllerId2\"]")
             @RequestBody List<String> controllerIds);
 
@@ -410,6 +417,7 @@ public interface MgmtTargetTagRestApi {
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> unassignTargets(
             @PathVariable("targetTagId") Long targetTagId,
+            @RequestParam(value = "onNotFoundPolicy", required = false, defaultValue = "FAIL") OnNotFoundPolicy onNotFoundPolicy,
             @Schema(description = "List of controller ids to be unassigned", example = "[\"controllerId1\", \"controllerId2\"]")
             @RequestBody List<String> controllerId);
 

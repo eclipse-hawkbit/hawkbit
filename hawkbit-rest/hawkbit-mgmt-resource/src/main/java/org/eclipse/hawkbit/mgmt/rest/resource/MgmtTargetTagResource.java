@@ -9,10 +9,11 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtAssignedTargetRequestBody;
@@ -186,14 +187,25 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> assignTargets(final Long targetTagId, final List<String> controllerIds) {
+    public ResponseEntity<Void> assignTargets(final Long targetTagId, final OnNotFoundPolicy onNotFoundPolicy, final List<String> controllerIds) {
         log.debug("Assign {} targets for target tag {}", controllerIds.size(), targetTagId);
-        this.targetManagement.assignTag(controllerIds, targetTagId);
+        if (onNotFoundPolicy == OnNotFoundPolicy.FAIL) {
+            this.targetManagement.assignTag(controllerIds, targetTagId);
+        } else {
+            final AtomicReference<Collection<String>> notFound = new AtomicReference<>();
+            this.targetManagement.assignTag(controllerIds, targetTagId, notFound::set);
+            if (notFound.get() != null) {
+                // has not found
+                if (onNotFoundPolicy == OnNotFoundPolicy.ON_WHAT_FOUND_AND_FAIL) {
+                    throw new EntityNotFoundException(Target.class, notFound.get());
+                } // else - success
+            }
+        }
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> unassignTarget(@PathVariable("targetTagId") final Long targetTagId,
+    public ResponseEntity<Void> unassignTarget(final Long targetTagId,
             @PathVariable("controllerId") final String controllerId) {
         log.debug("Unassign target {} for target tag {}", controllerId, targetTagId);
         this.targetManagement.unassignTag(controllerId, targetTagId);
@@ -201,9 +213,20 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> unassignTargets(final Long targetTagId, final List<String> controllerIds) {
+    public ResponseEntity<Void> unassignTargets(final Long targetTagId, final OnNotFoundPolicy onNotFoundPolicy, final List<String> controllerIds) {
         log.debug("Unassign {} targets for target tag {}", controllerIds.size(), targetTagId);
-        this.targetManagement.unassignTag(controllerIds, targetTagId);
+        if (onNotFoundPolicy == OnNotFoundPolicy.FAIL) {
+            this.targetManagement.unassignTag(controllerIds, targetTagId);
+        } else {
+            final AtomicReference<Collection<String>> notFound = new AtomicReference<>();
+            this.targetManagement.unassignTag(controllerIds, targetTagId, notFound::set);
+            if (notFound.get() != null) {
+                // has not found
+                if (onNotFoundPolicy == OnNotFoundPolicy.ON_WHAT_FOUND_AND_FAIL) {
+                    throw new EntityNotFoundException(Target.class, notFound.get());
+                } // else - success
+            }
+        }
         return ResponseEntity.ok().build();
     }
 

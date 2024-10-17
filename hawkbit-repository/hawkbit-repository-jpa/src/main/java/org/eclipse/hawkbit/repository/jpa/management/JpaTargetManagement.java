@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -533,8 +534,8 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<Target> assignTag(final Collection<String> controllerIds, final long targetTagId, final OnNotFoundPolicy onNotFoundPolicy) {
-        return updateTag(controllerIds, targetTagId, onNotFoundPolicy, (tag, target) -> {
+    public List<Target> assignTag(final Collection<String> controllerIds, final long targetTagId, final Consumer<Collection<String>> notFoundHandler) {
+        return updateTag(controllerIds, targetTagId, notFoundHandler, (tag, target) -> {
             if (target.getTags().contains(tag)) {
                 return target;
             } else {
@@ -547,8 +548,8 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<Target> unassignTag(final Collection<String> controllerIds, final long targetTagId,  final OnNotFoundPolicy onNotFoundPolicy) {
-        return updateTag(controllerIds, targetTagId, onNotFoundPolicy, (tag, target) -> {
+    public List<Target> unassignTag(final Collection<String> controllerIds, final long targetTagId, final Consumer<Collection<String>> notFoundHandler) {
+        return updateTag(controllerIds, targetTagId, notFoundHandler, (tag, target) -> {
             if (target.getTags().contains(tag)) {
                 target.removeTag(tag);
                 return targetRepository.save(target);
@@ -558,7 +559,7 @@ public class JpaTargetManagement implements TargetManagement {
         });
     }
     private List<Target> updateTag(
-            final Collection<String> controllerIds, final long targetTagId, final OnNotFoundPolicy notFoundPolicy,
+            final Collection<String> controllerIds, final long targetTagId, final Consumer<Collection<String>> notFoundHandler,
             final BiFunction<JpaTargetTag, JpaTarget, Target> updater) {
         final JpaTargetTag tag = targetTagRepository.findById(targetTagId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
@@ -568,25 +569,20 @@ public class JpaTargetManagement implements TargetManagement {
                         .orElseGet(Collections::emptyList) :
                 targetRepository
                         .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
-        final EntityNotFoundException notFoundException;
-        if (targets.size() < controllerIds.size() && notFoundPolicy != OnNotFoundPolicy.TAG_AND_SUCCESS) {
-            notFoundException = new EntityNotFoundException(Target.class, notFound(controllerIds, targets));
-            if (notFoundPolicy == OnNotFoundPolicy.FAIL) {
-                throw notFoundException;
+        if (targets.size() < controllerIds.size()) {
+            final Collection<String> notFound = notFound(controllerIds, targets);
+            if (notFoundHandler == null) {
+                throw new EntityNotFoundException(Target.class, notFound);
+            } else {
+                notFoundHandler.accept(notFound);
             }
-        } else {
-            notFoundException = null;
         }
+
         targetRepository.getAccessController()
                 .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, targets));
 
         try {
-            final List<Target> result = targets.stream().map(target -> updater.apply(tag, target)).toList();
-            if (notFoundException != null) { // if notFoundPolicy is NotFoundPolicy.TAG_AND_FAIL
-                throw notFoundException;
-            } else {
-                return result; // if all found or notFoundPolicy is NotFoundPolicy.TAG_AND_SUCCESS
-            }
+            return targets.stream().map(target -> updater.apply(tag, target)).toList();
         } finally {
             // No reason to save the tag
             entityManager.detach(tag);

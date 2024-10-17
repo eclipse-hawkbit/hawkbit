@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
@@ -48,15 +49,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Management service for {@link Target}s.
- *
  */
 public interface TargetManagement {
-
-    enum OnNotFoundPolicy {
-        FAIL, // default
-        TAG_AND_SUCCESS,
-        TAG_AND_ERROR
-    }
 
     /**
      * Counts number of targets with the given distribution set assigned.
@@ -674,12 +668,12 @@ public interface TargetManagement {
      *
      * @param controllerIds to assign for
      * @param targetTagId to assign
-     * @param onNotFoundPolicy what to do if there are targets that are not found
+     * @param notFoundHandler if not all targets found - if null - exception, otherwise tag what found and the handler is called with what's not found
      * @return list of assigned targets
      * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId, final OnNotFoundPolicy onNotFoundPolicy);
+    List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId, final Consumer<Collection<String>> notFoundHandler);
 
     /**
      * Assign a {@link TargetTag} assignment to given {@link Target}s.
@@ -691,7 +685,7 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     default List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId) {
-        return assignTag(controllerIds, targetTagId, OnNotFoundPolicy.FAIL);
+        return assignTag(controllerIds, targetTagId, null);
     }
 
     /**
@@ -699,12 +693,12 @@ public interface TargetManagement {
      *
      * @param controllerIds to un-assign for
      * @param targetTagId to un-assign
-     * @param onNotFoundPolicy what to do if there are targets that are not found
+     * @param notFoundHandler if not all targets found - if null - exception, otherwise un-tag what found and the handler is called with what's not found
      * @return list of unassigned targets
      * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    List<Target> unassignTag(@NotEmpty Collection<String> controllerIds, long targetTagId, final OnNotFoundPolicy onNotFoundPolicy);
+    List<Target> unassignTag(@NotEmpty Collection<String> controllerIds, long targetTagId, final Consumer<Collection<String>> notFoundHandler);
 
     /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}s.
@@ -716,7 +710,7 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     default List<Target> unassignTag(@NotEmpty Collection<String> controllerIds, long targetTagId) {
-        return unassignTag(controllerIds, targetTagId, OnNotFoundPolicy.FAIL);
+        return unassignTag(controllerIds, targetTagId, null);
     }
 
     /**
@@ -1012,7 +1006,7 @@ public interface TargetManagement {
     /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}.
      *
-     * @deprecated since 0.6.0 - use {@link #unassigнnTag(List, long)} instead
+     * @deprecated since 0.6.0 - use {@link #unassignTag(Collection, long)} (List, long)} instead
      * @param controllerId to un-assign for
      * @param targetTagId to un-assign
      * @return the unassigned target or <null> if no target is unassigned
