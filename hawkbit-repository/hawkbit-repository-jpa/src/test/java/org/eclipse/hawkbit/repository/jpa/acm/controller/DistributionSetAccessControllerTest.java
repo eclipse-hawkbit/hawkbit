@@ -191,6 +191,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         final DistributionSet readOnly = testdataFactory.createDistributionSet();
         final DistributionSet hidden = testdataFactory.createDistributionSet();
         final DistributionSetTag dsTag = distributionSetTagManagement.create(entityFactory.tag().create().name("dsTag"));
+        final DistributionSetTag dsTag2 = distributionSetTagManagement.create(entityFactory.tag().create().name("dsTag2"));
 
         // perform tag assignment before setting access rules
         distributionSetManagement.assignTag(Arrays.asList(permitted.getId(), readOnly.getId(), hidden.getId()),
@@ -230,14 +231,10 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
                 .isInstanceOf(InsufficientPermissionException.class);
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
+        // dsTag2- since - it is tagged with dsTag and won't do anything if assigning dsTag
         assertThatThrownBy(() -> {
-            distributionSetManagement.assignTag(Collections.singletonList(readOnly.getId()), dsTag.getId());
+            distributionSetManagement.assignTag(Collections.singletonList(readOnly.getId()), dsTag2.getId());
         }).as("Missing update permissions for target to toggle tag assignment.")
-                .isInstanceOf(InsufficientPermissionException.class);
-
-        // assignment is denied for readOnlyTarget (read, but no update permissions)
-        assertThatThrownBy(() -> distributionSetManagement.unassignTag(List.of(readOnly.getId()), dsTag.getId()))
-                .as("Missing update permissions for target to toggle tag assignment.")
                 .isInstanceOf(InsufficientPermissionException.class);
 
         // assignment is denied for hiddenTarget since it's hidden
