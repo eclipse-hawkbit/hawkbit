@@ -20,8 +20,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -30,13 +34,18 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreated
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONException;
@@ -424,6 +433,46 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
                 .containsOnly(assigned.getId());
+    }
+
+    private static final Random RND = new Random();
+    @Test
+    @Description("Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2)})
+    public void assignDistributionSetsNotFound() throws Exception {
+        final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
+        final List<Long> sets = testdataFactory.createDistributionSetsWithoutModules(2).stream().map(DistributionSet::getId).toList();
+        final List<Long> missing = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            while (true) {
+                final long id = Math.abs(RND.nextLong());
+                if (!sets.contains(id)) {
+                    missing.add(id);
+                    break;
+                }
+            }
+        }
+        Collections.sort(missing);
+        final List<Long> withMissing = new ArrayList<>(sets);
+        withMissing.addAll(missing);
+
+        mvc.perform(
+                        put(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                                .content(JsonBuilder.toArray(withMissing))
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound())
+                .andExpect(handler -> {
+                    final ExceptionInfo exceptionInfo = ResourceUtility.convertException(handler.getResponse().getContentAsString());
+                    final Map<String, Object> info = exceptionInfo.getInfo();
+                    assertThat(info).isNotNull();
+                    assertThat(info.get(EntityNotFoundException.TYPE)).isEqualTo(DistributionSet.class.getSimpleName());
+                    final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
+                    Collections.sort(notFound);
+                    assertThat(notFound).isEqualTo(missing);
+                });
     }
 
     // DEPRECATED flows
