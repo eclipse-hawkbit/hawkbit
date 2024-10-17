@@ -559,22 +559,29 @@ public class JpaTargetManagement implements TargetManagement {
             }
         });
     }
-    private List<Target> updateTag(final Collection<String> controllerIds, final long targetTagId, final BiFunction<JpaTargetTag, JpaTarget, Target> updater) {
+    private List<Target> updateTag(
+            final Collection<String> controllerIds, final long targetTagId,
+            final BiFunction<JpaTargetTag, JpaTarget, Target> updater) {
         final JpaTargetTag tag = targetTagRepository.findById(targetTagId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
-        final List<JpaTarget> targets = targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
+        final List<JpaTarget> targets = controllerIds.size() == 1 ?
+                targetRepository.findOne(TargetSpecifications.hasControllerId(controllerIds.iterator().next()))
+                        .map(List::of)
+                        .orElseGet(Collections::emptyList) :
+                targetRepository
+                        .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
         if (targets.size() < controllerIds.size()) {
             throw new EntityNotFoundException(Target.class, notFound(controllerIds, targets));
         }
         targetRepository.getAccessController()
                 .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, targets));
 
-        // apply update and collect modified targets
-        final List<Target> result = targets.stream().map(target -> updater.apply(tag, target)).toList();
-        // No reason to save the tag
-        entityManager.detach(tag);
-        return result;
+        try {
+            return targets.stream().map(target -> updater.apply(tag, target)).toList();
+        } finally {
+            // No reason to save the tag
+            entityManager.detach(tag);
+        }
     }
 
     @Override
