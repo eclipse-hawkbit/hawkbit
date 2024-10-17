@@ -72,7 +72,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final String targetDsAIdPref = "targ-A";
         List<Target> targAs = testdataFactory.createTargets(100, targetDsAIdPref,
                 targetDsAIdPref.concat(" description"), lastTargetQueryNotOverdue);
-        targAs = toggleTagAssignment(targAs, targTagX).getAssignedEntity();
+        targAs = assignTag(targAs, targTagX);
 
         final Target targSpecialName = targetManagement
                 .update(entityFactory.target().update(targAs.get(0).getControllerId()).name("targ-A-special"));
@@ -81,15 +81,15 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         List<Target> targBs = testdataFactory.createTargets(100, targetDsBIdPref,
                 targetDsBIdPref.concat(" description"), lastTargetQueryAlwaysOverdue);
 
-        targBs = toggleTagAssignment(targBs, targTagY).getAssignedEntity();
-        targBs = toggleTagAssignment(targBs, targTagW).getAssignedEntity();
+        targBs = assignTag(targBs, targTagY);
+        targBs = assignTag(targBs, targTagW);
 
         final String targetDsCIdPref = "targ-C";
         List<Target> targCs = testdataFactory.createTargets(100, targetDsCIdPref,
                 targetDsCIdPref.concat(" description"), lastTargetQueryAlwaysOverdue);
 
-        targCs = toggleTagAssignment(targCs, targTagZ).getAssignedEntity();
-        targCs = toggleTagAssignment(targCs, targTagW).getAssignedEntity();
+        targCs = assignTag(targCs, targTagZ);
+        targCs = assignTag(targCs, targTagW);
 
         final String targetDsDIdPref = "targ-D";
         final List<Target> targDs = testdataFactory.createTargets(100, targetDsDIdPref,

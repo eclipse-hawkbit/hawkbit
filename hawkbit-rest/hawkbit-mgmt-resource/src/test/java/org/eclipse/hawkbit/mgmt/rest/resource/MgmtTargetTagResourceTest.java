@@ -97,9 +97,9 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final TargetTag tag1 = tags.get(0);
         final TargetTag tag2 = tags.get(1);
 
-        targetManagement.toggleTagAssignment(List.of(controllerId1, controllerId2), tag1.getName());
-        targetManagement.toggleTagAssignment(List.of(controllerId2), tag2.getName())
-        ;
+        targetManagement.assignTag(List.of(controllerId1, controllerId2), tag1.getId());
+        targetManagement.assignTag(List.of(controllerId2), tag2.getId());
+
         // pass here q directly as a pure string because .queryParam method delimiters the parameters in q with ,
         // which is logical OR, we want AND here
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING +
@@ -207,8 +207,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
         final int targetsAssigned = 5;
         final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
-        targetManagement.toggleTagAssignment(targets.stream().map(Target::getControllerId).collect(Collectors.toList()),
-                tag.getName());
+        targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -226,8 +225,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final int targetsAssigned = 5;
         final int limitSize = 1;
         final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
-        targetManagement.toggleTagAssignment(targets.stream().map(Target::getControllerId).collect(Collectors.toList()),
-                tag.getName());
+        targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                 .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
@@ -248,8 +246,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final int expectedSize = targetsAssigned - offsetParam;
 
         final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
-        targetManagement.toggleTagAssignment(targets.stream().map(Target::getControllerId).collect(Collectors.toList()),
-                tag.getName());
+        targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                 .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
@@ -327,7 +324,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     }
 
     @Test
-    @Description("Verfies that tag unassignments done through tag API command are correctly stored in the repository.")
+    @Description("Verifies that tag unassignments done through tag API command are correctly stored in the repository.")
     @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 3) })
     public void unassignTarget() throws Exception {
@@ -337,8 +334,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final Target assigned = targets.get(0);
         final Target unassigned = targets.get(1);
 
-        targetManagement.toggleTagAssignment(targets.stream().map(Target::getControllerId).collect(Collectors.toList()),
-                tag.getName());
+        targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
 
         mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/"
                 + unassigned.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());

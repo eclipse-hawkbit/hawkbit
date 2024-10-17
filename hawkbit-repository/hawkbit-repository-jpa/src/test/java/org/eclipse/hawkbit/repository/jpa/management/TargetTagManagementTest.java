@@ -169,34 +169,22 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
                 .create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
 
         // toggle A only -> A is now assigned
-        TargetTagAssignmentResult result = toggleTagAssignment(groupA, tag);
-        assertThat(result.getAlreadyAssigned()).isZero();
-        assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedEntity()).containsAll(targetManagement
+        List<Target> result = assignTag(groupA, tag);
+        assertThat(result).size().isEqualTo(20);
+        assertThat(result).containsAll(targetManagement
                 .getByControllerID(groupA.stream().map(Target::getControllerId).collect(Collectors.toList())));
-        assertThat(result.getUnassigned()).isZero();
-        assertThat(result.getUnassignedEntity()).isEmpty();
-        assertThat(result.getTargetTag()).isEqualTo(tag);
 
         // toggle A+B -> A is still assigned and B is assigned as well
-        result = toggleTagAssignment(concat(groupA, groupB), tag);
-        assertThat(result.getAlreadyAssigned()).isEqualTo(20);
-        assertThat(result.getAssigned()).isEqualTo(20);
-        assertThat(result.getAssignedEntity()).containsAll(targetManagement
-                .getByControllerID(groupB.stream().map(Target::getControllerId).collect(Collectors.toList())));
-        assertThat(result.getUnassigned()).isZero();
-        assertThat(result.getUnassignedEntity()).isEmpty();
-        assertThat(result.getTargetTag()).isEqualTo(tag);
+        result = assignTag(concat(groupA, groupB), tag);
+        assertThat(result).size().isEqualTo(40);
+        assertThat(result).containsAll(targetManagement.getByControllerID(
+                concat(groupB, groupA).stream().map(Target::getControllerId).collect(Collectors.toList())));
 
         // toggle A+B -> both unassigned
-        result = toggleTagAssignment(concat(groupA, groupB), tag);
-        assertThat(result.getAlreadyAssigned()).isZero();
-        assertThat(result.getAssigned()).isZero();
-        assertThat(result.getAssignedEntity()).isEmpty();
-        assertThat(result.getUnassigned()).isEqualTo(40);
-        assertThat(result.getUnassignedEntity()).containsAll(targetManagement.getByControllerID(
+        result = unassignTag(concat(groupA, groupB), tag);
+        assertThat(result).size().isEqualTo(40);
+        assertThat(result).containsAll(targetManagement.getByControllerID(
                 concat(groupB, groupA).stream().map(Target::getControllerId).collect(Collectors.toList())));
-        assertThat(result.getTargetTag()).isEqualTo(tag);
 
     }
 
@@ -294,7 +282,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> targets = testdataFactory.createTargets(20);
         final Iterable<TargetTag> tags = testdataFactory.createTargetTags(20, "");
 
-        tags.forEach(tag -> toggleTagAssignment(targets, tag));
+        tags.forEach(tag -> assignTag(targets, tag));
 
         return targetTagRepository.findAll();
     }
