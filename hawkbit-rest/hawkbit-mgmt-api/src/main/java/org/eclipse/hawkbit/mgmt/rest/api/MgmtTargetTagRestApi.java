@@ -313,8 +313,7 @@ public interface MgmtTargetTagRestApi {
                     "and the client has to wait another second.")
     })
     @PostMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING +
-                    MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING + "/{controllerId}",
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE } )
+                    MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING + "/{controllerId}")
     ResponseEntity<Void> assignTarget(
             @PathVariable("targetTagId") Long targetTagId,
             @PathVariable("controllerId") String controllerId);
@@ -405,7 +404,8 @@ public interface MgmtTargetTagRestApi {
             @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
                     "and the client has to wait another second.")
     })
-    @DeleteMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING)
+    @DeleteMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> unassignTargets(
             @PathVariable("targetTagId") Long targetTagId,
             @Schema(description = "List of controller ids to be unassigned", example = "[\"controllerId1\", \"controllerId2\"]")
