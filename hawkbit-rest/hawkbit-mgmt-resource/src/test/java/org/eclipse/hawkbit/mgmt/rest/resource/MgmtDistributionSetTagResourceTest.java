@@ -348,10 +348,9 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final DistributionSet set = testdataFactory.createDistributionSetsWithoutModules(1).get(0);
 
-        mvc
-                .perform(
-                        post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
-                                set.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
+                        set.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
@@ -368,11 +367,10 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(2);
 
-        mvc
-                .perform(
-                        put(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
-                                .content(JsonBuilder.toArray(sets.stream().map(DistributionSet::getId).collect(Collectors.toList())))
-                                .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(
+                put(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                        .content(JsonBuilder.toArray(sets.stream().map(DistributionSet::getId).collect(Collectors.toList())))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
@@ -395,7 +393,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()), tag.getId());
 
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
-                unassigned.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                        unassigned.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
@@ -417,11 +416,9 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
         distributionSetManagement.assignTag(sets.stream().map(DistributionSet::getId).collect(Collectors.toList()), tag.getId());
 
-        mvc
-                .perform(
-                        delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
-                                .content(JsonBuilder.toArray(List.of(unassigned0.getId(), unassigned1.getId())))
-                                .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                        .content(JsonBuilder.toArray(List.of(unassigned0.getId(), unassigned1.getId())))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();

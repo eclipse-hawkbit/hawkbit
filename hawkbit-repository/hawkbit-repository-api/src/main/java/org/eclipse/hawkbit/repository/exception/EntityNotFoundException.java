@@ -101,7 +101,7 @@ public class EntityNotFoundException extends AbstractServerRtException {
      * @param key for the {@link MetaData} entry
      */
     public EntityNotFoundException(final Class<? extends MetaData> type, final String entityId, final String key) {
-        super(type.getSimpleName() + " for given entity {" + entityId + "} and with key {" + key + "} does not exist.",
+        super(type.getSimpleName() + " for given entity {" + toEntityString(entityId) + "} and with key {" + key + "} does not exist.",
                 THIS_ERROR,
                 Map.of(TYPE, type.getSimpleName(), ENTITY_ID, entityId, KEY, key));
     }
@@ -115,9 +115,15 @@ public class EntityNotFoundException extends AbstractServerRtException {
      */
     public EntityNotFoundException(final Class<? extends BaseEntity> type, final Collection<?> expected,
             final Collection<?> found) {
-        super(type.getSimpleName() + "s with given identifiers {" + expected.stream().filter(id -> !found.contains(id))
-                .map(String::valueOf).collect(Collectors.joining(",")) + "} do not exist.",
+        super(type.getSimpleName() + "s with given identifiers {" + toEntityString(expected.stream().filter(id -> !found.contains(id))
+                .map(String::valueOf).collect(Collectors.joining(","))) + "} do not exist.",
                 THIS_ERROR,
                 Map.of(TYPE, type.getSimpleName(), ENTITY_ID, expected.stream().filter(id -> !found.contains(id)).map(String::valueOf)));
+    }
+
+    private static final int ENTITY_STRING_MAX_LENGTH = 100;
+    private static String toEntityString(final Object obj) {
+        final String str = String.valueOf(obj);
+        return str.length() > ENTITY_STRING_MAX_LENGTH ? str.substring(0, ENTITY_STRING_MAX_LENGTH - 3).concat("...") : str;
     }
 }
