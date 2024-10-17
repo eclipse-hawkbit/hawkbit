@@ -210,22 +210,23 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         assertThat(distributionSetManagement.findByRsqlAndTag(Pageable.unpaged(), "id==*", dsTag.getId()).get()
                 .map(Identifiable::getId).toList()).containsOnly(permitted.getId(), readOnly.getId());
 
-        // verify distributionSetManagement#toggleTagAssignment on permitted target
+        // verify distributionSetManagement#unassignTag on permitted target
         assertThat(distributionSetManagement
-                .toggleTagAssignment(Collections.singletonList(permitted.getId()), dsTag.getName()).getUnassigned())
+                .unassignTag(Collections.singletonList(permitted.getId()), dsTag.getId()))
+                .size()
                 .isEqualTo(1);
         // verify distributionSetManagement#assignTag on permitted target
         assertThat(distributionSetManagement.assignTag(Collections.singletonList(permitted.getId()), dsTag.getId()))
                 .hasSize(1);
         // verify distributionSetManagement#unAssignTag on permitted target
-        assertThat(distributionSetManagement.unassignTag(permitted.getId(), dsTag.getId()).getId())
+        assertThat(distributionSetManagement.unassignTag(List.of(permitted.getId()), dsTag.getId())
+                .get(0).getId())
                 .isEqualTo(permitted.getId());
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
-        assertThatThrownBy(() -> {
-            distributionSetManagement.toggleTagAssignment(Collections.singletonList(readOnly.getId()), dsTag.getName())
-                    .getUnassigned();
-        }).as("Missing update permissions for target to toggle tag assignment.")
+        assertThatThrownBy(() ->
+            distributionSetManagement.unassignTag(Collections.singletonList(readOnly.getId()), dsTag.getId()))
+        .as("Missing update permissions for target to toggle tag assignment.")
                 .isInstanceOf(InsufficientPermissionException.class);
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
@@ -235,16 +236,13 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
                 .isInstanceOf(InsufficientPermissionException.class);
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
-        assertThatThrownBy(() -> {
-            distributionSetManagement.unassignTag(readOnly.getId(), dsTag.getId());
-        }).as("Missing update permissions for target to toggle tag assignment.")
+        assertThatThrownBy(() -> distributionSetManagement.unassignTag(List.of(readOnly.getId()), dsTag.getId()))
+                .as("Missing update permissions for target to toggle tag assignment.")
                 .isInstanceOf(InsufficientPermissionException.class);
 
         // assignment is denied for hiddenTarget since it's hidden
-        assertThatThrownBy(() -> {
-            distributionSetManagement.toggleTagAssignment(Collections.singletonList(hidden.getId()), dsTag.getName())
-                    .getUnassigned();
-        }).as("Missing update permissions for target to toggle tag assignment.")
+        assertThatThrownBy(() -> distributionSetManagement.unassignTag(Collections.singletonList(hidden.getId()), dsTag.getId()))
+                .as("Missing update permissions for target to toggle tag assignment.")
                 .isInstanceOf(EntityNotFoundException.class);
 
         // assignment is denied for hiddenTarget since it's hidden
