@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -338,11 +339,105 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     }
 
     @Test
-    @Description("Verfies that tag assignments done through tag API command are correctly stored in the repository.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+    @Description("Verifies that tag assignments done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1) })
+    public void assignDistributionSet() throws Exception {
+        final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
+        final DistributionSet set = testdataFactory.createDistributionSetsWithoutModules(1).get(0);
+
+        mvc
+                .perform(
+                        post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
+                                set.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
+        assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
+                .containsOnly(set.getId());
+    }
+
+    @Test
+    @Description("Verifies that tag assignments done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2) })
     public void assignDistributionSets() throws Exception {
+        final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
+        final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(2);
+
+        mvc
+                .perform(
+                        put(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                                .content(JsonBuilder.toArray(sets.stream().map(DistributionSet::getId).collect(Collectors.toList())))
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
+        assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
+                .containsAll(sets.stream().map(DistributionSet::getId).collect(Collectors.toList()));
+    }
+
+    @Test
+    @Description("Verifies that tag unassignments done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 3) })
+    public void unassignDistributionSet() throws Exception {
+        final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
+        final int setsAssigned = 2;
+        final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
+        final DistributionSet assigned = sets.get(0);
+        final DistributionSet unassigned = sets.get(1);
+
+        distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()), tag.getId());
+
+        mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
+                unassigned.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
+        assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
+                .containsOnly(assigned.getId());
+    }
+
+    @Test
+    @Description("Verifies that tag unassignments done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 5) })
+    public void unassignDistributionSets() throws Exception {
+        final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
+        final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(3);
+        final DistributionSet assigned = sets.get(0);
+        final DistributionSet unassigned0 = sets.get(1);
+        final DistributionSet unassigned1 = sets.get(2);
+
+        distributionSetManagement.assignTag(sets.stream().map(DistributionSet::getId).collect(Collectors.toList()), tag.getId());
+
+        mvc
+                .perform(
+                        delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                                .content(JsonBuilder.toArray(List.of(unassigned0.getId(), unassigned1.getId())))
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
+        assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
+                .containsOnly(assigned.getId());
+    }
+
+    // DEPRECATED flows
+
+    @Test
+    @Description("Verifies that tag assignments done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 2) })
+    public void assignDistributionSetsWithRequestBody() throws Exception {
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final int setsAssigned = 2;
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
@@ -363,28 +458,5 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
         result.andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(0)))
                 .andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(1)));
-    }
-
-    @Test
-    @Description("Verfies that tag unassignments done through tag API command are correctly stored in the repository.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 3) })
-    public void unassignDistributionSet() throws Exception {
-        final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
-        final int setsAssigned = 2;
-        final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
-        final DistributionSet assigned = sets.get(0);
-        final DistributionSet unassigned = sets.get(1);
-
-        distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()), tag.getId());
-
-        mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/"
-                + unassigned.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-
-        final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
-
-        assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
-                .containsOnly(assigned.getId());
     }
 }

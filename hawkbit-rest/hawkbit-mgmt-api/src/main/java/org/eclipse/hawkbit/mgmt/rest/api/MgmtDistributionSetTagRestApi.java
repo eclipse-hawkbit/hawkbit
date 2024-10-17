@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -416,9 +417,9 @@ public interface MgmtDistributionSetTagRestApi {
             + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING, consumes = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtDistributionSet>> assignDistributionSets(
+    ResponseEntity<Void> assignDistributionSets(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
-            List<Long> distributionsetIds);
+            @RequestBody List<Long> distributionsetIds);
 
     /**
      * Handles the DELETE request to unassign one distribution set from the given tag id.
@@ -490,7 +491,7 @@ public interface MgmtDistributionSetTagRestApi {
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
             List<Long> distributionsetId);
 
-    /**
+   /**
      * Handles the POST request to toggle the assignment of distribution sets by
      * the given tag id.
      *

@@ -34,9 +34,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Builder class for building certain json strings.
- *
- *
- *
  */
 public abstract class JsonBuilder {
 
@@ -49,9 +46,9 @@ public abstract class JsonBuilder {
         return list.toString();
     }
 
-    public static String controllerIds(final Collection<String> ids) throws JSONException {
+    public static <T> String toArray(final Collection<T> ids) throws JSONException {
         final JSONArray list = new JSONArray();
-        for (final String smID : ids) {
+        for (final T smID : ids) {
             list.put(smID);
         }
         return list.toString();

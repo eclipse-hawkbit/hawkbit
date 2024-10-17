@@ -172,14 +172,14 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
-    public ResponseEntity<List<MgmtDistributionSet>> assignDistributionSets(
+    public ResponseEntity<Void> assignDistributionSets(
             final Long distributionsetTagId,
             final List<Long> distributionsetIds) {
         log.debug("Assign DistributionSet {} for ds tag {}", distributionsetIds.size(), distributionsetTagId);
         final List<DistributionSet> assignedDs = this.distributionSetManagement
                 .assignTag(distributionsetIds, distributionsetTagId);
         log.debug("Assigned DistributionSet {}", assignedDs.size());
-        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDistributionSets(assignedDs));
+        return ResponseEntity.ok().build();
     }
 
     @Override
