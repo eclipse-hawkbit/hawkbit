@@ -268,9 +268,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
             @Expect(type = TargetUpdatedEvent.class, count = 1) })
     public void assignTarget() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
-        final int targetsAssigned = 1;
-        final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
-        final Target assigned = targets.get(0);
+        final Target assigned = testdataFactory.createTargets(1).get(0);
 
         mvc.perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
                 assigned.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
@@ -288,13 +286,12 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
             @Expect(type = TargetUpdatedEvent.class, count = 2) })
     public void assignTargets() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
-        final int targetsAssigned = 2;
-        final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
+        final List<Target> targets = testdataFactory.createTargets(2);
         final Target assigned0 = targets.get(0);
         final Target assigned1 = targets.get(1);;
 
         mvc.perform(put(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
-                        .content(JsonBuilder.controllerIds(Arrays.asList(assigned0.getControllerId(), assigned1.getControllerId())))
+                        .content(JsonBuilder.toArray(Arrays.asList(assigned0.getControllerId(), assigned1.getControllerId())))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
@@ -305,12 +302,13 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
     @Test
     @Description("Verifies that tag unassignments done through tag API command are correctly stored in the repository.")
-    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 1),
-            @Expect(type = TargetCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 3) })
+    @ExpectEvents({
+            @Expect(type = TargetTagCreatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 3) })
     public void unassignTarget() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
-        final int targetsAssigned = 2;
-        final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
+        final List<Target> targets = testdataFactory.createTargets(2);
         final Target assigned = targets.get(0);
         final Target unassigned = targets.get(1);
 
@@ -332,8 +330,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
             @Expect(type = TargetUpdatedEvent.class, count = 5) })
     public void unassignTargets() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
-        final int targetsAssigned = 3;
-        final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
+        final List<Target> targets = testdataFactory.createTargets(3);
         final Target assigned = targets.get(0);
         final Target unassigned0 = targets.get(1);
         final Target unassigned1 = targets.get(2);
@@ -341,7 +338,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
 
         mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
-                        .content(JsonBuilder.controllerIds(Arrays.asList(unassigned0.getControllerId(), unassigned1.getControllerId())))
+                        .content(JsonBuilder.toArray(Arrays.asList(unassigned0.getControllerId(), unassigned1.getControllerId())))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
