@@ -52,9 +52,8 @@ public abstract class JsonBuilder {
     public static String controllerIds(final Collection<String> ids) throws JSONException {
         final JSONArray list = new JSONArray();
         for (final String smID : ids) {
-            list.put(new JSONObject().put("controllerId", smID));
+            list.put(smID);
         }
-
         return list.toString();
     }
 

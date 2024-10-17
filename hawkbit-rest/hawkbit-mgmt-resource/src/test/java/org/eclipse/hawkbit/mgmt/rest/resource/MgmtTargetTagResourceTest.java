@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,9 @@ import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
@@ -256,9 +260,99 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(expectedSize)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(expectedSize)));
     }
+    @Test
+    @Description("Verifies that tag assignments done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({
+            @Expect(type = TargetTagCreatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1) })
+    public void assignTarget() throws Exception {
+        final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
+        final int targetsAssigned = 1;
+        final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
+        final Target assigned = targets.get(0);
+
+        mvc.perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
+                assigned.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
+        assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
+                .containsOnly(assigned.getControllerId());
+    }
 
     @Test
-    @Description("verfies that tag assignments done through toggle API command are correctly assigned or unassigned.")
+    @Description("Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({
+            @Expect(type = TargetTagCreatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 2) })
+    public void assignTargets() throws Exception {
+        final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
+        final int targetsAssigned = 2;
+        final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
+        final Target assigned0 = targets.get(0);
+        final Target assigned1 = targets.get(1);;
+
+        mvc.perform(put(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                        .content(JsonBuilder.controllerIds(Arrays.asList(assigned0.getControllerId(), assigned1.getControllerId())))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
+        assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
+                .containsOnly(assigned0.getControllerId(), assigned1.getControllerId());
+    }
+
+    @Test
+    @Description("Verifies that tag unassignments done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 3) })
+    public void unassignTarget() throws Exception {
+        final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
+        final int targetsAssigned = 2;
+        final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
+        final Target assigned = targets.get(0);
+        final Target unassigned = targets.get(1);
+
+        targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
+
+        mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
+                unassigned.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
+        assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
+                .containsOnly(assigned.getControllerId());
+    }
+
+    @Test
+    @Description("Verifies that tag unassignments (multi targets) done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({
+            @Expect(type = TargetTagCreatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 3),
+            @Expect(type = TargetUpdatedEvent.class, count = 5) })
+    public void unassignTargets() throws Exception {
+        final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
+        final int targetsAssigned = 3;
+        final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
+        final Target assigned = targets.get(0);
+        final Target unassigned0 = targets.get(1);
+        final Target unassigned1 = targets.get(2);
+
+        targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
+
+        mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                        .content(JsonBuilder.controllerIds(Arrays.asList(unassigned0.getControllerId(), unassigned1.getControllerId())))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
+        assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
+                .containsOnly(assigned.getControllerId());
+    }
+
+    // DEPRECATED scenarios
+    @Test
+    @Description("Verifes that tag assignments done through toggle API command are correctly assigned or unassigned.")
     @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 4) })
     public void toggleTagAssignment() throws Exception {
@@ -290,9 +384,9 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         return mvc
                 .perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId()
                         + "/assigned/toggleTagAssignment")
-                                .content(JsonBuilder.controllerIds(
-                                        targets.stream().map(Target::getControllerId).collect(Collectors.toList())))
-                                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                        .content(controllerIdsOld(
+                                targets.stream().map(Target::getControllerId).collect(Collectors.toList())))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
     }
@@ -308,7 +402,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         final ResultActions result = mvc
                 .perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
-                        .content(JsonBuilder.controllerIds(
+                        .content(controllerIdsOld(
                                 targets.stream().map(Target::getControllerId).collect(Collectors.toList())))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -322,27 +416,12 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         result.andExpect(applyTargetEntityMatcherOnArrayResult(updated.get(0)))
                 .andExpect(applyTargetEntityMatcherOnArrayResult(updated.get(1)));
     }
+    private static String controllerIdsOld(final Collection<String> ids) throws JSONException {
+        final JSONArray list = new JSONArray();
+        for (final String smID : ids) {
+            list.put(new JSONObject().put("controllerId", smID));
+        }
 
-    @Test
-    @Description("Verifies that tag unassignments done through tag API command are correctly stored in the repository.")
-    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 1),
-            @Expect(type = TargetCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 3) })
-    public void unassignTarget() throws Exception {
-        final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
-        final int targetsAssigned = 2;
-        final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
-        final Target assigned = targets.get(0);
-        final Target unassigned = targets.get(1);
-
-        targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
-
-        mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/"
-                + unassigned.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
-
-        final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
-
-        assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
-                .containsOnly(assigned.getControllerId());
+        return list.toString();
     }
-
 }
