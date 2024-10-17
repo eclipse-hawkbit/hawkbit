@@ -20,6 +20,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
@@ -533,50 +536,42 @@ public class JpaTargetManagement implements TargetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<Target> assignTag(final Collection<String> controllerIds, final long targetTagId) {
-        final JpaTargetTag tag = targetTagRepository.findById(targetTagId)
-                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
-
-        final List<JpaTarget> allTargets = targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
-        if (allTargets.size() < controllerIds.size()) {
-            throw new EntityNotFoundException(Target.class, controllerIds,
-                    allTargets.stream().map(Target::getControllerId).toList());
-        }
-
-        targetRepository.getAccessController()
-                .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, allTargets));
-
-        allTargets.forEach(target -> target.addTag(tag));
-
-        final List<Target> result = allTargets.stream().map(targetRepository::save).map(Target.class::cast).toList();
-
-        // No reason to save the tag
-        entityManager.detach(tag);
-        return result;
+        return updateTag(controllerIds, targetTagId, (tag, target) -> {
+            if (target.getTags().contains(tag)) {
+                return target;
+            } else {
+                target.addTag(tag);
+                return targetRepository.save(target);
+            }
+        });
     }
-
     @Override
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<Target> unassignTag(final List<String> controllerIds, final long targetTagId) {
+    public List<Target> unassignTag(final Collection<String> controllerIds, final long targetTagId) {
+        return updateTag(controllerIds, targetTagId, (tag, target) -> {
+            if (target.getTags().contains(tag)) {
+                target.removeTag(tag);
+                return targetRepository.save(target);
+            } else {
+                return target;
+            }
+        });
+    }
+    private List<Target> updateTag(final Collection<String> controllerIds, final long targetTagId, final BiFunction<JpaTargetTag, JpaTarget, Target> updater) {
         final JpaTargetTag tag = targetTagRepository.findById(targetTagId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
-
-        final List<JpaTarget> allTargets = targetRepository
+        final List<JpaTarget> targets = targetRepository
                 .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
-        if (allTargets.size() < controllerIds.size()) {
-            throw new EntityNotFoundException(Target.class, controllerIds,
-                    allTargets.stream().map(Target::getControllerId).toList());
+        if (targets.size() < controllerIds.size()) {
+            throw new EntityNotFoundException(Target.class, notFound(controllerIds, targets));
         }
-
         targetRepository.getAccessController()
-                .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, allTargets));
+                .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, targets));
 
-        allTargets.forEach(target -> target.removeTag(tag));
-
-        final List<Target> result = allTargets.stream().map(targetRepository::save).map(Target.class::cast).toList();
-
+        // apply update and collect modified targets
+        final List<Target> result = targets.stream().map(target -> updater.apply(tag, target)).toList();
         // No reason to save the tag
         entityManager.detach(tag);
         return result;
@@ -917,6 +912,12 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findByControllerAttributesRequested(final Pageable pageReq) {
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageReq,
                 List.of(TargetSpecifications.hasRequestControllerAttributesTrue()));
+    }
+
+    private static Collection<String> notFound(final Collection<String> controllerIds, final List<JpaTarget> foundTargets) {
+        final Map<String, JpaTarget> foundTargetMap = foundTargets.stream()
+                .collect(Collectors.toMap(Target::getControllerId, Function.identity()));
+        return controllerIds.stream().filter(id -> !foundTargetMap.containsKey(id)).toList();
     }
 
     @Override

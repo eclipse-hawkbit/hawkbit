@@ -666,14 +666,10 @@ public interface TargetManagement {
     /**
      * Assign a {@link TargetTag} assignment to given {@link Target}s.
      *
-     * @param controllerIds
-     *            to assign for
-     * @param targetTagId
-     *            to assign
+     * @param controllerIds to assign for
+     * @param targetTagId to assign
      * @return list of assigned targets
-     *
-     * @throws EntityNotFoundException
-     *             if given tagId or at least one of the targets do not exist
+     * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId);
@@ -683,11 +679,11 @@ public interface TargetManagement {
      *
      * @param controllerIds to un-assign for
      * @param targetTagId to un-assign
-     * @return the unassigned target or <null> if no target is unassigned
-     * @throws EntityNotFoundException if Tag with given ID does not exist
+     * @return list of unassigned targets
+     * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    List<Target> unassignTag(@NotEmpty List<String> controllerIds, long targetTagId);
+    List<Target> unassignTag(@NotEmpty Collection<String> controllerIds, long targetTagId);
 
     /**
      * Un-assign a {@link TargetType} assignment to given {@link Target}.
