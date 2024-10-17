@@ -268,9 +268,8 @@ public class ResponseExceptionHandler {
         response.setExceptionClass(ex.getClass().getName());
         if (ex instanceof AbstractServerRtException) {
             response.setErrorCode(((AbstractServerRtException) ex).getError().getKey());
+            response.setInfo(((AbstractServerRtException) ex).getInfo());
         }
-
         return response;
     }
-
 }

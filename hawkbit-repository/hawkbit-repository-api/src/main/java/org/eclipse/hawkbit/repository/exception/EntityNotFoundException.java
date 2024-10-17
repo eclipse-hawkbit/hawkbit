@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
@@ -25,14 +26,14 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 @Getter
 public class EntityNotFoundException extends AbstractServerRtException {
 
+    public static final String KEY = "key";
+    public static final String ENTITY_ID = "entityId";
+    public static final String TYPE = "type";
+
     @Serial
     private static final long serialVersionUID = 1L;
 
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_ENTITY_NOT_EXISTS;
-
-    private Class<?> type;
-    private Object entityId;
-    private String key;
 
     /**
      * Default constructor.
@@ -76,9 +77,9 @@ public class EntityNotFoundException extends AbstractServerRtException {
      * @param entityId of the {@link BaseEntity}
      */
     public EntityNotFoundException(final Class<? extends BaseEntity> type, final Object entityId) {
-        super(type.getSimpleName() + " with given identifier {" + entityId + "} does not exist.", THIS_ERROR);
-        this.type = type;
-        this.entityId = entityId;
+        super(type.getSimpleName() + " with given identifier {" + entityId + "} does not exist.",
+                THIS_ERROR,
+                Map.of(TYPE, type.getSimpleName(), ENTITY_ID, entityId));
     }
 
     /**
@@ -90,9 +91,6 @@ public class EntityNotFoundException extends AbstractServerRtException {
      */
     public EntityNotFoundException(final Class<? extends MetaData> type, final Long entityId, final String key) {
         this(type, String.valueOf(entityId), key);
-        this.type = type;
-        this.entityId = entityId;
-        this.key = key;
     }
 
     /**
@@ -103,10 +101,9 @@ public class EntityNotFoundException extends AbstractServerRtException {
      * @param key for the {@link MetaData} entry
      */
     public EntityNotFoundException(final Class<? extends MetaData> type, final String entityId, final String key) {
-        this(type.getSimpleName() + " for given entity {" + entityId + "} and with key {" + key + "} does not exist.");
-        this.type = type;
-        this.entityId = entityId;
-        this.key = key;
+        super(type.getSimpleName() + " for given entity {" + entityId + "} and with key {" + key + "} does not exist.",
+                THIS_ERROR,
+                Map.of(TYPE, type.getSimpleName(), ENTITY_ID, entityId, KEY, key));
     }
 
     /**
@@ -118,9 +115,9 @@ public class EntityNotFoundException extends AbstractServerRtException {
      */
     public EntityNotFoundException(final Class<? extends BaseEntity> type, final Collection<?> expected,
             final Collection<?> found) {
-        this(type.getSimpleName() + "s with given identifiers {" + expected.stream().filter(id -> !found.contains(id))
-                .map(String::valueOf).collect(Collectors.joining(",")) + "} do not exist.");
-        this.type = type;
-        this.entityId = expected.stream().filter(id -> !found.contains(id)).map(String::valueOf);
+        super(type.getSimpleName() + "s with given identifiers {" + expected.stream().filter(id -> !found.contains(id))
+                .map(String::valueOf).collect(Collectors.joining(",")) + "} do not exist.",
+                THIS_ERROR,
+                Map.of(TYPE, type.getSimpleName(), ENTITY_ID, expected.stream().filter(id -> !found.contains(id)).map(String::valueOf)));
     }
 }

@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.rest.json.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -30,15 +30,15 @@ public class ExceptionInfoTest {
         final String knownExceptionClass = "hawkbit.test.exception.Class";
         final String knownErrorCode = "hawkbit.error.code.Known";
         final String knownMessage = "a known message";
-        final List<String> knownParameters = new ArrayList<>();
-        knownParameters.add("param1");
-        knownParameters.add("param2");
+        final Map<String, Object> knownInfo = new HashMap<>();
+        knownInfo.put("param1", "1");
+        knownInfo.put("param2", 2);
 
         final ExceptionInfo underTest = new ExceptionInfo();
         underTest.setErrorCode(knownErrorCode);
         underTest.setExceptionClass(knownExceptionClass);
         underTest.setMessage(knownMessage);
-        underTest.setParameters(knownParameters);
+        underTest.setInfo(knownInfo);
 
         assertThat(underTest.getErrorCode()).as("The error code should match with the known error code in the test")
                 .isEqualTo(knownErrorCode);
@@ -47,8 +47,7 @@ public class ExceptionInfoTest {
                 .isEqualTo(knownExceptionClass);
         assertThat(underTest.getMessage()).as("The message should match with the known error code in the test")
                 .isEqualTo(knownMessage);
-        assertThat(underTest.getParameters()).as("The parameters should match with the known error code in the test")
-                .isEqualTo(knownParameters);
+        assertThat(underTest.getInfo()).as("The parameters should match with the known error code in the test")
+                .isEqualTo(knownInfo);
     }
-
 }
