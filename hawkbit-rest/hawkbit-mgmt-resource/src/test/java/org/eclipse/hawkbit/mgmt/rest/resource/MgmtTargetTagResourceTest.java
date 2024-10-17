@@ -20,9 +20,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -31,11 +35,14 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
@@ -300,6 +307,45 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .containsOnly(assigned0.getControllerId(), assigned1.getControllerId());
     }
 
+    private static final Random RND = new Random();
+    @Test
+    @Description("Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.")
+    @ExpectEvents({
+            @Expect(type = TargetTagCreatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 2)})
+    public void assignTargetsNotFound() throws Exception {
+        final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
+        final List<String> targets = testdataFactory.createTargets(2).stream().map(Target::getControllerId).toList();
+        final List<String> missing = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            while (true) {
+                final String id = String.valueOf(RND.nextLong());
+                if (!targets.contains(id)) {
+                    missing.add(id);
+                    break;
+                }
+            }
+        }
+        Collections.sort(missing);
+        final List<String> withMissing = new ArrayList<>(targets);
+        withMissing.addAll(missing);
+
+        mvc.perform(put(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                        .content(JsonBuilder.toArray(withMissing))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound())
+                .andExpect(handler -> {
+                    final ExceptionInfo exceptionInfo = ResourceUtility.convertException(handler.getResponse().getContentAsString());
+                    final Map<String, Object> info = exceptionInfo.getInfo();
+                    assertThat(info).isNotNull();
+                    assertThat(info.get(EntityNotFoundException.TYPE)).isEqualTo(Target.class.getSimpleName());
+                    final List<String> notFound = (List<String>) info.get(EntityNotFoundException.ENTITY_ID);
+                    Collections.sort(notFound);
+                    assertThat(notFound).isEqualTo(missing);
+                });
+    }
+
     @Test
     @Description("Verifies that tag unassignments done through tag API command are correctly stored in the repository.")
     @ExpectEvents({
@@ -315,7 +361,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
 
         mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
-                unassigned.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                        unassigned.getControllerId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
         assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))

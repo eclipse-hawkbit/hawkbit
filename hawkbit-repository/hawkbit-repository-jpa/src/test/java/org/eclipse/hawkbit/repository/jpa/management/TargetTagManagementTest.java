@@ -202,8 +202,8 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThatThrownBy(() -> targetManagement.assignTag(withMissing, tag.getId()))
                 .matches(e -> {
                     if (e instanceof EntityNotFoundException enfe) {
-                        if (enfe.getType().equals(Target.class)) {
-                            if (enfe.getEntityId() instanceof Collection entityId) {
+                        if (enfe.getInfo().get(EntityNotFoundException.TYPE).equals(Target.class.getSimpleName())) {
+                            if (enfe.getInfo().get(EntityNotFoundException.TYPE) instanceof Collection entityId) {
                                 return entityId.stream().sorted().toList().equals(missing);
                             }
                         }

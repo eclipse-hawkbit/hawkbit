@@ -206,8 +206,8 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         assertThatThrownBy(() -> distributionSetManagement.assignTag(withMissing, tag.getId()))
                 .matches(e -> {
                     if (e instanceof EntityNotFoundException enfe) {
-                        if (enfe.getType().equals(DistributionSet.class)) {
-                            if (enfe.getEntityId() instanceof Collection entityId) {
+                        if (enfe.getInfo().get(EntityNotFoundException.TYPE).equals(DistributionSet.class.getSimpleName())) {
+                            if (enfe.getInfo().get(EntityNotFoundException.ENTITY_ID) instanceof Collection entityId) {
                                 return entityId.stream().sorted().toList().equals(missing);
                             }
                         }
