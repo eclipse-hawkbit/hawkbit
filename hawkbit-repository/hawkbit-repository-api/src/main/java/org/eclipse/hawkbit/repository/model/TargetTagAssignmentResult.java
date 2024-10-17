@@ -16,7 +16,9 @@ import java.util.List;
 /**
  * Result object for {@link TargetTag} assignments.
  *
+ * @deprecated since 0.6.0 with deprecation of toggle assignments
  */
+@Deprecated(forRemoval = true)
 @Data
 public class TargetTagAssignmentResult extends AbstractAssignmentResult<Target> {
 
