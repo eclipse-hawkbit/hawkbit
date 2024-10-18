@@ -26,7 +26,7 @@ public abstract class AbstractServerRtException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     private final SpServerError error;
-    private final Map<String, Object> info;
+    private final transient Map<String, Object> info;
 
     /**
      * Parameterized constructor.
