@@ -26,5 +26,5 @@ public class ExceptionInfo {
     private String exceptionClass;
     private String errorCode;
     private String message;
-    private Map<String, Object> info;
+    private transient Map<String, Object> info;
 }
