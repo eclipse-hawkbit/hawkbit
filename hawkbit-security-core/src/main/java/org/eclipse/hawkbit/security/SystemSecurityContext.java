@@ -110,7 +110,7 @@ public class SystemSecurityContext {
             log.debug("Entering system code execution");
             return tenantAware.runAsTenant(tenant, () -> {
                 setSystemContext(SecurityContextHolder.getContext());
-                return MDCHandler.getInstance().withLoggingRE(callable);
+                return MdcHandler.getInstance().callWithAuthRE(callable);
             });
         } finally {
             SecurityContextHolder.setContext(oldContext);
@@ -139,7 +139,7 @@ public class SystemSecurityContext {
         try {
             return tenantAware.runAsTenant(tenant, () -> {
                 setCustomSecurityContext(tenant, oldContext.getAuthentication().getPrincipal(), authorities);
-                return MDCHandler.getInstance().withLoggingRE(callable);
+                return MdcHandler.getInstance().callWithAuthRE(callable);
             });
         } finally {
             SecurityContextHolder.setContext(oldContext);

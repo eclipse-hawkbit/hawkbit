@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateAnonymousDownlo
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticateSecurityTokenFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedGatewaySecurityTokenFilter;
 import org.eclipse.hawkbit.security.HttpControllerPreAuthenticatedSecurityHeaderFilter;
-import org.eclipse.hawkbit.security.MDCHandler;
+import org.eclipse.hawkbit.security.MdcHandler;
 import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -62,7 +62,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.firewall.FirewalledRequest;
@@ -203,7 +202,7 @@ public class SecurityManagedConfiguration {
                         .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
             }
 
-            MDCHandler.Filter.addLoggingFilter(http);
+            MdcHandler.Filter.addMdcFilter(http);
 
             return http.build();
         }
@@ -320,7 +319,7 @@ public class SecurityManagedConfiguration {
                         .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
             }
 
-            MDCHandler.Filter.addLoggingFilter(http);
+            MdcHandler.Filter.addMdcFilter(http);
 
             return http.build();
         }
@@ -453,7 +452,7 @@ public class SecurityManagedConfiguration {
                 httpSecurityCustomizer.customize(http);
             }
 
-            MDCHandler.Filter.addLoggingFilter(http);
+            MdcHandler.Filter.addMdcFilter(http);
 
             return http.build();
         }
