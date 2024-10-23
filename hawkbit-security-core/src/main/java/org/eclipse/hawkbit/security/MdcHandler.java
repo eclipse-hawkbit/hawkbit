@@ -30,36 +30,34 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class MDCHandler {
+public class MdcHandler {
 
     public static String MDC_KEY_TENANT = "tenant";
     public static String MDC_KEY_USER = "user";
 
-    private static final MDCHandler SINGLETON = new MDCHandler();
+    private static final MdcHandler SINGLETON = new MdcHandler();
 
     @Value("${hawkbit.logging.mdchandler.enabled:true}")
     private boolean mdcEnabled;
     @Autowired(required = false)
     private SpringSecurityAuditorAware springSecurityAuditorAware = new SpringSecurityAuditorAware();
-    @Autowired(required = false)
-    private SystemSecurityContext securityContext;
 
     /**
      * @return The holder singleton instance.
      */
-    public static MDCHandler getInstance() {
+    public static MdcHandler getInstance() {
         return SINGLETON;
     }
 
     /**
-     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user in the MDC context.
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user from the authentication in the MDC context.
      *
      * @param <T> the return type
      * @param callable the callable to execute
      * @return the result
      * @throws Exception if thrown by the callable
      */
-    public <T> T withLogging(final Callable<T> callable) throws Exception  {
+    public <T> T callWithAuth(final Callable<T> callable) throws Exception {
         if (!mdcEnabled) {
             return callable.call();
         }
@@ -76,30 +74,25 @@ public class MDCHandler {
             tenant = null;
         }
 
-        final String currentTenant = MDC.get(MDC_KEY_TENANT);
-        if (Objects.equals(currentTenant, tenant)) {
-            return putUserAndCall(callable);
-        } else {
-            put(MDC_KEY_TENANT, tenant);
-            try {
-                return putUserAndCall(callable);
-            } finally {
-                put(MDC_KEY_TENANT, currentTenant);
-            }
-        }
+        final String user = springSecurityAuditorAware
+                .getCurrentAuditor()
+                .filter(username -> !username.equals("system")) // null and system are the same - system user
+                .orElse(null);
+
+        return callWithTenantAndUser0(callable, tenant, user);
     }
 
     /**
-     * With logging throwing Runtime Exception (withLoggingRE). Calls the {@link #withLogging(Callable)} method and
-     * wraps any catchable exception into a {@link RuntimeException}.
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user from the authentication in the MDC context.
+     * Calls the {@link #callWithAuth(Callable)} method and wraps any catchable exception into a {@link RuntimeException}.
      *
      * @param <T> the return type
      * @param callable the callable to execute
      * @return the result
      */
-    public <T> T withLoggingRE(final Callable<T> callable)  {
+    public <T> T callWithAuthRE(final Callable<T> callable) {
         try {
-            return withLogging(callable);
+            return callWithAuth(callable);
         } catch (final RuntimeException re) {
             throw re;
         } catch (final Exception e) {
@@ -107,12 +100,58 @@ public class MDCHandler {
         }
     }
 
-    private <T> T putUserAndCall(final Callable<T> callable) throws Exception {
-        final String user = springSecurityAuditorAware
-                .getCurrentAuditor()
-                .filter(username -> !username.equals("system")) // null and system are the same - system user
-                .orElse(null);
+    /**
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user in the MDC context.
+     *
+     * @param <T> the return type
+     * @param callable the callable to execute
+     * @param tenant the tenant to set in the MDC context
+     * @param user the user to set in the MDC context
+     * @return the result
+     */
+    public <T> T callWithTenantAndUser(final Callable<T> callable, final String tenant, final String user) throws Exception {
+        if (!mdcEnabled) {
+            return callable.call();
+        }
 
+        return callWithTenantAndUser0(callable, tenant, user);
+    }
+
+    /**
+     * Executes callable and returns the result. If MDC is enabled, it sets the tenant and / or user from the authentication in the MDC context.
+     * Calls the {@link #callWithTenantAndUser(Callable, String, String)} method and wraps any catchable exception into a {@link RuntimeException}.
+     *
+     * @param <T> the return type
+     * @param callable the callable to execute
+     * @param tenant the tenant to set in the MDC context
+     * @param user the user to set in the MDC context
+     * @return the result
+     */
+    public <T> T callWithTenantAndUserRE(final Callable<T> callable, final String tenant, final String user) {
+        try {
+            return callWithTenantAndUser(callable, tenant, user);
+        } catch (final RuntimeException re) {
+            throw re;
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static <T> T callWithTenantAndUser0(final Callable<T> callable, final String tenant, final String user) throws Exception {
+        final String currentTenant = MDC.get(MDC_KEY_TENANT);
+        if (Objects.equals(currentTenant, tenant)) {
+            return callWithUser(callable, user);
+        } else {
+            put(MDC_KEY_TENANT, tenant);
+            try {
+                return callWithUser(callable, user);
+            } finally {
+                put(MDC_KEY_TENANT, currentTenant);
+            }
+        }
+    }
+
+    private static <T> T callWithUser(final Callable<T> callable, final String user) throws Exception {
         final String currentUser = MDC.get(MDC_KEY_USER);
         if (Objects.equals(currentUser, user)) {
             return callable.call();
@@ -137,17 +176,17 @@ public class MDCHandler {
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class Filter {
 
-        public static void addLoggingFilter(final HttpSecurity httpSecurity) {
+        public static void addMdcFilter(final HttpSecurity httpSecurity) {
             httpSecurity.addFilterBefore(new OncePerRequestFilter() {
 
-                private final MDCHandler mdcFilter = MDCHandler.getInstance();
+                private final MdcHandler mdcFilter = MdcHandler.getInstance();
 
                 @Override
                 protected void doFilterInternal(
                         final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain)
                         throws ServletException, IOException {
                     try {
-                        mdcFilter.withLogging(() -> {
+                        mdcFilter.callWithAuth(() -> {
                             filterChain.doFilter(request, response);
                             return null;
                         });

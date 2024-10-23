@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties.User;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.InMemoryUserAuthoritiesResolver;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.eclipse.hawkbit.security.MDCHandler;
+import org.eclipse.hawkbit.security.MdcHandler;
 import org.eclipse.hawkbit.security.SecurityContextSerializer;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
@@ -124,8 +124,8 @@ public class SecurityAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public MDCHandler mdcHandler() {
-        return MDCHandler.getInstance();
+    public MdcHandler mdcHandler() {
+        return MdcHandler.getInstance();
     }
 
     @Bean

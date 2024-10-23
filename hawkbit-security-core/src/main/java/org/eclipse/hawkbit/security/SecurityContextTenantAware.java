@@ -142,7 +142,7 @@ public class SecurityContextTenantAware implements ContextAware {
         } else {
             SecurityContextHolder.setContext(securityContext);
             try {
-                return MDCHandler.getInstance().withLoggingRE(supplier::get);
+                return MdcHandler.getInstance().callWithAuthRE(supplier::get);
             } finally {
                 SecurityContextHolder.setContext(originalContext);
             }
@@ -153,7 +153,7 @@ public class SecurityContextTenantAware implements ContextAware {
         final SecurityContext currentContext = SecurityContextHolder.getContext();
         SystemSecurityContext.setSystemContext(currentContext);
         try {
-          return MDCHandler.getInstance().withLoggingRE(tenantRunner::run);
+          return MdcHandler.getInstance().callWithAuthRE(tenantRunner::run);
         } finally {
             SecurityContextHolder.setContext(currentContext);
         }
