@@ -230,7 +230,7 @@ public class DdiController {
         getDdiApi().putConfigData(configData, getTenantId(), getControllerId());
     }
 
-    void sendFeedback(final UpdateStatus updateStatus) {
+    public void sendFeedback(final UpdateStatus updateStatus) {
         log.debug(LOG_PREFIX + "Send feedback {} -> {}", getTenantId(), getControllerId(), currentActionId, updateStatus);
         try {
             getDdiApi().postDeploymentBaseActionFeedback(updateStatus.feedback(), getTenantId(), getControllerId(),
