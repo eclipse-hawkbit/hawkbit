@@ -13,13 +13,17 @@
 
 ### REST API model changes for clients
 
-- ENTITYPagedList classes have been removed; generic `PagedList` used instead (e.g. `PagedList<TargetRest>` instead of `TargetPagedList`).
-- ENTITYsrest classes have been removed; `List<ENTITYrest>` used instead (e.g. `List<TargetRest>` instead of `TargetsRest`)
+- ENTITYPagedList classes have been removed; generic `PagedList` used instead (e.g. `PagedList<TargetRest>` instead
+  of `TargetPagedList`).
+- ENTITYsrest classes have been removed; `List<ENTITYrest>` used instead (e.g. `List<TargetRest>` instead
+  of `TargetsRest`)
 
 ### Renamed api annotations
 
-- Annotation `org.eclipse.hawkbit.rest.resource.EnableRestResources` has changed to `org.eclipse.hawkbit.mgmt.annotation.EnableMgmtApi`
-- Annotation `org.eclipse.hawkbit.ddi.resource.EnableDirectDeviceApi` has changed to `org.eclipse.hawkbit.ddi.annotation.EnableDdiApi`
+- Annotation `org.eclipse.hawkbit.rest.resource.EnableRestResources` has changed
+  to `org.eclipse.hawkbit.mgmt.annotation.EnableMgmtApi`
+- Annotation `org.eclipse.hawkbit.ddi.resource.EnableDirectDeviceApi` has changed
+  to `org.eclipse.hawkbit.ddi.annotation.EnableDdiApi`
 
 ### Renamed maven modules
 
@@ -29,17 +33,21 @@
 
 ### Configuration Property changes
 
-- `hawkbit.server.security.dos.maxTargetsPerManualAssignment` has changed to `hawkbit.server.security.dos.maxTargetDistributionSetAssignmentsPerManualAssignment`
+- `hawkbit.server.security.dos.maxTargetsPerManualAssignment` has changed
+  to `hawkbit.server.security.dos.maxTargetDistributionSetAssignmentsPerManualAssignment`
 
 ## Milestone 0.3.0M7
 
 ### Configuration Property changes
 
-- Due to Spring Boot version upgrade (see [spring boot 2.2 deprecations](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.2-Release-Notes#deprecations-in-spring-boot-22)) `server.use-forward-headers` has changed to `server.forward-headers-strategy`
+- Due to Spring Boot version upgrade (
+  see [spring boot 2.2 deprecations](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.2-Release-Notes#deprecations-in-spring-boot-22)) `server.use-forward-headers`
+  has changed to `server.forward-headers-strategy`
 
 ## Upgrade from Master Branch (after 0.3.0M6) to 0.3.0M7
 
-Due to changes in the DB migration scripts within PR [#1017](https://github.com/eclipse-hawkbit/hawkbit/pull/1017) the Hawkbit will not start up if one of the following cases is true:
+Due to changes in the DB migration scripts within PR [#1017](https://github.com/eclipse-hawkbit/hawkbit/pull/1017) the
+Hawkbit will not start up if one of the following cases is true:
 
 - DB2 database is used
 - MSSQL database is used and the `sp_action` table is not empty
@@ -47,9 +55,13 @@ Due to changes in the DB migration scripts within PR [#1017](https://github.com/
 
 The script was fixed with PR [#1061](https://github.com/eclipse-hawkbit/hawkbit/pull/1061).
 
-In case you upgrade from 0.3.0M6 to 0.3.0M7 there is no issue. But if you have built the Hawkbit from the master branch between PR [#1017](https://github.com/eclipse-hawkbit/hawkbit/pull/1017) and PR [#1061](https://github.com/eclipse-hawkbit/hawkbit/pull/1061), use PostgreSQL or MSSQL and upgrade to 0.3.0M7, it will fail at startup with the message: `Validate failed: Migration checksum mismatch for migration version 1.12.16`
+In case you upgrade from 0.3.0M6 to 0.3.0M7 there is no issue. But if you have built the Hawkbit from the master branch
+between PR [#1017](https://github.com/eclipse-hawkbit/hawkbit/pull/1017) and
+PR [#1061](https://github.com/eclipse-hawkbit/hawkbit/pull/1061), use PostgreSQL or MSSQL and upgrade to 0.3.0M7, it
+will fail at startup with the message: `Validate failed: Migration checksum mismatch for migration version 1.12.16`
 
-This can be fixed by adapting the schema_version table of the database. The checksum field of the entry with the version 1.12.16 has to be changed (mind the minus):
+This can be fixed by adapting the schema_version table of the database. The checksum field of the entry with the version
+1.12.16 has to be changed (mind the minus):
 
 - -1684307461 for MSSQL
 - -596342656 for PostgreSql

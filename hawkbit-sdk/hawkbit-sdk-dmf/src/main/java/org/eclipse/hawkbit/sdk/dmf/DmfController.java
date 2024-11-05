@@ -9,6 +9,10 @@
  */
 package org.eclipse.hawkbit.sdk.dmf;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +22,6 @@ import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.sdk.Controller;
 import org.eclipse.hawkbit.sdk.Tenant;
 import org.eclipse.hawkbit.sdk.dmf.amqp.DmfSender;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Class representing DMF device twin connecting to hawkBit via DMF.

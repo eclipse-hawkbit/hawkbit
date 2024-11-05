@@ -82,6 +82,7 @@ public final class MgmtRestConstants {
      * The basic authentication validation mapping
      */
     public static final String AUTH_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/userinfo";
+    public static final String SYSTEM_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + BASE_SYSTEM_MAPPING;
     /**
      * String representation of
      * {@link #REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE}.
@@ -99,7 +100,6 @@ public final class MgmtRestConstants {
      * The base URL mapping for the spring acuator management context path.
      */
     public static final String BASE_SYSTEM_MAPPING = "/system";
-    public static final String SYSTEM_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + BASE_SYSTEM_MAPPING;
     /**
      * URL mapping for system admin operations.
      */

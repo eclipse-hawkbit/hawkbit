@@ -9,33 +9,33 @@
     SPDX-License-Identifier: EPL-2.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-   <modelVersion>4.0.0</modelVersion>
-   <parent>
-      <groupId>org.eclipse.hawkbit</groupId>
-      <artifactId>hawkbit-starters</artifactId>
-      <version>${revision}</version>
-   </parent>
-   <artifactId>hawkbit-boot-starter</artifactId>
-   <name>hawkBit :: Spring Boot Starter</name>
-   <description>Complete starter, including auto-configuration, logging and all hawkBit interfaces</description>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.eclipse.hawkbit</groupId>
+        <artifactId>hawkbit-starters</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <artifactId>hawkbit-boot-starter</artifactId>
+    <name>hawkBit :: Spring Boot Starter</name>
+    <description>Complete starter, including auto-configuration, logging and all hawkBit interfaces</description>
 
-   <dependencies>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-boot-starter-ddi-api</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-boot-starter-dmf-api</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-boot-starter-mgmt-api</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-   </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-boot-starter-ddi-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-boot-starter-dmf-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-boot-starter-mgmt-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

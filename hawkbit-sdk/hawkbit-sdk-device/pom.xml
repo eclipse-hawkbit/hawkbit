@@ -10,31 +10,31 @@
 
 -->
 <project
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-   xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-   <modelVersion>4.0.0</modelVersion>
-   <parent>
-      <groupId>org.eclipse.hawkbit</groupId>
-      <artifactId>hawkbit-sdk</artifactId>
-      <version>${revision}</version>
-   </parent>
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.eclipse.hawkbit</groupId>
+        <artifactId>hawkbit-sdk</artifactId>
+        <version>${revision}</version>
+    </parent>
 
-   <artifactId>hawkbit-sdk-device</artifactId>
-   <name>hawkBit :: SDK :: Device SDK</name>
-   <description>Device SDK that could be used for development of devices on JVM based languages</description>
+    <artifactId>hawkbit-sdk-device</artifactId>
+    <name>hawkBit :: SDK :: Device SDK</name>
+    <description>Device SDK that could be used for development of devices on JVM based languages</description>
 
-   <dependencies>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-sdk-commons</artifactId>
-         <version>${project.version}</version>
-      </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-sdk-commons</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-ddi-api</artifactId>
-         <version>${project.version}</version>
-      </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-ddi-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-   </dependencies>
+    </dependencies>
 </project>

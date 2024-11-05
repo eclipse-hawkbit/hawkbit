@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.sdk.dmf.amqp;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 /**
  * Bean which holds the necessary properties for configuring the AMQP connection.

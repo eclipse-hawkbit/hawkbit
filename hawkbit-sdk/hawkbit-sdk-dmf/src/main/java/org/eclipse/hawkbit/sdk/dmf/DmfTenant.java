@@ -9,17 +9,17 @@
  */
 package org.eclipse.hawkbit.sdk.dmf;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+
 import lombok.Getter;
 import org.eclipse.hawkbit.sdk.Controller;
 import org.eclipse.hawkbit.sdk.Tenant;
 import org.eclipse.hawkbit.sdk.dmf.amqp.Amqp;
 import org.eclipse.hawkbit.sdk.dmf.amqp.VHost;
 import org.springframework.amqp.core.Message;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
 
 /**
  * An in-memory simulated DMF Tenant to hold the controller twins in

@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.sdk.dmf.amqp;
 
+import static org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings.DMF_EXCHANGE;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -31,17 +33,14 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.util.ObjectUtils;
 
-import static org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings.DMF_EXCHANGE;
-
 /**
  * Sender service to send messages to update server.
  */
 @Slf4j
 public class DmfSender {
 
-    private static final byte[] EMPTY_BODY = new byte[0];
-
     protected final RabbitTemplate rabbitTemplate;
+    private static final byte[] EMPTY_BODY = new byte[0];
     private final AmqpProperties amqpProperties;
     private final ConcurrentHashMap<String, BiConsumer<String, Message>> pingListeners = new ConcurrentHashMap<>();
 

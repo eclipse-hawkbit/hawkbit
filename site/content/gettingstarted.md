@@ -16,17 +16,20 @@ any personal data.
 
 In addition, the following vendors offer free trial accounts for their Eclipse hawkBit compatible products:
 
-* [Bosch IoT Rollouts](https://bosch-iot-suite.com/service/rollouts/) (by [Bosch Digital](https://www.bosch-digital.com))
+* [Bosch IoT Rollouts](https://bosch-iot-suite.com/service/rollouts/) (
+  by [Bosch Digital](https://www.bosch-digital.com))
 * [Kynetics Update Factory](https://www.kynetics.com/update-factory) (by [Kynetics LLC](https://www.kynetics.com/))
-
 
 ## From Docker Image
 
 ### Overview
 
-HawkBit Update Server username/password -> admin/admin as default login credentials. They can be overridden by the environment variables spring.security.user.name and spring.security.user.password which are defined in the corresponding default [application.properties](hawkbit-runtime/hawkbit-update-server/src/main/resources/application.properties).
+HawkBit Update Server username/password -> admin/admin as default login credentials. They can be overridden by the
+environment variables spring.security.user.name and spring.security.user.password which are defined in the corresponding
+default [application.properties](hawkbit-runtime/hawkbit-update-server/src/main/resources/application.properties).
 
 It supports two configurations:
+
 * monolith - hawkbit-update-server
 * micro-service - hawkbit-mgmt-server, hawkbit-ddi-server, hawkbit-dmf-server.
 
@@ -61,6 +64,7 @@ $ docker-compose -f docker-compose-micro-service-mysql.yml up -d
 ## From Sources
 
 ### 1: Clone and build hawkBit
+
 ```sh
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit
@@ -82,6 +86,7 @@ $ mvn clean install
 ```
 
 ### 4: Start hawkBit [Device Simulator](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-device-simulator)
+
 ```sh
 $ java -jar ./hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
 ```

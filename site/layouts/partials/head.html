@@ -1,83 +1,103 @@
 <!DOCTYPE html>
-  <!--[if lt IE 7 ]><html class="no-js ie6"><![endif]-->
-  <!--[if IE 7 ]><html class="no-js ie7"><![endif]-->
-  <!--[if IE 8 ]><html class="no-js ie8"><![endif]-->
-  <!--[if IE 9 ]><html class="no-js ie9"><![endif]-->
-  <!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js"> <!--<![endif]-->
+<!--[if lt IE 7 ]>
+<html class="no-js ie6"><![endif]-->
+<!--[if IE 7 ]>
+<html class="no-js ie7"><![endif]-->
+<!--[if IE 8 ]>
+<html class="no-js ie8"><![endif]-->
+<!--[if IE 9 ]>
+<html class="no-js ie9"><![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!-->
+<html class="no-js"> <!--<![endif]-->
 
-  <head {{ with .Site.LanguageCode }}lang="{{ . }}"{{ end }}>
+<head .Site.LanguageCode end with {{ {{ }} }}lang="{{ . }}">
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1">
-    <meta http-equiv="X-UA-Compatible" content="IE=10" />
+    <meta content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1" name="viewport">
+    <meta content="IE=10" http-equiv="X-UA-Compatible"/>
     <title>{{ .Title }}{{ if not .IsHome }} - {{ .Site.Title }}{{ end }}</title>
     {{ hugo.Generator }}
 
     {{ with .Site.Params.description }}
-    <meta name="description" content="{{ . }}">
+    <meta content="{{ . }}" name="description">
     {{ end }}
-    <link rel="canonical" href="{{ .Permalink }}">
+    <link href="{{ .Permalink }}" rel="canonical">
     {{ with .Site.Params.author }}
-    <meta name="author" content="{{ . }}">
+    <meta content="{{ . }}" name="author">
     {{ end }}
 
-    <meta property="og:url" content="{{ .Permalink }}">
-    {{ with .Site.Title }}<meta property="og:title" content="{{ . }}">{{ end }}
-    {{ with .Site.Params.logo }}<meta property="og:image" content="{{ . | absURL }}">{{ end }}
-    {{ with .Site.Title }}<meta name="apple-mobile-web-app-title" content="{{ . }}">{{ end }}
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta content="{{ .Permalink }}" property="og:url">
+    {{ with .Site.Title }}
+    <meta content="{{ . }}" property="og:title">
+    {{ end }}
+    {{ with .Site.Params.logo }}
+    <meta content="{{ . | absURL }}" property="og:image">
+    {{ end }}
+    {{ with .Site.Title }}
+    <meta content="{{ . }}" name="apple-mobile-web-app-title">
+    {{ end }}
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
 
-    {{ if .Params.redirectURL }}<meta http-equiv="refresh" content="1; url={{ .Params.redirectURL }}"/>{{ end }}
+    {{ if .Params.redirectURL }}
+    <meta content="1; url={{ .Params.redirectURL }}" http-equiv="refresh"/>
+    {{ end }}
 
-    <link rel="shortcut icon" type="image/x-icon" href="{{ with .Site.Params.favicon }}{{ . | absURL }}{{ else }}{{ "images/favicon.ico" | absURL }}{{ end }}">
-    <link rel="icon" type="image/x-icon" href="{{ with .Site.Params.favicon }}{{ . | absURL }}{{ else }}{{ "images/favicon.ico" | absURL }}{{ end }}">
+    <link href="{{ with .Site.Params.favicon }}{{ . | absURL }}{{ else }}{{ " images rel="shortcut icon"
+          type="image/x-icon"
+    /favicon.ico" | absURL }}{{ end }}">
+    <link href="{{ with .Site.Params.favicon }}{{ . | absURL }}{{ else }}{{ " images rel="icon" type="image/x-icon"
+    /favicon.ico" | absURL }}{{ end }}">
 
     <style>
-      @font-face {
-        font-family: 'Icon';
-        src: url('{{ "fonts/icon.eot?52m981" | absURL }}');
-        src: url('{{ "fonts/icon.eot?#iefix52m981" | absURL }}')
-               format('embedded-opentype'),
-             url('{{ "fonts/icon.woff?52m981" | absURL }}')
-               format('woff'),
-             url('{{ "fonts/icon.ttf?52m981" | absURL }}')
-               format('truetype'),
-             url('{{ "fonts/icon.svg?52m981#icon" | absURL }}')
-               format('svg');
-        font-weight: normal;
-        font-style: normal;
-      }
+        @font-face {
+            font-family: 'Icon';
+            src: url('{{ "fonts/icon.eot?52m981" | absURL }}');
+            src: url('{{ "fonts/icon.eot?#iefix52m981" | absURL }}') format('embedded-opentype'),
+            url('{{ "fonts/icon.woff?52m981" | absURL }}') format('woff'),
+            url('{{ "fonts/icon.ttf?52m981" | absURL }}') format('truetype'),
+            url('{{ "fonts/icon.svg?52m981#icon" | absURL }}') format('svg');
+            font-weight: normal;
+            font-style: normal;
+        }
     </style>
 
-    <link rel="stylesheet" href="{{ "stylesheets/application.css" | absURL }}">
-    <link rel="stylesheet" href="{{ "stylesheets/temporary.css" | absURL }}">
-    <link rel="stylesheet" href="{{ "stylesheets/palettes.css" | absURL }}">
-    <link rel="stylesheet" href="{{ with .Site.Params.highlight_css }}{{ . | absURL }}{{ else }}{{ "stylesheets/highlight/highlight.css" | absURL }}{{ end }}">
+    <link href="{{ " rel="stylesheet" stylesheets
+    /application.css" | absURL }}">
+    <link href="{{ " rel="stylesheet" stylesheets
+    /temporary.css" | absURL }}">
+    <link href="{{ " rel="stylesheet" stylesheets
+    /palettes.css" | absURL }}">
+    <link href="{{ with .Site.Params.highlight_css }}{{ . | absURL }}{{ else }}{{ " rel="stylesheet" stylesheets
+    /highlight/highlight.css" | absURL }}{{ end }}">
 
     {{/* set default values if no custom ones are defined */}}
     {{ $text := or .Site.Params.font.text "Roboto" }}
     {{ $code := or .Site.Params.font.code "Roboto Mono" }}
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family={{ $text }}:400,700|{{ replace  $code " " "+" | safeURL }}">
+    <link href="//fonts.googleapis.com/css?family={{ $text }}:400,700|{{ replace  $code " rel="stylesheet"
+    " "+" | safeURL }}">
     <style>
-      body, input {
-        font-family: '{{ $text }}', Helvetica, Arial, sans-serif;
-      }
-      pre, code {
-        font-family: '{{ $code }}', 'Courier New', 'Courier', monospace;
-      }
+        body, input {
+            font-family: '{{ $text }}', Helvetica, Arial, sans-serif;
+        }
+
+        pre, code {
+            font-family: '{{ $code }}', 'Courier New', 'Courier', monospace;
+        }
     </style>
 
     {{ range .Site.Params.custom_css }}
-    <link rel="stylesheet" href="{{ . | absURL }}">
+    <link href="{{ . | absURL }}" rel="stylesheet">
     {{ end }}
-    <script src="{{ "javascripts/modernizr.js" | absURL }}"></script>
+    <script javascripts src="{{ "
+    /modernizr.js" | absURL }}"></script>
     <script src="//www.eclipse.org/eclipse.org-common/themes/solstice/public/javascript/vendor/cookieconsent/default.min.js"></script>
 
     {{ with .OutputFormats.Get "RSS" }}
-    <link href="{{ . }}" rel="alternate" type="application/rss+xml" title="{{ $.Site.Title }}" />
-    <link href="{{ . }}" rel="feed" type="application/rss+xml" title="{{ $.Site.Title }}" />
+    <link href="{{ . }}" rel="alternate" title="{{ $.Site.Title }}" type="application/rss+xml"/>
+    <link href="{{ . }}" rel="feed" title="{{ $.Site.Title }}" type="application/rss+xml"/>
     {{ end }}
 
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
-  </head>
-  <body class="{{ with .Site.Params.palette.primary }}palette-primary-{{ . }}{{end }} {{ with .Site.Params.palette.accent }}palette-accent-{{ .  }}{{ end }}">
+    <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css"
+          integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" rel="stylesheet">
+</head>
+<body class="{{ with .Site.Params.palette.primary }}palette-primary-{{ . }}{{end }} {{ with .Site.Params.palette.accent }}palette-accent-{{ .  }}{{ end }}">

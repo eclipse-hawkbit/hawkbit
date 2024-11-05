@@ -1,4 +1,5 @@
-[Spring Boot Starter](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using-boot-starter) including all four interfaces:
+[Spring Boot Starter](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using-boot-starter) including
+all four interfaces:
 
 * [Management API](https://www.eclipse.org/hawkbit/documentation/interfaces/management-api.html)
 * [Direct Device Integration API](https://www.eclipse.org/hawkbit/documentation/interfaces/ddi-api.html)

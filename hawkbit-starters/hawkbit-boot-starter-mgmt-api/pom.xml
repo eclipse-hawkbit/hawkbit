@@ -9,68 +9,69 @@
     SPDX-License-Identifier: EPL-2.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.eclipse.hawkbit</groupId>
-    <artifactId>hawkbit-starters</artifactId>
-    <version>${revision}</version>
-  </parent>
-  <artifactId>hawkbit-boot-starter-mgmt-api</artifactId>
-  <name>hawkBit :: Spring Boot Starter Management API</name>
-  
-  <dependencies>
-      <!-- Spring - START -->
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-web</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.security</groupId>
-         <artifactId>spring-security-web</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.security</groupId>
-         <artifactId>spring-security-config</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.security</groupId>
-         <artifactId>spring-security-aspects</artifactId>
-      </dependency>
-      <!-- Spring - END -->
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.eclipse.hawkbit</groupId>
+        <artifactId>hawkbit-starters</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <artifactId>hawkbit-boot-starter-mgmt-api</artifactId>
+    <name>hawkBit :: Spring Boot Starter Management API</name>
 
-      <!-- hawkBit - START -->
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-mgmt-resource</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-security-integration</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-http-security</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-repository-jpa</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-autoconfigure</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <!-- hawkBit - END -->
+    <dependencies>
+        <!-- Spring - START -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-aspects</artifactId>
+        </dependency>
+        <!-- Spring - END -->
 
-   </dependencies>
-    
+        <!-- hawkBit - START -->
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-mgmt-resource</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-security-integration</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-http-security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-repository-jpa</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-autoconfigure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- hawkBit - END -->
+
+    </dependencies>
+
 </project>

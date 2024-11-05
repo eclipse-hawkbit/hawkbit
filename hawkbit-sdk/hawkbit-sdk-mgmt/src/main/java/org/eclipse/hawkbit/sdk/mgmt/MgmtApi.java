@@ -9,6 +9,12 @@
  */
 package org.eclipse.hawkbit.sdk.mgmt;
 
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
 
 import feign.FeignException;
 import lombok.AllArgsConstructor;
@@ -22,13 +28,6 @@ import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.Tenant;
 import org.springframework.util.ObjectUtils;
 
-import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
-
 /**
  * Management Api Interface
  */
@@ -39,13 +38,17 @@ public class MgmtApi {
     private static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY = "authentication.gatewaytoken.key";
     private static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED = "authentication.gatewaytoken.enabled";
     private static final String AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED = "authentication.targettoken.enabled";
-
-
+    private static final Random RND = new SecureRandom();
     @NonNull
     private final Tenant tenant;
     @NonNull
     private final HawkbitClient hawkbitClient;
 
+    public static String randomToken() {
+        final byte[] rnd = new byte[24];
+        RND.nextBytes(rnd);
+        return Base64.getEncoder().encodeToString(rnd);
+    }
 
     // if gateway toke is configured then the gateway auth is enabled key is set
     // so all devices use gateway token authentication
@@ -73,8 +76,8 @@ public class MgmtApi {
             }
             if (!gatewayToken.equals(
                     Objects.requireNonNull(mgmtTenantManagementRestApi
-                        .getTenantConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY)
-                        .getBody()).getValue())) {
+                            .getTenantConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY)
+                            .getBody()).getValue())) {
                 mgmtTenantManagementRestApi.updateTenantConfiguration(
                         Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, gatewayToken)
                 );
@@ -120,12 +123,5 @@ public class MgmtApi {
 
     public void deleteController(final String controllerId) {
         hawkbitClient.mgmtService(MgmtTargetRestApi.class, tenant).deleteTarget(controllerId);
-    }
-
-    private static final Random RND = new SecureRandom();
-    public static String randomToken() {
-        final byte[] rnd = new byte[24];
-        RND.nextBytes(rnd);
-        return Base64.getEncoder().encodeToString(rnd);
     }
 }
