@@ -78,6 +78,14 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((target == null) ? 0 : target.hashCode());
+        return result;
+    }
+
+    @Override
     // exception squid:S2259 - obj is checked for null in super
     @SuppressWarnings("squid:S2259")
     public boolean equals(final Object obj) {
@@ -93,13 +101,5 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
             return false;
         }
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((target == null) ? 0 : target.hashCode());
-        return result;
     }
 }

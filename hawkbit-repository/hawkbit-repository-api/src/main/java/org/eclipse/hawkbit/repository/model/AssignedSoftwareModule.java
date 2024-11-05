@@ -9,10 +9,10 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.io.Serializable;
+
 import lombok.Data;
 import org.eclipse.hawkbit.repository.Identifiable;
-
-import java.io.Serializable;
 
 /**
  * Use to display software modules for the selected distribution.

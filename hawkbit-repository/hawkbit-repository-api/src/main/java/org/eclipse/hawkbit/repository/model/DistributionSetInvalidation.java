@@ -22,6 +22,7 @@ public class DistributionSetInvalidation {
     private Collection<Long> distributionSetIds;
     private CancelationType cancelationType;
     private boolean cancelRollouts;
+
     /**
      * Parametric constructor
      *

@@ -9,10 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
-import cz.jirutka.rsql.parser.RSQLParser;
-import cz.jirutka.rsql.parser.ast.Node;
-import cz.jirutka.rsql.parser.ast.RSQLOperators;
-import cz.jirutka.rsql.parser.ast.RSQLVisitor;
+import java.util.List;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -21,6 +18,10 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
+import cz.jirutka.rsql.parser.RSQLParser;
+import cz.jirutka.rsql.parser.ast.Node;
+import cz.jirutka.rsql.parser.ast.RSQLOperators;
+import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -29,8 +30,6 @@ import org.eclipse.persistence.jpa.JpaQuery;
 import org.eclipse.persistence.queries.DatabaseQuery;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.util.CollectionUtils;
-
-import java.util.List;
 
 public class RSQLToSQL {
 
