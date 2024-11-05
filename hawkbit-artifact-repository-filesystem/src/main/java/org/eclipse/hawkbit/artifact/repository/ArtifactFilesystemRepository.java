@@ -24,10 +24,10 @@ import org.springframework.validation.annotation.Validated;
  * Implementation of the {@link ArtifactRepository} to store artifacts on the
  * file-system. The files are stored by their SHA1 hash of the artifact binary.
  * Duplicate files with the same SHA1 hash will only stored once.
- * 
+ *
  * All files are stored flat in one base directory configured in the
  * {@link ArtifactFilesystemProperties#getPath()}.
- * 
+ *
  * Due the limit of many file-systems of files within one directory, the files
  * are stored in different sub-directories based on the last four digits of the
  * SHA1-hash {@code (/basepath/[two digit sha1]/[two digit sha1])}.
@@ -39,10 +39,9 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
 
     /**
      * Constructor.
-     * 
-     * @param artifactResourceProperties
-     *            the properties which holds the necessary configuration for the
-     *            file-system repository
+     *
+     * @param artifactResourceProperties the properties which holds the necessary configuration for the
+     *         file-system repository
      */
     public ArtifactFilesystemRepository(final ArtifactFilesystemProperties artifactResourceProperties) {
         this.artifactResourceProperties = artifactResourceProperties;
@@ -64,10 +63,22 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
     }
 
     @Override
-    protected AbstractDbArtifact store(final String tenant, final DbArtifactHash base16Hashes, final String contentType, final String tempFile) throws IOException {
+    public void deleteByTenant(final String tenant) {
+        FileUtils.deleteQuietly(Paths.get(artifactResourceProperties.getPath(), sanitizeTenant(tenant)).toFile());
+    }
+
+    @Override
+    public boolean existsByTenantAndSha1(final String tenant, final String sha1) {
+        return getFile(tenant, sha1).exists();
+    }
+
+    @Override
+    protected AbstractDbArtifact store(final String tenant, final DbArtifactHash base16Hashes, final String contentType, final String tempFile)
+            throws IOException {
 
         final File file = new File(tempFile);
-        return renameFileToSHA1Naming(tenant, file, new ArtifactFilesystem(file, base16Hashes.getSha1(), base16Hashes, file.length(), contentType));
+        return renameFileToSHA1Naming(tenant, file,
+                new ArtifactFilesystem(file, base16Hashes.getSha1(), base16Hashes, file.length(), contentType));
     }
 
     private ArtifactFilesystem renameFileToSHA1Naming(final String tenant, final File file,
@@ -94,15 +105,5 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
         final String folder1 = sha1.substring(length - 4, length - 2);
         final String folder2 = sha1.substring(length - 2, length);
         return Paths.get(artifactResourceProperties.getPath(), sanitizeTenant(tenant), folder1, folder2);
-    }
-
-    @Override
-    public void deleteByTenant(final String tenant) {
-        FileUtils.deleteQuietly(Paths.get(artifactResourceProperties.getPath(), sanitizeTenant(tenant)).toFile());
-    }
-
-    @Override
-    public boolean existsByTenantAndSha1(final String tenant, final String sha1) {
-        return getFile(tenant, sha1).exists();
     }
 }
