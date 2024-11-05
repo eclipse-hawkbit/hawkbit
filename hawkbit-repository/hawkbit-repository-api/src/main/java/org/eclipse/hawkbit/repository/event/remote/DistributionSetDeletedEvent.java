@@ -29,13 +29,10 @@ public class DistributionSetDeletedEvent extends RemoteIdEvent implements Entity
 
     /**
      * Constructor.
-     * 
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param tenant the tenant
+     * @param entityId the entity id
+     * @param applicationId the origin application id
      */
     public DistributionSetDeletedEvent(final String tenant, final Long entityId,
             final Class<? extends TenantAwareBaseEntity> entityClass, final String applicationId) {

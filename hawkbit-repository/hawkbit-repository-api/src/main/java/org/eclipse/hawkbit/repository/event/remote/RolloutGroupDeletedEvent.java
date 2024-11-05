@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 /**
- *
  * Defines the remote event of deleting a {@link RolloutGroup}.
  */
 public class RolloutGroupDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
@@ -30,15 +29,11 @@ public class RolloutGroupDeletedEvent extends RemoteIdEvent implements EntityDel
 
     /**
      * Constructor for json serialization.
-     * 
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param entityClass
-     *            the entity class
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param tenant the tenant
+     * @param entityId the entity id
+     * @param entityClass the entity class
+     * @param applicationId the origin application id
      */
     public RolloutGroupDeletedEvent(final String tenant, final Long entityId,
             final Class<? extends TenantAwareBaseEntity> entityClass, final String applicationId) {

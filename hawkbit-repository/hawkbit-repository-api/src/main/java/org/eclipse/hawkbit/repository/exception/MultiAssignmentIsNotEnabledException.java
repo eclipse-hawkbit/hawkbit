@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.exception.SpServerError;
 /**
  * This exception is thrown if an operation requires multiassignments, but the
  * feature is not enabled.
- * 
  */
 public class MultiAssignmentIsNotEnabledException extends AbstractServerRtException {
 
@@ -31,9 +30,8 @@ public class MultiAssignmentIsNotEnabledException extends AbstractServerRtExcept
 
     /**
      * Parameterized constructor.
-     * 
-     * @param cause
-     *            of the exception
+     *
+     * @param cause of the exception
      */
     public MultiAssignmentIsNotEnabledException(final Throwable cause) {
         super(THIS_ERROR, cause);
@@ -41,11 +39,9 @@ public class MultiAssignmentIsNotEnabledException extends AbstractServerRtExcept
 
     /**
      * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
-     * @param cause
-     *            of the exception
+     *
+     * @param message of the exception
+     * @param cause of the exception
      */
     public MultiAssignmentIsNotEnabledException(final String message, final Throwable cause) {
         super(message, THIS_ERROR, cause);
@@ -53,9 +49,8 @@ public class MultiAssignmentIsNotEnabledException extends AbstractServerRtExcept
 
     /**
      * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
+     *
+     * @param message of the exception
      */
     public MultiAssignmentIsNotEnabledException(final String message) {
         super(message, THIS_ERROR);

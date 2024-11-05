@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository.event;
 /**
  * An event declaration which holds an revision for each event so consumers have
  * the chance to know if they might already retrieved a newer event.
- *
  */
 @FunctionalInterface
 public interface TenantAwareEvent {

@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 /**
  * Defines the remote event for updating a {@link DistributionSet}.
- *
  */
 public class DistributionSetUpdatedEvent extends RemoteEntityEvent<DistributionSet> implements EntityUpdatedEvent {
 
@@ -31,14 +30,11 @@ public class DistributionSetUpdatedEvent extends RemoteEntityEvent<DistributionS
 
     /**
      * Constructor.
-     * 
-     * @param ds
-     *            Distribution Set
-     * @param applicationId
-     *            the origin application id
-     * @param complete
-     *            <code>true</code> if {@link DistributionSet} is after the
-     *            update {@link DistributionSet#isComplete()}
+     *
+     * @param ds Distribution Set
+     * @param applicationId the origin application id
+     * @param complete <code>true</code> if {@link DistributionSet} is after the
+     *         update {@link DistributionSet#isComplete()}
      */
     public DistributionSetUpdatedEvent(final DistributionSet ds, final String applicationId, final boolean complete) {
         super(ds, applicationId);

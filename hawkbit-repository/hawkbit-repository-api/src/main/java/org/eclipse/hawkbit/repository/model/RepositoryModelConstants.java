@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.model;
 
 /**
  * Repository model constants.
- *
  */
 public final class RepositoryModelConstants {
 

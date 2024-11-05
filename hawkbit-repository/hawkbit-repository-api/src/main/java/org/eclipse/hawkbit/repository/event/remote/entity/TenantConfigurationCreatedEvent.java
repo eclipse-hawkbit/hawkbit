@@ -14,10 +14,10 @@ import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 
 /**
  * Defines the remote event of creating a new {@link TenantConfiguration}.
- *
  */
 public class TenantConfigurationCreatedEvent extends RemoteEntityEvent<TenantConfiguration>
         implements EntityCreatedEvent {
+
     private static final long serialVersionUID = 1L;
 
     /**
@@ -29,11 +29,9 @@ public class TenantConfigurationCreatedEvent extends RemoteEntityEvent<TenantCon
 
     /**
      * Constructor.
-     * 
-     * @param baseEntity
-     *            the tenantConfiguration
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param baseEntity the tenantConfiguration
+     * @param applicationId the origin application id
      */
     public TenantConfigurationCreatedEvent(final TenantConfiguration baseEntity, final String applicationId) {
         super(baseEntity, applicationId);

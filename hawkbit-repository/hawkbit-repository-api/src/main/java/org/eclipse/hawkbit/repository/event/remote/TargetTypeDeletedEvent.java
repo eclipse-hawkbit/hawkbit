@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 /**
- *
  * Defines the remote event of deleting a {@link TargetType}.
  */
 public class TargetTypeDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
@@ -31,14 +30,10 @@ public class TargetTypeDeletedEvent extends RemoteIdEvent implements EntityDelet
     /**
      * Constructor for json serialization.
      *
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param entityClass
-     *            the entity class
-     * @param applicationId
-     *            the origin application id
+     * @param tenant the tenant
+     * @param entityId the entity id
+     * @param entityClass the entity class
+     * @param applicationId the origin application id
      */
     public TargetTypeDeletedEvent(final String tenant, final Long entityId,
             final Class<? extends TenantAwareBaseEntity> entityClass, final String applicationId) {

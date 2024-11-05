@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * This class is used to validate, that the property is a String and that it is
  * in the correct duration format.
- *
  */
 public class TenantConfigurationPollingDurationValidator implements TenantConfigurationValidator {
 
@@ -29,9 +28,8 @@ public class TenantConfigurationPollingDurationValidator implements TenantConfig
 
     /**
      * Constructor.
-     * 
-     * @param properties
-     *            property accessor for poll configuration
+     *
+     * @param properties property accessor for poll configuration
      */
     @Autowired
     public TenantConfigurationPollingDurationValidator(final ControllerPollProperties properties) {

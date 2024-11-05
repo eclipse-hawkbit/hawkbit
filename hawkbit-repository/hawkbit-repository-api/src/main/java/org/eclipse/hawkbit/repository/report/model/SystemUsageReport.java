@@ -13,7 +13,6 @@ import lombok.Data;
 
 /**
  * Bean for holding the system usage stats.
- *
  */
 @Data
 public class SystemUsageReport {
@@ -27,16 +26,11 @@ public class SystemUsageReport {
     /**
      * Constructor.
      *
-     * @param overallTargets
-     *            of the system
-     * @param overallArtifacts
-     *            of the system
-     * @param overallActions
-     *            of the system
-     * @param overallArtifactVolumeInBytes
-     *            of the system
-     * @param overallTenants
-     *            of the system
+     * @param overallTargets of the system
+     * @param overallArtifacts of the system
+     * @param overallActions of the system
+     * @param overallArtifactVolumeInBytes of the system
+     * @param overallTenants of the system
      */
     public SystemUsageReport(final long overallTargets, final long overallArtifacts, final long overallActions,
             final long overallArtifactVolumeInBytes, final long overallTenants) {

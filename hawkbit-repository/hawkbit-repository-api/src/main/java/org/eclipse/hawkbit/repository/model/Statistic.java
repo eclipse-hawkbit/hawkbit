@@ -12,15 +12,13 @@ package org.eclipse.hawkbit.repository.model;
 
 public interface Statistic {
 
-  /**
-   *
-   * @return the key of the Statistic entity.
-   */
-  Object getName();
+    /**
+     * @return the key of the Statistic entity.
+     */
+    Object getName();
 
-  /**
-   *
-   * @return the value of the Statistic entity.
-   */
-  Object getData();
+    /**
+     * @return the value of the Statistic entity.
+     */
+    Object getData();
 }

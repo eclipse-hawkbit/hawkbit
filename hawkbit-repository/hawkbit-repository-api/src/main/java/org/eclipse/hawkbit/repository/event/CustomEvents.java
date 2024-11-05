@@ -11,10 +11,6 @@ package org.eclipse.hawkbit.repository.event;
 
 /**
  * Events to be published to refresh data on UI.
- *
- *
- *
- *
  */
 public enum CustomEvents {
 

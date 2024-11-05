@@ -20,26 +20,23 @@ import org.eclipse.hawkbit.repository.model.Tag;
  * Builder to create a new {@link Tag} entry. Defines all fields that can be set
  * at creation time. Other fields are set by the repository automatically, e.g.
  * {@link BaseEntity#getCreatedAt()}.
- *
  */
 public interface TagCreate {
+
     /**
-     * @param name
-     *            for {@link Tag#getName()}
+     * @param name for {@link Tag#getName()}
      * @return updated builder instance
      */
     TagCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
-     * @param description
-     *            for {@link Tag#getDescription()}
+     * @param description for {@link Tag#getDescription()}
      * @return updated builder instance
      */
     TagCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
-     * @param colour
-     *            for {@link Tag#getColour()}
+     * @param colour for {@link Tag#getColour()}
      * @return updated builder instance
      */
     TagCreate colour(@Size(max = Tag.COLOUR_MAX_SIZE) String colour);

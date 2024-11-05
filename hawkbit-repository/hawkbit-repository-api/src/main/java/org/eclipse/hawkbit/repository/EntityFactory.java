@@ -30,7 +30,6 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 /**
  * central {@link BaseEntity} generation service. Objects are created but not
  * persisted.
- *
  */
 public interface EntityFactory {
 
@@ -47,12 +46,9 @@ public interface EntityFactory {
     /**
      * Generates an {@link MetaData} element for distribution set without
      * persisting it.
-     * 
-     * @param key
-     *            {@link MetaData#getKey()}
-     * @param value
-     *            {@link MetaData#getValue()}
-     * 
+     *
+     * @param key {@link MetaData#getKey()}
+     * @param value {@link MetaData#getValue()}
      * @return {@link MetaData} object
      */
     MetaData generateDsMetadata(@Size(min = 1, max = MetaData.KEY_MAX_SIZE) @NotNull String key,
@@ -60,12 +56,9 @@ public interface EntityFactory {
 
     /**
      * Generates an {@link MetaData} element for target without persisting it.
-     * 
-     * @param key
-     *            {@link MetaData#getKey()}
-     * @param value
-     *            {@link MetaData#getValue()}
-     * 
+     *
+     * @param key {@link MetaData#getKey()}
+     * @param value {@link MetaData#getValue()}
      * @return {@link MetaData} object
      */
     MetaData generateTargetMetadata(@Size(min = 1, max = MetaData.KEY_MAX_SIZE) @NotNull String key,

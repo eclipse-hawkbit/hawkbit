@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 
 /**
  * Defines the remote event for the creation of a new {@link TargetTag}.
- *
  */
 public class TargetTagCreatedEvent extends RemoteEntityEvent<TargetTag> implements EntityCreatedEvent {
 
@@ -29,11 +28,9 @@ public class TargetTagCreatedEvent extends RemoteEntityEvent<TargetTag> implemen
 
     /**
      * Constructor.
-     * 
-     * @param tag
-     *            the tag which is deleted
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param tag the tag which is deleted
+     * @param applicationId the origin application id
      */
     public TargetTagCreatedEvent(final TargetTag tag, final String applicationId) {
         super(tag, applicationId);

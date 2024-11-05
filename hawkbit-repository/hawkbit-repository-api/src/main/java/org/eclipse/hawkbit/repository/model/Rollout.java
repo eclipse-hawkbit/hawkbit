@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
  * time. Monitoring of the rollout progress. Emergency rollout shutdown in case
  * of problems on to many devices and reporting capabilities for a complete
  * understanding of the rollout progress at each point in time.
- *
  */
 public interface Rollout extends NamedEntity {
 
@@ -119,9 +118,7 @@ public interface Rollout extends NamedEntity {
     Optional<String> getAccessControlContext();
 
     /**
-     *
      * State machine for rollout.
-     *
      */
     enum RolloutStatus {
 

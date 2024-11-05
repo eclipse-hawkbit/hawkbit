@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCond
 
 /**
  * Builder to build easily the {@link RolloutGroupConditions}.
- *
  */
 public class RolloutGroupConditionBuilder {
 
@@ -32,10 +31,8 @@ public class RolloutGroupConditionBuilder {
     /**
      * Sets the finish condition and expression on the builder.
      *
-     * @param condition
-     *            the finish condition
-     * @param expression
-     *            the finish expression
+     * @param condition the finish condition
+     * @param expression the finish expression
      * @return the builder itself
      */
     public RolloutGroupConditionBuilder successCondition(final RolloutGroupSuccessCondition condition,
@@ -48,10 +45,8 @@ public class RolloutGroupConditionBuilder {
     /**
      * Sets the success action and expression on the builder.
      *
-     * @param action
-     *            the success action
-     * @param expression
-     *            the error expression
+     * @param action the success action
+     * @param expression the error expression
      * @return the builder itself
      */
     public RolloutGroupConditionBuilder successAction(final RolloutGroupSuccessAction action, final String expression) {
@@ -63,10 +58,8 @@ public class RolloutGroupConditionBuilder {
     /**
      * Sets the error condition and expression on the builder.
      *
-     * @param condition
-     *            the error condition
-     * @param expression
-     *            the error expression
+     * @param condition the error condition
+     * @param expression the error expression
      * @return the builder itself
      */
     public RolloutGroupConditionBuilder errorCondition(final RolloutGroupErrorCondition condition,
@@ -79,10 +72,8 @@ public class RolloutGroupConditionBuilder {
     /**
      * Sets the error action and expression on the builder.
      *
-     * @param action
-     *            the error action
-     * @param expression
-     *            the error expression
+     * @param action the error action
+     * @param expression the error expression
      * @return the builder itself
      */
     public RolloutGroupConditionBuilder errorAction(final RolloutGroupErrorAction action, final String expression) {
@@ -93,7 +84,7 @@ public class RolloutGroupConditionBuilder {
 
     /**
      * Sets condition defaults.
-     * 
+     *
      * @return the builder itself
      */
     public RolloutGroupConditionBuilder withDefaults() {

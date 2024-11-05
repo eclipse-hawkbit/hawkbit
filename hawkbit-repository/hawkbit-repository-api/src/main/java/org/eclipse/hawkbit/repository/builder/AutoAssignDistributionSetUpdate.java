@@ -41,9 +41,8 @@ public class AutoAssignDistributionSetUpdate {
 
     /**
      * Constructor
-     * 
-     * @param targetFilterId
-     *            ID of {@link TargetFilterQuery} to update
+     *
+     * @param targetFilterId ID of {@link TargetFilterQuery} to update
      */
     public AutoAssignDistributionSetUpdate(final long targetFilterId) {
         this.targetFilterId = targetFilterId;
@@ -51,9 +50,8 @@ public class AutoAssignDistributionSetUpdate {
 
     /**
      * Specify {@link DistributionSet}
-     * 
-     * @param dsId
-     *            ID of the {@link DistributionSet}
+     *
+     * @param dsId ID of the {@link DistributionSet}
      * @return updated builder instance
      */
     public AutoAssignDistributionSetUpdate ds(final Long dsId) {
@@ -63,9 +61,8 @@ public class AutoAssignDistributionSetUpdate {
 
     /**
      * Specify {@link DistributionSet}
-     * 
-     * @param actionType
-     *            {@link ActionType} used for the auto assignment
+     *
+     * @param actionType {@link ActionType} used for the auto assignment
      * @return updated builder instance
      */
     public AutoAssignDistributionSetUpdate actionType(final ActionType actionType) {
@@ -75,9 +72,8 @@ public class AutoAssignDistributionSetUpdate {
 
     /**
      * Specify weight of resulting {@link Action}
-     * 
-     * @param weight
-     *            weight used for the auto assignment
+     *
+     * @param weight weight used for the auto assignment
      * @return updated builder instance
      */
     public AutoAssignDistributionSetUpdate weight(final Integer weight) {
@@ -88,9 +84,8 @@ public class AutoAssignDistributionSetUpdate {
     /**
      * Specify initial confirmation state of resulting {@link Action}
      *
-     * @param confirmationRequired
-     *            if confirmation is required for this auto assignment (considered
-     *            with confirmation flow active)
+     * @param confirmationRequired if confirmation is required for this auto assignment (considered
+     *         with confirmation flow active)
      * @return updated builder instance
      */
     public AutoAssignDistributionSetUpdate confirmationRequired(final boolean confirmationRequired) {

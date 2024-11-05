@@ -27,8 +27,7 @@ public final class ArtifactEncryptionUnsupportedException extends AbstractServer
     }
 
     /**
-     * @param message
-     *            of the error
+     * @param message of the error
      */
     public ArtifactEncryptionUnsupportedException(final String message) {
         super(message, SpServerError.SP_ARTIFACT_ENCRYPTION_NOT_SUPPORTED);

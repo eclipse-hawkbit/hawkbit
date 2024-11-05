@@ -33,9 +33,8 @@ public class TenantConfigurationValueChangeNotAllowedException extends AbstractS
      * Creates a new exception for the
      * {@link SpServerError#SP_CONFIGURATION_VALUE_CHANGE_NOT_ALLOWED} error
      * case.
-     * 
-     * @param message
-     *            A custom error message.
+     *
+     * @param message A custom error message.
      */
     public TenantConfigurationValueChangeNotAllowedException(final String message) {
         super(message, SpServerError.SP_CONFIGURATION_VALUE_CHANGE_NOT_ALLOWED);

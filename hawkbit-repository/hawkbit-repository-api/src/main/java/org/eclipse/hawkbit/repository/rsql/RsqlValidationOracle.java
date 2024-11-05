@@ -20,12 +20,10 @@ public interface RsqlValidationOracle {
     /**
      * Parses and validates an given RSQL based query syntax and provides
      * suggestion based on syntax error and cursor positioning.
-     * 
-     * @param rsqlQuery
-     *            an RSQL based query string to parse.
-     * @param cursorPosition
-     *            the position of the cursor to retrieve suggestions at the
-     *            position. {@code -1} indicates for no cursor suggestion
+     *
+     * @param rsqlQuery an RSQL based query string to parse.
+     * @param cursorPosition the position of the cursor to retrieve suggestions at the
+     *         position. {@code -1} indicates for no cursor suggestion
      * @return a validation oracle context providing information about syntax
      *         errors and possible suggestions for fixing the syntax error or at
      *         the cursor position to replace tokens

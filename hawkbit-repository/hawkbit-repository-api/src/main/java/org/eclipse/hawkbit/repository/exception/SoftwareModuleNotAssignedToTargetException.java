@@ -25,12 +25,10 @@ public class SoftwareModuleNotAssignedToTargetException extends EntityNotFoundEx
 
     /**
      * Constructor
-     * 
-     * @param moduleId
-     *            thats is not assigned to given {@link Target}
-     * @param controllerId
-     *            of the {@link Target} where given {@link SoftwareModule} is
-     *            not part of
+     *
+     * @param moduleId thats is not assigned to given {@link Target}
+     * @param controllerId of the {@link Target} where given {@link SoftwareModule} is
+     *         not part of
      */
     public SoftwareModuleNotAssignedToTargetException(final Long moduleId, final String controllerId) {
         super("No assignment found for " + SoftwareModule.class.getSimpleName() + " with id {" + moduleId + "} to "

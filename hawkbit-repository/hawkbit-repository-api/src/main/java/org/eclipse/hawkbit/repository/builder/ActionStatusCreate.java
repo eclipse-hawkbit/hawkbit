@@ -21,19 +21,17 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
  * Builder to create a new {@link ActionStatus} entry. Defines all fields that
  * can be set at creation time. Other fields are set by the repository
  * automatically, e.g. {@link BaseEntity#getCreatedAt()}.
- *
  */
 public interface ActionStatusCreate {
+
     /**
-     * @param status
-     *            {@link ActionStatus#getStatus()}
+     * @param status {@link ActionStatus#getStatus()}
      * @return updated {@link ActionStatusCreate} object
      */
     ActionStatusCreate status(@NotNull Status status);
 
     /**
-     * @param occurredAt
-     *            for {@link ActionStatus#getOccurredAt()}
+     * @param occurredAt for {@link ActionStatus#getOccurredAt()}
      * @return updated {@link ActionStatusCreate} object
      */
     ActionStatusCreate occurredAt(long occurredAt);
@@ -41,15 +39,13 @@ public interface ActionStatusCreate {
     ActionStatusCreate code(int code);
 
     /**
-     * @param messages
-     *            for {@link ActionStatus#getMessages()}
+     * @param messages for {@link ActionStatus#getMessages()}
      * @return updated {@link ActionStatusCreate} object
      */
     ActionStatusCreate messages(Collection<String> messages);
 
     /**
-     * @param message
-     *            for {@link ActionStatus#getMessages()}
+     * @param message for {@link ActionStatus#getMessages()}
      * @return updated {@link ActionStatusCreate} object
      */
     ActionStatusCreate message(String message);

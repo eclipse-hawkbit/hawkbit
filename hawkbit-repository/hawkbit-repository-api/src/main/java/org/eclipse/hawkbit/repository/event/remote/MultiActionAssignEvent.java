@@ -9,11 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import java.util.List;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.Action;
-
-import java.util.List;
 
 /**
  * Generic deployment event for the Multi-Assignments feature. The event extends
@@ -30,12 +30,9 @@ public class MultiActionAssignEvent extends MultiActionEvent {
     /**
      * Constructor.
      *
-     * @param tenant
-     *            tenant the event is scoped to
-     * @param applicationId
-     *            the application id
-     * @param actions
-     *            the actions of the deployment action
+     * @param tenant tenant the event is scoped to
+     * @param applicationId the application id
+     * @param actions the actions of the deployment action
      */
     public MultiActionAssignEvent(String tenant, String applicationId, List<Action> actions) {
         super(tenant, applicationId, actions);

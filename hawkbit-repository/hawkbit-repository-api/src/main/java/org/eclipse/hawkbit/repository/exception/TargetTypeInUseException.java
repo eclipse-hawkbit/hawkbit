@@ -30,8 +30,7 @@ public class TargetTypeInUseException extends AbstractServerRtException {
     /**
      * Parameterized constructor.
      *
-     * @param cause
-     *            of the exception
+     * @param cause of the exception
      */
     public TargetTypeInUseException(final Throwable cause) {
         super(THIS_ERROR, cause);
@@ -40,10 +39,8 @@ public class TargetTypeInUseException extends AbstractServerRtException {
     /**
      * Parameterized constructor.
      *
-     * @param message
-     *            of the exception
-     * @param cause
-     *            of the exception
+     * @param message of the exception
+     * @param cause of the exception
      */
     public TargetTypeInUseException(final String message, final Throwable cause) {
         super(message, THIS_ERROR, cause);
@@ -52,8 +49,7 @@ public class TargetTypeInUseException extends AbstractServerRtException {
     /**
      * Parameterized constructor.
      *
-     * @param message
-     *            of the exception
+     * @param message of the exception
      */
     public TargetTypeInUseException(final String message) {
         super(message, THIS_ERROR);

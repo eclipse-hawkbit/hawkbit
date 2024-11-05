@@ -12,13 +12,13 @@ package org.eclipse.hawkbit.utils;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.USER_CONFIRMATION_ENABLED;
 
+import java.io.Serializable;
+import java.util.function.Function;
+
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-
-import java.io.Serializable;
-import java.util.function.Function;
 
 /**
  * A collection of static helper methods for the tenant configuration
@@ -36,11 +36,9 @@ public final class TenantConfigHelper {
 
     /**
      * Setting the context of the tenant.
-     * 
-     * @param systemSecurityContext
-     *            Security context used to get the tenant and for execution
-     * @param tenantConfigurationManagement
-     *            to get the value from
+     *
+     * @param systemSecurityContext Security context used to get the tenant and for execution
+     * @param tenantConfigurationManagement to get the value from
      * @return is active
      */
     public static TenantConfigHelper usingContext(final SystemSecurityContext systemSecurityContext,
@@ -55,7 +53,7 @@ public final class TenantConfigHelper {
 
     /**
      * Is multi-assignments enabled for the current tenant
-     * 
+     *
      * @return is active
      */
     public boolean isMultiAssignmentsEnabled() {

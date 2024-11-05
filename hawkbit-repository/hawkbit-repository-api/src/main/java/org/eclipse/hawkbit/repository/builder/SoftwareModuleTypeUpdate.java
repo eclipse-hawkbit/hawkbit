@@ -17,19 +17,17 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 /**
  * Builder to update an existing {@link SoftwareModuleType} entry. Defines all
  * fields that can be updated.
- *
  */
 public interface SoftwareModuleTypeUpdate {
+
     /**
-     * @param description
-     *            for {@link SoftwareModuleType#getDescription()}
+     * @param description for {@link SoftwareModuleType#getDescription()}
      * @return updated builder instance
      */
     SoftwareModuleTypeUpdate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
-     * @param colour
-     *            for {@link SoftwareModuleType#getColour()}
+     * @param colour for {@link SoftwareModuleType#getColour()}
      * @return updated builder instance
      */
     SoftwareModuleTypeUpdate colour(@Size(max = SoftwareModuleType.COLOUR_MAX_SIZE) String colour);

@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.exception.SpServerError;
 /**
  * Exception which is thrown, when the validation of the configuration value has
  * not been successful.
- *
  */
 public class TenantConfigurationValidatorException extends AbstractServerRtException {
 
@@ -31,9 +30,8 @@ public class TenantConfigurationValidatorException extends AbstractServerRtExcep
 
     /**
      * Parameterized constructor.
-     * 
-     * @param cause
-     *            of the exception
+     *
+     * @param cause of the exception
      */
     public TenantConfigurationValidatorException(final Throwable cause) {
         super(THIS_ERROR, cause);
@@ -41,11 +39,9 @@ public class TenantConfigurationValidatorException extends AbstractServerRtExcep
 
     /**
      * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
-     * @param cause
-     *            of the exception
+     *
+     * @param message of the exception
+     * @param cause of the exception
      */
     public TenantConfigurationValidatorException(final String message, final Throwable cause) {
         super(message, THIS_ERROR, cause);
@@ -53,9 +49,8 @@ public class TenantConfigurationValidatorException extends AbstractServerRtExcep
 
     /**
      * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
+     *
+     * @param message of the exception
      */
     public TenantConfigurationValidatorException(final String message) {
         super(message, THIS_ERROR);

@@ -9,15 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import lombok.Data;
-import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.ActionProperties;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import lombok.Data;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.ActionProperties;
 
 /**
  * Abstract class providing information about an assignment.

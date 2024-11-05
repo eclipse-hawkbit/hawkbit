@@ -24,7 +24,7 @@ public interface RolloutExecutor {
     /**
      * This execution should only be triggered by the system as a background job and
      * not available via API.
-     * 
+     *
      * Process rollout based on its current {@link Rollout#getStatus()}.
      *
      * For {@link RolloutStatus#CREATING} that means creating the

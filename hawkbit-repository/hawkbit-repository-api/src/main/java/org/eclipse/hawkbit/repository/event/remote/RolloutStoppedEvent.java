@@ -15,7 +15,6 @@ import lombok.Data;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 /**
- *
  * Event that is published when a rollout is stopped due to invalidation of a
  * {@link DistributionSet}.
  */
@@ -37,14 +36,10 @@ public class RolloutStoppedEvent extends RemoteTenantAwareEvent {
     /**
      * Constructor for json serialization.
      *
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param entityClass
-     *            the entity class
-     * @param applicationId
-     *            the origin application id
+     * @param tenant the tenant
+     * @param entityId the entity id
+     * @param entityClass the entity class
+     * @param applicationId the origin application id
      */
     public RolloutStoppedEvent(final String tenant, final String applicationId, final long rolloutId,
             final Collection<Long> rolloutGroupIds) {

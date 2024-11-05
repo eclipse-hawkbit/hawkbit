@@ -43,12 +43,9 @@ public abstract class MultiActionEvent extends RemoteTenantAwareEvent implements
     /**
      * Constructor.
      *
-     * @param tenant
-     *            tenant the event is scoped to
-     * @param applicationId
-     *            the application id
-     * @param actions
-     *            the actions involved
+     * @param tenant tenant the event is scoped to
+     * @param applicationId the application id
+     * @param actions the actions involved
      */
     protected MultiActionEvent(String tenant, String applicationId, List<Action> actions) {
         super(applicationId, tenant, applicationId);

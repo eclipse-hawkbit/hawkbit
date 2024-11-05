@@ -121,15 +121,14 @@ public interface Action extends TenantAwareBaseEntity {
     String getMaintenanceWindowTimeZone();
 
     /**
-     * @param externalRef
-     *            associated with this action
-     */
-    void setExternalRef(@NotEmpty String externalRef);
-
-    /**
      * @return externalRef of the action
      */
     String getExternalRef();
+
+    /**
+     * @param externalRef associated with this action
+     */
+    void setExternalRef(@NotEmpty String externalRef);
 
     /**
      * @return the username that initiated this action (directly or indirectly)
@@ -147,9 +146,8 @@ public interface Action extends TenantAwareBaseEntity {
      * {@code hitTimeMillis}, by means if the given milliseconds are greater
      * than the forcedTime.
      *
-     * @param hitTimeMillis
-     *            the milliseconds, mostly the
-     *            {@link System#currentTimeMillis()}
+     * @param hitTimeMillis the milliseconds, mostly the
+     *         {@link System#currentTimeMillis()}
      * @return {@code true} if this {@link #getActionType()} is in
      *         {@link ActionType#TIMEFORCED} and the given {@code hitTimeMillis}
      *         is greater than the {@link #getForcedTime()} otherwise
@@ -173,12 +171,12 @@ public interface Action extends TenantAwareBaseEntity {
      */
     default boolean isForcedOrTimeForced() {
         switch (getActionType()) {
-        case FORCED:
-            return true;
-        case TIMEFORCED:
-            return isHitAutoForceTime(System.currentTimeMillis());
-        default:
-            return false;
+            case FORCED:
+                return true;
+            case TIMEFORCED:
+                return isHitAutoForceTime(System.currentTimeMillis());
+            default:
+                return false;
         }
     }
 
@@ -197,12 +195,59 @@ public interface Action extends TenantAwareBaseEntity {
     }
 
     /**
+     * Returns the start time of next available maintenance window for the
+     * {@link Action} as {@link ZonedDateTime}. If a maintenance window is
+     * already active, the start time of currently active window is returned.
+     *
+     * @return the start time as { @link Optional<ZonedDateTime>}.
+     */
+    Optional<ZonedDateTime> getMaintenanceWindowStartTime();
+
+    /**
+     * The method checks whether the action has a maintenance schedule defined
+     * for it. A maintenance schedule defines a set of maintenance windows
+     * during which actual update can be performed. A valid schedule defines at
+     * least one maintenance window.
+     *
+     * @return true if action has a maintenance schedule, else false.
+     */
+    boolean hasMaintenanceSchedule();
+
+    /**
+     * The method checks whether the maintenance schedule has already lapsed for
+     * the action, i.e. there are no more windows available for maintenance.
+     * Controller manager uses the method to check if the maintenance schedule
+     * has lapsed, and automatically cancels the action if it is lapsed.
+     *
+     * @return true if maintenance schedule has lapsed, else false.
+     */
+    boolean isMaintenanceScheduleLapsed();
+
+    /**
+     * The method checks whether a maintenance window is available for the
+     * action to proceed. If it is available, a 'true' value is returned. The
+     * maintenance window is considered available: 1) If there is no maintenance
+     * schedule at all, in which case device can start update any time after
+     * download is finished; or 2) the current time is within a scheduled
+     * maintenance window start and end time.
+     *
+     * @return true if maintenance window is available, else false.
+     */
+    boolean isMaintenanceWindowAvailable();
+
+    /**
+     * Checks if the action is waiting for confirmation.
+     *
+     * @return true if the action is waiting for confirmation, else false
+     */
+    boolean isWaitingConfirmation();
+
+    /**
      * Action status as reported by the controller.
      *
      * Be aware that JPA is persisting the ordinal number of the enum by means
      * the ordered number in the enum. So don't re-order the enums within the
      * Status enum declaration!
-     *
      */
     enum Status {
         /**
@@ -270,7 +315,6 @@ public interface Action extends TenantAwareBaseEntity {
 
     /**
      * The action type for this action relation.
-     *
      */
     enum ActionType {
         /**
@@ -295,52 +339,5 @@ public interface Action extends TenantAwareBaseEntity {
          */
         DOWNLOAD_ONLY
     }
-
-    /**
-     * Returns the start time of next available maintenance window for the
-     * {@link Action} as {@link ZonedDateTime}. If a maintenance window is
-     * already active, the start time of currently active window is returned.
-     *
-     * @return the start time as { @link Optional<ZonedDateTime>}.
-     */
-    Optional<ZonedDateTime> getMaintenanceWindowStartTime();
-
-    /**
-     * The method checks whether the action has a maintenance schedule defined
-     * for it. A maintenance schedule defines a set of maintenance windows
-     * during which actual update can be performed. A valid schedule defines at
-     * least one maintenance window.
-     *
-     * @return true if action has a maintenance schedule, else false.
-     */
-    boolean hasMaintenanceSchedule();
-
-    /**
-     * The method checks whether the maintenance schedule has already lapsed for
-     * the action, i.e. there are no more windows available for maintenance.
-     * Controller manager uses the method to check if the maintenance schedule
-     * has lapsed, and automatically cancels the action if it is lapsed.
-     *
-     * @return true if maintenance schedule has lapsed, else false.
-     */
-    boolean isMaintenanceScheduleLapsed();
-
-    /**
-     * The method checks whether a maintenance window is available for the
-     * action to proceed. If it is available, a 'true' value is returned. The
-     * maintenance window is considered available: 1) If there is no maintenance
-     * schedule at all, in which case device can start update any time after
-     * download is finished; or 2) the current time is within a scheduled
-     * maintenance window start and end time.
-     *
-     * @return true if maintenance window is available, else false.
-     */
-    boolean isMaintenanceWindowAvailable();
-
-    /**
-     * Checks if the action is waiting for confirmation.
-     * @return true if the action is waiting for confirmation, else false
-     */
-    boolean isWaitingConfirmation();
 
 }

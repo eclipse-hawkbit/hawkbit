@@ -20,9 +20,10 @@ import org.eclipse.hawkbit.repository.model.Rollout;
  * can be updated.
  */
 public interface RolloutUpdate {
+
     /**
      * Set name of the {@link Rollout}
-     * 
+     *
      * @param name for {@link Rollout#getName()}
      * @return updated builder instance
      */
@@ -30,7 +31,7 @@ public interface RolloutUpdate {
 
     /**
      * Set description of the {@link Rollout}
-     * 
+     *
      * @param description for {@link Rollout#getDescription()}
      * @return updated builder instance
      */

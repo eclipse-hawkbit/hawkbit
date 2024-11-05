@@ -14,9 +14,9 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 
 /**
  * Defines the remote event of creating a new {@link Rollout}.
- *
  */
 public class RolloutCreatedEvent extends RemoteEntityEvent<Rollout> implements EntityCreatedEvent {
+
     private static final long serialVersionUID = 1L;
 
     /**
@@ -28,11 +28,9 @@ public class RolloutCreatedEvent extends RemoteEntityEvent<Rollout> implements E
 
     /**
      * Constructor.
-     * 
-     * @param baseEntity
-     *            the Rollout
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param baseEntity the Rollout
+     * @param applicationId the origin application id
      */
     public RolloutCreatedEvent(final Rollout baseEntity, final String applicationId) {
         super(baseEntity, applicationId);

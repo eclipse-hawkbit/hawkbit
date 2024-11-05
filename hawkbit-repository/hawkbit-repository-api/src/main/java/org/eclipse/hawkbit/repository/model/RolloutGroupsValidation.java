@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.model;
 import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
+
 import lombok.Data;
 
 /**
@@ -33,12 +34,10 @@ public class RolloutGroupsValidation {
 
     /**
      * Instantiates a new validation result
-     * 
-     * @param totalTargets
-     *            The total amount of targets in a {@link Rollout}
-     * @param targetsPerGroup
-     *            A list containing the count of targets for each
-     *            {@link RolloutGroup}
+     *
+     * @param totalTargets The total amount of targets in a {@link Rollout}
+     * @param targetsPerGroup A list containing the count of targets for each
+     *         {@link RolloutGroup}
      */
     public RolloutGroupsValidation(final long totalTargets, @NotNull final List<Long> targetsPerGroup) {
         this.totalTargets = totalTargets;

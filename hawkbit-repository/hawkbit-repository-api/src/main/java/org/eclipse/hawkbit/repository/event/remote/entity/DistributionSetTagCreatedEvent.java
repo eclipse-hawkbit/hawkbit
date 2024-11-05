@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 /**
  * Defines the {@link RemoteEntityEvent} for creation of a new
  * {@link DistributionSetTag}.
- *
  */
 public class DistributionSetTagCreatedEvent extends RemoteEntityEvent<DistributionSetTag>
         implements EntityCreatedEvent {
@@ -31,11 +30,9 @@ public class DistributionSetTagCreatedEvent extends RemoteEntityEvent<Distributi
 
     /**
      * Constructor.
-     * 
-     * @param tag
-     *            the tag which is deleted
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param tag the tag which is deleted
+     * @param applicationId the origin application id
      */
     public DistributionSetTagCreatedEvent(final DistributionSetTag tag, final String applicationId) {
         super(tag, applicationId);

@@ -19,34 +19,29 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 /**
  * Builder to update an existing {@link DistributionSetType} entry. Defines all
  * fields that can be updated.
- *
  */
 public interface DistributionSetTypeUpdate {
 
     /**
-     * @param description
-     *            for {@link DistributionSetType#getDescription()}
+     * @param description for {@link DistributionSetType#getDescription()}
      * @return updated builder instance
      */
     DistributionSetTypeUpdate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
-     * @param colour
-     *            for {@link DistributionSetType#getColour()}
+     * @param colour for {@link DistributionSetType#getColour()}
      * @return updated builder instance
      */
     DistributionSetTypeUpdate colour(@Size(max = DistributionSetType.COLOUR_MAX_SIZE) String colour);
 
     /**
-     * @param mandatory
-     *            for {@link DistributionSetType#getMandatoryModuleTypes()}
+     * @param mandatory for {@link DistributionSetType#getMandatoryModuleTypes()}
      * @return updated builder instance
      */
     DistributionSetTypeUpdate mandatory(Collection<Long> mandatory);
 
     /**
-     * @param optional
-     *            for {@link DistributionSetType#getOptionalModuleTypes()}
+     * @param optional for {@link DistributionSetType#getOptionalModuleTypes()}
      * @return updated builder instance
      */
     DistributionSetTypeUpdate optional(Collection<Long> optional);

@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Service responsible for encryption operations.
- *
  */
 public final class ArtifactEncryptionService {
 
@@ -55,8 +54,7 @@ public final class ArtifactEncryptionService {
      * Generates encryption secrets and saves them in secret store by software
      * module id reference.
      *
-     * @param smId
-     *            software module id
+     * @param smId software module id
      */
     public void addSoftwareModuleEncryptionSecrets(final long smId) {
         if (!isEncryptionSupported()) {
@@ -73,10 +71,8 @@ public final class ArtifactEncryptionService {
      * Encrypts artifact stream using the keys retrieved from secrets store by
      * software module id reference.
      *
-     * @param smId
-     *            software module id
-     * @param artifactStream
-     *            artifact stream to encrypt
+     * @param smId software module id
+     * @param artifactStream artifact stream to encrypt
      * @return encrypted input stream
      */
     public InputStream encryptSoftwareModuleArtifact(final long smId, final InputStream artifactStream) {
@@ -87,26 +83,12 @@ public final class ArtifactEncryptionService {
         return artifactEncryption.encryptStream(getSoftwareModuleEncryptionSecrets(smId), artifactStream);
     }
 
-    private Map<String, String> getSoftwareModuleEncryptionSecrets(final long smId) {
-        final Set<String> requiredSecretsKeys = artifactEncryption.requiredSecretKeys();
-        final Map<String, String> requiredSecrets = new HashMap<>();
-        for (final String requiredSecretsKey : requiredSecretsKeys) {
-            final Optional<String> requiredSecretsValue = artifactEncryptionSecretsStore.getSecret(smId,
-                    requiredSecretsKey);
-            requiredSecretsValue.ifPresent(secretValue -> requiredSecrets.put(requiredSecretsKey, secretValue));
-        }
-
-        return requiredSecrets;
-    }
-
     /**
      * Decrypts artifact stream using the keys retrieved from secrets store by
      * software module id reference.
      *
-     * @param smId
-     *            software module id
-     * @param encryptedArtifactStream
-     *            artifact stream to decrypt
+     * @param smId software module id
+     * @param encryptedArtifactStream artifact stream to decrypt
      * @return decrypted input stream
      */
     public InputStream decryptSoftwareModuleArtifact(final long smId, final InputStream encryptedArtifactStream) {
@@ -124,5 +106,17 @@ public final class ArtifactEncryptionService {
      */
     public int encryptionSizeOverhead() {
         return artifactEncryption.encryptionSizeOverhead();
+    }
+
+    private Map<String, String> getSoftwareModuleEncryptionSecrets(final long smId) {
+        final Set<String> requiredSecretsKeys = artifactEncryption.requiredSecretKeys();
+        final Map<String, String> requiredSecrets = new HashMap<>();
+        for (final String requiredSecretsKey : requiredSecretsKeys) {
+            final Optional<String> requiredSecretsValue = artifactEncryptionSecretsStore.getSecret(smId,
+                    requiredSecretsKey);
+            requiredSecretsValue.ifPresent(secretValue -> requiredSecrets.put(requiredSecretsKey, secretValue));
+        }
+
+        return requiredSecrets;
     }
 }

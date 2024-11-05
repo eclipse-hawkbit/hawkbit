@@ -43,7 +43,7 @@ public class RegexCharacterCollection {
     public enum RegexChar {
         WHITESPACE("\\s", "character.whitespace"), DIGITS("0-9", "character.digits"), QUOTATION_MARKS("'\"",
                 "character.quotationMarks"), SLASHES("\\/\\\\", "character.slashes"), GREATER_THAN(
-                        ">"), LESS_THAN("<"), EQUALS_SYMBOL("="), EXCLAMATION_MARK("!"), QUESTION_MARK("?"), COLON(":");
+                ">"), LESS_THAN("<"), EQUALS_SYMBOL("="), EXCLAMATION_MARK("!"), QUESTION_MARK("?"), COLON(":");
 
         private final String regExp;
         private final String l18nReferenceDescription;
@@ -51,7 +51,7 @@ public class RegexCharacterCollection {
         RegexChar(final String character) {
             this(character, null);
         }
-    
+
         RegexChar(final String regExp, final String l18nReferenceDescription) {
             this.regExp = regExp;
             this.l18nReferenceDescription = l18nReferenceDescription;

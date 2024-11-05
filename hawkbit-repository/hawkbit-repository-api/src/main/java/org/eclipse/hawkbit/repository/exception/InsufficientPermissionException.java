@@ -15,9 +15,6 @@ import org.eclipse.hawkbit.exception.SpServerError;
 /**
  * Exception which is thrown in case the current security context object does
  * not hold a required authority/permission.
- * 
- *
- *
  */
 public class InsufficientPermissionException extends AbstractServerRtException {
 
@@ -25,9 +22,8 @@ public class InsufficientPermissionException extends AbstractServerRtException {
 
     /**
      * creates new InsufficientPermissionException.
-     * 
-     * @param cause
-     *            the cause of the exception
+     *
+     * @param cause the cause of the exception
      */
     public InsufficientPermissionException(final Throwable cause) {
         super(SpServerError.SP_INSUFFICIENT_PERMISSION, cause);

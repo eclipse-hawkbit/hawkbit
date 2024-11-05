@@ -20,27 +20,23 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
  * Builder to create a new {@link SoftwareModuleMetadata} entry. Defines all
  * fields that can be set at creation time. Other fields are set by the
  * repository automatically, e.g. {@link BaseEntity#getCreatedAt()}.
- *
  */
 public interface SoftwareModuleMetadataCreate {
 
     /**
-     * @param key
-     *            for {@link MetaData#getKey()}
+     * @param key for {@link MetaData#getKey()}
      * @return updated builder instance
      */
     SoftwareModuleMetadataCreate key(@Size(min = 1, max = MetaData.KEY_MAX_SIZE) @NotNull String key);
 
     /**
-     * @param value
-     *            for {@link MetaData#getValue()}
+     * @param value for {@link MetaData#getValue()}
      * @return updated builder instance
      */
     SoftwareModuleMetadataCreate value(@Size(max = MetaData.VALUE_MAX_SIZE) String value);
 
     /**
-     * @param visible
-     *            for {@link SoftwareModuleMetadata#isTargetVisible()}
+     * @param visible for {@link SoftwareModuleMetadata#isTargetVisible()}
      * @return updated builder instance
      */
     SoftwareModuleMetadataCreate targetVisible(Boolean visible);

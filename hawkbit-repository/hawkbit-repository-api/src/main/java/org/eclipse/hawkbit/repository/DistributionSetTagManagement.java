@@ -28,7 +28,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Management service for {@link DistributionSetTag}s.
- *
  */
 public interface DistributionSetTagManagement extends RepositoryManagement<DistributionSetTag, TagCreate, TagUpdate> {
 
@@ -36,11 +35,8 @@ public interface DistributionSetTagManagement extends RepositoryManagement<Distr
      * Deletes {@link DistributionSetTag} by given
      * {@link DistributionSetTag#getName()}.
      *
-     * @param tagName
-     *            to be deleted
-     * 
-     * @throws EntityNotFoundException
-     *             if tag with given name does not exist
+     * @param tagName to be deleted
+     * @throws EntityNotFoundException if tag with given name does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void delete(@NotEmpty String tagName);
@@ -48,8 +44,7 @@ public interface DistributionSetTagManagement extends RepositoryManagement<Distr
     /**
      * Find {@link DistributionSet} based on given name.
      *
-     * @param name
-     *            to look for.
+     * @param name to look for.
      * @return {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
@@ -57,16 +52,11 @@ public interface DistributionSetTagManagement extends RepositoryManagement<Distr
 
     /**
      * Finds all {@link TargetTag} assigned to given {@link Target}.
-     * 
-     * @param pageable
-     *            information for page size, offset and sort order.
      *
-     * @param distributionSetId
-     *            of the {@link DistributionSet}
+     * @param pageable information for page size, offset and sort order.
+     * @param distributionSetId of the {@link DistributionSet}
      * @return page of the found {@link TargetTag}s
-     * 
-     * @throws EntityNotFoundException
-     *             if {@link DistributionSet} with given ID does not exist
+     * @throws EntityNotFoundException if {@link DistributionSet} with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSetTag> findByDistributionSet(@NotNull Pageable pageable, long distributionSetId);

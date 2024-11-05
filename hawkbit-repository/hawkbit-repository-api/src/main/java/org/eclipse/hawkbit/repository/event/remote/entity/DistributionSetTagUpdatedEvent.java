@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 
 /**
  * Defines the remote event for update a {@link DistributionSetTag}.
- *
  */
 public class DistributionSetTagUpdatedEvent extends RemoteEntityEvent<DistributionSetTag>
         implements EntityUpdatedEvent {
@@ -30,11 +29,9 @@ public class DistributionSetTagUpdatedEvent extends RemoteEntityEvent<Distributi
 
     /**
      * Constructor.
-     * 
-     * @param tag
-     *            tag the tag which is updated
-     * @param applicationId
-     *            the applicationID
+     *
+     * @param tag tag the tag which is updated
+     * @param applicationId the applicationID
      */
     public DistributionSetTagUpdatedEvent(final DistributionSetTag tag, final String applicationId) {
         super(tag, applicationId);

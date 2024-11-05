@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
 
@@ -19,20 +18,17 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 /**
  * Builder to update an existing {@link SoftwareModule} entry. Defines all
  * fields that can be updated.
- *
  */
 public interface SoftwareModuleUpdate {
 
     /**
-     * @param description
-     *            for {@link SoftwareModule#getDescription()}
+     * @param description for {@link SoftwareModule#getDescription()}
      * @return updated builder instance
      */
     SoftwareModuleUpdate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
-     * @param vendor
-     *            for {@link SoftwareModule#getVendor()}
+     * @param vendor for {@link SoftwareModule#getVendor()}
      * @return updated builder instance
      */
     SoftwareModuleUpdate vendor(@Size(max = SoftwareModule.VENDOR_MAX_SIZE) String vendor);

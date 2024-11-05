@@ -9,10 +9,10 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
-
-import java.io.Serial;
 
 /**
  * Thrown if tried creation of type with no key nor name.

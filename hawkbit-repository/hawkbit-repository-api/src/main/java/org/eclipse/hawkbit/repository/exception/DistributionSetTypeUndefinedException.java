@@ -17,15 +17,12 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 /**
  * Thrown if the user tries to assign modules to a {@link DistributionSet} that
  * has to {@link DistributionSetType} defined.
- *
- *
- *
- *
  */
 public class DistributionSetTypeUndefinedException extends AbstractServerRtException {
+
     /**
-    *
-    */
+     *
+     */
     private static final long serialVersionUID = 1L;
 
     /**
@@ -37,16 +34,14 @@ public class DistributionSetTypeUndefinedException extends AbstractServerRtExcep
     }
 
     /**
-     * @param cause
-     *            for the exception
+     * @param cause for the exception
      */
     public DistributionSetTypeUndefinedException(final Throwable cause) {
         super(SpServerError.SP_DS_TYPE_UNDEFINED, cause);
     }
 
     /**
-     * @param message
-     *            of the error
+     * @param message of the error
      */
     public DistributionSetTypeUndefinedException(final String message) {
         super(message, SpServerError.SP_DS_TYPE_UNDEFINED);

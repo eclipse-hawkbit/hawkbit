@@ -167,7 +167,7 @@ public class TenantConfigurationProperties {
 
         /**
          * validates if a object matches the allowed data format of the corresponding key
-         * 
+         *
          * @param context application context
          * @param value which will be validated
          * @throws TenantConfigurationValidatorException is thrown, when object is invalid

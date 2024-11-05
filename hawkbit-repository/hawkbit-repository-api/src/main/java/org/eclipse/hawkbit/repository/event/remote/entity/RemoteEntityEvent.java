@@ -12,14 +12,13 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 import java.io.Serial;
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * A base definition class for remote events which contain a tenant aware base entity.

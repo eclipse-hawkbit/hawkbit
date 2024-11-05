@@ -30,9 +30,8 @@ public class EntityReadOnlyException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
-     * @param cause
-     *            of the exception
+     *
+     * @param cause of the exception
      */
     public EntityReadOnlyException(final Throwable cause) {
         super(THIS_ERROR, cause);
@@ -40,11 +39,9 @@ public class EntityReadOnlyException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
-     * @param cause
-     *            of the exception
+     *
+     * @param message of the exception
+     * @param cause of the exception
      */
     public EntityReadOnlyException(final String message, final Throwable cause) {
         super(message, THIS_ERROR, cause);
@@ -52,9 +49,8 @@ public class EntityReadOnlyException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
+     *
+     * @param message of the exception
      */
     public EntityReadOnlyException(final String message) {
         super(message, THIS_ERROR);

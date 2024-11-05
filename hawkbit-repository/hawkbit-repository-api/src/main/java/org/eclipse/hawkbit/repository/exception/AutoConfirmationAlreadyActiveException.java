@@ -32,9 +32,8 @@ public class AutoConfirmationAlreadyActiveException extends AbstractServerRtExce
 
     /**
      * Parameterized constructor.
-     * 
-     * @param cause
-     *            of the exception
+     *
+     * @param cause of the exception
      */
     public AutoConfirmationAlreadyActiveException(final Throwable cause) {
         super(THIS_ERROR, cause);
@@ -44,8 +43,7 @@ public class AutoConfirmationAlreadyActiveException extends AbstractServerRtExce
      * Parameterized constructor for auto confirmation is already active for given
      * controller ID
      *
-     * @param controllerId
-     *            of affected device
+     * @param controllerId of affected device
      */
     public AutoConfirmationAlreadyActiveException(final String controllerId) {
         super("Auto confirmation is already active for device " + controllerId, THIS_ERROR);

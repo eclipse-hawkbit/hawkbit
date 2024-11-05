@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 /**
  * Defines the the remote of creating a new {@link DistributionSet}.
- *
  */
 public class DistributionSetCreatedEvent extends RemoteEntityEvent<DistributionSet> implements EntityCreatedEvent {
 
@@ -29,11 +28,9 @@ public class DistributionSetCreatedEvent extends RemoteEntityEvent<DistributionS
 
     /**
      * Constructor.
-     * 
-     * @param distributionSet
-     *            the created distributionSet
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param distributionSet the created distributionSet
+     * @param applicationId the origin application id
      */
     public DistributionSetCreatedEvent(final DistributionSet distributionSet, final String applicationId) {
         super(distributionSet, applicationId);

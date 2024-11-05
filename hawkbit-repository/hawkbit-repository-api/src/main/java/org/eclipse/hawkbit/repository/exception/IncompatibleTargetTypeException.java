@@ -31,11 +31,9 @@ public class IncompatibleTargetTypeException extends AbstractServerRtException {
     /**
      * Creates a new IncompatibleTargetTypeException with
      * {@link SpServerError#SP_TARGET_TYPE_INCOMPATIBLE} error.
-     * 
-     * @param targetTypeName
-     *            Name of the target type
-     * @param distributionSetTypeNames
-     *            Names of the distribution set types
+     *
+     * @param targetTypeName Name of the target type
+     * @param distributionSetTypeNames Names of the distribution set types
      */
     public IncompatibleTargetTypeException(final String targetTypeName,
             final Collection<String> distributionSetTypeNames) {
@@ -49,10 +47,8 @@ public class IncompatibleTargetTypeException extends AbstractServerRtException {
      * Creates a new IncompatibleTargetTypeException with
      * {@link SpServerError#SP_TARGET_TYPE_INCOMPATIBLE} error.
      *
-     * @param targetTypeNames
-     *            Name of the target types
-     * @param distributionSetTypeName
-     *            Name of the distribution set type
+     * @param targetTypeNames Name of the target types
+     * @param distributionSetTypeName Name of the distribution set type
      */
     public IncompatibleTargetTypeException(final Collection<String> targetTypeNames,
             final String distributionSetTypeName) {
