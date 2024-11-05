@@ -11,17 +11,16 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import jakarta.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.hateoas.RepresentationModel;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * Update action resource.
@@ -221,13 +220,10 @@ public class DdiDeploymentBase extends RepresentationModel<DdiDeploymentBase> {
     /**
      * Constructor.
      *
-     * @param id
-     *            of the update action
-     * @param deployment
-     *            details
-     * @param actionHistory
-     *            containing current action status and a list of feedback
-     *            messages received earlier from the controller.
+     * @param id of the update action
+     * @param deployment details
+     * @param actionHistory containing current action status and a list of feedback
+     *         messages received earlier from the controller.
      */
     public DdiDeploymentBase(final String id, final DdiDeployment deployment, final DdiActionHistory actionHistory) {
         this.id = id;

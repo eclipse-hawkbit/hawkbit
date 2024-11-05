@@ -12,18 +12,16 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
-import org.junit.jupiter.api.Test;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-
-import java.util.List;
+import org.junit.jupiter.api.Test;
 
 /**
  * Check DDI api model classes for '@JsonIgnoreProperties' annotation

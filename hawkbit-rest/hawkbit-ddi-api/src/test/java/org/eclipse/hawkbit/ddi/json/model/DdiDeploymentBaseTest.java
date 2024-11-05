@@ -20,14 +20,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.jupiter.api.Test;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test serializability of DDI api model 'DdiDeploymentBase'

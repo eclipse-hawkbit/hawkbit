@@ -29,10 +29,8 @@ public class DdiAssignedVersion {
     /**
      * Constructor
      *
-     * @param name
-     *            Distribution set name
-     * @param version
-     *            Distribution set version
+     * @param name Distribution set name
+     * @param version Distribution set version
      */
     @JsonCreator
     public DdiAssignedVersion(@JsonProperty(value = "name", required = true) String name,

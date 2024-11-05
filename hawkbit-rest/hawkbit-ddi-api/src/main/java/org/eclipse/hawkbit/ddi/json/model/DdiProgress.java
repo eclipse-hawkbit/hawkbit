@@ -40,7 +40,7 @@ public class DdiProgress {
      * Constructor.
      *
      * @param cnt achieved amount
-     * @param of  maximum levels
+     * @param of maximum levels
      */
     @JsonCreator
     public DdiProgress(@JsonProperty("cnt") final Integer cnt, @JsonProperty("of") final Integer of) {

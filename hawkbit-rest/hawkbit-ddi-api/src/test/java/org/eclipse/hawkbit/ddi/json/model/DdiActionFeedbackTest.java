@@ -18,15 +18,13 @@ import java.time.Instant;
 import java.util.Collections;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.Test;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test serialization of DDI api model 'DdiActionFeedback'
@@ -57,14 +55,14 @@ class DdiActionFeedbackTest {
     void shouldSerializeAndDeserializeObjectWithOptionalValues() throws IOException {
         // Setup
         final String time = Instant.now().toString();
-        final DdiResult ddiResult = new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(10,10));
+        final DdiResult ddiResult = new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(10, 10));
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, ddiResult, 200, Collections.singletonList("myMessage"));
         final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(time, ddiStatus);
 
         // Test
         final String serializedDdiActionFeedback = mapper.writeValueAsString(ddiActionFeedback);
         final DdiActionFeedback deserializedDdiActionFeedback = mapper.readValue(serializedDdiActionFeedback,
-              DdiActionFeedback.class);
+                DdiActionFeedback.class);
 
         assertThat(serializedDdiActionFeedback).contains(time);
         assertThat(deserializedDdiActionFeedback.getTime()).isEqualTo(time);
@@ -78,7 +76,7 @@ class DdiActionFeedbackTest {
         final String serializedDdiActionFeedback = "{\"time\":\"20190809T121314\",\"status\":{\"execution\": [closed],\"result\":null,\"details\":[]}}";
 
         assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
-              () -> mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class));
+                () -> mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class));
     }
 
     @Test
@@ -95,7 +93,7 @@ class DdiActionFeedbackTest {
                 "  }\n" + //
                 "}";//
 
-        assertThat(mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class)).satisfies(deserializedDdiActionFeedback ->  {
+        assertThat(mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class)).satisfies(deserializedDdiActionFeedback -> {
             assertThat(deserializedDdiActionFeedback.getTime()).isNull();
             assertThat(deserializedDdiActionFeedback.getStatus()).isNotNull();
             assertThat(deserializedDdiActionFeedback.getStatus().getResult()).isNotNull();

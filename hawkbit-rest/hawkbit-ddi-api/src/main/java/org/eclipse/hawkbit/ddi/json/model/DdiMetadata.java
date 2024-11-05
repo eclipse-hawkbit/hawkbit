@@ -39,7 +39,7 @@ public class DdiMetadata {
     private final String value;
 
     @JsonCreator
-    public DdiMetadata(@JsonProperty("key") final String key, @JsonProperty("value")final String value) {
+    public DdiMetadata(@JsonProperty("key") final String key, @JsonProperty("value") final String value) {
         this.key = key;
         this.value = value;
     }

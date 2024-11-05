@@ -34,10 +34,48 @@ import lombok.ToString;
 @Schema(description = "Target action status")
 public class DdiStatus {
 
+    @NotNull
+    @Valid
+    @Schema(description = "Status of the action execution")
+    private final ExecutionStatus execution;
+    @NotNull
+    @Valid
+    @Schema(description = "Result of the action execution")
+    private final DdiResult result;
+    @Schema(description = "(Optional) Individual status code", example = "200")
+    private final Integer code;
+    @Schema(description = "List of details message information", example = "[ \"Some feedback\" ]")
+    private final List<String> details;
+
+    /**
+     * Constructor.
+     *
+     * @param execution status
+     * @param result information
+     * @param code as optional code (can be null)
+     * @param details as optional addition
+     */
+    @JsonCreator
+    public DdiStatus(@JsonProperty("execution") final ExecutionStatus execution,
+            @JsonProperty("result") final DdiResult result, @JsonProperty("code") final Integer code,
+            @JsonProperty("details") final List<String> details) {
+        this.execution = execution;
+        this.result = result;
+        this.code = code;
+        this.details = details;
+    }
+
+    public List<String> getDetails() {
+        if (details == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(details);
+    }
+
     /**
      * The element status contains information about the execution of the
      * operation.
-     *
      */
     public enum ExecutionStatus {
         /**
@@ -90,51 +128,5 @@ public class DdiStatus {
         public String getName() {
             return name;
         }
-    }
-
-    @NotNull
-    @Valid
-    @Schema(description = "Status of the action execution")
-    private final ExecutionStatus execution;
-
-    @NotNull
-    @Valid
-    @Schema(description = "Result of the action execution")
-    private final DdiResult result;
-
-    @Schema(description = "(Optional) Individual status code", example = "200")
-    private final Integer code;
-
-    @Schema(description = "List of details message information", example = "[ \"Some feedback\" ]")
-    private final List<String> details;
-
-    /**
-     * Constructor.
-     *
-     * @param execution
-     *            status
-     * @param result
-     *            information
-     * @param code
-     *            as optional code (can be null)
-     * @param details
-     *            as optional addition
-     */
-    @JsonCreator
-    public DdiStatus(@JsonProperty("execution") final ExecutionStatus execution,
-            @JsonProperty("result") final DdiResult result, @JsonProperty("code") final Integer code,
-            @JsonProperty("details") final List<String> details) {
-        this.execution = execution;
-        this.result = result;
-        this.code = code;
-        this.details = details;
-    }
-
-    public List<String> getDetails() {
-        if (details == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(details);
     }
 }

@@ -28,14 +28,14 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Schema(example =  """
-    {
-       "mode" : "merge",
-       "data" : {
-         "VIN" : "JH4TB2H26CC000000",
-         "hwRevision" : "2"
-       }
-     }""")
+@Schema(example = """
+        {
+           "mode" : "merge",
+           "data" : {
+             "VIN" : "JH4TB2H26CC000000",
+             "hwRevision" : "2"
+           }
+         }""")
 public class DdiConfigData {
 
     @NotEmpty
@@ -48,10 +48,8 @@ public class DdiConfigData {
     /**
      * Constructor.
      *
-     * @param data
-     *            contains the attributes.
-     * @param mode
-     *            defines the mode of the update (replace, merge, remove)
+     * @param data contains the attributes.
+     * @param mode defines the mode of the update (replace, merge, remove)
      */
     @JsonCreator
     public DdiConfigData(
