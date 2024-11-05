@@ -29,6 +29,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiArtifactDownloadTest.DownloadTestConfiguration;
 import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
@@ -47,10 +50,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 /**
  * Test artifact downloads from the controller.
@@ -102,55 +101,55 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // test now consistent data to test allowed methods
         mvc.perform(get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
                         .header(HttpHeaders.IF_MATCH, artifact.getSha1Hash()))
                 .andExpect(status().isOk());
         mvc.perform(get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
-                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isOk());
 
         // test failed If-match
         mvc.perform(get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
                         .header(HttpHeaders.IF_MATCH, "fsjkhgjfdhg"))
                 .andExpect(status().isPreconditionFailed());
 
         // test invalid range
         mvc.perform(get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
                         .header("Range", "bytes=1-10,hdsfjksdh"))
                 .andExpect(header().string("Content-Range", "bytes */" + 5 * 1024))
                 .andExpect(status().isRequestedRangeNotSatisfiable());
 
         mvc.perform(get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename())
                         .header("Range", "bytes=100-10"))
                 .andExpect(header().string("Content-Range", "bytes */" + 5 * 1024))
                 .andExpect(status().isRequestedRangeNotSatisfiable());
 
         // not allowed methods
         mvc.perform(put("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(delete("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(post("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(put("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
-                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(delete("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
-                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(post("/{tenant}/controller/v1/{controllerId}/softwaremodules/{smId}/artifacts/{filename}.MD5SUM",
-                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isMethodNotAllowed());
     }
 
@@ -182,8 +181,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // now assign and download successful
         assignDistributionSet(ds, targets);
         final MvcResult result = mvc.perform(get(
-                "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
-                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                        "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("Accept-Ranges", "bytes"))
                 .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
@@ -191,7 +190,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .andReturn();
 
         assertTrue(
-                Arrays.equals(result.getResponse().getContentAsByteArray(), random), "The same file that was uploaded is expected when downloaded");
+                Arrays.equals(result.getResponse().getContentAsByteArray(), random),
+                "The same file that was uploaded is expected when downloaded");
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
@@ -217,8 +217,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // download
         final MvcResult result = mvc.perform(get(
-                "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}.MD5SUM",
-                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
+                        "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}.MD5SUM",
+                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), artifact.getFilename()))
                 .andExpect(status().isOk()).andExpect(header().string("Content-Disposition",
                         "attachment;filename=" + artifact.getFilename() + ".MD5SUM"))
                 .andReturn();
@@ -258,8 +258,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
             final String rangeString = "" + i * range + "-" + ((i + 1) * range - 1);
 
             final MvcResult result = mvc.perform(get(
-                    "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
-                    tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1").header("Range",
+                            "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                            tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1").header("Range",
                             "bytes=" + rangeString))
                     .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                     .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
@@ -276,8 +276,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // return last 1000 Bytes
         MvcResult result = mvc.perform(
-                get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
-                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
+                        get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
                                 .header("Range", "bytes=-1000"))
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
@@ -293,8 +293,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // skip first 1000 Bytes and return the rest
         result = mvc.perform(
-                get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
-                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
+                        get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
                                 .header("Range", "bytes=1000-"))
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
@@ -310,8 +310,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // Start download from file end fails
         mvc.perform(
-                get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
-                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
+                        get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
                                 .header("Range", "bytes=" + random.length + "-"))
                 .andExpect(status().isRequestedRangeNotSatisfiable())
                 .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
@@ -322,8 +322,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // multipart download - first 20 bytes in 2 parts
         result = mvc.perform(
-                get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
-                        tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
+                        get("/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{filename}",
+                                tenantAware.getCurrentTenant(), target.getControllerId(), getOsModule(ds), "file1")
                                 .header("Range", "bytes=0-9,10-19"))
                 .andExpect(status().isPartialContent()).andExpect(header().string("ETag", artifact.getSha1Hash()))
                 .andExpect(content().contentType("multipart/byteranges; boundary=THIS_STRING_SEPARATES_MULTIPART"))

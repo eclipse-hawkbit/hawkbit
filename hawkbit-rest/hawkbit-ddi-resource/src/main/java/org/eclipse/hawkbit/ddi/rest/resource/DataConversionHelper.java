@@ -45,69 +45,9 @@ import org.springframework.util.CollectionUtils;
  * Utility class for the DDI API.
  */
 public final class DataConversionHelper {
+
     // utility class, private constructor.
     private DataConversionHelper() {
-
-    }
-
-    static List<DdiChunk> createChunks(final Target target, final Action uAction,
-            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
-            final HttpRequest request, final ControllerManagement controllerManagement) {
-
-        final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement
-                .findTargetVisibleMetaDataBySoftwareModuleId(uAction.getDistributionSet().getModules().stream()
-                        .map(SoftwareModule::getId).collect(Collectors.toList()));
-
-        return new ResponseList<>(uAction.getDistributionSet().getModules().stream()
-                .map(module -> new DdiChunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
-                        module.getName(), module.isEncrypted() ? Boolean.TRUE : null,
-                        createArtifacts(target, module, artifactUrlHandler, systemManagement, request),
-                        mapMetadata(metadata.get(module.getId()))))
-                .collect(Collectors.toList()));
-
-    }
-
-    private static List<DdiMetadata> mapMetadata(final List<SoftwareModuleMetadata> metadata) {
-        return CollectionUtils.isEmpty(metadata) ? null
-                : metadata.stream().map(md -> new DdiMetadata(md.getKey(), md.getValue())).collect(Collectors.toList());
-    }
-
-    private static String mapChunkLegacyKeys(final String key) {
-        if ("application".equals(key)) {
-            return "bApp";
-        }
-        if ("runtime".equals(key)) {
-            return "jvm";
-        }
-
-        return key;
-    }
-
-    static List<DdiArtifact> createArtifacts(final Target target, final SoftwareModule module,
-            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
-            final HttpRequest request) {
-
-        return new ResponseList<>(module.getArtifacts().stream()
-                .map(artifact -> createArtifact(target, artifactUrlHandler, artifact, systemManagement, request))
-                .collect(Collectors.toList()));
-    }
-
-    private static DdiArtifact createArtifact(final Target target, final ArtifactUrlHandler artifactUrlHandler,
-            final Artifact artifact, final SystemManagement systemManagement, final HttpRequest request) {
-        final DdiArtifact file = new DdiArtifact();
-        file.setHashes(new DdiArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash(), artifact.getSha256Hash()));
-        file.setFilename(artifact.getFilename());
-        file.setSize(artifact.getSize());
-
-        artifactUrlHandler
-                .getUrls(new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),
-                        systemManagement.getTenantMetadata().getId(), target.getControllerId(), target.getId(),
-                        new SoftwareData(artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getId(),
-                                artifact.getSha1Hash())),
-                        ApiType.DDI, request.getURI())
-                .forEach(entry -> file.add(Link.of(entry.getRef()).withRel(entry.getRel()).expand()));
-
-        return file;
 
     }
 
@@ -145,9 +85,9 @@ public final class DataConversionHelper {
         if (activeAction != null) {
             if (activeAction.isWaitingConfirmation()) {
                 result.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder
-                        .methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                        .getConfirmationBaseAction(tenantAware.getCurrentTenant(), target.getControllerId(),
-                                activeAction.getId(), calculateEtag(activeAction), null))
+                                .methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+                                .getConfirmationBaseAction(tenantAware.getCurrentTenant(), target.getControllerId(),
+                                        activeAction.getId(), calculateEtag(activeAction), null))
                         .withRel(DdiRestConstants.CONFIRMATION_BASE).expand());
 
             } else if (activeAction.isCancelingOrCanceled()) {
@@ -163,9 +103,9 @@ public final class DataConversionHelper {
                 // change the payload of the
                 // response because of eTags.
                 result.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder
-                        .methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                        .getControllerDeploymentBaseAction(tenantAware.getCurrentTenant(), target.getControllerId(),
-                                activeAction.getId(), calculateEtag(activeAction), null))
+                                .methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+                                .getControllerDeploymentBaseAction(tenantAware.getCurrentTenant(), target.getControllerId(),
+                                        activeAction.getId(), calculateEtag(activeAction), null))
                         .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION).expand());
             }
         }
@@ -189,13 +129,73 @@ public final class DataConversionHelper {
         return result;
     }
 
+    static List<DdiChunk> createChunks(final Target target, final Action uAction,
+            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
+            final HttpRequest request, final ControllerManagement controllerManagement) {
+
+        final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement
+                .findTargetVisibleMetaDataBySoftwareModuleId(uAction.getDistributionSet().getModules().stream()
+                        .map(SoftwareModule::getId).collect(Collectors.toList()));
+
+        return new ResponseList<>(uAction.getDistributionSet().getModules().stream()
+                .map(module -> new DdiChunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
+                        module.getName(), module.isEncrypted() ? Boolean.TRUE : null,
+                        createArtifacts(target, module, artifactUrlHandler, systemManagement, request),
+                        mapMetadata(metadata.get(module.getId()))))
+                .collect(Collectors.toList()));
+
+    }
+
+    static List<DdiArtifact> createArtifacts(final Target target, final SoftwareModule module,
+            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
+            final HttpRequest request) {
+
+        return new ResponseList<>(module.getArtifacts().stream()
+                .map(artifact -> createArtifact(target, artifactUrlHandler, artifact, systemManagement, request))
+                .collect(Collectors.toList()));
+    }
+
+    private static List<DdiMetadata> mapMetadata(final List<SoftwareModuleMetadata> metadata) {
+        return CollectionUtils.isEmpty(metadata) ? null
+                : metadata.stream().map(md -> new DdiMetadata(md.getKey(), md.getValue())).collect(Collectors.toList());
+    }
+
+    private static String mapChunkLegacyKeys(final String key) {
+        if ("application".equals(key)) {
+            return "bApp";
+        }
+        if ("runtime".equals(key)) {
+            return "jvm";
+        }
+
+        return key;
+    }
+
+    private static DdiArtifact createArtifact(final Target target, final ArtifactUrlHandler artifactUrlHandler,
+            final Artifact artifact, final SystemManagement systemManagement, final HttpRequest request) {
+        final DdiArtifact file = new DdiArtifact();
+        file.setHashes(new DdiArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash(), artifact.getSha256Hash()));
+        file.setFilename(artifact.getFilename());
+        file.setSize(artifact.getSize());
+
+        artifactUrlHandler
+                .getUrls(new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),
+                                systemManagement.getTenantMetadata().getId(), target.getControllerId(), target.getId(),
+                                new SoftwareData(artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getId(),
+                                        artifact.getSha1Hash())),
+                        ApiType.DDI, request.getURI())
+                .forEach(entry -> file.add(Link.of(entry.getRef()).withRel(entry.getRel()).expand()));
+
+        return file;
+
+    }
+
     /**
      * Calculates an etag for the given {@link Action} based on the entities
      * hashcode and the {@link Action#isHitAutoForceTime(long)} to reflect a
      * force switch.
-     * 
-     * @param action
-     *            to calculate the etag for
+     *
+     * @param action to calculate the etag for
      * @return the etag
      */
     private static int calculateEtag(final Action action) {
