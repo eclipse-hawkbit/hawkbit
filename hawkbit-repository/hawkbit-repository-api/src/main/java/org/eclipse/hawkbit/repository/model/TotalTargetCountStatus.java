@@ -23,6 +23,7 @@ public class TotalTargetCountStatus {
     private final Map<Status, Long> statusTotalCountMap = new EnumMap<>(Status.class);
     private final Long totalTargetCount;
     private final Action.ActionType rolloutType;
+
     /**
      * Create a new states map with the target count for each state.
      *

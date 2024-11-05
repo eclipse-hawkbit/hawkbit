@@ -15,6 +15,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.Arrays;
 import java.util.List;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
@@ -24,10 +27,6 @@ import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @Feature("Component Tests - Access Control")
 @Story("Test Target Type Access Controller")
