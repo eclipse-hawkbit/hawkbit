@@ -9,27 +9,26 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import org.springframework.util.ErrorHandler;
-
 import java.util.Iterator;
 import java.util.List;
+
+import org.springframework.util.ErrorHandler;
 
 /**
  * An error handler chain that delegates the error to the matching error handler based on the type of exception
  */
 public final class AmqpErrorHandlerChain {
+
     private final Iterator<AmqpErrorHandler> iterator;
     private final ErrorHandler defaultHandler;
 
     /**
      * Constructor.
      *
-     * @param iterator
-     *                  the {@link AmqpErrorHandler} iterator
-     * @param defaultHandler
-     *                  the default handler
+     * @param iterator the {@link AmqpErrorHandler} iterator
+     * @param defaultHandler the default handler
      */
-   private AmqpErrorHandlerChain(Iterator<AmqpErrorHandler> iterator, ErrorHandler defaultHandler) {
+    private AmqpErrorHandlerChain(Iterator<AmqpErrorHandler> iterator, ErrorHandler defaultHandler) {
         this.iterator = iterator;
         this.defaultHandler = defaultHandler;
     }
@@ -37,10 +36,8 @@ public final class AmqpErrorHandlerChain {
     /**
      * Returns an {@link AmqpErrorHandlerChain}
      *
-     * @param errorHandlers
-     *                      {@link List} of error handlers
-     * @param defaultHandler
-     *                      the default error handler
+     * @param errorHandlers {@link List} of error handlers
+     * @param defaultHandler the default error handler
      * @return an {@link AmqpErrorHandlerChain}
      */
     public static AmqpErrorHandlerChain getHandlerChain(final List<AmqpErrorHandler> errorHandlers, final ErrorHandler defaultHandler) {
@@ -50,8 +47,7 @@ public final class AmqpErrorHandlerChain {
     /**
      * Handles the error based on the type of exception
      *
-     * @param error
-     *               the throwable containing the cause of exception
+     * @param error the throwable containing the cause of exception
      */
     public void handle(final Throwable error) {
         if (iterator.hasNext()) {

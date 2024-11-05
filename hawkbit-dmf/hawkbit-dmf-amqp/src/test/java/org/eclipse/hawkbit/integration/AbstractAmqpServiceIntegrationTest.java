@@ -21,6 +21,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
+import com.cronutils.utils.StringUtils;
+import io.qameta.allure.Step;
 import org.assertj.core.api.HamcrestCondition;
 import org.eclipse.hawkbit.amqp.DmfApiConfiguration;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
@@ -48,9 +50,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.test.TestConfiguration;
-import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
+import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
@@ -63,12 +64,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.CollectionUtils;
 
-import com.cronutils.utils.StringUtils;
-
-import io.qameta.allure.Step;
-
 /**
- *
  * Common class for {@link AmqpMessageHandlerServiceIntegrationTest} and
  * {@link AmqpMessageDispatcherServiceIntegrationTest}.
  */
@@ -131,7 +127,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         testdataFactory.addSoftwareModuleMetadata(distributionSet);
 
         return registerTargetAndAssignDistributionSet(distributionSet.getId(), TargetUpdateStatus.REGISTERED,
-              distributionSet.getModules(), controllerId);
+                distributionSet.getModules(), controllerId);
     }
 
     protected DistributionSetAssignmentResult prepareDistributionSetAndAssign(final String controllerId) {
@@ -194,17 +190,6 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         assertThat(Long.valueOf(new String(replyMessage.getBody(), StandardCharsets.UTF_8)))
                 .isLessThanOrEqualTo(System.currentTimeMillis());
 
-    }
-
-    private void assertAssignmentMessage(final Set<SoftwareModule> dsModules, final String controllerId,
-            final EventTopic topic) {
-        final Message replyMessage = assertReplyMessageHeader(topic, controllerId);
-        assertAllTargetsCount(1);
-
-        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = (DmfDownloadAndUpdateRequest) getDmfClient()
-                .getMessageConverter().fromMessage(replyMessage);
-
-        assertDmfDownloadAndUpdateRequest(downloadAndUpdateRequest, dsModules, controllerId);
     }
 
     protected void assertDmfDownloadAndUpdateRequest(final DmfDownloadAndUpdateRequest request,
@@ -294,18 +279,6 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
                 expectedTargetStatus, createdBy, attributes, () -> targetManagement.getByControllerID(controllerId));
     }
 
-    private void registerAndAssertTargetWithExistingTenant(final String controllerId, final String name,
-            final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus,
-            final String createdBy, final Map<String, String> attributes,
-            final Callable<Optional<Target>> fetchTarget) {
-        createAndSendThingCreated(controllerId, name, attributes);
-        final Target registeredTarget = waitUntilIsPresent(fetchTarget::call);
-        assertAllTargetsCount(existingTargetsAfterCreation);
-        assertThat(registeredTarget).isNotNull();
-        assertTarget(registeredTarget, name != null ? name : controllerId, expectedTargetStatus, createdBy,
-                attributes != null ? attributes : Collections.emptyMap());
-    }
-
     protected void registerSameTargetAndAssertBasedOnVersion(final String controllerId,
             final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus) {
         registerSameTargetAndAssertBasedOnVersion(controllerId, null, existingTargetsAfterCreation,
@@ -318,27 +291,6 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         final int version = controllerManagement.getByControllerId(controllerId).get().getOptLockRevision();
         registerAndAssertTargetWithExistingTenant(controllerId, name, existingTargetsAfterCreation,
                 expectedTargetStatus, CREATED_BY, attributes, () -> findTargetBasedOnNewVersion(controllerId, version));
-    }
-
-    private Optional<Target> findTargetBasedOnNewVersion(final String controllerId, final int version) {
-        final Optional<Target> target2 = controllerManagement.getByControllerId(controllerId);
-        if (version < target2.get().getOptLockRevision()) {
-            return target2;
-        }
-        return Optional.empty();
-    }
-
-    private void assertTarget(final Target target, final String name, final TargetUpdateStatus updateStatus,
-            final String createdBy, final Map<String, String> attributes) {
-        assertThat(target.getTenant()).isEqualTo(TENANT_EXIST);
-        assertThat(target.getName()).isEqualTo(name);
-        assertThat(target.getDescription()).contains("Plug and Play");
-        assertThat(target.getDescription()).contains(target.getControllerId());
-        assertThat(target.getCreatedBy()).isEqualTo(createdBy);
-        assertThat(target.getUpdateStatus()).isEqualTo(updateStatus);
-        assertThat(target.getAddress())
-                .isEqualTo(IpUtil.createAmqpUri(getVirtualHost(), DmfTestConfiguration.REPLY_TO_EXCHANGE));
-        assertThat(targetManagement.getControllerAttributes(target.getControllerId())).isEqualTo(attributes);
     }
 
     protected Message createTargetMessage(final String controllerId, final String tenant) {
@@ -458,7 +410,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
     }
 
     protected void assertSoftwareModules(final Set<SoftwareModule> expectedSoftwareModules,
-                                         final List<DmfSoftwareModule> softwareModules) {
+            final List<DmfSoftwareModule> softwareModules) {
         assertThat(expectedSoftwareModules)
                 .is(new HamcrestCondition<>(SoftwareModuleJsonMatcher.containsExactly(softwareModules)));
         softwareModules.forEach(dmfModule -> assertThat(dmfModule.getMetadata()).containsExactly(
@@ -482,6 +434,50 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(controllerId));
         assertThat(updatedTarget).isNotNull();
         assertThat(updatedTarget.getSecurityToken()).isEqualTo(request.getTargetSecurityToken());
+    }
+
+    private void assertAssignmentMessage(final Set<SoftwareModule> dsModules, final String controllerId,
+            final EventTopic topic) {
+        final Message replyMessage = assertReplyMessageHeader(topic, controllerId);
+        assertAllTargetsCount(1);
+
+        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = (DmfDownloadAndUpdateRequest) getDmfClient()
+                .getMessageConverter().fromMessage(replyMessage);
+
+        assertDmfDownloadAndUpdateRequest(downloadAndUpdateRequest, dsModules, controllerId);
+    }
+
+    private void registerAndAssertTargetWithExistingTenant(final String controllerId, final String name,
+            final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus,
+            final String createdBy, final Map<String, String> attributes,
+            final Callable<Optional<Target>> fetchTarget) {
+        createAndSendThingCreated(controllerId, name, attributes);
+        final Target registeredTarget = waitUntilIsPresent(fetchTarget::call);
+        assertAllTargetsCount(existingTargetsAfterCreation);
+        assertThat(registeredTarget).isNotNull();
+        assertTarget(registeredTarget, name != null ? name : controllerId, expectedTargetStatus, createdBy,
+                attributes != null ? attributes : Collections.emptyMap());
+    }
+
+    private Optional<Target> findTargetBasedOnNewVersion(final String controllerId, final int version) {
+        final Optional<Target> target2 = controllerManagement.getByControllerId(controllerId);
+        if (version < target2.get().getOptLockRevision()) {
+            return target2;
+        }
+        return Optional.empty();
+    }
+
+    private void assertTarget(final Target target, final String name, final TargetUpdateStatus updateStatus,
+            final String createdBy, final Map<String, String> attributes) {
+        assertThat(target.getTenant()).isEqualTo(TENANT_EXIST);
+        assertThat(target.getName()).isEqualTo(name);
+        assertThat(target.getDescription()).contains("Plug and Play");
+        assertThat(target.getDescription()).contains(target.getControllerId());
+        assertThat(target.getCreatedBy()).isEqualTo(createdBy);
+        assertThat(target.getUpdateStatus()).isEqualTo(updateStatus);
+        assertThat(target.getAddress())
+                .isEqualTo(IpUtil.createAmqpUri(getVirtualHost(), DmfTestConfiguration.REPLY_TO_EXCHANGE));
+        assertThat(targetManagement.getControllerAttributes(target.getControllerId())).isEqualTo(attributes);
     }
 
 }

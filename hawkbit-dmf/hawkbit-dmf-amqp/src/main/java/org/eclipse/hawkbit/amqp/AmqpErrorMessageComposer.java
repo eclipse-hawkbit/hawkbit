@@ -27,10 +27,8 @@ public final class AmqpErrorMessageComposer {
     /**
      * Constructs an error message based on failed message content
      *
-     * @param throwable
-     *                  the throwable containing failed message content
-     * @return
-     *                  meaningful error message
+     * @param throwable the throwable containing failed message content
+     * @return meaningful error message
      */
     public static String constructErrorMessage(final Throwable throwable) {
         StringBuilder completeErrorMessage = new StringBuilder();

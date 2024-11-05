@@ -19,10 +19,8 @@ public interface AmqpErrorHandler {
     /**
      * Handles the error based on the type of exception
      *
-     * @param throwable
-     *            the throwable
-     * @param chain
-     *            an {@link AmqpErrorHandlerChain}
+     * @param throwable the throwable
+     * @param chain an {@link AmqpErrorHandlerChain}
      */
     void doHandle(final Throwable throwable, final AmqpErrorHandlerChain chain);
 }

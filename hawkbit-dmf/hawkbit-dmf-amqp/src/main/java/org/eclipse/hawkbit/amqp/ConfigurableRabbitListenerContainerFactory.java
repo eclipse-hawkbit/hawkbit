@@ -18,7 +18,6 @@ import org.springframework.util.ErrorHandler;
 /**
  * {@link RabbitListenerContainerFactory} that can be configured through
  * hawkBit's {@link AmqpProperties}.
- *
  */
 public class ConfigurableRabbitListenerContainerFactory extends SimpleRabbitListenerContainerFactory {
 
@@ -26,14 +25,11 @@ public class ConfigurableRabbitListenerContainerFactory extends SimpleRabbitList
 
     /**
      * Constructor.
-     * 
-     * @param missingQueuesFatal
-     *            the missingQueuesFatal to set.
+     *
+     * @param missingQueuesFatal the missingQueuesFatal to set.
+     * @param declarationRetries The number of retries
+     * @param errorHandler the error handler which should be use
      * @see SimpleMessageListenerContainer#setMissingQueuesFatal
-     * @param declarationRetries
-     *            The number of retries
-     * @param errorHandler
-     *            the error handler which should be use
      */
     public ConfigurableRabbitListenerContainerFactory(final boolean missingQueuesFatal, final int declarationRetries,
             final ErrorHandler errorHandler) {

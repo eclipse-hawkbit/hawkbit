@@ -106,26 +106,16 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     /**
      * Constructor.
      *
-     * @param rabbitTemplate
-     *            the rabbitTemplate
-     * @param amqpSenderService
-     *            to send AMQP message
-     * @param artifactUrlHandler
-     *            for generating download URLs
-     * @param systemSecurityContext
-     *            for execution with system permissions
-     * @param systemManagement
-     *            the systemManagement
-     * @param targetManagement
-     *            to access target information
-     * @param serviceMatcher
-     *            to check in cluster case if the message is from the same
-     *            cluster node
-     * @param distributionSetManagement
-     *            to retrieve modules
-     * @param tenantConfigurationManagement
-     *            to access tenant configuration
-     *
+     * @param rabbitTemplate the rabbitTemplate
+     * @param amqpSenderService to send AMQP message
+     * @param artifactUrlHandler for generating download URLs
+     * @param systemSecurityContext for execution with system permissions
+     * @param systemManagement the systemManagement
+     * @param targetManagement to access target information
+     * @param serviceMatcher to check in cluster case if the message is from the same
+     *         cluster node
+     * @param distributionSetManagement to retrieve modules
+     * @param tenantConfigurationManagement to access tenant configuration
      */
     protected AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
@@ -147,12 +137,16 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 
+    public boolean isBatchAssignmentsEnabled() {
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(BATCH_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
+    }
+
     /**
      * Method to send a message to a RabbitMQ Exchange after the Distribution
      * set has been assign to a Target.
      *
-     * @param assignedEvent
-     *            the object to be send.
+     * @param assignedEvent the object to be send.
      */
     @EventListener(classes = TargetAssignDistributionSetEvent.class)
     protected void targetAssignDistributionSet(final TargetAssignDistributionSetEvent assignedEvent) {
@@ -173,8 +167,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     /**
      * Listener for Multi-Action events.
      *
-     * @param multiActionEvent
-     *            the Multi-Action event to be processed
+     * @param multiActionEvent the Multi-Action event to be processed
      */
     @EventListener(classes = MultiActionEvent.class)
     protected void onMultiAction(final MultiActionEvent multiActionEvent) {
@@ -183,6 +176,261 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         }
         log.debug("MultiActionEvent received for {}", multiActionEvent.getControllerIds());
         sendMultiActionRequestMessages(multiActionEvent.getTenant(), multiActionEvent.getControllerIds());
+    }
+
+    protected void sendUpdateMessageToTarget(final ActionProperties actionsProps, final Target target,
+            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
+        final Map<String, ActionProperties> actionProp = new HashMap<>();
+        actionProp.put(target.getControllerId(), actionsProps);
+        sendUpdateMessageToTargets(actionProp, Collections.singletonList(target), softwareModules);
+    }
+
+    protected void sendMultiActionRequestToTarget(final String tenant, final Target target, final List<Action> actions,
+            final Function<Action, Map<SoftwareModule, List<SoftwareModuleMetadata>>> getSoftwareModuleMetaData) {
+
+        final URI targetAddress = target.getAddress();
+        if (!IpUtil.isAmqpUri(targetAddress) || CollectionUtils.isEmpty(actions)) {
+            return;
+        }
+
+        final DmfMultiActionRequest multiActionRequest = new DmfMultiActionRequest();
+        actions.forEach(action -> {
+            final DmfActionRequest actionRequest = createDmfActionRequest(target, action,
+                    getSoftwareModuleMetaData.apply(action));
+            final int weight = deploymentManagement.getWeightConsideringDefault(action);
+            multiActionRequest.addElement(getEventTypeForAction(action), actionRequest, weight);
+        });
+
+        final Message message = getMessageConverter().toMessage(multiActionRequest,
+                createConnectorMessagePropertiesEvent(tenant, target.getControllerId(), EventTopic.MULTI_ACTION));
+        amqpSenderService.sendMessage(message, targetAddress);
+    }
+
+    protected DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(final Target target, final Long actionId,
+            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
+        final DmfDownloadAndUpdateRequest request = new DmfDownloadAndUpdateRequest();
+        request.setActionId(actionId);
+        request.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
+
+        if (softwareModules != null) {
+            softwareModules.entrySet()
+                    .forEach(entry -> request.addSoftwareModule(convertToAmqpSoftwareModule(target, entry)));
+        }
+        return request;
+    }
+
+    /**
+     * Method to send a message to a RabbitMQ Exchange after the assignment of
+     * the Distribution set to a Target has been canceled.
+     *
+     * @param cancelEvent that is to be converted to a DMF message
+     */
+    @EventListener(classes = CancelTargetAssignmentEvent.class)
+    protected void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentEvent cancelEvent) {
+        if (!shouldBeProcessed(cancelEvent)) {
+            return;
+        }
+
+        final List<Target> eventTargets = partitionedParallelExecution(cancelEvent.getActions().keySet(),
+                targetManagement::getByControllerID);
+
+        eventTargets.forEach(target -> {
+            cancelEvent.getActionPropertiesForController(target.getControllerId()).map(ActionProperties::getId)
+                    .ifPresent(actionId -> {
+                        sendCancelMessageToTarget(cancelEvent.getTenant(), target.getControllerId(), actionId,
+                                target.getAddress());
+                    });
+        });
+    }
+
+    /**
+     * Method to send a message to a RabbitMQ Exchange after a Target was
+     * deleted.
+     *
+     * @param deleteEvent the TargetDeletedEvent which holds the necessary data for
+     *         sending a target delete message.
+     */
+    @EventListener(classes = TargetDeletedEvent.class)
+    protected void targetDelete(final TargetDeletedEvent deleteEvent) {
+        if (!shouldBeProcessed(deleteEvent)) {
+            return;
+        }
+        sendDeleteMessage(deleteEvent.getTenant(), deleteEvent.getControllerId(), deleteEvent.getTargetAddress());
+    }
+
+    @EventListener(classes = TargetAttributesRequestedEvent.class)
+    protected void targetTriggerUpdateAttributes(final TargetAttributesRequestedEvent updateAttributesEvent) {
+        sendUpdateAttributesMessageToTarget(updateAttributesEvent.getTenant(), updateAttributesEvent.getControllerId(),
+                updateAttributesEvent.getTargetAddress());
+    }
+
+    protected void sendPingReponseToDmfReceiver(final Message ping, final String tenant, final String virtualHost) {
+        final Message message = MessageBuilder.withBody(String.valueOf(System.currentTimeMillis()).getBytes())
+                .setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN)
+                .setCorrelationId(ping.getMessageProperties().getCorrelationId())
+                .setHeader(MessageHeaderKey.TYPE, MessageType.PING_RESPONSE).setHeader(MessageHeaderKey.TENANT, tenant)
+                .build();
+
+        amqpSenderService.sendMessage(message,
+                IpUtil.createAmqpUri(virtualHost, ping.getMessageProperties().getReplyTo()));
+    }
+
+    protected boolean shouldBeProcessed(final RemoteApplicationEvent event) {
+        return isFromSelf(event);
+    }
+
+    protected void sendCancelMessageToTarget(final String tenant, final String controllerId, final Long actionId,
+            final URI address) {
+        if (!IpUtil.isAmqpUri(address)) {
+            return;
+        }
+
+        final DmfActionRequest actionRequest = new DmfActionRequest();
+        actionRequest.setActionId(actionId);
+
+        final Message message = getMessageConverter().toMessage(actionRequest,
+                createConnectorMessagePropertiesEvent(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
+
+        amqpSenderService.sendMessage(message, address);
+
+    }
+
+    protected DmfTarget convertToDmfTarget(final Target target, final Long actionId) {
+        final DmfTarget dmfTarget = new DmfTarget();
+        dmfTarget.setActionId(actionId);
+        dmfTarget.setControllerId(target.getControllerId());
+        dmfTarget.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
+        return dmfTarget;
+    }
+
+    /**
+     * Creates a Confirmation request.
+     *
+     * @param target the target
+     * @param actionId the actionId
+     * @param softwareModules the software modules
+     * @return
+     */
+    protected DmfConfirmRequest createConfirmRequest(final Target target, final Long actionId, final Map<SoftwareModule,
+            List<SoftwareModuleMetadata>> softwareModules) {
+        final DmfConfirmRequest request = new DmfConfirmRequest();
+        request.setActionId(actionId);
+        request.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
+
+        //Software modules can be filtered in the future exposing only the needed.
+        if (softwareModules != null) {
+            softwareModules.entrySet()
+                    .forEach(entry -> request.addSoftwareModule(convertToAmqpSoftwareModule(target, entry)));
+        }
+        return request;
+    }
+
+    private static DmfActionRequest createPlainActionRequest(final Action action) {
+        final DmfActionRequest actionRequest = new DmfActionRequest();
+        actionRequest.setActionId(action.getId());
+        return actionRequest;
+    }
+
+    /**
+     * Method to get the type of event depending on whether the action is a
+     * DOWNLOAD_ONLY action or if it has a valid maintenance window available or
+     * not based on defined maintenance schedule. In case of no maintenance
+     * schedule or if there is a valid window available, the topic
+     * {@link EventTopic#DOWNLOAD_AND_INSTALL} is returned else
+     * {@link EventTopic#DOWNLOAD} is returned.
+     *
+     * @param action current action properties.
+     * @return {@link EventTopic} to use for message.
+     */
+    private static EventTopic getEventTypeForTarget(final ActionProperties action) {
+        if (action.isWaitingConfirmation()) {
+            return EventTopic.CONFIRM;
+        }
+        return (Action.ActionType.DOWNLOAD_ONLY == action.getActionType() || !action.isMaintenanceWindowAvailable())
+                ? EventTopic.DOWNLOAD
+                : EventTopic.DOWNLOAD_AND_INSTALL;
+    }
+
+    /**
+     * Determines the {@link EventTopic} for the given {@link Action}, depending
+     * on its action type.
+     *
+     * @param action to obtain the corresponding {@link EventTopic} for
+     * @return the {@link EventTopic} for this action
+     */
+    private static EventTopic getEventTypeForAction(final Action action) {
+        if (action.isCancelingOrCanceled()) {
+            return EventTopic.CANCEL_DOWNLOAD;
+        }
+        return getEventTypeForTarget(new ActionProperties(action));
+    }
+
+    private static <T, R> List<R> partitionedParallelExecution(final Collection<T> controllerIds,
+            final Function<Collection<T>, List<R>> loadingFunction) {
+        // Ensure not exceeding the max value of MAX_PROCESSING_SIZE
+        if (controllerIds.size() > MAX_PROCESSING_SIZE) {
+            // Split the provided collection
+            final Iterable<List<T>> partitions = ListUtils.partition(IterableUtils.toList(controllerIds), MAX_PROCESSING_SIZE);
+            // Preserve the security context because it gets lost when executing
+            // loading calls in new threads
+            final SecurityContext context = SecurityContextHolder.getContext();
+            // Handling remote request in parallel streams
+            return StreamSupport.stream(partitions.spliterator(), true) //
+                    .flatMap(partition -> withSecurityContext(() -> loadingFunction.apply(partition), context).stream())
+                    .collect(Collectors.toList());
+        }
+        return loadingFunction.apply(controllerIds);
+    }
+
+    private static <T> T withSecurityContext(final Supplier<T> callable, final SecurityContext securityContext) {
+        final SecurityContext oldContext = SecurityContextHolder.getContext();
+        try {
+            SecurityContextHolder.setContext(securityContext);
+            return callable.get();
+        } finally {
+            SecurityContextHolder.setContext(oldContext);
+        }
+    }
+
+    private static MessageProperties createConnectorMessagePropertiesEvent(final String tenant,
+            final String controllerId, final EventTopic topic) {
+        final MessageProperties messageProperties = createConnectorMessageProperties(tenant, controllerId);
+        messageProperties.setHeader(MessageHeaderKey.TOPIC, topic);
+        messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.EVENT);
+        return messageProperties;
+    }
+
+    private static MessageProperties createConnectorMessagePropertiesDeleteThing(final String tenant,
+            final String controllerId) {
+        final MessageProperties messageProperties = createConnectorMessageProperties(tenant, controllerId);
+        messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.THING_DELETED);
+        return messageProperties;
+    }
+
+    private static MessageProperties createConnectorMessageProperties(final String tenant, final String controllerId) {
+        final MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
+        messageProperties.setHeader(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, controllerId);
+        messageProperties.setHeader(MessageHeaderKey.TENANT, tenant);
+        return messageProperties;
+    }
+
+    private static MessageProperties createMessagePropertiesBatch(final String tenant, final EventTopic topic) {
+        final MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
+        messageProperties.setHeader(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
+        messageProperties.setHeader(MessageHeaderKey.TENANT, tenant);
+
+        messageProperties.setHeader(MessageHeaderKey.TOPIC, topic);
+        messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.EVENT);
+        return messageProperties;
+    }
+
+    private static EventTopic getBatchEventTopicForAction(final ActionProperties action) {
+        return (Action.ActionType.DOWNLOAD_ONLY == action.getActionType() || !action.isMaintenanceWindowAvailable())
+                ? EventTopic.BATCH_DOWNLOAD
+                : EventTopic.BATCH_DOWNLOAD_AND_INSTALL;
     }
 
     private List<Target> getTargetsWithoutPendingCancellations(final Set<String> controllerIds) {
@@ -205,13 +453,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                     ds);
             sendUpdateMessageToTargets(actionsPropsByTargetId, targets, softwareModules);
         });
-    }
-
-    protected void sendUpdateMessageToTarget(final ActionProperties actionsProps, final Target target,
-            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
-        final Map<String, ActionProperties> actionProp = new HashMap<>();
-        actionProp.put(target.getControllerId(), actionsProps);
-        sendUpdateMessageToTargets(actionProp, Collections.singletonList(target), softwareModules);
     }
 
     private void sendUpdateMessageToTargets(final Map<String, ActionProperties> actionsPropsByTargetId,
@@ -248,27 +489,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     }
 
-    protected void sendMultiActionRequestToTarget(final String tenant, final Target target, final List<Action> actions,
-            final Function<Action, Map<SoftwareModule, List<SoftwareModuleMetadata>>> getSoftwareModuleMetaData) {
-
-        final URI targetAddress = target.getAddress();
-        if (!IpUtil.isAmqpUri(targetAddress) || CollectionUtils.isEmpty(actions)) {
-            return;
-        }
-
-        final DmfMultiActionRequest multiActionRequest = new DmfMultiActionRequest();
-        actions.forEach(action -> {
-            final DmfActionRequest actionRequest = createDmfActionRequest(target, action,
-                    getSoftwareModuleMetaData.apply(action));
-            final int weight = deploymentManagement.getWeightConsideringDefault(action);
-            multiActionRequest.addElement(getEventTypeForAction(action), actionRequest, weight);
-        });
-
-        final Message message = getMessageConverter().toMessage(multiActionRequest,
-                createConnectorMessagePropertiesEvent(tenant, target.getControllerId(), EventTopic.MULTI_ACTION));
-        amqpSenderService.sendMessage(message, targetAddress);
-    }
-
     private DmfActionRequest createDmfActionRequest(final Target target, final Action action,
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
         if (action.isCancelingOrCanceled()) {
@@ -277,137 +497,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return createConfirmRequest(target, action.getId(), softwareModules);
         }
         return createDownloadAndUpdateRequest(target, action.getId(), softwareModules);
-    }
-
-    private static DmfActionRequest createPlainActionRequest(final Action action) {
-        final DmfActionRequest actionRequest = new DmfActionRequest();
-        actionRequest.setActionId(action.getId());
-        return actionRequest;
-    }
-
-    protected DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(final Target target, final Long actionId,
-            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
-        final DmfDownloadAndUpdateRequest request = new DmfDownloadAndUpdateRequest();
-        request.setActionId(actionId);
-        request.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
-
-        if (softwareModules != null) {
-            softwareModules.entrySet()
-                    .forEach(entry -> request.addSoftwareModule(convertToAmqpSoftwareModule(target, entry)));
-        }
-        return request;
-    }
-
-    /**
-     * Method to get the type of event depending on whether the action is a
-     * DOWNLOAD_ONLY action or if it has a valid maintenance window available or
-     * not based on defined maintenance schedule. In case of no maintenance
-     * schedule or if there is a valid window available, the topic
-     * {@link EventTopic#DOWNLOAD_AND_INSTALL} is returned else
-     * {@link EventTopic#DOWNLOAD} is returned.
-     *
-     * @param action
-     *            current action properties.
-     *
-     * @return {@link EventTopic} to use for message.
-     */
-    private static EventTopic getEventTypeForTarget(final ActionProperties action) {
-        if (action.isWaitingConfirmation()) {
-            return EventTopic.CONFIRM;
-        }
-        return (Action.ActionType.DOWNLOAD_ONLY == action.getActionType() || !action.isMaintenanceWindowAvailable())
-                ? EventTopic.DOWNLOAD
-                : EventTopic.DOWNLOAD_AND_INSTALL;
-    }
-
-    /**
-     * Determines the {@link EventTopic} for the given {@link Action}, depending
-     * on its action type.
-     *
-     * @param action
-     *            to obtain the corresponding {@link EventTopic} for
-     *
-     * @return the {@link EventTopic} for this action
-     */
-    private static EventTopic getEventTypeForAction(final Action action) {
-        if (action.isCancelingOrCanceled()) {
-            return EventTopic.CANCEL_DOWNLOAD;
-        }
-        return getEventTypeForTarget(new ActionProperties(action));
-    }
-
-    /**
-     * Method to send a message to a RabbitMQ Exchange after the assignment of
-     * the Distribution set to a Target has been canceled.
-     *
-     * @param cancelEvent
-     *            that is to be converted to a DMF message
-     */
-    @EventListener(classes = CancelTargetAssignmentEvent.class)
-    protected void targetCancelAssignmentToDistributionSet(final CancelTargetAssignmentEvent cancelEvent) {
-        if (!shouldBeProcessed(cancelEvent)) {
-            return;
-        }
-
-        final List<Target> eventTargets = partitionedParallelExecution(cancelEvent.getActions().keySet(),
-                targetManagement::getByControllerID);
-
-        eventTargets.forEach(target -> {
-            cancelEvent.getActionPropertiesForController(target.getControllerId()).map(ActionProperties::getId)
-                    .ifPresent(actionId -> {
-                        sendCancelMessageToTarget(cancelEvent.getTenant(), target.getControllerId(), actionId,
-                                target.getAddress());
-                    });
-        });
-    }
-
-    private static <T, R> List<R> partitionedParallelExecution(final Collection<T> controllerIds,
-            final Function<Collection<T>, List<R>> loadingFunction) {
-        // Ensure not exceeding the max value of MAX_PROCESSING_SIZE
-        if (controllerIds.size() > MAX_PROCESSING_SIZE) {
-            // Split the provided collection
-            final Iterable<List<T>> partitions = ListUtils.partition(IterableUtils.toList(controllerIds), MAX_PROCESSING_SIZE);
-            // Preserve the security context because it gets lost when executing
-            // loading calls in new threads
-            final SecurityContext context = SecurityContextHolder.getContext();
-            // Handling remote request in parallel streams
-            return StreamSupport.stream(partitions.spliterator(), true) //
-                    .flatMap(partition -> withSecurityContext(() -> loadingFunction.apply(partition), context).stream())
-                    .collect(Collectors.toList());
-        }
-        return loadingFunction.apply(controllerIds);
-    }
-
-    private static <T> T withSecurityContext(final Supplier<T> callable, final SecurityContext securityContext) {
-        final SecurityContext oldContext = SecurityContextHolder.getContext();
-        try {
-            SecurityContextHolder.setContext(securityContext);
-            return callable.get();
-        } finally {
-            SecurityContextHolder.setContext(oldContext);
-        }
-    }
-
-    /**
-     * Method to send a message to a RabbitMQ Exchange after a Target was
-     * deleted.
-     *
-     * @param deleteEvent
-     *            the TargetDeletedEvent which holds the necessary data for
-     *            sending a target delete message.
-     */
-    @EventListener(classes = TargetDeletedEvent.class)
-    protected void targetDelete(final TargetDeletedEvent deleteEvent) {
-        if (!shouldBeProcessed(deleteEvent)) {
-            return;
-        }
-        sendDeleteMessage(deleteEvent.getTenant(), deleteEvent.getControllerId(), deleteEvent.getTargetAddress());
-    }
-
-    @EventListener(classes = TargetAttributesRequestedEvent.class)
-    protected void targetTriggerUpdateAttributes(final TargetAttributesRequestedEvent updateAttributesEvent) {
-        sendUpdateAttributesMessageToTarget(updateAttributesEvent.getTenant(), updateAttributesEvent.getControllerId(),
-                updateAttributesEvent.getTargetAddress());
     }
 
     private void sendSingleUpdateMessage(final ActionProperties action, final Target target,
@@ -434,17 +523,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         amqpSenderService.sendMessage(message, targetAddress);
     }
 
-    protected void sendPingReponseToDmfReceiver(final Message ping, final String tenant, final String virtualHost) {
-        final Message message = MessageBuilder.withBody(String.valueOf(System.currentTimeMillis()).getBytes())
-                .setContentType(MessageProperties.CONTENT_TYPE_TEXT_PLAIN)
-                .setCorrelationId(ping.getMessageProperties().getCorrelationId())
-                .setHeader(MessageHeaderKey.TYPE, MessageType.PING_RESPONSE).setHeader(MessageHeaderKey.TENANT, tenant)
-                .build();
-
-        amqpSenderService.sendMessage(message,
-                IpUtil.createAmqpUri(virtualHost, ping.getMessageProperties().getReplyTo()));
-    }
-
     private void sendDeleteMessage(final String tenant, final String controllerId, final String targetAddress) {
         if (!hasValidAddress(targetAddress)) {
             return;
@@ -459,32 +537,12 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return targetAddress != null && IpUtil.isAmqpUri(URI.create(targetAddress));
     }
 
-    protected boolean shouldBeProcessed(final RemoteApplicationEvent event) {
-        return isFromSelf(event);
-    }
-
     private boolean isFromSelf(final RemoteApplicationEvent event) {
         return serviceMatcher == null || serviceMatcher.isFromSelf(event);
     }
 
     private boolean hasPendingCancellations(final Long targetId) {
         return deploymentManagement.hasPendingCancellations(targetId);
-    }
-
-    protected void sendCancelMessageToTarget(final String tenant, final String controllerId, final Long actionId,
-            final URI address) {
-        if (!IpUtil.isAmqpUri(address)) {
-            return;
-        }
-
-        final DmfActionRequest actionRequest = new DmfActionRequest();
-        actionRequest.setActionId(actionId);
-
-        final Message message = getMessageConverter().toMessage(actionRequest,
-                createConnectorMessagePropertiesEvent(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
-
-        amqpSenderService.sendMessage(message, address);
-
     }
 
     private void sendUpdateAttributesMessageToTarget(final String tenant, final String controllerId,
@@ -497,30 +555,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 createConnectorMessagePropertiesEvent(tenant, controllerId, EventTopic.REQUEST_ATTRIBUTES_UPDATE));
 
         amqpSenderService.sendMessage(message, URI.create(targetAddress));
-    }
-
-    private static MessageProperties createConnectorMessagePropertiesEvent(final String tenant,
-            final String controllerId, final EventTopic topic) {
-        final MessageProperties messageProperties = createConnectorMessageProperties(tenant, controllerId);
-        messageProperties.setHeader(MessageHeaderKey.TOPIC, topic);
-        messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.EVENT);
-        return messageProperties;
-    }
-
-    private static MessageProperties createConnectorMessagePropertiesDeleteThing(final String tenant,
-            final String controllerId) {
-        final MessageProperties messageProperties = createConnectorMessageProperties(tenant, controllerId);
-        messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.THING_DELETED);
-        return messageProperties;
-    }
-
-    private static MessageProperties createConnectorMessageProperties(final String tenant, final String controllerId) {
-        final MessageProperties messageProperties = new MessageProperties();
-        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
-        messageProperties.setHeader(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
-        messageProperties.setHeader(MessageHeaderKey.THING_ID, controllerId);
-        messageProperties.setHeader(MessageHeaderKey.TENANT, tenant);
-        return messageProperties;
     }
 
     private DmfSoftwareModule convertToAmqpSoftwareModule(final Target target,
@@ -558,9 +592,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         final TenantMetaData metaData = systemManagement.getTenantMetadata();
         artifact.setUrls(artifactUrlHandler
                 .getUrls(new URLPlaceholder(metaData.getTenant(),
-                        metaData.getId(), target.getControllerId(), target.getId(),
-                        new SoftwareData(localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(),
-                                localArtifact.getId(), localArtifact.getSha1Hash())),
+                                metaData.getId(), target.getControllerId(), target.getId(),
+                                new SoftwareData(localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(),
+                                        localArtifact.getId(), localArtifact.getSha1Hash())),
                         ApiType.DMF)
                 .stream().collect(Collectors.toMap(ArtifactUrl::getProtocol, ArtifactUrl::getRef)));
 
@@ -607,56 +641,5 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         final Message message = getMessageConverter().toMessage(batchRequest,
                 createMessagePropertiesBatch(firstAction.getTenant(), getBatchEventTopicForAction(firstAction)));
         amqpSenderService.sendMessage(message, firstTarget.getAddress());
-    }
-
-    protected DmfTarget convertToDmfTarget(final Target target, final Long actionId) {
-        final DmfTarget dmfTarget = new DmfTarget();
-        dmfTarget.setActionId(actionId);
-        dmfTarget.setControllerId(target.getControllerId());
-        dmfTarget.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
-        return dmfTarget;
-    }
-
-    private static MessageProperties createMessagePropertiesBatch(final String tenant, final EventTopic topic) {
-        final MessageProperties messageProperties = new MessageProperties();
-        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
-        messageProperties.setHeader(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
-        messageProperties.setHeader(MessageHeaderKey.TENANT, tenant);
-
-        messageProperties.setHeader(MessageHeaderKey.TOPIC, topic);
-        messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.EVENT);
-        return messageProperties;
-    }
-
-    public boolean isBatchAssignmentsEnabled() {
-        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
-                .getConfigurationValue(BATCH_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
-    }
-
-    private static EventTopic getBatchEventTopicForAction(final ActionProperties action) {
-        return (Action.ActionType.DOWNLOAD_ONLY == action.getActionType() || !action.isMaintenanceWindowAvailable())
-                ? EventTopic.BATCH_DOWNLOAD
-                : EventTopic.BATCH_DOWNLOAD_AND_INSTALL;
-    }
-
-    /**
-     * Creates a Confirmation request.
-     * @param target the target
-     * @param actionId the actionId
-     * @param softwareModules the software modules
-     * @return
-     */
-    protected DmfConfirmRequest createConfirmRequest(final Target target, final Long actionId, final Map<SoftwareModule,
-            List<SoftwareModuleMetadata>> softwareModules) {
-        final DmfConfirmRequest request = new DmfConfirmRequest();
-        request.setActionId(actionId);
-        request.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
-
-        //Software modules can be filtered in the future exposing only the needed.
-        if (softwareModules != null) {
-            softwareModules.entrySet()
-                    .forEach(entry -> request.addSoftwareModule(convertToAmqpSoftwareModule(target, entry)));
-        }
-        return request;
     }
 }

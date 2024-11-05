@@ -24,11 +24,9 @@ public interface AmqpMessageSenderService {
     /**
      * Send the given message to the given uri. The uri contains the (virtual)
      * host and exchange e.g amqp://host/exchange.
-     * 
-     * @param message
-     *            the amqp message
-     * @param replyTo
-     *            the reply to uri
+     *
+     * @param message the amqp message
+     * @param replyTo the reply to uri
      */
     void sendMessage(@NotNull final Message message, @NotNull final URI replyTo);
 }

@@ -15,7 +15,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * Bean which holds the necessary properties for configuring the AMQP
  * connection.
- * 
  */
 @Data
 @ConfigurationProperties("hawkbit.dmf.rabbitmq")
