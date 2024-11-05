@@ -31,10 +31,6 @@ public class SecurityContextSwitch {
     private static final WithUser PRIVILEDGED_USER =
             createWithUser("bumlux", DEFAULT_TENANT, false, true, false, "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE");
 
-    private static  void setSecurityContext(final WithUser annotation) {
-        SecurityContextHolder.setContext(new WithUserSecurityContext(annotation));
-    }
-
     public static <T> T runAsPrivileged(final Callable<T> callable) throws Exception {
         createTenant(DEFAULT_TENANT);
         return runAs(PRIVILEDGED_USER, callable);
@@ -48,16 +44,6 @@ public class SecurityContextSwitch {
         }
         try {
             return callable.call();
-        } finally {
-            SecurityContextHolder.setContext(oldContext);
-        }
-    }
-
-    private static void createTenant(final String tenantId) {
-        final SecurityContext oldContext = SecurityContextHolder.getContext();
-        setSecurityContext(PRIVILEDGED_USER);
-        try {
-            SystemManagementHolder.getInstance().getSystemManagement().createTenantMetadata(tenantId);
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }
@@ -81,6 +67,20 @@ public class SecurityContextSwitch {
         return createWithUser(principal, tenant, autoCreateTenant, allSpPermission, controller, authorities);
     }
 
+    private static void setSecurityContext(final WithUser annotation) {
+        SecurityContextHolder.setContext(new WithUserSecurityContext(annotation));
+    }
+
+    private static void createTenant(final String tenantId) {
+        final SecurityContext oldContext = SecurityContextHolder.getContext();
+        setSecurityContext(PRIVILEDGED_USER);
+        try {
+            SystemManagementHolder.getInstance().getSystemManagement().createTenantMetadata(tenantId);
+        } finally {
+            SecurityContextHolder.setContext(oldContext);
+        }
+    }
+
     private static WithUser createWithUser(final String principal, final String tenant, final boolean autoCreateTenant,
             final boolean allSpPermission, final boolean controller, final String... authorities) {
         return new WithUser() {
@@ -101,6 +101,16 @@ public class SecurityContextSwitch {
             }
 
             @Override
+            public String tenantId() {
+                return tenant;
+            }
+
+            @Override
+            public boolean autoCreateTenant() {
+                return autoCreateTenant;
+            }
+
+            @Override
             public String[] authorities() {
                 return authorities;
             }
@@ -113,16 +123,6 @@ public class SecurityContextSwitch {
             @Override
             public String[] removeFromAllPermission() {
                 return new String[0];
-            }
-
-            @Override
-            public String tenantId() {
-                return tenant;
-            }
-
-            @Override
-            public boolean autoCreateTenant() {
-                return autoCreateTenant;
             }
 
             @Override
@@ -146,11 +146,6 @@ public class SecurityContextSwitch {
         }
 
         @Override
-        public void setAuthentication(final Authentication authentication) {
-            // nothing to do
-        }
-
-        @Override
         public Authentication getAuthentication() {
             final String[] authorities;
             if (annotation.allSpPermissions()) {
@@ -166,15 +161,14 @@ public class SecurityContextSwitch {
             return testingAuthenticationToken;
         }
 
-        private String[] getAllAuthorities(final String[] additionalAuthorities, final String[] notInclude) {
-            final List<String> permissions = SpPermission.getAllAuthorities();
-            if (notInclude != null) {
-                permissions.removeAll(Arrays.asList(notInclude));
-            }
-            if (additionalAuthorities != null) {
-                permissions.addAll(Arrays.asList(additionalAuthorities));
-            }
-            return permissions.toArray(new String[0]);
+        @Override
+        public void setAuthentication(final Authentication authentication) {
+            // nothing to do
+        }
+
+        @Override
+        public int hashCode() {
+            return annotation.hashCode();
         }
 
         @Override
@@ -186,9 +180,15 @@ public class SecurityContextSwitch {
             }
         }
 
-        @Override
-        public int hashCode() {
-            return annotation.hashCode();
+        private String[] getAllAuthorities(final String[] additionalAuthorities, final String[] notInclude) {
+            final List<String> permissions = SpPermission.getAllAuthorities();
+            if (notInclude != null) {
+                permissions.removeAll(Arrays.asList(notInclude));
+            }
+            if (additionalAuthorities != null) {
+                permissions.addAll(Arrays.asList(additionalAuthorities));
+            }
+            return permissions.toArray(new String[0]);
         }
     }
 }

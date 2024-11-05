@@ -26,7 +26,7 @@ import org.springframework.util.AntPathMatcher;
  */
 @Slf4j
 public abstract class AbstractSqlTestDatabase extends AbstractTestExecutionListener {
-    
+
     protected static final AntPathMatcher MATCHER = new AntPathMatcher();
 
     protected final DatasourceContext context;
@@ -45,7 +45,7 @@ public abstract class AbstractSqlTestDatabase extends AbstractTestExecutionListe
         log.trace("\033[0;33mExecuting statement {} on uri {} \033[0m", statement, uri);
 
         try (final Connection connection = getConnection(uri, context.getUsername(), context.getPassword());
-             final PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
+                final PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
             preparedStatement.execute();
         } catch (final SQLException e) {
             log.error("Execution of statement '{}' on uri {} failed!", statement, uri, e);

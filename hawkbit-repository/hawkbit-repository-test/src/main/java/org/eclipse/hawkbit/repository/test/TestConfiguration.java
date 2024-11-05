@@ -49,7 +49,6 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.context.ApplicationEvent;
@@ -71,8 +70,6 @@ import org.springframework.security.concurrent.DelegatingSecurityContextExecutor
 import org.springframework.security.concurrent.DelegatingSecurityContextScheduledExecutorService;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * Spring context configuration required for Dev.Environment.
  */
@@ -85,6 +82,29 @@ import static java.util.Objects.requireNonNull;
 @EnableAutoConfiguration
 @PropertySource("classpath:/hawkbit-test-defaults.properties")
 public class TestConfiguration implements AsyncConfigurer {
+
+    @Override
+    public Executor getAsyncExecutor() {
+        return asyncExecutor();
+    }
+
+    @Override
+    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
+        return new SimpleAsyncUncaughtExceptionHandler();
+    }
+
+    @Bean
+    public ScheduledExecutorService scheduledExecutorService() {
+        final AtomicLong count = new AtomicLong(0);
+        return new DelegatingSecurityContextScheduledExecutorService(
+                Executors.newScheduledThreadPool(1, (runnable) -> {
+                    final Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+                    thread.setName(
+                            String.format(
+                                    Locale.ROOT, "central-scheduled-executor-pool-%d", count.getAndIncrement()));
+                    return thread;
+                }));
+    }
 
     /**
      * Disables caching during test to avoid concurrency failures during test.
@@ -154,6 +174,43 @@ public class TestConfiguration implements AsyncConfigurer {
         return simpleApplicationEventMulticaster;
     }
 
+    @Bean
+    EventPublisherHolder eventBusHolder() {
+        return EventPublisherHolder.getInstance();
+    }
+
+    @Bean
+    Executor asyncExecutor() {
+        return new DelegatingSecurityContextExecutorService(Executors.newSingleThreadExecutor());
+    }
+
+    @Bean
+    AuditorAware<String> auditorAware() {
+        return new SpringSecurityAuditorAware();
+    }
+
+    /**
+     * @return returns a VirtualPropertyReplacer
+     */
+    @Bean
+    VirtualPropertyReplacer virtualPropertyReplacer() {
+        return new VirtualPropertyResolver();
+    }
+
+    @Bean
+    RolloutApprovalStrategy rolloutApprovalStrategy() {
+        return new RolloutTestApprovalStrategy();
+    }
+
+    /**
+     * @return the protostuff io message converter
+     */
+    @Bean
+    @ConditionalOnBusEnabled
+    MessageConverter busProtoBufConverter() {
+        return new BusProtoStuffMessageConverter();
+    }
+
     private static class FilterEnabledApplicationEventPublisher extends SimpleApplicationEventMulticaster {
 
         private final ApplicationEventFilter applicationEventFilter;
@@ -170,67 +227,5 @@ public class TestConfiguration implements AsyncConfigurer {
 
             super.multicastEvent(event, eventType);
         }
-    }
-
-    @Bean
-    EventPublisherHolder eventBusHolder() {
-        return EventPublisherHolder.getInstance();
-    }
-
-    @Bean
-    Executor asyncExecutor() {
-        return new DelegatingSecurityContextExecutorService(Executors.newSingleThreadExecutor());
-    }
-
-    @Bean
-    AuditorAware<String> auditorAware() {
-        return new SpringSecurityAuditorAware();
-    }
-
-    @Override
-    public Executor getAsyncExecutor() {
-        return asyncExecutor();
-    }
-
-    @Override
-    public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return new SimpleAsyncUncaughtExceptionHandler();
-    }
-
-    @Bean
-    public ScheduledExecutorService scheduledExecutorService() {
-        final AtomicLong count = new AtomicLong(0);
-        return new DelegatingSecurityContextScheduledExecutorService(
-                Executors.newScheduledThreadPool(1, (runnable) -> {
-                    final Thread thread = Executors.defaultThreadFactory().newThread(runnable);
-                    thread.setName(
-                            String.format(
-                                    Locale.ROOT, "central-scheduled-executor-pool-%d", count.getAndIncrement()));
-                    return thread;
-                }));
-    }
-
-    /**
-     *
-     * @return returns a VirtualPropertyReplacer
-     */
-    @Bean
-    VirtualPropertyReplacer virtualPropertyReplacer() {
-        return new VirtualPropertyResolver();
-    }
-
-    @Bean
-    RolloutApprovalStrategy rolloutApprovalStrategy() {
-        return new RolloutTestApprovalStrategy();
-    }
-
-    /**
-     *
-     * @return the protostuff io message converter
-     */
-    @Bean
-    @ConditionalOnBusEnabled
-    MessageConverter busProtoBufConverter() {
-        return new BusProtoStuffMessageConverter();
     }
 }

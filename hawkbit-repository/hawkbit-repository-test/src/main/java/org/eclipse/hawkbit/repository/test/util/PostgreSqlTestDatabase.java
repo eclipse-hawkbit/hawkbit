@@ -20,7 +20,7 @@ import org.junit.jupiter.api.extension.Extension;
  */
 @Slf4j
 public class PostgreSqlTestDatabase extends AbstractSqlTestDatabase {
-    
+
     private static final String POSTGRESQL_URI_PATTERN = "jdbc:postgresql://{host}:{port}/{db}*";
 
     public PostgreSqlTestDatabase(final DatasourceContext context) {

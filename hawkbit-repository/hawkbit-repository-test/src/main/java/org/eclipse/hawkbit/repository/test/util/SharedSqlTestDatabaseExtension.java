@@ -22,13 +22,13 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  */
 @Slf4j
 public class SharedSqlTestDatabaseExtension implements BeforeAllCallback {
-    
+
     protected static final AtomicReference<DatasourceContext> CONTEXT = new AtomicReference<>();
 
     @Override
     public void beforeAll(final ExtensionContext extensionContext) {
         final DatasourceContext testDatasourceContext = new DatasourceContext();
-        
+
         if (testDatasourceContext.isNotProperlyConfigured()) {
             log.info("\033[0;33mSchema generation skipped... No datasource environment variables found!\033[0m");
             return;
@@ -47,13 +47,6 @@ public class SharedSqlTestDatabaseExtension implements BeforeAllCallback {
         System.setProperty(SPRING_DATASOURCE_URL_KEY, randomSchemaUri);
 
         registerDropSchemaOnSystemShutdownHook(database, randomSchemaUri);
-    }
-
-    private void registerDropSchemaOnSystemShutdownHook(final AbstractSqlTestDatabase database, final String schemaUri) {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            log.warn("\033[0;33mDropping schema at url {}  \033[0m", schemaUri);
-            database.dropRandomSchema();
-        }));
     }
 
     protected AbstractSqlTestDatabase matchingDatabase(final DatasourceContext context) {
@@ -77,6 +70,13 @@ public class SharedSqlTestDatabaseExtension implements BeforeAllCallback {
         }
 
         return database;
+    }
+
+    private void registerDropSchemaOnSystemShutdownHook(final AbstractSqlTestDatabase database, final String schemaUri) {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            log.warn("\033[0;33mDropping schema at url {}  \033[0m", schemaUri);
+            database.dropRandomSchema();
+        }));
     }
 
 }

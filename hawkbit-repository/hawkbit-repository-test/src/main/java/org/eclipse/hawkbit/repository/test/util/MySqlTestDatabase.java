@@ -20,7 +20,7 @@ import org.junit.jupiter.api.extension.Extension;
  */
 @Slf4j
 public class MySqlTestDatabase extends AbstractSqlTestDatabase {
-    
+
     protected static final String MYSQL_URI_PATTERN = "jdbc:mariadb://{host}:{port}/{db}*";
 
     public MySqlTestDatabase(final DatasourceContext context) {
