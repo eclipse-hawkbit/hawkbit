@@ -23,7 +23,7 @@ import org.springframework.stereotype.Controller;
  */
 @Configuration
 @ComponentScan
-@Import({RestConfiguration.class, OpenApiConfiguration.class})
+@Import({ RestConfiguration.class, OpenApiConfiguration.class })
 public class DdiApiConfiguration {
 
 }

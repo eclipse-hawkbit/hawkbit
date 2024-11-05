@@ -28,6 +28,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
@@ -40,10 +44,6 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
 /**
  * Test config data from the controller.
  */
@@ -66,8 +66,8 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         attributes.put(ATTRIBUTE_KEY_VALID, ATTRIBUTE_VALUE_VALID);
 
         mvc.perform(put(TARGET1_CONFIGDATA_PATH, tenantAware.getCurrentTenant())
-                .content(jsonToCbor(JsonBuilder.configData(attributes).toString()))
-                .contentType(DdiRestConstants.MEDIA_TYPE_CBOR)).andDo(MockMvcResultPrinter.print())
+                        .content(jsonToCbor(JsonBuilder.configData(attributes).toString()))
+                        .contentType(DdiRestConstants.MEDIA_TYPE_CBOR)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
         assertThat(targetManagement.getControllerAttributes(TARGET1_ID)).isEqualTo(attributes);
     }
@@ -81,15 +81,15 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
         final long current = System.currentTimeMillis();
         mvc.perform(
-                get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()).accept(MediaTypes.HAL_JSON))
+                        get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()).accept(MediaTypes.HAL_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.configData.href", equalTo(
                         "http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/4712/configData")));
         Thread.sleep(1); // is required: otherwise processing the next line is
-                         // often too fast and
-                         // the following assert will fail
+        // often too fast and
+        // the following assert will fail
         assertThat(targetManagement.getByControllerID("4712").orElseThrow(NoSuchElementException::new)
                 .getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
@@ -107,7 +107,7 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         assertThat(updateControllerAttributes.isRequestControllerAttributes()).isFalse();
 
         mvc.perform(
-                get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()).accept(MediaTypes.HAL_JSON))
+                        get("/{tenant}/controller/v1/4712", tenantAware.getCurrentTenant()).accept(MediaTypes.HAL_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
@@ -125,14 +125,14 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         attributes.put(ATTRIBUTE_KEY_VALID, ATTRIBUTE_VALUE_VALID);
 
         mvc.perform(put(TARGET1_CONFIGDATA_PATH, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                        .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(targetManagement.getControllerAttributes(TARGET1_ID)).isEqualTo(attributes);
 
         // update
         attributes.put("sdsds", "123412");
         mvc.perform(put(TARGET1_CONFIGDATA_PATH, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                        .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         assertThat(targetManagement.getControllerAttributes(TARGET1_ID)).isEqualTo(attributes);
     }
@@ -149,13 +149,13 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
             attributes.put("dsafsdf" + i, "sdsds" + i);
         }
         mvc.perform(put(TARGET1_CONFIGDATA_PATH, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                        .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         attributes = new HashMap<>();
         attributes.put("on too many", "sdsds");
         mvc.perform(put(TARGET1_CONFIGDATA_PATH, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                        .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
@@ -183,17 +183,17 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         final Map<String, String> attributes = new HashMap<>();
         attributes.put("dsafsdf", "sdsds");
         mvc.perform(put("/{tenant}/controller/v1/4712/configData", tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaTypes.HAL_JSON))
+                        .content(JsonBuilder.configData(attributes).toString()).contentType(MediaTypes.HAL_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isUnsupportedMediaType());
 
         // non existing target
         mvc.perform(put("/{tenant}/controller/v1/456456/configData", tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                        .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
         // bad body
         mvc.perform(put("/{tenant}/controller/v1/4712/configData", tenantAware.getCurrentTenant())
-                .content("{\"id\": \"51659181\"}").contentType(MediaType.APPLICATION_JSON))
+                        .content("{\"id\": \"51659181\"}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
     }
 
@@ -204,26 +204,6 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         testdataFactory.createTarget(TARGET2_ID);
         putAndVerifyConfigDataWithKeyTooLong();
         putAndVerifyConfigDataWithValueTooLong();
-    }
-
-    @Step
-    private void putAndVerifyConfigDataWithKeyTooLong() throws Exception {
-        final Map<String, String> attributes = Collections.singletonMap(ATTRIBUTE_KEY_TOO_LONG, ATTRIBUTE_VALUE_VALID);
-        mvc.perform(put(DdiConfigDataTest.TARGET2_CONFIGDATA_PATH, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.exceptionClass", equalTo(InvalidTargetAttributeException.class.getName())))
-                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_TARGET_ATTRIBUTES_INVALID.getKey())));
-    }
-
-    @Step
-    private void putAndVerifyConfigDataWithValueTooLong() throws Exception {
-        final Map<String, String> attributes = Collections.singletonMap(ATTRIBUTE_KEY_VALID, ATTRIBUTE_VALUE_TOO_LONG);
-        mvc.perform(put(DdiConfigDataTest.TARGET2_CONFIGDATA_PATH, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.exceptionClass", equalTo(InvalidTargetAttributeException.class.getName())))
-                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_TARGET_ATTRIBUTES_INVALID.getKey())));
     }
 
     @Test
@@ -250,6 +230,26 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Step
+    private void putAndVerifyConfigDataWithKeyTooLong() throws Exception {
+        final Map<String, String> attributes = Collections.singletonMap(ATTRIBUTE_KEY_TOO_LONG, ATTRIBUTE_VALUE_VALID);
+        mvc.perform(put(DdiConfigDataTest.TARGET2_CONFIGDATA_PATH, tenantAware.getCurrentTenant())
+                        .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(InvalidTargetAttributeException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_TARGET_ATTRIBUTES_INVALID.getKey())));
+    }
+
+    @Step
+    private void putAndVerifyConfigDataWithValueTooLong() throws Exception {
+        final Map<String, String> attributes = Collections.singletonMap(ATTRIBUTE_KEY_VALID, ATTRIBUTE_VALUE_TOO_LONG);
+        mvc.perform(put(DdiConfigDataTest.TARGET2_CONFIGDATA_PATH, tenantAware.getCurrentTenant())
+                        .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(InvalidTargetAttributeException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_TARGET_ATTRIBUTES_INVALID.getKey())));
+    }
+
+    @Step
     private void putConfigDataWithInvalidUpdateMode() throws Exception {
         // create some attriutes
         final Map<String, String> attributes = new HashMap<>();
@@ -258,8 +258,8 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
         // use an invalid update mode
         mvc.perform(put(DdiConfigDataTest.TARGET1_CONFIGDATA_PATH, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes, "KJHGKJHGKJHG").toString())
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content(JsonBuilder.configData(attributes, "KJHGKJHGKJHG").toString())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
     }
 
@@ -274,8 +274,8 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         removeAttributes.put("k3", "bar");
 
         mvc.perform(put(DdiConfigDataTest.TARGET1_CONFIGDATA_PATH, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(removeAttributes, "remove").toString())
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content(JsonBuilder.configData(removeAttributes, "remove").toString())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // verify attribute removal
@@ -298,8 +298,8 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         mergeAttributes.put("k1", "v1_modified_again");
         mergeAttributes.put("k4", "v4");
         mvc.perform(put(DdiConfigDataTest.TARGET1_CONFIGDATA_PATH, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(mergeAttributes, "merge").toString())
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content(JsonBuilder.configData(mergeAttributes, "merge").toString())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // verify attribute merge
@@ -325,8 +325,8 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
         replacementAttributes.put("k2", "v2");
         replacementAttributes.put("k3", "v3");
         mvc.perform(put(DdiConfigDataTest.TARGET1_CONFIGDATA_PATH, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(replacementAttributes, "replace").toString())
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content(JsonBuilder.configData(replacementAttributes, "replace").toString())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // verify attribute replacement
@@ -349,7 +349,7 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
 
         // set the initial attributes
         mvc.perform(put(DdiConfigDataTest.TARGET1_CONFIGDATA_PATH, tenantAware.getCurrentTenant())
-                .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                        .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         // verify the initial parameters

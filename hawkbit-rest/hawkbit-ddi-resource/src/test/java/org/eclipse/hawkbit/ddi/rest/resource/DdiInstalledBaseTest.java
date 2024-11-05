@@ -27,6 +27,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
@@ -62,10 +65,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 /**
  * Test installed base from the controller.
  */
@@ -73,6 +72,8 @@ import io.qameta.allure.Story;
 @Story("Installed Base Resource")
 public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
+    @Autowired
+    ActionStatusRepository actionStatusRepository;
     private static final int ARTIFACT_SIZE = 5 * 1024;
     private static final String CONTROLLER_ID = "4715";
 
@@ -105,17 +106,17 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = createTargetAndAssertNoActiveActions();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
-
         // update assigned version
-        putInstalledBase(target.getControllerId(),getJsonInstalledBase(ds.getName(),ds.getVersion()),status()
+        putInstalledBase(target.getControllerId(), getJsonInstalledBase(ds.getName(), ds.getVersion()), status()
                 .isCreated());
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get().getId())
                 .isEqualTo(ds.getId());
 
         // update assigned version while version already assigned
-        putInstalledBase(target.getControllerId(),getJsonInstalledBase(ds.getName(),ds.getVersion()),status().isOk());
+        putInstalledBase(target.getControllerId(), getJsonInstalledBase(ds.getName(), ds.getVersion()), status().isOk());
     }
+
     @Test
     @Description("Ensure that installedVersion is version self assigned")
     public void installedVersionNotExist() throws Exception {
@@ -123,9 +124,8 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final String dsName = "unknown";
         final String dsVersion = "1.0.0";
 
-
         // get installed base
-        putInstalledBase(target.getControllerId(),getJsonInstalledBase(dsName,dsVersion),status().isNotFound());
+        putInstalledBase(target.getControllerId(), getJsonInstalledBase(dsName, dsVersion), status().isNotFound());
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).isEmpty()).isTrue();
     }
@@ -401,14 +401,10 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isOk(),
                 tenantAware.getCurrentTenant(), target.getControllerId(), softwareModuleId.toString())
-                        .andExpect(jsonPath("$", hasSize(3)))
-                        .andExpect(jsonPath("$.[?(@.filename=='filename0')]", hasSize(1)))
-                        .andExpect(jsonPath("$.[?(@.filename=='filename1')]", hasSize(1)))
-                        .andExpect(jsonPath("$.[?(@.filename=='filename2')]", hasSize(1)));
-    }
-
-    private static Stream<Action.ActionType> actionTypeForDeployment() {
-        return Stream.of(Action.ActionType.SOFT, Action.ActionType.FORCED);
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$.[?(@.filename=='filename0')]", hasSize(1)))
+                .andExpect(jsonPath("$.[?(@.filename=='filename1')]", hasSize(1)))
+                .andExpect(jsonPath("$.[?(@.filename=='filename2')]", hasSize(1)));
     }
 
     @ParameterizedTest
@@ -484,8 +480,8 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), tenantAware.getCurrentTenant(),
                 target.getControllerId()).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                        .andExpect(jsonPath("$._links.deploymentBase.href").exists())
-                        .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
+                .andExpect(jsonPath("$._links.deploymentBase.href").exists())
+                .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
 
         postDeploymentFeedback(target.getControllerId(), actionId, getJsonDownloadDeploymentActionFeedback(),
                 status().isOk());
@@ -495,8 +491,8 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         // Test
         performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), tenantAware.getCurrentTenant(),
                 target.getControllerId()).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                        .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist())
-                        .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
+                .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist())
+                .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
     }
 
     @ParameterizedTest
@@ -511,8 +507,8 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), tenantAware.getCurrentTenant(),
                 target.getControllerId()).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                        .andExpect(jsonPath("$._links.deploymentBase.href").exists())
-                        .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
+                .andExpect(jsonPath("$._links.deploymentBase.href").exists())
+                .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
 
         postDeploymentFeedback(target.getControllerId(), actionId,
                 getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE),
@@ -525,8 +521,8 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         // Test
         performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), tenantAware.getCurrentTenant(),
                 target.getControllerId()).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                        .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist())
-                        .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
+                .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist())
+                .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
     }
 
     @Test
@@ -556,14 +552,14 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         // Test
         // for zero input no action history is returned
         mvc.perform(get(INSTALLED_BASE + "?actionHistory", tenantAware.getCurrentTenant(), 911, savedAction.getId())
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.actionHistory.messages").doesNotExist());
 
         // depending on given query parameter value, only the latest messages are
         // returned
         mvc.perform(get(INSTALLED_BASE + "?actionHistory=2", tenantAware.getCurrentTenant(), 911, savedAction.getId())
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.actionHistory.messages", hasItem(containsString("Installation completed"))))
                 .andExpect(jsonPath("$.actionHistory.messages", hasItem(containsString("Installation proceeding"))))
@@ -572,7 +568,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         // for negative input the entire action history is returned
         mvc.perform(get(INSTALLED_BASE + "?actionHistory=-3", tenantAware.getCurrentTenant(), 911, savedAction.getId())
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.actionHistory.messages", hasItem(containsString("Installation completed"))))
                 .andExpect(jsonPath("$.actionHistory.messages", hasItem(containsString("Installation proceeding"))))
@@ -611,12 +607,14 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), CONTROLLER_ID, actionId))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), CONTROLLER_ID, actionId)
-                .accept(MediaType.APPLICATION_ATOM_XML)).andDo(MockMvcResultPrinter.print())
+                        .accept(MediaType.APPLICATION_ATOM_XML)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotAcceptable());
     }
 
-    @Autowired
-    ActionStatusRepository actionStatusRepository;
+    private static Stream<Action.ActionType> actionTypeForDeployment() {
+        return Stream.of(Action.ActionType.SOFT, Action.ActionType.FORCED);
+    }
+
     private Target createTargetAndAssertNoActiveActions() {
         final Target savedTarget = testdataFactory.createTarget(CONTROLLER_ID);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).isEmpty();

@@ -26,6 +26,10 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.jayway.jsonpath.JsonPath;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.apache.commons.lang3.RandomUtils;
 import org.assertj.core.api.Condition;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
@@ -66,12 +70,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.jayway.jsonpath.JsonPath;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 /**
  * Test deployment base from the controller.
  */
@@ -79,6 +77,10 @@ import io.qameta.allure.Story;
 @Story("Deployment Action Resource")
 public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
+    @Autowired
+    ActionRepository actionRepository;
+    @Autowired
+    ActionStatusRepository actionStatusRepository;
     private static final String DEFAULT_CONTROLLER_ID = "4712";
 
     @Test
@@ -130,10 +132,10 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isOk(),
                 tenantAware.getCurrentTenant(), target.getControllerId(), softwareModuleId.toString())
-                        .andExpect(jsonPath("$", hasSize(3)))
-                        .andExpect(jsonPath("$.[?(@.filename=='filename0')]", hasSize(1)))
-                        .andExpect(jsonPath("$.[?(@.filename=='filename1')]", hasSize(1)))
-                        .andExpect(jsonPath("$.[?(@.filename=='filename2')]", hasSize(1)));
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$.[?(@.filename=='filename0')]", hasSize(1)))
+                .andExpect(jsonPath("$.[?(@.filename=='filename1')]", hasSize(1)))
+                .andExpect(jsonPath("$.[?(@.filename=='filename2')]", hasSize(1)));
     }
 
     @Test
@@ -171,8 +173,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final long current = System.currentTimeMillis();
         performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenantAware.getCurrentTenant(),
                 DEFAULT_CONTROLLER_ID).andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
-                        .andExpect(jsonPath("$._links.deploymentBase.href",
-                                startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
+                .andExpect(jsonPath("$._links.deploymentBase.href",
+                        startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
@@ -214,7 +216,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 DEFAULT_CONTROLLER_ID).andReturn();
         assertThat(JsonPath.compile("_links.deploymentBase.href").read(mvcResult.getResponse().getContentAsString())
                 .toString()).isEqualTo(urlBeforeSwitch)
-                        .startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, actionId.toString()));
+                .startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, actionId.toString()));
 
         // After the time is over we should see a new etag
         TimeUnit.MILLISECONDS.sleep(2_000);
@@ -269,8 +271,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final long current = System.currentTimeMillis();
         performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenantAware.getCurrentTenant(),
                 DEFAULT_CONTROLLER_ID).andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
-                        .andExpect(jsonPath("$._links.deploymentBase.href",
-                                startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
+                .andExpect(jsonPath("$._links.deploymentBase.href",
+                        startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
@@ -327,8 +329,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final long current = System.currentTimeMillis();
         performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenantAware.getCurrentTenant(),
                 DEFAULT_CONTROLLER_ID).andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
-                        .andExpect(jsonPath("$._links.deploymentBase.href",
-                                startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
+                .andExpect(jsonPath("$._links.deploymentBase.href",
+                        startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
@@ -373,7 +375,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(),
                 ActionType.DOWNLOAD_ONLY).getAssignedEntity().stream().map(Action::getTarget)
-                        .collect(Collectors.toList());
+                .collect(Collectors.toList());
         implicitLock(ds);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
@@ -394,8 +396,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final long current = System.currentTimeMillis();
         performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenantAware.getCurrentTenant(),
                 DEFAULT_CONTROLLER_ID).andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
-                        .andExpect(jsonPath("$._links.deploymentBase.href",
-                                startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
+                .andExpect(jsonPath("$._links.deploymentBase.href",
+                        startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
@@ -415,17 +417,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final ActionStatus actionStatusMessage = actionStatusMessages.iterator().next();
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
 
-    }
-
-    private void getAndVerifyDeploymentBasePayload(final String controllerId, final MediaType mediaType,
-            final DistributionSet ds, final String visibleMetadataOsKey, final String visibleMetadataOsValue,
-            final Artifact artifact, final Artifact artifactSignature, final Long actionId, final String downloadType,
-            final String updateType, final Long osModuleId) throws Exception {
-        getAndVerifyDeploymentBasePayload(controllerId, mediaType, ds, artifact, artifactSignature, actionId,
-                osModuleId, downloadType, updateType).andExpect(
-                        jsonPath("$.deployment.chunks[?(@.part=='os')].metadata[0].key").value(visibleMetadataOsKey))
-                        .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].metadata[0].value")
-                                .value(visibleMetadataOsValue));
     }
 
     @Test
@@ -449,7 +440,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // no deployment
         mvc.perform(
-                MockMvcRequestBuilders.get(DEPLOYMENT_BASE, tenantAware.getCurrentTenant(), DEFAULT_CONTROLLER_ID, "1"))
+                        MockMvcRequestBuilders.get(DEPLOYMENT_BASE, tenantAware.getCurrentTenant(), DEFAULT_CONTROLLER_ID, "1"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
         // wrong media type
@@ -460,8 +451,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_BASE, tenantAware.getCurrentTenant(), DEFAULT_CONTROLLER_ID,
                 actionId)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         mvc.perform(MockMvcRequestBuilders
-                .get(DEPLOYMENT_BASE, tenantAware.getCurrentTenant(), DEFAULT_CONTROLLER_ID, actionId)
-                .accept(MediaType.APPLICATION_ATOM_XML)).andDo(MockMvcResultPrinter.print())
+                        .get(DEPLOYMENT_BASE, tenantAware.getCurrentTenant(), DEFAULT_CONTROLLER_ID, actionId)
+                        .accept(MediaType.APPLICATION_ATOM_XML)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotAcceptable());
     }
 
@@ -552,8 +543,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertStatusMessagesCount(6);
     }
 
-    @Autowired
-    ActionRepository actionRepository;
     @Test
     @Description("Verifies that an update action is correctly set to error if the controller provides error feedback.")
     public void rootRsSingleDeploymentActionWithErrorFeedback() throws Exception {
@@ -669,7 +658,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // not allowed methods
         mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_FEEDBACK, tenantAware.getCurrentTenant(),
-                DEFAULT_CONTROLLER_ID, "2")).andDo(MockMvcResultPrinter.print())
+                        DEFAULT_CONTROLLER_ID, "2")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(put(DEPLOYMENT_FEEDBACK, tenantAware.getCurrentTenant(), DEFAULT_CONTROLLER_ID, "2"))
@@ -750,6 +739,21 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getCanonicalName())));
     }
 
+    public long countActionStatusAll() {
+        return actionStatusRepository.count();
+    }
+
+    private void getAndVerifyDeploymentBasePayload(final String controllerId, final MediaType mediaType,
+            final DistributionSet ds, final String visibleMetadataOsKey, final String visibleMetadataOsValue,
+            final Artifact artifact, final Artifact artifactSignature, final Long actionId, final String downloadType,
+            final String updateType, final Long osModuleId) throws Exception {
+        getAndVerifyDeploymentBasePayload(controllerId, mediaType, ds, artifact, artifactSignature, actionId,
+                osModuleId, downloadType, updateType).andExpect(
+                        jsonPath("$.deployment.chunks[?(@.part=='os')].metadata[0].key").value(visibleMetadataOsKey))
+                .andExpect(jsonPath("$.deployment.chunks[?(@.part=='os')].metadata[0].value")
+                        .value(visibleMetadataOsValue));
+    }
+
     private void assertActionStatusCount(final int actionStatusCount, final int minActionStatusCountInPage) {
         final Target target = targetManagement.getByControllerID(DdiDeploymentBaseTest.DEFAULT_CONTROLLER_ID).get();
         assertThat(target.getUpdateStatus()).isEqualTo(TargetUpdateStatus.PENDING);
@@ -760,19 +764,6 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(countActionStatusAll()).isEqualTo(actionStatusCount);
         assertThat(findActionStatusAll(PAGE).getContent()).haveAtLeast(minActionStatusCountInPage,
                 new ActionStatusCondition(Status.RUNNING));
-    }
-
-    private static class ActionStatusCondition extends Condition<ActionStatus> {
-        private final Action.Status status;
-
-        public ActionStatusCondition(final Action.Status status) {
-            this.status = status;
-        }
-
-        @Override
-        public boolean matches(final ActionStatus value) {
-            return value.getStatus() == status;
-        }
     }
 
     private Target createTargetAndAssertNoActiveActions() {
@@ -829,12 +820,21 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .hasSize(activeActions);
     }
 
-    @Autowired
-    ActionStatusRepository actionStatusRepository;
     private Page<ActionStatus> findActionStatusAll(final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(actionStatusRepository, pageable, null);
     }
-    public long countActionStatusAll() {
-        return actionStatusRepository.count();
+
+    private static class ActionStatusCondition extends Condition<ActionStatus> {
+
+        private final Action.Status status;
+
+        public ActionStatusCondition(final Action.Status status) {
+            this.status = status;
+        }
+
+        @Override
+        public boolean matches(final ActionStatus value) {
+            return value.getStatus() == status;
+        }
     }
 }

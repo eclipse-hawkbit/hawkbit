@@ -24,10 +24,18 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
+import com.fasterxml.jackson.dataformat.cbor.CBORParser;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
-import org.eclipse.hawkbit.ddi.json.model.DdiConfirmationFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiAssignedVersion;
+import org.eclipse.hawkbit.ddi.json.model.DdiConfirmationFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiProgress;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
@@ -49,15 +57,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
-import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
-import com.fasterxml.jackson.dataformat.cbor.CBORParser;
-
 @ContextConfiguration(classes = { DdiApiConfiguration.class, RestConfiguration.class,
         RepositoryApplicationConfiguration.class, TestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
@@ -65,19 +64,17 @@ import com.fasterxml.jackson.dataformat.cbor.CBORParser;
 public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrationTest {
 
     public static final int HTTP_PORT = 8080;
-    protected static final String HTTP_LOCALHOST = String.format("http://localhost:%s/",HTTP_PORT);
+    protected static final String HTTP_LOCALHOST = String.format("http://localhost:%s/", HTTP_PORT);
     protected static final String CONTROLLER_BASE = "/{tenant}/controller/v1/{controllerId}";
 
     protected static final String SOFTWARE_MODULE_ARTIFACTS = CONTROLLER_BASE
             + "/softwaremodules/{softwareModuleId}/artifacts";
     protected static final String DEPLOYMENT_BASE = CONTROLLER_BASE + "/deploymentBase/{actionId}";
+    protected static final String DEPLOYMENT_FEEDBACK = DEPLOYMENT_BASE + "/feedback";
     protected static final String CANCEL_ACTION = CONTROLLER_BASE + "/cancelAction/{actionId}";
+    protected static final String CANCEL_FEEDBACK = CANCEL_ACTION + "/feedback";
     protected static final String INSTALLED_BASE = CONTROLLER_BASE + "/installedBase/{actionId}";
     protected static final String INSTALLED_BASE_ROOT = CONTROLLER_BASE + "/installedBase";
-
-    protected static final String DEPLOYMENT_FEEDBACK = DEPLOYMENT_BASE + "/feedback";
-    protected static final String CANCEL_FEEDBACK = CANCEL_ACTION + "/feedback";
-
     protected static final String CONFIRMATION_BASE = CONTROLLER_BASE + "/confirmationBase";
     protected static final String ACTIVATE_AUTO_CONFIRM = CONFIRMATION_BASE + "/activateAutoConfirm";
     protected static final String DEACTIVATE_AUTO_CONFIRM = CONFIRMATION_BASE + "/deactivateAutoConfirm";
@@ -91,11 +88,9 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     /**
      * Convert JSON to a CBOR equivalent.
      *
-     * @param json
-     *            JSON object to convert
+     * @param json JSON object to convert
      * @return Equivalent CBOR data
-     * @throws IOException
-     *             Invalid JSON input
+     * @throws IOException Invalid JSON input
      */
     protected static byte[] jsonToCbor(final String json) throws IOException {
         final JsonFactory jsonFactory = new JsonFactory();
@@ -113,11 +108,9 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     /**
      * Convert CBOR to JSON equivalent.
      *
-     * @param input
-     *            CBOR data to convert
+     * @param input CBOR data to convert
      * @return Equivalent JSON string
-     * @throws IOException
-     *             Invalid CBOR input
+     * @throws IOException Invalid CBOR input
      */
     protected static String cborToJson(final byte[] input) throws IOException {
         final CBORFactory cborFactory = new CBORFactory();
@@ -132,6 +125,10 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
         return stringWriter.toString();
     }
 
+    protected static ObjectMapper getMapper() {
+        return objectMapper;
+    }
+
     protected ResultActions postDeploymentFeedback(final String controllerId, final Long actionId, final String content,
             final ResultMatcher statusMatcher) throws Exception {
         return postDeploymentFeedback(MediaType.APPLICATION_JSON_UTF8, controllerId, actionId, content.getBytes(),
@@ -139,7 +136,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     }
 
     protected ResultActions putInstalledBase(final String controllerId, final String content,
-                                             final ResultMatcher statusMatcher) throws Exception {
+            final ResultMatcher statusMatcher) throws Exception {
         return mvc.perform(put(INSTALLED_BASE_ROOT, tenantAware.getCurrentTenant(), controllerId)
                         .content(content.getBytes()).contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(statusMatcher);
@@ -170,7 +167,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     protected ResultActions performGet(final String url, final MediaType mediaType, final ResultMatcher statusMatcher,
             final String... values) throws Exception {
         return mvc.perform(MockMvcRequestBuilders.get(url, values).accept(mediaType)
-                .with(new RequestOnHawkbitDefaultPortPostProcessor()))
+                        .with(new RequestOnHawkbitDefaultPortPostProcessor()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(statusMatcher)
                 .andExpect(content().contentTypeCompatibleWith(mediaType));
     }
@@ -200,61 +197,6 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
                 getDownloadAndUploadType(actionType), getDownloadAndUploadType(actionType));
     }
 
-    private ResultActions verifyBasePayload(final String prefix, final ResultActions resultActions, final String controllerId,
-            final DistributionSet ds, final Artifact artifact, final Artifact artifactSignature, final Long actionId,
-            final Long osModuleId, final String downloadType, final String updateType) throws Exception {
-        return resultActions.andExpect(jsonPath("$.id", equalTo(String.valueOf(actionId))))
-                .andExpect(jsonPath(prefix + ".download", equalTo(downloadType)))
-                .andExpect(jsonPath(prefix + ".update", equalTo(updateType)))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='jvm')].name",
-                        contains(ds.findFirstModuleByType(runtimeType).get().getName())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='jvm')].version",
-                        contains(ds.findFirstModuleByType(runtimeType).get().getVersion())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].name",
-                        contains(ds.findFirstModuleByType(osType).get().getName())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].version",
-                        contains(ds.findFirstModuleByType(osType).get().getVersion())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].size", contains(ARTIFACT_SIZE)))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].filename",
-                        contains(artifact.getFilename())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].hashes.md5",
-                        contains(artifact.getMd5Hash())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].hashes.sha1",
-                        contains(artifact.getSha1Hash())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].hashes.sha256",
-                        contains(artifact.getSha256Hash())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0]._links.download-http.href",
-                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
-                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifact.getFilename()
-                                + "/download")))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0]._links.md5sum-http.href",
-                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
-                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifact.getFilename()
-                                + "/download.MD5SUM")))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].size", contains(ARTIFACT_SIZE)))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].filename",
-                        contains(artifactSignature.getFilename())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].hashes.md5",
-                        contains(artifactSignature.getMd5Hash())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].hashes.sha1",
-                        contains(artifactSignature.getSha1Hash())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].hashes.sha256",
-                        contains(artifactSignature.getSha256Hash())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1]._links.download-http.href",
-                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
-                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifactSignature.getFilename()
-                                + "/download")))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1]._links.md5sum-http.href",
-                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
-                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifactSignature.getFilename()
-                                + "/download.MD5SUM")))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='bApp')].version",
-                        contains(ds.findFirstModuleByType(appType).get().getVersion())))
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='bApp')].metadata").doesNotExist())
-                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='bApp')].name")
-                        .value(ds.findFirstModuleByType(appType).get().getName()));
-    }
-
     protected String installedBaseLink(final String controllerId, final String actionId) {
         return HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
                 + "/installedBase/" + actionId;
@@ -263,13 +205,6 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     protected String deploymentBaseLink(final String controllerId, final String actionId) {
         return HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
                 + "/deploymentBase/" + actionId;
-    }
-
-    private static String getDownloadAndUploadType(final Action.ActionType actionType) {
-        if (Action.ActionType.FORCED.equals(actionType)) {
-            return "forced";
-        }
-        return "attempt";
     }
 
     protected String getJsonRejectedCancelActionFeedback() throws JsonProcessingException {
@@ -367,16 +302,12 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     }
 
     protected String getJsonConfirmationFeedback(final DdiConfirmationFeedback.Confirmation confirmation,
-             final Integer code, final List<String> messages) throws JsonProcessingException {
+            final Integer code, final List<String> messages) throws JsonProcessingException {
         return objectMapper.writeValueAsString(new DdiConfirmationFeedback(confirmation, code, messages));
     }
 
     protected String getJsonInstalledBase(String name, String version) throws JsonProcessingException {
         return objectMapper.writeValueAsString(new DdiAssignedVersion(name, version));
-    }
-
-    protected static ObjectMapper getMapper(){
-        return objectMapper;
     }
 
     protected ResultActions getAndVerifyConfirmationBasePayload(final String controllerId, final MediaType mediaType,
@@ -390,5 +321,67 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
 
     static void implicitLock(final DistributionSet set) {
         ((JpaDistributionSet) set).setOptLockRevision(set.getOptLockRevision() + 1);
+    }
+
+    private static String getDownloadAndUploadType(final Action.ActionType actionType) {
+        if (Action.ActionType.FORCED.equals(actionType)) {
+            return "forced";
+        }
+        return "attempt";
+    }
+
+    private ResultActions verifyBasePayload(final String prefix, final ResultActions resultActions, final String controllerId,
+            final DistributionSet ds, final Artifact artifact, final Artifact artifactSignature, final Long actionId,
+            final Long osModuleId, final String downloadType, final String updateType) throws Exception {
+        return resultActions.andExpect(jsonPath("$.id", equalTo(String.valueOf(actionId))))
+                .andExpect(jsonPath(prefix + ".download", equalTo(downloadType)))
+                .andExpect(jsonPath(prefix + ".update", equalTo(updateType)))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='jvm')].name",
+                        contains(ds.findFirstModuleByType(runtimeType).get().getName())))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='jvm')].version",
+                        contains(ds.findFirstModuleByType(runtimeType).get().getVersion())))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].name",
+                        contains(ds.findFirstModuleByType(osType).get().getName())))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].version",
+                        contains(ds.findFirstModuleByType(osType).get().getVersion())))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].size", contains(ARTIFACT_SIZE)))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].filename",
+                        contains(artifact.getFilename())))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].hashes.md5",
+                        contains(artifact.getMd5Hash())))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].hashes.sha1",
+                        contains(artifact.getSha1Hash())))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].hashes.sha256",
+                        contains(artifact.getSha256Hash())))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0]._links.download-http.href",
+                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
+                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifact.getFilename()
+                                + "/download")))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0]._links.md5sum-http.href",
+                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
+                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifact.getFilename()
+                                + "/download.MD5SUM")))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].size", contains(ARTIFACT_SIZE)))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].filename",
+                        contains(artifactSignature.getFilename())))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].hashes.md5",
+                        contains(artifactSignature.getMd5Hash())))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].hashes.sha1",
+                        contains(artifactSignature.getSha1Hash())))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].hashes.sha256",
+                        contains(artifactSignature.getSha256Hash())))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1]._links.download-http.href",
+                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
+                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifactSignature.getFilename()
+                                + "/download")))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1]._links.md5sum-http.href",
+                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
+                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifactSignature.getFilename()
+                                + "/download.MD5SUM")))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='bApp')].version",
+                        contains(ds.findFirstModuleByType(appType).get().getVersion())))
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='bApp')].metadata").doesNotExist())
+                .andExpect(jsonPath(prefix + ".chunks[?(@.part=='bApp')].name")
+                        .value(ds.findFirstModuleByType(appType).get().getName()));
     }
 }

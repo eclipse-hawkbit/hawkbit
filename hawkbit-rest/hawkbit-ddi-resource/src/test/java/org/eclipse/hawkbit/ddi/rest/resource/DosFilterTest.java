@@ -17,6 +17,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Collections;
 import java.util.List;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -30,13 +33,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.web.context.WebApplicationContext;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 /**
  * Test potential DOS attack scenarios and check if the filter prevents them.
- *
  */
 @ActiveProfiles({ "test" })
 @Feature("Component Tests - REST Security")
@@ -100,7 +98,8 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that a relatively high number of READ requests is allowed if it is below the DoS detection threshold")
-    @SuppressWarnings("squid:S2925") // No idea how to get rid of the Thread.sleep here
+    @SuppressWarnings("squid:S2925")
+        // No idea how to get rid of the Thread.sleep here
     void acceptableGetLoad() throws Exception {
 
         for (int x = 0; x < 3; x++) {
@@ -123,7 +122,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
         int requests = 0;
         do {
             result = mvc.perform(post("/{tenant}/controller/v1/4711/deploymentBase/" + actionId + "/feedback",
-                    tenantAware.getCurrentTenant()).header(X_FORWARDED_FOR, "10.0.0.1").content(feedback)
+                            tenantAware.getCurrentTenant()).header(X_FORWARDED_FOR, "10.0.0.1").content(feedback)
                             .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                     .andReturn();
             requests++;
@@ -139,7 +138,8 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that a relatively high number of WRITE requests is allowed if it is below the DoS detection threshold")
-    @SuppressWarnings("squid:S2925") // No idea how to get rid of the Thread.sleep here
+    @SuppressWarnings("squid:S2925")
+        // No idea how to get rid of the Thread.sleep here
     void acceptablePutPostLoad() throws Exception {
         final Long actionId = prepareDeploymentBase();
         final String feedback = getJsonProceedingDeploymentActionFeedback();
@@ -150,7 +150,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
             for (int i = 0; i < 9; i++) {
                 mvc.perform(post("/{tenant}/controller/v1/4711/deploymentBase/" + actionId + "/feedback",
-                        tenantAware.getCurrentTenant()).header(X_FORWARDED_FOR, "10.0.0.1")
+                                tenantAware.getCurrentTenant()).header(X_FORWARDED_FOR, "10.0.0.1")
                                 .content(feedback).contentType(MediaType.APPLICATION_JSON)
                                 .accept(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk());
