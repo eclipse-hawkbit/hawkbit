@@ -23,7 +23,7 @@ public interface FieldValueConverter<T extends Enum<T>> {
     /**
      * Converts the given {@code value} into the representation to build a
      * generic query.
-     * 
+     *
      * @param e the enum to build the value for
      * @param value the value in string representation
      * @return the converted object or {@code null} if conversation fails, if
@@ -34,7 +34,7 @@ public interface FieldValueConverter<T extends Enum<T>> {
 
     /**
      * returns the possible values associated with the given enum type.
-     * 
+     *
      * @param e the enum type to retrieve the possible values
      * @return the possible values for a specific enum or {@code null}
      */

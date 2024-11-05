@@ -11,25 +11,26 @@ package org.eclipse.hawkbit;
 
 import lombok.Data;
 import lombok.Getter;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Properties for the server e.g. the server's URL which must be configured.
- * 
  */
 @Getter
 @ConfigurationProperties("hawkbit.server")
 public class HawkbitServerProperties {
+
+    private final Anonymous anonymous = new Anonymous();
+    private final Build build = new Build();
     /**
      * Defines under which URI the update server can be reached. Used to
      * calculate download URLs for DMF transmitted update actions.
      */
     private String url = "http://localhost:8080";
 
-    private final Anonymous anonymous = new Anonymous();
-
-    private final Build build = new Build();
+    public void setUrl(final String url) {
+        this.url = url;
+    }
 
     /**
      * Properties for anonymous API access by Devices/Controllers.
@@ -42,7 +43,6 @@ public class HawkbitServerProperties {
         /**
          * Properties for artifact download under anonymous API access by
          * Devices/Controllers.
-         *
          */
         @Data
         public static class Download {
@@ -56,7 +56,6 @@ public class HawkbitServerProperties {
 
     /**
      * Build information of the hawkBit instance. Influenced by maven.
-     *
      */
     public static class Build {
 
@@ -73,9 +72,5 @@ public class HawkbitServerProperties {
             this.version = version;
         }
 
-    }
-
-    public void setUrl(final String url) {
-        this.url = url;
     }
 }

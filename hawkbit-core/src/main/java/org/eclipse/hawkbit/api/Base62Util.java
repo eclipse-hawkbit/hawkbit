@@ -23,8 +23,7 @@ public final class Base62Util {
     private static final int BASE62_BASE = BASE62_ALPHABET.length();
 
     /**
-     * @param base10
-     *            number
+     * @param base10 number
      * @return converted number into Base62 ASCII string
      */
     public static String fromBase10(final long base10) {
@@ -42,8 +41,7 @@ public final class Base62Util {
     }
 
     /**
-     * @param base62
-     *            number
+     * @param base62 number
      * @return converted number into Base10
      */
     public static Long toBase10(final String base62) {

@@ -13,7 +13,6 @@ import lombok.Data;
 
 /**
  * Container for a generated Artifact URL.
- *
  */
 @Data
 public class ArtifactUrl {
@@ -24,13 +23,10 @@ public class ArtifactUrl {
 
     /**
      * Constructor.
-     * 
-     * @param protocol
-     *            string, e.g. ftp, http, https
-     * @param rel
-     *            hypermedia value
-     * @param ref
-     *            hypermedia value
+     *
+     * @param protocol string, e.g. ftp, http, https
+     * @param rel hypermedia value
+     * @param ref hypermedia value
      */
     public ArtifactUrl(final String protocol, final String rel, final String ref) {
         this.protocol = protocol;

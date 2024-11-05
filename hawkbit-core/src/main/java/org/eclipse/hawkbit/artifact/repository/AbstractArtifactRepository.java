@@ -83,19 +83,8 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
         }
     }
 
-    private AbstractDbArtifact addMissingHashes(final AbstractDbArtifact existing, final String calculatedSha1,
-            final String calculatedMd5, final String calculatedSha256) {
-
-        final String sha1 = checkEmpty(existing.getHashes().getSha1(), calculatedSha1);
-        final String md5 = checkEmpty(existing.getHashes().getMd5(), calculatedMd5);
-        final String sha256 = checkEmpty(existing.getHashes().getSha256(), calculatedSha256);
-
-        existing.setHashes(new DbArtifactHash(sha1, md5, sha256));
-        return existing;
-    }
-
-    private String checkEmpty(final String value, final String fallback) {
-        return StringUtils.isEmpty(value) ? fallback : value;
+    protected static String sanitizeTenant(final String tenant) {
+        return tenant.trim().toUpperCase();
     }
 
     protected void deleteTempFile(final String tempFile) {
@@ -115,6 +104,9 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
         }
         return file.getPath();
     }
+
+    protected abstract AbstractDbArtifact store(final String tenant, final DbArtifactHash base16Hashes,
+            final String contentType, final String tempFile) throws IOException;
 
     private static File createTempFile() {
         try {
@@ -149,15 +141,23 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
         return providedHashValue != null && !hashValue.equals(providedHashValue);
     }
 
-    protected abstract AbstractDbArtifact store(final String tenant, final DbArtifactHash base16Hashes,
-            final String contentType, final String tempFile) throws IOException;
-
     private static DigestInputStream wrapInDigestInputStream(final InputStream input, final MessageDigest mdSHA1,
             final MessageDigest mdMD5, final MessageDigest mdSHA256) {
         return new DigestInputStream(new DigestInputStream(new DigestInputStream(input, mdSHA256), mdMD5), mdSHA1);
     }
 
-    protected static String sanitizeTenant(final String tenant) {
-        return tenant.trim().toUpperCase();
+    private AbstractDbArtifact addMissingHashes(final AbstractDbArtifact existing, final String calculatedSha1,
+            final String calculatedMd5, final String calculatedSha256) {
+
+        final String sha1 = checkEmpty(existing.getHashes().getSha1(), calculatedSha1);
+        final String md5 = checkEmpty(existing.getHashes().getMd5(), calculatedMd5);
+        final String sha256 = checkEmpty(existing.getHashes().getSha256(), calculatedSha256);
+
+        existing.setHashes(new DbArtifactHash(sha1, md5, sha256));
+        return existing;
+    }
+
+    private String checkEmpty(final String value, final String fallback) {
+        return StringUtils.isEmpty(value) ? fallback : value;
     }
 }

@@ -9,10 +9,10 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import lombok.Getter;
-
 import java.util.Collections;
 import java.util.List;
+
+import lombok.Getter;
 
 /**
  * Sort and search fields for actions.

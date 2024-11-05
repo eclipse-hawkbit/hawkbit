@@ -40,6 +40,12 @@ public class DistributedResourceBundleMessageSource extends ReloadableResourceBu
     }
 
     @Override
+    public void setResourceLoader(final ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+        super.setResourceLoader(resourceLoader);
+    }
+
+    @Override
     protected PropertiesHolder refreshProperties(final String filename, final PropertiesHolder propHolder) {
         final Properties properties = new Properties();
         long lastModified = -1;
@@ -65,11 +71,5 @@ public class DistributedResourceBundleMessageSource extends ReloadableResourceBu
             log.warn("Resource with filename " + filename + " couldn't load", ignored);
         }
         return new PropertiesHolder(properties, lastModified);
-    }
-
-    @Override
-    public void setResourceLoader(final ResourceLoader resourceLoader) {
-        this.resourceLoader = resourceLoader;
-        super.setResourceLoader(resourceLoader);
     }
 }

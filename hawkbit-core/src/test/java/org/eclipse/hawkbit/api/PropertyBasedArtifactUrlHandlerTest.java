@@ -13,18 +13,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.List;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
 import org.eclipse.hawkbit.api.URLPlaceholder.SoftwareData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
@@ -51,13 +49,10 @@ public class PropertyBasedArtifactUrlHandlerTest {
     private static final String TENANT = "TEST_TENANT";
 
     private static final String HTTP_LOCALHOST = "http://localhost:8080/";
-
-    private ArtifactUrlHandler urlHandlerUnderTest;
-
-    private ArtifactUrlHandlerProperties properties;
-
     private static URLPlaceholder placeholder = new URLPlaceholder(TENANT, TENANT_ID, CONTROLLER_ID, TARGETID,
             new SoftwareData(SOFTWAREMODULEID, FILENAME_DECODE, ARTIFACTID, SHA1HASH));
+    private ArtifactUrlHandler urlHandlerUnderTest;
+    private ArtifactUrlHandlerProperties properties;
 
     @BeforeEach
     public void setup() {
@@ -142,6 +137,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
         assertThat(urls).containsExactly(new ArtifactUrl(TEST_PROTO.toUpperCase(), TEST_REL, TEST_PROTO + "://"
                 + testHost + ":5683/fws/" + TENANT + "/" + TARGETID_BASE62 + "/" + ARTIFACTID_BASE62));
     }
+
     @Test
     @Description("Verfies that the protocol of the statically defined hostname is replaced with the protocol of the request.")
     public void urlGenerationWithProtocolFromRequest() throws URISyntaxException {
@@ -191,10 +187,10 @@ public class PropertyBasedArtifactUrlHandlerTest {
         proto.setProtocol(protocol);
         properties.getProtocols().put("download-http", proto);
 
-        URI uri = new URI(protocol+"://anotherHost.com");
+        URI uri = new URI(protocol + "://anotherHost.com");
         final List<ArtifactUrl> urls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DDI, uri);
         assertThat(urls).containsExactly(new ArtifactUrl(protocol.toUpperCase(), "download-http",
-                uri +"/" + TENANT + "/controller/v1/" + CONTROLLER_ID + "/softwaremodules/"
+                uri + "/" + TENANT + "/controller/v1/" + CONTROLLER_ID + "/softwaremodules/"
                         + SOFTWAREMODULEID + "/artifacts/" + FILENAME_ENCODE));
 
     }

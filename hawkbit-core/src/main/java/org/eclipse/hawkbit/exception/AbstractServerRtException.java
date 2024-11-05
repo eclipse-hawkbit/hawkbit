@@ -9,11 +9,11 @@
  */
 package org.eclipse.hawkbit.exception;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
 import java.io.Serial;
 import java.util.Map;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * Generic Custom Exception to wrap the Runtime and checked exception
@@ -30,7 +30,7 @@ public abstract class AbstractServerRtException extends RuntimeException {
 
     /**
      * Parameterized constructor.
-     * 
+     *
      * @param error detail
      */
     protected AbstractServerRtException(final SpServerError error) {
@@ -41,7 +41,7 @@ public abstract class AbstractServerRtException extends RuntimeException {
 
     /**
      * Parameterized constructor.
-     * 
+     *
      * @param message custom error message
      * @param error detail
      */
@@ -63,7 +63,7 @@ public abstract class AbstractServerRtException extends RuntimeException {
 
     /**
      * Parameterized constructor.
-     * 
+     *
      * @param message custom error message
      * @param error detail
      * @param cause of the exception
@@ -76,7 +76,7 @@ public abstract class AbstractServerRtException extends RuntimeException {
 
     /**
      * Parameterized constructor.
-     * 
+     *
      * @param error detail
      * @param cause of the exception
      */
@@ -93,7 +93,8 @@ public abstract class AbstractServerRtException extends RuntimeException {
      * @param error detail
      * @param cause of the exception
      */
-    protected AbstractServerRtException(final String message, final SpServerError error, final Throwable cause, final Map<String, Object> info) {
+    protected AbstractServerRtException(final String message, final SpServerError error, final Throwable cause,
+            final Map<String, Object> info) {
         super(message, cause);
         this.error = error;
         this.info = info;

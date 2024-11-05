@@ -11,11 +11,10 @@ package org.eclipse.hawkbit.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Artifact URL Handler")
 @Story("URL placeholder tests")

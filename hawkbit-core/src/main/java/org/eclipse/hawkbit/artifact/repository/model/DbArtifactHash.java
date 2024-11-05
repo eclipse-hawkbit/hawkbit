@@ -23,7 +23,7 @@ public class DbArtifactHash {
 
     /**
      * Constructor.
-     * 
+     *
      * @param sha1 the sha1 hash
      * @param md5 the md5 hash
      * @param sha256 the sha256 hash

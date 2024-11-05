@@ -19,11 +19,9 @@ public class ArtifactStoreException extends RuntimeException {
 
     /**
      * Constructs a ArtifactStoreException with message and cause.
-     * 
-     * @param message
-     *            the message of the exception
-     * @param cause
-     *            of the exception
+     *
+     * @param message the message of the exception
+     * @param cause of the exception
      */
     public ArtifactStoreException(final String message, final Throwable cause) {
         super(message, cause);
@@ -31,9 +29,8 @@ public class ArtifactStoreException extends RuntimeException {
 
     /**
      * Constructs a ArtifactStoreException with message.
-     * 
-     * @param message
-     *            the message of the exception
+     *
+     * @param message the message of the exception
      */
     public ArtifactStoreException(final String message) {
         super(message);
@@ -41,9 +38,8 @@ public class ArtifactStoreException extends RuntimeException {
 
     /**
      * Constructs a ArtifactStoreException with cause.
-     * 
-     * @param cause
-     *            of the exception
+     *
+     * @param cause of the exception
      */
     public ArtifactStoreException(final Throwable cause) {
         super(cause);

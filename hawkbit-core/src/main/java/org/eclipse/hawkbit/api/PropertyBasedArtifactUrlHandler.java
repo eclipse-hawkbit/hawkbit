@@ -28,19 +28,18 @@ import org.springframework.util.StringUtils;
 /**
  * Implementation for ArtifactUrlHandler for creating urls to download resource
  * based on patterns configured by {@link ArtifactUrlHandlerProperties}.
- * 
+ *
  * This mechanism can be used to generate links to arbitrary file hosting
  * infrastructure. However, the hawkBit update server supports hosting files as
  * well in the following {@link UrlProtocol#getRef()} patterns:
- * 
+ *
  * Default:
  * {protocol}://{hostname}:{port}{contextPath}/{tenant}/controller/v1/{controllerId}/
  * softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}
- * 
+ *
  * Default (MD5SUM files):
  * {protocol}://{hostname}:{port}{contextPath}/{tenant}/controller/v1/{controllerId}/
  * softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}.MD5SUM
- * 
  */
 public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
 
@@ -64,16 +63,13 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
     private static final String TENANT_ID_BASE10_PLACEHOLDER = "tenantId";
     private static final String TENANT_ID_BASE62_PLACEHOLDER = "tenantIdBase62";
     private static final String SOFTWARE_MODULE_ID_BASE10_PLACEHOLDER = "softwareModuleId";
-    private static final String SOFTWARE_MODULE_ID_BASE62_PLACEHOLDER = "softwareModuleIdBase62";
-
     final static String DEFAULT_URL_PROTOCOL_REF = "{" + PROTOCOL_PLACEHOLDER + "}://{" + HOSTNAME_PLACEHOLDER + "}:{" + PORT_PLACEHOLDER + "}{" + CONTEXT_PATH + "}/{" + TENANT_PLACEHOLDER + "}/controller/v1/{" + CONTROLLER_ID_PLACEHOLDER + "}/softwaremodules/{" + SOFTWARE_MODULE_ID_BASE10_PLACEHOLDER + "}/artifacts/{" + ARTIFACT_FILENAME_PLACEHOLDER + "}";
-
+    private static final String SOFTWARE_MODULE_ID_BASE62_PLACEHOLDER = "softwareModuleIdBase62";
     private final ArtifactUrlHandlerProperties urlHandlerProperties;
     private final String contextPath;
 
     /**
-     * @param urlHandlerProperties
-     *            for URL generation configuration
+     * @param urlHandlerProperties for URL generation configuration
      */
     public PropertyBasedArtifactUrlHandler(final ArtifactUrlHandlerProperties urlHandlerProperties, final String contextPath) {
         this.urlHandlerProperties = urlHandlerProperties;
@@ -93,64 +89,6 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
                         generateUrl(urlProtocol, placeholder, requestUri)))
                 .collect(Collectors.toList());
 
-    }
-
-    private String generateUrl(final UrlProtocol protocol, final URLPlaceholder placeholder,
-            final URI requestUri) {
-        final Set<Entry<String, String>> entrySet = getReplaceMap(protocol, placeholder, requestUri).entrySet();
-
-        String urlPattern = protocol.getRef();
-
-        for (final Entry<String, String> entry : entrySet) {
-            if (List.of(PORT_PLACEHOLDER,PORT_REQUEST_PLACEHOLDER).contains(entry.getKey())) {
-                urlPattern = urlPattern.replace(":{" + entry.getKey() + "}",
-                        ObjectUtils.isEmpty(entry.getValue()) ? "" : (":" + entry.getValue()));
-            } else {
-                if(entry.getValue() != null) {
-                    urlPattern = urlPattern.replace("{" + entry.getKey() + "}", entry.getValue());
-                }
-            }
-        }
-
-        return urlPattern;
-    }
-
-    private Map<String, String> getReplaceMap(final UrlProtocol protocol, final URLPlaceholder placeholder,
-            final URI requestUri) {
-        final Map<String, String> replaceMap = new HashMap<>();
-        replaceMap.put(IP_PLACEHOLDER, protocol.getIp());
-
-        replaceMap.put(HOSTNAME_PLACEHOLDER, protocol.getHostname());
-
-        replaceMap.put(HOSTNAME_REQUEST_PLACEHOLDER, getRequestHost(protocol, requestUri));
-        replaceMap.put(PORT_REQUEST_PLACEHOLDER, getRequestPort(protocol, requestUri));
-        replaceMap.put(HOSTNAME_WITH_DOMAIN_REQUEST_PLACEHOLDER, computeHostWithRequestDomain(protocol, requestUri));
-        replaceMap.put(PROTOCOL_REQUEST_PLACEHOLDER, getRequestProtocol(protocol, requestUri));
-
-        replaceMap.put(CONTEXT_PATH, contextPath);
-
-        replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER,
-                URLEncoder.encode(placeholder.getSoftwareData().getFilename(), StandardCharsets.UTF_8));
-
-        replaceMap.put(ARTIFACT_SHA1_PLACEHOLDER, placeholder.getSoftwareData().getSha1Hash());
-        replaceMap.put(PROTOCOL_PLACEHOLDER, protocol.getProtocol());
-        replaceMap.put(PORT_PLACEHOLDER, getPort(protocol));
-        replaceMap.put(TENANT_PLACEHOLDER, placeholder.getTenant());
-        replaceMap.put(TENANT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getTenantId()));
-        replaceMap.put(TENANT_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTenantId()));
-        replaceMap.put(CONTROLLER_ID_PLACEHOLDER, placeholder.getControllerId());
-        replaceMap.put(TARGET_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getTargetId()));
-        if (placeholder.getTargetId() != null) {
-            replaceMap.put(TARGET_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTargetId()));
-        }
-        replaceMap.put(ARTIFACT_ID_BASE62_PLACEHOLDER,
-                Base62Util.fromBase10(placeholder.getSoftwareData().getArtifactId()));
-        replaceMap.put(ARTIFACT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getSoftwareData().getArtifactId()));
-        replaceMap.put(SOFTWARE_MODULE_ID_BASE10_PLACEHOLDER,
-                String.valueOf(placeholder.getSoftwareData().getSoftwareModuleId()));
-        replaceMap.put(SOFTWARE_MODULE_ID_BASE62_PLACEHOLDER,
-                Base62Util.fromBase10(placeholder.getSoftwareData().getSoftwareModuleId()));
-        return replaceMap;
     }
 
     private static String getRequestPort(final UrlProtocol protocol, final URI requestUri) {
@@ -203,6 +141,64 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         }
 
         return host + "." + domain;
+    }
+
+    private String generateUrl(final UrlProtocol protocol, final URLPlaceholder placeholder,
+            final URI requestUri) {
+        final Set<Entry<String, String>> entrySet = getReplaceMap(protocol, placeholder, requestUri).entrySet();
+
+        String urlPattern = protocol.getRef();
+
+        for (final Entry<String, String> entry : entrySet) {
+            if (List.of(PORT_PLACEHOLDER, PORT_REQUEST_PLACEHOLDER).contains(entry.getKey())) {
+                urlPattern = urlPattern.replace(":{" + entry.getKey() + "}",
+                        ObjectUtils.isEmpty(entry.getValue()) ? "" : (":" + entry.getValue()));
+            } else {
+                if (entry.getValue() != null) {
+                    urlPattern = urlPattern.replace("{" + entry.getKey() + "}", entry.getValue());
+                }
+            }
+        }
+
+        return urlPattern;
+    }
+
+    private Map<String, String> getReplaceMap(final UrlProtocol protocol, final URLPlaceholder placeholder,
+            final URI requestUri) {
+        final Map<String, String> replaceMap = new HashMap<>();
+        replaceMap.put(IP_PLACEHOLDER, protocol.getIp());
+
+        replaceMap.put(HOSTNAME_PLACEHOLDER, protocol.getHostname());
+
+        replaceMap.put(HOSTNAME_REQUEST_PLACEHOLDER, getRequestHost(protocol, requestUri));
+        replaceMap.put(PORT_REQUEST_PLACEHOLDER, getRequestPort(protocol, requestUri));
+        replaceMap.put(HOSTNAME_WITH_DOMAIN_REQUEST_PLACEHOLDER, computeHostWithRequestDomain(protocol, requestUri));
+        replaceMap.put(PROTOCOL_REQUEST_PLACEHOLDER, getRequestProtocol(protocol, requestUri));
+
+        replaceMap.put(CONTEXT_PATH, contextPath);
+
+        replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER,
+                URLEncoder.encode(placeholder.getSoftwareData().getFilename(), StandardCharsets.UTF_8));
+
+        replaceMap.put(ARTIFACT_SHA1_PLACEHOLDER, placeholder.getSoftwareData().getSha1Hash());
+        replaceMap.put(PROTOCOL_PLACEHOLDER, protocol.getProtocol());
+        replaceMap.put(PORT_PLACEHOLDER, getPort(protocol));
+        replaceMap.put(TENANT_PLACEHOLDER, placeholder.getTenant());
+        replaceMap.put(TENANT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getTenantId()));
+        replaceMap.put(TENANT_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTenantId()));
+        replaceMap.put(CONTROLLER_ID_PLACEHOLDER, placeholder.getControllerId());
+        replaceMap.put(TARGET_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getTargetId()));
+        if (placeholder.getTargetId() != null) {
+            replaceMap.put(TARGET_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTargetId()));
+        }
+        replaceMap.put(ARTIFACT_ID_BASE62_PLACEHOLDER,
+                Base62Util.fromBase10(placeholder.getSoftwareData().getArtifactId()));
+        replaceMap.put(ARTIFACT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getSoftwareData().getArtifactId()));
+        replaceMap.put(SOFTWARE_MODULE_ID_BASE10_PLACEHOLDER,
+                String.valueOf(placeholder.getSoftwareData().getSoftwareModuleId()));
+        replaceMap.put(SOFTWARE_MODULE_ID_BASE62_PLACEHOLDER,
+                Base62Util.fromBase10(placeholder.getSoftwareData().getSoftwareModuleId()));
+        return replaceMap;
     }
 
 }

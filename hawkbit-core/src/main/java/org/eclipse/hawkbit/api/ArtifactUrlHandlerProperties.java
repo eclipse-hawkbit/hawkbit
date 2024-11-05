@@ -21,7 +21,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * Artifact handler properties class for holding all supported protocols with
  * host, ip, port and download pattern.
- * 
+ *
  * @see PropertyBasedArtifactUrlHandler
  */
 @Data

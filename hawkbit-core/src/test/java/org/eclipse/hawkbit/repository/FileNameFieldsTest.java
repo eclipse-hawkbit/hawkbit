@@ -9,15 +9,15 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
 import io.qameta.allure.Description;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class FileNameFieldsTest {
 

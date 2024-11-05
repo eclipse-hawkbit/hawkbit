@@ -9,11 +9,11 @@
  */
 package org.eclipse.hawkbit;
 
-import org.eclipse.hawkbit.tenancy.TenantAware;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+
+import org.eclipse.hawkbit.tenancy.TenantAware;
 
 /**
  * {@link ContextAware} provides means for getting the current context (via {@link #getCurrentContext()}) and then
@@ -28,7 +28,7 @@ public interface ContextAware extends TenantAware {
     /**
      * Return the current context encoded as a {@link String}. Depending on the implementation it could,
      * for instance, be a serialized context or a reference to such.
-     * 
+     *
      * @return could be empty if there is nothing to serialize or context aware is not supported.
      */
     Optional<String> getCurrentContext();
@@ -38,7 +38,6 @@ public interface ContextAware extends TenantAware {
      *
      * @param <T> the type of the input to the function
      * @param <R> the type of the result of the function
-     *
      * @param serializedContext created by {@link #getCurrentContext()}. Must be non-<code>null</code>.
      * @param function function to call in the reconstructed context. Must be non-<code>null</code>.
      * @param t the argument that will be passed to the function

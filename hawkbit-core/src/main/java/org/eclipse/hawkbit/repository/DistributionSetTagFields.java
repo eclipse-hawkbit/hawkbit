@@ -9,10 +9,10 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import lombok.Getter;
-
 import java.util.Collections;
 import java.util.List;
+
+import lombok.Getter;
 
 /**
  * Describing the fields of the Tag model which can be used in the REST API e.g.
@@ -23,23 +23,23 @@ import java.util.List;
 @Getter
 public enum DistributionSetTagFields implements RsqlQueryField {
 
-  ID(TagFields.ID.getJpaEntityFieldName()),
-  NAME(TagFields.NAME.getJpaEntityFieldName()),
-  DESCRIPTION(TagFields.DESCRIPTION.getJpaEntityFieldName()),
-  COLOUR(TagFields.COLOUR.getJpaEntityFieldName()),
-  DISTRIBUTIONSET("assignedToDistributionSet",
-      DistributionSetFields.ID.getJpaEntityFieldName(), DistributionSetFields.NAME.getJpaEntityFieldName());
+    ID(TagFields.ID.getJpaEntityFieldName()),
+    NAME(TagFields.NAME.getJpaEntityFieldName()),
+    DESCRIPTION(TagFields.DESCRIPTION.getJpaEntityFieldName()),
+    COLOUR(TagFields.COLOUR.getJpaEntityFieldName()),
+    DISTRIBUTIONSET("assignedToDistributionSet",
+            DistributionSetFields.ID.getJpaEntityFieldName(), DistributionSetFields.NAME.getJpaEntityFieldName());
 
-  private final String jpaEntityFieldName;
-  private final List<String> subEntityAttributes;
+    private final String jpaEntityFieldName;
+    private final List<String> subEntityAttributes;
 
-  DistributionSetTagFields(final String jpaEntityFieldName) {
-    this.jpaEntityFieldName = jpaEntityFieldName;
-    this.subEntityAttributes = Collections.emptyList();
-  }
+    DistributionSetTagFields(final String jpaEntityFieldName) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
+        this.subEntityAttributes = Collections.emptyList();
+    }
 
-  DistributionSetTagFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
-    this.jpaEntityFieldName = jpaEntityFieldName;
-    this.subEntityAttributes = List.of(subEntityAttributes);
-  }
+    DistributionSetTagFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
+        this.subEntityAttributes = List.of(subEntityAttributes);
+    }
 }

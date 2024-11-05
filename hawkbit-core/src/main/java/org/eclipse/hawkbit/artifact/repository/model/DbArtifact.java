@@ -39,7 +39,7 @@ public interface DbArtifact {
     /**
      * Creates an {@link InputStream} on this artifact. Caller has to take care of
      * closing the stream. Repeatable calls open a new {@link InputStream}.
-     * 
+     *
      * @return {@link InputStream} to read from artifact.
      */
     InputStream getFileInputStream();
