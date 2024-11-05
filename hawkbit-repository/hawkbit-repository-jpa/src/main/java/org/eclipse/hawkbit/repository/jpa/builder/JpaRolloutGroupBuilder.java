@@ -15,9 +15,9 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 /**
  * Builder implementation for {@link RolloutGroup}.
- *
  */
 public class JpaRolloutGroupBuilder implements RolloutGroupBuilder {
+
     @Override
     public RolloutGroupCreate create() {
         return new JpaRolloutGroupCreate();

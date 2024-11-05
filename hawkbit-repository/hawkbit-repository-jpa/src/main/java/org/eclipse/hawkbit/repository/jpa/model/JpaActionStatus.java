@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -50,6 +49,7 @@ import org.eclipse.persistence.annotations.ObjectTypeConverter;
 // sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements ActionStatus {
+
     private static final int MESSAGE_ENTRY_LENGTH = 512;
 
     private static final long serialVersionUID = 1L;
@@ -75,7 +75,7 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
             @ConversionValue(objectValue = "SCHEDULED", dataValue = "8"),
             @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9"),
             @ConversionValue(objectValue = "DOWNLOADED", dataValue = "10"),
-            @ConversionValue(objectValue = "WAIT_FOR_CONFIRMATION", dataValue = "11")})
+            @ConversionValue(objectValue = "WAIT_FOR_CONFIRMATION", dataValue = "11") })
     @Convert("status")
     @NotNull
     private Status status;
@@ -89,16 +89,13 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
 
     @Column(name = "code", nullable = true, updatable = false)
     private Integer code;
-    
+
     /**
      * Creates a new {@link ActionStatus} object.
      *
-     * @param action
-     *            the action for this action status
-     * @param status
-     *            the status for this action status
-     * @param occurredAt
-     *            the occurred timestamp
+     * @param action the action for this action status
+     * @param status the status for this action status
+     * @param occurredAt the occurred timestamp
      */
     public JpaActionStatus(final Action action, final Status status, final long occurredAt) {
         this.action = (JpaAction) action;
@@ -109,14 +106,10 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     /**
      * Creates a new {@link ActionStatus} object.
      *
-     * @param action
-     *            the action for this action status
-     * @param status
-     *            the status for this action status
-     * @param occurredAt
-     *            the occurred timestamp
-     * @param message
-     *            the message which should be added to this action status
+     * @param action the action for this action status
+     * @param status the status for this action status
+     * @param occurredAt the occurred timestamp
+     * @param message the message which should be added to this action status
      */
     public JpaActionStatus(final JpaAction action, final Status status, final long occurredAt, final String message) {
         this.action = action;
@@ -128,10 +121,8 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     /**
      * Creates a new {@link ActionStatus} object.
      *
-     * @param status
-     *            the status for this action status
-     * @param occurredAt
-     *            the occurred timestamp
+     * @param status the status for this action status
+     * @param occurredAt the occurred timestamp
      */
     public JpaActionStatus(final Status status, final long occurredAt) {
         this.status = status;
@@ -152,36 +143,6 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
 
     public void setOccurredAt(final long occurredAt) {
         this.occurredAt = occurredAt;
-    }
-
-    public final void addMessage(final String message) {
-        if (message != null) {
-            if (messages == null) {
-                messages = new ArrayList<>((message.length() / MESSAGE_ENTRY_LENGTH) + 1);
-            }
-            if (message.length() > MESSAGE_ENTRY_LENGTH) {
-                // split
-                for (int off = 0; off < message.length();) {
-                    final int end = off + MESSAGE_ENTRY_LENGTH;
-                    if (end < message.length()) {
-                        messages.add(message.substring(off, end));
-                    } else {
-                        messages.add(message.substring(off));
-                    }
-                    off = end;
-                }
-            } else {
-                messages.add(message);
-            }
-        }
-    }
-
-    public List<String> getMessages() {
-        if (messages == null) {
-            messages = Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(messages);
     }
 
     @Override
@@ -208,5 +169,35 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
 
     public void setCode(final Integer code) {
         this.code = code;
+    }
+
+    public final void addMessage(final String message) {
+        if (message != null) {
+            if (messages == null) {
+                messages = new ArrayList<>((message.length() / MESSAGE_ENTRY_LENGTH) + 1);
+            }
+            if (message.length() > MESSAGE_ENTRY_LENGTH) {
+                // split
+                for (int off = 0; off < message.length(); ) {
+                    final int end = off + MESSAGE_ENTRY_LENGTH;
+                    if (end < message.length()) {
+                        messages.add(message.substring(off, end));
+                    } else {
+                        messages.add(message.substring(off));
+                    }
+                    off = end;
+                }
+            } else {
+                messages.add(message);
+            }
+        }
+    }
+
+    public List<String> getMessages() {
+        if (messages == null) {
+            messages = Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(messages);
     }
 }

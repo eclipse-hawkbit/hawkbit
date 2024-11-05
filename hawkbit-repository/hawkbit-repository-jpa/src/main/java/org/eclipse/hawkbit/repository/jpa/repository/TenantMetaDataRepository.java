@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
-import java.util.List;
-
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantMetaData;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.springframework.data.domain.Page;
@@ -24,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * repository for operations on {@link TenantMetaData} entity.
- *
  */
 @Transactional(readOnly = true)
 public interface TenantMetaDataRepository
@@ -34,8 +31,7 @@ public interface TenantMetaDataRepository
     /**
      * Search {@link TenantMetaData} by tenant name.
      *
-     * @param tenant
-     *            to search for
+     * @param tenant to search for
      * @return found {@link TenantMetaData} or <code>null</code>
      */
     TenantMetaData findByTenantIgnoreCase(String tenant);

@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -49,7 +48,6 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * JPA implementation of {@link TargetTagManagement}.
- *
  */
 @Transactional(readOnly = true)
 @Validated
@@ -76,22 +74,11 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetTag update(final TagUpdate u) {
-        final GenericTagUpdate update = (GenericTagUpdate) u;
-
-        final JpaDistributionSetTag tag = distributionSetTagRepository.findById(update.getId())
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, update.getId()));
-
-        update.getName().ifPresent(tag::setName);
-        update.getDescription().ifPresent(tag::setDescription);
-        update.getColour().ifPresent(tag::setColour);
-
-        return distributionSetTagRepository.save(tag);
-    }
-
-    @Override
-    public Optional<DistributionSetTag> getByName(final String name) {
-        return distributionSetTagRepository.findByNameEquals(name);
+    public List<DistributionSetTag> create(final Collection<TagCreate> dst) {
+        final List<JpaDistributionSetTag> toCreate = dst.stream().map(JpaTagCreate.class::cast)
+                .map(JpaTagCreate::buildDistributionSetTag).toList();
+        return Collections
+                .unmodifiableList(distributionSetTagRepository.saveAll(AccessController.Operation.CREATE, toCreate));
     }
 
     @Override
@@ -107,47 +94,30 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<DistributionSetTag> create(final Collection<TagCreate> dst) {
-        final List<JpaDistributionSetTag> toCreate = dst.stream().map(JpaTagCreate.class::cast)
-                .map(JpaTagCreate::buildDistributionSetTag).toList();
-        return Collections
-                .unmodifiableList(distributionSetTagRepository.saveAll(AccessController.Operation.CREATE, toCreate));
+    public DistributionSetTag update(final TagUpdate u) {
+        final GenericTagUpdate update = (GenericTagUpdate) u;
+
+        final JpaDistributionSetTag tag = distributionSetTagRepository.findById(update.getId())
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, update.getId()));
+
+        update.getName().ifPresent(tag::setName);
+        update.getDescription().ifPresent(tag::setDescription);
+        update.getColour().ifPresent(tag::setColour);
+
+        return distributionSetTagRepository.save(tag);
+    }
+
+    @Override
+    public long count() {
+        return distributionSetTagRepository.count();
     }
 
     @Override
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final String tagName) {
-        final JpaDistributionSetTag dsTag = distributionSetTagRepository
-                .findOne(DistributionSetTagSpecifications.byName(tagName))
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName));
-
-        distributionSetTagRepository.delete(dsTag);
-    }
-
-    @Override
-    public Slice<DistributionSetTag> findAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetTagRepository, pageable, null);
-    }
-
-    @Override
-    public Page<DistributionSetTag> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaDistributionSetTag> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTagFields.class,
-                virtualPropertyReplacer, database);
-
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, pageable,
-                Collections.singletonList(spec));
-    }
-
-    @Override
-    public Page<DistributionSetTag> findByDistributionSet(final Pageable pageable, final long distributionSetId) {
-        if (!distributionSetRepository.existsById(distributionSetId)) {
-            throw new EntityNotFoundException(DistributionSet.class, distributionSetId);
-        }
-
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, pageable,
-                Collections.singletonList(TagSpecification.ofDistributionSet(distributionSetId)));
+    public void delete(final long id) {
+        distributionSetTagRepository.deleteById(id);
     }
 
     @Override
@@ -171,25 +141,53 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     }
 
     @Override
+    public boolean exists(final long id) {
+        return distributionSetTagRepository.existsById(id);
+    }
+
+    @Override
     public Optional<DistributionSetTag> get(final long id) {
         return distributionSetTagRepository.findById(id).map(DistributionSetTag.class::cast);
+    }
+
+    @Override
+    public Slice<DistributionSetTag> findAll(final Pageable pageable) {
+        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetTagRepository, pageable, null);
+    }
+
+    @Override
+    public Page<DistributionSetTag> findByRsql(final Pageable pageable, final String rsqlParam) {
+        final Specification<JpaDistributionSetTag> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTagFields.class,
+                virtualPropertyReplacer, database);
+
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, pageable,
+                Collections.singletonList(spec));
     }
 
     @Override
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final long id) {
-        distributionSetTagRepository.deleteById(id);
+    public void delete(final String tagName) {
+        final JpaDistributionSetTag dsTag = distributionSetTagRepository
+                .findOne(DistributionSetTagSpecifications.byName(tagName))
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName));
+
+        distributionSetTagRepository.delete(dsTag);
     }
 
     @Override
-    public boolean exists(final long id) {
-        return distributionSetTagRepository.existsById(id);
+    public Optional<DistributionSetTag> getByName(final String name) {
+        return distributionSetTagRepository.findByNameEquals(name);
     }
 
     @Override
-    public long count() {
-        return distributionSetTagRepository.count();
+    public Page<DistributionSetTag> findByDistributionSet(final Pageable pageable, final long distributionSetId) {
+        if (!distributionSetRepository.existsById(distributionSetId)) {
+            throw new EntityNotFoundException(DistributionSet.class, distributionSetId);
+        }
+
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, pageable,
+                Collections.singletonList(TagSpecification.ofDistributionSet(distributionSetId)));
     }
 }

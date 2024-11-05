@@ -39,7 +39,6 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * Stored target filter.
- *
  */
 @Entity
 @Table(name = "sp_target_filter_query", uniqueConstraints = @UniqueConstraint(columnNames = { "name",
@@ -49,6 +48,7 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 @SuppressWarnings("squid:S2160")
 public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
         implements TargetFilterQuery, EventAwareEntity {
+
     private static final long serialVersionUID = 1L;
 
     @Column(name = "name", length = NamedEntity.NAME_MAX_SIZE, nullable = false)
@@ -93,19 +93,13 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
 
     /**
      * Construct a Target filter query with auto assign distribution set
-     * 
-     * @param name
-     *            of the {@link TargetFilterQuery}.
-     * @param query
-     *            of the {@link TargetFilterQuery}.
-     * @param autoAssignDistributionSet
-     *            of the {@link TargetFilterQuery}.
-     * @param autoAssignActionType
-     *            of the {@link TargetFilterQuery}.
-     * @param autoAssignWeight
-     *            of the {@link TargetFilterQuery}.
-     * @param confirmationRequired
-     *            of the {@link TargetFilterQuery}.
+     *
+     * @param name of the {@link TargetFilterQuery}.
+     * @param query of the {@link TargetFilterQuery}.
+     * @param autoAssignDistributionSet of the {@link TargetFilterQuery}.
+     * @param autoAssignActionType of the {@link TargetFilterQuery}.
+     * @param autoAssignWeight of the {@link TargetFilterQuery}.
+     * @param confirmationRequired of the {@link TargetFilterQuery}.
      */
     public JpaTargetFilterQuery(final String name, final String query, final DistributionSet autoAssignDistributionSet,
             final ActionType autoAssignActionType, final Integer autoAssignWeight, final boolean confirmationRequired) {

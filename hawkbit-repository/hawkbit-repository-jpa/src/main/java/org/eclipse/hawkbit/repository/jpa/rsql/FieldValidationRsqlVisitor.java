@@ -9,13 +9,12 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
-import org.eclipse.hawkbit.repository.RsqlQueryField;
-
 import cz.jirutka.rsql.parser.ast.AndNode;
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.LogicalNode;
 import cz.jirutka.rsql.parser.ast.OrNode;
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
+import org.eclipse.hawkbit.repository.RsqlQueryField;
 
 /**
  * {@link RSQLVisitor} implementation which validates the nodes (fields) based
@@ -28,7 +27,7 @@ public class FieldValidationRsqlVisitor<A extends Enum<A> & RsqlQueryField> exte
 
     /**
      * Constructs the visitor and initializes it.
-     * 
+     *
      * @param fieldNameProvider The {@link RsqlQueryField} to use for validation.
      */
     public FieldValidationRsqlVisitor(final Class<A> fieldNameProvider) {

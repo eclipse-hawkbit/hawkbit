@@ -74,81 +74,57 @@ import org.springframework.validation.annotation.Validated;
 public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement {
 
     private static final int MAX_TENANTS_QUERY = 1000;
-
+    private final String countArtifactQuery;
+    private final String countSoftwareModulesQuery;
     @Autowired
     private EntityManager entityManager;
-
     @Autowired
     private TargetRepository targetRepository;
-
     @Autowired
     private TargetFilterQueryRepository targetFilterQueryRepository;
-
     @Autowired
     private DistributionSetRepository distributionSetRepository;
-
     @Autowired
     private SoftwareModuleRepository softwareModuleRepository;
-
     @Autowired
     private TenantMetaDataRepository tenantMetaDataRepository;
-
     @Autowired
     private DistributionSetTypeRepository distributionSetTypeRepository;
-
     @Autowired
     private SoftwareModuleTypeRepository softwareModuleTypeRepository;
-
     @Autowired
     private TargetTagRepository targetTagRepository;
-
     @Autowired
     private TargetTypeRepository targetTypeRepository;
-
     @Autowired
     private DistributionSetTagRepository distributionSetTagRepository;
-
     @Autowired
     private TenantConfigurationRepository tenantConfigurationRepository;
-
     @Autowired
     private RolloutRepository rolloutRepository;
-
     @Autowired
     private TenantAware tenantAware;
-
     @Autowired
     private TenantStatsManagement systemStatsManagement;
-
     @Autowired
     private TenancyCacheManager cacheManager;
-
     @Autowired
     private SystemManagementCacheKeyGenerator currentTenantCacheKeyGenerator;
-
     @Autowired
     private SystemSecurityContext systemSecurityContext;
-
     @Autowired
     private PlatformTransactionManager txManager;
-
     @Autowired
     private RolloutStatusCache rolloutStatusCache;
-
     @Autowired
     private ArtifactRepository artifactRepository;
-
     @Autowired
     private RepositoryProperties repositoryProperties;
 
-    private final String countArtifactQuery;
-    private final String countSoftwareModulesQuery;
-
     /**
      * Constructor.
-     * 
-     * @param properties
-     *            properties to get the underlying database
+     *
+     * @param properties properties to get the underlying database
      */
     public JpaSystemManagement(final JpaProperties properties) {
 
@@ -160,66 +136,19 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    public SystemUsageReport getSystemUsageStatistics() {
-
-        final Number count = (Number) entityManager.createNativeQuery(countSoftwareModulesQuery).getSingleResult();
-
-        long sumOfArtifacts = 0;
-        if (count != null) {
-            sumOfArtifacts = count.longValue();
-        }
-
-        // we use native queries to punch through the tenant boundaries. This
-        // has to be used with care!
-        final long targets = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_target")
-                .getSingleResult()).longValue();
-
-        final long artifacts = ((Number) entityManager.createNativeQuery(countArtifactQuery).getSingleResult())
-                .longValue();
-
-        final long actions = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_action")
-                .getSingleResult()).longValue();
-
-        return new SystemUsageReportWithTenants(targets, artifacts, actions, sumOfArtifacts,
-                tenantMetaDataRepository.count());
-    }
-
-    private static boolean isPostgreSql(final JpaProperties properties) {
-        return Database.POSTGRESQL == properties.getDatabase();
-    }
-
-    @Override
-    public SystemUsageReportWithTenants getSystemUsageStatisticsWithTenants() {
-        final SystemUsageReportWithTenants result = (SystemUsageReportWithTenants) getSystemUsageStatistics();
-
-        usageStatsPerTenant(result);
-
-        return result;
-    }
-
-    private void usageStatsPerTenant(final SystemUsageReportWithTenants report) {
-        forEachTenant(tenant -> report.addTenantData(systemStatsManagement.getStatsOfTenant()));
-    }
-
-    @Override
     @Transactional(propagation = Propagation.SUPPORTS)
     public KeyGenerator currentTenantKeyGenerator() {
         return currentTenantCacheKeyGenerator.currentTenantKeyGenerator();
     }
 
     @Override
-    public TenantMetaData createTenantMetadata(final String tenant) {
-        final TenantMetaData result = tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
-        // Create if it does not exist
-        if (result == null) {
-            return createTenantMetadata0(tenant);
-        }
-        return result;
-    }
-
-    @Override
-    public Page<String> findTenants(final Pageable pageable) {
-        return tenantMetaDataRepository.findTenants(pageable);
+    @Cacheable(value = "currentTenant", keyGenerator = "currentTenantKeyGenerator", cacheManager = "directCacheManager", unless = "#result == null")
+    public String currentTenant() {
+        return currentTenantCacheKeyGenerator.getTenantInCreation().orElseGet(() -> {
+            final TenantMetaData findByTenant = tenantMetaDataRepository
+                    .findByTenantIgnoreCase(tenantAware.getCurrentTenant());
+            return findByTenant != null ? findByTenant.getTenant() : null;
+        });
     }
 
     @Override
@@ -250,6 +179,70 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
+    public Page<String> findTenants(final Pageable pageable) {
+        return tenantMetaDataRepository.findTenants(pageable);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    // Exception squid:S2229 - calling findTenants without transaction is
+    // intended in this case
+    @SuppressWarnings("squid:S2229")
+    public void forEachTenant(final Consumer<String> consumer) {
+        Page<String> tenants;
+        Pageable query = PageRequest.of(0, MAX_TENANTS_QUERY);
+        do {
+            tenants = findTenants(query);
+            tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> {
+                try {
+                    consumer.accept(tenant);
+                } catch (final RuntimeException ex) {
+                    log.debug("Exception on forEachTenant execution for tenant {}. Continue with next tenant.",
+                            tenant, ex);
+                    log.error("Exception on forEachTenant execution for tenant {} with error message [{}]. "
+                            + "Continue with next tenant.", tenant, ex.getMessage());
+                }
+                return null;
+            }));
+        } while ((query = tenants.nextPageable()) != Pageable.unpaged());
+
+    }
+
+    @Override
+    public SystemUsageReportWithTenants getSystemUsageStatisticsWithTenants() {
+        final SystemUsageReportWithTenants result = (SystemUsageReportWithTenants) getSystemUsageStatistics();
+
+        usageStatsPerTenant(result);
+
+        return result;
+    }
+
+    @Override
+    public SystemUsageReport getSystemUsageStatistics() {
+
+        final Number count = (Number) entityManager.createNativeQuery(countSoftwareModulesQuery).getSingleResult();
+
+        long sumOfArtifacts = 0;
+        if (count != null) {
+            sumOfArtifacts = count.longValue();
+        }
+
+        // we use native queries to punch through the tenant boundaries. This
+        // has to be used with care!
+        final long targets = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_target")
+                .getSingleResult()).longValue();
+
+        final long artifacts = ((Number) entityManager.createNativeQuery(countArtifactQuery).getSingleResult())
+                .longValue();
+
+        final long actions = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_action")
+                .getSingleResult()).longValue();
+
+        return new SystemUsageReportWithTenants(targets, artifacts, actions, sumOfArtifacts,
+                tenantMetaDataRepository.count());
+    }
+
+    @Override
     public TenantMetaData getTenantMetadata() {
         final String tenant = tenantAware.getCurrentTenant();
         if (tenant == null) {
@@ -270,13 +263,13 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Cacheable(value = "currentTenant", keyGenerator = "currentTenantKeyGenerator", cacheManager = "directCacheManager", unless = "#result == null")
-    public String currentTenant() {
-        return currentTenantCacheKeyGenerator.getTenantInCreation().orElseGet(() -> {
-            final TenantMetaData findByTenant = tenantMetaDataRepository
-                    .findByTenantIgnoreCase(tenantAware.getCurrentTenant());
-            return findByTenant != null ? findByTenant.getTenant() : null;
-        });
+    public TenantMetaData createTenantMetadata(final String tenant) {
+        final TenantMetaData result = tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
+        // Create if it does not exist
+        if (result == null) {
+            return createTenantMetadata0(tenant);
+        }
+        return result;
     }
 
     @Override
@@ -290,6 +283,20 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, defaultDsType)));
 
         return tenantMetaDataRepository.save(data);
+    }
+
+    @Override
+    public TenantMetaData getTenantMetadata(final long tenantId) {
+        return tenantMetaDataRepository.findById(tenantId)
+                .orElseThrow(() -> new EntityNotFoundException(TenantMetaData.class, tenantId));
+    }
+
+    private static boolean isPostgreSql(final JpaProperties properties) {
+        return Database.POSTGRESQL == properties.getDatabase();
+    }
+
+    private void usageStatsPerTenant(final SystemUsageReportWithTenants report) {
+        forEachTenant(tenant -> report.addTenantData(systemStatsManagement.getStatsOfTenant()));
     }
 
     private DistributionSetType createStandardSoftwareDataSetup() {
@@ -318,38 +325,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                 .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_WITH_APPS_KEY,
                         org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_WITH_APPS_NAME,
                         "Default type with Firmware/OS and optional app(s).").addMandatoryModuleType(os)
-                                .addOptionalModuleType(app));
-    }
-
-    @Override
-    public TenantMetaData getTenantMetadata(final long tenantId) {
-        return tenantMetaDataRepository.findById(tenantId)
-                .orElseThrow(() -> new EntityNotFoundException(TenantMetaData.class, tenantId));
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    // Exception squid:S2229 - calling findTenants without transaction is
-    // intended in this case
-    @SuppressWarnings("squid:S2229")
-    public void forEachTenant(final Consumer<String> consumer) {
-        Page<String> tenants;
-        Pageable query = PageRequest.of(0, MAX_TENANTS_QUERY);
-        do {
-            tenants = findTenants(query);
-            tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> {
-                try {
-                    consumer.accept(tenant);
-                } catch (final RuntimeException ex) {
-                    log.debug("Exception on forEachTenant execution for tenant {}. Continue with next tenant.",
-                            tenant, ex);
-                    log.error("Exception on forEachTenant execution for tenant {} with error message [{}]. "
-                            + "Continue with next tenant.", tenant, ex.getMessage());
-                }
-                return null;
-            }));
-        } while ((query = tenants.nextPageable()) != Pageable.unpaged());
-
+                        .addOptionalModuleType(app));
     }
 
     private TenantMetaData createTenantMetadata0(final String tenant) {
@@ -371,8 +347,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
      * {@link MultiTenantJpaTransactionManager} is called again and set the
      * tenant for this transaction.
      *
-     * @param tenant
-     *            the tenant to be created
+     * @param tenant the tenant to be created
      * @return the initial created {@link TenantMetaData}
      */
     private TenantMetaData createInitialTenantMetaData(final String tenant) {

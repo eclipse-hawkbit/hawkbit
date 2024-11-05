@@ -15,12 +15,11 @@ import java.util.stream.Collectors;
 
 import jakarta.validation.constraints.NotNull;
 
+import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-
-import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import org.springframework.util.ObjectUtils;
 
 @Slf4j
@@ -28,25 +27,15 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
 
     private final Class<A> rsqlQueryFieldType;
 
-    @Value
-    protected class QuertPath {
-
-        A enumValue;
-        String[] jpaPath;
-
-        private QuertPath(final A enumValue, final String[] jpaPath) {
-            this.enumValue = enumValue;
-            this.jpaPath = jpaPath;
-        }
-    }
-
     protected AbstractRSQLVisitor(final Class<A> rsqlQueryFieldType) {
         this.rsqlQueryFieldType = rsqlQueryFieldType;
     }
 
     protected QuertPath getQuertPath(final ComparisonNode node) {
         final int firstSeparatorIndex = node.getSelector().indexOf(RsqlQueryField.SUB_ATTRIBUTE_SEPARATOR);
-        final String enumName = (firstSeparatorIndex == -1 ? node.getSelector() : node.getSelector().substring(0, firstSeparatorIndex)).toUpperCase();
+        final String enumName = (firstSeparatorIndex == -1
+                ? node.getSelector()
+                : node.getSelector().substring(0, firstSeparatorIndex)).toUpperCase();
         log.debug("Get field identifier by name {} of enum type {}", enumName, rsqlQueryFieldType);
 
         try {
@@ -136,5 +125,17 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
                 }).toList();
         expectedFieldList.addAll(expectedSubFieldList);
         return expectedFieldList;
+    }
+
+    @Value
+    protected class QuertPath {
+
+        A enumValue;
+        String[] jpaPath;
+
+        private QuertPath(final A enumValue, final String[] jpaPath) {
+            this.enumValue = enumValue;
+            this.jpaPath = jpaPath;
+        }
     }
 }

@@ -26,7 +26,6 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * A JPA entity which stores the tenant specific configuration.
- *
  */
 @Entity
 @Table(name = "sp_tenant_configuration", uniqueConstraints = @UniqueConstraint(columnNames = { "conf_key",
@@ -36,6 +35,7 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 @SuppressWarnings("squid:S2160")
 public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity
         implements TenantConfiguration, EventAwareEntity {
+
     private static final long serialVersionUID = 1L;
 
     @Column(name = "conf_key", length = TenantConfiguration.KEY_MAX_SIZE, nullable = false, updatable = false)
@@ -57,10 +57,8 @@ public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity
     }
 
     /**
-     * @param key
-     *            the key of this configuration
-     * @param value
-     *            the value of this configuration
+     * @param key the key of this configuration
+     * @param value the value of this configuration
      */
     public JpaTenantConfiguration(final String key, final String value) {
         this.key = key;

@@ -11,13 +11,19 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -36,14 +42,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 @Feature("Unit Tests - Repository")
 @Story("Auto assign checker")
 @ExtendWith(MockitoExtension.class)
 class AutoAssignCheckerTest {
+
     @Mock
     private TargetFilterQueryManagement targetFilterQueryManagement;
     @Mock
@@ -86,13 +89,6 @@ class AutoAssignCheckerTest {
         Mockito.verifyNoMoreInteractions(deploymentManagement);
     }
 
-    private ArgumentMatcher<List<DeploymentRequest>> deployReqMatcher(final String target, final long ds) {
-        return requests -> {
-            final DeploymentRequest request = requests.get(0);
-            return requests.size() == 1 && request.getDistributionSetId() == ds && request.getControllerId() == target;
-        };
-    }
-
     private static TargetFilterQuery mockFilterQuery(final long dsId) {
         final DistributionSet ds = mock(DistributionSet.class);
         when(ds.getId()).thenReturn(dsId);
@@ -104,18 +100,25 @@ class AutoAssignCheckerTest {
         return filter;
     }
 
-    private void mockRunningAsNonSystem() {
-        when(contextAware.getCurrentTenant()).thenReturn(getRandomString());
-        when(contextAware.runAsTenantAsUser(any(String.class), any(String.class), any(TenantAware.TenantRunner.class)))
-                .thenAnswer(i -> ((TenantAware.TenantRunner)i.getArgument(2)).run());
-    }
-
     private static long getRandomLong() {
         return ThreadLocalRandom.current().nextLong();
     }
 
     private static String getRandomString() {
         return UUID.randomUUID().toString();
+    }
+
+    private ArgumentMatcher<List<DeploymentRequest>> deployReqMatcher(final String target, final long ds) {
+        return requests -> {
+            final DeploymentRequest request = requests.get(0);
+            return requests.size() == 1 && request.getDistributionSetId() == ds && request.getControllerId() == target;
+        };
+    }
+
+    private void mockRunningAsNonSystem() {
+        when(contextAware.getCurrentTenant()).thenReturn(getRandomString());
+        when(contextAware.runAsTenantAsUser(any(String.class), any(String.class), any(TenantAware.TenantRunner.class)))
+                .thenAnswer(i -> ((TenantAware.TenantRunner) i.getArgument(2)).run());
     }
 
 }

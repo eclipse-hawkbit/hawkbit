@@ -41,7 +41,6 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * JPA implementation of {@link TargetTagManagement}.
- *
  */
 @Transactional(readOnly = true)
 @Validated
@@ -62,8 +61,8 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     }
 
     @Override
-    public Optional<TargetTag> getByName(final String name) {
-        return targetTagRepository.findByNameEquals(name);
+    public long count() {
+        return targetTagRepository.count();
     }
 
     @Override
@@ -94,8 +93,13 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     public void delete(final String targetTagName) {
         targetTagRepository.delete(
                 targetTagRepository
-                    .findOne(((root, query, cb) -> cb.equal(root.get(JpaTargetTag_.name), targetTagName)))
-                    .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagName)));
+                        .findOne(((root, query, cb) -> cb.equal(root.get(JpaTargetTag_.name), targetTagName)))
+                        .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagName)));
+    }
+
+    @Override
+    public Page<TargetTag> findAll(final Pageable pageable) {
+        return JpaManagementHelper.findAllWithCountBySpec(targetTagRepository, pageable, null);
     }
 
     @Override
@@ -105,8 +109,18 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     }
 
     @Override
-    public long count() {
-        return targetTagRepository.count();
+    public Optional<TargetTag> getByName(final String name) {
+        return targetTagRepository.findByNameEquals(name);
+    }
+
+    @Override
+    public Optional<TargetTag> get(final long id) {
+        return targetTagRepository.findById(id).map(TargetTag.class::cast);
+    }
+
+    @Override
+    public List<TargetTag> get(final Collection<Long> ids) {
+        return Collections.unmodifiableList(targetTagRepository.findAllById(ids));
     }
 
     @Override
@@ -124,20 +138,5 @@ public class JpaTargetTagManagement implements TargetTagManagement {
         update.getColour().ifPresent(tag::setColour);
 
         return targetTagRepository.save(tag);
-    }
-
-    @Override
-    public Optional<TargetTag> get(final long id) {
-        return targetTagRepository.findById(id).map(TargetTag.class::cast);
-    }
-
-    @Override
-    public List<TargetTag> get(final Collection<Long> ids) {
-        return Collections.unmodifiableList(targetTagRepository.findAllById(ids));
-    }
-
-    @Override
-    public Page<TargetTag> findAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithCountBySpec(targetTagRepository, pageable, null);
     }
 }

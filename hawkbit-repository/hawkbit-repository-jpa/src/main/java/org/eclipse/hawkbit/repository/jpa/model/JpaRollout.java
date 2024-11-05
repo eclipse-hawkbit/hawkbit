@@ -52,7 +52,6 @@ import org.eclipse.persistence.sessions.changesets.ObjectChangeSet;
 
 /**
  * JPA implementation of a {@link Rollout}.
- *
  */
 @Entity
 @Table(name = "sp_rollout", uniqueConstraints = @UniqueConstraint(columnNames = { "name",
@@ -149,6 +148,62 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Transient
     private transient TotalTargetCountStatus totalTargetCountStatus;
 
+    public List<RolloutGroup> getRolloutGroups() {
+        if (rolloutGroups == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(rolloutGroups);
+    }
+
+    public long getLastCheck() {
+        return lastCheck;
+    }
+
+    public void setLastCheck(final long lastCheck) {
+        this.lastCheck = lastCheck;
+    }
+
+    // dynamic is null only for old rollouts - could be used for distinguishing
+    // old once from the other
+    public boolean isNewStyleTargetPercent() {
+        return dynamic != null;
+    }
+
+    @Override
+    public String toString() {
+        return "Rollout [ targetFilterQuery=" + targetFilterQuery + ", distributionSet=" + distributionSet + ", status="
+                + status + ", lastCheck=" + lastCheck + ", getName()=" + getName() + ", getId()=" + getId() + "]";
+    }
+
+    @Override
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new RolloutCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new RolloutUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+
+        if (isSoftDeleted(descriptorEvent)) {
+            EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(),
+                    getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
+        }
+    }
+
+    @Override
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(),
+                getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public boolean isDeleted() {
+        return deleted;
+    }
+
     @Override
     public DistributionSet getDistributionSet() {
         return distributionSet;
@@ -156,14 +211,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     public void setDistributionSet(final DistributionSet distributionSet) {
         this.distributionSet = (JpaDistributionSet) distributionSet;
-    }
-
-    public List<RolloutGroup> getRolloutGroups() {
-        if (rolloutGroups == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(rolloutGroups);
     }
 
     @Override
@@ -184,23 +231,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         this.status = status;
     }
 
-    public long getLastCheck() {
-        return lastCheck;
-    }
-
-    public void setLastCheck(final long lastCheck) {
-        this.lastCheck = lastCheck;
-    }
-
-    @Override
-    public Long getStartAt() {
-        return startAt;
-    }
-
-    public void setStartAt(final Long startAt) {
-        this.startAt = startAt;
-    }
-
     @Override
     public ActionType getActionType() {
         return actionType;
@@ -215,40 +245,13 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         return forcedTime;
     }
 
-    public void setForcedTime(final long forcedTime) {
-        this.forcedTime = forcedTime;
-    }
-
     @Override
-    public Optional<Integer> getWeight() {
-        return Optional.ofNullable(weight);
+    public Long getStartAt() {
+        return startAt;
     }
 
-    public void setWeight(final Integer weight) {
-        this.weight = weight;
-    }
-
-    @Override
-    public boolean isDynamic() {
-        return Boolean.TRUE.equals(dynamic);
-    }
-
-    public void setDynamic(final Boolean dynamic) {
-        this.dynamic = dynamic;
-    }
-
-    // dynamic is null only for old rollouts - could be used for distinguishing
-    // old once from the other
-    public boolean isNewStyleTargetPercent() {
-        return dynamic != null;
-    }
-
-    public Optional<String> getAccessControlContext() {
-        return Optional.ofNullable(accessControlContext);
-    }
-
-    public void setAccessControlContext(final String accessControlContext) {
-        this.accessControlContext = accessControlContext;
+    public void setStartAt(final Long startAt) {
+        this.startAt = startAt;
     }
 
     @Override
@@ -282,54 +285,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     }
 
     @Override
-    public String toString() {
-        return "Rollout [ targetFilterQuery=" + targetFilterQuery + ", distributionSet=" + distributionSet + ", status="
-                + status + ", lastCheck=" + lastCheck + ", getName()=" + getName() + ", getId()=" + getId() + "]";
-    }
-
-    @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new RolloutCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
-    }
-
-    @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new RolloutUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
-
-        if (isSoftDeleted(descriptorEvent)) {
-            EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(),
-                    getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
-        }
-    }
-
-    private static boolean isSoftDeleted(final DescriptorEvent event) {
-        final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
-        final List<DirectToFieldChangeRecord> changes = changeSet.getChanges().stream()
-                .filter(DirectToFieldChangeRecord.class::isInstance).map(DirectToFieldChangeRecord.class::cast)
-                .collect(Collectors.toList());
-
-        return changes.stream().anyMatch(changeRecord -> DELETED_PROPERTY.equals(changeRecord.getAttribute())
-                && Boolean.parseBoolean(changeRecord.getNewValue().toString()));
-    }
-
-    @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(),
-                getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
-    }
-
-    @Override
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(final boolean deleted) {
-        this.deleted = deleted;
-    }
-
-    @Override
     public String getApprovalDecidedBy() {
         return approvalDecidedBy;
     }
@@ -343,7 +298,51 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
         return approvalRemark;
     }
 
+    @Override
+    public Optional<Integer> getWeight() {
+        return Optional.ofNullable(weight);
+    }
+
+    public void setWeight(final Integer weight) {
+        this.weight = weight;
+    }
+
+    @Override
+    public boolean isDynamic() {
+        return Boolean.TRUE.equals(dynamic);
+    }
+
+    public void setDynamic(final Boolean dynamic) {
+        this.dynamic = dynamic;
+    }
+
+    public Optional<String> getAccessControlContext() {
+        return Optional.ofNullable(accessControlContext);
+    }
+
+    public void setAccessControlContext(final String accessControlContext) {
+        this.accessControlContext = accessControlContext;
+    }
+
     public void setApprovalRemark(final String approvalRemark) {
         this.approvalRemark = approvalRemark;
+    }
+
+    public void setForcedTime(final long forcedTime) {
+        this.forcedTime = forcedTime;
+    }
+
+    public void setDeleted(final boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    private static boolean isSoftDeleted(final DescriptorEvent event) {
+        final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
+        final List<DirectToFieldChangeRecord> changes = changeSet.getChanges().stream()
+                .filter(DirectToFieldChangeRecord.class::isInstance).map(DirectToFieldChangeRecord.class::cast)
+                .collect(Collectors.toList());
+
+        return changes.stream().anyMatch(changeRecord -> DELETED_PROPERTY.equals(changeRecord.getAttribute())
+                && Boolean.parseBoolean(changeRecord.getNewValue().toString()));
     }
 }

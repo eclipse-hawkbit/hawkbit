@@ -15,9 +15,11 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.util.Collections;
 import java.util.List;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
@@ -34,16 +36,11 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.springframework.data.repository.query.Param;
 
 /**
  * Test class testing the functionality of invalidating a
  * {@link DistributionSet}
- *
  */
 @Feature("Component Tests - Repository")
 @Story("Distribution set invalidation management")
@@ -104,7 +101,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
             // if status is pending, the assignment has not been canceled
             assertThat(
                     targetRepository.findById(invalidationTestData.getTargets().get(0).getId()).get().getUpdateStatus())
-                            .isEqualTo(TargetUpdateStatus.PENDING);
+                    .isEqualTo(TargetUpdateStatus.PENDING);
             assertThat(findActionsByTarget(target).size()).isEqualTo(1);
             assertThat(findActionsByTarget(target).get(0).getStatus()).isEqualTo(Status.RUNNING);
         }
@@ -138,17 +135,6 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
             assertThat(findActionsByTarget(target).size()).isEqualTo(1);
             assertThat(findActionsByTarget(target).get(0).getStatus()).isEqualTo(Status.CANCELED);
         }
-    }
-
-    private void assertNoScheduledActionsExist(final Rollout rollout) {
-        assertThat(
-                actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Status.SCHEDULED).getTotalElements())
-                        .isZero();
-    }
-
-    private void assertRolloutGroupsAreFinished(final Rollout rollout) {
-        assertThat(rolloutGroupRepository.findByRolloutId(rollout.getId(), PAGE))
-                .allMatch(rolloutGroup -> rolloutGroup.getStatus().equals(RolloutGroupStatus.FINISHED));
     }
 
     @Test
@@ -196,8 +182,8 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     void verifyInvalidateInvalidatedDistributionSetDontThrowsException() {
         final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
         distributionSetInvalidationManagement.invalidateDistributionSet(
-                        new DistributionSetInvalidation(Collections.singletonList(distributionSet.getId()),
-                                CancelationType.SOFT, true));
+                new DistributionSetInvalidation(Collections.singletonList(distributionSet.getId()),
+                        CancelationType.SOFT, true));
     }
 
     @Test
@@ -234,7 +220,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
                 false));
         assertThat(
                 distributionSetRepository.findById(invalidationTestData.getDistributionSet().getId()).get().isValid())
-                        .isFalse();
+                .isFalse();
     }
 
     @Test
@@ -249,7 +235,18 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
                 true));
         assertThat(
                 distributionSetRepository.findById(invalidationTestData.getDistributionSet().getId()).get().isValid())
-                        .isFalse();
+                .isFalse();
+    }
+
+    private void assertNoScheduledActionsExist(final Rollout rollout) {
+        assertThat(
+                actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Status.SCHEDULED).getTotalElements())
+                .isZero();
+    }
+
+    private void assertRolloutGroupsAreFinished(final Rollout rollout) {
+        assertThat(rolloutGroupRepository.findByRolloutId(rollout.getId(), PAGE))
+                .allMatch(rolloutGroup -> rolloutGroup.getStatus().equals(RolloutGroupStatus.FINISHED));
     }
 
     private InvalidationTestData createInvalidationTestData(final String testName) {
@@ -264,7 +261,20 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         return new InvalidationTestData(distributionSet, targets, targetFilterQuery, rollout);
     }
 
+    private void assertDistributionSetInvalidationCount(
+            final DistributionSetInvalidationCount distributionSetInvalidationCount,
+            final long expectedAutoAssignmentCount, final long expectedActionCount, final long expectedRolloutCount) {
+        assertThat(distributionSetInvalidationCount.getAutoAssignmentCount()).isEqualTo(expectedAutoAssignmentCount);
+        assertThat(distributionSetInvalidationCount.getActionCount()).isEqualTo(expectedActionCount);
+        assertThat(distributionSetInvalidationCount.getRolloutsCount()).isEqualTo(expectedRolloutCount);
+    }
+
+    private List<JpaAction> findActionsByTarget(@Param("target") Target target) { // order by id ?
+        return actionRepository.findAll(ActionSpecifications.byTargetControllerId(target.getControllerId()));
+    }
+
     private static class InvalidationTestData {
+
         private final DistributionSet distributionSet;
         private final List<Target> targets;
         private final TargetFilterQuery targetFilterQuery;
@@ -294,17 +304,5 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         public Rollout getRollout() {
             return rollout;
         }
-    }
-
-    private void assertDistributionSetInvalidationCount(
-            final DistributionSetInvalidationCount distributionSetInvalidationCount,
-            final long expectedAutoAssignmentCount, final long expectedActionCount, final long expectedRolloutCount) {
-        assertThat(distributionSetInvalidationCount.getAutoAssignmentCount()).isEqualTo(expectedAutoAssignmentCount);
-        assertThat(distributionSetInvalidationCount.getActionCount()).isEqualTo(expectedActionCount);
-        assertThat(distributionSetInvalidationCount.getRolloutsCount()).isEqualTo(expectedRolloutCount);
-    }
-
-    private List<JpaAction> findActionsByTarget(@Param("target") Target target) { // order by id ?
-        return actionRepository.findAll(ActionSpecifications.byTargetControllerId(target.getControllerId()));
     }
 }

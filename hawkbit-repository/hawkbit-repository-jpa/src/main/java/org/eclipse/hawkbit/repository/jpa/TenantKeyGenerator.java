@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * {@link KeyGenerator} for tenant related caches.
- *
  */
 @Service
 public class TenantKeyGenerator implements KeyGenerator {

@@ -28,6 +28,10 @@ import java.util.stream.Stream;
 
 import jakarta.validation.ConstraintViolationException;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.api.Condition;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -74,20 +78,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
-
 /**
  * {@link DistributionSetManagement} tests.
- *
  */
 @Feature("Component Tests - Repository")
 @Story("DistributionSet Management")
 class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
     public static final String TAG1_NAME = "Tag1";
+    @Autowired
+    RepositoryProperties repositoryProperties;
 
     @Test
     @Description("Verifies that management get access react as specified on calls for non existing entities by means "
@@ -213,84 +213,6 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         createAndUpdateDistributionSetWithInvalidVersion(set);
     }
 
-    @Step
-    private void createAndUpdateDistributionSetWithInvalidDescription(final DistributionSet set) {
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("entity with too long description should not be created")
-                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a")
-                        .version("a").description(RandomStringUtils.randomAlphanumeric(513))));
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("entity with invalid description should not be created")
-                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a")
-                        .version("a").description(INVALID_TEXT_HTML)));
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("entity with too long description should not be updated")
-                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
-                        .description(RandomStringUtils.randomAlphanumeric(513))));
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("entity with invalid characters should not be updated").isThrownBy(() -> distributionSetManagement
-                        .update(entityFactory.distributionSet().update(set.getId()).description(INVALID_TEXT_HTML)));
-    }
-
-    @Step
-    private void createAndUpdateDistributionSetWithInvalidName(final DistributionSet set) {
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("entity with too long name should not be created")
-                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().version("a")
-                        .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1))));
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("entity with too short name should not be created").isThrownBy(() -> distributionSetManagement
-                        .create(entityFactory.distributionSet().create().version("a").name("")));
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("entity with invalid characters in name should not be created")
-                .isThrownBy(() -> distributionSetManagement
-                        .create(entityFactory.distributionSet().create().version("a").name(INVALID_TEXT_HTML)));
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("entity with too long name should not be updated")
-                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
-                        .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1))));
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("entity with invalid characters should not be updated").isThrownBy(() -> distributionSetManagement
-                        .update(entityFactory.distributionSet().update(set.getId()).name(INVALID_TEXT_HTML)));
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("entity with too short name should not be updated").isThrownBy(() -> distributionSetManagement
-                        .update(entityFactory.distributionSet().update(set.getId()).name("")));
-
-    }
-
-    @Step
-    private void createAndUpdateDistributionSetWithInvalidVersion(final DistributionSet set) {
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("entity with too long version should not be created")
-                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a")
-                        .version(RandomStringUtils.randomAlphanumeric(NamedVersionedEntity.VERSION_MAX_SIZE + 1))));
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("entity with too short version should not be created").isThrownBy(() -> distributionSetManagement
-                        .create(entityFactory.distributionSet().create().name("a").version("")));
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("entity with too long version should not be updated")
-                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
-                        .version(RandomStringUtils.randomAlphanumeric(NamedVersionedEntity.VERSION_MAX_SIZE + 1))));
-
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("entity with too short version should not be updated").isThrownBy(() -> distributionSetManagement
-                        .update(entityFactory.distributionSet().update(set.getId()).version("")));
-
-    }
-
     @Test
     @Description("Ensures that it is not possible to create a DS that already exists (unique constraint is on name,version for DS).")
     void createDuplicateDistributionSetsFailsWithException() {
@@ -333,6 +255,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final List<DistributionSet> sets = distributionSetManagement.create(creates);
 
         assertThat(sets).as("Type should be equal to default type of tenant").are(new Condition<DistributionSet>() {
+
             @Override
             public boolean matches(final DistributionSet value) {
                 return value.getType().equals(systemManagement.getTenantMetadata().getDefaultDsType());
@@ -484,7 +407,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // update data
         assertThatThrownBy(
                 () -> distributionSetManagement.assignSoftwareModules(set.getId(), Set.of(module.getId())))
-                        .isInstanceOf(UnsupportedSoftwareModuleForThisDistributionSetException.class);
+                .isInstanceOf(UnsupportedSoftwareModuleForThisDistributionSetException.class);
     }
 
     @Test
@@ -772,223 +695,6 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         validateDeletedAndCompletedAndTypeAndSearchTextAndTag(dsGroup2, dsTagA, dsGroup2Prefix);
     }
 
-    @Step
-    private void validateFindAll(final List<DistributionSet> expectedDistributionsets) {
-
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder(), expectedDistributionsets);
-    }
-
-    @Step
-    private void validateDeleted(final DistributionSet deletedDistributionSet, final int notDeletedSize) {
-
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().isDeleted(Boolean.TRUE),
-                singletonList(deletedDistributionSet));
-
-        assertThatFilterHasSizeAndDoesNotContainDistributionSet(
-                DistributionSetFilter.builder().isDeleted(Boolean.FALSE), notDeletedSize, deletedDistributionSet);
-    }
-
-    @Step
-    private void validateCompleted(final DistributionSet dsIncomplete, final int completedSize) {
-
-        assertThatFilterHasSizeAndDoesNotContainDistributionSet(
-                DistributionSetFilter.builder().isComplete(Boolean.TRUE), completedSize, dsIncomplete);
-
-        assertThatFilterContainsOnlyGivenDistributionSets(
-                DistributionSetFilter.builder().isComplete(Boolean.FALSE), singletonList(dsIncomplete));
-    }
-
-    @Step
-    private void validateType(final DistributionSetType newType, final DistributionSet dsNewType,
-            final int standardDsTypeSize) {
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().typeId(newType.getId()),
-                singletonList(dsNewType));
-        assertThatFilterHasSizeAndDoesNotContainDistributionSet(
-                DistributionSetFilter.builder().typeId(standardDsType.getId()), standardDsTypeSize, dsNewType);
-    }
-
-    @Step
-    private void validateSearchText(final List<DistributionSet> allDistributionSets, final String dsNamePrefix) {
-
-        final List<DistributionSet> withTestNamePrefix = allDistributionSets.stream()
-                .filter(ds -> ds.getName().startsWith(dsNamePrefix)).collect(Collectors.toList());
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(dsNamePrefix),
-                withTestNamePrefix);
-
-        final List<DistributionSet> withTestNameExact = withTestNamePrefix.stream()
-                .filter(ds -> ds.getName().equals(dsNamePrefix)).collect(Collectors.toList());
-        assertThatFilterContainsOnlyGivenDistributionSets(
-                DistributionSetFilter.builder().searchText(dsNamePrefix + ":"), withTestNameExact);
-
-        final List<DistributionSet> withTestNameExactAndVersionPrefix = withTestNameExact.stream()
-                .filter(ds -> ds.getVersion().startsWith("1")).collect(Collectors.toList());
-        assertThatFilterContainsOnlyGivenDistributionSets(
-                DistributionSetFilter.builder().searchText(dsNamePrefix + ":1"),
-                withTestNameExactAndVersionPrefix);
-
-        final List<DistributionSet> dsWithExactNameAndVersion = withTestNameExactAndVersionPrefix.stream()
-                .filter(ds -> ds.getVersion().equals("1.0.0")).collect(Collectors.toList());
-        assertThat(dsWithExactNameAndVersion).hasSize(1);
-        assertThatFilterContainsOnlyGivenDistributionSets(
-                DistributionSetFilter.builder().searchText(dsNamePrefix + ":1.0.0"), dsWithExactNameAndVersion);
-
-        final List<DistributionSet> withVersionPrefix = allDistributionSets.stream()
-                .filter(ds -> ds.getVersion().startsWith("1.0.")).collect(Collectors.toList());
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(":1.0."),
-                withVersionPrefix);
-
-        final List<DistributionSet> withVersionExact = withVersionPrefix.stream()
-                .filter(ds -> ds.getVersion().equals("1.0.0")).collect(Collectors.toList());
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(":1.0.0"),
-                withVersionExact);
-
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(":"),
-                allDistributionSets);
-
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(" : "),
-                allDistributionSets);
-    }
-
-    @Step
-    private void validateTags(final DistributionSetTag dsTagA, final DistributionSetTag dsTagB,
-            final DistributionSetTag dsTagC, final List<DistributionSet> dsWithTagA,
-            final List<DistributionSet> dsWithTagB) {
-
-        assertThatFilterContainsOnlyGivenDistributionSets(
-                DistributionSetFilter.builder().tagNames(singletonList(dsTagA.getName())), dsWithTagA);
-
-        assertThatFilterContainsOnlyGivenDistributionSets(
-                DistributionSetFilter.builder().tagNames(singletonList(dsTagB.getName())), dsWithTagB);
-
-        assertThatFilterContainsOnlyGivenDistributionSets(
-                DistributionSetFilter.builder().tagNames(Arrays.asList(dsTagA.getName(), dsTagB.getName())),
-                dsWithTagA);
-
-        assertThatFilterContainsOnlyGivenDistributionSets(
-                DistributionSetFilter.builder().tagNames(Arrays.asList(dsTagC.getName(), dsTagB.getName())),
-                dsWithTagB);
-
-        assertThatFilterDoesNotContainAnyDistributionSet(
-                DistributionSetFilter.builder().tagNames(singletonList(dsTagC.getName())));
-    }
-
-    @Step
-    private void validateDeletedAndCompleted(final List<DistributionSet> completedStandardType,
-            final DistributionSet dsNewType, final DistributionSet dsDeleted) {
-
-        final List<DistributionSet> completedNotDeleted = new ArrayList<>(completedStandardType);
-        completedNotDeleted.add(dsNewType);
-        assertThatFilterContainsOnlyGivenDistributionSets(
-                DistributionSetFilter.builder().isComplete(Boolean.TRUE).isDeleted(Boolean.FALSE),
-                completedNotDeleted);
-
-        assertThatFilterContainsOnlyGivenDistributionSets(
-                DistributionSetFilter.builder().isComplete(Boolean.TRUE).isDeleted(Boolean.TRUE),
-                singletonList(dsDeleted));
-
-        assertThatFilterDoesNotContainAnyDistributionSet(
-                DistributionSetFilter.builder().isComplete(Boolean.FALSE).isDeleted(Boolean.TRUE));
-    }
-
-    @Step
-    private void validateDeletedAndCompletedAndType(final List<DistributionSet> deletedAndCompletedAndStandardType,
-            final DistributionSet dsDeleted, final DistributionSetType newType, final DistributionSet dsNewType) {
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().isDeleted(Boolean.FALSE)
-                .isComplete(Boolean.TRUE).typeId(standardDsType.getId()), deletedAndCompletedAndStandardType);
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().isComplete(Boolean.TRUE)
-                .typeId(standardDsType.getId()).isDeleted(Boolean.TRUE), singletonList(dsDeleted));
-        assertThatFilterDoesNotContainAnyDistributionSet(DistributionSetFilter.builder().isDeleted(Boolean.TRUE)
-                .isComplete(Boolean.FALSE).typeId(standardDsType.getId()));
-        assertThatFilterContainsOnlyGivenDistributionSets(
-                DistributionSetFilter.builder().isComplete(Boolean.TRUE).typeId(newType.getId()),
-                singletonList(dsNewType));
-    }
-
-    @Step
-    private void validateDeletedAndCompletedAndTypeAndSearchText(
-            final List<DistributionSet> completedAndStandardTypeAndSearchText, final DistributionSetType newType,
-            final String text) {
-
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().isDeleted(Boolean.FALSE)
-                .isComplete(Boolean.TRUE).typeId(standardDsType.getId()).searchText(text),
-                completedAndStandardTypeAndSearchText);
-
-        assertThatFilterDoesNotContainAnyDistributionSet(DistributionSetFilter.builder().isComplete(Boolean.TRUE)
-                .isDeleted(Boolean.TRUE).typeId(standardDsType.getId()).searchText(text + ":"));
-
-        assertThatFilterDoesNotContainAnyDistributionSet(
-                DistributionSetFilter.builder().typeId(standardDsType.getId()).searchText(text)
-                        .isComplete(Boolean.FALSE).isDeleted(Boolean.FALSE));
-
-        assertThatFilterDoesNotContainAnyDistributionSet(DistributionSetFilter.builder().typeId(newType.getId())
-                .searchText(text).isComplete(Boolean.TRUE).isDeleted(Boolean.FALSE));
-    }
-
-    @Step
-    private void validateDeletedAndCompletedAndTypeAndSearchText(
-            final List<DistributionSet> completedAndNotDeletedStandardTypeAndFilterString,
-            final DistributionSet dsDeleted, final DistributionSet dsInComplete, final DistributionSet dsNewType,
-            final DistributionSetType newType, final String filterString) {
-
-        final List<DistributionSet> completedAndStandardTypeAndFilterString = new ArrayList<>(
-                completedAndNotDeletedStandardTypeAndFilterString);
-        completedAndStandardTypeAndFilterString.add(dsDeleted);
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().isComplete(Boolean.TRUE)
-                .typeId(standardDsType.getId()).searchText(filterString),
-                completedAndStandardTypeAndFilterString);
-
-        assertThatFilterContainsOnlyGivenDistributionSets(
-                DistributionSetFilter.builder().isComplete(Boolean.TRUE).isDeleted(Boolean.FALSE)
-                        .typeId(standardDsType.getId()).searchText(filterString),
-                completedAndNotDeletedStandardTypeAndFilterString);
-
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().isComplete(Boolean.TRUE)
-                .isDeleted(Boolean.TRUE).typeId(standardDsType.getId()).searchText(filterString),
-                singletonList(dsDeleted));
-
-        assertThatFilterContainsOnlyGivenDistributionSets(
-                DistributionSetFilter.builder().typeId(standardDsType.getId()).searchText(filterString)
-                        .isComplete(Boolean.FALSE).isDeleted(Boolean.FALSE),
-                singletonList(dsInComplete));
-
-        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().typeId(newType.getId())
-                .searchText(filterString).isComplete(Boolean.TRUE).isDeleted(Boolean.FALSE),
-                singletonList(dsNewType));
-    }
-
-    @Step
-    private void validateDeletedAndCompletedAndTypeAndSearchTextAndTag(
-            final List<DistributionSet> completedAndStandartTypeAndSearchTextAndTagA, final DistributionSetTag dsTagA,
-            final String text) {
-
-        assertThatFilterContainsOnlyGivenDistributionSets(
-                DistributionSetFilter.builder().isComplete(Boolean.TRUE).typeId(standardDsType.getId())
-                        .searchText(text).tagNames(singletonList(dsTagA.getName())),
-                completedAndStandartTypeAndSearchTextAndTagA);
-
-        assertThatFilterDoesNotContainAnyDistributionSet(DistributionSetFilter.builder()
-                .typeId(standardDsType.getId()).searchText(text).tagNames(singletonList(dsTagA.getName()))
-                .isComplete(Boolean.FALSE).isDeleted(Boolean.FALSE));
-    }
-
-    private void assertThatFilterContainsOnlyGivenDistributionSets(final DistributionSetFilterBuilder filterBuilder,
-            final List<DistributionSet> distributionSets) {
-        final int expectedDsSize = distributionSets.size();
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, filterBuilder.build()).getContent())
-                .hasSize(expectedDsSize).containsOnly(distributionSets.toArray(new DistributionSet[expectedDsSize]));
-    }
-
-    private void assertThatFilterDoesNotContainAnyDistributionSet(final DistributionSetFilterBuilder filterBuilder) {
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, filterBuilder.build()).getContent())
-                .isEmpty();
-    }
-
-    private void assertThatFilterHasSizeAndDoesNotContainDistributionSet(
-            final DistributionSetFilterBuilder filterBuilder, final int size, final DistributionSet ds) {
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, filterBuilder.build()).getContent())
-                .hasSize(size).doesNotContain(ds);
-    }
-
     @Test
     @Description("Simple DS load without the related data that should be loaded lazy.")
     void findDistributionSetsWithoutLazy() {
@@ -1097,25 +803,24 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .isEqualTo(softwareModuleCount);
     }
 
-    @Autowired RepositoryProperties repositoryProperties;
     @Test
     @Description("Test implicit locks for a DS and skip tags.")
     void isImplicitLockApplicableForDistributionSet() {
         final JpaDistributionSetManagement distributionSetManagement =
-                (JpaDistributionSetManagement)this.distributionSetManagement;
+                (JpaDistributionSetManagement) this.distributionSetManagement;
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-non-skip");
         // assert that implicit lock is applicable for non skip tags
         assertThat(distributionSetManagement.isImplicitLockApplicable(distributionSet)).isTrue();
 
         assertThat(repositoryProperties.getSkipImplicitLockForTags().size()).isNotEqualTo(0);
         final List<DistributionSetTag> skipTags = distributionSetTagManagement.create(
-            repositoryProperties.getSkipImplicitLockForTags().stream()
-                    .map(String::toLowerCase)
-                    // remove same in case-insensitive terms tags
-                    // in of case-insensitive db's it will end up as same names and constraint violation (?)
-                    .distinct()
-                    .map(skipTag -> entityFactory.tag().create().name(skipTag))
-                    .toList());
+                repositoryProperties.getSkipImplicitLockForTags().stream()
+                        .map(String::toLowerCase)
+                        // remove same in case-insensitive terms tags
+                        // in of case-insensitive db's it will end up as same names and constraint violation (?)
+                        .distinct()
+                        .map(skipTag -> entityFactory.tag().create().name(skipTag))
+                        .toList());
         // assert that implicit lock locks for every skip tag
         skipTags.forEach(skipTag -> {
             DistributionSet distributionSetWithSkipTag =
@@ -1324,10 +1029,14 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds3.getId())).isEmpty();
 
         Optional<Rollout> rollout = rolloutManagement.get(rollout1.getId());
-        rollout.ifPresent(value -> assertThat(Rollout.RolloutStatus.valueOf(String.valueOf(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds1.getId()).get(0).getName()))).isEqualTo(value.getStatus()));
+        rollout.ifPresent(value -> assertThat(Rollout.RolloutStatus.valueOf(
+                String.valueOf(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds1.getId()).get(0).getName()))).isEqualTo(
+                value.getStatus()));
 
         rollout = rolloutManagement.get(rollout2.getId());
-        rollout.ifPresent(value -> assertThat(Rollout.RolloutStatus.valueOf(String.valueOf(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds2.getId()).get(0).getName()))).isEqualTo(value.getStatus()));
+        rollout.ifPresent(value -> assertThat(Rollout.RolloutStatus.valueOf(
+                String.valueOf(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds2.getId()).get(0).getName()))).isEqualTo(
+                value.getStatus()));
     }
 
     @Test
@@ -1364,6 +1073,301 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(distributionSetManagement.countAutoAssignmentsForDistributionSet(ds.getId())).isEqualTo(2);
         assertThat(distributionSetManagement.countAutoAssignmentsForDistributionSet(ds2.getId())).isNull();
+    }
+
+    @Step
+    private void createAndUpdateDistributionSetWithInvalidDescription(final DistributionSet set) {
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("entity with too long description should not be created")
+                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a")
+                        .version("a").description(RandomStringUtils.randomAlphanumeric(513))));
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("entity with invalid description should not be created")
+                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a")
+                        .version("a").description(INVALID_TEXT_HTML)));
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("entity with too long description should not be updated")
+                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
+                        .description(RandomStringUtils.randomAlphanumeric(513))));
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("entity with invalid characters should not be updated").isThrownBy(() -> distributionSetManagement
+                        .update(entityFactory.distributionSet().update(set.getId()).description(INVALID_TEXT_HTML)));
+    }
+
+    @Step
+    private void createAndUpdateDistributionSetWithInvalidName(final DistributionSet set) {
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("entity with too long name should not be created")
+                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().version("a")
+                        .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1))));
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("entity with too short name should not be created").isThrownBy(() -> distributionSetManagement
+                        .create(entityFactory.distributionSet().create().version("a").name("")));
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("entity with invalid characters in name should not be created")
+                .isThrownBy(() -> distributionSetManagement
+                        .create(entityFactory.distributionSet().create().version("a").name(INVALID_TEXT_HTML)));
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("entity with too long name should not be updated")
+                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
+                        .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1))));
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("entity with invalid characters should not be updated").isThrownBy(() -> distributionSetManagement
+                        .update(entityFactory.distributionSet().update(set.getId()).name(INVALID_TEXT_HTML)));
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("entity with too short name should not be updated").isThrownBy(() -> distributionSetManagement
+                        .update(entityFactory.distributionSet().update(set.getId()).name("")));
+
+    }
+
+    @Step
+    private void createAndUpdateDistributionSetWithInvalidVersion(final DistributionSet set) {
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("entity with too long version should not be created")
+                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a")
+                        .version(RandomStringUtils.randomAlphanumeric(NamedVersionedEntity.VERSION_MAX_SIZE + 1))));
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("entity with too short version should not be created").isThrownBy(() -> distributionSetManagement
+                        .create(entityFactory.distributionSet().create().name("a").version("")));
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("entity with too long version should not be updated")
+                .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
+                        .version(RandomStringUtils.randomAlphanumeric(NamedVersionedEntity.VERSION_MAX_SIZE + 1))));
+
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("entity with too short version should not be updated").isThrownBy(() -> distributionSetManagement
+                        .update(entityFactory.distributionSet().update(set.getId()).version("")));
+
+    }
+
+    @Step
+    private void validateFindAll(final List<DistributionSet> expectedDistributionsets) {
+
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder(), expectedDistributionsets);
+    }
+
+    @Step
+    private void validateDeleted(final DistributionSet deletedDistributionSet, final int notDeletedSize) {
+
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().isDeleted(Boolean.TRUE),
+                singletonList(deletedDistributionSet));
+
+        assertThatFilterHasSizeAndDoesNotContainDistributionSet(
+                DistributionSetFilter.builder().isDeleted(Boolean.FALSE), notDeletedSize, deletedDistributionSet);
+    }
+
+    @Step
+    private void validateCompleted(final DistributionSet dsIncomplete, final int completedSize) {
+
+        assertThatFilterHasSizeAndDoesNotContainDistributionSet(
+                DistributionSetFilter.builder().isComplete(Boolean.TRUE), completedSize, dsIncomplete);
+
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                DistributionSetFilter.builder().isComplete(Boolean.FALSE), singletonList(dsIncomplete));
+    }
+
+    @Step
+    private void validateType(final DistributionSetType newType, final DistributionSet dsNewType,
+            final int standardDsTypeSize) {
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().typeId(newType.getId()),
+                singletonList(dsNewType));
+        assertThatFilterHasSizeAndDoesNotContainDistributionSet(
+                DistributionSetFilter.builder().typeId(standardDsType.getId()), standardDsTypeSize, dsNewType);
+    }
+
+    @Step
+    private void validateSearchText(final List<DistributionSet> allDistributionSets, final String dsNamePrefix) {
+
+        final List<DistributionSet> withTestNamePrefix = allDistributionSets.stream()
+                .filter(ds -> ds.getName().startsWith(dsNamePrefix)).collect(Collectors.toList());
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(dsNamePrefix),
+                withTestNamePrefix);
+
+        final List<DistributionSet> withTestNameExact = withTestNamePrefix.stream()
+                .filter(ds -> ds.getName().equals(dsNamePrefix)).collect(Collectors.toList());
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                DistributionSetFilter.builder().searchText(dsNamePrefix + ":"), withTestNameExact);
+
+        final List<DistributionSet> withTestNameExactAndVersionPrefix = withTestNameExact.stream()
+                .filter(ds -> ds.getVersion().startsWith("1")).collect(Collectors.toList());
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                DistributionSetFilter.builder().searchText(dsNamePrefix + ":1"),
+                withTestNameExactAndVersionPrefix);
+
+        final List<DistributionSet> dsWithExactNameAndVersion = withTestNameExactAndVersionPrefix.stream()
+                .filter(ds -> ds.getVersion().equals("1.0.0")).collect(Collectors.toList());
+        assertThat(dsWithExactNameAndVersion).hasSize(1);
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                DistributionSetFilter.builder().searchText(dsNamePrefix + ":1.0.0"), dsWithExactNameAndVersion);
+
+        final List<DistributionSet> withVersionPrefix = allDistributionSets.stream()
+                .filter(ds -> ds.getVersion().startsWith("1.0.")).collect(Collectors.toList());
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(":1.0."),
+                withVersionPrefix);
+
+        final List<DistributionSet> withVersionExact = withVersionPrefix.stream()
+                .filter(ds -> ds.getVersion().equals("1.0.0")).collect(Collectors.toList());
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(":1.0.0"),
+                withVersionExact);
+
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(":"),
+                allDistributionSets);
+
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().searchText(" : "),
+                allDistributionSets);
+    }
+
+    @Step
+    private void validateTags(final DistributionSetTag dsTagA, final DistributionSetTag dsTagB,
+            final DistributionSetTag dsTagC, final List<DistributionSet> dsWithTagA,
+            final List<DistributionSet> dsWithTagB) {
+
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                DistributionSetFilter.builder().tagNames(singletonList(dsTagA.getName())), dsWithTagA);
+
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                DistributionSetFilter.builder().tagNames(singletonList(dsTagB.getName())), dsWithTagB);
+
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                DistributionSetFilter.builder().tagNames(Arrays.asList(dsTagA.getName(), dsTagB.getName())),
+                dsWithTagA);
+
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                DistributionSetFilter.builder().tagNames(Arrays.asList(dsTagC.getName(), dsTagB.getName())),
+                dsWithTagB);
+
+        assertThatFilterDoesNotContainAnyDistributionSet(
+                DistributionSetFilter.builder().tagNames(singletonList(dsTagC.getName())));
+    }
+
+    @Step
+    private void validateDeletedAndCompleted(final List<DistributionSet> completedStandardType,
+            final DistributionSet dsNewType, final DistributionSet dsDeleted) {
+
+        final List<DistributionSet> completedNotDeleted = new ArrayList<>(completedStandardType);
+        completedNotDeleted.add(dsNewType);
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                DistributionSetFilter.builder().isComplete(Boolean.TRUE).isDeleted(Boolean.FALSE),
+                completedNotDeleted);
+
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                DistributionSetFilter.builder().isComplete(Boolean.TRUE).isDeleted(Boolean.TRUE),
+                singletonList(dsDeleted));
+
+        assertThatFilterDoesNotContainAnyDistributionSet(
+                DistributionSetFilter.builder().isComplete(Boolean.FALSE).isDeleted(Boolean.TRUE));
+    }
+
+    @Step
+    private void validateDeletedAndCompletedAndType(final List<DistributionSet> deletedAndCompletedAndStandardType,
+            final DistributionSet dsDeleted, final DistributionSetType newType, final DistributionSet dsNewType) {
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().isDeleted(Boolean.FALSE)
+                .isComplete(Boolean.TRUE).typeId(standardDsType.getId()), deletedAndCompletedAndStandardType);
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().isComplete(Boolean.TRUE)
+                .typeId(standardDsType.getId()).isDeleted(Boolean.TRUE), singletonList(dsDeleted));
+        assertThatFilterDoesNotContainAnyDistributionSet(DistributionSetFilter.builder().isDeleted(Boolean.TRUE)
+                .isComplete(Boolean.FALSE).typeId(standardDsType.getId()));
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                DistributionSetFilter.builder().isComplete(Boolean.TRUE).typeId(newType.getId()),
+                singletonList(dsNewType));
+    }
+
+    @Step
+    private void validateDeletedAndCompletedAndTypeAndSearchText(
+            final List<DistributionSet> completedAndStandardTypeAndSearchText, final DistributionSetType newType,
+            final String text) {
+
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().isDeleted(Boolean.FALSE)
+                        .isComplete(Boolean.TRUE).typeId(standardDsType.getId()).searchText(text),
+                completedAndStandardTypeAndSearchText);
+
+        assertThatFilterDoesNotContainAnyDistributionSet(DistributionSetFilter.builder().isComplete(Boolean.TRUE)
+                .isDeleted(Boolean.TRUE).typeId(standardDsType.getId()).searchText(text + ":"));
+
+        assertThatFilterDoesNotContainAnyDistributionSet(
+                DistributionSetFilter.builder().typeId(standardDsType.getId()).searchText(text)
+                        .isComplete(Boolean.FALSE).isDeleted(Boolean.FALSE));
+
+        assertThatFilterDoesNotContainAnyDistributionSet(DistributionSetFilter.builder().typeId(newType.getId())
+                .searchText(text).isComplete(Boolean.TRUE).isDeleted(Boolean.FALSE));
+    }
+
+    @Step
+    private void validateDeletedAndCompletedAndTypeAndSearchText(
+            final List<DistributionSet> completedAndNotDeletedStandardTypeAndFilterString,
+            final DistributionSet dsDeleted, final DistributionSet dsInComplete, final DistributionSet dsNewType,
+            final DistributionSetType newType, final String filterString) {
+
+        final List<DistributionSet> completedAndStandardTypeAndFilterString = new ArrayList<>(
+                completedAndNotDeletedStandardTypeAndFilterString);
+        completedAndStandardTypeAndFilterString.add(dsDeleted);
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().isComplete(Boolean.TRUE)
+                        .typeId(standardDsType.getId()).searchText(filterString),
+                completedAndStandardTypeAndFilterString);
+
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                DistributionSetFilter.builder().isComplete(Boolean.TRUE).isDeleted(Boolean.FALSE)
+                        .typeId(standardDsType.getId()).searchText(filterString),
+                completedAndNotDeletedStandardTypeAndFilterString);
+
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().isComplete(Boolean.TRUE)
+                        .isDeleted(Boolean.TRUE).typeId(standardDsType.getId()).searchText(filterString),
+                singletonList(dsDeleted));
+
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                DistributionSetFilter.builder().typeId(standardDsType.getId()).searchText(filterString)
+                        .isComplete(Boolean.FALSE).isDeleted(Boolean.FALSE),
+                singletonList(dsInComplete));
+
+        assertThatFilterContainsOnlyGivenDistributionSets(DistributionSetFilter.builder().typeId(newType.getId())
+                        .searchText(filterString).isComplete(Boolean.TRUE).isDeleted(Boolean.FALSE),
+                singletonList(dsNewType));
+    }
+
+    @Step
+    private void validateDeletedAndCompletedAndTypeAndSearchTextAndTag(
+            final List<DistributionSet> completedAndStandartTypeAndSearchTextAndTagA, final DistributionSetTag dsTagA,
+            final String text) {
+
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                DistributionSetFilter.builder().isComplete(Boolean.TRUE).typeId(standardDsType.getId())
+                        .searchText(text).tagNames(singletonList(dsTagA.getName())),
+                completedAndStandartTypeAndSearchTextAndTagA);
+
+        assertThatFilterDoesNotContainAnyDistributionSet(DistributionSetFilter.builder()
+                .typeId(standardDsType.getId()).searchText(text).tagNames(singletonList(dsTagA.getName()))
+                .isComplete(Boolean.FALSE).isDeleted(Boolean.FALSE));
+    }
+
+    private void assertThatFilterContainsOnlyGivenDistributionSets(final DistributionSetFilterBuilder filterBuilder,
+            final List<DistributionSet> distributionSets) {
+        final int expectedDsSize = distributionSets.size();
+        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, filterBuilder.build()).getContent())
+                .hasSize(expectedDsSize).containsOnly(distributionSets.toArray(new DistributionSet[expectedDsSize]));
+    }
+
+    private void assertThatFilterDoesNotContainAnyDistributionSet(final DistributionSetFilterBuilder filterBuilder) {
+        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, filterBuilder.build()).getContent())
+                .isEmpty();
+    }
+
+    private void assertThatFilterHasSizeAndDoesNotContainDistributionSet(
+            final DistributionSetFilterBuilder filterBuilder, final int size, final DistributionSet ds) {
+        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, filterBuilder.build()).getContent())
+                .hasSize(size).doesNotContain(ds);
     }
 
     // can be removed with java-11

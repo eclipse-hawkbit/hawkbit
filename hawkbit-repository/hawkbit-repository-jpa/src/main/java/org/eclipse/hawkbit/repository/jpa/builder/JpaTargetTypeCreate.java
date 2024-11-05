@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractTargetTypeUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
@@ -19,12 +22,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collection;
-import java.util.Collections;
-
 /**
  * Create/build implementation.
- *
  */
 public class JpaTargetTypeCreate extends AbstractTargetTypeUpdateCreate<TargetTypeCreate>
         implements TargetTypeCreate {
@@ -34,8 +33,7 @@ public class JpaTargetTypeCreate extends AbstractTargetTypeUpdateCreate<TargetTy
     /**
      * Constructor
      *
-     * @param distributionSetTypeManagement
-     *          Distribution set type management
+     * @param distributionSetTypeManagement Distribution set type management
      */
     JpaTargetTypeCreate(final DistributionSetTypeManagement distributionSetTypeManagement) {
         this.distributionSetTypeManagement = distributionSetTypeManagement;

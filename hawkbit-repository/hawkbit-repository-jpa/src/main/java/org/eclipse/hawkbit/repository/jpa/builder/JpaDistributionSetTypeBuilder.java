@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 
 /**
  * Builder implementation for {@link DistributionSetType}.
- *
  */
 public class JpaDistributionSetTypeBuilder implements DistributionSetTypeBuilder {
 

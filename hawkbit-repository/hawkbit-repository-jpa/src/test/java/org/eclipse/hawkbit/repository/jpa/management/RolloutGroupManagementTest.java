@@ -13,6 +13,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
@@ -37,10 +40,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.CollectionUtils;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("Rollout Management")
@@ -159,40 +158,9 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
                 .hasSize((int) rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroup.getId()));
 
         targetsWithActionStatus = rolloutGroupManagement.findAllTargetsOfRolloutGroupWithActionStatus(
-                PageRequest.of(0, 500, Sort.by(Direction.DESC, "lastActionStatusCode")), rolloutGroup.getId())
+                        PageRequest.of(0, 500, Sort.by(Direction.DESC, "lastActionStatusCode")), rolloutGroup.getId())
                 .getContent();
         assertSortedListOfActionStatus(targetsWithActionStatus, target24, 24, target0, 0);
-    }
-
-    private void assertSortedListOfActionStatus(final List<TargetWithActionStatus> targetsWithActionStatus,
-            final Target first, final Integer firstStatusCode, final Target last, final Integer lastStatusCode) {
-        assertTargetAndActionStatusCode(CollectionUtils.firstElement(targetsWithActionStatus), first, firstStatusCode);
-        assertTargetAndActionStatusCode(CollectionUtils.lastElement(targetsWithActionStatus), last, lastStatusCode);
-    }
-
-    private void assertTargetAndActionStatusCode(final TargetWithActionStatus targetWithActionStatus,
-            final Target target, final Integer actionStatusCode) {
-        assertThat(targetWithActionStatus.getTarget().getControllerId()).isEqualTo(target.getControllerId());
-        assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
-    }
-
-    private void assertTargetNotNullAndActionStatusNullAndActionStatusCode(
-            final List<TargetWithActionStatus> targetsWithActionStatus, final Integer actionStatusCode) {
-        targetsWithActionStatus.forEach(targetWithActionStatus -> {
-            assertThat(targetWithActionStatus.getTarget().getControllerId()).isNotNull();
-            assertThat(targetWithActionStatus.getStatus()).isNull();
-            assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
-        });
-    }
-
-    private void assertTargetNotNullAndActionStatusAndActionStatusCode(
-            final List<TargetWithActionStatus> targetsWithActionStatus, final Status actionStatus,
-            final Integer actionStatusCode) {
-        targetsWithActionStatus.forEach(targetWithActionStatus -> {
-            assertThat(targetWithActionStatus.getTarget().getControllerId()).isNotNull();
-            assertThat(targetWithActionStatus.getStatus()).isEqualTo(actionStatus);
-            assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
-        });
     }
 
     @Test
@@ -247,6 +215,37 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
                 .hasSize((int) rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroupRunning.getId()));
         assertTargetNotNullAndActionStatusAndActionStatusCode(targetsWithActionStatusForRunningRG,
                 Status.RUNNING, 100);
+    }
+
+    private void assertSortedListOfActionStatus(final List<TargetWithActionStatus> targetsWithActionStatus,
+            final Target first, final Integer firstStatusCode, final Target last, final Integer lastStatusCode) {
+        assertTargetAndActionStatusCode(CollectionUtils.firstElement(targetsWithActionStatus), first, firstStatusCode);
+        assertTargetAndActionStatusCode(CollectionUtils.lastElement(targetsWithActionStatus), last, lastStatusCode);
+    }
+
+    private void assertTargetAndActionStatusCode(final TargetWithActionStatus targetWithActionStatus,
+            final Target target, final Integer actionStatusCode) {
+        assertThat(targetWithActionStatus.getTarget().getControllerId()).isEqualTo(target.getControllerId());
+        assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
+    }
+
+    private void assertTargetNotNullAndActionStatusNullAndActionStatusCode(
+            final List<TargetWithActionStatus> targetsWithActionStatus, final Integer actionStatusCode) {
+        targetsWithActionStatus.forEach(targetWithActionStatus -> {
+            assertThat(targetWithActionStatus.getTarget().getControllerId()).isNotNull();
+            assertThat(targetWithActionStatus.getStatus()).isNull();
+            assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
+        });
+    }
+
+    private void assertTargetNotNullAndActionStatusAndActionStatusCode(
+            final List<TargetWithActionStatus> targetsWithActionStatus, final Status actionStatus,
+            final Integer actionStatusCode) {
+        targetsWithActionStatus.forEach(targetWithActionStatus -> {
+            assertThat(targetWithActionStatus.getTarget().getControllerId()).isNotNull();
+            assertThat(targetWithActionStatus.getStatus()).isEqualTo(actionStatus);
+            assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
+        });
     }
 
     private void assertThatListIsSortedByTargetName(final List<TargetWithActionStatus> targets,

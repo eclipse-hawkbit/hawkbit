@@ -20,7 +20,6 @@ import org.springframework.util.StringUtils;
 
 /**
  * Create/build implementation.
- *
  */
 public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> implements TargetCreate {
 
@@ -29,8 +28,7 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
     /**
      * Constructor
      *
-     * @param targetTypeManagement
-     *          Target type management
+     * @param targetTypeManagement Target type management
      */
     JpaTargetCreate(final TargetTypeManagement targetTypeManagement) {
         super(null);
@@ -51,7 +49,7 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
             target.setName(name);
         }
 
-        if (targetTypeId != null){
+        if (targetTypeId != null) {
             TargetType targetType = targetTypeManagement.get(targetTypeId)
                     .orElseThrow(() -> new EntityNotFoundException(TargetType.class, targetTypeId));
             target.setTargetType(targetType);

@@ -17,9 +17,16 @@ import org.eclipse.persistence.queries.UpdateObjectQuery;
 /**
  * Listens to change in property values of an entity and calls the corresponding
  * {@link EventAwareEntity}.
- *
  */
 public class EntityPropertyChangeListener extends DescriptorEventAdapter {
+
+    @Override
+    public void postDelete(final DescriptorEvent event) {
+        final Object object = event.getObject();
+        if (isEventAwareEntity(object)) {
+            doNotifiy(() -> ((EventAwareEntity) object).fireDeleteEvent(event));
+        }
+    }
 
     @Override
     public void postInsert(final DescriptorEvent event) {
@@ -38,14 +45,6 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
             doNotifiy(() -> ((EventAwareEntity) object).fireUpdateEvent(event));
         }
 
-    }
-
-    @Override
-    public void postDelete(final DescriptorEvent event) {
-        final Object object = event.getObject();
-        if (isEventAwareEntity(object)) {
-            doNotifiy(() -> ((EventAwareEntity) object).fireDeleteEvent(event));
-        }
     }
 
     private static boolean isEventAwareEntity(final Object object) {

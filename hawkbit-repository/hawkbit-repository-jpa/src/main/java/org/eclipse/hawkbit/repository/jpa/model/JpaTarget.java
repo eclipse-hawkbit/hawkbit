@@ -77,7 +77,7 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
         @Index(name = "sp_idx_target_04", columnList = "tenant,created_at"),
         @Index(name = "sp_idx_target_05", columnList = "tenant,last_modified_at"),
         @Index(name = "sp_idx_target_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-                "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
+        "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
@@ -218,89 +218,23 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         return assignedDistributionSet;
     }
 
+    /**
+     * @param assignedDistributionSet Distribution set
+     */
+    public void setAssignedDistributionSet(final DistributionSet assignedDistributionSet) {
+        this.assignedDistributionSet = (JpaDistributionSet) assignedDistributionSet;
+    }
+
     @Override
     public String getControllerId() {
         return controllerId;
     }
 
     /**
-     * @return tags
-     */
-    public Set<TargetTag> getTags() {
-        if (tags == null) {
-            return Collections.emptySet();
-        }
-
-        return Collections.unmodifiableSet(tags);
-    }
-
-    /**
-     * @return rollouts target group
-     */
-    public List<RolloutTargetGroup> getRolloutTargetGroup() {
-        if (rolloutTargetGroup == null) {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(rolloutTargetGroup);
-    }
-
-    /**
-     * @param tag
-     *            to be added
-     */
-    public void addTag(final TargetTag tag) {
-        if (tags == null) {
-            tags = new HashSet<>();
-        }
-        tags.add(tag);
-    }
-
-    /**
-     * @param tag
-     *            the tag to be removed from the target
-     */
-    public void removeTag(final TargetTag tag) {
-        if (tags != null) {
-            tags.remove(tag);
-        }
-    }
-
-    /**
-     * @param assignedDistributionSet
-     *          Distribution set
-     */
-    public void setAssignedDistributionSet(final DistributionSet assignedDistributionSet) {
-        this.assignedDistributionSet = (JpaDistributionSet) assignedDistributionSet;
-    }
-
-    /**
-     * @param controllerId
-     *          Controller ID
+     * @param controllerId Controller ID
      */
     public void setControllerId(final String controllerId) {
         this.controllerId = controllerId;
-    }
-
-    /**
-     * @return list of action
-     */
-    public List<Action> getActions() {
-        if (actions == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(actions);
-    }
-
-    /**
-     * @param action
-     *          Action
-     */
-    public void addAction(final Action action) {
-        if (actions == null) {
-            actions = new ArrayList<>();
-        }
-        actions.add((JpaAction) action);
     }
 
     /**
@@ -321,8 +255,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     }
 
     /**
-     * @param securityToken
-     *          token value
+     * @param securityToken token value
      */
     public void setSecurityToken(final String securityToken) {
         this.securityToken = securityToken;
@@ -342,6 +275,26 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             log.warn("Invalid address provided. Cloud not be configured to URI", e);
             return null;
         }
+    }
+
+    @Override
+    public Long getLastTargetQuery() {
+        return lastTargetQuery;
+    }
+
+    @Override
+    public Long getInstallationDate() {
+        return installationDate;
+    }
+
+    @Override
+    public TargetUpdateStatus getUpdateStatus() {
+        return updateStatus;
+    }
+
+    @Override
+    public TargetType getTargetType() {
+        return targetType;
     }
 
     /**
@@ -366,35 +319,115 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     }
 
     public void setAutoConfirmationStatus(final JpaAutoConfirmationStatus autoConfirmationStatus) {
-        this.autoConfirmationStatus =  autoConfirmationStatus;
+        this.autoConfirmationStatus = autoConfirmationStatus;
     }
 
     @Override
-    public Long getLastTargetQuery() {
-        return lastTargetQuery;
-    }
-
-    @Override
-    public Long getInstallationDate() {
-        return installationDate;
-    }
-
-    @Override
-    public TargetUpdateStatus getUpdateStatus() {
-        return updateStatus;
-    }
-
-    @Override
-    public TargetType getTargetType() {
-        return targetType;
+    public boolean isRequestControllerAttributes() {
+        return requestControllerAttributes;
     }
 
     /**
-     * @param type
-     *          Target type
+     * @param requestControllerAttributes Attributes
+     */
+    public void setRequestControllerAttributes(final boolean requestControllerAttributes) {
+        this.requestControllerAttributes = requestControllerAttributes;
+    }
+
+    /**
+     * @param type Target type
      */
     public void setTargetType(final TargetType type) {
         this.targetType = type;
+    }
+
+    /**
+     * @param updateStatus Status
+     */
+    public void setUpdateStatus(final TargetUpdateStatus updateStatus) {
+        this.updateStatus = updateStatus;
+    }
+
+    /**
+     * @param installationDate installation date
+     */
+    public void setInstallationDate(final Long installationDate) {
+        this.installationDate = installationDate;
+    }
+
+    /**
+     * @param lastTargetQuery last query ID
+     */
+    public void setLastTargetQuery(final Long lastTargetQuery) {
+        this.lastTargetQuery = lastTargetQuery;
+    }
+
+    /**
+     * @param address Address
+     */
+    public void setAddress(final String address) {
+        this.address = address;
+    }
+
+    /**
+     * @return tags
+     */
+    public Set<TargetTag> getTags() {
+        if (tags == null) {
+            return Collections.emptySet();
+        }
+
+        return Collections.unmodifiableSet(tags);
+    }
+
+    /**
+     * @return rollouts target group
+     */
+    public List<RolloutTargetGroup> getRolloutTargetGroup() {
+        if (rolloutTargetGroup == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(rolloutTargetGroup);
+    }
+
+    /**
+     * @param tag to be added
+     */
+    public void addTag(final TargetTag tag) {
+        if (tags == null) {
+            tags = new HashSet<>();
+        }
+        tags.add(tag);
+    }
+
+    /**
+     * @param tag the tag to be removed from the target
+     */
+    public void removeTag(final TargetTag tag) {
+        if (tags != null) {
+            tags.remove(tag);
+        }
+    }
+
+    /**
+     * @return list of action
+     */
+    public List<Action> getActions() {
+        if (actions == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(actions);
+    }
+
+    /**
+     * @param action Action
+     */
+    public void addAction(final Action action) {
+        if (actions == null) {
+            actions = new ArrayList<>();
+        }
+        actions.add((JpaAction) action);
     }
 
     /**
@@ -405,15 +438,17 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     }
 
     /**
+     * @param installedDistributionSet Distribution set
+     */
+    public void setInstalledDistributionSet(final JpaDistributionSet installedDistributionSet) {
+        this.installedDistributionSet = installedDistributionSet;
+    }
+
+    /**
      * @return controller attributes
      */
     public Map<String, String> getControllerAttributes() {
         return controllerAttributes;
-    }
-
-    @Override
-    public boolean isRequestControllerAttributes() {
-        return requestControllerAttributes;
     }
 
     /**
@@ -433,63 +468,10 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
                 + "]";
     }
 
-    /**
-     * @param address
-     *          Address
-     */
-    public void setAddress(final String address) {
-        this.address = address;
-    }
-
-    /**
-     * @param lastTargetQuery
-     *          last query ID
-     */
-    public void setLastTargetQuery(final Long lastTargetQuery) {
-        this.lastTargetQuery = lastTargetQuery;
-    }
-
-    /**
-     * @param installationDate
-     *          installation date
-     */
-    public void setInstallationDate(final Long installationDate) {
-        this.installationDate = installationDate;
-    }
-
-    /**
-     * @param installedDistributionSet
-     *          Distribution set
-     */
-    public void setInstalledDistributionSet(final JpaDistributionSet installedDistributionSet) {
-        this.installedDistributionSet = installedDistributionSet;
-    }
-
-    /**
-     * @param updateStatus
-     *          Status
-     */
-    public void setUpdateStatus(final TargetUpdateStatus updateStatus) {
-        this.updateStatus = updateStatus;
-    }
-
-    /**
-     * @param requestControllerAttributes
-     *          Attributes
-     */
-    public void setRequestControllerAttributes(final boolean requestControllerAttributes) {
-        this.requestControllerAttributes = requestControllerAttributes;
-    }
-
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new TargetCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
-    }
-
-    @Override
-    public List<String> getUpdateIgnoreFields() {
-        return TARGET_UPDATE_EVENT_IGNORE_FIELDS;
     }
 
     @Override
@@ -503,5 +485,10 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new TargetDeletedEvent(getTenant(), getId(), getControllerId(), address,
                         getClass(), EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public List<String> getUpdateIgnoreFields() {
+        return TARGET_UPDATE_EVENT_IGNORE_FIELDS;
     }
 }

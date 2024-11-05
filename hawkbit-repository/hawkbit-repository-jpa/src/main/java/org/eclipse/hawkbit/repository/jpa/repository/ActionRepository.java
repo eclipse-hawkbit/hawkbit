@@ -14,10 +14,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -35,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link Action} repository.
- *
  */
 @Transactional(readOnly = true)
 public interface ActionRepository extends BaseEntityRepository<JpaAction> {
@@ -43,8 +40,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     /**
      * Retrieves an Action with all lazy attributes.
      *
-     * @param actionId
-     *            the ID of the action
+     * @param actionId the ID of the action
      * @return the found {@link Action}
      */
     @EntityGraph(value = "Action.all", type = EntityGraphType.LOAD)
@@ -53,12 +49,9 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     /**
      * Retrieves the latest finished {@link Action} for given target and {@link DistributionSet}.
      *
-     * @param targetId
-     *            the action belongs to
-     * @param dsId
-     *            of the ds that is assigned to the target
-     * @param status
-     *            of the action
+     * @param targetId the action belongs to
+     * @param dsId of the ds that is assigned to the target
+     * @param status of the action
      * @return action if there is one with assigned target and assigned
      *         {@link DistributionSet}.
      */
@@ -71,14 +64,10 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param statusToSet
-     *            the new status the actions should get
-     * @param targetIds
-     *            the IDs of the targets of the actions which are affected
-     * @param active
-     *            the active flag of the actions which should be affected
-     * @param currentStatus
-     *            the current status of the actions which are affected
+     * @param statusToSet the new status the actions should get
+     * @param targetIds the IDs of the targets of the actions which are affected
+     * @param active the active flag of the actions which should be affected
+     * @param currentStatus the current status of the actions which are affected
      */
     @Modifying
     @Transactional
@@ -89,8 +78,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     /**
      * Retrieves an {@link Action} that matches the queried externalRef.
      *
-     * @param externalRef
-     *            of the action. See {@link Action#getExternalRef()}
+     * @param externalRef of the action. See {@link Action#getExternalRef()}
      * @return the found {@link Action}
      */
     Optional<Action> findByExternalRef(@Param("externalRef") String externalRef);
@@ -100,8 +88,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param controllerId
-     *            the target to count the {@link Action}s
+     * @param controllerId the target to count the {@link Action}s
      * @return the count of actions referring to the given target
      */
     Long countByTargetControllerId(String controllerId);
@@ -111,8 +98,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param targetId
-     *            the target to count the {@link Action}s
+     * @param targetId the target to count the {@link Action}s
      * @return the count of actions referring to the given target
      */
     Long countByTargetId(Long targetId);
@@ -122,8 +108,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param distributionSet
-     *            DistributionSet to count the {@link Action}s from
+     * @param distributionSet DistributionSet to count the {@link Action}s from
      * @return the count of actions referring to the given distributionSet
      */
     Long countByDistributionSetId(Long distributionSet);
@@ -133,8 +118,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param distributionSet
-     *            DistributionSet to count the {@link Action}s from
+     * @param distributionSet DistributionSet to count the {@link Action}s from
      * @return the count of actions referring to the given distributionSet
      */
     Long countByDistributionSetIdAndActiveIsTrue(Long distributionSet);
@@ -145,10 +129,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param distributionSet
-     *            DistributionSet to count the {@link Action}s from
-     * @param status
-     *            the state the actions should not have
+     * @param distributionSet DistributionSet to count the {@link Action}s from
+     * @param status the state the actions should not have
      * @return the count of actions referring to the given distributionSet
      */
     Long countByDistributionSetIdAndActiveIsTrueAndStatusIsNot(Long distributionSet, Status status);
@@ -161,12 +143,9 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param rollout
-     *            the rollout the actions are belong to
-     * @param rolloutGroup
-     *            the rolloutgroup the actions are belong to
-     * @param statuses
-     *            the list of statuses the action should not have
+     * @param rollout the rollout the actions are belong to
+     * @param rolloutGroup the rolloutgroup the actions are belong to
+     * @param statuses the list of statuses the action should not have
      * @return the count of actions referring the rollout and rolloutgroup and
      *         are not in given states
      */
@@ -178,10 +157,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param rollout
-     *            the rollout the actions belong to
-     * @param rolloutGroup
-     *            the rolloutgroup the actions belong to
+     * @param rollout the rollout the actions belong to
+     * @param rolloutGroup the rolloutgroup the actions belong to
      * @return the count of actions referring to a rollout and rolloutgroup
      */
     Long countByRolloutAndRolloutGroup(JpaRollout rollout, JpaRolloutGroup rolloutGroup);
@@ -191,12 +168,9 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param rolloutId
-     *            the ID of rollout the actions belong to
-     * @param rolloutGroupId
-     *            the ID rolloutgroup the actions belong to
-     * @param status
-     *            the status the actions should have
+     * @param rolloutId the ID of rollout the actions belong to
+     * @param rolloutGroupId the ID rolloutgroup the actions belong to
+     * @param status the status the actions should have
      * @return the count of actions referring to a rollout, rolloutgroup and are
      *         in a given status
      */
@@ -207,10 +181,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param rolloutId
-     *            the ID of the rollout the actions belong to
-     * @param status
-     *            the status the actions should have
+     * @param rolloutId the ID of the rollout the actions belong to
+     * @param status the status the actions should have
      * @return the count of actions referring to a rollout and are in a given
      *         status
      */
@@ -222,8 +194,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param rolloutId
-     *            the ID of the rollout the actions belong to
+     * @param rolloutId the ID of the rollout the actions belong to
      * @return {@code true} if actions for the given rollout exists, otherwise
      *         {@code false}
      */
@@ -236,10 +207,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param rolloutId
-     *            the ID of the rollout the actions belong to
-     * @param status
-     *            the action is not to be in
+     * @param rolloutId the ID of the rollout the actions belong to
+     * @param status the action is not to be in
      * @return {@code true} if actions for the given rollout exists, otherwise
      *         {@code false}
      */
@@ -254,14 +223,10 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param pageable
-     *            page parameters
-     * @param rollout
-     *            the rollout the actions belong to
-     * @param rolloutGroupParent
-     *            the parent rolloutgroup the actions should reference
-     * @param actionStatus
-     *            the status the actions have
+     * @param pageable page parameters
+     * @param rollout the rollout the actions belong to
+     * @param rolloutGroupParent the parent rolloutgroup the actions should reference
+     * @param actionStatus the status the actions have
      * @return the actions referring a specific rollout and a specific parent
      *         rolloutgroup in a specific status
      */
@@ -274,12 +239,9 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param pageable
-     *            page parameters
-     * @param rollout
-     *            the rollout the actions belong to
-     * @param actionStatus
-     *            the status the actions have
+     * @param pageable page parameters
+     * @param rollout the rollout the actions belong to
+     * @param actionStatus the status the actions have
      * @return the actions referring a specific rollout and a specific parent
      *         rolloutgroup in a specific status
      */
@@ -293,12 +255,9 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param pageable
-     *            page parameters
-     * @param rolloutId
-     *            the rollout the actions belong to
-     * @param actionStatus
-     *            the status of the actions
+     * @param pageable page parameters
+     * @param rolloutId the rollout the actions belong to
+     * @param actionStatus the status of the actions
      * @return the actions referring a specific rollout an in a specific status
      */
     Page<JpaAction> findByRolloutIdAndStatus(Pageable pageable, Long rolloutId, Status actionStatus);
@@ -309,8 +268,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param rolloutId
-     *            id of {@link Rollout}
+     * @param rolloutId id of {@link Rollout}
      * @return list of objects with status and target count
      */
     @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus( a.rollout.id, a.status , COUNT(a.id)) FROM JpaAction a WHERE a.rollout.id IN ?1 GROUP BY a.rollout.id,a.status")
@@ -322,8 +280,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param rolloutId
-     *            id of {@link Rollout}
+     * @param rolloutId id of {@link Rollout}
      * @return list of objects with status and target count
      */
     @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus( a.rollout.id, a.status , COUNT(a.id)) FROM JpaAction a WHERE a.rollout.id = ?1 GROUP BY a.rollout.id,a.status")
@@ -335,8 +292,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param rolloutGroupId
-     *            id of {@link RolloutGroup}
+     * @param rolloutGroupId id of {@link RolloutGroup}
      * @return list of objects with status and target count
      */
     @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rolloutGroup.id, a.status , COUNT(a.id)) FROM JpaAction a WHERE a.rolloutGroup.id = ?1 GROUP BY a.rolloutGroup.id, a.status")
@@ -348,8 +304,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
-     * @param rolloutGroupId
-     *            list of id of {@link RolloutGroup}
+     * @param rolloutGroupId list of id of {@link RolloutGroup}
      * @return list of objects with status and target count
      */
     @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rolloutGroup.id, a.status , COUNT(a.id)) FROM JpaAction a WHERE a.rolloutGroup.id IN ?1 GROUP BY a.rolloutGroup.id, a.status")
@@ -358,10 +313,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     /**
      * Updates the externalRef of an action by its actionId.
      *
-     * @param actionId
-     *            for which the externalRef is being updated.
-     * @param externalRef
-     *            value of the external reference for the given action id.
+     * @param actionId for which the externalRef is being updated.
+     * @param externalRef value of the external reference for the given action id.
      */
     @Modifying
     @Transactional
@@ -371,8 +324,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     /**
      * Deletes all actions with the given IDs.
      *
-     * @param actionIDs
-     *            the IDs of the actions to be deleted.
+     * @param actionIDs the IDs of the actions to be deleted.
      */
     @Modifying
     @Transactional

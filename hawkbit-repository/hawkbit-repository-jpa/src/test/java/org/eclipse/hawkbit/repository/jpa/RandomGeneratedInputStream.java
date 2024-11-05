@@ -16,8 +16,6 @@ import java.util.Random;
 
 /**
  *
- *
- *
  */
 public class RandomGeneratedInputStream extends InputStream {
 
@@ -30,8 +28,7 @@ public class RandomGeneratedInputStream extends InputStream {
     private long index;
 
     /**
-     * @param size
-     *            target size of the stream [byte]
+     * @param size target size of the stream [byte]
      */
     public RandomGeneratedInputStream(final long size) {
         this.size = size;

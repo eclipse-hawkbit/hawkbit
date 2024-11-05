@@ -22,6 +22,10 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
@@ -33,17 +37,10 @@ import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Tag;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.jupiter.api.Test;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -52,6 +49,8 @@ import org.springframework.data.domain.Pageable;
 @Feature("Component Tests - Repository")
 @Story("DistributionSet Tag Management")
 public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
+
+    private static final Random RND = new Random();
 
     @Test
     @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
@@ -137,17 +136,6 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
                 Stream.of(dsCs, dsACs, dsBCs, dsABCs));
     }
 
-    @Step
-    private void verifyExpectedFilteredDistributionSets(final DistributionSetFilter.DistributionSetFilterBuilder distributionSetFilterBuilder,
-            final Stream<Collection<DistributionSet>> expectedFilteredDistributionSets) {
-        final Collection<Long> retrievedFilteredDsIds = distributionSetManagement
-                .findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build()).stream()
-                .map(DistributionSet::getId).collect(Collectors.toList());
-        final Collection<Long> expectedFilteredDsIds = expectedFilteredDistributionSets.flatMap(Collection::stream)
-                .map(DistributionSet::getId).collect(Collectors.toList());
-        assertThat(retrievedFilteredDsIds).hasSameElementsAs(expectedFilteredDsIds);
-    }
-
     @Test
     @Description("Verifies assign/unassign.")
     public void assignAndUnassignDistributionSetTags() {
@@ -162,7 +150,9 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         assertThat(result).size().isEqualTo(20);
         assertThat(result).containsAll(distributionSetManagement
                 .get(groupA.stream().map(DistributionSet::getId).collect(Collectors.toList())));
-        assertThat(distributionSetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent().stream().map(DistributionSet::getId).sorted().toList())
+        assertThat(
+                distributionSetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent().stream().map(DistributionSet::getId).sorted()
+                        .toList())
                 .isEqualTo(groupA.stream().map(DistributionSet::getId).sorted().toList());
 
         final Collection<DistributionSet> groupAB = concat(groupA, groupB);
@@ -171,7 +161,9 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         assertThat(result).size().isEqualTo(40);
         assertThat(result).containsAll(distributionSetManagement
                 .get(groupAB.stream().map(DistributionSet::getId).collect(Collectors.toList())));
-        assertThat(distributionSetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent().stream().map(DistributionSet::getId).sorted().toList())
+        assertThat(
+                distributionSetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent().stream().map(DistributionSet::getId).sorted()
+                        .toList())
                 .isEqualTo(groupAB.stream().map(DistributionSet::getId).sorted().toList());
 
         // toggle A+B -> both unassigned
@@ -182,7 +174,6 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         assertThat(distributionSetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent()).isEmpty();
     }
 
-    private static final Random RND = new Random();
     @Test
     @Description("Verifies that tagging of set containing missing DS throws meaningful and correct exception.")
     public void failOnMissingDs() {
@@ -310,6 +301,17 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
     public void createDistributionSetTags() {
         final List<DistributionSetTag> tags = createDsSetsWithTags();
         assertThat(distributionSetTagRepository.findAll()).as("Wrong size of tags created").hasSize(tags.size());
+    }
+
+    @Step
+    private void verifyExpectedFilteredDistributionSets(final DistributionSetFilter.DistributionSetFilterBuilder distributionSetFilterBuilder,
+            final Stream<Collection<DistributionSet>> expectedFilteredDistributionSets) {
+        final Collection<Long> retrievedFilteredDsIds = distributionSetManagement
+                .findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build()).stream()
+                .map(DistributionSet::getId).collect(Collectors.toList());
+        final Collection<Long> expectedFilteredDsIds = expectedFilteredDistributionSets.flatMap(Collection::stream)
+                .map(DistributionSet::getId).collect(Collectors.toList());
+        assertThat(retrievedFilteredDsIds).hasSameElementsAs(expectedFilteredDsIds);
     }
 
     private List<DistributionSetTag> createDsSetsWithTags() {

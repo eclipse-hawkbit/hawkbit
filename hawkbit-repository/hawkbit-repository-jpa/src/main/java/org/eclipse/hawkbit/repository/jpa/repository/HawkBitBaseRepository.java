@@ -47,21 +47,20 @@ public class HawkBitBaseRepository<T, ID extends Serializable> extends SimpleJpa
     }
 
     @Override
+    public Slice<T> findAllWithoutCount(final Pageable pageable) {
+        return findAllWithoutCount(null, pageable);
+    }
+
+    @Override
     public Slice<T> findAllWithoutCount(@Nullable final Specification<T> spec, final Pageable pageable) {
         final TypedQuery<T> query = getQuery(spec, pageable);
         return pageable.isUnpaged() ? new PageImpl<>(query.getResultList()) : readPageWithoutCount(query, pageable);
     }
 
     @Override
-    public Slice<T> findAllWithoutCount(final Pageable pageable) {
-        return findAllWithoutCount(null, pageable);
-    }
-
-
-    @Override
     @Transactional
     @NonNull
-    public <S  extends T> S save(@Nullable AccessController.Operation operation, @NonNull final S entity) {
+    public <S extends T> S save(@Nullable AccessController.Operation operation, @NonNull final S entity) {
         return save(entity);
     }
 
@@ -70,7 +69,6 @@ public class HawkBitBaseRepository<T, ID extends Serializable> extends SimpleJpa
     public <S extends T> List<S> saveAll(@Nullable AccessController.Operation operation, final Iterable<S> entities) {
         return saveAll(entities);
     }
-
 
     @NonNull
     public Optional<T> findOne(@Nullable AccessController.Operation operation, @Nullable Specification<T> spec) {
@@ -97,7 +95,8 @@ public class HawkBitBaseRepository<T, ID extends Serializable> extends SimpleJpa
 
     @NonNull
     @Override
-    public Slice<T> findAllWithoutCount(@Nullable final AccessController.Operation operation, @Nullable Specification<T> spec, Pageable pageable) {
+    public Slice<T> findAllWithoutCount(@Nullable final AccessController.Operation operation, @Nullable Specification<T> spec,
+            Pageable pageable) {
         return findAllWithoutCount(spec, pageable);
     }
 

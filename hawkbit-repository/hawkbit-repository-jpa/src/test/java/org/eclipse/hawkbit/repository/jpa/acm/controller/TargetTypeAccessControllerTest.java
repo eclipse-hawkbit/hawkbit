@@ -59,7 +59,7 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
         // verify targetTypeManagement#findByName
         assertThat(targetTypeManagement.findByName(Pageable.unpaged(), permittedTargetType.getName()).getContent())
                 .hasSize(1).satisfies(results ->
-                    assertThat(results.get(0).getId()).isEqualTo(permittedTargetType.getId()));
+                        assertThat(results.get(0).getId()).isEqualTo(permittedTargetType.getId()));
         assertThat(targetTypeManagement.findByName(Pageable.unpaged(), hiddenTargetType.getName())).isEmpty();
 
         // verify targetTypeManagement#count
@@ -144,7 +144,7 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
         // verify targetTypeManagement#update for readOnlyTargetType is not possible
         assertThatThrownBy(() ->
                 targetTypeManagement.update(entityFactory.targetType().update(readOnlyTargetType.getId())
-                    .name(readOnlyTargetType.getName() + "/new").description("newDesc")))
+                        .name(readOnlyTargetType.getName() + "/new").description("newDesc")))
                 .isInstanceOf(InsufficientPermissionException.class);
     }
 

@@ -15,7 +15,6 @@ import java.util.Optional;
 import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
@@ -26,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link TargetTag} repository.
- *
  */
 @Transactional(readOnly = true)
 public interface DistributionSetTagRepository
@@ -34,9 +32,8 @@ public interface DistributionSetTagRepository
 
     /**
      * find {@link DistributionSetTag} by its name.
-     * 
-     * @param tagName
-     *            to filter on
+     *
+     * @param tagName to filter on
      * @return the {@link DistributionSetTag} if found, otherwise null
      */
     Optional<DistributionSetTag> findByNameEquals(String tagName);
@@ -55,8 +52,7 @@ public interface DistributionSetTagRepository
      * manually to query even if this will by done by {@link EntityManager}
      * anyhow. The DB should take care of optimizing this away.
      *
-     * @param tenant
-     *            to delete data from
+     * @param tenant to delete data from
      */
     @Modifying
     @Transactional

@@ -18,21 +18,20 @@ import java.sql.SQLException;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PersistenceException;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.UncategorizedDataAccessException;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 /**
  * Mapping tests for {@link HawkBitEclipseLinkJpaDialect}.
- *
  */
 @Feature("Unit Tests - Repository")
 @Story("Exception handling")
 public class HawkBitEclipseLinkJpaDialectTest {
+
     private final HawkBitEclipseLinkJpaDialect hawkBitEclipseLinkJpaDialectUnderTest = new HawkBitEclipseLinkJpaDialect();
 
     @Test
@@ -40,7 +39,7 @@ public class HawkBitEclipseLinkJpaDialectTest {
     public void jpaOptimisticLockExceptionIsConcurrencyFailureException() {
         assertThat(
                 hawkBitEclipseLinkJpaDialectUnderTest.translateExceptionIfPossible(mock(OptimisticLockException.class)))
-                        .isInstanceOf(ConcurrencyFailureException.class);
+                .isInstanceOf(ConcurrencyFailureException.class);
     }
 
     @Test

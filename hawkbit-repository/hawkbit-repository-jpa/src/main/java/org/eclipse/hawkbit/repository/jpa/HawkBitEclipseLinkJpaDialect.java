@@ -22,10 +22,10 @@ import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
 /**
  * {@link EclipseLinkJpaDialect} with additional exception translation
  * mechanisms based on {@link SQLStateSQLExceptionTranslator}.
- * 
+ *
  * There are multiple variations of exceptions coming out of persistence
  * provider:
- * 
+ *
  * <p>
  * 1) {@link PersistenceException}s that can be mapped by
  * {@link EclipseLinkJpaDialect} into corresponding {@link DataAccessException}.
@@ -47,9 +47,9 @@ import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
  * <p>
  * 3.b.) the cause is not an {@link SQLException} and as a result cannot be
  * mapped.
- *
  */
 public class HawkBitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
+
     private static final long serialVersionUID = 1L;
 
     private static final SQLStateSQLExceptionTranslator SQLSTATE_EXCEPTION_TRANSLATOR = new SQLStateSQLExceptionTranslator();

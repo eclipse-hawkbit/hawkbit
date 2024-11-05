@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.util.Collections;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -31,14 +30,14 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 /**
  * A {@link DistributionSetTag} is used to describe DistributionSet attributes
  * and use them also for filtering the DistributionSet list.
- *
  */
 @Entity
 @Table(name = "sp_distributionset_tag", indexes = {
         @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id"),
         @Index(name = "sp_idx_distribution_set_tag_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-                "name", "tenant" }, name = "uk_ds_tag"))
+        "name", "tenant" }, name = "uk_ds_tag"))
 public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag, EventAwareEntity {
+
     private static final long serialVersionUID = 1L;
 
     @CascadeOnDelete
@@ -48,12 +47,9 @@ public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag,
     /**
      * Public constructor.
      *
-     * @param name
-     *            of the {@link DistributionSetTag}
-     * @param description
-     *            of the {@link DistributionSetTag}
-     * @param colour
-     *            of tag in UI
+     * @param name of the {@link DistributionSetTag}
+     * @param description of the {@link DistributionSetTag}
+     * @param colour of tag in UI
      */
     public JpaDistributionSetTag(final String name, final String description, final String colour) {
         super(name, description, colour);

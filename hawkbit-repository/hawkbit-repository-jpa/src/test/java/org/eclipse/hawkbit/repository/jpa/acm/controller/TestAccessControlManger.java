@@ -20,8 +20,6 @@ import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.springframework.data.jpa.domain.Specification;
 
-import jakarta.persistence.criteria.CriteriaQuery;
-
 public class TestAccessControlManger {
 
     private final Map<AccessRuleId<?>, AccessRule<?>> accessRules = new HashMap<>();
@@ -36,22 +34,20 @@ public class TestAccessControlManger {
         accessRules.put(new AccessRuleId<T>(ruleClass, operation), new AccessRule<T>(specification, check));
     }
 
-    public <T extends AbstractJpaBaseEntity> Specification<T> getAccessRule(final Class<T> ruleClass, final AccessController.Operation operation) {
-        @SuppressWarnings("unchecked")
-        final AccessRule<T> accessRule = (AccessRule<T>) accessRules.getOrDefault(new AccessRuleId<T>(ruleClass, operation), null);
+    public <T extends AbstractJpaBaseEntity> Specification<T> getAccessRule(final Class<T> ruleClass,
+            final AccessController.Operation operation) {
+        @SuppressWarnings("unchecked") final AccessRule<T> accessRule = (AccessRule<T>) accessRules.getOrDefault(
+                new AccessRuleId<T>(ruleClass, operation), null);
         if (accessRule == null) {
             return nop();
         } else {
             return accessRule.specification();
         }
     }
-    private static <T extends AbstractJpaBaseEntity> Specification<T> nop() {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(AbstractJpaBaseEntity_.id), -1);
-    }
 
     public <T> void assertOperation(final Class<T> ruleClass, final AccessController.Operation operation, final List<T> entities) {
-        @SuppressWarnings("unchecked")
-        final AccessRule<T> accessRule = (AccessRule<T>) accessRules.getOrDefault(new AccessRuleId<T>(ruleClass, operation), null);
+        @SuppressWarnings("unchecked") final AccessRule<T> accessRule = (AccessRule<T>) accessRules.getOrDefault(
+                new AccessRuleId<T>(ruleClass, operation), null);
         if (accessRule == null) {
             throw new InsufficientPermissionException("No access define - reject all");
         } else {
@@ -65,6 +61,11 @@ public class TestAccessControlManger {
         }
     }
 
+    private static <T extends AbstractJpaBaseEntity> Specification<T> nop() {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(AbstractJpaBaseEntity_.id), -1);
+    }
+
     private record AccessRuleId<T>(Class<T> ruleClass, AccessController.Operation operation) {}
-    private record AccessRule<T> (Specification<T> specification, Predicate<T> checker) {}
+
+    private record AccessRule<T>(Specification<T> specification, Predicate<T> checker) {}
 }

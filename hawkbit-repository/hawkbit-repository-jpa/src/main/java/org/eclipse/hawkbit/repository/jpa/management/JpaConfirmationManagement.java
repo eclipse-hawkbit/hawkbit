@@ -65,9 +65,9 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
      * Constructor
      */
     public JpaConfirmationManagement(final TargetRepository targetRepository,
-                                        final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-                                        final RepositoryProperties repositoryProperties, final QuotaManagement quotaManagement,
-                                        final EntityFactory entityFactory) {
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final RepositoryProperties repositoryProperties, final QuotaManagement quotaManagement,
+            final EntityFactory entityFactory) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.targetRepository = targetRepository;
         this.entityFactory = entityFactory;
@@ -96,7 +96,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         final AutoConfirmationStatus autoConfStatus = updatedTarget.getAutoConfirmationStatus();
         if (autoConfStatus == null) {
             final String message = String.format("Persisted auto confirmation status is null. "
-                    + "Cannot proceed with giving confirmations for active actions for device %s with initiator %s.",
+                            + "Cannot proceed with giving confirmations for active actions for device %s with initiator %s.",
                     controllerId, initiator);
             log.error("message");
             throw new IllegalStateException(message);
@@ -159,17 +159,20 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         return addActionStatus((JpaActionStatusCreate) statusCreate);
     }
 
-    private ActionStatusCreate createConfirmationActionStatus(final long actionId, final Integer code,
-            final Collection<String> messages) {
-        final ActionStatusCreate statusCreate = entityFactory.actionStatus().create(actionId);
-        if (!CollectionUtils.isEmpty(messages)) {
-            statusCreate.messages(messages);
+    @Override
+    @Transactional
+    public void deactivateAutoConfirmation(String controllerId) {
+        log.debug("Deactivate auto confirmation for controllerId '{}'", controllerId);
+        final JpaTarget target = getTargetByControllerIdAndThrowIfNotFound(controllerId);
+        target.setAutoConfirmationStatus(null);
+        targetRepository.save(target);
+    }
+
+    @Override
+    protected void onActionStatusUpdate(final Status updatedActionStatus, final JpaAction action) {
+        if (updatedActionStatus == Status.RUNNING && action.isActive()) {
+            action.setStatus(Status.RUNNING);
         }
-        if (code != null) {
-            statusCreate.code(code);
-            statusCreate.message(String.format(CONFIRMATION_CODE_MSG_PREFIX, code));
-        }
-        return statusCreate;
     }
 
     private static void assertActionCanAcceptFeedback(final Action action) {
@@ -186,6 +189,19 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
             throw new InvalidConfirmationFeedbackException(
                     InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION, msg);
         }
+    }
+
+    private ActionStatusCreate createConfirmationActionStatus(final long actionId, final Integer code,
+            final Collection<String> messages) {
+        final ActionStatusCreate statusCreate = entityFactory.actionStatus().create(actionId);
+        if (!CollectionUtils.isEmpty(messages)) {
+            statusCreate.messages(messages);
+        }
+        if (code != null) {
+            statusCreate.code(code);
+            statusCreate.message(String.format(CONFIRMATION_CODE_MSG_PREFIX, code));
+        }
+        return statusCreate;
     }
 
     private List<Action> giveConfirmationForActiveActions(final AutoConfirmationStatus autoConfirmationStatus) {
@@ -218,24 +234,8 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         return actionRepository.save(action);
     }
 
-    @Override
-    @Transactional
-    public void deactivateAutoConfirmation(String controllerId) {
-        log.debug("Deactivate auto confirmation for controllerId '{}'", controllerId);
-        final JpaTarget target = getTargetByControllerIdAndThrowIfNotFound(controllerId);
-        target.setAutoConfirmationStatus(null);
-        targetRepository.save(target);
-    }
-
     private JpaTarget getTargetByControllerIdAndThrowIfNotFound(final String controllerId) {
         return targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-    }
-
-    @Override
-    protected void onActionStatusUpdate(final Status updatedActionStatus, final JpaAction action) {
-        if (updatedActionStatus == Status.RUNNING && action.isActive()) {
-            action.setStatus(Status.RUNNING);
-        }
     }
 }

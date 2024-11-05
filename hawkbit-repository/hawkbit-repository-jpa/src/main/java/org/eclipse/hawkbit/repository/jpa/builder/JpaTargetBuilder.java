@@ -17,14 +17,13 @@ import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * Builder implementation for {@link Target}.
- *
  */
 public class JpaTargetBuilder implements TargetBuilder {
+
     final private TargetTypeManagement targetTypeManagement;
 
     /**
-     * @param targetTypeManagement
-     *          Target type management
+     * @param targetTypeManagement Target type management
      */
     public JpaTargetBuilder(TargetTypeManagement targetTypeManagement) {
         this.targetTypeManagement = targetTypeManagement;

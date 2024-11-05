@@ -19,6 +19,7 @@ import jakarta.persistence.Embeddable;
  */
 @Embeddable
 public class DistributionSetTypeElementCompositeKey implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     @Column(name = "distribution_set_type", nullable = false, updatable = false)
@@ -36,10 +37,8 @@ public class DistributionSetTypeElementCompositeKey implements Serializable {
     /**
      * Constructor.
      *
-     * @param dsType
-     *            in the key
-     * @param smType
-     *            in the key
+     * @param dsType in the key
+     * @param smType in the key
      */
     DistributionSetTypeElementCompositeKey(final JpaDistributionSetType dsType, final JpaSoftwareModuleType smType) {
         this.dsType = dsType.getId();

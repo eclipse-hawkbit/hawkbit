@@ -9,8 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
+import java.util.Optional;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.ValidString;
 import org.eclipse.hawkbit.repository.builder.AbstractNamedEntityBuilder;
@@ -20,11 +23,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.springframework.util.StringUtils;
 
-import java.util.Optional;
-
 public class JpaRolloutCreate extends AbstractNamedEntityBuilder<RolloutCreate> implements RolloutCreate {
-
-    private final DistributionSetManagement distributionSetManagement;
 
     protected Long distributionSetId;
     @ValidString
@@ -35,12 +34,13 @@ public class JpaRolloutCreate extends AbstractNamedEntityBuilder<RolloutCreate> 
     @Min(Action.WEIGHT_MIN)
     @Max(Action.WEIGHT_MAX)
     protected Integer weight;
-
+    private final DistributionSetManagement distributionSetManagement;
     private boolean dynamic;
 
     JpaRolloutCreate(final DistributionSetManagement distributionSetManagement) {
         this.distributionSetManagement = distributionSetManagement;
     }
+
     /**
      * {@link DistributionSet} of rollout
      *
@@ -62,6 +62,7 @@ public class JpaRolloutCreate extends AbstractNamedEntityBuilder<RolloutCreate> 
         this.targetFilterQuery = StringUtils.trimWhitespace(targetFilterQuery);
         return this;
     }
+
     /**
      * {@link Action.ActionType} used for {@link Action}s
      *
@@ -95,6 +96,11 @@ public class JpaRolloutCreate extends AbstractNamedEntityBuilder<RolloutCreate> 
         return this;
     }
 
+    public RolloutCreate dynamic(final boolean dynamic) {
+        this.dynamic = dynamic;
+        return this;
+    }
+
     /**
      * Set start of the Rollout
      *
@@ -103,31 +109,6 @@ public class JpaRolloutCreate extends AbstractNamedEntityBuilder<RolloutCreate> 
      */
     public RolloutCreate startAt(final Long startAt) {
         this.startAt = startAt;
-        return this;
-    }
-
-    public Optional<Long> getDistributionSetId() {
-        return Optional.ofNullable(distributionSetId);
-    }
-
-    public Optional<Action.ActionType> getActionType() {
-        return Optional.ofNullable(actionType);
-    }
-
-    public Optional<Long> getForcedTime() {
-        return Optional.ofNullable(forcedTime);
-    }
-
-    public Optional<Integer> getWeight() {
-        return Optional.ofNullable(weight);
-    }
-
-    public Optional<Long> getStartAt() {
-        return Optional.ofNullable(startAt);
-    }
-
-    public RolloutCreate dynamic(final boolean dynamic) {
-        this.dynamic = dynamic;
         return this;
     }
 
@@ -152,5 +133,25 @@ public class JpaRolloutCreate extends AbstractNamedEntityBuilder<RolloutCreate> 
         }
 
         return rollout;
+    }
+
+    public Optional<Long> getDistributionSetId() {
+        return Optional.ofNullable(distributionSetId);
+    }
+
+    public Optional<Action.ActionType> getActionType() {
+        return Optional.ofNullable(actionType);
+    }
+
+    public Optional<Long> getForcedTime() {
+        return Optional.ofNullable(forcedTime);
+    }
+
+    public Optional<Integer> getWeight() {
+        return Optional.ofNullable(weight);
+    }
+
+    public Optional<Long> getStartAt() {
+        return Optional.ofNullable(startAt);
     }
 }

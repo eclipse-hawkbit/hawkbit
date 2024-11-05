@@ -23,7 +23,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Slf4j
 public class AfterTransactionCommitDefaultServiceExecutor extends TransactionSynchronizationAdapter
         implements AfterTransactionCommitExecutor {
-    
+
     private static final ThreadLocal<List<Runnable>> THREAD_LOCAL_RUNNABLES = new ThreadLocal<>();
 
     @Override
@@ -40,6 +40,14 @@ public class AfterTransactionCommitDefaultServiceExecutor extends TransactionSyn
                 log.error("Failed to execute runnable " + afterCommitRunnable, e);
             }
         }
+    }
+
+    @Override
+    @SuppressWarnings({ "squid:S1217" })
+    public void afterCompletion(final int status) {
+        final String transactionStatus = status == STATUS_COMMITTED ? "COMMITTED" : "ROLLEDBACK";
+        log.debug("Transaction completed after commit with status {}", transactionStatus);
+        THREAD_LOCAL_RUNNABLES.remove();
     }
 
     @Override
@@ -60,14 +68,6 @@ public class AfterTransactionCommitDefaultServiceExecutor extends TransactionSyn
         log.info("Transaction synchronization is NOT ACTIVE/ INACTIVE. Executing right now runnable {}", runnable);
 
         runnable.run();
-    }
-
-    @Override
-    @SuppressWarnings({ "squid:S1217" })
-    public void afterCompletion(final int status) {
-        final String transactionStatus = status == STATUS_COMMITTED ? "COMMITTED" : "ROLLEDBACK";
-        log.debug("Transaction completed after commit with status {}", transactionStatus);
-        THREAD_LOCAL_RUNNABLES.remove();
     }
 
 }

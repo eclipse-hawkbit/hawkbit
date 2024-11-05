@@ -27,12 +27,11 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.data.jpa.domain.Specification;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.jpa.domain.Specification;
 
 @Feature("Unit Tests - Repository")
 @Story("Specifications builder")

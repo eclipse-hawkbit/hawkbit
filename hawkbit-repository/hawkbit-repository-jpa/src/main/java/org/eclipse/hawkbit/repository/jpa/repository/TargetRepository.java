@@ -25,12 +25,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link Target} repository.
- *
  */
 @Transactional(readOnly = true)
 public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
 
     // TODO AC - remove it and use specification
+
     /**
      * @deprecated remove it and use specification
      */
@@ -42,7 +42,6 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
     void setAssignedDistributionSetAndUpdateStatus(@Param("status") TargetUpdateStatus status,
             @Param("set") JpaDistributionSet set, @Param("lastModifiedAt") Long modifiedAt,
             @Param("lastModifiedBy") String modifiedBy, @Param("targets") Collection<Long> targets);
-
 
     // TODO AC - remove it and use specification
 
@@ -58,7 +57,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
             @Param("set") JpaDistributionSet set, @Param("lastModifiedAt") Long modifiedAt,
             @Param("lastModifiedBy") String modifiedBy, @Param("targets") Collection<Long> targets);
 
-   /**
+    /**
      * Counts {@link Target} instances of given type in the repository.
      * <p/>
      * No access control applied

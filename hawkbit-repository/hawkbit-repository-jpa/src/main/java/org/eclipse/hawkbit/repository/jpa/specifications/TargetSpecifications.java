@@ -100,9 +100,7 @@ public final class TargetSpecifications {
     /**
      * {@link Specification} for retrieving {@link Target}s by controllerId
      *
-     * @param id
-     *            to search for
-     *
+     * @param id to search for
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasId(final Long id) {
@@ -112,9 +110,7 @@ public final class TargetSpecifications {
     /**
      * {@link Specification} for retrieving {@link Target}s by controllerId
      *
-     * @param ids
-     *            to search for
-     *
+     * @param ids to search for
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasIdIn(final Collection<Long> ids) {
@@ -135,9 +131,7 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link JpaTarget}s including
      * {@link JpaTarget#getAssignedDistributionSet()}.
      *
-     * @param controllerIDs
-     *            to search for
-     *
+     * @param controllerIDs to search for
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> byControllerIdWithAssignedDsInJoin(final Collection<String> controllerIDs) {
@@ -153,9 +147,7 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link Target}s by "equal to any
      * given {@link TargetUpdateStatus}".
      *
-     * @param updateStatus
-     *            to be filtered on
-     *
+     * @param updateStatus to be filtered on
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasTargetUpdateStatus(final Collection<TargetUpdateStatus> updateStatus) {
@@ -166,9 +158,7 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link Target}s by "equal to given
      * {@link TargetUpdateStatus}".
      *
-     * @param updateStatus
-     *            to be filtered on
-     *
+     * @param updateStatus to be filtered on
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasTargetUpdateStatus(final TargetUpdateStatus updateStatus) {
@@ -179,9 +169,7 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link Target}s by "not equal to
      * given {@link TargetUpdateStatus}".
      *
-     * @param updateStatus
-     *            to be filtered on
-     *
+     * @param updateStatus to be filtered on
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> notEqualToTargetUpdateStatus(final TargetUpdateStatus updateStatus) {
@@ -194,14 +182,12 @@ public final class TargetSpecifications {
      * intervals:<br>
      * <em>poll_itvl + overdue_itvl</em>
      *
-     * @param overdueTimestamp
-     *            the calculated timestamp to compare with the last respond of a
-     *            target (lastTargetQuery).<br>
-     *            The <code>overdueTimestamp</code> has to be calculated with
-     *            the following expression:<br>
-     *            <em>overdueTimestamp = nowTimestamp - poll_itvl -
-     *            overdue_itvl</em>
-     *
+     * @param overdueTimestamp the calculated timestamp to compare with the last respond of a
+     *         target (lastTargetQuery).<br>
+     *         The <code>overdueTimestamp</code> has to be calculated with
+     *         the following expression:<br>
+     *         <em>overdueTimestamp = nowTimestamp - poll_itvl -
+     *         overdue_itvl</em>
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> isOverdue(final long overdueTimestamp) {
@@ -213,8 +199,7 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link Target}s by "like
      * controllerId or like name".
      *
-     * @param searchText
-     *            to be filtered on
+     * @param searchText to be filtered on
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> likeControllerIdOrName(final String searchText) {
@@ -229,8 +214,7 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link Target}s by "like
      * controllerId".
      *
-     * @param distributionId
-     *            to be filtered on
+     * @param distributionId to be filtered on
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasInstalledOrAssignedDistributionSet(@NotNull final Long distributionId) {
@@ -241,17 +225,15 @@ public final class TargetSpecifications {
      * Finds all targets by given {@link Target#getControllerId()}s and which
      * are not yet assigned to given {@link DistributionSet}.
      *
-     * @param tIDs
-     *            to search for.
-     * @param distributionId
-     *            set that is not yet assigned
+     * @param tIDs to search for.
+     * @param distributionId set that is not yet assigned
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasControllerIdAndAssignedDistributionSetIdNot(final List<String> tIDs,
             @NotNull final Long distributionId) {
         return (targetRoot, query, cb) -> cb.and(targetRoot.get(JpaTarget_.controllerId).in(tIDs),
                 cb.or(cb.notEqual(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet)
-                        .get(JpaDistributionSet_.id), distributionId),
+                                .get(JpaDistributionSet_.id), distributionId),
                         cb.isNull(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet))));
     }
 
@@ -259,9 +241,7 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link Target}s based on a
      * {@link TargetTag} name.
      *
-     * @param tagName
-     *            to search for
-     *
+     * @param tagName to search for
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasTagName(final String tagName) {
@@ -275,10 +255,8 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link Target}s by "has no tag
      * names"or "has at least on of the given tag names".
      *
-     * @param tagNames
-     *            to be filtered on
-     * @param selectTargetWithNoTag
-     *            flag to get targets with no tag assigned
+     * @param tagNames to be filtered on
+     * @param selectTargetWithNoTag flag to get targets with no tag assigned
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasTags(final String[] tagNames, final Boolean selectTargetWithNoTag) {
@@ -289,37 +267,11 @@ public final class TargetSpecifications {
         };
     }
 
-    private static Predicate getHasTagsPredicate(final Root<JpaTarget> targetRoot, final CriteriaBuilder cb,
-            final Boolean selectTargetWithNoTag, final String[] tagNames) {
-        final SetJoin<JpaTarget, JpaTargetTag> tags = targetRoot.join(JpaTarget_.tags, JoinType.LEFT);
-        final Path<String> exp = tags.get(JpaTargetTag_.name);
-
-        final List<Predicate> hasTagsPredicates = new ArrayList<>();
-        if (isNoTagActive(selectTargetWithNoTag)) {
-            hasTagsPredicates.add(exp.isNull());
-        }
-        if (isAtLeastOneTagActive(tagNames)) {
-            hasTagsPredicates.add(exp.in(tagNames));
-        }
-
-        return hasTagsPredicates.stream().reduce(cb::or)
-                .orElseThrow(() -> new RuntimeException("Neither NO_TAG, nor TAG target tag filter was provided!"));
-    }
-
-    private static boolean isNoTagActive(final Boolean selectTargetWithNoTag) {
-        return Boolean.TRUE.equals(selectTargetWithNoTag);
-    }
-
-    private static boolean isAtLeastOneTagActive(final String[] tagNames) {
-        return tagNames != null && tagNames.length > 0;
-    }
-
     /**
      * {@link Specification} for retrieving {@link Target}s by assigned
      * distribution set.
      *
-     * @param distributionSetId
-     *            the ID of the distribution set which must be assigned
+     * @param distributionSetId the ID of the distribution set which must be assigned
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasAssignedDistributionSet(final Long distributionSetId) {
@@ -332,8 +284,7 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link Target}s that don't have the
      * given distribution set in their action history
      *
-     * @param distributionSetId
-     *            the ID of the distribution set which must not be assigned
+     * @param distributionSetId the ID of the distribution set which must not be assigned
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasNotDistributionSetInActions(final Long distributionSetId) {
@@ -352,8 +303,7 @@ public final class TargetSpecifications {
      * checking the {@link TargetType} of a target. Targets that don't have a
      * {@link TargetType} are compatible with all {@link DistributionSetType}
      *
-     * @param distributionSetTypeId
-     *            the ID of the distribution set type which must be compatible
+     * @param distributionSetTypeId the ID of the distribution set type which must be compatible
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> isCompatibleWithDistributionSetType(final Long distributionSetTypeId) {
@@ -366,10 +316,6 @@ public final class TargetSpecifications {
         };
     }
 
-    private static Predicate getTargetTypeIsNullPredicate(final Root<JpaTarget> targetRoot) {
-        return targetRoot.get(JpaTarget_.targetType).isNull();
-    }
-
     /**
      * {@link Specification} for retrieving {@link Target}s that are NOT
      * compatible with given {@link DistributionSetType}. Compatibility is
@@ -377,8 +323,7 @@ public final class TargetSpecifications {
      * don't have a {@link TargetType} are compatible with all
      * {@link DistributionSetType}
      *
-     * @param distributionSetTypeId
-     *            the ID of the distribution set type which must be incompatible
+     * @param distributionSetTypeId the ID of the distribution set type which must be incompatible
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> notCompatibleWithDistributionSetType(final Long distributionSetTypeId) {
@@ -398,21 +343,11 @@ public final class TargetSpecifications {
         };
     }
 
-    private static Path<Long> getDsTypeIdPath(final Root<JpaTarget> root) {
-        final Join<JpaTarget, JpaTargetType> targetTypeJoin = root.join(JpaTarget_.targetType, JoinType.LEFT);
-        targetTypeJoin.fetch(JpaTargetType_.distributionSetTypes);
-        final SetJoin<JpaTargetType, JpaDistributionSetType> dsTypeTargetTypeJoin = targetTypeJoin
-                .join(JpaTargetType_.distributionSetTypes, JoinType.LEFT);
-
-        return dsTypeTargetTypeJoin.get(JpaDistributionSetType_.id);
-    }
-
     /**
      * {@link Specification} for retrieving {@link Target}s that are in a given
      * {@link RolloutGroup}
      *
-     * @param group
-     *            the {@link RolloutGroup}
+     * @param group the {@link RolloutGroup}
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> isInRolloutGroup(final Long group) {
@@ -427,8 +362,7 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link Target}s that are in an
      * action for a given {@link RolloutGroup}
      *
-     * @param group
-     *            the {@link RolloutGroup}
+     * @param group the {@link RolloutGroup}
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> isInActionRolloutGroup(final Long group) {
@@ -442,8 +376,7 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link Target}s that are not in the
      * given {@link RolloutGroup}s
      *
-     * @param groups
-     *            the {@link RolloutGroup}s
+     * @param groups the {@link RolloutGroup}s
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> isNotInRolloutGroups(final Collection<Long> groups) {
@@ -476,8 +409,7 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link Target}s that have no Action
      * of the {@link RolloutGroup}.
      *
-     * @param group
-     *            the {@link RolloutGroup}
+     * @param group the {@link RolloutGroup}
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasNoActionInRolloutGroup(final Long group) {
@@ -498,8 +430,7 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link Target}s by assigned
      * distribution set.
      *
-     * @param distributionSetId
-     *            the ID of the distribution set which must be assigned
+     * @param distributionSetId the ID of the distribution set which must be assigned
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasInstalledDistributionSet(final Long distributionSetId) {
@@ -510,8 +441,7 @@ public final class TargetSpecifications {
     /**
      * {@link Specification} for retrieving {@link Target}s by tag.
      *
-     * @param tagId
-     *            the ID of the tag that should be to be assigned to target
+     * @param tagId the ID of the tag that should be to be assigned to target
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasTag(final Long tagId) {
@@ -525,9 +455,7 @@ public final class TargetSpecifications {
     /**
      * {@link Specification} for retrieving {@link Target}s by target type id
      *
-     * @param typeId
-     *            the id of the target type
-     *
+     * @param typeId the id of the target type
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasTargetType(final long typeId) {
@@ -549,9 +477,7 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link Target}s that don't have
      * target type assigned
      *
-     * @param typeId
-     *            the id of the target type
-     *
+     * @param typeId the id of the target type
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasTargetTypeNot(final Long typeId) {
@@ -570,10 +496,8 @@ public final class TargetSpecifications {
      * orderBy entry too, possibly invalidating the applied order, keep in mind
      * when using this
      *
-     * @param distributionSetIdForOrder
-     *            distribution set to consider
-     * @param sort
-     *            the sorting requested
+     * @param distributionSetIdForOrder distribution set to consider
+     * @param sort the sorting requested
      * @return specification that applies order by ds, may be overwritten
      */
     public static Specification<JpaTarget> orderedByLinkedDistributionSet(final long distributionSetIdForOrder,
@@ -603,11 +527,11 @@ public final class TargetSpecifications {
     public static Specification<JpaTarget> failedActionsForRollout(final String rolloutId) {
         return (targetRoot, query, cb) -> {
             Join<JpaTarget, Action> targetActions =
-                targetRoot.join("actions");
+                    targetRoot.join("actions");
 
             return cb.and(
-                cb.equal(targetActions.get("rollout").get("id"), rolloutId),
-                cb.equal(targetActions.get("status"), Action.Status.ERROR));
+                    cb.equal(targetActions.get("rollout").get("id"), rolloutId),
+                    cb.equal(targetActions.get("status"), Action.Status.ERROR));
         };
     }
 
@@ -627,7 +551,7 @@ public final class TargetSpecifications {
                             cb.and(
                                     cb.equal(actionsJoin.get(JpaAction_.weight), weight),
                                     cb.ge(actionsJoin.get(JpaAction_.ROLLOUT).get(JpaRollout_.ID), rolloutId))));
-                    // another, but probably heavier variant
+            // another, but probably heavier variant
 //            actionsJoin.on(
 //                    cb.or(
 //                            // in rollout
@@ -642,5 +566,43 @@ public final class TargetSpecifications {
 //                                    cb.gt(actionsJoin.get(JpaAction_.weight), weight))));
             return cb.isNull(actionsJoin.get(JpaAction_.id));
         };
+    }
+
+    private static Predicate getHasTagsPredicate(final Root<JpaTarget> targetRoot, final CriteriaBuilder cb,
+            final Boolean selectTargetWithNoTag, final String[] tagNames) {
+        final SetJoin<JpaTarget, JpaTargetTag> tags = targetRoot.join(JpaTarget_.tags, JoinType.LEFT);
+        final Path<String> exp = tags.get(JpaTargetTag_.name);
+
+        final List<Predicate> hasTagsPredicates = new ArrayList<>();
+        if (isNoTagActive(selectTargetWithNoTag)) {
+            hasTagsPredicates.add(exp.isNull());
+        }
+        if (isAtLeastOneTagActive(tagNames)) {
+            hasTagsPredicates.add(exp.in(tagNames));
+        }
+
+        return hasTagsPredicates.stream().reduce(cb::or)
+                .orElseThrow(() -> new RuntimeException("Neither NO_TAG, nor TAG target tag filter was provided!"));
+    }
+
+    private static boolean isNoTagActive(final Boolean selectTargetWithNoTag) {
+        return Boolean.TRUE.equals(selectTargetWithNoTag);
+    }
+
+    private static boolean isAtLeastOneTagActive(final String[] tagNames) {
+        return tagNames != null && tagNames.length > 0;
+    }
+
+    private static Predicate getTargetTypeIsNullPredicate(final Root<JpaTarget> targetRoot) {
+        return targetRoot.get(JpaTarget_.targetType).isNull();
+    }
+
+    private static Path<Long> getDsTypeIdPath(final Root<JpaTarget> root) {
+        final Join<JpaTarget, JpaTargetType> targetTypeJoin = root.join(JpaTarget_.targetType, JoinType.LEFT);
+        targetTypeJoin.fetch(JpaTargetType_.distributionSetTypes);
+        final SetJoin<JpaTargetType, JpaDistributionSetType> dsTypeTargetTypeJoin = targetTypeJoin
+                .join(JpaTargetType_.distributionSetTypes, JoinType.LEFT);
+
+        return dsTypeTargetTypeJoin.get(JpaDistributionSetType_.id);
     }
 }

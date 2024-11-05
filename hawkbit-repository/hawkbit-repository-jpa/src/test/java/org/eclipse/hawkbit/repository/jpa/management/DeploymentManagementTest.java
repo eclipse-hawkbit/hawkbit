@@ -30,15 +30,18 @@ import java.util.stream.Stream;
 
 import jakarta.validation.ConstraintViolationException;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
@@ -92,10 +95,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort.Direction;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 /**
  * Test class testing the functionality of triggering a deployment of {@link DistributionSet}s to {@link Target}s.
  */
@@ -105,6 +104,44 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     private static final boolean STATE_ACTIVE = true;
     private static final boolean STATE_INACTIVE = false;
+
+    @Test
+    @Description("Tests that an exception is thrown when a target is assigned to an incomplete distribution set")
+    public void verifyAssignTargetsToIncompleteDistribution() {
+        final DistributionSet distributionSet = testdataFactory.createIncompleteDistributionSet();
+        final Target target = testdataFactory.createTarget();
+
+        assertThatExceptionOfType(IncompleteDistributionSetException.class)
+                .as("Incomplete distributionSet should throw an exception")
+                .isThrownBy(() -> assignDistributionSet(distributionSet, target));
+
+    }
+
+    @Test
+    @Description("Tests that an exception is thrown when a target is assigned to an invalidated distribution set")
+    public void verifyAssignTargetsToInvalidDistribution() {
+        final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
+        final Target target = testdataFactory.createTarget();
+
+        assertThatExceptionOfType(InvalidDistributionSetException.class)
+                .as("Invalid distributionSet should throw an exception")
+                .isThrownBy(() -> assignDistributionSet(distributionSet, target));
+
+    }
+
+    protected List<DeploymentRequest> createAssignmentRequests(final Collection<DistributionSet> distributionSets,
+            final Collection<Target> targets, final int weight) {
+        return createAssignmentRequests(distributionSets, targets, weight, false);
+    }
+
+    protected List<DeploymentRequest> createAssignmentRequests(final Collection<DistributionSet> distributionSets,
+            final Collection<Target> targets, final int weight, final boolean confirmationRequired) {
+        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
+        distributionSets.forEach(ds -> targets.forEach(target -> deploymentRequests
+                .add(DeploymentManagement.deploymentRequest(target.getControllerId(), ds.getId()).setWeight(weight)
+                        .setConfirmationRequired(confirmationRequired).build())));
+        return deploymentRequests;
+    }
 
     @Test
     @Description("Verifies that management get access react as specified on calls for non existing entities by means " +
@@ -279,7 +316,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6) }) // implicit lock })
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6) })
+        // implicit lock })
     void multiAssigmentHistoryOverMultiplePagesResultsInTwoActiveAction() {
 
         final DistributionSet cancelDs = testdataFactory.createDistributionSet("Canceled DS", "1.0",
@@ -450,24 +488,6 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .isThrownBy(() -> deploymentManagement.forceQuitAction(assigningAction.getId()));
     }
 
-    private JpaAction assignSet(final Target target, final DistributionSet ds) {
-        assignDistributionSet(ds.getId(), target.getControllerId());
-        implicitLock(ds);
-        assertThat(targetManagement.getByControllerID(target.getControllerId()).get().getUpdateStatus())
-                .as("wrong update status").isEqualTo(TargetUpdateStatus.PENDING);
-        assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId())).as("wrong assigned ds")
-                .contains(ds);
-        final JpaAction action = actionRepository
-                .findAll(
-                        (root, query, cb) ->
-                                cb.and(
-                                        cb.equal(root.get(JpaAction_.target).get(JpaTarget_.id), target.getId()),
-                                        cb.equal(root.get(JpaAction_.distributionSet).get(JpaDistributionSet_.id), ds.getId())),
-                        PAGE).getContent().get(0);
-        assertThat(action).as("action should not be null").isNotNull();
-        return action;
-    }
-
     @Test
     @Description("Simple offline deployment of a distribution set to a list of targets. Verifies that offline assigment "
             + "is correctly executed for targets that do not have a running update already. Those are ignored.")
@@ -617,20 +637,6 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertDsExclusivelyAssignedToTargets(targets, ds1.getId(), STATE_ACTIVE, RUNNING);
     }
 
-    private void assertDsExclusivelyAssignedToTargets(final List<Target> targets, final long dsId, final boolean active,
-            final Status status) {
-        final List<Action> assignment = findActionsByDistributionSet(PAGE, dsId).getContent();
-        final String currentUsername = tenantAware.getCurrentUsername();
-
-        assertThat(assignment).hasSize(10).allMatch(action -> action.isActive() == active)
-                .as("Is assigned to DS " + dsId).allMatch(action -> action.getDistributionSet().getId().equals(dsId))
-                .as("State is " + status).allMatch(action -> action.getStatus() == status)
-                .as("Initiated by " + currentUsername).allMatch(a -> a.getInitiatedBy().equals(currentUsername));
-        final long[] targetIds = targets.stream().mapToLong(Target::getId).toArray();
-        assertThat(targetIds).as("All targets represented in assignment").containsExactlyInAnyOrder(
-                assignment.stream().mapToLong(action -> action.getTarget().getId()).toArray());
-    }
-
     @Test
     @Description("Assign multiple DSs to a single Target in one request in multiassignment mode.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -699,20 +705,6 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         });
     }
 
-    protected List<DeploymentRequest> createAssignmentRequests(final Collection<DistributionSet> distributionSets,
-            final Collection<Target> targets, final int weight) {
-        return createAssignmentRequests(distributionSets, targets, weight, false);
-    }
-
-    protected List<DeploymentRequest> createAssignmentRequests(final Collection<DistributionSet> distributionSets,
-            final Collection<Target> targets, final int weight, final boolean confirmationRequired) {
-        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
-        distributionSets.forEach(ds -> targets.forEach(target -> deploymentRequests
-                .add(DeploymentManagement.deploymentRequest(target.getControllerId(), ds.getId()).setWeight(weight)
-                        .setConfirmationRequired(confirmationRequired).build())));
-        return deploymentRequests;
-    }
-
     @Test
     @Description("A Request resulting in multiple assignments to a single target is only allowed when multiassignment is enabled.")
     void multipleAssignmentsToTargetOnlyAllowedInMultiAssignMode() {
@@ -741,7 +733,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
 
         final List<String> knownTargetIds = new ArrayList<>();
-        knownTargetIds.add( "1");
+        knownTargetIds.add("1");
         knownTargetIds.add("2");
         testdataFactory.createTargets(knownTargetIds.toArray(new String[0]));
 
@@ -898,16 +890,6 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         });
     }
 
-    private List<DistributionSetAssignmentResult> assignDistributionSetToTargets(final DistributionSet distributionSet,
-            final Iterable<String> targetIds, final boolean confirmationRequired) {
-        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
-        for (final String controllerId : targetIds) {
-            deploymentRequests.add(new DeploymentRequest(controllerId, distributionSet.getId(), ActionType.FORCED, 0,
-                    null, null, null, null, confirmationRequired));
-        }
-        return deploymentManagement.assignDistributionSets(deploymentRequests);
-    }
-
     @Test
     @Description("Duplicate Assignments are removed from a request when multiassignment is disabled, otherwise not")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -934,10 +916,6 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(getResultingActionCount(deploymentManagement.assignDistributionSets(twoEqualAssignmentsWithWeight)))
                 .isEqualTo(1);
-    }
-
-    private int getResultingActionCount(final List<DistributionSetAssignmentResult> results) {
-        return results.stream().map(DistributionSetAssignmentResult::getTotal).reduce(0, Integer::sum);
     }
 
     @Test
@@ -1033,7 +1011,6 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
      * test a simple deployment by calling the
      * {@link TargetRepository#assignDistributionSet(DistributionSet, Iterable)} and
      * checking the active action and the action history of the targets.
-     *
      */
     @Test
     @Description("Simple deployment or distribution set to target assignment test.")
@@ -1319,7 +1296,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(allFoundDS.size()).as("no ds should be founded").isZero();
 
         assertThat(distributionSetRepository.findAll(SpecificationsBuilder.combineWithAnd(Arrays
-                .asList(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))),
+                        .asList(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))),
                 PAGE).getContent()).as("wrong size of founded ds").hasSize(noOfDistributionSets);
 
         for (final DistributionSet ds : deploymentResult.getDistributionSets()) {
@@ -1335,7 +1312,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         allFoundDS = distributionSetManagement.findByCompleted(pageRequest, true).getContent();
         assertThat(allFoundDS.size()).as("no ds should be founded").isZero();
         assertThat(distributionSetRepository.findAll(SpecificationsBuilder.combineWithAnd(Arrays
-                .asList(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))),
+                        .asList(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))),
                 PAGE).getContent()).as("wrong size of founded ds").hasSize(noOfDistributionSets);
 
     }
@@ -1550,30 +1527,6 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Tests that an exception is thrown when a target is assigned to an incomplete distribution set")
-    public void verifyAssignTargetsToIncompleteDistribution() {
-        final DistributionSet distributionSet = testdataFactory.createIncompleteDistributionSet();
-        final Target target = testdataFactory.createTarget();
-
-        assertThatExceptionOfType(IncompleteDistributionSetException.class)
-                .as("Incomplete distributionSet should throw an exception")
-                .isThrownBy(() -> assignDistributionSet(distributionSet, target));
-
-    }
-
-    @Test
-    @Description("Tests that an exception is thrown when a target is assigned to an invalidated distribution set")
-    public void verifyAssignTargetsToInvalidDistribution() {
-        final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
-        final Target target = testdataFactory.createTarget();
-
-        assertThatExceptionOfType(InvalidDistributionSetException.class)
-                .as("Invalid distributionSet should throw an exception")
-                .isThrownBy(() -> assignDistributionSet(distributionSet, target));
-
-    }
-
-    @Test
     @Description("Verify that the DistributionSet assignments work for multiple targets of the same target type within the same request.")
     void verifyDSAssignmentForMultipleTargetsWithSameTargetType() {
         final DistributionSet ds = testdataFactory.createDistributionSet("test-ds");
@@ -1661,6 +1614,52 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .isThrownBy(() -> deploymentManagement.assignDistributionSets(deploymentRequests));
     }
 
+    private JpaAction assignSet(final Target target, final DistributionSet ds) {
+        assignDistributionSet(ds.getId(), target.getControllerId());
+        implicitLock(ds);
+        assertThat(targetManagement.getByControllerID(target.getControllerId()).get().getUpdateStatus())
+                .as("wrong update status").isEqualTo(TargetUpdateStatus.PENDING);
+        assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId())).as("wrong assigned ds")
+                .contains(ds);
+        final JpaAction action = actionRepository
+                .findAll(
+                        (root, query, cb) ->
+                                cb.and(
+                                        cb.equal(root.get(JpaAction_.target).get(JpaTarget_.id), target.getId()),
+                                        cb.equal(root.get(JpaAction_.distributionSet).get(JpaDistributionSet_.id), ds.getId())),
+                        PAGE).getContent().get(0);
+        assertThat(action).as("action should not be null").isNotNull();
+        return action;
+    }
+
+    private void assertDsExclusivelyAssignedToTargets(final List<Target> targets, final long dsId, final boolean active,
+            final Status status) {
+        final List<Action> assignment = findActionsByDistributionSet(PAGE, dsId).getContent();
+        final String currentUsername = tenantAware.getCurrentUsername();
+
+        assertThat(assignment).hasSize(10).allMatch(action -> action.isActive() == active)
+                .as("Is assigned to DS " + dsId).allMatch(action -> action.getDistributionSet().getId().equals(dsId))
+                .as("State is " + status).allMatch(action -> action.getStatus() == status)
+                .as("Initiated by " + currentUsername).allMatch(a -> a.getInitiatedBy().equals(currentUsername));
+        final long[] targetIds = targets.stream().mapToLong(Target::getId).toArray();
+        assertThat(targetIds).as("All targets represented in assignment").containsExactlyInAnyOrder(
+                assignment.stream().mapToLong(action -> action.getTarget().getId()).toArray());
+    }
+
+    private List<DistributionSetAssignmentResult> assignDistributionSetToTargets(final DistributionSet distributionSet,
+            final Iterable<String> targetIds, final boolean confirmationRequired) {
+        final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
+        for (final String controllerId : targetIds) {
+            deploymentRequests.add(new DeploymentRequest(controllerId, distributionSet.getId(), ActionType.FORCED, 0,
+                    null, null, null, null, confirmationRequired));
+        }
+        return deploymentManagement.assignDistributionSets(deploymentRequests);
+    }
+
+    private int getResultingActionCount(final List<DistributionSetAssignmentResult> results) {
+        return results.stream().map(DistributionSetAssignmentResult::getTotal).reduce(0, Integer::sum);
+    }
+
     /**
      * Helper methods that creates 2 lists of targets and a list of distribution
      * sets.
@@ -1668,18 +1667,12 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
      * <b>All created distribution sets are assigned to all targets of the target
      * list deployedTargets.</b>
      *
-     * @param undeployedTargetPrefix
-     *            prefix to be used as target controller prefix
-     * @param noOfUndeployedTargets
-     *            number of targets which remain undeployed
-     * @param deployedTargetPrefix
-     *            prefix to be used as target controller prefix
-     * @param noOfDeployedTargets
-     *            number of targets to which the created distribution sets assigned
-     * @param noOfDistributionSets
-     *            number of distribution sets
-     * @param distributionSetPrefix
-     *            prefix for the created distribution sets
+     * @param undeployedTargetPrefix prefix to be used as target controller prefix
+     * @param noOfUndeployedTargets number of targets which remain undeployed
+     * @param deployedTargetPrefix prefix to be used as target controller prefix
+     * @param noOfDeployedTargets number of targets to which the created distribution sets assigned
+     * @param noOfDistributionSets number of distribution sets
+     * @param distributionSetPrefix prefix for the created distribution sets
      * @return the {@link DeploymentResult} containing all created targets, the
      *         distribution sets, the corresponding IDs for later evaluation in
      *         tests
@@ -1720,6 +1713,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private static class DeploymentResult {
+
         final List<Long> deployedTargetIDs = new ArrayList<>();
         final List<Long> undeployedTargetIDs = new ArrayList<>();
         final List<Long> distributionSetIDs = new ArrayList<>();

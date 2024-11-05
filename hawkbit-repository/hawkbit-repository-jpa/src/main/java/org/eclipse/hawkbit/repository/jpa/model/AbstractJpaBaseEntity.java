@@ -30,15 +30,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Holder of the base attributes common to all entities.
- *
  */
 @MappedSuperclass
 @Access(AccessType.FIELD)
 @EntityListeners({ AuditingEntityListener.class, EntityPropertyChangeListener.class, EntityInterceptorListener.class })
 public abstract class AbstractJpaBaseEntity implements BaseEntity {
-    private static final long serialVersionUID = 1L;
-    protected static final int USERNAME_FIELD_LENGTH = 64;
 
+    protected static final int USERNAME_FIELD_LENGTH = 64;
+    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -88,6 +87,34 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         return lastModifiedBy;
     }
 
+    @LastModifiedBy
+    public void setLastModifiedBy(final String lastModifiedBy) {
+        if (isController()) {
+            return;
+        }
+
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    @Override
+    public int getOptLockRevision() {
+        return optLockRevision;
+    }
+
+    public void setOptLockRevision(final int optLockRevision) {
+        this.optLockRevision = optLockRevision;
+    }
+
+    @LastModifiedDate
+    public void setLastModifiedAt(final long lastModifiedAt) {
+
+        if (isController()) {
+            return;
+        }
+
+        this.lastModifiedAt = lastModifiedAt;
+    }
+
     @CreatedBy
     public void setCreatedBy(final String createdBy) {
         if (isController()) {
@@ -115,50 +142,9 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         }
     }
 
-    @LastModifiedDate
-    public void setLastModifiedAt(final long lastModifiedAt) {
-
-        if (isController()) {
-            return;
-        }
-
-        this.lastModifiedAt = lastModifiedAt;
-    }
-
-    @LastModifiedBy
-    public void setLastModifiedBy(final String lastModifiedBy) {
-        if (isController()) {
-            return;
-        }
-
-        this.lastModifiedBy = lastModifiedBy;
-    }
-
-    private boolean isController() {
-        return SecurityContextHolder.getContext().getAuthentication() != null
-                && SecurityContextHolder.getContext().getAuthentication()
-                        .getDetails() instanceof TenantAwareAuthenticationDetails
-                && ((TenantAwareAuthenticationDetails) SecurityContextHolder.getContext().getAuthentication()
-                        .getDetails()).isController();
-    }
-
-    @Override
-    public int getOptLockRevision() {
-        return optLockRevision;
-    }
-
-    public void setOptLockRevision(final int optLockRevision) {
-        this.optLockRevision = optLockRevision;
-    }
-
     @Override
     public Long getId() {
         return id;
-    }
-
-    @Override
-    public String toString() {
-        return this.getClass().getSimpleName() + " [id=" + id + "]";
     }
 
     public void setId(final Long id) {
@@ -169,7 +155,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
      * Defined equals/hashcode strategy for the repository in general is that an
      * entity is equal if it has the same {@link #getId()} and
      * {@link #getOptLockRevision()} and class.
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -188,7 +174,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
      * Defined equals/hashcode strategy for the repository in general is that an
      * entity is equal if it has the same {@link #getId()} and
      * {@link #getOptLockRevision()} and class.
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -211,6 +197,19 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
             return false;
         }
         return optLockRevision == other.optLockRevision;
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + " [id=" + id + "]";
+    }
+
+    private boolean isController() {
+        return SecurityContextHolder.getContext().getAuthentication() != null
+                && SecurityContextHolder.getContext().getAuthentication()
+                .getDetails() instanceof TenantAwareAuthenticationDetails
+                && ((TenantAwareAuthenticationDetails) SecurityContextHolder.getContext().getAuthentication()
+                .getDetails()).isController();
     }
 
 }

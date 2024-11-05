@@ -11,16 +11,15 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.awaitility.Awaitility;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.junit.jupiter.api.Test;
+import java.time.Duration;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-
-import java.time.Duration;
+import org.awaitility.Awaitility;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Repository")
 @Story("Deployment Management")

@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * Builder implementation for {@link SoftwareModule}.
- *
  */
 public class JpaSoftwareModuleBuilder implements SoftwareModuleBuilder {
 

@@ -17,6 +17,9 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.exception.InvalidTenantConfigurationKeyException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
@@ -27,10 +30,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("Tenant Configuration Management")
@@ -101,9 +100,11 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
 
         // add value first
         tenantConfigurationManagement.addOrUpdateConfiguration(configuration);
-        assertThat(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue())
+        assertThat(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
+                String.class).getValue())
                 .isEqualTo("token_123");
-        assertThat(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue())
+        assertThat(
+                tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue())
                 .isTrue();
     }
 
@@ -149,9 +150,12 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
             tenantConfigurationManagement.addOrUpdateConfiguration(configuration);
             fail("should not have worked as type is wrong");
         } catch (final TenantConfigurationValidatorException e) {
-            assertThat(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue())
+            assertThat(
+                    tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
+                            String.class).getValue())
                     .isNotEqualTo("token_123");
-            assertThat(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue())
+            assertThat(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class)
+                    .getValue())
                     .isNotEqualTo(true);
         }
     }

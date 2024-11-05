@@ -68,8 +68,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
      * catch exceptions of the {@link TransactionManager} and wrap them to
      * custom exceptions.
      *
-     * @param ex
-     *            the thrown and catched exception
+     * @param ex the thrown and catched exception
      * @throws Throwable
      */
     @AfterThrowing(pointcut = "execution( * org.eclipse.hawkbit.repository.jpa.management.*Management.*(..))", throwing = "ex")
@@ -103,6 +102,11 @@ public class ExceptionMappingAspectHandler implements Ordered {
         throw ex;
     }
 
+    @Override
+    public int getOrder() {
+        return 1;
+    }
+
     private static Exception replaceWithCauseIfConstraintViolationException(final TransactionSystemException rex) {
         Throwable exception = rex;
         do {
@@ -114,10 +118,5 @@ public class ExceptionMappingAspectHandler implements Ordered {
         } while (exception != null);
 
         return rex;
-    }
-
-    @Override
-    public int getOrder() {
-        return 1;
     }
 }

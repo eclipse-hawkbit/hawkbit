@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * {@link PagingAndSortingRepository} and {@link  org.springframework.data.repository.CrudRepository} for
  * {@link DistributionSetType}.
- *
  */
 @Transactional(readOnly = true)
 public interface DistributionSetTypeRepository
@@ -36,11 +35,9 @@ public interface DistributionSetTypeRepository
      * assigned to.
      * <p/>
      * No access control applied
-     * 
-     * @param softwareModuleType
-     *            the software module type to count the distribution set type
-     *            which has this software module type assigned
-     * 
+     *
+     * @param softwareModuleType the software module type to count the distribution set type
+     *         which has this software module type assigned
      * @return the number of {@link DistributionSetType}s in the repository
      *         assigned to the given software module type
      */
@@ -64,10 +61,8 @@ public interface DistributionSetTypeRepository
      * addressed {@link DistributionSetType}.
      * <p/>
      * No access control applied
-     * 
-     * @param id
-     *            of the distribution set type
-     * 
+     *
+     * @param id of the distribution set type
      * @return the number of associated software module types
      */
     @Query("SELECT COUNT (e.smType) FROM DistributionSetTypeElement e WHERE e.dsType.id = :id")

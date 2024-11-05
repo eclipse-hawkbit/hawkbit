@@ -67,6 +67,7 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 // sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Action, EventAwareEntity {
+
     private static final long serialVersionUID = 1L;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -113,7 +114,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
             @ConversionValue(objectValue = "SCHEDULED", dataValue = "8"),
             @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9"),
             @ConversionValue(objectValue = "DOWNLOADED", dataValue = "10"),
-            @ConversionValue(objectValue = "WAIT_FOR_CONFIRMATION", dataValue = "11")})
+            @ConversionValue(objectValue = "WAIT_FOR_CONFIRMATION", dataValue = "11") })
     @Convert("status")
     @NotNull
     private Status status;
@@ -157,10 +158,6 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         this.distributionSet = (JpaDistributionSet) distributionSet;
     }
 
-    public void setActive(final boolean active) {
-        this.active = active;
-    }
-
     @Override
     public Status getStatus() {
         return status;
@@ -175,8 +172,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         return active;
     }
 
-    public void setActionType(final ActionType actionType) {
-        this.actionType = actionType;
+    public void setActive(final boolean active) {
+        this.active = active;
     }
 
     @Override
@@ -184,21 +181,17 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         return actionType;
     }
 
-    public List<ActionStatus> getActionStatus() {
-        if (actionStatus == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(actionStatus);
-    }
-
-    public void setTarget(final Target target) {
-        this.target = (JpaTarget) target;
+    public void setActionType(final ActionType actionType) {
+        this.actionType = actionType;
     }
 
     @Override
     public Target getTarget() {
         return target;
+    }
+
+    public void setTarget(final Target target) {
+        this.target = (JpaTarget) target;
     }
 
     @Override
@@ -238,35 +231,6 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     }
 
     @Override
-    public String toString() {
-        return "JpaAction [distributionSet=" + distributionSet.getId() + ", version=" + getOptLockRevision() + ", id="
-                + getId() + ", actionType=" + getActionType() + ", weight=" + getWeight() + ", isActive=" + isActive()
-                + ",  createdAt=" + getCreatedAt() + ", lastModifiedAt=" + getLastModifiedAt() + ", status="
-                + getStatus().name() + "]";
-    }
-
-    @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new ActionCreatedEvent(this, BaseEntity.getIdOrNull(target),
-                        BaseEntity.getIdOrNull(rollout), BaseEntity.getIdOrNull(rolloutGroup),
-                        EventPublisherHolder.getInstance().getApplicationId()));
-    }
-
-    @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new ActionUpdatedEvent(this, BaseEntity.getIdOrNull(target),
-                        BaseEntity.getIdOrNull(rollout), BaseEntity.getIdOrNull(rolloutGroup),
-                        EventPublisherHolder.getInstance().getApplicationId()));
-    }
-
-    @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        // there is no action deletion
-    }
-
-    @Override
     public String getMaintenanceWindowSchedule() {
         return maintenanceWindowSchedule;
     }
@@ -274,8 +238,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     /**
      * Sets the maintenance schedule.
      *
-     * @param maintenanceWindowSchedule
-     *            is a cron expression to be used for scheduling.
+     * @param maintenanceWindowSchedule is a cron expression to be used for scheduling.
      */
     public void setMaintenanceWindowSchedule(final String maintenanceWindowSchedule) {
         this.maintenanceWindowSchedule = maintenanceWindowSchedule;
@@ -289,9 +252,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     /**
      * Sets the maintenance window duration.
      *
-     * @param maintenanceWindowDuration
-     *            is the duration of an available maintenance schedule in
-     *            HH:mm:ss format.
+     * @param maintenanceWindowDuration is the duration of an available maintenance schedule in
+     *         HH:mm:ss format.
      */
     public void setMaintenanceWindowDuration(final String maintenanceWindowDuration) {
         this.maintenanceWindowDuration = maintenanceWindowDuration;
@@ -305,32 +267,43 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     /**
      * Sets the time zone to be used for maintenance window.
      *
-     * @param maintenanceWindowTimeZone
-     *            is the time zone specified as +/-hh:mm offset from UTC for
-     *            example +02:00 for CET summer time and +00:00 for UTC. The
-     *            start time of a maintenance window calculated based on the
-     *            cron expression is relative to this time zone.
+     * @param maintenanceWindowTimeZone is the time zone specified as +/-hh:mm offset from UTC for
+     *         example +02:00 for CET summer time and +00:00 for UTC. The
+     *         start time of a maintenance window calculated based on the
+     *         cron expression is relative to this time zone.
      */
     public void setMaintenanceWindowTimeZone(final String maintenanceWindowTimeZone) {
         this.maintenanceWindowTimeZone = maintenanceWindowTimeZone;
     }
 
     @Override
+    public String getExternalRef() {
+        return externalRef;
+    }
+
+    @Override
+    public void setExternalRef(final String externalRef) {
+        this.externalRef = externalRef;
+    }
+
+    @Override
+    public String getInitiatedBy() {
+        return initiatedBy;
+    }
+
+    public void setInitiatedBy(final String initiatedBy) {
+        this.initiatedBy = initiatedBy;
+    }
+
+    @Override
+    public Optional<Integer> getLastActionStatusCode() {
+        return Optional.ofNullable(lastActionStatusCode);
+    }
+
+    @Override
     public Optional<ZonedDateTime> getMaintenanceWindowStartTime() {
         return MaintenanceScheduleHelper.getNextMaintenanceWindow(maintenanceWindowSchedule, maintenanceWindowDuration,
                 maintenanceWindowTimeZone);
-    }
-
-    /**
-     * Returns the end time of next available or active maintenance window for
-     * the {@link Action} as {@link ZonedDateTime}. If a maintenance window is
-     * already active, the end time of currently active window is returned.
-     *
-     * @return the end time of window as { @link Optional<ZonedDateTime>}.
-     */
-    private Optional<ZonedDateTime> getMaintenanceWindowEndTime() {
-        return getMaintenanceWindowStartTime()
-                .map(start -> start.plus(MaintenanceScheduleHelper.convertToISODuration(maintenanceWindowDuration)));
     }
 
     @Override
@@ -366,35 +339,60 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         }
     }
 
-    @Override
-    public void setExternalRef(final String externalRef) {
-        this.externalRef = externalRef;
-    }
-
-    @Override
-    public String getExternalRef() {
-        return externalRef;
-    }
-
-    public void setInitiatedBy(final String initiatedBy) {
-        this.initiatedBy = initiatedBy;
-    }
-
-    @Override
-    public String getInitiatedBy() {
-        return initiatedBy;
-    }
-
-    @Override
-    public Optional<Integer> getLastActionStatusCode() {
-        return Optional.ofNullable(lastActionStatusCode);
+    public boolean isWaitingConfirmation() {
+        return status == Status.WAIT_FOR_CONFIRMATION;
     }
 
     public void setLastActionStatusCode(final Integer lastActionStatusCode) {
         this.lastActionStatusCode = lastActionStatusCode;
     }
 
-    public boolean isWaitingConfirmation() {
-        return status == Status.WAIT_FOR_CONFIRMATION;
+    public List<ActionStatus> getActionStatus() {
+        if (actionStatus == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(actionStatus);
+    }
+
+    @Override
+    public String toString() {
+        return "JpaAction [distributionSet=" + distributionSet.getId() + ", version=" + getOptLockRevision() + ", id="
+                + getId() + ", actionType=" + getActionType() + ", weight=" + getWeight() + ", isActive=" + isActive()
+                + ",  createdAt=" + getCreatedAt() + ", lastModifiedAt=" + getLastModifiedAt() + ", status="
+                + getStatus().name() + "]";
+    }
+
+    @Override
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new ActionCreatedEvent(this, BaseEntity.getIdOrNull(target),
+                        BaseEntity.getIdOrNull(rollout), BaseEntity.getIdOrNull(rolloutGroup),
+                        EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new ActionUpdatedEvent(this, BaseEntity.getIdOrNull(target),
+                        BaseEntity.getIdOrNull(rollout), BaseEntity.getIdOrNull(rolloutGroup),
+                        EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        // there is no action deletion
+    }
+
+    /**
+     * Returns the end time of next available or active maintenance window for
+     * the {@link Action} as {@link ZonedDateTime}. If a maintenance window is
+     * already active, the end time of currently active window is returned.
+     *
+     * @return the end time of window as { @link Optional<ZonedDateTime>}.
+     */
+    private Optional<ZonedDateTime> getMaintenanceWindowEndTime() {
+        return getMaintenanceWindowStartTime()
+                .map(start -> start.plus(MaintenanceScheduleHelper.convertToISODuration(maintenanceWindowDuration)));
     }
 }

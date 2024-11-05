@@ -16,7 +16,6 @@ import jakarta.persistence.EntityManager;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Spring data repositories for {@link TargetFilterQuery}s.
- *
  */
 @Transactional(readOnly = true)
 public interface TargetFilterQueryRepository
@@ -57,8 +55,7 @@ public interface TargetFilterQueryRepository
      * <p/>
      * No access control applied
      *
-     * @param autoAssignDistributionSetId
-     *            the id of the distribution set
+     * @param autoAssignDistributionSetId the id of the distribution set
      * @return the count
      */
     long countByAutoAssignDistributionSetId(long autoAssignDistributionSetId);
@@ -69,8 +66,7 @@ public interface TargetFilterQueryRepository
      * manually to query even if this will by done by {@link EntityManager}
      * anyhow. The DB should take care of optimizing this away.
      *
-     * @param tenant
-     *            to delete data from
+     * @param tenant to delete data from
      */
     @Modifying
     @Transactional

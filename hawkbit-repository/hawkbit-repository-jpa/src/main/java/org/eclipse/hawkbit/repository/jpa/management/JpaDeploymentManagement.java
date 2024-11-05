@@ -127,16 +127,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             + ACTION_PAGE_LIMIT;
 
     private static final EnumMap<Database, String> QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED;
-
-    static {
-        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED = new EnumMap<>(Database.class);
-        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(Database.SQL_SERVER, "DELETE TOP (" + ACTION_PAGE_LIMIT
-                + ") FROM sp_action WHERE tenant=#tenant AND status IN (%s) AND last_modified_at<#last_modified_at ");
-        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(Database.POSTGRESQL,
-                "DELETE FROM sp_action WHERE id IN (SELECT id FROM sp_action WHERE tenant=#tenant AND status IN (%s) AND last_modified_at<#last_modified_at LIMIT "
-                        + ACTION_PAGE_LIMIT + ")");
-    }
-
     private final EntityManager entityManager;
     private final DistributionSetManagement distributionSetManagement;
     private final TargetRepository targetRepository;
@@ -151,6 +141,15 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final AuditorAware<String> auditorAware;
     private final Database database;
     private final RetryTemplate retryTemplate;
+
+    static {
+        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED = new EnumMap<>(Database.class);
+        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(Database.SQL_SERVER, "DELETE TOP (" + ACTION_PAGE_LIMIT
+                + ") FROM sp_action WHERE tenant=#tenant AND status IN (%s) AND last_modified_at<#last_modified_at ");
+        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(Database.POSTGRESQL,
+                "DELETE FROM sp_action WHERE id IN (SELECT id FROM sp_action WHERE tenant=#tenant AND status IN (%s) AND last_modified_at<#last_modified_at LIMIT "
+                        + ACTION_PAGE_LIMIT + ")");
+    }
 
     public JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
@@ -183,9 +182,18 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(
-            final Collection<Entry<String, Long>> assignments) {
-            return offlineAssignedDistributionSets(assignments,tenantAware.getCurrentUsername());
+    public List<DistributionSetAssignmentResult> assignDistributionSets(
+            final List<DeploymentRequest> deploymentRequests) {
+        return assignDistributionSets(tenantAware.getCurrentUsername(), deploymentRequests, null);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public List<DistributionSetAssignmentResult> assignDistributionSets(final String initiatedBy,
+            final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
+        WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
+                .validate(deploymentRequests);
+        return assignDistributionSets(initiatedBy, deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
     }
 
     @Override
@@ -205,18 +213,422 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<DistributionSetAssignmentResult> assignDistributionSets(
-            final List<DeploymentRequest> deploymentRequests) {
-        return assignDistributionSets(tenantAware.getCurrentUsername(), deploymentRequests, null);
+    public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(
+            final Collection<Entry<String, Long>> assignments) {
+        return offlineAssignedDistributionSets(assignments, tenantAware.getCurrentUsername());
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<DistributionSetAssignmentResult> assignDistributionSets(final String initiatedBy,
-            final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
-        WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
-                .validate(deploymentRequests);
-        return assignDistributionSets(initiatedBy, deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Action cancelAction(final long actionId) {
+        log.debug("cancelAction({})", actionId);
+
+        final JpaAction action = actionRepository.findById(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+
+        if (action.isCancelingOrCanceled()) {
+            throw new CancelActionNotAllowedException("Actions in canceling or canceled state cannot be canceled");
+        }
+
+        assertTargetUpdateAllowed(action);
+
+        if (action.isActive()) {
+            log.debug("action ({}) was still active. Change to {}.", action, Status.CANCELING);
+            action.setStatus(Status.CANCELING);
+
+            // document that the status has been retrieved
+            actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
+                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "manual cancelation requested"));
+            final Action saveAction = actionRepository.save(action);
+
+            onlineDsAssignmentStrategy.cancelAssignment(action);
+
+            return saveAction;
+        } else {
+            throw new CancelActionNotAllowedException(action.getId() + " is not active and cannot be canceled");
+        }
+    }
+
+    @Override
+    public long countActionsByTarget(final String rsqlParam, final String controllerId) {
+        assertTargetReadAllowed(controllerId);
+
+        final List<Specification<JpaAction>> specList = Arrays.asList(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database),
+                ActionSpecifications.byTargetControllerId(controllerId));
+
+        return JpaManagementHelper.countBySpec(actionRepository, specList);
+    }
+
+    @Override
+    public long countActionsAll() {
+        return actionRepository.count();
+    }
+
+    @Override
+    public long countActions(final String rsqlParam) {
+        final List<Specification<JpaAction>> specList = List.of(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database));
+        return JpaManagementHelper.countBySpec(actionRepository, specList);
+    }
+
+    @Override
+    public long countActionsByTarget(final String controllerId) {
+        assertTargetReadAllowed(controllerId);
+        return actionRepository.countByTargetControllerId(controllerId);
+    }
+
+    @Override
+    public Optional<Action> findAction(final long actionId) {
+        return actionRepository.findById(actionId)
+                .filter(action -> targetRepository.exists(TargetSpecifications.hasId(action.getTarget().getId())))
+                .map(JpaAction.class::cast);
+    }
+
+    @Override
+    public Slice<Action> findActionsAll(final Pageable pageable) {
+        return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, pageable, null);
+    }
+
+    @Override
+    public Slice<Action> findActions(final String rsqlParam, final Pageable pageable) {
+        final List<Specification<JpaAction>> specList = List.of(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database));
+        return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, pageable, specList);
+    }
+
+    @Override
+    public Page<Action> findActionsByTarget(final String rsqlParam, final String controllerId,
+            final Pageable pageable) {
+        assertTargetReadAllowed(controllerId);
+
+        final List<Specification<JpaAction>> specList = Arrays.asList(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database),
+                ActionSpecifications.byTargetControllerId(controllerId));
+
+        return JpaManagementHelper.findAllWithCountBySpec(actionRepository, pageable, specList);
+    }
+
+    @Override
+    public Slice<Action> findActionsByTarget(final String controllerId, final Pageable pageable) {
+        assertTargetReadAllowed(controllerId);
+        return actionRepository.findAll(ActionSpecifications.byTargetControllerId(controllerId), pageable)
+                .map(Action.class::cast);
+    }
+
+    @Override
+    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final long actionId) {
+        assertActionExistsAndAccessible(actionId);
+
+        return actionStatusRepository.findByActionId(pageReq, actionId);
+    }
+
+    @Override
+    public long countActionStatusByAction(final long actionId) {
+        assertActionExistsAndAccessible(actionId);
+
+        return actionStatusRepository.countByActionId(actionId);
+    }
+
+    // action is already got and there are checked read permissions - do not check
+    // permissions
+    // and UI which is to be removed
+    @Override
+    public Page<String> findMessagesByActionStatusId(final Pageable pageable, final long actionStatusId) {
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+        final CriteriaQuery<String> msgQuery = cb.createQuery(String.class);
+        final Root<JpaActionStatus> as = msgQuery.from(JpaActionStatus.class);
+        final ListJoin<JpaActionStatus, String> join = as.joinList("messages", JoinType.LEFT);
+        final CriteriaQuery<String> selMsgQuery = msgQuery.select(join);
+        selMsgQuery.where(cb.equal(as.get(JpaActionStatus_.id), actionStatusId));
+
+        final List<String> result = new ArrayList<>(entityManager.createQuery(selMsgQuery)
+                .setFirstResult((int) pageable.getOffset()).setMaxResults(pageable.getPageSize()).getResultList());
+
+        return new PageImpl<>(result, pageable, result.size());
+    }
+
+    @Override
+    public Optional<Action> findActionWithDetails(final long actionId) {
+        return actionRepository.findWithDetailsById(actionId)
+                .filter(action -> targetRepository.exists(TargetSpecifications.hasId(action.getTarget().getId())));
+    }
+
+    @Override
+    public Page<Action> findActiveActionsByTarget(final Pageable pageable, final String controllerId) {
+        assertTargetReadAllowed(controllerId);
+        return actionRepository
+                .findAll(ActionSpecifications.byTargetControllerIdAndActive(controllerId, true), pageable)
+                .map(Action.class::cast);
+    }
+
+    @Override
+    public Page<Action> findInActiveActionsByTarget(final Pageable pageable, final String controllerId) {
+        assertTargetReadAllowed(controllerId);
+        return actionRepository
+                .findAll(ActionSpecifications.byTargetControllerIdAndActive(controllerId, false), pageable)
+                .map(Action.class::cast);
+    }
+
+    @Override
+    public List<Action> findActiveActionsWithHighestWeight(final String controllerId, final int maxActionCount) {
+        assertTargetReadAllowed(controllerId);
+        return findActiveActionsWithHighestWeightConsideringDefault(controllerId, maxActionCount);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Action forceQuitAction(final long actionId) {
+        final JpaAction action = actionRepository.findById(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+
+        if (!action.isCancelingOrCanceled()) {
+            throw new ForceQuitActionNotAllowedException(
+                    action.getId() + " is not canceled yet and cannot be force quit");
+        }
+
+        if (!action.isActive()) {
+            throw new ForceQuitActionNotAllowedException(action.getId() + " is not active and cannot be force quit");
+        }
+
+        assertTargetUpdateAllowed(action);
+
+        log.warn("action ({}) was still active and has been force quite.", action);
+
+        // document that the status has been retrieved
+        actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
+                RepositoryConstants.SERVER_MESSAGE_PREFIX + "A force quit has been performed."));
+
+        DeploymentHelper.successCancellation(action, actionRepository, targetRepository);
+
+        return actionRepository.save(action);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Action forceTargetAction(final long actionId) {
+        final JpaAction action = actionRepository.findById(actionId).map(this::assertTargetUpdateAllowed)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+
+        if (!action.isForcedOrTimeForced()) {
+            action.setActionType(ActionType.FORCED);
+            return actionRepository.save(action);
+        }
+        return action;
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void cancelInactiveScheduledActionsForTargets(final List<Long> targetIds) {
+        if (!isMultiAssignmentsEnabled()) {
+            targetRepository.getAccessController().ifPresent(v -> {
+                if (targetRepository.count(AccessController.Operation.UPDATE,
+                        TargetSpecifications.hasIdIn(targetIds)) != targetIds.size()) {
+                    throw new EntityNotFoundException(Target.class, targetIds);
+                }
+            });
+            actionRepository.switchStatus(Status.CANCELED, targetIds, false, Status.SCHEDULED);
+        } else {
+            log.debug("The Multi Assignments feature is enabled: No need to cancel inactive scheduled actions.");
+        }
+    }
+
+    @Override
+    public void startScheduledActionsByRolloutGroupParent(final long rolloutId, final long distributionSetId,
+            final Long rolloutGroupParentId) {
+        while (DeploymentHelper.runInNewTransaction(
+                txManager,
+                "startScheduledActions-" + rolloutId,
+                status -> {
+                    final PageRequest pageRequest = PageRequest.of(0, ACTION_PAGE_LIMIT);
+                    final Page<Action> groupScheduledActions;
+                    if (rolloutGroupParentId == null) {
+                        groupScheduledActions = actionRepository.findByRolloutIdAndRolloutGroupParentIsNullAndStatus(pageRequest, rolloutId,
+                                Action.Status.SCHEDULED);
+                    } else {
+                        groupScheduledActions = actionRepository.findByRolloutIdAndRolloutGroupParentIdAndStatus(pageRequest, rolloutId,
+                                rolloutGroupParentId, Action.Status.SCHEDULED);
+                    }
+
+                    if (groupScheduledActions.getContent().isEmpty()) {
+                        return 0L;
+                    } else {
+                        // self invocation won't check @PreAuthorize but it is already checked for the method
+                        startScheduledActions(groupScheduledActions.getContent());
+                        return groupScheduledActions.getTotalElements();
+                    }
+                }) > 0) ;
+    }
+
+    @Override
+    public void startScheduledActions(final List<Action> rolloutGroupActions) {
+        // Close actions already assigned and collect pending assignments
+        final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.stream()
+                .map(JpaAction.class::cast)
+                .map(this::closeActionIfSetWasAlreadyAssigned)
+                .filter(Objects::nonNull)
+                .toList();
+        if (pendingTargetAssignments.isEmpty()) {
+            return;
+        }
+        // check if old actions needs to be canceled first
+        final List<Action> newTargetAssignments = startScheduledActionsAndHandleOpenCancellationFirst(pendingTargetAssignments);
+        if (!newTargetAssignments.isEmpty()) {
+            onlineDsAssignmentStrategy.sendDeploymentEvents(newTargetAssignments.get(0).getDistributionSet().getId(), newTargetAssignments);
+        }
+    }
+
+    @Override
+    public Optional<DistributionSet> getAssignedDistributionSet(final String controllerId) {
+        return targetRepository
+                .findOne(TargetSpecifications.hasControllerId(controllerId))
+                .map(JpaTarget::getAssignedDistributionSet);
+    }
+
+    @Override
+    public Optional<DistributionSet> getInstalledDistributionSet(final String controllerId) {
+        return targetRepository
+                .findOne(TargetSpecifications.hasControllerId(controllerId))
+                .map(JpaTarget::getInstalledDistributionSet);
+    }
+
+    @Override
+    @Transactional(readOnly = false)
+    public int deleteActionsByStatusAndLastModifiedBefore(final Set<Status> status, final long lastModified) {
+        if (status.isEmpty()) {
+            return 0;
+        }
+        /*
+         * We use a native query here because Spring JPA does not support to specify a
+         * LIMIT clause on a DELETE statement. However, for this specific use case
+         * (action cleanup), we must specify a row limit to reduce the overall load on
+         * the database.
+         */
+
+        final int statusCount = status.size();
+        final Status[] statusArr = status.toArray(new Status[statusCount]);
+
+        final String queryStr = String.format(getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(database),
+                formatInClauseWithNumberKeys(statusCount));
+        final Query deleteQuery = entityManager.createNativeQuery(queryStr);
+
+        IntStream.range(0, statusCount)
+                .forEach(i -> deleteQuery.setParameter(String.valueOf(i), statusArr[i].ordinal()));
+        deleteQuery.setParameter("tenant", tenantAware.getCurrentTenant().toUpperCase());
+        deleteQuery.setParameter("last_modified_at", lastModified);
+
+        log.debug("Action cleanup: Executing the following (native) query: {}", deleteQuery);
+        return deleteQuery.executeUpdate();
+    }
+
+    @Override
+    public boolean hasPendingCancellations(final Long targetId) {
+        // target access checked in assertTargetReadAllowed
+        assertTargetReadAllowed(targetId);
+        return actionRepository
+                .exists(ActionSpecifications.byTargetIdAndIsActiveAndStatus(targetId, Action.Status.CANCELING));
+    }
+
+    @Override
+    @Transactional
+    public void cancelActionsForDistributionSet(final CancelationType cancelationType,
+            final DistributionSet distributionSet) {
+        actionRepository.findAll(ActionSpecifications
+                        .byDistributionSetIdAndActiveAndStatusIsNot(distributionSet.getId(), Status.CANCELING))
+                .forEach(action -> {
+                    try {
+                        assertTargetUpdateAllowed(action);
+                        cancelAction(action.getId());
+                        log.debug("Action {} canceled", action.getId());
+                    } catch (final InsufficientPermissionException e) {
+                        log.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
+                    } catch (final EntityNotFoundException e) {
+                        log.trace("Could not cancel action {} due to entity not found exception.", action.getId(), e);
+                    }
+                });
+        if (cancelationType == CancelationType.FORCE) {
+            actionRepository.findAll(ActionSpecifications.byDistributionSetIdAndActive(distributionSet.getId()))
+                    .forEach(action -> {
+                        try {
+                            assertTargetUpdateAllowed(action);
+                            forceQuitAction(action.getId());
+                            log.debug("Action {} force canceled", action.getId());
+                        } catch (final InsufficientPermissionException e) {
+                            log.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
+                        } catch (final EntityNotFoundException e) {
+                            log.trace("Could not cancel action {} due to entity not found exception.", action.getId(),
+                                    e);
+                        }
+                    });
+        }
+    }
+
+    protected ActionRepository getActionRepository() {
+        return actionRepository;
+    }
+
+    protected boolean isActionsAutocloseEnabled() {
+        return getConfigValue(REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class);
+    }
+
+    private static Map<Long, List<TargetWithActionType>> convertRequest(
+            final Collection<DeploymentRequest> deploymentRequests) {
+        return deploymentRequests.stream().collect(Collectors.groupingBy(DeploymentRequest::getDistributionSetId,
+                Collectors.mapping(DeploymentRequest::getTargetWithActionType, Collectors.toList())));
+    }
+
+    /**
+     * split tIDs length into max entries in-statement because many database have
+     * constraint of max entries in in-statements e.g. Oracle with maximum 1000
+     * elements, so we need to split the entries here and execute multiple
+     * statements
+     */
+    private static List<List<Long>> getTargetEntitiesAsChunks(final List<JpaTarget> targetEntities) {
+        return ListUtils.partition(targetEntities.stream().map(Target::getId).collect(Collectors.toList()),
+                Constants.MAX_ENTRIES_IN_STATEMENT);
+    }
+
+    private static DistributionSetAssignmentResult buildAssignmentResult(final JpaDistributionSet distributionSet,
+            final List<JpaAction> assignedActions, final int totalTargetsForAssignment) {
+        final int alreadyAssignedTargetsCount = totalTargetsForAssignment - assignedActions.size();
+
+        return new DistributionSetAssignmentResult(distributionSet, alreadyAssignedTargetsCount, assignedActions);
+    }
+
+    private static String getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(final Database database) {
+        return QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.getOrDefault(database,
+                QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED_DEFAULT);
+    }
+
+    private static String formatInClauseWithNumberKeys(final int count) {
+        return formatInClause(IntStream.range(0, count).mapToObj(String::valueOf).collect(Collectors.toList()));
+    }
+
+    private static String formatInClause(final Collection<String> elements) {
+        return "#" + String.join(",#", elements);
+    }
+
+    private static RetryTemplate createRetryTemplate() {
+        final RetryTemplate template = new RetryTemplate();
+
+        final FixedBackOffPolicy backOffPolicy = new FixedBackOffPolicy();
+        backOffPolicy.setBackOffPeriod(Constants.TX_RT_DELAY);
+        template.setBackOffPolicy(backOffPolicy);
+
+        final SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(Constants.TX_RT_MAX,
+                Collections.singletonMap(ConcurrencyFailureException.class, true));
+        template.setRetryPolicy(retryPolicy);
+
+        return template;
     }
 
     private List<DistributionSetAssignmentResult> assignDistributionSets(final String initiatedBy,
@@ -327,12 +739,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         return deploymentRequests;
     }
 
-    private static Map<Long, List<TargetWithActionType>> convertRequest(
-            final Collection<DeploymentRequest> deploymentRequests) {
-        return deploymentRequests.stream().collect(Collectors.groupingBy(DeploymentRequest::getDistributionSetId,
-                Collectors.mapping(DeploymentRequest::getTargetWithActionType, Collectors.toList())));
-    }
-
     private DistributionSetAssignmentResult assignDistributionSetToTargetsWithRetry(final String initiatedBy,
             final Long dsId, final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
@@ -355,21 +761,14 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      * to {@link TargetUpdateStatus#IN_SYNC} <br/>
      * D. does not send a {@link TargetAssignDistributionSetEvent}.<br/>
      *
-     * @param initiatedBy
-     *            the username of the user who initiated the assignment
-     * @param dsId
-     *            the ID of the distribution set to assign
-     * @param targetsWithActionType
-     *            a list of all targets and their action type
-     * @param actionMessage
-     *            an optional message to be written into the action status
-     * @param assignmentStrategy
-     *            the assignment strategy (online /offline)
+     * @param initiatedBy the username of the user who initiated the assignment
+     * @param dsId the ID of the distribution set to assign
+     * @param targetsWithActionType a list of all targets and their action type
+     * @param actionMessage an optional message to be written into the action status
+     * @param assignmentStrategy the assignment strategy (online /offline)
      * @return the assignment result
-     *
-     * @throws IncompleteDistributionSetException
-     *             if mandatory {@link SoftwareModuleType} are not assigned as
-     *             define by the {@link DistributionSetType}.
+     * @throws IncompleteDistributionSetException if mandatory {@link SoftwareModuleType} are not assigned as
+     *         define by the {@link DistributionSetType}.
      */
     private DistributionSetAssignmentResult assignDistributionSetToTargets(final String initiatedBy, final Long dsId,
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
@@ -377,7 +776,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         final JpaDistributionSet distributionSet =
                 (JpaDistributionSet) distributionSetManagement.getValidAndComplete(dsId);
 
-        if (((JpaDistributionSetManagement)distributionSetManagement).isImplicitLockApplicable(distributionSet)) {
+        if (((JpaDistributionSetManagement) distributionSetManagement).isImplicitLockApplicable(distributionSet)) {
             // without new transaction DS changed event is not thrown
             DeploymentHelper.runInNewTransaction(txManager, "Implicit lock", status -> {
                 distributionSetManagement.lock(distributionSet.getId());
@@ -446,24 +845,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         return new ArrayList<>(assignedActions.values());
     }
 
-    /**
-     * split tIDs length into max entries in-statement because many database have
-     * constraint of max entries in in-statements e.g. Oracle with maximum 1000
-     * elements, so we need to split the entries here and execute multiple
-     * statements
-     */
-    private static List<List<Long>> getTargetEntitiesAsChunks(final List<JpaTarget> targetEntities) {
-        return ListUtils.partition(targetEntities.stream().map(Target::getId).collect(Collectors.toList()),
-                Constants.MAX_ENTRIES_IN_STATEMENT);
-    }
-
-    private static DistributionSetAssignmentResult buildAssignmentResult(final JpaDistributionSet distributionSet,
-            final List<JpaAction> assignedActions, final int totalTargetsForAssignment) {
-        final int alreadyAssignedTargetsCount = totalTargetsForAssignment - assignedActions.size();
-
-        return new DistributionSetAssignmentResult(distributionSet, alreadyAssignedTargetsCount, assignedActions);
-    }
-
     private void enforceMaxAssignmentsPerRequest(final int requestedActions) {
         QuotaHelper.assertAssignmentRequestSizeQuota(requestedActions,
                 quotaManagement.getMaxTargetDistributionSetAssignmentsPerManualAssignment());
@@ -486,24 +867,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             assignmentStrategy.closeActiveActions(targetIdsChunks);
         } else {
             assignmentStrategy.cancelActiveActions(targetIdsChunks);
-        }
-    }
-
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void cancelInactiveScheduledActionsForTargets(final List<Long> targetIds) {
-        if (!isMultiAssignmentsEnabled()) {
-            targetRepository.getAccessController().ifPresent(v -> {
-                if (targetRepository.count(AccessController.Operation.UPDATE,
-                        TargetSpecifications.hasIdIn(targetIds)) != targetIds.size()) {
-                    throw new EntityNotFoundException(Target.class, targetIds);
-                }
-            });
-            actionRepository.switchStatus(Status.CANCELED, targetIds, false, Status.SCHEDULED);
-        } else {
-            log.debug("The Multi Assignments feature is enabled: No need to cancel inactive scheduled actions.");
         }
     }
 
@@ -579,112 +942,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         // detaching as the entity has been updated by the JPQL query above
         targets.forEach(entityManager::detach);
         assignmentStrategy.sendTargetUpdatedEvents(set, targets);
-    }
-
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Action cancelAction(final long actionId) {
-        log.debug("cancelAction({})", actionId);
-
-        final JpaAction action = actionRepository.findById(actionId)
-                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
-
-        if (action.isCancelingOrCanceled()) {
-            throw new CancelActionNotAllowedException("Actions in canceling or canceled state cannot be canceled");
-        }
-
-        assertTargetUpdateAllowed(action);
-
-        if (action.isActive()) {
-            log.debug("action ({}) was still active. Change to {}.", action, Status.CANCELING);
-            action.setStatus(Status.CANCELING);
-
-            // document that the status has been retrieved
-            actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
-                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "manual cancelation requested"));
-            final Action saveAction = actionRepository.save(action);
-
-            onlineDsAssignmentStrategy.cancelAssignment(action);
-
-            return saveAction;
-        } else {
-            throw new CancelActionNotAllowedException(action.getId() + " is not active and cannot be canceled");
-        }
-    }
-
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Action forceQuitAction(final long actionId) {
-        final JpaAction action = actionRepository.findById(actionId)
-                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
-
-        if (!action.isCancelingOrCanceled()) {
-            throw new ForceQuitActionNotAllowedException(
-                    action.getId() + " is not canceled yet and cannot be force quit");
-        }
-
-        if (!action.isActive()) {
-            throw new ForceQuitActionNotAllowedException(action.getId() + " is not active and cannot be force quit");
-        }
-
-        assertTargetUpdateAllowed(action);
-
-        log.warn("action ({}) was still active and has been force quite.", action);
-
-        // document that the status has been retrieved
-        actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
-                RepositoryConstants.SERVER_MESSAGE_PREFIX + "A force quit has been performed."));
-
-        DeploymentHelper.successCancellation(action, actionRepository, targetRepository);
-
-        return actionRepository.save(action);
-    }
-
-    @Override
-    public void startScheduledActionsByRolloutGroupParent(final long rolloutId, final long distributionSetId,
-            final Long rolloutGroupParentId) {
-        while (DeploymentHelper.runInNewTransaction(
-                    txManager,
-                    "startScheduledActions-" + rolloutId,
-                    status -> {
-                        final PageRequest pageRequest = PageRequest.of(0, ACTION_PAGE_LIMIT);
-                        final Page<Action> groupScheduledActions;
-                        if (rolloutGroupParentId == null) {
-                            groupScheduledActions = actionRepository.findByRolloutIdAndRolloutGroupParentIsNullAndStatus(pageRequest, rolloutId, Action.Status.SCHEDULED);
-                        } else {
-                            groupScheduledActions = actionRepository.findByRolloutIdAndRolloutGroupParentIdAndStatus(pageRequest, rolloutId, rolloutGroupParentId, Action.Status.SCHEDULED);
-                        }
-
-                        if (groupScheduledActions.getContent().isEmpty()) {
-                            return 0L;
-                        } else {
-                            // self invocation won't check @PreAuthorize but it is already checked for the method
-                            startScheduledActions(groupScheduledActions.getContent());
-                            return groupScheduledActions.getTotalElements();
-                        }
-                    }) > 0);
-    }
-
-    @Override
-    public void startScheduledActions(final List<Action> rolloutGroupActions) {
-        // Close actions already assigned and collect pending assignments
-        final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.stream()
-                .map(JpaAction.class::cast)
-                .map(this::closeActionIfSetWasAlreadyAssigned)
-                .filter(Objects::nonNull)
-                .toList();
-        if (pendingTargetAssignments.isEmpty()) {
-            return;
-        }
-        // check if old actions needs to be canceled first
-        final List<Action> newTargetAssignments = startScheduledActionsAndHandleOpenCancellationFirst(pendingTargetAssignments);
-        if (!newTargetAssignments.isEmpty()) {
-            onlineDsAssignmentStrategy.sendDeploymentEvents(newTargetAssignments.get(0).getDistributionSet().getId(), newTargetAssignments);
-        }
     }
 
     private JpaAction closeActionIfSetWasAlreadyAssigned(final JpaAction action) {
@@ -764,221 +1021,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         actionStatusRepository.save(actionStatus);
     }
 
-    @Override
-    public Optional<Action> findAction(final long actionId) {
-        return actionRepository.findById(actionId)
-                .filter(action -> targetRepository.exists(TargetSpecifications.hasId(action.getTarget().getId())))
-                .map(JpaAction.class::cast);
-    }
-
-    @Override
-    public Optional<Action> findActionWithDetails(final long actionId) {
-        return actionRepository.findWithDetailsById(actionId)
-                .filter(action -> targetRepository.exists(TargetSpecifications.hasId(action.getTarget().getId())));
-    }
-
-    @Override
-    public Slice<Action> findActionsByTarget(final String controllerId, final Pageable pageable) {
-        assertTargetReadAllowed(controllerId);
-        return actionRepository.findAll(ActionSpecifications.byTargetControllerId(controllerId), pageable)
-                .map(Action.class::cast);
-    }
-
-    @Override
-    public Page<Action> findActionsByTarget(final String rsqlParam, final String controllerId,
-            final Pageable pageable) {
-        assertTargetReadAllowed(controllerId);
-
-        final List<Specification<JpaAction>> specList = Arrays.asList(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database),
-                ActionSpecifications.byTargetControllerId(controllerId));
-
-        return JpaManagementHelper.findAllWithCountBySpec(actionRepository, pageable, specList);
-    }
-
-    @Override
-    public Page<Action> findActiveActionsByTarget(final Pageable pageable, final String controllerId) {
-        assertTargetReadAllowed(controllerId);
-        return actionRepository
-                .findAll(ActionSpecifications.byTargetControllerIdAndActive(controllerId, true), pageable)
-                .map(Action.class::cast);
-    }
-
-    @Override
-    public Page<Action> findInActiveActionsByTarget(final Pageable pageable, final String controllerId) {
-        assertTargetReadAllowed(controllerId);
-        return actionRepository
-                .findAll(ActionSpecifications.byTargetControllerIdAndActive(controllerId, false), pageable)
-                .map(Action.class::cast);
-    }
-
-    @Override
-    public List<Action> findActiveActionsWithHighestWeight(final String controllerId, final int maxActionCount) {
-        assertTargetReadAllowed(controllerId);
-        return findActiveActionsWithHighestWeightConsideringDefault(controllerId, maxActionCount);
-    }
-
-    @Override
-    public long countActionsByTarget(final String controllerId) {
-        assertTargetReadAllowed(controllerId);
-        return actionRepository.countByTargetControllerId(controllerId);
-    }
-
-    @Override
-    public long countActionsByTarget(final String rsqlParam, final String controllerId) {
-        assertTargetReadAllowed(controllerId);
-
-        final List<Specification<JpaAction>> specList = Arrays.asList(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database),
-                ActionSpecifications.byTargetControllerId(controllerId));
-
-        return JpaManagementHelper.countBySpec(actionRepository, specList);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Action forceTargetAction(final long actionId) {
-        final JpaAction action = actionRepository.findById(actionId).map(this::assertTargetUpdateAllowed)
-                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
-
-        if (!action.isForcedOrTimeForced()) {
-            action.setActionType(ActionType.FORCED);
-            return actionRepository.save(action);
-        }
-        return action;
-    }
-
-    @Override
-    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final long actionId) {
-        assertActionExistsAndAccessible(actionId);
-
-        return actionStatusRepository.findByActionId(pageReq, actionId);
-    }
-
-    @Override
-    public long countActionStatusByAction(final long actionId) {
-        assertActionExistsAndAccessible(actionId);
-
-        return actionStatusRepository.countByActionId(actionId);
-    }
-
-    // action is already got and there are checked read permissions - do not check
-    // permissions
-    // and UI which is to be removed
-    @Override
-    public Page<String> findMessagesByActionStatusId(final Pageable pageable, final long actionStatusId) {
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-
-        final CriteriaQuery<String> msgQuery = cb.createQuery(String.class);
-        final Root<JpaActionStatus> as = msgQuery.from(JpaActionStatus.class);
-        final ListJoin<JpaActionStatus, String> join = as.joinList("messages", JoinType.LEFT);
-        final CriteriaQuery<String> selMsgQuery = msgQuery.select(join);
-        selMsgQuery.where(cb.equal(as.get(JpaActionStatus_.id), actionStatusId));
-
-        final List<String> result = new ArrayList<>(entityManager.createQuery(selMsgQuery)
-                .setFirstResult((int) pageable.getOffset()).setMaxResults(pageable.getPageSize()).getResultList());
-
-        return new PageImpl<>(result, pageable, result.size());
-    }
-
-    @Override
-    public long countActionsAll() {
-        return actionRepository.count();
-    }
-
-    @Override
-    public long countActions(final String rsqlParam) {
-        final List<Specification<JpaAction>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database));
-        return JpaManagementHelper.countBySpec(actionRepository, specList);
-    }
-
-    @Override
-    public Slice<Action> findActionsAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, pageable, null);
-    }
-
-    @Override
-    public Slice<Action> findActions(final String rsqlParam, final Pageable pageable) {
-        final List<Specification<JpaAction>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database));
-        return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, pageable, specList);
-    }
-
-    @Override
-    public Optional<DistributionSet> getAssignedDistributionSet(final String controllerId) {
-        return targetRepository
-                .findOne(TargetSpecifications.hasControllerId(controllerId))
-                .map(JpaTarget::getAssignedDistributionSet);
-    }
-
-    @Override
-    public Optional<DistributionSet> getInstalledDistributionSet(final String controllerId) {
-        return targetRepository
-                .findOne(TargetSpecifications.hasControllerId(controllerId))
-                .map(JpaTarget::getInstalledDistributionSet);
-    }
-
-    @Override
-    @Transactional(readOnly = false)
-    public int deleteActionsByStatusAndLastModifiedBefore(final Set<Status> status, final long lastModified) {
-        if (status.isEmpty()) {
-            return 0;
-        }
-        /*
-         * We use a native query here because Spring JPA does not support to specify a
-         * LIMIT clause on a DELETE statement. However, for this specific use case
-         * (action cleanup), we must specify a row limit to reduce the overall load on
-         * the database.
-         */
-
-        final int statusCount = status.size();
-        final Status[] statusArr = status.toArray(new Status[statusCount]);
-
-        final String queryStr = String.format(getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(database),
-                formatInClauseWithNumberKeys(statusCount));
-        final Query deleteQuery = entityManager.createNativeQuery(queryStr);
-
-        IntStream.range(0, statusCount)
-                .forEach(i -> deleteQuery.setParameter(String.valueOf(i), statusArr[i].ordinal()));
-        deleteQuery.setParameter("tenant", tenantAware.getCurrentTenant().toUpperCase());
-        deleteQuery.setParameter("last_modified_at", lastModified);
-
-        log.debug("Action cleanup: Executing the following (native) query: {}", deleteQuery);
-        return deleteQuery.executeUpdate();
-    }
-
-    @Override
-    public boolean hasPendingCancellations(final Long targetId) {
-        // target access checked in assertTargetReadAllowed
-        assertTargetReadAllowed(targetId);
-        return actionRepository
-                .exists(ActionSpecifications.byTargetIdAndIsActiveAndStatus(targetId, Action.Status.CANCELING));
-    }
-
-    private static String getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(final Database database) {
-        return QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.getOrDefault(database,
-                QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED_DEFAULT);
-    }
-
-    private static String formatInClauseWithNumberKeys(final int count) {
-        return formatInClause(IntStream.range(0, count).mapToObj(String::valueOf).collect(Collectors.toList()));
-    }
-
-    private static String formatInClause(final Collection<String> elements) {
-        return "#" + String.join(",#", elements);
-    }
-
-    protected ActionRepository getActionRepository() {
-        return actionRepository;
-    }
-
-    protected boolean isActionsAutocloseEnabled() {
-        return getConfigValue(REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, Boolean.class);
-    }
-
     private boolean isMultiAssignmentsEnabled() {
         return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
                 .isMultiAssignmentsEnabled();
@@ -992,54 +1034,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {
         return systemSecurityContext
                 .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
-    }
-
-    private static RetryTemplate createRetryTemplate() {
-        final RetryTemplate template = new RetryTemplate();
-
-        final FixedBackOffPolicy backOffPolicy = new FixedBackOffPolicy();
-        backOffPolicy.setBackOffPeriod(Constants.TX_RT_DELAY);
-        template.setBackOffPolicy(backOffPolicy);
-
-        final SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(Constants.TX_RT_MAX,
-                Collections.singletonMap(ConcurrencyFailureException.class, true));
-        template.setRetryPolicy(retryPolicy);
-
-        return template;
-    }
-
-    @Override
-    @Transactional
-    public void cancelActionsForDistributionSet(final CancelationType cancelationType,
-            final DistributionSet distributionSet) {
-        actionRepository.findAll(ActionSpecifications
-                .byDistributionSetIdAndActiveAndStatusIsNot(distributionSet.getId(), Status.CANCELING))
-                .forEach(action -> {
-                    try {
-                        assertTargetUpdateAllowed(action);
-                        cancelAction(action.getId());
-                        log.debug("Action {} canceled", action.getId());
-                    } catch (final InsufficientPermissionException e) {
-                        log.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
-                    } catch (final EntityNotFoundException e) {
-                        log.trace("Could not cancel action {} due to entity not found exception.", action.getId(), e);
-                    }
-                });
-        if (cancelationType == CancelationType.FORCE) {
-            actionRepository.findAll(ActionSpecifications.byDistributionSetIdAndActive(distributionSet.getId()))
-                    .forEach(action -> {
-                        try {
-                            assertTargetUpdateAllowed(action);
-                            forceQuitAction(action.getId());
-                            log.debug("Action {} force canceled", action.getId());
-                        } catch (final InsufficientPermissionException e) {
-                            log.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
-                        } catch (final EntityNotFoundException e) {
-                            log.trace("Could not cancel action {} due to entity not found exception.", action.getId(),
-                                    e);
-                        }
-                    });
-        }
     }
 
     private void assertTargetReadAllowed(final Long targetId) {
