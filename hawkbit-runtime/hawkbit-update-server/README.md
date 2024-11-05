@@ -41,7 +41,8 @@ Add to your `pom.xml` :
 </dependency>
 ```
 
-Optional as well is the addition of [Protostuff](https://github.com/protostuff/protostuff) based message payload serialization for improved performance.
+Optional as well is the addition of [Protostuff](https://github.com/protostuff/protostuff) based message payload
+serialization for improved performance.
 
 Add to your `application.properties` :
 

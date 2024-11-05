@@ -9,11 +9,6 @@
  */
 package org.eclipse.hawkbit.ui.simple.view.util;
 
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.theme.lumo.LumoUtility;
-
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -21,11 +16,15 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.theme.lumo.LumoUtility;
+
 // id type shall have proper equals and hashCode - i.e. eligible hash set element
-public class SelectionGrid<T,ID> extends Grid<T> {
+public class SelectionGrid<T, ID> extends Grid<T> {
 
     private volatile String rsqlFilter;
-
 
     public SelectionGrid(
             final EntityRepresentation<T, ID> entityRepresentation) {

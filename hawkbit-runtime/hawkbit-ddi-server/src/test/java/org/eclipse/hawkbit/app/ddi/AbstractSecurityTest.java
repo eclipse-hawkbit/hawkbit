@@ -24,10 +24,9 @@ import org.springframework.web.context.WebApplicationContext;
 @ExtendWith(SharedSqlTestDatabaseExtension.class)
 public abstract class AbstractSecurityTest {
 
+    protected MockMvc mvc;
     @Autowired
     private WebApplicationContext context;
-
-    protected MockMvc mvc;
 
     @BeforeEach
     public void setup() {

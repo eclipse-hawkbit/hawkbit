@@ -9,12 +9,17 @@
  */
 package org.eclipse.hawkbit.ui.simple.view;
 
-import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
-import org.eclipse.hawkbit.ui.simple.view.util.Filter;
-import org.eclipse.hawkbit.ui.simple.MainLayout;
-import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
-import org.eclipse.hawkbit.ui.simple.view.util.TableView;
-import org.eclipse.hawkbit.ui.simple.view.util.Utils;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
+
+import jakarta.annotation.security.RolesAllowed;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -33,27 +38,23 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import jakarta.annotation.security.RolesAllowed;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetType;
+import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
+import org.eclipse.hawkbit.ui.simple.MainLayout;
+import org.eclipse.hawkbit.ui.simple.view.util.Filter;
+import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
+import org.eclipse.hawkbit.ui.simple.view.util.TableView;
+import org.eclipse.hawkbit.ui.simple.view.util.Utils;
 import org.springframework.util.ObjectUtils;
-
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 @PageTitle("Targets")
 @Route(value = "targets", layout = MainLayout.class)
-@RolesAllowed({"TARGET_READ"})
+@RolesAllowed({ "TARGET_READ" })
 @Uses(Icon.class)
 public class TargetView extends TableView<MgmtTarget, String> {
 
@@ -156,34 +157,35 @@ public class TargetView extends TableView<MgmtTarget, String> {
                                             .getFilters(0, 30, null, null, null)
                                             .getBody().getContent())
                             .orElse(Collections.emptyList()));
-            savedFilters.setItemLabelGenerator(query -> Optional.ofNullable(query).map(MgmtTargetFilterQuery::getName).orElse("<select saved filter>"));
+            savedFilters.setItemLabelGenerator(
+                    query -> Optional.ofNullable(query).map(MgmtTargetFilterQuery::getName).orElse("<select saved filter>"));
             savedFilters.setWidthFull();
 
             textFilter.setWidthFull();
             final Button saveBtn = Utils.tooltip(new Button(VaadinIcon.ARCHIVE.create()), "Save (Enter)");
             saveBtn.addClickListener(e ->
-                new Utils.BaseDialog<Void>("Save Filter") {{
-                    setHeight("40%");
-                    final Button finishBtn = Utils.tooltip(new Button("Save"), "Save (Enter)");
-                    final TextField name = Utils.textField(
-                            Constants.NAME,
-                            e -> finishBtn.setEnabled(!e.getHasValue().isEmpty()));
-                    name.focus();
-                    finishBtn.addClickShortcut(Key.ENTER);
-                    finishBtn.setEnabled(false);
-                    finishBtn.addClickListener(e -> {
-                        final MgmtTargetFilterQueryRequestBody createRequest = new MgmtTargetFilterQueryRequestBody();
-                        createRequest.setName(name.getValue());
-                        createRequest.setQuery(textFilter.getValue());
-                        hawkbitClient.getTargetFilterQueryRestApi().createFilter(createRequest);
-                        savedFilters.setItems(
-                                hawkbitClient.getTargetFilterQueryRestApi()
-                                        .getFilters(0, 30, null, null, null).getBody().getContent());
-                        close();
-                    });
-                    add(name, finishBtn);
-                    open();
-                }});
+                    new Utils.BaseDialog<Void>("Save Filter") {{
+                        setHeight("40%");
+                        final Button finishBtn = Utils.tooltip(new Button("Save"), "Save (Enter)");
+                        final TextField name = Utils.textField(
+                                Constants.NAME,
+                                e -> finishBtn.setEnabled(!e.getHasValue().isEmpty()));
+                        name.focus();
+                        finishBtn.addClickShortcut(Key.ENTER);
+                        finishBtn.setEnabled(false);
+                        finishBtn.addClickListener(e -> {
+                            final MgmtTargetFilterQueryRequestBody createRequest = new MgmtTargetFilterQueryRequestBody();
+                            createRequest.setName(name.getValue());
+                            createRequest.setQuery(textFilter.getValue());
+                            hawkbitClient.getTargetFilterQueryRestApi().createFilter(createRequest);
+                            savedFilters.setItems(
+                                    hawkbitClient.getTargetFilterQueryRestApi()
+                                            .getFilters(0, 30, null, null, null).getBody().getContent());
+                            close();
+                        });
+                        add(name, finishBtn);
+                        open();
+                    }});
             saveBtn.addClickShortcut(Key.ENTER);
 
             layout.setSpacing(false);
@@ -216,10 +218,10 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private TargetDetails() {
             description.setMinLength(2);
             Stream.of(
-                    description,
-                    createdBy, createdAt,
-                    lastModifiedBy, lastModifiedAt,
-                    securityToken)
+                            description,
+                            createdBy, createdAt,
+                            lastModifiedBy, lastModifiedAt,
+                            securityToken)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -300,7 +302,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     request.setTargetType(type.getValue().getTypeId());
                 }
                 hawkbitClient.getTargetRestApi().createTargets(
-                        List.of(request))
+                                List.of(request))
                         .getBody()
                         .stream()
                         .findFirst()

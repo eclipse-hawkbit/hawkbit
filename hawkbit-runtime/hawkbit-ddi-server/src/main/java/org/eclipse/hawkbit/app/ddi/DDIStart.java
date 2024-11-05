@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
-
 /**
  * A {@link SpringBootApplication} annotated class with a main method to start.
  * The minimal configuration for the stand alone hawkBit DDI server.
@@ -31,8 +30,7 @@ public class DDIStart {
     /**
      * Main method to start the spring-boot application.
      *
-     * @param args
-     *            the VM arguments.
+     * @param args the VM arguments.
      */
     public static void main(final String[] args) {
         SpringApplication.run(DDIStart.class, args);

@@ -9,13 +9,14 @@
  */
 package org.eclipse.hawkbit.ui.simple.security;
 
+import java.util.Optional;
+
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 public class AuthenticatedUser {
+
     private final AuthenticationContext authenticationContext;
 
     public AuthenticatedUser(final AuthenticationContext authenticationContext) {

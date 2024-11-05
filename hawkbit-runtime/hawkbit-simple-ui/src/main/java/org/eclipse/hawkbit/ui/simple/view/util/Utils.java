@@ -9,6 +9,14 @@
  */
 package org.eclipse.hawkbit.ui.simple.view.util;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Text;
@@ -28,14 +36,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 public class Utils {
 
     private Utils() {
@@ -45,6 +45,7 @@ public class Utils {
     public static TextField textField(final String label) {
         return textField(label, null);
     }
+
     public static TextField textField(final String label, final Consumer<HasValue.ValueChangeEvent<String>> changeListener) {
         final TextField textField = new TextField(label);
         textField.setWidthFull();
@@ -60,6 +61,7 @@ public class Utils {
     public static NumberField numberField(final String label) {
         return numberField(label, null);
     }
+
     public static NumberField numberField(final String label, final Consumer<HasValue.ValueChangeEvent<Double>> changeListener) {
         final NumberField numberField = new NumberField(label);
         numberField.setWidthFull();
@@ -109,7 +111,7 @@ public class Utils {
     public static <T> void remove(final Collection<T> remove, final Set<T> from, final Function<T, ?> idFn) {
         remove.forEach(toRemove -> {
             final Object id = idFn.apply(toRemove);
-            for (final Iterator<T> i = from.iterator(); i.hasNext();) {
+            for (final Iterator<T> i = from.iterator(); i.hasNext(); ) {
                 if (idFn.apply(i.next()).equals(id)) {
                     i.remove();
                 }

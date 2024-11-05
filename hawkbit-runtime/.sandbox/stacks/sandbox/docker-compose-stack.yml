@@ -28,18 +28,18 @@ services:
   hawkbit:
     image: "hawkbit/hawkbit-update-server:latest"
     networks:
-    - proxy_proxy
-    - sandbox
+      - proxy_proxy
+      - sandbox
     deploy:
       restart_policy:
         condition: on-failure
     environment:
-    - 'SPRING_PROFILES_ACTIVE=cloudsandbox'
-    - 'SPRING_RABBITMQ_HOST=rabbitmq'
-    - 'SPRING_RABBITMQ_USERNAME=guest'
-    - 'SPRING_RABBITMQ_PASSWORD=guest'
-    - 'VIRTUAL_HOST=hawkbit.eclipseprojects.io'
-    - 'LETSENCRYPT_HOST=hawkbit.eclipseprojects.io'
+      - 'SPRING_PROFILES_ACTIVE=cloudsandbox'
+      - 'SPRING_RABBITMQ_HOST=rabbitmq'
+      - 'SPRING_RABBITMQ_USERNAME=guest'
+      - 'SPRING_RABBITMQ_PASSWORD=guest'
+      - 'VIRTUAL_HOST=hawkbit.eclipseprojects.io'
+      - 'LETSENCRYPT_HOST=hawkbit.eclipseprojects.io'
 
   # ---------------------
   # hawkBit simulator
@@ -47,16 +47,16 @@ services:
   simulator:
     image: "hawkbit/hawkbit-device-simulator:latest"
     networks:
-    - sandbox
+      - sandbox
     deploy:
       restart_policy:
         condition: on-failure
     environment:
-    - 'SPRING_RABBITMQ_VIRTUALHOST=/'
-    - 'SPRING_RABBITMQ_HOST=rabbitmq'
-    - 'SPRING_RABBITMQ_PORT=5672'
-    - 'SPRING_RABBITMQ_USERNAME=guest'
-    - 'SPRING_RABBITMQ_PASSWORD=guest'
+      - 'SPRING_RABBITMQ_VIRTUALHOST=/'
+      - 'SPRING_RABBITMQ_HOST=rabbitmq'
+      - 'SPRING_RABBITMQ_PORT=5672'
+      - 'SPRING_RABBITMQ_USERNAME=guest'
+      - 'SPRING_RABBITMQ_PASSWORD=guest'
 
   # ---------------------
   # RabbitMQ service
@@ -64,7 +64,7 @@ services:
   rabbitmq:
     image: "rabbitmq:3-management"
     networks:
-    - sandbox
+      - sandbox
     deploy:
       restart_policy:
         condition: on-failure

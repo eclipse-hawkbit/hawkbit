@@ -14,18 +14,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.ResultActions;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @SpringBootTest(
         properties = {
@@ -35,7 +33,7 @@ import io.qameta.allure.Story;
                         CorsTest.ALLOWED_ORIGIN_FIRST + "," +
                         CorsTest.ALLOWED_ORIGIN_SECOND,
                 "hawkbit.server.security.cors.exposedHeaders=" +
-                        HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN})
+                        HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN })
 @Feature("Integration Test - Security")
 @Story("CORS")
 public class CorsTest extends AbstractSecurityTest {
@@ -63,8 +61,8 @@ public class CorsTest extends AbstractSecurityTest {
 
         final String invalidCorsUrlResponseBody = performOptionsRequestToUrlWithOrigin(
                 MgmtRestConstants.BASE_SYSTEM_MAPPING, ALLOWED_ORIGIN_FIRST).andExpect(status().isForbidden())
-                        .andExpect(header().doesNotExist(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).andReturn()
-                        .getResponse().getContentAsString();
+                .andExpect(header().doesNotExist(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).andReturn()
+                .getResponse().getContentAsString();
         assertThat(invalidCorsUrlResponseBody).isEqualTo(INVALID_CORS_REQUEST);
     }
 

@@ -9,6 +9,15 @@
  */
 package org.eclipse.hawkbit.ui.simple.view.util;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
@@ -18,15 +27,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Filter extends Div {
 
@@ -46,7 +46,7 @@ public class Filter extends Div {
         filtersDiv.add(primaryRsql.components());
         filtersDiv.addClassName(LumoUtility.Gap.SMALL);
 
-        final Button searchBtn = Utils.tooltip(new Button(VaadinIcon.REFRESH.create()),"Search");
+        final Button searchBtn = Utils.tooltip(new Button(VaadinIcon.REFRESH.create()), "Search");
         searchBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         searchBtn.addClickListener(e -> changeListener.accept(rsql.filter()));
         final Button resetBtn = Utils.tooltip(new Button(VaadinIcon.ERASER.create()), "Reset");

@@ -9,17 +9,20 @@
  */
 package org.eclipse.hawkbit.ui.simple.view;
 
-import com.vaadin.flow.component.checkbox.Checkbox;
-import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
-import org.eclipse.hawkbit.ui.simple.MainLayout;
-import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
-import org.eclipse.hawkbit.ui.simple.view.util.TableView;
-import org.eclipse.hawkbit.ui.simple.view.util.Utils;
-import org.eclipse.hawkbit.ui.simple.view.util.Filter;
+import java.time.ZoneOffset;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
+
+import jakarta.annotation.security.RolesAllowed;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -37,7 +40,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import jakarta.annotation.security.RolesAllowed;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutCondition;
@@ -46,18 +48,17 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
+import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
+import org.eclipse.hawkbit.ui.simple.MainLayout;
+import org.eclipse.hawkbit.ui.simple.view.util.Filter;
+import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
+import org.eclipse.hawkbit.ui.simple.view.util.TableView;
+import org.eclipse.hawkbit.ui.simple.view.util.Utils;
 import org.springframework.util.ObjectUtils;
-
-import java.time.ZoneOffset;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 @PageTitle("Rollouts")
 @Route(value = "rollouts", layout = MainLayout.class)
-@RolesAllowed({"ROLLOUT_READ"})
+@RolesAllowed({ "ROLLOUT_READ" })
 @Uses(Icon.class)
 public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
@@ -81,9 +82,9 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                         grid.addComponentColumn(rollout -> new Actions(rollout, grid, hawkbitClient)).setHeader(
                                 Constants.ACTIONS).setAutoWidth(true);
 
-                            grid.setItemDetailsRenderer(new ComponentRenderer<>(
-                                    () -> details, RolloutDetails::setItem));
-                        }
+                        grid.setItemDetailsRenderer(new ComponentRenderer<>(
+                                () -> details, RolloutDetails::setItem));
+                    }
                 },
                 (query, rsqlFilter) -> hawkbitClient.getRolloutRestApi()
                         .getRollouts(
@@ -103,6 +104,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
     private static SelectionGrid<MgmtRolloutGroupResponseBody, Long> createGroupGrid() {
         return new SelectionGrid<>(
                 new SelectionGrid.EntityRepresentation<>(MgmtRolloutGroupResponseBody.class, MgmtRolloutGroupResponseBody::getRolloutGroupId) {
+
                     @Override
                     protected void addColumns(final Grid<MgmtRolloutGroupResponseBody> grid) {
                         grid.addColumn(MgmtRolloutGroupResponseBody::getRolloutGroupId).setHeader(Constants.ID).setAutoWidth(true);
@@ -120,7 +122,8 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         private final Grid<MgmtRolloutResponseBody> grid;
         private final transient HawkbitMgmtClient hawkbitClient;
 
-        private Actions(final MgmtRolloutResponseBody rollout, final Grid<MgmtRolloutResponseBody> grid, final HawkbitMgmtClient hawkbitClient) {
+        private Actions(final MgmtRolloutResponseBody rollout, final Grid<MgmtRolloutResponseBody> grid,
+                final HawkbitMgmtClient hawkbitClient) {
             this.rolloutId = rollout.getRolloutId();
             this.grid = grid;
             this.hawkbitClient = hawkbitClient;
@@ -196,7 +199,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         private final TextField distributionSet = Utils.textField(Constants.DISTRIBUTION_SET);
         private final TextField actonType = Utils.textField(Constants.ACTION_TYPE);
         private final TextField startAt = Utils.textField(Constants.START_AT);
-        private final Checkbox dynamic  = new Checkbox(Constants.DYNAMIC);
+        private final Checkbox dynamic = new Checkbox(Constants.DYNAMIC);
         private final SelectionGrid<MgmtRolloutGroupResponseBody, Long> groupGrid;
 
         private RolloutDetails(final HawkbitMgmtClient hawkbitClient) {
@@ -205,11 +208,11 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             description.setMinLength(2);
             groupGrid = createGroupGrid();
             Stream.of(
-                    description,
-                    createdBy, createdAt,
-                    lastModifiedBy, lastModifiedAt,
-                    targetFilter, distributionSet,
-                    actonType, startAt)
+                            description,
+                            createdBy, createdAt,
+                            lastModifiedBy, lastModifiedAt,
+                            targetFilter, distributionSet,
+                            actonType, startAt)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -258,10 +261,6 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
     private static class CreateDialog extends Utils.BaseDialog<Void> {
 
-        private enum StartType {
-            MANUAL, AUTO, SCHEDULED
-        }
-
         private final TextField name;
         private final Select<MgmtDistributionSet> distributionSet;
         private final Select<MgmtTargetFilterQuery> targetFilter;
@@ -274,7 +273,6 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         private final NumberField triggerThreshold;
         private final NumberField errorThreshold;
         private final Checkbox dynamic = new Checkbox(Constants.DYNAMIC);
-
         private final Button create = new Button("Create");
 
         private CreateDialog(final HawkbitMgmtClient hawkbitClient) {
@@ -442,6 +440,10 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 request.setDynamic(dynamic.getValue());
                 hawkbitClient.getRolloutRestApi().create(request).getBody();
             });
+        }
+
+        private enum StartType {
+            MANUAL, AUTO, SCHEDULED
         }
     }
 }

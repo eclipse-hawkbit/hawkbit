@@ -9,8 +9,8 @@
  */
 package org.eclipse.hawkbit.ui.simple.security;
 
-import org.eclipse.hawkbit.ui.simple.view.LoginView;
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
+import org.eclipse.hawkbit.ui.simple.view.LoginView;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -33,7 +33,7 @@ public class SecurityConfiguration extends VaadinWebSecurity {
         http.authorizeHttpRequests(
                 authorize -> authorize.requestMatchers(new AntPathRequestMatcher("/images/*.png")).permitAll());
 
-      super.configure(http);
+        super.configure(http);
         setLoginView(http, LoginView.class);
     }
 }

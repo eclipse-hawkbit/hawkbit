@@ -9,6 +9,13 @@
  */
 package org.eclipse.hawkbit.ui.simple;
 
+import static feign.Util.ISO_8859_1;
+
+import java.util.Base64;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
@@ -35,15 +42,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Base64;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-
-import static feign.Util.ISO_8859_1;
-
 @Theme(themeClass = Lumo.class)
-@PWA(name="hawkBit UI", shortName="hawkBit UI")
+@PWA(name = "hawkBit UI", shortName = "hawkBit UI")
 @SpringBootApplication
 @Import(FeignClientsConfiguration.class)
 public class SimpleUIApp implements AppShellConfigurator {
@@ -74,8 +74,8 @@ public class SimpleUIApp implements AppShellConfigurator {
                 hawkBitServer, client, encoder, decoder, contract,
                 ERROR_DECODER,
                 (tenant, controller) ->
-                    controller == null ?
-                            AUTHORIZATION : HawkbitClient.DEFAULT_REQUEST_INTERCEPTOR_FN.apply(tenant, controller));
+                        controller == null ?
+                                AUTHORIZATION : HawkbitClient.DEFAULT_REQUEST_INTERCEPTOR_FN.apply(tenant, controller));
     }
 
     @Bean
@@ -86,45 +86,46 @@ public class SimpleUIApp implements AppShellConfigurator {
     // accepts all user / pass, just delegating them to the feign client
     @Bean
     AuthenticationManager authenticationManager(final HawkbitMgmtClient hawkbitClient) {
-        return authentication-> {
-                final String username = authentication.getName();
-                final String password = authentication.getCredentials().toString();
+        return authentication -> {
+            final String username = authentication.getName();
+            final String password = authentication.getCredentials().toString();
 
-                final List<String> roles = new LinkedList<>();
-                roles.add("ANONYMOUS");
-                final SecurityContext unauthorizedContext = SecurityContextHolder.createEmptyContext();
-                unauthorizedContext.setAuthentication(
-                        new UsernamePasswordAuthenticationToken(username, password));
-                final SecurityContext currentContext = SecurityContextHolder.getContext();
-                try {
-                    SecurityContextHolder.setContext(unauthorizedContext);
-                    if (hawkbitClient.hasSoftwareModulesRead()) {
-                        roles.add("SOFTWARE_MODULE_READ");
-                    }
-                    if (hawkbitClient.hasRolloutRead()) {
-                        roles.add("ROLLOUT_READ");
-                    }
-                    if (hawkbitClient.hasDistributionSetRead()) {
-                        roles.add("DISTRIBUTION_SET_READ");
-                    }
-                    if (hawkbitClient.hasTargetRead()) {
-                        roles.add("TARGET_READ");
-                    }
-                    if (hawkbitClient.hasConfigRead()) {
-                        roles.add("CONFIG_READ");
-                    }
-                } finally {
-                    SecurityContextHolder.setContext(currentContext);
+            final List<String> roles = new LinkedList<>();
+            roles.add("ANONYMOUS");
+            final SecurityContext unauthorizedContext = SecurityContextHolder.createEmptyContext();
+            unauthorizedContext.setAuthentication(
+                    new UsernamePasswordAuthenticationToken(username, password));
+            final SecurityContext currentContext = SecurityContextHolder.getContext();
+            try {
+                SecurityContextHolder.setContext(unauthorizedContext);
+                if (hawkbitClient.hasSoftwareModulesRead()) {
+                    roles.add("SOFTWARE_MODULE_READ");
                 }
-                return new UsernamePasswordAuthenticationToken(
-                        username, password,
-                        roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role)).toList()) {
-                    @Override
-                    public void eraseCredentials() {
-                        // don't erase credentials because they will be used
-                        // to authenticate to the hawkBit update server / mgmt server
-                    }
-                };
+                if (hawkbitClient.hasRolloutRead()) {
+                    roles.add("ROLLOUT_READ");
+                }
+                if (hawkbitClient.hasDistributionSetRead()) {
+                    roles.add("DISTRIBUTION_SET_READ");
+                }
+                if (hawkbitClient.hasTargetRead()) {
+                    roles.add("TARGET_READ");
+                }
+                if (hawkbitClient.hasConfigRead()) {
+                    roles.add("CONFIG_READ");
+                }
+            } finally {
+                SecurityContextHolder.setContext(currentContext);
+            }
+            return new UsernamePasswordAuthenticationToken(
+                    username, password,
+                    roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role)).toList()) {
+
+                @Override
+                public void eraseCredentials() {
+                    // don't erase credentials because they will be used
+                    // to authenticate to the hawkBit update server / mgmt server
+                }
             };
+        };
     }
 }

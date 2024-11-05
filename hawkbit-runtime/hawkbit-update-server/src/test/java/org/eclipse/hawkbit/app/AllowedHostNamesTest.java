@@ -9,17 +9,14 @@
  */
 package org.eclipse.hawkbit.app;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.qameta.allure.Description;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
-import org.springframework.security.web.firewall.RequestRejectedException;
-
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = { "hawkbit.server.security.allowedHostNames=localhost",
