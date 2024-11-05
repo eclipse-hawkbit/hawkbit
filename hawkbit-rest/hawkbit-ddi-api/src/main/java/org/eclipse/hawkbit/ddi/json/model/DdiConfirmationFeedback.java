@@ -9,20 +9,20 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
+import java.util.Collections;
+import java.util.List;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * New update actions require confirmation when confirmation flow is switched on. This is the feedback channel for
@@ -35,49 +35,24 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiConfirmationFeedback {
 
-    public enum Confirmation {
-        /**
-         * Confirm the action.
-         */
-        CONFIRMED("confirmed"),
-
-        /**
-         * Deny the action.
-         */
-        DENIED("denied");
-
-
-        private final String name;
-
-        Confirmation(final String name) {
-            this.name = name;
-        }
-
-        @JsonValue
-        public String getName() {
-            return name;
-        }
-    }
-
     @NotNull
     @Valid
     @Schema(description = "Action confirmation state")
     private final Confirmation confirmation;
-
     @Schema(description = "(Optional) Individual status code", example = "200")
     private final Integer code;
-
     @Schema(description = "List of detailed message information", example = "[ \"Feedback message\" ]")
     private final List<String> details;
 
     /**
      * Constructs an confirmation-feedback
      *
-     * @param confirmation  confirmation value for the action. Valid values are "Confirmed" and "Denied
-     * @param code  code for confirmation
+     * @param confirmation confirmation value for the action. Valid values are "Confirmed" and "Denied
+     * @param code code for confirmation
      * @param details messages
      */
-    @JsonCreator public DdiConfirmationFeedback(
+    @JsonCreator
+    public DdiConfirmationFeedback(
             @JsonProperty(value = "confirmation", required = true) final Confirmation confirmation,
             @JsonProperty(value = "code") final Integer code,
             @JsonProperty(value = "details") final List<String> details) {
@@ -91,5 +66,28 @@ public class DdiConfirmationFeedback {
             return Collections.emptyList();
         }
         return Collections.unmodifiableList(details);
+    }
+
+    public enum Confirmation {
+        /**
+         * Confirm the action.
+         */
+        CONFIRMED("confirmed"),
+
+        /**
+         * Deny the action.
+         */
+        DENIED("denied");
+
+        private final String name;
+
+        Confirmation(final String name) {
+            this.name = name;
+        }
+
+        @JsonValue
+        public String getName() {
+            return name;
+        }
     }
 }

@@ -19,14 +19,12 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -58,22 +56,13 @@ public class DdiStatusTest {
                 ddiStatus.getResult().getProgress().getOf());
         assertThat(deserializedDdiStatus.getDetails()).isEqualTo(ddiStatus.getDetails());
     }
-    
-    private static Stream<Arguments> ddiStatusPossibilities(){
-        final DdiProgress ddiProgress = new DdiProgress(30, 100);
-        final DdiResult ddiResult = new DdiResult(NONE, ddiProgress);
-        return Stream.of(
-              Arguments.of(ddiResult, new DdiStatus(PROCEEDING, ddiResult, null, Collections.emptyList())),
-              Arguments.of(ddiResult, new DdiStatus(PROCEEDING, ddiResult, null, Collections.singletonList("testMessage"))),
-              Arguments.of(ddiResult, new DdiStatus(PROCEEDING, ddiResult, 12, Collections.emptyList())));
-    }
 
     @Test
     @Description("Verify the correct deserialization of a model with a additional unknown property")
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\","
-              + "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[],\"unknownProperty\":\"test\"}";
+                + "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[],\"unknownProperty\":\"test\"}";
 
         // Test
         final DdiStatus ddiStatus = mapper.readValue(serializedDdiStatus, DdiStatus.class);
@@ -112,5 +101,14 @@ public class DdiStatusTest {
         // Test
         assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
                 () -> mapper.readValue(serializedDdiStatus, DdiStatus.class));
+    }
+
+    private static Stream<Arguments> ddiStatusPossibilities() {
+        final DdiProgress ddiProgress = new DdiProgress(30, 100);
+        final DdiResult ddiResult = new DdiResult(NONE, ddiProgress);
+        return Stream.of(
+                Arguments.of(ddiResult, new DdiStatus(PROCEEDING, ddiResult, null, Collections.emptyList())),
+                Arguments.of(ddiResult, new DdiStatus(PROCEEDING, ddiResult, null, Collections.singletonList("testMessage"))),
+                Arguments.of(ddiResult, new DdiStatus(PROCEEDING, ddiResult, 12, Collections.emptyList())));
     }
 }

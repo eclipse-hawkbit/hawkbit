@@ -11,15 +11,14 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import java.util.List;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 
 /**
  * Provide action history information to the controller as part of response to

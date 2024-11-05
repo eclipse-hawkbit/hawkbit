@@ -54,7 +54,7 @@ public class DdiActionFeedback {
 
     /**
      * Constructs an action-feedback
-     * 
+     *
      * @param time time of feedback
      * @param status status to be appended to the action
      */

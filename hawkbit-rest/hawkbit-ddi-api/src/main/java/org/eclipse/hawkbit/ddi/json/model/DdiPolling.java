@@ -30,8 +30,7 @@ public class DdiPolling {
     /**
      * Constructor.
      *
-     * @param sleep
-     *            between polls
+     * @param sleep between polls
      */
     public DdiPolling(final String sleep) {
         this.sleep = sleep;
@@ -39,7 +38,6 @@ public class DdiPolling {
 
     /**
      * Constructor.
-     *
      */
     public DdiPolling() {
         // needed for json create

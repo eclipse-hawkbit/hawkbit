@@ -31,9 +31,28 @@ import lombok.ToString;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiResult {
 
+    @NotNull
+    @Valid
+    @Schema(description = "Result of the action execution")
+    private final FinalResult finished;
+    @Schema(description = "Progress assumption of the device (currently not supported)")
+    private final DdiProgress progress;
+
+    /**
+     * Constructor.
+     *
+     * @param finished as final result
+     * @param progress if not yet finished
+     */
+    @JsonCreator
+    public DdiResult(@JsonProperty("finished") final FinalResult finished,
+            @JsonProperty("progress") final DdiProgress progress) {
+        this.finished = finished;
+        this.progress = progress;
+    }
+
     /**
      * Defined status of the final result.
-     *
      */
     public enum FinalResult {
         /**
@@ -61,28 +80,5 @@ public class DdiResult {
         public String getName() {
             return name;
         }
-    }
-
-    @NotNull
-    @Valid
-    @Schema(description = "Result of the action execution")
-    private final FinalResult finished;
-
-    @Schema(description = "Progress assumption of the device (currently not supported)")
-    private final DdiProgress progress;
-
-    /**
-     * Constructor.
-     *
-     * @param finished
-     *            as final result
-     * @param progress
-     *            if not yet finished
-     */
-    @JsonCreator
-    public DdiResult(@JsonProperty("finished") final FinalResult finished,
-            @JsonProperty("progress") final DdiProgress progress) {
-        this.finished = finished;
-        this.progress = progress;
     }
 }

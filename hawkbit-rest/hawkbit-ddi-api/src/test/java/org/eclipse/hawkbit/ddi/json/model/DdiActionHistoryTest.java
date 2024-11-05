@@ -17,14 +17,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test serializability of DDI api model 'DdiActionHistory'
@@ -57,11 +55,11 @@ public class DdiActionHistoryTest {
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiActionHistory = """
-            {
-                "status": "SomeAction",
-                "messages": [ "Some message"],
-                "unknownProperty": "test"
-            }""";
+                {
+                    "status": "SomeAction",
+                    "messages": [ "Some message"],
+                    "unknownProperty": "test"
+                }""";
 
         // Test
         final DdiActionHistory ddiActionHistory = OBJECT_MAPPER.readValue(serializedDdiActionHistory, DdiActionHistory.class);
@@ -74,10 +72,10 @@ public class DdiActionHistoryTest {
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
         final String serializedDdiActionFeedback = """
-            {
-                "status": [SomeAction],
-                "messages": ["Some message"]
-            }""";
+                {
+                    "status": [SomeAction],
+                    "messages": ["Some message"]
+                }""";
 
         assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
                 () -> OBJECT_MAPPER.readValue(serializedDdiActionFeedback, DdiActionHistory.class));

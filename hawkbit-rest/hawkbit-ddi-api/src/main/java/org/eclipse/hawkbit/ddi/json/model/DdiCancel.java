@@ -38,10 +38,8 @@ public class DdiCancel {
     /**
      * Parameterized constructor.
      *
-     * @param id
-     *            of the cancel action
-     * @param cancelAction
-     *            the action
+     * @param id of the cancel action
+     * @param cancelAction the action
      */
     @JsonCreator
     public DdiCancel(@JsonProperty("id") final String id,
