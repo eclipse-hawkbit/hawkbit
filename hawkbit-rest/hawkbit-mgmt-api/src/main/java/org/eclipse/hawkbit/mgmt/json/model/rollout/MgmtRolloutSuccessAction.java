@@ -26,17 +26,16 @@ import lombok.experimental.Accessors;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtRolloutSuccessAction {
 
-    public enum SuccessAction {
-        NEXTGROUP
-    }
-
     @Schema(description = "The success action to execute")
     private SuccessAction action = SuccessAction.NEXTGROUP;
     @Schema(description = "The expression for the success action")
     private String expression;
-
     public MgmtRolloutSuccessAction(final SuccessAction action, final String expression) {
         this.action = action;
         this.expression = expression;
+    }
+
+    public enum SuccessAction {
+        NEXTGROUP
     }
 }

@@ -45,12 +45,6 @@ public class PagedListTest {
         assertListSize(knownTotal, knownContentList);
     }
 
-    private void assertListSize(final long knownTotal, final List<String> knownContentList) {
-        final PagedList<String> pagedList = new PagedList<>(knownContentList, knownTotal);
-        assertThat(pagedList.getTotal()).as("total size is wrong").isEqualTo(knownTotal);
-        assertThat(pagedList.getSize()).as("list size is wrong").isEqualTo(knownContentList.size());
-    }
-
     @Test
     @Description("Create list with payload and verify size values.")
     public void createListWithSmallerTotalThanContentSizeIsOk() {
@@ -60,5 +54,11 @@ public class PagedListTest {
         knownContentList.add("content2");
 
         assertListSize(knownTotal, knownContentList);
+    }
+
+    private void assertListSize(final long knownTotal, final List<String> knownContentList) {
+        final PagedList<String> pagedList = new PagedList<>(knownContentList, knownTotal);
+        assertThat(pagedList.getTotal()).as("total size is wrong").isEqualTo(knownTotal);
+        assertThat(pagedList.getSize()).as("list size is wrong").isEqualTo(knownContentList.size());
     }
 }

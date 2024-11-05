@@ -3,11 +3,11 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.target;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * {@link Map} with attributes of SP Target.

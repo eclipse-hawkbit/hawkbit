@@ -9,9 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype;
 
-import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 
 /**
  * Request Body of SoftwareModuleType for assignment operations (ID only).

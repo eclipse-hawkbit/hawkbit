@@ -3,6 +3,8 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.target;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,9 +13,6 @@ import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Request Body of DistributionSet for assignment operations (ID only).
@@ -33,8 +32,8 @@ public class MgmtDistributionSetAssignment extends MgmtId {
 
     @JsonProperty
     @Schema(description = """
-        (Available with user consent flow active) Specifies if the confirmation by the device
-        is required for this action""", example = "false")
+            (Available with user consent flow active) Specifies if the confirmation by the device
+            is required for this action""", example = "false")
     private Boolean confirmationRequired;
 
     @Schema(description = "The type of the assignment")
@@ -45,9 +44,8 @@ public class MgmtDistributionSetAssignment extends MgmtId {
 
     /**
      * Constructor
-     * 
-     * @param id
-     *            ID of object
+     *
+     * @param id ID of object
      */
     @JsonCreator
     public MgmtDistributionSetAssignment(@JsonProperty(required = true, value = "id") final Long id) {

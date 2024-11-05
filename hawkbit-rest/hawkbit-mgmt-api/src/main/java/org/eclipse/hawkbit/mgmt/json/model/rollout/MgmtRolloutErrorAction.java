@@ -29,23 +29,22 @@ import lombok.experimental.Accessors;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtRolloutErrorAction {
 
-    public enum ErrorAction {
-        PAUSE
-    }
-
     @Schema(description = "The error action to execute")
     private ErrorAction action = ErrorAction.PAUSE;
     @Schema(description = "The expression for the error action", example = "80")
     private String expression;
-
     /**
      * Creates a rollout error action
-     * 
+     *
      * @param action the action to run when th error condition is met
      * @param expression the expression for the action
      */
     public MgmtRolloutErrorAction(ErrorAction action, String expression) {
         this.action = action;
         this.expression = expression;
+    }
+
+    public enum ErrorAction {
+        PAUSE
     }
 }

@@ -30,27 +30,27 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = """
-    **_links**:
-    * **compatibledistributionsettypes** - Link to the compatible distribution set types in this target type
-    """, example = """
-    {
-      "createdBy" : "bumlux",
-      "createdAt" : 1682408564546,
-      "lastModifiedBy" : "bumlux",
-      "lastModifiedAt" : 1682408564546,
-      "name" : "TargetType",
-      "description" : "TargetType description",
-      "colour" : "#000000",
-      "_links" : {
-        "self" : {
-          "href" : "https://management-api.host.com/rest/v1/targettypes/8"
-        },
-        "compatibledistributionsettypes" : {
-          "href" : "https://management-api.host.com/rest/v1/targettypes/8/compatibledistributionsettypes"
-        }
-      },
-      "id" : 8
-    }""")
+        **_links**:
+        * **compatibledistributionsettypes** - Link to the compatible distribution set types in this target type
+        """, example = """
+        {
+          "createdBy" : "bumlux",
+          "createdAt" : 1682408564546,
+          "lastModifiedBy" : "bumlux",
+          "lastModifiedAt" : 1682408564546,
+          "name" : "TargetType",
+          "description" : "TargetType description",
+          "colour" : "#000000",
+          "_links" : {
+            "self" : {
+              "href" : "https://management-api.host.com/rest/v1/targettypes/8"
+            },
+            "compatibledistributionsettypes" : {
+              "href" : "https://management-api.host.com/rest/v1/targettypes/8/compatibledistributionsettypes"
+            }
+          },
+          "id" : 8
+        }""")
 public class MgmtTargetType extends MgmtTypeEntity {
 
     @JsonProperty(value = "id", required = true)

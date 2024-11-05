@@ -44,19 +44,14 @@ public interface MgmtDistributionSetTypeRestApi {
     /**
      * Handles the GET request of retrieving all DistributionSetTypes.
      *
-     * @param pagingOffsetParam
-     *            the offset of list of modules for pagination, might not be
-     *            present in the rest request then default value will be applied
-     * @param pagingLimitParam
-     *            the limit of the paged request, might not be present in the
-     *            rest request then default value will be applied
-     * @param sortParam
-     *            the sorting parameter in the request URL, syntax
-     *            {@code field:direction, field:direction}
-     * @param rsqlParam
-     *            the search parameter in the request URL, syntax
-     *            {@code q=name==abc}
-     *
+     * @param pagingOffsetParam the offset of list of modules for pagination, might not be
+     *         present in the rest request then default value will be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the
+     *         rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax
+     *         {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax
+     *         {@code q=name==abc}
      * @return a list of all DistributionSetType for a defined or default page
      *         request with status OK. The response is always paged. In any
      *         failure the JsonResponseExceptionHandler is handling the
@@ -65,22 +60,22 @@ public interface MgmtDistributionSetTypeRestApi {
     @Operation(summary = "Return all Distribution Set Types", description = "Handles the GET request of " +
             "retrieving all distribution set types. Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "403",
-                description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                        "data volume restriction applies.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                "and the client has to wait another second.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING, produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
@@ -112,32 +107,30 @@ public interface MgmtDistributionSetTypeRestApi {
      * Handles the GET request of retrieving a single DistributionSetType
      * within.
      *
-     * @param distributionSetTypeId
-     *            the ID of the DS type to retrieve
-     *
+     * @param distributionSetTypeId the ID of the DS type to retrieve
      * @return a single DS type with status OK.
      */
     @Operation(summary = "Return single Distribution Set Type", description = "Handles the GET request of retrieving a " +
             "single distribution set type. Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "403",
-                description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                        "data volume restriction applies.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                "and the client has to wait another second.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
             + "/{distributionSetTypeId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
@@ -147,32 +140,30 @@ public interface MgmtDistributionSetTypeRestApi {
     /**
      * Handles the DELETE request for a single Distribution Set Type.
      *
-     * @param distributionSetTypeId
-     *            the ID of the module to retrieve
+     * @param distributionSetTypeId the ID of the module to retrieve
      * @return status OK if delete is successful.
-     *
      */
     @Operation(summary = "Delete Distribution Set Type by Id", description = "Handles the DELETE request for a single" +
             " distribution set type. Required Permission: DELETE_REPOSITORY")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "403",
-                description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                        "data volume restriction applies.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                "and the client has to wait another second.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}")
     ResponseEntity<Void> deleteDistributionSetType(@PathVariable("distributionSetTypeId") Long distributionSetTypeId);
@@ -180,44 +171,42 @@ public interface MgmtDistributionSetTypeRestApi {
     /**
      * Handles the PUT request of updating a Distribution Set Type.
      *
-     * @param distributionSetTypeId
-     *            the ID of the DS type in the URL
-     * @param restDistributionSetType
-     *            the DS type to be updated.
+     * @param distributionSetTypeId the ID of the DS type in the URL
+     * @param restDistributionSetType the DS type to be updated.
      * @return status OK if update is successful
      */
     @Operation(summary = "Update Distribution Set Type", description = "Handles the PUT request for a single " +
             "distribution set type. Required Permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "403",
-                description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                        "data volume restriction applies.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                "user in another request at the same time. You may retry your modification request.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                "supported by the server for this resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                "and the client has to wait another second.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
+                    "user in another request at the same time. You may retry your modification request.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
+                    "supported by the server for this resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
             + "/{distributionSetTypeId}", consumes = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-                            MediaType.APPLICATION_JSON_VALUE })
+            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetType> updateDistributionSetType(
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId,
             MgmtDistributionSetTypeRequestBodyPut restDistributionSetType);
@@ -226,8 +215,7 @@ public interface MgmtDistributionSetTypeRestApi {
      * Handles the POST request of creating new DistributionSetTypes. The
      * request body must always be a list of types.
      *
-     * @param distributionSetTypes
-     *            the modules to be created.
+     * @param distributionSetTypes the modules to be created.
      * @return In case all modules could successful created the ResponseEntity
      *         with status code 201 - Created but without ResponseBody. In any
      *         failure the JsonResponseExceptionHandler is handling the
@@ -237,32 +225,32 @@ public interface MgmtDistributionSetTypeRestApi {
             "new distribution set types. The request body must always be a list of types. " +
             "Required Permission: CREATE_REPOSITORY")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "Successfully created"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "403",
-                description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                        "data volume restriction applies.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                "user in another request at the same time. You may retry your modification request.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                "supported by the server for this resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                "and the client has to wait another second.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = "201", description = "Successfully created"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
+                    "user in another request at the same time. You may retry your modification request.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
+                    "supported by the server for this resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING, consumes = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE })
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSetType>> createDistributionSetTypes(
             List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes);
 
@@ -270,36 +258,35 @@ public interface MgmtDistributionSetTypeRestApi {
      * Handles the GET request of retrieving the list of mandatory software
      * module types in that distribution set type.
      *
-     * @param distributionSetTypeId
-     *            of the DistributionSetType.
+     * @param distributionSetTypeId of the DistributionSetType.
      * @return Unpaged list of module types and OK in case of success.
      */
     @Operation(summary = "Return mandatory Software Module Types in a Distribution Set Type",
             description = "Handles the GET request of retrieving the list of mandatory software module types in that " +
                     "distribution set type. Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "403",
-                description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                        "data volume restriction applies.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                "and the client has to wait another second.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES, produces = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE })
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleType>> getMandatoryModules(
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId);
 
@@ -307,34 +294,32 @@ public interface MgmtDistributionSetTypeRestApi {
      * Handles the GET request of retrieving the single mandatory software
      * module type in that distribution set type.
      *
-     * @param distributionSetTypeId
-     *            of the DistributionSetType.
-     * @param softwareModuleTypeId
-     *            of SoftwareModuleType.
+     * @param distributionSetTypeId of the DistributionSetType.
+     * @param softwareModuleTypeId of SoftwareModuleType.
      * @return Unpaged list of module types and OK in case of success.
      */
     @Operation(summary = "Return single mandatory Software Module Type in a Distribution Set Type",
             description = "Handles the GET request of retrieving the single mandatory software module type in that " +
                     "distribution set type. Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "403",
-                description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                        "data volume restriction applies.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                "and the client has to wait another second.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES
@@ -347,34 +332,32 @@ public interface MgmtDistributionSetTypeRestApi {
      * Handles the GET request of retrieving the single optional software module
      * type in that distribution set type.
      *
-     * @param distributionSetTypeId
-     *            of the DistributionSetType.
-     * @param softwareModuleTypeId
-     *            of SoftwareModuleType.
+     * @param distributionSetTypeId of the DistributionSetType.
+     * @param softwareModuleTypeId of SoftwareModuleType.
      * @return Unpaged list of module types and OK in case of success.
      */
     @Operation(summary = "Return single optional Software Module Type in a Distribution Set Type",
             description = "Handles the GET request of retrieving the single optional software module type in that " +
                     "distribution set type. Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "403",
-                description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                        "data volume restriction applies.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                "and the client has to wait another second.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES
@@ -387,36 +370,35 @@ public interface MgmtDistributionSetTypeRestApi {
      * Handles the GET request of retrieving the list of optional software
      * module types in that distribution set type.
      *
-     * @param distributionSetTypeId
-     *            of the DistributionSetType.
+     * @param distributionSetTypeId of the DistributionSetType.
      * @return Unpaged list of module types and OK in case of success.
      */
     @Operation(summary = "Return optional Software Module Types in a Distribution Set Type",
             description = "Handles the GET request of retrieving the list of optional software module types in that " +
                     "distribution set type. Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "403",
-                description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                        "data volume restriction applies.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                "and the client has to wait another second.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES, produces = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE })
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleType>> getOptionalModules(
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId);
 
@@ -424,35 +406,32 @@ public interface MgmtDistributionSetTypeRestApi {
      * Handles DELETE request for removing a mandatory module from the
      * DistributionSetType.
      *
-     * @param distributionSetTypeId
-     *            of the DistributionSetType.
-     * @param softwareModuleTypeId
-     *            of the SoftwareModuleType to remove
-     *
+     * @param distributionSetTypeId of the DistributionSetType.
+     * @param softwareModuleTypeId of the SoftwareModuleType to remove
      * @return OK if the request was successful
      */
     @Operation(summary = "Delete a mandatory module from a Distribution Set Type",
             description = "Handles the DELETE request for removing a software module type from a single " +
                     "distribution set type. Required Permission: DELETE_REPOSITORY")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "403",
-                description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                        "data volume restriction applies.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                "and the client has to wait another second.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES + "/{softwareModuleTypeId}")
@@ -463,11 +442,8 @@ public interface MgmtDistributionSetTypeRestApi {
      * Handles DELETE request for removing an optional module from the
      * DistributionSetType.
      *
-     * @param distributionSetTypeId
-     *            of the DistributionSetType.
-     * @param softwareModuleTypeId
-     *            of the SoftwareModuleType to remove
-     *
+     * @param distributionSetTypeId of the DistributionSetType.
+     * @param softwareModuleTypeId of the SoftwareModuleType to remove
      * @return OK if the request was successful
      */
     @Operation(summary = "Delete an optional module from a Distribution Set Type",
@@ -475,24 +451,24 @@ public interface MgmtDistributionSetTypeRestApi {
                     "Note that a DS type cannot be changed after it has been used by a DS. " +
                     "Required Permission: UPDATE_REPOSITORY and READ_REPOSITORY")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "403",
-                description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                        "data volume restriction applies.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                "and the client has to wait another second.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES + "/{softwareModuleTypeId}")
@@ -503,11 +479,8 @@ public interface MgmtDistributionSetTypeRestApi {
      * Handles the POST request for adding a mandatory software module type to a
      * distribution set type.
      *
-     * @param distributionSetTypeId
-     *            of the DistributionSetType.
-     * @param smtId
-     *            of the SoftwareModuleType to add
-     *
+     * @param distributionSetTypeId of the DistributionSetType.
+     * @param smtId of the SoftwareModuleType to add
      * @return OK if the request was successful
      */
     @Operation(summary = "Add mandatory Software Module Type to a Distribution Set Type",
@@ -515,34 +488,34 @@ public interface MgmtDistributionSetTypeRestApi {
                     "distribution set type.Note that a DS type cannot be changed after it has been used by a DS. " +
                     "Required Permission: UPDATE_REPOSITORY and READ_REPOSITORY")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "403",
-                description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                        "data volume restriction applies.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                "user in another request at the same time. You may retry your modification request.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                "supported by the server for this resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                "and the client has to wait another second.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
+                    "user in another request at the same time. You may retry your modification request.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
+                    "supported by the server for this resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES, consumes = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE })
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> addMandatoryModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId,
             MgmtId smtId);
 
@@ -550,11 +523,8 @@ public interface MgmtDistributionSetTypeRestApi {
      * Handles the POST request for adding an optional software module type to a
      * distribution set type.
      *
-     * @param distributionSetTypeId
-     *            of the DistributionSetType.
-     * @param smtId
-     *            of the SoftwareModuleType to add
-     *
+     * @param distributionSetTypeId of the DistributionSetType.
+     * @param smtId of the SoftwareModuleType to add
      * @return OK if the request was successful
      */
     @Operation(summary = "Add optional Software Module Type to a Distribution Set Type",
@@ -562,34 +532,34 @@ public interface MgmtDistributionSetTypeRestApi {
                     "distribution set type.Note that a DS type cannot be changed after it has been used by a DS. " +
                     "Required Permission: UPDATE_REPOSITORY and READ_REPOSITORY")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "403",
-                description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                        "data volume restriction applies.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                "user in another request at the same time. You may retry your modification request.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                "supported by the server for this resource.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                "and the client has to wait another second.",
-                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Distribution Set Type not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
+                    "user in another request at the same time. You may retry your modification request.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
+                    "supported by the server for this resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
             + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES, consumes = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE })
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> addOptionalModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId,
             MgmtId smtId);
 }

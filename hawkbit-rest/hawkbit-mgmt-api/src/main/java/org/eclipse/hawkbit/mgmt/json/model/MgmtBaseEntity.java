@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,9 +18,6 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A json annotated rest model for BaseEntity to RESTful API representation.

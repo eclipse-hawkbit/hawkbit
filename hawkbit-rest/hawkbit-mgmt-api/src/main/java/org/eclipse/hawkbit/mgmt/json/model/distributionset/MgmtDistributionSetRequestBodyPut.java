@@ -49,7 +49,7 @@ public class MgmtDistributionSetRequestBodyPut {
 
     @JsonProperty
     @Schema(description = """
-        True if DS is a required migration step for another DS. As a result the DS’s assignment will not be cancelled
-        when another DS is assigned (note: updatable only if DS is not yet assigned to a target)""", example = "false")
+            True if DS is a required migration step for another DS. As a result the DS’s assignment will not be cancelled
+            when another DS is assigned (note: updatable only if DS is not yet assigned to a target)""", example = "false")
     private Boolean requiredMigrationStep;
 }

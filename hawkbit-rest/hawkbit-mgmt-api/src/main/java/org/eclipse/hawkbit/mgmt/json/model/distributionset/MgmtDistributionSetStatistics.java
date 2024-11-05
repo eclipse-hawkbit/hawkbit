@@ -10,18 +10,17 @@
 
 package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
@@ -31,67 +30,67 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtDistributionSetStatistics {
 
-  private static final String TOTAL = "total";
+    private static final String TOTAL = "total";
 
-  @JsonProperty("actions")
-  private Map<String, Long> totalActionsPerStatus;
-  @JsonProperty("rollouts")
-  private Map<String, Long> totalRolloutsPerStatus;
-  @JsonProperty
-  private Long totalAutoAssignments;
-
-  public static class Builder {
-
-    private final Map<String, Long> totalActionsPerStatus;
-    private final Map<String, Long> totalRolloutsPerStatus;
+    @JsonProperty("actions")
+    private Map<String, Long> totalActionsPerStatus;
+    @JsonProperty("rollouts")
+    private Map<String, Long> totalRolloutsPerStatus;
+    @JsonProperty
     private Long totalAutoAssignments;
-    private final boolean fullRepresentation;
 
-    public Builder(boolean fullRepresentation) {
-      totalActionsPerStatus = new HashMap<>();
-      totalRolloutsPerStatus = new HashMap<>();
-      this.fullRepresentation = fullRepresentation;
+    public static class Builder {
+
+        private final Map<String, Long> totalActionsPerStatus;
+        private final Map<String, Long> totalRolloutsPerStatus;
+        private final boolean fullRepresentation;
+        private Long totalAutoAssignments;
+
+        public Builder(boolean fullRepresentation) {
+            totalActionsPerStatus = new HashMap<>();
+            totalRolloutsPerStatus = new HashMap<>();
+            this.fullRepresentation = fullRepresentation;
+        }
+
+        public Builder addTotalActionPerStatus(String status, Long count) {
+            totalActionsPerStatus.put(status, count);
+            return this;
+        }
+
+        public Builder addTotalRolloutPerStatus(String status, Long count) {
+            totalRolloutsPerStatus.put(status, count);
+            return this;
+        }
+
+        public Builder addTotalAutoAssignments(Long count) {
+            totalAutoAssignments = count;
+            return this;
+        }
+
+        public MgmtDistributionSetStatistics build() {
+            MgmtDistributionSetStatistics statistics = new MgmtDistributionSetStatistics();
+            statistics.totalActionsPerStatus = calculateTotalWithStatus(totalActionsPerStatus);
+            statistics.totalRolloutsPerStatus = calculateTotalWithStatus(totalRolloutsPerStatus);
+            statistics.totalAutoAssignments = calculateTotalAutoAssignments();
+            return statistics;
+        }
+
+        private Map<String, Long> calculateTotalWithStatus(Map<String, Long> statusMap) {
+            if (!fullRepresentation && statusMap.isEmpty()) {
+                return statusMap;
+            }
+
+            long total = statusMap.values().stream().mapToLong(Long::longValue).sum();
+            statusMap.put(TOTAL, total);
+            return statusMap;
+        }
+
+        private Long calculateTotalAutoAssignments() {
+            if (fullRepresentation) {
+                return totalAutoAssignments == null ? Long.valueOf(0) : totalAutoAssignments;
+            }
+
+            return totalAutoAssignments;
+        }
     }
-
-    public Builder addTotalActionPerStatus(String status, Long count) {
-      totalActionsPerStatus.put(status, count);
-      return this;
-    }
-
-    public Builder addTotalRolloutPerStatus(String status, Long count) {
-      totalRolloutsPerStatus.put(status, count);
-      return this;
-    }
-
-    public Builder addTotalAutoAssignments(Long count) {
-      totalAutoAssignments = count;
-      return this;
-    }
-
-    public MgmtDistributionSetStatistics build() {
-      MgmtDistributionSetStatistics statistics = new MgmtDistributionSetStatistics();
-      statistics.totalActionsPerStatus = calculateTotalWithStatus(totalActionsPerStatus);
-      statistics.totalRolloutsPerStatus = calculateTotalWithStatus(totalRolloutsPerStatus);
-      statistics.totalAutoAssignments = calculateTotalAutoAssignments();
-      return statistics;
-    }
-
-    private Map<String, Long> calculateTotalWithStatus(Map<String, Long> statusMap) {
-      if (!fullRepresentation && statusMap.isEmpty()) {
-        return statusMap;
-      }
-
-      long total = statusMap.values().stream().mapToLong(Long::longValue).sum();
-      statusMap.put(TOTAL, total);
-      return statusMap;
-    }
-
-    private Long calculateTotalAutoAssignments() {
-      if (fullRepresentation) {
-        return totalAutoAssignments == null ?  Long.valueOf(0) : totalAutoAssignments;
-      }
-
-      return totalAutoAssignments;
-    }
-  }
 }

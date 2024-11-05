@@ -16,10 +16,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import io.qameta.allure.Story;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Description;
 

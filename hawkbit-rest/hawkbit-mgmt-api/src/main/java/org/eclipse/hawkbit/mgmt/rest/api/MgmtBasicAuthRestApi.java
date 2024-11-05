@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Tag(name = "Basic Authentication", description = "API for basic auth user validation.")
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtBasicAuthRestApi {
+
     /**
      * Handles the GET request of basic auth.
      *

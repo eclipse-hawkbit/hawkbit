@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Definition of the action cancel type for the distribution set invalidation
  * via REST management API.
- *
  */
 public enum MgmtCancelationType {
 

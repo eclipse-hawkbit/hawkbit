@@ -9,17 +9,16 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.targetfilter;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtBaseEntity;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A json annotated rest model for Target Filter Queries to RESTful API representation.
@@ -30,30 +29,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(Include.ALWAYS)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = """
-    **_links**:
-    * **autoAssignDS** - Link to manage the auto assign distribution set
-    """, example = """
-    {
-       "createdBy" : "bumlux",
-       "createdAt" : 1682408566380,
-       "lastModifiedBy" : "bumlux",
-       "lastModifiedAt" : 1682408566385,
-       "name" : "filter1",
-       "query" : "name==*",
-       "autoAssignDistributionSet" : 3,
-       "autoAssignActionType" : "forced",
-       "autoAssignWeight" : null,
-       "confirmationRequired" : null,
-       "_links" : {
-         "self" : {
-           "href" : "https://management-api.host.com/rest/v1/targetfilters/5"
-         },
-         "autoAssignDS" : {
-           "href" : "https://management-api.host.com/rest/v1/targetfilters/5/autoAssignDS"
-         }
-       },
-       "id" : 5
-     }""")
+        **_links**:
+        * **autoAssignDS** - Link to manage the auto assign distribution set
+        """, example = """
+        {
+           "createdBy" : "bumlux",
+           "createdAt" : 1682408566380,
+           "lastModifiedBy" : "bumlux",
+           "lastModifiedAt" : 1682408566385,
+           "name" : "filter1",
+           "query" : "name==*",
+           "autoAssignDistributionSet" : 3,
+           "autoAssignActionType" : "forced",
+           "autoAssignWeight" : null,
+           "confirmationRequired" : null,
+           "_links" : {
+             "self" : {
+               "href" : "https://management-api.host.com/rest/v1/targetfilters/5"
+             },
+             "autoAssignDS" : {
+               "href" : "https://management-api.host.com/rest/v1/targetfilters/5/autoAssignDS"
+             }
+           },
+           "id" : 5
+         }""")
 public class MgmtTargetFilterQuery extends MgmtBaseEntity {
 
     @JsonProperty(value = "id", required = true)
