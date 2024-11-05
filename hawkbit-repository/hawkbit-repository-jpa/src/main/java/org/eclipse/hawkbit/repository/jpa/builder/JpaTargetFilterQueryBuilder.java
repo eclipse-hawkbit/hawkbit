@@ -19,9 +19,9 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
  * Builder implementation for {@link TargetFilterQuery}.
- *
  */
 public class JpaTargetFilterQueryBuilder implements TargetFilterQueryBuilder {
+
     private final DistributionSetManagement distributionSetManagement;
 
     public JpaTargetFilterQueryBuilder(final DistributionSetManagement distributionSetManagement) {
@@ -34,13 +34,13 @@ public class JpaTargetFilterQueryBuilder implements TargetFilterQueryBuilder {
     }
 
     @Override
-    public TargetFilterQueryCreate create() {
-        return new JpaTargetFilterQueryCreate(distributionSetManagement);
+    public AutoAssignDistributionSetUpdate updateAutoAssign(final long id) {
+        return new AutoAssignDistributionSetUpdate(id);
     }
 
     @Override
-    public AutoAssignDistributionSetUpdate updateAutoAssign(final long id) {
-        return new AutoAssignDistributionSetUpdate(id);
+    public TargetFilterQueryCreate create() {
+        return new JpaTargetFilterQueryCreate(distributionSetManagement);
     }
 
 }

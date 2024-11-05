@@ -9,11 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
-import org.eclipse.hawkbit.repository.model.NamedEntity;
-import org.eclipse.hawkbit.repository.model.Target;
-import org.springframework.util.StringUtils;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -23,6 +18,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
+
+import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.Target;
+import org.springframework.util.StringUtils;
 
 @Entity
 @Table(name = "sp_target_conf_status")
@@ -81,11 +81,11 @@ public class JpaAutoConfirmationStatus extends AbstractJpaTenantAwareBaseEntity 
         // https://docs.oracle.com/en/java/javase/17/text-blocks/index.html#normalization-of-line-terminators
         // nevertheless of the end of line of the file (\r\n, \n or \r) the result will contains \n
         return """
-            Assignment automatically confirmed by initiator '%s'.\040
-            
-            Auto confirmation activated by system user: '%s'\040
-            
-            Remark: %s""".formatted(formattedInitiator, createdByRolloutsUser, remarkMessage);
+                Assignment automatically confirmed by initiator '%s'.\040
+                            
+                Auto confirmation activated by system user: '%s'\040
+                            
+                Remark: %s""".formatted(formattedInitiator, createdByRolloutsUser, remarkMessage);
     }
 
     @Override

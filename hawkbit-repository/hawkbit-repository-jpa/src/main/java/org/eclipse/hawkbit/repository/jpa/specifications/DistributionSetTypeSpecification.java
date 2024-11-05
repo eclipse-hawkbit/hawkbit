@@ -20,6 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
  * Spring Data JPQL Specifications.
  */
 public final class DistributionSetTypeSpecification {
+
     private DistributionSetTypeSpecification() {
         // utility class
     }
@@ -39,8 +40,7 @@ public final class DistributionSetTypeSpecification {
      * given {@link DistributionSetType#getName()} including fetching the
      * elements list.
      *
-     * @param name
-     *            to search
+     * @param name to search
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSetType> byName(final String name) {
@@ -52,8 +52,7 @@ public final class DistributionSetTypeSpecification {
      * given {@link DistributionSetType#getKey()} including fetching the
      * elements list.
      *
-     * @param key
-     *            to search
+     * @param key to search
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSetType> byKey(final String key) {

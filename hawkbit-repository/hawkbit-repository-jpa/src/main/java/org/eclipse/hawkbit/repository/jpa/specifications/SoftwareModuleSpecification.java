@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
+import jakarta.persistence.criteria.ListJoin;
+
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -18,14 +20,12 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.springframework.data.jpa.domain.Specification;
 
-import jakarta.persistence.criteria.ListJoin;
-
 /**
  * Specifications class for {@link SoftwareModule}s. The class provides Spring
  * Data JPQL Specifications
- *
  */
 public final class SoftwareModuleSpecification {
+
     private SoftwareModuleSpecification() {
         // utility class
     }
@@ -34,8 +34,7 @@ public final class SoftwareModuleSpecification {
      * {@link Specification} for retrieving {@link SoftwareModule} with given
      * {@link DistributionSet#getId()}.
      *
-     * @param swModuleId
-     *            to search
+     * @param swModuleId to search
      * @return the {@link SoftwareModule} {@link Specification}
      */
     public static Specification<JpaSoftwareModule> byId(final Long swModuleId) {
@@ -52,7 +51,7 @@ public final class SoftwareModuleSpecification {
     /**
      * {@link Specification} for retrieving {@link SoftwareModule}s with
      * DELETED attribute <code>false</code> - i.e. is not deleted.
-     * 
+     *
      * @return the {@link SoftwareModule} {@link Specification}
      */
     public static Specification<JpaSoftwareModule> isNotDeleted() {
@@ -63,10 +62,8 @@ public final class SoftwareModuleSpecification {
      * {@link Specification} for retrieving {@link SoftwareModule}s by "like
      * name and like version".
      *
-     * @param name
-     *            to be filtered on
-     * @param version
-     *            to be filtered on
+     * @param name to be filtered on
+     * @param version to be filtered on
      * @return the {@link SoftwareModule} {@link Specification}
      */
     public static Specification<JpaSoftwareModule> likeNameAndVersion(final String name, final String version) {
@@ -78,9 +75,8 @@ public final class SoftwareModuleSpecification {
     /**
      * {@link Specification} for retrieving {@link SoftwareModule}s by "like
      * name or like version".
-     * 
-     * @param type
-     *            to be filtered on
+     *
+     * @param type to be filtered on
      * @return the {@link SoftwareModule} {@link Specification}
      */
     public static Specification<JpaSoftwareModule> equalType(final Long type) {
@@ -90,7 +86,7 @@ public final class SoftwareModuleSpecification {
 
     /**
      * {@link Specification} for fetching {@link SoftwareModule}s type.
-     * 
+     *
      * @return the {@link SoftwareModule} {@link Specification}
      */
     public static Specification<JpaSoftwareModule> fetchType() {

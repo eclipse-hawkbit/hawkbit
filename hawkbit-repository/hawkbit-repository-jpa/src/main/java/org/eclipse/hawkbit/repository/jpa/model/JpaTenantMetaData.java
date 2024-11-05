@@ -33,16 +33,16 @@ import org.eclipse.hawkbit.repository.model.TenantMetaData;
  * through the {@link EntityManager} even before the actual tenant exists.
  *
  * Entities owned by the tenant are based on {@link TenantAwareBaseEntity}.
- *
  */
 @Table(name = "sp_tenant", indexes = {
         @Index(name = "sp_idx_tenant_prim", columnList = "tenant,id") }, uniqueConstraints = {
-                @UniqueConstraint(columnNames = { "tenant" }, name = "uk_tenantmd_tenant") })
+        @UniqueConstraint(columnNames = { "tenant" }, name = "uk_tenantmd_tenant") })
 @Entity
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMetaData {
+
     private static final long serialVersionUID = 1L;
 
     @Column(name = "tenant", nullable = false, updatable = false, length = 40)
@@ -64,8 +64,7 @@ public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMe
     /**
      * Standard constructor.
      *
-     * @param defaultDsType
-     *            of this tenant
+     * @param defaultDsType of this tenant
      * @param tenant
      */
     public JpaTenantMetaData(final DistributionSetType defaultDsType, final String tenant) {

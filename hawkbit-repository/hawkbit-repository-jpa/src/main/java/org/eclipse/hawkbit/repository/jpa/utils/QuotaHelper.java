@@ -30,21 +30,15 @@ public final class QuotaHelper {
 
     /**
      * Asserts the specified assignment quota.
-     * 
-     * @param requested
-     *            The number of entities that shall be assigned to the parent
-     *            entity.
-     * @param limit
-     *            The maximum number of entities that may be assigned to the
-     *            parent entity.
-     * @param type
-     *            The type of the entities that shall be assigned.
-     * @param parentType
-     *            The type of the parent entity.
-     * 
-     * @throws AssignmentQuotaExceededException
-     *             if the assignment operation would cause the quota to be
-     *             exceeded
+     *
+     * @param requested The number of entities that shall be assigned to the parent
+     *         entity.
+     * @param limit The maximum number of entities that may be assigned to the
+     *         parent entity.
+     * @param type The type of the entities that shall be assigned.
+     * @param parentType The type of the parent entity.
+     * @throws AssignmentQuotaExceededException if the assignment operation would cause the quota to be
+     *         exceeded
      */
     public static void assertAssignmentQuota(final long requested, final long limit, @NotNull final Class<?> type,
             @NotNull final Class<?> parentType) {
@@ -53,26 +47,18 @@ public final class QuotaHelper {
 
     /**
      * Asserts the specified assignment quota.
-     * 
-     * @param parentId
-     *            The ID of the parent entity.
-     * @param requested
-     *            The number of entities that shall be assigned to the parent
-     *            entity.
-     * @param limit
-     *            The maximum number of entities that may be assigned to the
-     *            parent entity.
-     * @param type
-     *            The type of the entities that shall be assigned.
-     * @param parentType
-     *            The type of the parent entity.
-     * @param countFct
-     *            Function to count the entities that are currently assigned to
-     *            the parent entity.
-     * 
-     * @throws AssignmentQuotaExceededException
-     *             if the assignment operation would cause the quota to be
-     *             exceeded
+     *
+     * @param parentId The ID of the parent entity.
+     * @param requested The number of entities that shall be assigned to the parent
+     *         entity.
+     * @param limit The maximum number of entities that may be assigned to the
+     *         parent entity.
+     * @param type The type of the entities that shall be assigned.
+     * @param parentType The type of the parent entity.
+     * @param countFct Function to count the entities that are currently assigned to
+     *         the parent entity.
+     * @throws AssignmentQuotaExceededException if the assignment operation would cause the quota to be
+     *         exceeded
      */
     public static <T> void assertAssignmentQuota(final T parentId, final long requested, final long limit,
             @NotNull final Class<?> type, @NotNull final Class<?> parentType, final ToLongFunction<T> countFct) {
@@ -81,26 +67,18 @@ public final class QuotaHelper {
 
     /**
      * Asserts the specified assignment quota.
-     * 
-     * @param parentId
-     *            The ID of the parent entity.
-     * @param requested
-     *            The number of entities that shall be assigned to the parent
-     *            entity.
-     * @param limit
-     *            The maximum number of entities that may be assigned to the
-     *            parent entity.
-     * @param type
-     *            The type of the entities that shall be assigned.
-     * @param parentType
-     *            The type of the parent entity.
-     * @param countFct
-     *            Function to count the entities that are currently assigned to
-     *            the parent entity.
-     * 
-     * @throws AssignmentQuotaExceededException
-     *             if the assignment operation would cause the quota to be
-     *             exceeded
+     *
+     * @param parentId The ID of the parent entity.
+     * @param requested The number of entities that shall be assigned to the parent
+     *         entity.
+     * @param limit The maximum number of entities that may be assigned to the
+     *         parent entity.
+     * @param type The type of the entities that shall be assigned.
+     * @param parentType The type of the parent entity.
+     * @param countFct Function to count the entities that are currently assigned to
+     *         the parent entity.
+     * @throws AssignmentQuotaExceededException if the assignment operation would cause the quota to be
+     *         exceeded
      */
     public static <T> void assertAssignmentQuota(final T parentId, final long requested, final long limit,
             @NotNull final String type, @NotNull final String parentType, final ToLongFunction<T> countFct) {
@@ -132,11 +110,9 @@ public final class QuotaHelper {
     /**
      * Assert that the number of assignments in a request does not exceed the
      * limit.
-     * 
-     * @param requested
-     *            the number of assignments that are to be made
-     * @param limit
-     *            the maximum number of assignments per request
+     *
+     * @param requested the number of assignments that are to be made
+     * @param limit the maximum number of assignments per request
      */
     public static void assertAssignmentRequestSizeQuota(final long requested, final long limit) {
         if (requested > limit) {

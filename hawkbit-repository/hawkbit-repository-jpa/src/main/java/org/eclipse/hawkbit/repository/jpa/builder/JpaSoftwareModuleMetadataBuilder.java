@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 
 /**
  * Builder implementation for {@link SoftwareModuleMetadata}.
- *
  */
 public class JpaSoftwareModuleMetadataBuilder implements SoftwareModuleMetadataBuilder {
 

@@ -30,11 +30,11 @@ import org.eclipse.persistence.annotations.CascadeOnDelete;
 /**
  * Relation element between a {@link DistributionSetType} and its
  * {@link SoftwareModuleType} elements.
- *
  */
 @Entity
 @Table(name = "sp_ds_type_element")
 public class DistributionSetTypeElement implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     @EmbeddedId
@@ -62,13 +62,10 @@ public class DistributionSetTypeElement implements Serializable {
     /**
      * Standard constructor.
      *
-     * @param dsType
-     *            of the element
-     * @param smType
-     *            of the element
-     * @param mandatory
-     *            to <code>true</code> if the {@link SoftwareModuleType} if
-     *            mandatory element in the {@link DistributionSet}.
+     * @param dsType of the element
+     * @param smType of the element
+     * @param mandatory to <code>true</code> if the {@link SoftwareModuleType} if
+     *         mandatory element in the {@link DistributionSet}.
      */
     DistributionSetTypeElement(final JpaDistributionSetType dsType, final JpaSoftwareModuleType smType,
             final boolean mandatory) {
@@ -78,13 +75,13 @@ public class DistributionSetTypeElement implements Serializable {
         this.mandatory = mandatory;
     }
 
+    public boolean isMandatory() {
+        return mandatory;
+    }
+
     DistributionSetTypeElement setMandatory(final boolean mandatory) {
         this.mandatory = mandatory;
         return this;
-    }
-
-    public boolean isMandatory() {
-        return mandatory;
     }
 
     public DistributionSetType getDsType() {
@@ -97,11 +94,6 @@ public class DistributionSetTypeElement implements Serializable {
 
     public DistributionSetTypeElementCompositeKey getKey() {
         return key;
-    }
-
-    @Override
-    public String toString() {
-        return "DistributionSetTypeElement [mandatory=" + mandatory + ", dsType=" + dsType + ", smType=" + smType + "]";
     }
 
     @Override
@@ -132,6 +124,11 @@ public class DistributionSetTypeElement implements Serializable {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "DistributionSetTypeElement [mandatory=" + mandatory + ", dsType=" + dsType + ", smType=" + smType + "]";
     }
 
 }

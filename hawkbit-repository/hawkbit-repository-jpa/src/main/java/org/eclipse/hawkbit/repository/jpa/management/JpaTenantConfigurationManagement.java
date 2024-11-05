@@ -58,75 +58,17 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class JpaTenantConfigurationManagement implements TenantConfigurationManagement {
 
+    private static final ConfigurableConversionService conversionService = new DefaultConversionService();
     @Autowired
     private TenantConfigurationRepository tenantConfigurationRepository;
-
     @Autowired
     private TenantConfigurationProperties tenantConfigurationProperties;
-
     @Autowired
     private ApplicationContext applicationContext;
-
     @Autowired
     private CacheManager cacheManager;
-
     @Autowired
     private AfterTransactionCommitExecutor afterCommitExecutor;
-
-    private static final ConfigurableConversionService conversionService = new DefaultConversionService();
-
-    @Override
-    @Cacheable(value = "tenantConfiguration", key = "#configurationKeyName")
-    public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(final String configurationKeyName,
-            final Class<T> propertyType) {
-        checkAccess(configurationKeyName);
-
-        final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(configurationKeyName);
-
-        validateTenantConfigurationDataType(configurationKey, propertyType);
-
-        final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
-                .findByKey(configurationKey.getKeyName());
-
-        return buildTenantConfigurationValueByKey(configurationKey, propertyType, tenantConfiguration);
-    }
-
-    @Override
-    public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(
-            final String configurationKeyName) {
-        checkAccess(configurationKeyName);
-
-        final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(configurationKeyName);
-
-        return getConfigurationValue(configurationKeyName, (Class<T>)configurationKey.getDataType());
-    }
-
-    @Override
-    public <T> T getGlobalConfigurationValue(final String configurationKeyName, final Class<T> propertyType) {
-        checkAccess(configurationKeyName);
-
-        final TenantConfigurationKey key = tenantConfigurationProperties.fromKeyName(configurationKeyName);
-
-        if (!key.getDataType().isAssignableFrom(propertyType)) {
-            throw new TenantConfigurationValidatorException(String.format(
-                    "Cannot parse the database value of type %s into the type %s.", key.getDataType(), propertyType));
-        }
-
-        return conversionService.convert(key.getDefaultValue(), propertyType);
-    }
-
-    private void checkAccess(final String configurationKeyName) {
-        if (TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY
-                .equalsIgnoreCase(configurationKeyName)) {
-            final SystemSecurityContext systemSecurityContext =
-                    SystemSecurityContextHolder.getInstance().getSystemSecurityContext();
-            if (!systemSecurityContext.isCurrentThreadSystemCode() &&
-                    !systemSecurityContext.hasPermission(SpPermission.READ_GATEWAY_SEC_TOKEN)) {
-                throw new InsufficientPermissionException(
-                        "Can't read gateway security token! " + SpPermission.READ_GATEWAY_SEC_TOKEN + " is required!");
-            }
-        }
-    }
 
     @Override
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
@@ -152,6 +94,85 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         });
 
         return addOrUpdateConfiguration0(configurations);
+    }
+
+    @Override
+    @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void deleteConfiguration(final String configurationKeyName) {
+        tenantConfigurationRepository.deleteByKey(configurationKeyName);
+    }
+
+    @Override
+    public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(
+            final String configurationKeyName) {
+        checkAccess(configurationKeyName);
+
+        final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(configurationKeyName);
+
+        return getConfigurationValue(configurationKeyName, (Class<T>) configurationKey.getDataType());
+    }
+
+    @Override
+    @Cacheable(value = "tenantConfiguration", key = "#configurationKeyName")
+    public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(final String configurationKeyName,
+            final Class<T> propertyType) {
+        checkAccess(configurationKeyName);
+
+        final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(configurationKeyName);
+
+        validateTenantConfigurationDataType(configurationKey, propertyType);
+
+        final TenantConfiguration tenantConfiguration = tenantConfigurationRepository
+                .findByKey(configurationKey.getKeyName());
+
+        return buildTenantConfigurationValueByKey(configurationKey, propertyType, tenantConfiguration);
+    }
+
+    @Override
+    public <T> T getGlobalConfigurationValue(final String configurationKeyName, final Class<T> propertyType) {
+        checkAccess(configurationKeyName);
+
+        final TenantConfigurationKey key = tenantConfigurationProperties.fromKeyName(configurationKeyName);
+
+        if (!key.getDataType().isAssignableFrom(propertyType)) {
+            throw new TenantConfigurationValidatorException(String.format(
+                    "Cannot parse the database value of type %s into the type %s.", key.getDataType(), propertyType));
+        }
+
+        return conversionService.convert(key.getDefaultValue(), propertyType);
+    }
+
+    /**
+     * Validates the data type of the tenant configuration. If it is possible to
+     * cast to the given data type.
+     *
+     * @param configurationKey the key
+     * @param propertyType the class
+     */
+    private static <T> void validateTenantConfigurationDataType(final TenantConfigurationKey configurationKey,
+            final Class<T> propertyType) {
+
+        if (!configurationKey.getDataType().isAssignableFrom(propertyType)) {
+            throw new TenantConfigurationValidatorException(
+                    String.format("Cannot parse the database value of type %s into the type %s.",
+                            configurationKey.getDataType(), propertyType));
+        }
+    }
+
+    private void checkAccess(final String configurationKeyName) {
+        if (TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY
+                .equalsIgnoreCase(configurationKeyName)) {
+            final SystemSecurityContext systemSecurityContext =
+                    SystemSecurityContextHolder.getInstance().getSystemSecurityContext();
+            if (!systemSecurityContext.isCurrentThreadSystemCode() &&
+                    !systemSecurityContext.hasPermission(SpPermission.READ_GATEWAY_SEC_TOKEN)) {
+                throw new InsufficientPermissionException(
+                        "Can't read gateway security token! " + SpPermission.READ_GATEWAY_SEC_TOKEN + " is required!");
+            }
+        }
     }
 
     private <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration0(Map<String, T> configurations) {
@@ -187,9 +208,9 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
                 JpaTenantConfiguration::getKey,
                 updatedTenantConfiguration -> {
 
-                    @SuppressWarnings("unchecked")
-                    final Class<T> clazzT = (Class<T>) configurations.get(updatedTenantConfiguration.getKey()).getClass();
-                    return TenantConfigurationValue.<T>builder().global(false)
+                    @SuppressWarnings("unchecked") final Class<T> clazzT = (Class<T>) configurations.get(updatedTenantConfiguration.getKey())
+                            .getClass();
+                    return TenantConfigurationValue.<T> builder().global(false)
                             .createdBy(updatedTenantConfiguration.getCreatedBy())
                             .createdAt(updatedTenantConfiguration.getCreatedAt())
                             .lastModifiedAt(updatedTenantConfiguration.getLastModifiedAt())
@@ -197,32 +218,6 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
                             .value(conversionService.convert(updatedTenantConfiguration.getValue(), clazzT))
                             .build();
                 }));
-    }
-
-    @Override
-    @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void deleteConfiguration(final String configurationKeyName) {
-        tenantConfigurationRepository.deleteByKey(configurationKeyName);
-    }
-
-    /**
-     * Validates the data type of the tenant configuration. If it is possible to
-     * cast to the given data type.
-     *
-     * @param configurationKey the key
-     * @param propertyType the class
-     */
-    private static <T> void validateTenantConfigurationDataType(final TenantConfigurationKey configurationKey,
-            final Class<T> propertyType) {
-
-        if (!configurationKey.getDataType().isAssignableFrom(propertyType)) {
-            throw new TenantConfigurationValidatorException(
-                    String.format("Cannot parse the database value of type %s into the type %s.",
-                            configurationKey.getDataType(), propertyType));
-        }
     }
 
     private <T extends Serializable> TenantConfigurationValue<T> buildTenantConfigurationValueByKey(
@@ -247,14 +242,10 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     /**
      * Asserts that the requested configuration value change is allowed. Throws
      * a {@link TenantConfigurationValueChangeNotAllowedException} otherwise.
-     * 
-     * @param key
-     *            The configuration key.
-     * @param valueChange
-     *            The configuration to be validated.
-     * 
-     * @throws TenantConfigurationValueChangeNotAllowedException
-     *             if the requested configuration change is not allowed.
+     *
+     * @param key The configuration key.
+     * @param valueChange The configuration to be validated.
+     * @throws TenantConfigurationValueChangeNotAllowedException if the requested configuration change is not allowed.
      */
     private void assertValueChangeIsAllowed(final String key, final JpaTenantConfiguration valueChange) {
         assertMultiAssignmentsValueChange(key, valueChange);
@@ -280,7 +271,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         }
         if (MULTI_ASSIGNMENTS_ENABLED.equals(key) && Boolean.parseBoolean(valueChange.getValue())) {
             JpaTenantConfiguration batchConfig = tenantConfigurationRepository.findByKey(BATCH_ASSIGNMENTS_ENABLED);
-            if (batchConfig!=null && Boolean.parseBoolean(batchConfig.getValue())) {
+            if (batchConfig != null && Boolean.parseBoolean(batchConfig.getValue())) {
                 log.debug("The Multi-Assignments '{}' feature cannot be enabled as it contradicts with " +
                         "The Batch-Assignments feature, which is already enabled .", key);
                 throw new TenantConfigurationValueChangeNotAllowedException();

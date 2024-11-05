@@ -15,7 +15,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 /**
  * Helper class to easily combine {@link Specification} instances.
- *
  */
 public final class SpecificationsBuilder {
 
@@ -27,8 +26,7 @@ public final class SpecificationsBuilder {
      * Combine all given specification with and. The first specification is the
      * where clause.
      *
-     * @param specList
-     *            all specification which will combine
+     * @param specList all specification which will combine
      * @return <null> if the given specification list is empty
      */
     public static <T> Specification<T> combineWithAnd(final List<Specification<T>> specList) {

@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.IMPLICIT_LOCK_ENABLED;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -75,7 +77,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Statistic;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -92,11 +93,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.IMPLICIT_LOCK_ENABLED;
-
 /**
  * JPA implementation of {@link DistributionSetManagement}.
- *
  */
 @Transactional(readOnly = true)
 @Validated
@@ -152,91 +150,25 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Optional<DistributionSet> getWithDetails(final long id) {
-        return distributionSetRepository.findById(id).map(DistributionSet.class::cast);
-    }
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public List<DistributionSet> create(final Collection<DistributionSetCreate> creates) {
+        final List<JpaDistributionSet> toCreate = creates.stream().map(JpaDistributionSetCreate.class::cast)
+                .map(this::setDefaultTypeIfMissing).map(JpaDistributionSetCreate::build).toList();
 
-    @Override
-    public long countByTypeId(final long typeId) {
-        if (!distributionSetTypeManagement.exists(typeId)) {
-            throw new EntityNotFoundException(DistributionSetType.class, typeId);
-        }
-
-        return distributionSetRepository.count(DistributionSetSpecification.byType(typeId));
-    }
-
-    @Override
-    public List<Statistic> countRolloutsByStatusForDistributionSet(final Long id) {
-        assertDistributionSetExists(id);
-
-        return distributionSetRepository.countRolloutsByStatusForDistributionSet(id).stream()
-                .map(Statistic.class::cast).toList();
-    }
-
-    @Override
-    public List<Statistic> countActionsByStatusForDistributionSet(final Long id) {
-        assertDistributionSetExists(id);
-
-        return distributionSetRepository.countActionsByStatusForDistributionSet(id).stream()
-                .map(Statistic.class::cast).toList();
-    }
-
-    @Override
-    public Long countAutoAssignmentsForDistributionSet(final Long id) {
-        assertDistributionSetExists(id);
-
-        return distributionSetRepository.countAutoAssignmentsForDistributionSet(id);
+        return Collections.unmodifiableList(distributionSetRepository.saveAll(AccessController.Operation.CREATE, toCreate));
     }
 
     @Override
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<DistributionSet> assignTag(final Collection<Long> ids, final long dsTagId) {
-        return updateTag(ids, dsTagId, (tag, distributionSet) -> {
-            if (distributionSet.getTags().contains(tag)) {
-                return distributionSet;
-            } else {
-                distributionSet.addTag(tag);
-                return distributionSetRepository.save(distributionSet);
-            }
-        });
-    }
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<DistributionSet> unassignTag(final Collection<Long> ids, final long dsTagId) {
-        return updateTag(ids, dsTagId, (tag, distributionSet) -> {
-                    if (distributionSet.getTags().contains(tag)) {
-                        distributionSet.removeTag(tag);
-                        return distributionSetRepository.save(distributionSet);
-                    } else {
-                        return distributionSet;
-                    }
-                });
-    }
-    private List<DistributionSet> updateTag(
-            final Collection<Long> dsIds, final long dsTagId,
-            final BiFunction<DistributionSetTag, JpaDistributionSet, DistributionSet> updater) {
-        final DistributionSetTag tag = distributionSetTagManagement.get(dsTagId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));
-        final List<JpaDistributionSet> allDs =  dsIds.size() == 1 ?
-                distributionSetRepository.findById(dsIds.iterator().next())
-                        .map(List::of)
-                        .orElseGet(Collections::emptyList) :
-                distributionSetRepository.findAll(DistributionSetSpecification.byIds(dsIds));
-        if (allDs.size() < dsIds.size()) {
-            throw new EntityNotFoundException(DistributionSet.class, notFound(dsIds, allDs));
-        }
+    public DistributionSet create(final DistributionSetCreate c) {
+        final JpaDistributionSetCreate create = (JpaDistributionSetCreate) c;
+        setDefaultTypeIfMissing(create);
 
-        try {
-            // apply update and collect modified targets
-            return allDs.stream().map(distributionSet -> updater.apply(tag, distributionSet)).toList();
-        } finally {
-            // No reason to save the tag
-            entityManager.detach(tag);
-        }
+        return distributionSetRepository.save(AccessController.Operation.CREATE, create.build());
     }
 
     @Override
@@ -273,9 +205,17 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return distributionSetRepository.save(set);
     }
 
-    private JpaSoftwareModule findSoftwareModuleAndThrowExceptionIfNotFound(final Long softwareModuleId) {
-        return softwareModuleRepository.findById(softwareModuleId)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
+    @Override
+    public long count() {
+        return distributionSetRepository.count(DistributionSetSpecification.isNotDeleted());
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void delete(final long id) {
+        delete(List.of(id));
     }
 
     @Override
@@ -315,32 +255,32 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSet create(final DistributionSetCreate c) {
-        final JpaDistributionSetCreate create = (JpaDistributionSetCreate) c;
-        setDefaultTypeIfMissing(create);
-
-        return distributionSetRepository.save(AccessController.Operation.CREATE, create.build());
+    public List<DistributionSet> get(final Collection<Long> ids) {
+        return Collections.unmodifiableList(getDistributionSets(ids));
     }
 
     @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<DistributionSet> create(final Collection<DistributionSetCreate> creates) {
-        final List<JpaDistributionSet> toCreate = creates.stream().map(JpaDistributionSetCreate.class::cast)
-                .map(this::setDefaultTypeIfMissing).map(JpaDistributionSetCreate::build).toList();
-
-        return Collections.unmodifiableList(distributionSetRepository.saveAll(AccessController.Operation.CREATE, toCreate));
+    public boolean exists(final long id) {
+        return distributionSetRepository.existsById(id);
     }
 
-    private JpaDistributionSetCreate setDefaultTypeIfMissing(final JpaDistributionSetCreate create) {
-        if (create.getType() == null) {
-            create.type(systemManagement.getTenantMetadata().getDefaultDsType().getKey());
-        }
-        return create;
+    @Override
+    public Optional<DistributionSet> get(final long id) {
+        return distributionSetRepository.findById(id).map(DistributionSet.class::cast);
+    }
+
+    @Override
+    public Slice<DistributionSet> findAll(final Pageable pageable) {
+        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, pageable, List.of(
+                DistributionSetSpecification.isNotDeleted()));
+    }
+
+    @Override
+    public Page<DistributionSet> findByRsql(final Pageable pageable, final String rsqlParam) {
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, pageable, List.of(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class, virtualPropertyReplacer,
+                        database),
+                DistributionSetSpecification.isNotDeleted()));
     }
 
     @Override
@@ -367,81 +307,30 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSet unassignSoftwareModule(final long id, final long moduleId) {
-        final JpaDistributionSet set = (JpaDistributionSet) getValid(id);
-        assertDistributionSetIsNotAssignedToTargets(id);
-
-        final JpaSoftwareModule module = findSoftwareModuleAndThrowExceptionIfNotFound(moduleId);
-        set.removeModule(module);
-
-        return distributionSetRepository.save(set);
+    public List<DistributionSet> assignTag(final Collection<Long> ids, final long dsTagId) {
+        return updateTag(ids, dsTagId, (tag, distributionSet) -> {
+            if (distributionSet.getTags().contains(tag)) {
+                return distributionSet;
+            } else {
+                distributionSet.addTag(tag);
+                return distributionSetRepository.save(distributionSet);
+            }
+        });
     }
 
     @Override
-    public Slice<DistributionSet> findByDistributionSetFilter(final Pageable pageable,
-            final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
-                distributionSetFilter);
-
-        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, pageable, specList);
-    }
-
-    @Override
-    public long countByDistributionSetFilter(@NotNull final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
-                distributionSetFilter);
-
-        return JpaManagementHelper.countBySpec(distributionSetRepository, specList);
-    }
-
-    @Override
-    public Slice<DistributionSet> findByCompleted(final Pageable pageReq, final Boolean complete) {
-        final List<Specification<JpaDistributionSet>> specifications = buildSpecsByComplete(complete);
-
-        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, pageReq, specifications);
-    }
-
-    @Override
-    public long countByCompleted(final Boolean complete) {
-        final List<Specification<JpaDistributionSet>> specifications = buildSpecsByComplete(complete);
-
-        return JpaManagementHelper.countBySpec(distributionSetRepository, specifications);
-    }
-
-    private List<Specification<JpaDistributionSet>> buildSpecsByComplete(final Boolean complete) {
-        final List<Specification<JpaDistributionSet>> specifications = new ArrayList<>();
-        specifications.add(DistributionSetSpecification.isNotDeleted());
-        if (complete != null) {
-            specifications.add(DistributionSetSpecification.isCompleted(complete));
-        }
-        return specifications;
-    }
-
-    @Override
-    public Slice<DistributionSet> findByDistributionSetFilterOrderByLinkedTarget(final Pageable pageable,
-            final DistributionSetFilter distributionSetFilter, final String assignedOrInstalled) {
-        // remove default sort from pageable to not overwrite sorted spec
-        final OffsetBasedPageRequest unsortedPage = new OffsetBasedPageRequest(pageable.getOffset(),
-                pageable.getPageSize(), Sort.unsorted());
-
-        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
-                distributionSetFilter);
-        specList.add(DistributionSetSpecification.orderedByLinkedTarget(assignedOrInstalled, pageable.getSort()));
-
-        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, unsortedPage, specList);
-    }
-
-    @Override
-    public Optional<DistributionSet> getByNameAndVersion(final String distributionName, final String version) {
-        return distributionSetRepository
-                .findOne(DistributionSetSpecification.equalsNameAndVersionIgnoreCase(distributionName, version))
-                .map(DistributionSet.class::cast);
-
-    }
-
-    @Override
-    public long count() {
-        return distributionSetRepository.count(DistributionSetSpecification.isNotDeleted());
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public List<DistributionSet> unassignTag(final Collection<Long> ids, final long dsTagId) {
+        return updateTag(ids, dsTagId, (tag, distributionSet) -> {
+            if (distributionSet.getTags().contains(tag)) {
+                distributionSet.removeTag(tag);
+                return distributionSetRepository.save(distributionSet);
+            } else {
+                return distributionSet;
+            }
+        });
     }
 
     @Override
@@ -449,7 +338,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSetMetadata> createMetaData(final long id, final Collection<MetaData> md) {
-        final JpaDistributionSet distributionSet = (JpaDistributionSet)getValid(id);
+        final JpaDistributionSet distributionSet = (JpaDistributionSet) getValid(id);
         assertMetaDataQuota(id, md.size());
 
         md.forEach(meta -> checkAndThrowIfDistributionSetMetadataAlreadyExists(
@@ -461,34 +350,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                 .map(meta -> distributionSetMetadataRepository
                         .save(new JpaDistributionSetMetadata(meta.getKey(), distributionSet, meta.getValue())))
                 .collect(Collectors.toUnmodifiableList());
-    }
-
-    private void assertMetaDataQuota(final Long dsId, final int requested) {
-        QuotaHelper.assertAssignmentQuota(dsId, requested, quotaManagement.getMaxMetaDataEntriesPerDistributionSet(),
-                DistributionSetMetadata.class, DistributionSet.class,
-                distributionSetMetadataRepository::countByDistributionSetId);
-    }
-
-    private void assertSoftwareModuleQuota(final Long id, final int requested) {
-        QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxSoftwareModulesPerDistributionSet(),
-                SoftwareModule.class, DistributionSet.class, softwareModuleRepository::countByAssignedToId);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetMetadata updateMetaData(final long id, final MetaData md) {
-        // check if exists otherwise throw entity not found exception
-        final JpaDistributionSetMetadata toUpdate = (JpaDistributionSetMetadata) getMetaDataByDistributionSetId(id,
-                md.getKey())
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetMetadata.class, id, md.getKey()));
-        toUpdate.setValue(md.getValue());
-
-        // touch it to update the lock revision because we are modifying the
-        // DS indirectly, it will, also check UPDATE access
-        JpaManagementHelper.touch(entityManager, distributionSetRepository, (JpaDistributionSet) getValid(id));
-        return distributionSetMetadataRepository.save(toUpdate);
     }
 
     @Override
@@ -508,45 +369,28 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Page<DistributionSetMetadata> findMetaDataByDistributionSetId(final Pageable pageable,
-            final long id) {
-        assertDistributionSetExists(id);
-
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetMetadataRepository, pageable,
-                Collections.singletonList(byDsIdSpec(id)));
-    }
-
-    private Specification<JpaDistributionSetMetadata> byDsIdSpec(final long dsId) {
-        return (root, query, cb) -> cb
-                .equal(root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id), dsId);
-    }
-
-    @Override
-    public long countMetaDataByDistributionSetId(final long id) {
-        assertDistributionSetExists(id);
-
-        return distributionSetMetadataRepository.countByDistributionSetId(id);
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void lock(final long id) {
+        final JpaDistributionSet distributionSet = getById(id);
+        if (!distributionSet.isLocked()) {
+            lockSoftwareModules(distributionSet);
+            distributionSet.lock();
+            distributionSetRepository.save(distributionSet);
+        }
     }
 
     @Override
-    public Page<DistributionSetMetadata> findMetaDataByDistributionSetIdAndRsql(final Pageable pageable,
-                                                                                final long id, final String rsqlParam) {
-        assertDistributionSetExists(id);
-
-        final List<Specification<JpaDistributionSetMetadata>> specList = Arrays
-                .asList(RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetMetadataFields.class,
-                        virtualPropertyReplacer, database), byDsIdSpec(id));
-
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetMetadataRepository, pageable, specList);
-    }
-
-    @Override
-    public Optional<DistributionSetMetadata> getMetaDataByDistributionSetId(final long id, final String key) {
-        assertDistributionSetExists(id);
-
-        return distributionSetMetadataRepository
-                .findById(new DsMetadataCompositeKey(id, key))
-                .map(DistributionSetMetadata.class::cast);
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void unlock(final long id) {
+        final JpaDistributionSet distributionSet = getById(id);
+        if (distributionSet.isLocked()) {
+            distributionSet.unlock();
+            distributionSetRepository.save(distributionSet);
+        }
     }
 
     @Override
@@ -569,10 +413,313 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
+    public Optional<DistributionSet> getWithDetails(final long id) {
+        return distributionSetRepository.findById(id).map(DistributionSet.class::cast);
+    }
+
+    @Override
+    public Optional<DistributionSet> getByNameAndVersion(final String distributionName, final String version) {
+        return distributionSetRepository
+                .findOne(DistributionSetSpecification.equalsNameAndVersionIgnoreCase(distributionName, version))
+                .map(DistributionSet.class::cast);
+
+    }
+
+    @Override
+    public DistributionSet getValidAndComplete(final long id) {
+        final DistributionSet distributionSet = getValid(id);
+
+        if (!distributionSet.isComplete()) {
+            throw new IncompleteDistributionSetException("Distribution set of type "
+                    + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
+        }
+
+        if (distributionSet.isDeleted()) {
+            throw new DeletedException(DistributionSet.class, id);
+        }
+
+        return distributionSet;
+    }
+
+    @Override
+    public DistributionSet getValid(final long id) {
+        final DistributionSet distributionSet = getOrElseThrowException(id);
+
+        if (!distributionSet.isValid()) {
+            throw new InvalidDistributionSetException("Distribution set of type " + distributionSet.getType().getKey()
+                    + " is invalid: " + distributionSet.getId());
+        }
+
+        return distributionSet;
+    }
+
+    @Override
+    public DistributionSet getOrElseThrowException(final long id) {
+        return getById(id);
+    }
+
+    @Override
+    public Page<DistributionSetMetadata> findMetaDataByDistributionSetId(final Pageable pageable,
+            final long id) {
+        assertDistributionSetExists(id);
+
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetMetadataRepository, pageable,
+                Collections.singletonList(byDsIdSpec(id)));
+    }
+
+    @Override
+    public long countMetaDataByDistributionSetId(final long id) {
+        assertDistributionSetExists(id);
+
+        return distributionSetMetadataRepository.countByDistributionSetId(id);
+    }
+
+    @Override
+    public Page<DistributionSetMetadata> findMetaDataByDistributionSetIdAndRsql(final Pageable pageable,
+            final long id, final String rsqlParam) {
+        assertDistributionSetExists(id);
+
+        final List<Specification<JpaDistributionSetMetadata>> specList = Arrays
+                .asList(RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetMetadataFields.class,
+                        virtualPropertyReplacer, database), byDsIdSpec(id));
+
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetMetadataRepository, pageable, specList);
+    }
+
+    @Override
+    public Slice<DistributionSet> findByCompleted(final Pageable pageReq, final Boolean complete) {
+        final List<Specification<JpaDistributionSet>> specifications = buildSpecsByComplete(complete);
+
+        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, pageReq, specifications);
+    }
+
+    @Override
+    public long countByCompleted(final Boolean complete) {
+        final List<Specification<JpaDistributionSet>> specifications = buildSpecsByComplete(complete);
+
+        return JpaManagementHelper.countBySpec(distributionSetRepository, specifications);
+    }
+
+    @Override
+    public Slice<DistributionSet> findByDistributionSetFilter(final Pageable pageable,
+            final DistributionSetFilter distributionSetFilter) {
+        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
+                distributionSetFilter);
+
+        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, pageable, specList);
+    }
+
+    @Override
+    public Slice<DistributionSet> findByDistributionSetFilterOrderByLinkedTarget(final Pageable pageable,
+            final DistributionSetFilter distributionSetFilter, final String assignedOrInstalled) {
+        // remove default sort from pageable to not overwrite sorted spec
+        final OffsetBasedPageRequest unsortedPage = new OffsetBasedPageRequest(pageable.getOffset(),
+                pageable.getPageSize(), Sort.unsorted());
+
+        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
+                distributionSetFilter);
+        specList.add(DistributionSetSpecification.orderedByLinkedTarget(assignedOrInstalled, pageable.getSort()));
+
+        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, unsortedPage, specList);
+    }
+
+    @Override
+    public long countByDistributionSetFilter(@NotNull final DistributionSetFilter distributionSetFilter) {
+        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
+                distributionSetFilter);
+
+        return JpaManagementHelper.countBySpec(distributionSetRepository, specList);
+    }
+
+    @Override
+    public Page<DistributionSet> findByTag(final Pageable pageable, final long tagId) {
+        assertDsTagExists(tagId);
+
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, pageable, List.of(
+                DistributionSetSpecification.hasTag(tagId)));
+    }
+
+    @Override
+    public Page<DistributionSet> findByRsqlAndTag(final Pageable pageable, final String rsqlParam, final long tagId) {
+        assertDsTagExists(tagId);
+
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, pageable, List.of(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class, virtualPropertyReplacer,
+                        database),
+                DistributionSetSpecification.hasTag(tagId), DistributionSetSpecification.isNotDeleted()));
+    }
+
+    @Override
+    public Optional<DistributionSetMetadata> getMetaDataByDistributionSetId(final long id, final String key) {
+        assertDistributionSetExists(id);
+
+        return distributionSetMetadataRepository
+                .findById(new DsMetadataCompositeKey(id, key))
+                .map(DistributionSetMetadata.class::cast);
+    }
+
+    @Override
     public boolean isInUse(final long id) {
         assertDistributionSetExists(id);
 
         return actionRepository.countByDistributionSetId(id) > 0;
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public DistributionSet unassignSoftwareModule(final long id, final long moduleId) {
+        final JpaDistributionSet set = (JpaDistributionSet) getValid(id);
+        assertDistributionSetIsNotAssignedToTargets(id);
+
+        final JpaSoftwareModule module = findSoftwareModuleAndThrowExceptionIfNotFound(moduleId);
+        set.removeModule(module);
+
+        return distributionSetRepository.save(set);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public DistributionSetMetadata updateMetaData(final long id, final MetaData md) {
+        // check if exists otherwise throw entity not found exception
+        final JpaDistributionSetMetadata toUpdate = (JpaDistributionSetMetadata) getMetaDataByDistributionSetId(id,
+                md.getKey())
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetMetadata.class, id, md.getKey()));
+        toUpdate.setValue(md.getValue());
+
+        // touch it to update the lock revision because we are modifying the
+        // DS indirectly, it will, also check UPDATE access
+        JpaManagementHelper.touch(entityManager, distributionSetRepository, (JpaDistributionSet) getValid(id));
+        return distributionSetMetadataRepository.save(toUpdate);
+    }
+
+    @Override
+    public long countByTypeId(final long typeId) {
+        if (!distributionSetTypeManagement.exists(typeId)) {
+            throw new EntityNotFoundException(DistributionSetType.class, typeId);
+        }
+
+        return distributionSetRepository.count(DistributionSetSpecification.byType(typeId));
+    }
+
+    @Override
+    public List<Statistic> countRolloutsByStatusForDistributionSet(final Long id) {
+        assertDistributionSetExists(id);
+
+        return distributionSetRepository.countRolloutsByStatusForDistributionSet(id).stream()
+                .map(Statistic.class::cast).toList();
+    }
+
+    @Override
+    public List<Statistic> countActionsByStatusForDistributionSet(final Long id) {
+        assertDistributionSetExists(id);
+
+        return distributionSetRepository.countActionsByStatusForDistributionSet(id).stream()
+                .map(Statistic.class::cast).toList();
+    }
+
+    @Override
+    public Long countAutoAssignmentsForDistributionSet(final Long id) {
+        assertDistributionSetExists(id);
+
+        return distributionSetRepository.countAutoAssignmentsForDistributionSet(id);
+    }
+
+    @Override
+    @Transactional
+    public void invalidate(final DistributionSet distributionSet) {
+        final JpaDistributionSet jpaSet = (JpaDistributionSet) distributionSet;
+        jpaSet.invalidate();
+        distributionSetRepository.save(jpaSet);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<Long> ids, final String tagName) {
+        return updateTag(
+                ids,
+                () -> distributionSetTagManagement
+                        .getByName(tagName)
+                        .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName)),
+                (allDs, distributionSetTag) -> {
+                    final List<JpaDistributionSet> toBeChangedDSs = allDs.stream().filter(set -> set.addTag(distributionSetTag))
+                            .collect(Collectors.toList());
+
+                    final DistributionSetTagAssignmentResult result;
+                    // un-assignment case
+                    if (toBeChangedDSs.isEmpty()) {
+                        for (final JpaDistributionSet set : allDs) {
+                            if (set.removeTag(distributionSetTag)) {
+                                toBeChangedDSs.add(set);
+                            }
+                        }
+                        result = new DistributionSetTagAssignmentResult(ids.size() - toBeChangedDSs.size(),
+                                Collections.emptyList(),
+                                Collections.unmodifiableList(
+                                        toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
+                                distributionSetTag);
+                    } else {
+                        result = new DistributionSetTagAssignmentResult(ids.size() - toBeChangedDSs.size(),
+                                Collections.unmodifiableList(
+                                        toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
+                                Collections.emptyList(), distributionSetTag);
+                    }
+                    return result;
+                });
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public DistributionSet unassignTag(final long id, final long dsTagId) {
+        final JpaDistributionSet set = (JpaDistributionSet) getWithDetails(id)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, id));
+
+        final DistributionSetTag distributionSetTag = distributionSetTagManagement.get(dsTagId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));
+        set.removeTag(distributionSetTag);
+
+        final JpaDistributionSet result = distributionSetRepository.save(set);
+
+        // No reason to save the tag
+        entityManager.detach(distributionSetTag);
+        return result;
+    }
+
+    // check if shall implicitly lock a distribution set
+    boolean isImplicitLockApplicable(final DistributionSet distributionSet) {
+        final JpaDistributionSet jpaDistributionSet = (JpaDistributionSet) distributionSet;
+        if (jpaDistributionSet.isLocked()) {
+            // already locked
+            return false;
+        }
+
+        if (!tenantConfigHelper.getConfigValue(IMPLICIT_LOCK_ENABLED, Boolean.class)) {
+            // implicit lock disabled
+            return false;
+        }
+
+        final List<String> skipForTags = repositoryProperties.getSkipImplicitLockForTags();
+        if (!ObjectUtils.isEmpty(skipForTags)) {
+            final Set<DistributionSetTag> tags = jpaDistributionSet.getTags();
+            if (!ObjectUtils.isEmpty(tags)) {
+                for (final DistributionSetTag tag : tags) {
+                    if (skipForTags.contains(tag.getName())) {
+                        // has a skip tag
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // finally - implicit lock is applicable
+        return true;
     }
 
     private static List<Specification<JpaDistributionSet>> buildDistributionSetSpecifications(
@@ -617,13 +764,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return specList;
     }
 
-    private void assertDistributionSetIsNotAssignedToTargets(final Long distributionSet) {
-        if (actionRepository.countByDistributionSetId(distributionSet) > 0) {
-            throw new EntityReadOnlyException(String.format(
-                    "Distribution set %s is already assigned to targets and cannot be changed", distributionSet));
-        }
-    }
-
     private static boolean hasTagsFilterActive(final DistributionSetFilter distributionSetFilter) {
         final boolean isNoTagActive = Boolean.TRUE.equals(distributionSetFilter.getSelectDSWithNoTag());
         final boolean isAtLeastOneTagActive = !CollectionUtils.isEmpty(distributionSetFilter.getTagNames());
@@ -631,49 +771,84 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return isNoTagActive || isAtLeastOneTagActive;
     }
 
+    private static Collection<Long> notFound(final Collection<Long> distributionSetIds, final List<JpaDistributionSet> foundDistributionSets) {
+        final Map<Long, JpaDistributionSet> foundDistributionSetMap = foundDistributionSets.stream()
+                .collect(Collectors.toMap(JpaDistributionSet::getId, Function.identity()));
+        return distributionSetIds.stream().filter(id -> !foundDistributionSetMap.containsKey(id)).toList();
+    }
+
+    private List<DistributionSet> updateTag(
+            final Collection<Long> dsIds, final long dsTagId,
+            final BiFunction<DistributionSetTag, JpaDistributionSet, DistributionSet> updater) {
+        final DistributionSetTag tag = distributionSetTagManagement.get(dsTagId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));
+        final List<JpaDistributionSet> allDs = dsIds.size() == 1 ?
+                distributionSetRepository.findById(dsIds.iterator().next())
+                        .map(List::of)
+                        .orElseGet(Collections::emptyList) :
+                distributionSetRepository.findAll(DistributionSetSpecification.byIds(dsIds));
+        if (allDs.size() < dsIds.size()) {
+            throw new EntityNotFoundException(DistributionSet.class, notFound(dsIds, allDs));
+        }
+
+        try {
+            // apply update and collect modified targets
+            return allDs.stream().map(distributionSet -> updater.apply(tag, distributionSet)).toList();
+        } finally {
+            // No reason to save the tag
+            entityManager.detach(tag);
+        }
+    }
+
+    private JpaSoftwareModule findSoftwareModuleAndThrowExceptionIfNotFound(final Long softwareModuleId) {
+        return softwareModuleRepository.findById(softwareModuleId)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
+    }
+
+    private JpaDistributionSetCreate setDefaultTypeIfMissing(final JpaDistributionSetCreate create) {
+        if (create.getType() == null) {
+            create.type(systemManagement.getTenantMetadata().getDefaultDsType().getKey());
+        }
+        return create;
+    }
+
+    private List<Specification<JpaDistributionSet>> buildSpecsByComplete(final Boolean complete) {
+        final List<Specification<JpaDistributionSet>> specifications = new ArrayList<>();
+        specifications.add(DistributionSetSpecification.isNotDeleted());
+        if (complete != null) {
+            specifications.add(DistributionSetSpecification.isCompleted(complete));
+        }
+        return specifications;
+    }
+
+    private void assertMetaDataQuota(final Long dsId, final int requested) {
+        QuotaHelper.assertAssignmentQuota(dsId, requested, quotaManagement.getMaxMetaDataEntriesPerDistributionSet(),
+                DistributionSetMetadata.class, DistributionSet.class,
+                distributionSetMetadataRepository::countByDistributionSetId);
+    }
+
+    private void assertSoftwareModuleQuota(final Long id, final int requested) {
+        QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxSoftwareModulesPerDistributionSet(),
+                SoftwareModule.class, DistributionSet.class, softwareModuleRepository::countByAssignedToId);
+    }
+
+    private Specification<JpaDistributionSetMetadata> byDsIdSpec(final long dsId) {
+        return (root, query, cb) -> cb
+                .equal(root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id), dsId);
+    }
+
+    private void assertDistributionSetIsNotAssignedToTargets(final Long distributionSet) {
+        if (actionRepository.countByDistributionSetId(distributionSet) > 0) {
+            throw new EntityReadOnlyException(String.format(
+                    "Distribution set %s is already assigned to targets and cannot be changed", distributionSet));
+        }
+    }
+
     private void checkAndThrowIfDistributionSetMetadataAlreadyExists(final DsMetadataCompositeKey metadataId) {
         if (distributionSetMetadataRepository.existsById(metadataId)) {
             throw new EntityAlreadyExistsException(
                     "Metadata entry with key '" + metadataId.getKey() + "' already exists");
         }
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void lock(final long id) {
-        final JpaDistributionSet distributionSet = getById(id);
-        if (!distributionSet.isLocked()) {
-            lockSoftwareModules(distributionSet);
-            distributionSet.lock();
-            distributionSetRepository.save(distributionSet);
-        }
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void unlock(final long id) {
-        final JpaDistributionSet distributionSet = getById(id);
-        if (distributionSet.isLocked()) {
-            distributionSet.unlock();
-            distributionSetRepository.save(distributionSet);
-        }
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final long id) {
-        delete(List.of(id));
-    }
-
-    @Override
-    public List<DistributionSet> get(final Collection<Long> ids) {
-        return Collections.unmodifiableList(getDistributionSets(ids));
     }
 
     private List<JpaDistributionSet> getDistributionSets(final Collection<Long> ids) {
@@ -685,130 +860,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return foundDs;
     }
 
-    @Override
-    public Page<DistributionSet> findByTag(final Pageable pageable, final long tagId) {
-        assertDsTagExists(tagId);
-
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, pageable, List.of(
-                DistributionSetSpecification.hasTag(tagId)));
-    }
-
-    @Override
-    public Page<DistributionSet> findByRsqlAndTag(final Pageable pageable, final String rsqlParam, final long tagId) {
-        assertDsTagExists(tagId);
-
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, pageable, List.of(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class, virtualPropertyReplacer,
-                        database),
-                DistributionSetSpecification.hasTag(tagId), DistributionSetSpecification.isNotDeleted()));
-    }
-
-    @Override
-    public Slice<DistributionSet> findAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, pageable, List.of(
-                DistributionSetSpecification.isNotDeleted()));
-    }
-
-    @Override
-    public Page<DistributionSet> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, pageable, List.of(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class, virtualPropertyReplacer,
-                        database),
-                DistributionSetSpecification.isNotDeleted()));
-    }
-
-    @Override
-    public Optional<DistributionSet> get(final long id) {
-        return distributionSetRepository.findById(id).map(DistributionSet.class::cast);
-    }
-
-    @Override
-    public boolean exists(final long id) {
-        return distributionSetRepository.existsById(id);
-    }
-
-    @Override
-    public DistributionSet getOrElseThrowException(final long id) {
-        return getById(id);
-    }
-
-    @Override
-    public DistributionSet getValidAndComplete(final long id) {
-        final DistributionSet distributionSet = getValid(id);
-
-        if (!distributionSet.isComplete()) {
-            throw new IncompleteDistributionSetException("Distribution set of type "
-                    + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
-        }
-
-        if (distributionSet.isDeleted()) {
-            throw new DeletedException(DistributionSet.class, id);
-        }
-
-        return distributionSet;
-    }
-
-    @Override
-    public DistributionSet getValid(final long id) {
-        final DistributionSet distributionSet = getOrElseThrowException(id);
-
-        if (!distributionSet.isValid()) {
-            throw new InvalidDistributionSetException("Distribution set of type " + distributionSet.getType().getKey()
-                    + " is invalid: " + distributionSet.getId());
-        }
-
-        return distributionSet;
-    }
-
-    @Override
-    @Transactional
-    public void invalidate(final DistributionSet distributionSet) {
-        final JpaDistributionSet jpaSet = (JpaDistributionSet) distributionSet;
-        jpaSet.invalidate();
-        distributionSetRepository.save(jpaSet);
-    }
-
-    // check if shall implicitly lock a distribution set
-    boolean isImplicitLockApplicable(final DistributionSet distributionSet) {
-        final JpaDistributionSet jpaDistributionSet = (JpaDistributionSet) distributionSet;
-        if (jpaDistributionSet.isLocked()) {
-            // already locked
-            return false;
-        }
-
-        if (!tenantConfigHelper.getConfigValue(IMPLICIT_LOCK_ENABLED, Boolean.class)) {
-            // implicit lock disabled
-            return false;
-        }
-
-        final List<String> skipForTags = repositoryProperties.getSkipImplicitLockForTags();
-        if (!ObjectUtils.isEmpty(skipForTags)) {
-            final Set<DistributionSetTag> tags = jpaDistributionSet.getTags();
-            if (!ObjectUtils.isEmpty(tags)) {
-                for (final DistributionSetTag tag : tags) {
-                    if (skipForTags.contains(tag.getName())) {
-                        // has a skip tag
-                        return false;
-                    }
-                }
-            }
-        }
-
-        // finally - implicit lock is applicable
-        return true;
-    }
-
-    private static Collection<Long> notFound(final Collection<Long> distributionSetIds, final List<JpaDistributionSet> foundDistributionSets) {
-        final Map<Long, JpaDistributionSet> foundDistributionSetMap = foundDistributionSets.stream()
-                .collect(Collectors.toMap(JpaDistributionSet::getId, Function.identity()));
-        return distributionSetIds.stream().filter(id -> !foundDistributionSetMap.containsKey(id)).toList();
-    }
-
-
     private void lockSoftwareModules(final JpaDistributionSet distributionSet) {
         distributionSet.getModules().forEach(module -> {
             if (!module.isLocked()) {
-                final JpaSoftwareModule jpaSoftwareModule = (JpaSoftwareModule)module;
+                final JpaSoftwareModule jpaSoftwareModule = (JpaSoftwareModule) module;
                 jpaSoftwareModule.lock();
                 softwareModuleRepository.save(jpaSoftwareModule);
             }
@@ -823,7 +878,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private void assertDistributionSetExists(final long id) {
         if (!distributionSetRepository.existsById(id)) {
-          throw new EntityNotFoundException(DistributionSet.class, id);
+            throw new EntityNotFoundException(DistributionSet.class, id);
         }
     }
 
@@ -833,46 +888,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
     }
 
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<Long> ids, final String tagName) {
-        return updateTag(
-                ids,
-                () -> distributionSetTagManagement
-                        .getByName(tagName)
-                        .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName)),
-                (allDs, distributionSetTag) -> {
-                    final List<JpaDistributionSet> toBeChangedDSs = allDs.stream().filter(set -> set.addTag(distributionSetTag))
-                            .collect(Collectors.toList());
-
-                    final DistributionSetTagAssignmentResult result;
-                    // un-assignment case
-                    if (toBeChangedDSs.isEmpty()) {
-                        for (final JpaDistributionSet set : allDs) {
-                            if (set.removeTag(distributionSetTag)) {
-                                toBeChangedDSs.add(set);
-                            }
-                        }
-                        result = new DistributionSetTagAssignmentResult(ids.size() - toBeChangedDSs.size(),
-                                Collections.emptyList(),
-                                Collections.unmodifiableList(
-                                        toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
-                                distributionSetTag);
-                    } else {
-                        result = new DistributionSetTagAssignmentResult(ids.size() - toBeChangedDSs.size(),
-                                Collections.unmodifiableList(
-                                        toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
-                                Collections.emptyList(), distributionSetTag);
-                    }
-                    return result;
-                });
-    }
     private <T> T updateTag(
             final Collection<Long> dsIds, final Supplier<DistributionSetTag> tagSupplier,
             final BiFunction<List<JpaDistributionSet>, DistributionSetTag, T> updater) {
-        final List<JpaDistributionSet> allDs =  dsIds.size() == 1 ?
+        final List<JpaDistributionSet> allDs = dsIds.size() == 1 ?
                 distributionSetRepository.findById(dsIds.iterator().next()).map(List::of).orElseGet(Collections::emptyList) :
                 distributionSetRepository.findAll(DistributionSetSpecification.byIds(dsIds));
         if (allDs.size() < dsIds.size()) {
@@ -886,24 +905,5 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             // No reason to save the tag
             entityManager.detach(distributionSetTag);
         }
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSet unassignTag(final long id, final long dsTagId) {
-        final JpaDistributionSet set = (JpaDistributionSet) getWithDetails(id)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, id));
-
-        final DistributionSetTag distributionSetTag = distributionSetTagManagement.get(dsTagId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));
-        set.removeTag(distributionSetTag);
-
-        final JpaDistributionSet result = distributionSetRepository.save(set);
-
-        // No reason to save the tag
-        entityManager.detach(distributionSetTag);
-        return result;
     }
 }

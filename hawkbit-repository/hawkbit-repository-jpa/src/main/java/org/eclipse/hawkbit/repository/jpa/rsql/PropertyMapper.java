@@ -14,9 +14,6 @@ import java.util.Map;
 
 /**
  * Maps property of entity to its alias .
- * 
- *
- *
  */
 public final class PropertyMapper {
 
@@ -28,13 +25,10 @@ public final class PropertyMapper {
 
     /**
      * Add new mapping - property name and alias.
-     * 
-     * @param type
-     *            entity type
-     * @param property
-     *            alias of property
-     * @param mapping
-     *            property name
+     *
+     * @param type entity type
+     * @param property alias of property
+     * @param mapping property name
      */
     public static void addNewMapping(final Class<?> type, final String property, final String mapping) {
         allowedColumns.computeIfAbsent(type, k -> new HashMap<>());

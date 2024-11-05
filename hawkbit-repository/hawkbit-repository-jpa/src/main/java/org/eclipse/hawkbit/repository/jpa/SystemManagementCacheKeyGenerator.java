@@ -26,25 +26,9 @@ import org.springframework.context.annotation.Bean;
  */
 public class SystemManagementCacheKeyGenerator implements CurrentTenantCacheKeyGenerator {
 
+    private final ThreadLocal<String> createInitialTenant = new ThreadLocal<>();
     @Autowired
     private TenantAware tenantAware;
-
-    private final ThreadLocal<String> createInitialTenant = new ThreadLocal<>();
-
-    /**
-     * An implementation of the {@link KeyGenerator} to generate a key based on
-     * either the {@code createInitialTenant} thread local and the
-     * {@link TenantAware}, but in case we are in a tenant creation with its default
-     * types we need to use as the tenant the current tenant which is currently
-     * created and not the one currently in the {@link TenantAware}.
-     */
-    public class CurrentTenantKeyGenerator implements KeyGenerator {
-        @Override
-        public Object generate(final Object target, final Method method, final Object... params) {
-            String tenant = getTenantInCreation().orElseGet(() -> tenantAware.getCurrentTenant()).toUpperCase();
-            return SimpleKeyGenerator.generateKey(tenant, tenant);
-        }
-    }
 
     @Override
     @Bean
@@ -55,7 +39,7 @@ public class SystemManagementCacheKeyGenerator implements CurrentTenantCacheKeyG
     /**
      * Get the tenant which overwrites the actual tenant used by the
      * {@linkplain #currentTenantKeyGenerator()}.
-     * 
+     *
      * @return A present optional in case that there is a tenant in the progress of
      *         creation.
      */
@@ -66,9 +50,8 @@ public class SystemManagementCacheKeyGenerator implements CurrentTenantCacheKeyG
     /**
      * Overwrite the tenant used by the key generator in case that the tenant is in
      * the process of creation.
-     * 
-     * @param tenant
-     *            the tenant which should be used instead of the actual one.
+     *
+     * @param tenant the tenant which should be used instead of the actual one.
      */
     public void setTenantInCreation(@NotNull String tenant) {
         createInitialTenant.set(Objects.requireNonNull(tenant));
@@ -80,5 +63,21 @@ public class SystemManagementCacheKeyGenerator implements CurrentTenantCacheKeyG
      */
     public void removeTenantInCreation() {
         createInitialTenant.remove();
+    }
+
+    /**
+     * An implementation of the {@link KeyGenerator} to generate a key based on
+     * either the {@code createInitialTenant} thread local and the
+     * {@link TenantAware}, but in case we are in a tenant creation with its default
+     * types we need to use as the tenant the current tenant which is currently
+     * created and not the one currently in the {@link TenantAware}.
+     */
+    public class CurrentTenantKeyGenerator implements KeyGenerator {
+
+        @Override
+        public Object generate(final Object target, final Method method, final Object... params) {
+            String tenant = getTenantInCreation().orElseGet(() -> tenantAware.getCurrentTenant()).toUpperCase();
+            return SimpleKeyGenerator.generateKey(tenant, tenant);
+        }
     }
 }

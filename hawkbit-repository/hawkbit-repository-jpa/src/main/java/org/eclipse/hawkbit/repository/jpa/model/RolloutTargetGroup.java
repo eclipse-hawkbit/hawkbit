@@ -33,7 +33,6 @@ import org.eclipse.persistence.annotations.ExistenceType;
 /**
  * Entity with JPA annotation to store the information which {@link Target} is
  * in a specific {@link RolloutGroup}.
- * 
  */
 @IdClass(RolloutTargetGroupId.class)
 @Entity

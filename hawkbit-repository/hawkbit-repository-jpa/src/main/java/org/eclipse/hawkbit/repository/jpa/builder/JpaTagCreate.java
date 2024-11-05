@@ -18,9 +18,9 @@ import org.eclipse.hawkbit.repository.model.Tag;
 
 /**
  * Create/build implementation.
- *
  */
 public class JpaTagCreate extends AbstractTagUpdateCreate<TagCreate> implements TagCreate {
+
     JpaTagCreate() {
 
     }

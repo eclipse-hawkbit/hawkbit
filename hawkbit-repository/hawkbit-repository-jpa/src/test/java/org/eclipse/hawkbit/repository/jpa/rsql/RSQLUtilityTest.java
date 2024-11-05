@@ -33,10 +33,13 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 import jakarta.persistence.metamodel.Attribute;
-
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.SingularAttribute;
 import jakarta.persistence.metamodel.Type;
+
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
@@ -48,8 +51,8 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
-import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
+import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -66,10 +69,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 @ExtendWith(SpringExtension.class)
 @Feature("Component Tests - Repository")
 @Story("RSQL search utility")
@@ -77,58 +76,31 @@ import io.qameta.allure.Story;
 // method name as short text
 public class RSQLUtilityTest {
 
-    @Spy
-    private final VirtualPropertyResolver macroResolver = new VirtualPropertyResolver();
-
-    @MockBean
-    private TenantConfigurationManagement confMgmt;
-
-    @MockBean
-    private SystemSecurityContext securityContext;
-
-    @MockBean
-    private RsqlVisitorFactory rsqlVisitorFactory;
-
-    @Mock
-    private Root<Object> baseSoftwareModuleRootMock;
-
-    @Mock
-    private CriteriaQuery<SoftwareModule> criteriaQueryMock;
-    @Mock
-    private CriteriaBuilder criteriaBuilderMock;
-
-    @Mock
-    private Subquery<SoftwareModule> subqueryMock;
-    @Mock
-    private Root<SoftwareModule> subqueryRootMock;
-
-    private final Database testDb = Database.H2;
-
-    @Mock
-    private Attribute attribute;
-
-    @Configuration
-    static class Config {
-        @Bean
-        TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
-            return TenantConfigurationManagementHolder.getInstance();
-        }
-
-        @Bean
-        SystemSecurityContextHolder systemSecurityContextHolder() {
-            return SystemSecurityContextHolder.getInstance();
-        }
-
-        @Bean
-        RsqlConfigHolder rsqlVisitorFactoryHolder() {
-            return RsqlConfigHolder.getInstance();
-        }
-    }
-
     private static final TenantConfigurationValue<String> TEST_POLLING_TIME_INTERVAL = TenantConfigurationValue
             .<String> builder().value("00:05:00").build();
     private static final TenantConfigurationValue<String> TEST_POLLING_OVERDUE_TIME_INTERVAL = TenantConfigurationValue
             .<String> builder().value("00:07:37").build();
+    @Spy
+    private final VirtualPropertyResolver macroResolver = new VirtualPropertyResolver();
+    private final Database testDb = Database.H2;
+    @MockBean
+    private TenantConfigurationManagement confMgmt;
+    @MockBean
+    private SystemSecurityContext securityContext;
+    @MockBean
+    private RsqlVisitorFactory rsqlVisitorFactory;
+    @Mock
+    private Root<Object> baseSoftwareModuleRootMock;
+    @Mock
+    private CriteriaQuery<SoftwareModule> criteriaQueryMock;
+    @Mock
+    private CriteriaBuilder criteriaBuilderMock;
+    @Mock
+    private Subquery<SoftwareModule> subqueryMock;
+    @Mock
+    private Root<SoftwareModule> subqueryRootMock;
+    @Mock
+    private Attribute attribute;
 
     @BeforeEach
     public void beforeEach() {
@@ -555,6 +527,34 @@ public class RSQLUtilityTest {
         return (Path<Y>) path;
     }
 
+    private void validateRsqlForTestFields(final String rsql) {
+        when(rsqlVisitorFactory.validationRsqlVisitor(eq(TestFieldEnum.class))).thenReturn(
+                new FieldValidationRsqlVisitor<>(TestFieldEnum.class));
+        RSQLUtility.validateRsqlFor(rsql, TestFieldEnum.class);
+    }
+
+    private void reset0(final Object... mocks) {
+        reset(mocks);
+        if (Arrays.asList(mocks).contains(baseSoftwareModuleRootMock)) {
+            setupRoot(baseSoftwareModuleRootMock);
+        }
+        if (Arrays.asList(mocks).contains(subqueryRootMock)) {
+            setupRoot(subqueryRootMock);
+        }
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void setupRoot(final Root<?> root) {
+        final Type type = Mockito.mock(Type.class);
+        when(type.getPersistenceType()).thenReturn(Type.PersistenceType.BASIC);
+        final SingularAttribute singularAttribute = Mockito.mock(SingularAttribute.class);
+        when(singularAttribute.getType()).thenReturn(type);
+        final EntityType entityType = Mockito.mock(EntityType.class);
+        when(entityType.getAttribute(any())).thenReturn(singularAttribute);
+        when(entityType.getPersistenceType()).thenReturn(Type.PersistenceType.BASIC);
+        when(root.getModel()).thenReturn(entityType);
+    }
+
     private enum TestFieldEnum implements RsqlQueryField {
         TESTFIELD("testfield"), TESTFIELD_WITH_SUB_ENTITIES("testfieldWithSubEntities", "subentity11", "subentity22");
 
@@ -581,34 +581,26 @@ public class RSQLUtilityTest {
         }
     }
 
-    private void validateRsqlForTestFields(final String rsql) {
-        when(rsqlVisitorFactory.validationRsqlVisitor(eq(TestFieldEnum.class))).thenReturn(new FieldValidationRsqlVisitor<>(TestFieldEnum.class));
-        RSQLUtility.validateRsqlFor(rsql, TestFieldEnum.class);
-    }
-
-    private void reset0(final Object... mocks) {
-        reset(mocks);
-        if (Arrays.asList(mocks).contains(baseSoftwareModuleRootMock)) {
-            setupRoot(baseSoftwareModuleRootMock);
-        }
-        if (Arrays.asList(mocks).contains(subqueryRootMock)) {
-            setupRoot(subqueryRootMock);
-        }
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void setupRoot(final Root<?> root) {
-        final Type type = Mockito.mock(Type.class);
-        when(type.getPersistenceType()).thenReturn(Type.PersistenceType.BASIC);
-        final SingularAttribute singularAttribute = Mockito.mock(SingularAttribute.class);
-        when(singularAttribute.getType()).thenReturn(type);
-        final EntityType entityType = Mockito.mock(EntityType.class);
-        when(entityType.getAttribute(any())).thenReturn(singularAttribute);
-        when(entityType.getPersistenceType()).thenReturn(Type.PersistenceType.BASIC);
-        when(root.getModel()).thenReturn(entityType);
-    }
-
     private enum TestValueEnum {
         BUMLUX;
+    }
+
+    @Configuration
+    static class Config {
+
+        @Bean
+        TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
+            return TenantConfigurationManagementHolder.getInstance();
+        }
+
+        @Bean
+        SystemSecurityContextHolder systemSecurityContextHolder() {
+            return SystemSecurityContextHolder.getInstance();
+        }
+
+        @Bean
+        RsqlConfigHolder rsqlVisitorFactoryHolder() {
+            return RsqlConfigHolder.getInstance();
+        }
     }
 }

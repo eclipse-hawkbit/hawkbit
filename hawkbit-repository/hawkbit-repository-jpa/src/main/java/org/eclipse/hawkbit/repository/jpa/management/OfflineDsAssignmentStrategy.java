@@ -44,25 +44,16 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 /**
  * AbstractDsAssignmentStrategy for offline assignments, i.e. not managed by
  * hawkBit.
- *
  */
 public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     OfflineDsAssignmentStrategy(final TargetRepository targetRepository,
-                                final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
-                                final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-                                final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
-                                final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
+            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
+            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
         super(targetRepository, afterCommit, eventPublisherHolder, actionRepository, actionStatusRepository,
                 quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties);
-    }
-
-    @Override
-    public void sendTargetUpdatedEvents(final DistributionSet set, final List<JpaTarget> targets) {
-        targets.forEach(target -> {
-            target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
-            sendTargetUpdatedEvent(target);
-        });
     }
 
     @Override
@@ -80,13 +71,11 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    public Set<Long> cancelActiveActions(final List<List<Long>> targetIds) {
-        return Collections.emptySet();
-    }
-
-    @Override
-    public void closeActiveActions(final List<List<Long>> targetIds) {
-        // Not supported by offline case
+    public void sendTargetUpdatedEvents(final DistributionSet set, final List<JpaTarget> targets) {
+        targets.forEach(target -> {
+            target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
+            sendTargetUpdatedEvent(target);
+        });
     }
 
     @Override
@@ -94,7 +83,8 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             final JpaDistributionSet set, final List<List<Long>> targetIds, final String currentUser) {
         final long now = System.currentTimeMillis();
         targetIds.forEach(targetIdsChunk -> {
-            if (targetRepository.count(AccessController.Operation.UPDATE, targetRepository.byIdsSpec(targetIdsChunk)) != targetIdsChunk.size()) {
+            if (targetRepository.count(AccessController.Operation.UPDATE,
+                    targetRepository.byIdsSpec(targetIdsChunk)) != targetIdsChunk.size()) {
                 throw new InsufficientPermissionException("No update access to all targets!");
             }
             targetRepository.setAssignedAndInstalledDistributionSetAndUpdateStatus(
@@ -117,6 +107,26 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
+    public Set<Long> cancelActiveActions(final List<List<Long>> targetIds) {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public void closeActiveActions(final List<List<Long>> targetIds) {
+        // Not supported by offline case
+    }
+
+    @Override
+    void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult) {
+        // no need to send deployment events in the offline case
+    }
+
+    @Override
+    void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults) {
+        // no need to send deployment events in the offline case
+    }
+
+    @Override
     public JpaAction createTargetAction(final String initiatedBy, final TargetWithActionType targetWithActionType,
             final List<JpaTarget> targets, final JpaDistributionSet set) {
         final JpaAction result = super.createTargetAction(initiatedBy, targetWithActionType, targets, set);
@@ -133,16 +143,6 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         result.setStatus(Status.FINISHED);
         result.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Action reported as offline deployment");
         return result;
-    }
-
-    @Override
-    void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult) {
-        // no need to send deployment events in the offline case
-    }
-
-    @Override
-    void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults) {
-        // no need to send deployment events in the offline case
     }
 
 }

@@ -36,15 +36,11 @@ public class AutoCleanupScheduler {
     /**
      * Constructs the cleanup schedulers and initializes it with a set of
      * cleanup handlers.
-     * 
-     * @param systemManagement
-     *            Management APIs to invoke actions in a certain tenant context.
-     * @param systemSecurityContext
-     *            The system security context.
-     * @param lockRegistry
-     *            A registry for shared locks.
-     * @param cleanupTasks
-     *            A list of cleanup tasks.
+     *
+     * @param systemManagement Management APIs to invoke actions in a certain tenant context.
+     * @param systemSecurityContext The system security context.
+     * @param lockRegistry A registry for shared locks.
+     * @param cleanupTasks A list of cleanup tasks.
      */
     public AutoCleanupScheduler(final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext, final LockRegistry lockRegistry,

@@ -62,9 +62,9 @@ import org.eclipse.persistence.sessions.changesets.ObjectChangeSet;
 @Entity
 @Table(name = "sp_base_software_module", uniqueConstraints = @UniqueConstraint(columnNames = { "module_type", "name",
         "version", "tenant" }, name = "uk_base_sw_mod"), indexes = {
-                @Index(name = "sp_idx_base_sw_module_01", columnList = "tenant,deleted,name,version"),
-                @Index(name = "sp_idx_base_sw_module_02", columnList = "tenant,deleted,module_type"),
-                @Index(name = "sp_idx_base_sw_module_prim", columnList = "tenant,id") })
+        @Index(name = "sp_idx_base_sw_module_01", columnList = "tenant,deleted,name,version"),
+        @Index(name = "sp_idx_base_sw_module_02", columnList = "tenant,deleted,module_type"),
+        @Index(name = "sp_idx_base_sw_module_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "SoftwareModule.artifacts", attributeNodes = { @NamedAttributeNode("artifacts") })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
@@ -83,7 +83,8 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     private JpaSoftwareModuleType type;
 
     @CascadeOnDelete
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule", cascade = { CascadeType.PERSIST }, targetEntity = JpaArtifact.class, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule", cascade = {
+            CascadeType.PERSIST }, targetEntity = JpaArtifact.class, orphanRemoval = true)
     private List<JpaArtifact> artifacts;
 
     @Setter
@@ -191,7 +192,8 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
                 }
                 sb.delete(sb.length() - 2, sb.length());
                 throw new LockedException(JpaSoftwareModule.class, getId(), "DELETE", sb.toString());
-            };
+            }
+            ;
         }
         this.deleted = deleted;
     }

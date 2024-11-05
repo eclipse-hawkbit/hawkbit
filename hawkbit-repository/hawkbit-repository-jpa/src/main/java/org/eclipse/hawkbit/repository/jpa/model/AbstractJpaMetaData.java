@@ -22,10 +22,10 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 
 /**
  * Meta data for entities.
- *
  */
 @MappedSuperclass
 public abstract class AbstractJpaMetaData implements MetaData {
+
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -67,6 +67,11 @@ public abstract class AbstractJpaMetaData implements MetaData {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(key, value);
+    }
+
+    @Override
     public boolean equals(final Object o) {
         if (this == o)
             return true;
@@ -74,10 +79,5 @@ public abstract class AbstractJpaMetaData implements MetaData {
             return false;
         final AbstractJpaMetaData that = (AbstractJpaMetaData) o;
         return Objects.equals(key, that.key) && Objects.equals(value, that.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(key, value);
     }
 }

@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagBuilder;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetBuilder;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
 import org.eclipse.hawkbit.repository.model.MetaData;
@@ -36,7 +35,6 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * JPA Implementation of {@link EntityFactory}.
- *
  */
 @Validated
 public class JpaEntityFactory implements EntityFactory {
@@ -66,6 +64,16 @@ public class JpaEntityFactory implements EntityFactory {
     private TargetTypeBuilder targetTypeBuilder;
 
     @Override
+    public ActionStatusBuilder actionStatus() {
+        return new JpaActionStatusBuilder();
+    }
+
+    @Override
+    public DistributionSetBuilder distributionSet() {
+        return distributionSetBuilder;
+    }
+
+    @Override
     public MetaData generateDsMetadata(final String key, final String value) {
         return new JpaDistributionSetMetadata(key, StringUtils.trimWhitespace(value));
     }
@@ -76,23 +84,8 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public DistributionSetTypeBuilder distributionSetType() {
-        return distributionSetTypeBuilder;
-    }
-
-    @Override
-    public DistributionSetBuilder distributionSet() {
-        return distributionSetBuilder;
-    }
-
-    @Override
-    public TargetBuilder target() {
-        return targetBuilder;
-    }
-
-    @Override
-    public TargetTypeBuilder targetType() {
-        return targetTypeBuilder;
+    public SoftwareModuleMetadataBuilder softwareModuleMetadata() {
+        return softwareModuleMetadataBuilder;
     }
 
     @Override
@@ -101,8 +94,18 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public TargetFilterQueryBuilder targetFilterQuery() {
-        return targetFilterQueryBuilder;
+    public RolloutGroupBuilder rolloutGroup() {
+        return new JpaRolloutGroupBuilder();
+    }
+
+    @Override
+    public DistributionSetTypeBuilder distributionSetType() {
+        return distributionSetTypeBuilder;
+    }
+
+    @Override
+    public RolloutBuilder rollout() {
+        return rolloutBuilder;
     }
 
     @Override
@@ -116,23 +119,18 @@ public class JpaEntityFactory implements EntityFactory {
     }
 
     @Override
-    public ActionStatusBuilder actionStatus() {
-        return new JpaActionStatusBuilder();
+    public TargetBuilder target() {
+        return targetBuilder;
     }
 
     @Override
-    public RolloutBuilder rollout() {
-        return rolloutBuilder;
+    public TargetTypeBuilder targetType() {
+        return targetTypeBuilder;
     }
 
     @Override
-    public RolloutGroupBuilder rolloutGroup() {
-        return new JpaRolloutGroupBuilder();
-    }
-
-    @Override
-    public SoftwareModuleMetadataBuilder softwareModuleMetadata() {
-        return softwareModuleMetadataBuilder;
+    public TargetFilterQueryBuilder targetFilterQuery() {
+        return targetFilterQueryBuilder;
     }
 
 }

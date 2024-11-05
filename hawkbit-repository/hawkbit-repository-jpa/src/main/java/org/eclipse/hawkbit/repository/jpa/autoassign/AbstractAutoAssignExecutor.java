@@ -56,15 +56,11 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
 
     /**
      * Constructor
-     * 
-     * @param targetFilterQueryManagement
-     *            to get all target filter queries
-     * @param deploymentManagement
-     *            to assign distribution sets to targets
-     * @param transactionManager
-     *            to run transactions
-     * @param contextAware
-     *            to handle the context
+     *
+     * @param targetFilterQueryManagement to get all target filter queries
+     * @param deploymentManagement to assign distribution sets to targets
+     * @param transactionManager to run transactions
+     * @param contextAware to handle the context
      */
     protected AbstractAutoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
             final DeploymentManagement deploymentManagement, final PlatformTransactionManager transactionManager,
@@ -73,6 +69,12 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
         this.deploymentManagement = deploymentManagement;
         this.transactionManager = transactionManager;
         this.contextAware = contextAware;
+    }
+
+    protected static String getAutoAssignmentInitiatedBy(final TargetFilterQuery targetFilterQuery) {
+        return StringUtils.hasText(targetFilterQuery.getAutoAssignInitiatedBy())
+                ? targetFilterQuery.getAutoAssignInitiatedBy()
+                : targetFilterQuery.getCreatedBy();
     }
 
     protected DeploymentManagement getDeploymentManagement() {
@@ -100,17 +102,17 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
             filterQueries.forEach(filterQuery -> {
                 try {
                     filterQuery.getAccessControlContext().ifPresentOrElse(
-                        context -> // has stored context - executes it with it
-                            contextAware.runInContext(
-                                context,
-                                () -> consumer.accept(filterQuery)),
-                        () -> // has no stored context - executes it in the tenant & user scope
-                            contextAware.runAsTenantAsUser(
-                                contextAware.getCurrentTenant(),
-                                getAutoAssignmentInitiatedBy(filterQuery), () -> {
-                                    consumer.accept(filterQuery);
-                                    return null;
-                                })
+                            context -> // has stored context - executes it with it
+                                    contextAware.runInContext(
+                                            context,
+                                            () -> consumer.accept(filterQuery)),
+                            () -> // has no stored context - executes it in the tenant & user scope
+                                    contextAware.runAsTenantAsUser(
+                                            contextAware.getCurrentTenant(),
+                                            getAutoAssignmentInitiatedBy(filterQuery), () -> {
+                                                consumer.accept(filterQuery);
+                                                return null;
+                                            })
                     );
                 } catch (final RuntimeException ex) {
                     log.debug(
@@ -128,11 +130,9 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     /**
      * Runs target assignments within a dedicated transaction for a given list of
      * controllerIDs
-     * 
-     * @param targetFilterQuery
-     *            the target filter query
-     * @param controllerIds
-     *            the controllerIDs
+     *
+     * @param targetFilterQuery the target filter query
+     * @param controllerIds the controllerIDs
      * @return count of targets
      */
     protected int runTransactionalAssignment(final TargetFilterQuery targetFilterQuery,
@@ -158,10 +158,8 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
      * Creates a list of {@link DeploymentRequest} for given list of controllerIds
      * and {@link TargetFilterQuery}
      *
-     * @param controllerIds
-     *            list of controllerIds
-     * @param filterQuery
-     *            the query the targets have to match
+     * @param controllerIds list of controllerIds
+     * @param filterQuery the query the targets have to match
      * @return list of deployment request
      */
     protected List<DeploymentRequest> mapToDeploymentRequests(final List<String> controllerIds,
@@ -178,11 +176,5 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
                         .setActionType(autoAssignActionType).setWeight(filterQuery.getAutoAssignWeight().orElse(null))
                         .setConfirmationRequired(filterQuery.isConfirmationRequired()).build())
                 .toList();
-    }
-
-    protected static String getAutoAssignmentInitiatedBy(final TargetFilterQuery targetFilterQuery) {
-        return StringUtils.hasText(targetFilterQuery.getAutoAssignInitiatedBy())
-                ? targetFilterQuery.getAutoAssignInitiatedBy()
-                : targetFilterQuery.getCreatedBy();
     }
 }

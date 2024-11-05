@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification;
@@ -25,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * {@link PagingAndSortingRepository} and {@link org.springframework.data.repository.CrudRepository} for
  * {@link JpaTargetType}.
- *
  */
 @Transactional(readOnly = true)
 public interface TargetTypeRepository
@@ -43,9 +41,7 @@ public interface TargetTypeRepository
     long countDsSetTypesById(@Param("id") Long id);
 
     /**
-     *
-     * @param dsTypeId
-     *            to search for
+     * @param dsTypeId to search for
      * @return all {@link TargetType}s in the repository with given
      *         {@link TargetType#getName()}
      */

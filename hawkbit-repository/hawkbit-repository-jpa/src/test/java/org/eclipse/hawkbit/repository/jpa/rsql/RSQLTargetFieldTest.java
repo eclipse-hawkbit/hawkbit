@@ -17,6 +17,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.assertj.core.util.Maps;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetTypeFields;
@@ -31,21 +34,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Slice;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 @Feature("Component Tests - Repository")
 @Story("RSQL filter target")
 class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
+    private static final String OR = ",";
+    private static final String AND = ";";
     private Target target;
     private Target target2;
     private TargetType targetType1;
     private TargetType targetType2;
-
-    private static final String OR = ",";
-    private static final String AND = ";";
 
     @BeforeEach
     void setupBeforeTest() {

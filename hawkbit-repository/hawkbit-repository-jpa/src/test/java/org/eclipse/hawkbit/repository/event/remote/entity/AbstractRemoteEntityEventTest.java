@@ -15,10 +15,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 
-import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEventTest;
-
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.eclipse.hawkbit.repository.event.remote.AbstractRemoteEventTest;
 
 /**
  * Test the remote entity events.

@@ -50,7 +50,6 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * JPA implementation of {@link TargetTypeManagement}.
- *
  */
 @Transactional(readOnly = true)
 @Validated
@@ -68,14 +67,10 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     /**
      * Constructor
      *
-     * @param targetTypeRepository
-     *            Target type repository
-     * @param targetRepository
-     *            Target repository
-     * @param virtualPropertyReplacer
-     *            replacer
-     * @param database
-     *            database
+     * @param targetTypeRepository Target type repository
+     * @param targetRepository Target repository
+     * @param virtualPropertyReplacer replacer
+     * @param database database
      */
     public JpaTargetTypeManagement(final TargetTypeRepository targetTypeRepository,
             final TargetRepository targetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
@@ -152,7 +147,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
         return JpaManagementHelper.findAllWithCountBySpec(targetTypeRepository, pageable,
                 List.of(
                         RSQLUtility.buildRsqlSpecification(
-                                rsqlParam, TargetTypeFields.class, virtualPropertyReplacer,database)));
+                                rsqlParam, TargetTypeFields.class, virtualPropertyReplacer, database)));
     }
 
     @Override
@@ -236,13 +231,9 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
      * Enforces the quota specifying the maximum number of
      * {@link DistributionSetType}s per {@link TargetType}.
      *
-     * @param id
-     *            of the target type
-     * @param requested
-     *            number of distribution set types to check
-     *
-     * @throws AssignmentQuotaExceededException
-     *             if the software module type quota is exceeded
+     * @param id of the target type
+     * @param requested number of distribution set types to check
+     * @throws AssignmentQuotaExceededException if the software module type quota is exceeded
      */
     private void assertDistributionSetTypeQuota(final long id, final int requested) {
         QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxDistributionSetTypesPerTargetType(),

@@ -67,8 +67,8 @@ import org.springframework.context.ApplicationEvent;
 @Entity
 @Table(name = "sp_distribution_set", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "name", "version", "tenant" }, name = "uk_distrib_set") }, indexes = {
-                @Index(name = "sp_idx_distribution_set_01", columnList = "tenant,deleted,complete"),
-                @Index(name = "sp_idx_distribution_set_prim", columnList = "tenant,id") })
+        @Index(name = "sp_idx_distribution_set_01", columnList = "tenant,deleted,complete"),
+        @Index(name = "sp_idx_distribution_set_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "DistributionSet.detail", attributeNodes = { @NamedAttributeNode("modules"),
         @NamedAttributeNode("tags"), @NamedAttributeNode("type") })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
@@ -90,7 +90,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
     @JoinTable(name = "sp_ds_module", joinColumns = {
             @JoinColumn(name = "ds_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) }, inverseJoinColumns = {
-                    @JoinColumn(name = "module_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
+            @JoinColumn(name = "module_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
     private Set<SoftwareModule> modules;
 
     @CascadeOnDelete
@@ -284,18 +284,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
                 EventPublisherHolder.getInstance().getApplicationId()));
     }
 
-    private void checkTypeCompatability(final SoftwareModule softwareModule) {
-        // we cannot allow that modules are added without a type defined
-        if (type == null) {
-            throw new DistributionSetTypeUndefinedException();
-        }
-
-        // check if it is allowed to such a module to this DS type
-        if (!type.containsModuleType(softwareModule.getType())) {
-            throw new UnsupportedSoftwareModuleForThisDistributionSetException();
-        }
-    }
-
     private static void publishEventWithEventPublisher(final ApplicationEvent event) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(event);
     }
@@ -308,5 +296,17 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
         return changes.stream().anyMatch(changeRecord -> DELETED_PROPERTY.equals(changeRecord.getAttribute())
                 && Boolean.parseBoolean(changeRecord.getNewValue().toString()));
+    }
+
+    private void checkTypeCompatability(final SoftwareModule softwareModule) {
+        // we cannot allow that modules are added without a type defined
+        if (type == null) {
+            throw new DistributionSetTypeUndefinedException();
+        }
+
+        // check if it is allowed to such a module to this DS type
+        if (!type.containsModuleType(softwareModule.getType())) {
+            throw new UnsupportedSoftwareModuleForThisDistributionSetException();
+        }
     }
 }

@@ -9,8 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+
 import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
@@ -24,10 +27,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
-
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment=NONE, properties = {
+@SpringBootTest(webEnvironment = NONE, properties = {
         "hawkbit.rsql.caseInsensitiveDB=true",
         "spring.main.allow-bean-definition-overriding=true",
         "spring.main.banner-mode=off",
@@ -38,11 +39,6 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 public class RSQLToSQLTest {
 
     private RSQLToSQL rsqlToSQL;
-
-    @PersistenceContext
-    private void setEntityManager(final EntityManager entityManager) {
-        rsqlToSQL = new RSQLToSQL(entityManager);
-    }
 
     @Test
     public void print() {
@@ -56,6 +52,15 @@ public class RSQLToSQLTest {
     public void printPG() {
         printFrom(JpaTarget.class, TargetFields.class, "tag!=TAG1 and tag==TAG2");
         printFrom(JpaTarget.class, TargetFields.class, "tag==TAG1 and tag!=TAG2");
+    }
+
+    private static String from(final String sql) {
+        return sql.substring(sql.indexOf("FROM"));
+    }
+
+    @PersistenceContext
+    private void setEntityManager(final EntityManager entityManager) {
+        rsqlToSQL = new RSQLToSQL(entityManager);
     }
 
     private <T, A extends Enum<A> & RsqlQueryField> void print(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
@@ -72,8 +77,5 @@ public class RSQLToSQLTest {
                 "\t\t" + from(rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, true)));
         System.out.println("\tG2:\n" +
                 "\t\t" + from(rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, false)));
-    }
-    private static String from(final String sql) {
-        return sql.substring(sql.indexOf("FROM"));
     }
 }

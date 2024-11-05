@@ -24,12 +24,12 @@ import org.eclipse.hawkbit.repository.model.TargetMetadata;
 
 /**
  * Meta data for {@link Target}.
- *
  */
 @IdClass(TargetMetadataCompositeKey.class)
 @Entity
 @Table(name = "sp_target_metadata")
 public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMetadata {
+
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -43,11 +43,9 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
 
     /**
      * Creates a single metadata entry with the given key and value.
-     * 
-     * @param key
-     *            of the meta data entry
-     * @param value
-     *            of the meta data entry
+     *
+     * @param key of the meta data entry
+     * @param value of the meta data entry
      */
     public JpaTargetMetadata(final String key, final String value) {
         super(key, value);
@@ -56,13 +54,10 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
     /**
      * Creates a single metadata entry with the given key and value for the
      * given {@link Target}.
-     * 
-     * @param key
-     *            of the meta data entry
-     * @param value
-     *            of the meta data entry
-     * @param target
-     *            the meta data entry is associated with
+     *
+     * @param key of the meta data entry
+     * @param value of the meta data entry
+     * @param target the meta data entry is associated with
      */
     public JpaTargetMetadata(final String key, final String value, final Target target) {
         super(key, value);
@@ -73,21 +68,13 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
         return new TargetMetadataCompositeKey(target.getId(), getKey());
     }
 
-    public void setTarget(final Target target) {
-        this.target = (JpaTarget) target;
-    }
-
     @Override
     public Target getTarget() {
         return target;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((target == null) ? 0 : target.hashCode());
-        return result;
+    public void setTarget(final Target target) {
+        this.target = (JpaTarget) target;
     }
 
     @Override
@@ -106,5 +93,13 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
             return false;
         }
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((target == null) ? 0 : target.hashCode());
+        return result;
     }
 }

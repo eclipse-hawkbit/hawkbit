@@ -22,21 +22,21 @@ public interface EventAwareEntity {
 
     /**
      * Fired for the Entity creation.
-     * 
+     *
      * @param descriptorEvent
      */
     void fireCreateEvent(DescriptorEvent descriptorEvent);
 
     /**
      * Fired for the Entity updation.
-     * 
+     *
      * @param descriptorEvent
      */
     void fireUpdateEvent(DescriptorEvent descriptorEvent);
 
     /**
      * Fired for the Entity deletion.
-     * 
+     *
      * @param descriptorEvent
      */
     void fireDeleteEvent(DescriptorEvent descriptorEvent);

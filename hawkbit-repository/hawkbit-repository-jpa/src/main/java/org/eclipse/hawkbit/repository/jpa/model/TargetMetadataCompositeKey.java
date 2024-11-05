@@ -15,9 +15,9 @@ import java.util.Objects;
 /**
  * The Target Metadata composite key which contains the meta data key and the ID
  * of the Target itself.
- *
  */
 public final class TargetMetadataCompositeKey implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     private String key;
@@ -29,10 +29,8 @@ public final class TargetMetadataCompositeKey implements Serializable {
     }
 
     /**
-     * @param target
-     *            the target Id for this meta data
-     * @param key
-     *            the key of the meta data
+     * @param target the target Id for this meta data
+     * @param key the key of the meta data
      */
     public TargetMetadataCompositeKey(final Long target, final String key) {
         this.target = target;

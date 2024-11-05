@@ -33,13 +33,10 @@ public class RolloutScheduler {
 
     /**
      * Constructor.
-     * 
-     * @param systemManagement
-     *            to find all tenants
-     * @param rolloutHandler
-     *            to run the rollout handler
-     * @param systemSecurityContext
-     *            to run as system
+     *
+     * @param systemManagement to find all tenants
+     * @param rolloutHandler to run the rollout handler
+     * @param systemSecurityContext to run as system
      */
     public RolloutScheduler(final SystemManagement systemManagement, final RolloutHandler rolloutHandler,
             final SystemSecurityContext systemSecurityContext) {

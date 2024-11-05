@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -31,9 +33,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Test the remote entity events.
@@ -56,6 +55,23 @@ public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest
 
     }
 
+    protected Message<?> createMessageWithImmutableHeader(final TenantAwareEvent event) {
+        final Map<String, Object> headers = new LinkedHashMap<>();
+        return busProtoStuffMessageConverter.toMessage(event, new MessageHeaders(headers));
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T extends TenantAwareEvent> T createJacksonEvent(final T event) {
+        final Message<String> message = createJsonMessage(event);
+        return (T) jacksonMessageConverter.fromMessage(message, event.getClass());
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T extends TenantAwareEvent> T createProtoStuffEvent(final T event) {
+        final Message<?> message = createProtoStuffMessage(event);
+        return (T) busProtoStuffMessageConverter.fromMessage(message, event.getClass());
+    }
+
     private Message<?> createProtoStuffMessage(final TenantAwareEvent event) {
         final Map<String, Object> headers = new LinkedHashMap<>();
         headers.put(MessageHeaders.CONTENT_TYPE, BusProtoStuffMessageConverter.APPLICATION_BINARY_PROTOSTUFF);
@@ -73,22 +89,5 @@ public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest
             fail(e.getMessage());
         }
         return null;
-    }
-
-    protected Message<?> createMessageWithImmutableHeader(final TenantAwareEvent event) {
-        final Map<String, Object> headers = new LinkedHashMap<>();
-        return busProtoStuffMessageConverter.toMessage(event, new MessageHeaders(headers));
-    }
-
-    @SuppressWarnings("unchecked")
-    protected <T extends TenantAwareEvent> T createJacksonEvent(final T event) {
-        final Message<String> message = createJsonMessage(event);
-        return (T) jacksonMessageConverter.fromMessage(message, event.getClass());
-    }
-
-    @SuppressWarnings("unchecked")
-    protected <T extends TenantAwareEvent> T createProtoStuffEvent(final T event) {
-        final Message<?> message = createProtoStuffMessage(event);
-        return (T) busProtoStuffMessageConverter.fromMessage(message, event.getClass());
     }
 }

@@ -21,9 +21,9 @@ import org.springframework.data.jpa.repository.query.QueryUtils;
 /**
  * Specifications class for {@link Rollout}s. The class provides Spring Data
  * JPQL Specifications.
- *
  */
 public final class RolloutSpecification {
+
     private RolloutSpecification() {
         // utility class
     }
@@ -33,9 +33,8 @@ public final class RolloutSpecification {
      * attribute. Includes fetch for stuff that is required for {@link Rollout}
      * queries.
      *
-     * @param isDeleted
-     *            TRUE/FALSE are compared to the attribute DELETED. If NULL the
-     *            attribute is ignored
+     * @param isDeleted TRUE/FALSE are compared to the attribute DELETED. If NULL the
+     *         attribute is ignored
      * @return the {@link Rollout} {@link Specification}
      */
     public static Specification<JpaRollout> isDeletedWithDistributionSet(final Boolean isDeleted, final Sort sort) {
@@ -52,13 +51,10 @@ public final class RolloutSpecification {
     /**
      * Builds a {@link Specification} to search a rollout by name.
      *
-     * @param searchText
-     *            search string
-     * @param isDeleted
-     *            <code>true</code> if deleted rollouts should be included in
-     *            the search. Otherwise <code>false</code>
+     * @param searchText search string
+     * @param isDeleted <code>true</code> if deleted rollouts should be included in
+     *         the search. Otherwise <code>false</code>
      * @return criteria specification with a query for name of a rollout
-     *
      */
     public static Specification<JpaRollout> likeName(final String searchText, final boolean isDeleted) {
         return (rolloutRoot, query, criteriaBuilder) -> {

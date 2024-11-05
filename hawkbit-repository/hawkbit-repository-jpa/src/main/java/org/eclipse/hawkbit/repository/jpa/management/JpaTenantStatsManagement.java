@@ -22,7 +22,6 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * Management service for statistics of a single tenant.
- *
  */
 @Validated
 public class JpaTenantStatsManagement implements TenantStatsManagement {

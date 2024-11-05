@@ -31,18 +31,14 @@ public class RolloutGroupEvaluationManager {
     /**
      * Constructor
      *
-     * @param errorConditionEvaluators
-     *            evaluators for instances of {@link RolloutGroupConditionEvaluator}
-     *            handling the {@link RolloutGroup.RolloutGroupErrorCondition}
-     * @param successConditionEvaluators
-     *            evaluators for instances of {@link RolloutGroupConditionEvaluator}
-     *            handling the {@link RolloutGroup.RolloutGroupSuccessCondition}
-     * @param errorActionEvaluators
-     *            evaluators for instances of {@link RolloutGroupActionEvaluator}
-     *            handling the {@link RolloutGroup.RolloutGroupErrorAction}
-     * @param successActionEvaluators
-     *            evaluators for instances of {@link RolloutGroupActionEvaluator}
-     *            handling the {@link RolloutGroup.RolloutGroupSuccessAction}
+     * @param errorConditionEvaluators evaluators for instances of {@link RolloutGroupConditionEvaluator}
+     *         handling the {@link RolloutGroup.RolloutGroupErrorCondition}
+     * @param successConditionEvaluators evaluators for instances of {@link RolloutGroupConditionEvaluator}
+     *         handling the {@link RolloutGroup.RolloutGroupSuccessCondition}
+     * @param errorActionEvaluators evaluators for instances of {@link RolloutGroupActionEvaluator}
+     *         handling the {@link RolloutGroup.RolloutGroupErrorAction}
+     * @param successActionEvaluators evaluators for instances of {@link RolloutGroupActionEvaluator}
+     *         handling the {@link RolloutGroup.RolloutGroupSuccessAction}
      */
     public RolloutGroupEvaluationManager(
             final List<RolloutGroupConditionEvaluator<RolloutGroup.RolloutGroupErrorCondition>> errorConditionEvaluators,
@@ -62,7 +58,7 @@ public class RolloutGroupEvaluationManager {
     }
 
     public RolloutGroupActionEvaluator<RolloutGroup.RolloutGroupSuccessAction> getSuccessActionEvaluator(
-          final RolloutGroup.RolloutGroupSuccessAction successAction) {
+            final RolloutGroup.RolloutGroupSuccessAction successAction) {
         return findFirstActionEvaluator(successActionEvaluators, successAction);
     }
 

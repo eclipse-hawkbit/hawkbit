@@ -38,14 +38,10 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
     @Autowired
     protected TestAccessControlManger testAccessControlManger;
 
-    @BeforeEach
-    void beforeEach() {
-        testAccessControlManger.deleteAllRules();
-    }
-
-    @AfterEach
-    void afterEach() {
-        testAccessControlManger.deleteAllRules();
+    protected static <T> List<T> merge(final List<T> lists0, final List<T> list1) {
+        final List<T> merge = new ArrayList<>(lists0);
+        merge.addAll(list1);
+        return merge;
     }
 
     protected void permitAllOperations(final AccessController.Operation operation) {
@@ -55,6 +51,16 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
                 JpaTargetType.class, operation, Specification.where(null), type -> true);
         testAccessControlManger.defineAccessRule(
                 JpaDistributionSet.class, operation, Specification.where(null), type -> true);
+    }
+
+    @BeforeEach
+    void beforeEach() {
+        testAccessControlManger.deleteAllRules();
+    }
+
+    @AfterEach
+    void afterEach() {
+        testAccessControlManger.deleteAllRules();
     }
 
     public static class AccessControlTestConfig {
@@ -77,7 +83,8 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
 
                 @Override
                 public Optional<Specification<JpaTarget>> getAccessRules(final Operation operation) {
-                    if (contextAware.getCurrentTenant() != null && SecurityContextTenantAware.SYSTEM_USER.equals(contextAware.getCurrentUsername())) {
+                    if (contextAware.getCurrentTenant() != null && SecurityContextTenantAware.SYSTEM_USER.equals(
+                            contextAware.getCurrentUsername())) {
                         // as tenant, no restrictions
                         return Optional.empty();
                     }
@@ -104,7 +111,8 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
 
                 @Override
                 public Optional<Specification<JpaTargetType>> getAccessRules(final Operation operation) {
-                    if (contextAware.getCurrentTenant() != null && SecurityContextTenantAware.SYSTEM_USER.equals(contextAware.getCurrentUsername())) {
+                    if (contextAware.getCurrentTenant() != null && SecurityContextTenantAware.SYSTEM_USER.equals(
+                            contextAware.getCurrentUsername())) {
                         // as tenant, no restrictions
                         return Optional.empty();
                     }
@@ -131,7 +139,8 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
 
                 @Override
                 public Optional<Specification<JpaDistributionSet>> getAccessRules(final Operation operation) {
-                    if (contextAware.getCurrentTenant() != null && SecurityContextTenantAware.SYSTEM_USER.equals(contextAware.getCurrentUsername())) {
+                    if (contextAware.getCurrentTenant() != null && SecurityContextTenantAware.SYSTEM_USER.equals(
+                            contextAware.getCurrentUsername())) {
                         // as tenant, no restrictions
                         return Optional.empty();
                     }
@@ -150,11 +159,5 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
                 }
             };
         }
-    }
-
-    protected static <T> List<T> merge(final List<T> lists0, final List<T> list1) {
-        final List<T> merge = new ArrayList<>(lists0);
-        merge.addAll(list1);
-        return merge;
     }
 }

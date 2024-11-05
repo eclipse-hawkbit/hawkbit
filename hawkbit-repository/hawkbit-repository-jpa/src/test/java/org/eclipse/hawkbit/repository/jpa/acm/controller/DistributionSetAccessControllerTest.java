@@ -139,8 +139,8 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         // verify distributionSetManagement#assignSoftwareModules
         assertThat(distributionSetManagement.assignSoftwareModules(permitted.getId(),
                 Collections.singletonList(swModule.getId()))).satisfies(ds -> {
-                    assertThat(ds.getModules().stream().map(Identifiable::getId).toList()).contains(swModule.getId());
-                });
+            assertThat(ds.getModules().stream().map(Identifiable::getId).toList()).contains(swModule.getId());
+        });
         assertThatThrownBy(() -> {
             distributionSetManagement.assignSoftwareModules(readOnly.getId(),
                     Collections.singletonList(swModule.getId()));
@@ -226,8 +226,8 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
         assertThatThrownBy(() ->
-            distributionSetManagement.unassignTag(Collections.singletonList(readOnly.getId()), dsTag.getId()))
-        .as("Missing update permissions for target to toggle tag assignment.")
+                distributionSetManagement.unassignTag(Collections.singletonList(readOnly.getId()), dsTag.getId()))
+                .as("Missing update permissions for target to toggle tag assignment.")
                 .isInstanceOf(InsufficientPermissionException.class);
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
@@ -295,7 +295,6 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
                     .getAutoAssignDistributionSet().getId();
         }).isInstanceOf(EntityNotFoundException.class);
     }
-
 
     private void defineAccess(final AccessController.Operation operation, final DistributionSet... distributionSets) {
         defineAccess(operation, List.of(distributionSets));

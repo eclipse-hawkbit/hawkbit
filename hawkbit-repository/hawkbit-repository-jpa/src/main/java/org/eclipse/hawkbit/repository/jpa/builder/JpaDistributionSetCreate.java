@@ -27,16 +27,14 @@ import org.springframework.util.StringUtils;
 
 /**
  * Create/build implementation.
- *
  */
 public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreate<DistributionSetCreate>
         implements DistributionSetCreate {
 
-    @ValidString
-    private String type;
-
     private final DistributionSetTypeManagement distributionSetTypeManagement;
     private final SoftwareModuleManagement softwareModuleManagement;
+    @ValidString
+    private String type;
 
     JpaDistributionSetCreate(final DistributionSetTypeManagement distributionSetTypeManagement,
             final SoftwareModuleManagement softwareManagement) {
@@ -45,17 +43,17 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
     }
 
     @Override
+    public DistributionSetCreate type(final String type) {
+        this.type = StringUtils.trimWhitespace(type);
+        return this;
+    }
+
+    @Override
     public JpaDistributionSet build() {
         return new JpaDistributionSet(name, version, description,
                 Optional.ofNullable(type).map(this::findDistributionSetTypeWithExceptionIfNotFound).orElse(null),
                 findSoftwareModuleWithExceptionIfNotFound(modules),
                 Optional.ofNullable(requiredMigrationStep).orElse(Boolean.FALSE));
-    }
-
-    @Override
-    public DistributionSetCreate type(final String type) {
-        this.type = StringUtils.trimWhitespace(type);
-        return this;
     }
 
     public String getType() {

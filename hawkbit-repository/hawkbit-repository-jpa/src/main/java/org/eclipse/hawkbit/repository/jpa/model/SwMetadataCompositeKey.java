@@ -16,6 +16,7 @@ import java.io.Serializable;
  * and the ID of the software module itself.
  */
 public final class SwMetadataCompositeKey implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     private String key;
@@ -30,10 +31,8 @@ public final class SwMetadataCompositeKey implements Serializable {
     }
 
     /**
-     * @param moduleId
-     *            the software module for this meta data
-     * @param key
-     *            the key of the meta data
+     * @param moduleId the software module for this meta data
+     * @param key the key of the meta data
      */
     public SwMetadataCompositeKey(final Long moduleId, final String key) {
         this.softwareModule = moduleId;
@@ -48,8 +47,7 @@ public final class SwMetadataCompositeKey implements Serializable {
     }
 
     /**
-     * @param key
-     *            the key to set
+     * @param key the key to set
      */
     public void setKey(final String key) {
         this.key = key;
@@ -63,8 +61,7 @@ public final class SwMetadataCompositeKey implements Serializable {
     }
 
     /**
-     * @param softwareModule
-     *            the softwareModule to set
+     * @param softwareModule the softwareModule to set
      */
     public void setSoftwareModule(final Long softwareModule) {
         this.softwareModule = softwareModule;

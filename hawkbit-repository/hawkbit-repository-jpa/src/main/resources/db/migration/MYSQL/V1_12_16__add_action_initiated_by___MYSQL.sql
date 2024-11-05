@@ -1,2 +1,4 @@
-ALTER TABLE sp_action ADD COLUMN initiated_by VARCHAR(64) NOT NULL;
-ALTER TABLE sp_target_filter_query ADD COLUMN auto_assign_initiated_by VARCHAR(64);
+ALTER TABLE sp_action
+    ADD COLUMN initiated_by VARCHAR(64) NOT NULL;
+ALTER TABLE sp_target_filter_query
+    ADD COLUMN auto_assign_initiated_by VARCHAR(64);

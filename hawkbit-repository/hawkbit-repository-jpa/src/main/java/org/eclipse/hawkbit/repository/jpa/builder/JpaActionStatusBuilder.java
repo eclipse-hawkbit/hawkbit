@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 
 /**
  * Builder implementation for {@link ActionStatus}.
- *
  */
 public class JpaActionStatusBuilder implements ActionStatusBuilder {
 

@@ -16,6 +16,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -37,10 +40,6 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @Feature("Component Tests - Access Control")
 @Story("Test Target Access Controller")
@@ -328,11 +327,11 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
         assertThat(content).hasSize(updateTargets.size());
 
         final List<Target> rolloutTargets = content.stream().flatMap(
-                group -> rolloutGroupManagement.findTargetsOfRolloutGroup(Pageable.unpaged(), group.getId()).get())
+                        group -> rolloutGroupManagement.findTargetsOfRolloutGroup(Pageable.unpaged(), group.getId()).get())
                 .toList();
 
         assertThat(rolloutTargets).hasSize(updateTargets.size()).allMatch(
-                target -> updateTargets.stream().anyMatch(readTarget -> readTarget.getId().equals(target.getId())))
+                        target -> updateTargets.stream().anyMatch(readTarget -> readTarget.getId().equals(target.getId())))
                 .noneMatch(target -> readTargets.stream()
                         .anyMatch(readTarget -> readTarget.getId().equals(target.getId())))
                 .noneMatch(target -> hiddenTargets.stream()
@@ -358,7 +357,8 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
                 "hidden5");
 
         defineAccess(AccessController.Operation.UPDATE, updateTargets);
-        defineAccess(AccessController.Operation.READ, merge(updateTargets, readTargets));;
+        defineAccess(AccessController.Operation.READ, merge(updateTargets, readTargets));
+        ;
 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("testName").query("id==*"));

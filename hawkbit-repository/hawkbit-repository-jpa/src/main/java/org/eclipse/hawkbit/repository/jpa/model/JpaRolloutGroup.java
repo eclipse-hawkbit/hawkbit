@@ -41,7 +41,6 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * JPA entity definition of persisting a group of an rollout.
- *
  */
 @Entity
 @Table(name = "sp_rolloutgroup", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "rollout",
@@ -121,7 +120,7 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
 
     @Column(name = "target_percentage")
     private float targetPercentage = 100;
-    
+
     @Column(name = "confirmation_required")
     private boolean confirmationRequired;
 
@@ -146,14 +145,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         this.status = status;
     }
 
-    public List<RolloutTargetGroup> getRolloutTargetGroup() {
-        if (rolloutTargetGroup == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(rolloutTargetGroup);
-    }
-
     @Override
     public RolloutGroup getParent() {
         return parent;
@@ -166,10 +157,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
 
     public void setDynamic(final boolean dynamic) {
         this.dynamic = dynamic;
-    }
-
-    public void setParent(final RolloutGroup parent) {
-        this.parent = (JpaRolloutGroup) parent;
     }
 
     @Override
@@ -245,12 +232,15 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         this.totalTargets = totalTargets;
     }
 
-    public void setSuccessAction(final RolloutGroupSuccessAction successAction) {
-        this.successAction = successAction;
-    }
-
-    public void setSuccessActionExp(final String successActionExp) {
-        this.successActionExp = successActionExp;
+    /**
+     * @return the totalTargetCountStatus
+     */
+    @Override
+    public TotalTargetCountStatus getTotalTargetCountStatus() {
+        if (totalTargetCountStatus == null) {
+            totalTargetCountStatus = new TotalTargetCountStatus(Long.valueOf(totalTargets), rollout.getActionType());
+        }
+        return totalTargetCountStatus;
     }
 
     @Override
@@ -267,13 +257,13 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return targetPercentage;
     }
 
-    public void setConfirmationRequired(final boolean confirmationRequired) {
-        this.confirmationRequired = confirmationRequired;
-    }
-    
     @Override
     public boolean isConfirmationRequired() {
         return confirmationRequired;
+    }
+
+    public void setConfirmationRequired(final boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
     }
 
     public void setTargetPercentage(final float targetPercentage) {
@@ -281,22 +271,30 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     }
 
     /**
-     * @return the totalTargetCountStatus
-     */
-    @Override
-    public TotalTargetCountStatus getTotalTargetCountStatus() {
-        if (totalTargetCountStatus == null) {
-            totalTargetCountStatus = new TotalTargetCountStatus(Long.valueOf(totalTargets), rollout.getActionType());
-        }
-        return totalTargetCountStatus;
-    }
-
-    /**
-     * @param totalTargetCountStatus
-     *            the totalTargetCountStatus to set
+     * @param totalTargetCountStatus the totalTargetCountStatus to set
      */
     public void setTotalTargetCountStatus(final TotalTargetCountStatus totalTargetCountStatus) {
         this.totalTargetCountStatus = totalTargetCountStatus;
+    }
+
+    public void setSuccessActionExp(final String successActionExp) {
+        this.successActionExp = successActionExp;
+    }
+
+    public void setSuccessAction(final RolloutGroupSuccessAction successAction) {
+        this.successAction = successAction;
+    }
+
+    public void setParent(final RolloutGroup parent) {
+        this.parent = (JpaRolloutGroup) parent;
+    }
+
+    public List<RolloutTargetGroup> getRolloutTargetGroup() {
+        if (rolloutTargetGroup == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(rolloutTargetGroup);
     }
 
     @Override

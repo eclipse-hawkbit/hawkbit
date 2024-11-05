@@ -15,10 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * A singleton bean which holds {@link TenantAware} service and makes it
  * accessible to beans which are not managed by spring, e.g. JPA entities.
- *
- *
- *
- *
  */
 public final class TenantAwareHolder {
 

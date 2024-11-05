@@ -16,9 +16,9 @@ import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * Combined unique key of the table {@link RolloutTargetGroup}.
- *
  */
 public class RolloutTargetGroupId implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     private Long rolloutGroup;
@@ -33,11 +33,9 @@ public class RolloutTargetGroupId implements Serializable {
 
     /**
      * Constructor.
-     * 
-     * @param rolloutGroup
-     *            the rollout group for this key
-     * @param target
-     *            the target for this key
+     *
+     * @param rolloutGroup the rollout group for this key
+     * @param target the target for this key
      */
     public RolloutTargetGroupId(final RolloutGroup rolloutGroup, final Target target) {
         this.rolloutGroup = rolloutGroup.getId();

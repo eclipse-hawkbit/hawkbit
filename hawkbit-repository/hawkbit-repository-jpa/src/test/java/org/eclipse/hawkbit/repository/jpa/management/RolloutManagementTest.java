@@ -29,6 +29,10 @@ import java.util.stream.Stream;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
@@ -96,17 +100,74 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
-
 /**
  * Junit tests for RolloutManagement.
  */
 @Feature("Component Tests - Repository")
 @Story("Rollout Management")
 class RolloutManagementTest extends AbstractJpaIntegrationTest {
+
+    /**
+     * Tests static assignment aspects of the dynamic group assignment filters.
+     */
+    @Test
+    @Description("Dynamic group doesn't override newer static group assignments")
+    public void dynamicGroupDoesntOverrideItsOrNewerStaticGroups() {
+        final int amountGroups = 1; // static only
+        final String targetPrefix = "controller-dynamic-rollout-";
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds");
+
+        testdataFactory.createTargets(targetPrefix, 0, amountGroups * 2);
+        final Rollout dynamicRollout = testdataFactory.createRolloutByVariables("dynamic", "static rollout", amountGroups,
+                "controllerid==" + targetPrefix + "*", distributionSet, "0", "30", ActionType.FORCED, 1000, false, true);
+        rolloutManagement.start(dynamicRollout.getId());
+        rolloutHandler.handleAll();
+        assertRollout(dynamicRollout, true, RolloutStatus.RUNNING, amountGroups + 1, amountGroups * 2);
+        final List<RolloutGroup> dynamicGroups = rolloutGroupManagement.findByRollout(
+                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
+                dynamicRollout.getId()).getContent();
+        for (int i = 0; i < dynamicGroups.size(); i++) {
+            final RolloutGroup group = dynamicGroups.get(i);
+            if (i + 1 == dynamicGroups.size()) {
+                assertGroup(group, true, RolloutGroupStatus.SCHEDULED, 0);
+            } else {
+                assertGroup(group, false, RolloutGroupStatus.RUNNING, 2);
+            }
+        }
+        assertAndGetRunning(dynamicRollout, 2).forEach(this::finishAction);
+        rolloutHandler.handleAll();
+        for (int i = 0; i < dynamicGroups.size(); i++) {
+            final RolloutGroup group = dynamicGroups.get(i);
+            if (i + 1 == dynamicGroups.size()) {
+                assertGroup(group, true, RolloutGroupStatus.RUNNING, 0);
+            } else {
+                assertGroup(group, false, RolloutGroupStatus.FINISHED, 2);
+            }
+        }
+        assertAndGetRunning(dynamicRollout, 0);
+        rolloutHandler.handleAll();
+        // NB: asserts that dynamic group doesn't get from its static groups (already finished action targets)
+        assertGroup(dynamicGroups.get(dynamicGroups.size() - 1), true, RolloutGroupStatus.RUNNING, 0);
+        assertAndGetRunning(dynamicRollout, 0);
+        rolloutManagement.pauseRollout(dynamicRollout.getId());
+        rolloutHandler.handleAll();
+
+        testdataFactory.createTargets(targetPrefix, amountGroups * 2, amountGroups);
+        final Rollout staticRollout = testdataFactory.createRolloutByVariables("static", "static rollout", amountGroups,
+                "controllerid==" + targetPrefix + "*", distributionSet, "0", "30", ActionType.FORCED, 0, false, false);
+        rolloutManagement.start(staticRollout.getId());
+        rolloutHandler.handleAll();
+        assertRollout(staticRollout, false, RolloutStatus.RUNNING, amountGroups, amountGroups * 3);
+        final List<RolloutGroup> staticGroups = rolloutGroupManagement.findByRollout(
+                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
+                staticRollout.getId()).getContent();
+        staticGroups.forEach(group -> assertGroup(group, false, RolloutGroupStatus.RUNNING, 3));
+
+        rolloutManagement.resumeRollout(dynamicRollout.getId());
+        rolloutHandler.handleAll(); // resume, do not get last devices (they are assigned to a newer group, nevertheless newer is with bigger weight
+        assertGroup(dynamicGroups.get(dynamicGroups.size() - 1), true, RolloutGroupStatus.RUNNING, 0);
+        assertAndGetRunning(dynamicRollout, 0);
+    }
 
     @BeforeEach
     void reset() {
@@ -174,13 +235,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .getContent();
         assertThat(actionsByKnownTarget).hasSize(1);
         assertThat(actionsByKnownTarget.get(0).getStatus()).isEqualTo(expectedStatus);
-    }
-
-    private static Stream<Arguments> simpleRolloutsPossibilities() {
-        return Stream.of(Arguments.of(true, true, Status.WAIT_FOR_CONFIRMATION), //
-                Arguments.of(true, false, Status.RUNNING), //
-                Arguments.of(false, true, Status.RUNNING), //
-                Arguments.of(false, false, Status.RUNNING));//
     }
 
     @Test
@@ -380,64 +434,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         deleteAllTargetsFromThirdGroup(createdRollout);
         rolloutHandler.handleAll(); // one more time to finish the second group
         verifyRolloutAndAllGroupsAreFinished(createdRollout);
-    }
-
-    @Step("Finish three actions of the rollout group and delete two targets")
-    private void finishActionAndDeleteTargetsOfFirstRunningGroup(final Rollout createdRollout) {
-        // finish group one by finishing targets and deleting targets
-        final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(PAGE,
-                createdRollout.getId(), Status.RUNNING);
-        final List<JpaAction> runningActions = runningActionsSlice.getContent();
-        finishAction(runningActions.get(0));
-        finishAction(runningActions.get(1));
-        finishAction(runningActions.get(2));
-        targetManagement.delete(
-                Arrays.asList(runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
-    }
-
-    @Step("Check the status of the rollout groups, second group should be in running status")
-    private void checkSecondGroupStatusIsRunning(final Rollout createdRollout) {
-        rolloutHandler.handleAll();
-        final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement
-                .findByRollout(new OffsetBasedPageRequest(0, 10, Sort.by(Direction.ASC, "id")), createdRollout.getId())
-                .getContent();
-        assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
-        assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
-        assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED);
-    }
-
-    @Step("Finish one action of the rollout group and delete four targets")
-    private void finishActionAndDeleteTargetsOfSecondRunningGroup(final Rollout createdRollout) {
-        final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(PAGE,
-                createdRollout.getId(), Status.RUNNING);
-        final List<JpaAction> runningActions = runningActionsSlice.getContent();
-        finishAction(runningActions.get(0));
-        targetManagement.delete(
-                Arrays.asList(runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
-                        runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
-
-    }
-
-    @Step("Delete all targets of the rollout group")
-    private void deleteAllTargetsFromThirdGroup(final Rollout createdRollout) {
-        final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(PAGE,
-                createdRollout.getId(), Status.SCHEDULED);
-        final List<JpaAction> runningActions = runningActionsSlice.getContent();
-        targetManagement.delete(Arrays.asList(runningActions.get(0).getTarget().getId(),
-                runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
-                runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
-    }
-
-    @Step("Check the status of the rollout groups and the rollout")
-    private void verifyRolloutAndAllGroupsAreFinished(final Rollout createdRollout) {
-        rolloutHandler.handleAll();
-        final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement
-                .findByRollout(PAGE, createdRollout.getId()).getContent();
-        assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
-        assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
-        assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
-        assertThat(reloadRollout(createdRollout).getStatus()).isEqualTo(RolloutStatus.FINISHED);
-
     }
 
     @Test
@@ -1491,14 +1487,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(myRollout.getDescription()).isEqualTo("newDesc");
     }
 
-    private Rollout reloadRollout(final Rollout r) {
-        return getRollout(r.getId());
-    }
-
-    private Rollout getRollout(final Long myRolloutId) {
-        return rolloutManagement.get(myRolloutId).orElseThrow(NoSuchElementException::new);
-    }
-
     @Test
     @Description("Verify the creation of a rollout with a groups definition.")
     void createRolloutWithGroupDefinition() throws Exception {
@@ -1633,41 +1621,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertRolloutGroup(rolloutGroupIds.get(1), RolloutGroupStatus.RUNNING, false, amountTargetsInGroup2,
                 Status.RUNNING);
 
-    }
-
-    private void assertRolloutGroup(final long rolloutGroupId, final RolloutGroupStatus status,
-            final boolean isConfirmationRequired, final long totalTargets, final Status actionStatusToCheck) {
-        assertThat(rolloutGroupManagement.get(rolloutGroupId)).hasValueSatisfying(rolloutGroup -> {
-            assertThat(rolloutGroup.getStatus()).isEqualTo(status);
-            assertThat(rolloutGroup.isConfirmationRequired()).isEqualTo(isConfirmationRequired);
-            assertThat(rolloutGroup.getTotalTargets()).isEqualTo(totalTargets);
-            if (actionStatusToCheck != null) {
-                assertAllActionOfRolloutGroupHavingStatus(rolloutGroup.getId(), actionStatusToCheck);
-            }
-        });
-    }
-
-    private void assertAllActionOfRolloutGroupHavingStatus(final long rolloutGroupId, final Status status) {
-        final List<Target> targets = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, rolloutGroupId)
-              .getContent();
-        targets.forEach(target -> {
-            final List<Action> activeActions = deploymentManagement
-                  .findActionsByTarget(target.getControllerId(), PAGE).getContent();
-            assertThat(activeActions).hasSize(1);
-            assertThat(activeActions.get(0).getStatus()).isEqualTo(status);
-        });
-    }
-
-    private void forceQuitAllActionsOfRolloutGroup(final long rolloutGroupId) {
-        final List<Target> targets = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, rolloutGroupId)
-                .getContent();
-        targets.forEach(target -> {
-            deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId()).getContent().stream().map(Identifiable::getId)
-                    .forEach(actionId -> {
-                        deploymentManagement.cancelAction(actionId);
-                        deploymentManagement.forceQuitAction(actionId);
-                    });
-        });
     }
 
     @Test
@@ -1961,8 +1914,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Description("Creating a rollout with a weight causes an error when multi assignment in disabled.")
     void weightAllowedWhenMultiAssignmentModeNotEnabled() {
         testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 2, "50",
-                        "80",
-                        ActionType.FORCED, 66);
+                "80",
+                ActionType.FORCED, 66);
     }
 
     @Test
@@ -1996,7 +1949,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         enableMultiAssignments();
         final Long rolloutId = testdataFactory
                 .createSimpleTestRolloutWithTargetsAndDistributionSet(amountOfTargets, 2, amountOfTargets,
-                "80", "50", null, weight).getId();
+                        "80", "50", null, weight).getId();
         rolloutManagement.start(rolloutId);
         rolloutHandler.handleAll();
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
@@ -2084,102 +2037,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(rolloutGroupTargets).hasSize(targets.size()).containsExactlyInAnyOrderElementsOf(targets)
                 .doesNotContainAnyElementsOf(incompatibleTargets);
-    }
-
-    private RolloutGroupCreate generateRolloutGroup(final int index, final Integer percentage,
-            final String targetFilter) {
-        return generateRolloutGroup(index, percentage, targetFilter, false);
-    }
-
-    private RolloutGroupCreate generateRolloutGroup(final int index, final Integer percentage,
-            final String targetFilter, final boolean confirmationRequired) {
-        return entityFactory.rolloutGroup().create().name("Group" + index).description("Group" + index + "desc")
-                .targetPercentage(Float.valueOf(percentage)).targetFilterQuery(targetFilter)
-                .confirmationRequired(confirmationRequired);
-    }
-
-    private RolloutCreate generateTargetsAndRollout(final String rolloutName, final int amountTargetsForRollout) {
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
-
-        testdataFactory.createTargets(amountTargetsForRollout, rolloutName + "-", rolloutName);
-
-        return entityFactory.rollout().create().name(rolloutName)
-                .description("This is a test description for the rollout")
-                .targetFilterQuery("controllerId==" + rolloutName + "-*").distributionSetId(distributionSet);
-    }
-
-    private void validateRolloutGroupActionStatus(final RolloutGroup rolloutGroup,
-            final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus) {
-        final RolloutGroup rolloutGroupWithDetail = rolloutGroupManagement.getWithDetailedStatus(rolloutGroup.getId())
-                .get();
-        validateStatus(rolloutGroupWithDetail.getTotalTargetCountStatus(), expectedTargetCountStatus);
-    }
-
-    private void validateRolloutActionStatus(final Long rolloutId,
-            final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus) {
-        final Rollout rolloutWithDetail = rolloutManagement.getWithDetailedStatus(rolloutId).get();
-        validateStatus(rolloutWithDetail.getTotalTargetCountStatus(), expectedTargetCountStatus);
-    }
-
-    private void validateStatus(final TotalTargetCountStatus totalTargetCountStatus,
-            final Map<TotalTargetCountStatus.Status, Long> expectedTotalCountStates) {
-        for (final Map.Entry<TotalTargetCountStatus.Status, Long> entry : expectedTotalCountStates.entrySet()) {
-            final Long countReady = totalTargetCountStatus.getTotalTargetCountByStatus(entry.getKey());
-            assertThat(countReady).as("targets in status " + entry.getKey()).isEqualTo(entry.getValue());
-        }
-    }
-
-    private Rollout createTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
-            final int groupSize, final String successCondition, final String errorCondition, final String rolloutName,
-            final String targetPrefixName) {
-        return createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, groupSize, successCondition,
-                errorCondition, rolloutName, targetPrefixName, null);
-    }
-
-    private Rollout createTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
-            final int groupSize, final String successCondition, final String errorCondition, final String rolloutName,
-            final String targetPrefixName, final Integer weight) {
-        final DistributionSet dsForRolloutTwo = testdataFactory.createDistributionSet("dsFor" + rolloutName);
-        testdataFactory.createTargets(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName);
-        return testdataFactory.createRolloutByVariables(rolloutName, rolloutName + "description", groupSize,
-                "controllerId==" + targetPrefixName + "-*", dsForRolloutTwo, successCondition, errorCondition,
-                Action.ActionType.FORCED, weight, false);
-    }
-
-    private int changeStatusForAllRunningActions(final Rollout rollout, final Status status) {
-        final List<Action> runningActions = findActionsByRolloutAndStatus(rollout, Status.RUNNING);
-        for (final Action action : runningActions) {
-            controllerManagement
-                    .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(status));
-        }
-        return runningActions.size();
-    }
-
-    private int changeStatusForRunningActions(final Rollout rollout, final Status status,
-            final int amountOfTargetsToGetChanged) {
-        final List<Action> runningActions = findActionsByRolloutAndStatus(rollout, Status.RUNNING);
-        assertThat(runningActions.size()).isGreaterThanOrEqualTo(amountOfTargetsToGetChanged);
-        for (int i = 0; i < amountOfTargetsToGetChanged; i++) {
-            controllerManagement.addUpdateActionStatus(
-                    entityFactory.actionStatus().create(runningActions.get(i).getId()).status(status));
-        }
-        return runningActions.size();
-    }
-
-    private static Map<TotalTargetCountStatus.Status, Long> createInitStatusMap() {
-        final Map<TotalTargetCountStatus.Status, Long> map = new HashMap<>();
-        for (final TotalTargetCountStatus.Status status : TotalTargetCountStatus.Status.values()) {
-            map.put(status, 0L);
-        }
-        return map;
-    }
-
-    private void awaitRunningState(final Long myRolloutId) {
-        Awaitility.await().atMost(Duration.ofSeconds(10)).pollInterval(Duration.ofMillis(500)).with()
-                .until(() -> SecurityContextSwitch
-                        .runAsPrivileged(
-                                () -> rolloutManagement.get(myRolloutId).orElseThrow(NoSuchElementException::new))
-                        .getStatus().equals(RolloutStatus.RUNNING));
     }
 
     @Test
@@ -2272,65 +2129,207 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .withMessageContaining(errorMessage);
     }
 
-    /**
-     * Tests static assignment aspects of the dynamic group assignment filters.
-     */
-    @Test
-    @Description("Dynamic group doesn't override newer static group assignments")
-    public void dynamicGroupDoesntOverrideItsOrNewerStaticGroups() {
-        final int amountGroups = 1; // static only
-        final String targetPrefix = "controller-dynamic-rollout-";
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds");
+    private static Stream<Arguments> simpleRolloutsPossibilities() {
+        return Stream.of(Arguments.of(true, true, Status.WAIT_FOR_CONFIRMATION), //
+                Arguments.of(true, false, Status.RUNNING), //
+                Arguments.of(false, true, Status.RUNNING), //
+                Arguments.of(false, false, Status.RUNNING));//
+    }
 
-        testdataFactory.createTargets(targetPrefix, 0, amountGroups * 2);
-        final Rollout dynamicRollout = testdataFactory.createRolloutByVariables("dynamic", "static rollout", amountGroups,
-                "controllerid==" + targetPrefix + "*", distributionSet, "0", "30", ActionType.FORCED, 1000, false, true);
-        rolloutManagement.start(dynamicRollout.getId());
-        rolloutHandler.handleAll();
-        assertRollout(dynamicRollout, true, RolloutStatus.RUNNING, amountGroups + 1, amountGroups * 2);
-        final List<RolloutGroup> dynamicGroups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
-                dynamicRollout.getId()).getContent();
-        for (int i = 0; i < dynamicGroups.size(); i++) {
-            final RolloutGroup group = dynamicGroups.get(i);
-            if (i + 1 == dynamicGroups.size()) {
-                assertGroup(group, true, RolloutGroupStatus.SCHEDULED, 0);
-            } else {
-                assertGroup(group, false, RolloutGroupStatus.RUNNING, 2);
-            }
+    private static Map<TotalTargetCountStatus.Status, Long> createInitStatusMap() {
+        final Map<TotalTargetCountStatus.Status, Long> map = new HashMap<>();
+        for (final TotalTargetCountStatus.Status status : TotalTargetCountStatus.Status.values()) {
+            map.put(status, 0L);
         }
-        assertAndGetRunning(dynamicRollout, 2).forEach(this::finishAction);
+        return map;
+    }
+
+    @Step("Finish three actions of the rollout group and delete two targets")
+    private void finishActionAndDeleteTargetsOfFirstRunningGroup(final Rollout createdRollout) {
+        // finish group one by finishing targets and deleting targets
+        final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(PAGE,
+                createdRollout.getId(), Status.RUNNING);
+        final List<JpaAction> runningActions = runningActionsSlice.getContent();
+        finishAction(runningActions.get(0));
+        finishAction(runningActions.get(1));
+        finishAction(runningActions.get(2));
+        targetManagement.delete(
+                Arrays.asList(runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
+    }
+
+    @Step("Check the status of the rollout groups, second group should be in running status")
+    private void checkSecondGroupStatusIsRunning(final Rollout createdRollout) {
         rolloutHandler.handleAll();
-        for (int i = 0; i < dynamicGroups.size(); i++) {
-            final RolloutGroup group = dynamicGroups.get(i);
-            if (i + 1 == dynamicGroups.size()) {
-                assertGroup(group, true, RolloutGroupStatus.RUNNING, 0);
-            } else {
-                assertGroup(group, false, RolloutGroupStatus.FINISHED, 2);
+        final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement
+                .findByRollout(new OffsetBasedPageRequest(0, 10, Sort.by(Direction.ASC, "id")), createdRollout.getId())
+                .getContent();
+        assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
+        assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED);
+    }
+
+    @Step("Finish one action of the rollout group and delete four targets")
+    private void finishActionAndDeleteTargetsOfSecondRunningGroup(final Rollout createdRollout) {
+        final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(PAGE,
+                createdRollout.getId(), Status.RUNNING);
+        final List<JpaAction> runningActions = runningActionsSlice.getContent();
+        finishAction(runningActions.get(0));
+        targetManagement.delete(
+                Arrays.asList(runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
+                        runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
+
+    }
+
+    @Step("Delete all targets of the rollout group")
+    private void deleteAllTargetsFromThirdGroup(final Rollout createdRollout) {
+        final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(PAGE,
+                createdRollout.getId(), Status.SCHEDULED);
+        final List<JpaAction> runningActions = runningActionsSlice.getContent();
+        targetManagement.delete(Arrays.asList(runningActions.get(0).getTarget().getId(),
+                runningActions.get(1).getTarget().getId(), runningActions.get(2).getTarget().getId(),
+                runningActions.get(3).getTarget().getId(), runningActions.get(4).getTarget().getId()));
+    }
+
+    @Step("Check the status of the rollout groups and the rollout")
+    private void verifyRolloutAndAllGroupsAreFinished(final Rollout createdRollout) {
+        rolloutHandler.handleAll();
+        final List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement
+                .findByRollout(PAGE, createdRollout.getId()).getContent();
+        assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
+        assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
+        assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.FINISHED);
+        assertThat(reloadRollout(createdRollout).getStatus()).isEqualTo(RolloutStatus.FINISHED);
+
+    }
+
+    private Rollout reloadRollout(final Rollout r) {
+        return getRollout(r.getId());
+    }
+
+    private Rollout getRollout(final Long myRolloutId) {
+        return rolloutManagement.get(myRolloutId).orElseThrow(NoSuchElementException::new);
+    }
+
+    private void assertRolloutGroup(final long rolloutGroupId, final RolloutGroupStatus status,
+            final boolean isConfirmationRequired, final long totalTargets, final Status actionStatusToCheck) {
+        assertThat(rolloutGroupManagement.get(rolloutGroupId)).hasValueSatisfying(rolloutGroup -> {
+            assertThat(rolloutGroup.getStatus()).isEqualTo(status);
+            assertThat(rolloutGroup.isConfirmationRequired()).isEqualTo(isConfirmationRequired);
+            assertThat(rolloutGroup.getTotalTargets()).isEqualTo(totalTargets);
+            if (actionStatusToCheck != null) {
+                assertAllActionOfRolloutGroupHavingStatus(rolloutGroup.getId(), actionStatusToCheck);
             }
+        });
+    }
+
+    private void assertAllActionOfRolloutGroupHavingStatus(final long rolloutGroupId, final Status status) {
+        final List<Target> targets = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, rolloutGroupId)
+                .getContent();
+        targets.forEach(target -> {
+            final List<Action> activeActions = deploymentManagement
+                    .findActionsByTarget(target.getControllerId(), PAGE).getContent();
+            assertThat(activeActions).hasSize(1);
+            assertThat(activeActions.get(0).getStatus()).isEqualTo(status);
+        });
+    }
+
+    private void forceQuitAllActionsOfRolloutGroup(final long rolloutGroupId) {
+        final List<Target> targets = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, rolloutGroupId)
+                .getContent();
+        targets.forEach(target -> {
+            deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId()).getContent().stream().map(Identifiable::getId)
+                    .forEach(actionId -> {
+                        deploymentManagement.cancelAction(actionId);
+                        deploymentManagement.forceQuitAction(actionId);
+                    });
+        });
+    }
+
+    private RolloutGroupCreate generateRolloutGroup(final int index, final Integer percentage,
+            final String targetFilter) {
+        return generateRolloutGroup(index, percentage, targetFilter, false);
+    }
+
+    private RolloutGroupCreate generateRolloutGroup(final int index, final Integer percentage,
+            final String targetFilter, final boolean confirmationRequired) {
+        return entityFactory.rolloutGroup().create().name("Group" + index).description("Group" + index + "desc")
+                .targetPercentage(Float.valueOf(percentage)).targetFilterQuery(targetFilter)
+                .confirmationRequired(confirmationRequired);
+    }
+
+    private RolloutCreate generateTargetsAndRollout(final String rolloutName, final int amountTargetsForRollout) {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
+
+        testdataFactory.createTargets(amountTargetsForRollout, rolloutName + "-", rolloutName);
+
+        return entityFactory.rollout().create().name(rolloutName)
+                .description("This is a test description for the rollout")
+                .targetFilterQuery("controllerId==" + rolloutName + "-*").distributionSetId(distributionSet);
+    }
+
+    private void validateRolloutGroupActionStatus(final RolloutGroup rolloutGroup,
+            final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus) {
+        final RolloutGroup rolloutGroupWithDetail = rolloutGroupManagement.getWithDetailedStatus(rolloutGroup.getId())
+                .get();
+        validateStatus(rolloutGroupWithDetail.getTotalTargetCountStatus(), expectedTargetCountStatus);
+    }
+
+    private void validateRolloutActionStatus(final Long rolloutId,
+            final Map<TotalTargetCountStatus.Status, Long> expectedTargetCountStatus) {
+        final Rollout rolloutWithDetail = rolloutManagement.getWithDetailedStatus(rolloutId).get();
+        validateStatus(rolloutWithDetail.getTotalTargetCountStatus(), expectedTargetCountStatus);
+    }
+
+    private void validateStatus(final TotalTargetCountStatus totalTargetCountStatus,
+            final Map<TotalTargetCountStatus.Status, Long> expectedTotalCountStates) {
+        for (final Map.Entry<TotalTargetCountStatus.Status, Long> entry : expectedTotalCountStates.entrySet()) {
+            final Long countReady = totalTargetCountStatus.getTotalTargetCountByStatus(entry.getKey());
+            assertThat(countReady).as("targets in status " + entry.getKey()).isEqualTo(entry.getValue());
         }
-        assertAndGetRunning(dynamicRollout, 0);
-        rolloutHandler.handleAll();
-        // NB: asserts that dynamic group doesn't get from its static groups (already finished action targets)
-        assertGroup(dynamicGroups.get(dynamicGroups.size() - 1), true, RolloutGroupStatus.RUNNING, 0);
-        assertAndGetRunning(dynamicRollout, 0);
-        rolloutManagement.pauseRollout(dynamicRollout.getId());
-        rolloutHandler.handleAll();
+    }
 
-        testdataFactory.createTargets(targetPrefix, amountGroups * 2, amountGroups);
-        final Rollout staticRollout = testdataFactory.createRolloutByVariables("static", "static rollout", amountGroups,
-                "controllerid==" + targetPrefix + "*", distributionSet, "0", "30", ActionType.FORCED, 0, false, false);
-        rolloutManagement.start(staticRollout.getId());
-        rolloutHandler.handleAll();
-        assertRollout(staticRollout, false, RolloutStatus.RUNNING, amountGroups, amountGroups * 3);
-        final List<RolloutGroup> staticGroups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
-                staticRollout.getId()).getContent();
-        staticGroups.forEach(group -> assertGroup(group, false, RolloutGroupStatus.RUNNING, 3));
+    private Rollout createTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
+            final int groupSize, final String successCondition, final String errorCondition, final String rolloutName,
+            final String targetPrefixName) {
+        return createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, groupSize, successCondition,
+                errorCondition, rolloutName, targetPrefixName, null);
+    }
 
-        rolloutManagement.resumeRollout(dynamicRollout.getId());
-        rolloutHandler.handleAll(); // resume, do not get last devices (they are assigned to a newer group, nevertheless newer is with bigger weight
-        assertGroup(dynamicGroups.get(dynamicGroups.size() - 1), true, RolloutGroupStatus.RUNNING, 0);
-        assertAndGetRunning(dynamicRollout, 0);
+    private Rollout createTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
+            final int groupSize, final String successCondition, final String errorCondition, final String rolloutName,
+            final String targetPrefixName, final Integer weight) {
+        final DistributionSet dsForRolloutTwo = testdataFactory.createDistributionSet("dsFor" + rolloutName);
+        testdataFactory.createTargets(amountTargetsForRollout, targetPrefixName + "-", targetPrefixName);
+        return testdataFactory.createRolloutByVariables(rolloutName, rolloutName + "description", groupSize,
+                "controllerId==" + targetPrefixName + "-*", dsForRolloutTwo, successCondition, errorCondition,
+                Action.ActionType.FORCED, weight, false);
+    }
+
+    private int changeStatusForAllRunningActions(final Rollout rollout, final Status status) {
+        final List<Action> runningActions = findActionsByRolloutAndStatus(rollout, Status.RUNNING);
+        for (final Action action : runningActions) {
+            controllerManagement
+                    .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(status));
+        }
+        return runningActions.size();
+    }
+
+    private int changeStatusForRunningActions(final Rollout rollout, final Status status,
+            final int amountOfTargetsToGetChanged) {
+        final List<Action> runningActions = findActionsByRolloutAndStatus(rollout, Status.RUNNING);
+        assertThat(runningActions.size()).isGreaterThanOrEqualTo(amountOfTargetsToGetChanged);
+        for (int i = 0; i < amountOfTargetsToGetChanged; i++) {
+            controllerManagement.addUpdateActionStatus(
+                    entityFactory.actionStatus().create(runningActions.get(i).getId()).status(status));
+        }
+        return runningActions.size();
+    }
+
+    private void awaitRunningState(final Long myRolloutId) {
+        Awaitility.await().atMost(Duration.ofSeconds(10)).pollInterval(Duration.ofMillis(500)).with()
+                .until(() -> SecurityContextSwitch
+                        .runAsPrivileged(
+                                () -> rolloutManagement.get(myRolloutId).orElseThrow(NoSuchElementException::new))
+                        .getStatus().equals(RolloutStatus.RUNNING));
     }
 }

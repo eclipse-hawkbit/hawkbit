@@ -22,6 +22,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import cz.jirutka.rsql.parser.ParseException;
+import cz.jirutka.rsql.parser.RSQLParserException;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
@@ -36,17 +38,14 @@ import org.eclipse.persistence.exceptions.ConversionException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.util.CollectionUtils;
 
-import cz.jirutka.rsql.parser.ParseException;
-import cz.jirutka.rsql.parser.RSQLParserException;
-
 /**
  * An implementation of {@link RsqlValidationOracle} which retrieves the
  * exception using the {@link ParseException} to retrieve the suggestions.
- * 
+ *
  * The suggestion only works when there are syntax errors existing because the
  * information about current and next tokens in the RSQL syntax are from the
  * {@link ParseException}.
- * 
+ *
  * There is a feature request on the GitHub project
  * <a href="https://github.com/jirutka/rsql-parser/issues/22">https://github.com
  * /jirutka/rsql-parser/issues/22</a>

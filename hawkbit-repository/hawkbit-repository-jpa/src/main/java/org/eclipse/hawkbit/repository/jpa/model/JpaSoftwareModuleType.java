@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
@@ -23,18 +25,15 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
-import java.io.Serial;
-
 /**
  * Type of a software modules.
- *
  */
 @Entity
 @Table(name = "sp_software_module_type", indexes = {
         @Index(name = "sp_idx_software_module_type_01", columnList = "tenant,deleted"),
         @Index(name = "sp_idx_software_module_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
-                @UniqueConstraint(columnNames = { "type_key", "tenant" }, name = "uk_smt_type_key"),
-                @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_smt_name") })
+        @UniqueConstraint(columnNames = { "type_key", "tenant" }, name = "uk_smt_type_key"),
+        @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_smt_name") })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
@@ -53,14 +52,10 @@ public class JpaSoftwareModuleType extends AbstractJpaTypeEntity implements Soft
     /**
      * Constructor.
      *
-     * @param key
-     *            of the type
-     * @param name
-     *            of the type
-     * @param description
-     *            of the type
-     * @param maxAssignments
-     *            assignments to a DS
+     * @param key of the type
+     * @param name of the type
+     * @param description of the type
+     * @param maxAssignments assignments to a DS
      */
     public JpaSoftwareModuleType(final String key, final String name, final String description,
             final int maxAssignments) {
@@ -70,16 +65,11 @@ public class JpaSoftwareModuleType extends AbstractJpaTypeEntity implements Soft
     /**
      * Constructor.
      *
-     * @param key
-     *            of the type
-     * @param name
-     *            of the type
-     * @param description
-     *            of the type
-     * @param maxAssignments
-     *            assignments to a DS
-     * @param colour
-     *            of the type. It will be null by default
+     * @param key of the type
+     * @param name of the type
+     * @param description of the type
+     * @param maxAssignments assignments to a DS
+     * @param colour of the type. It will be null by default
      */
     public JpaSoftwareModuleType(final String key, final String name, final String description,
             final int maxAssignments, final String colour) {
@@ -94,13 +84,13 @@ public class JpaSoftwareModuleType extends AbstractJpaTypeEntity implements Soft
         // Default Constructor for JPA.
     }
 
-    public void setMaxAssignments(final int maxAssignments) {
-        this.maxAssignments = maxAssignments;
-    }
-
     @Override
     public int getMaxAssignments() {
         return maxAssignments;
+    }
+
+    public void setMaxAssignments(final int maxAssignments) {
+        this.maxAssignments = maxAssignments;
     }
 
     @Override

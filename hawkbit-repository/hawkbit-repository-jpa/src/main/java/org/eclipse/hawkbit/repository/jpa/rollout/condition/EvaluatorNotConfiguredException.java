@@ -19,9 +19,8 @@ public class EvaluatorNotConfiguredException extends RuntimeException {
 
     /**
      * Constructor
-     * 
-     * @param s
-     *            the action/condition to evaluate
+     *
+     * @param s the action/condition to evaluate
      */
     public EvaluatorNotConfiguredException(final String s) {
         super(String.format(MESSAGE_FORMAT, s));

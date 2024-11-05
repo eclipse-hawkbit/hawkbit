@@ -31,7 +31,7 @@ public final class TagSpecification {
     /**
      * {@link Specification} for retrieving {@link DistributionSetTag}s by
      * assigned {@link DistributionSet}.
-     * 
+     *
      * @param dsId of the distribution set
      * @return the {@link JpaDistributionSetTag} {@link Specification}
      */

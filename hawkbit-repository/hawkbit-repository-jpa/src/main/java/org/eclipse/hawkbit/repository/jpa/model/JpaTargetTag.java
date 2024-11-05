@@ -33,7 +33,7 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 @Entity
 @Table(name = "sp_target_tag", indexes = { @Index(name = "sp_idx_target_tag_prim", columnList = "tenant,id"),
         @Index(name = "sp_idx_target_tag_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-                "name", "tenant" }, name = "uk_targ_tag"))
+        "name", "tenant" }, name = "uk_targ_tag"))
 public class JpaTargetTag extends JpaTag implements TargetTag, EventAwareEntity {
 
     @Serial

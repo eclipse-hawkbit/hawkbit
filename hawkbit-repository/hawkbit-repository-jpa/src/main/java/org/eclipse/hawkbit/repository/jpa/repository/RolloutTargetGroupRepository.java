@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Spring data repository for {@link RolloutTargetGroup}.
- *
  */
 @Transactional(readOnly = true)
 public interface RolloutTargetGroupRepository
@@ -26,9 +25,8 @@ public interface RolloutTargetGroupRepository
 
     /**
      * Counts all entries that have the specified rolloutGroup
-     * 
-     * @param rolloutGroup
-     *            the group to filter for
+     *
+     * @param rolloutGroup the group to filter for
      * @return count of targets in the group
      */
     Long countByRolloutGroup(JpaRolloutGroup rolloutGroup);

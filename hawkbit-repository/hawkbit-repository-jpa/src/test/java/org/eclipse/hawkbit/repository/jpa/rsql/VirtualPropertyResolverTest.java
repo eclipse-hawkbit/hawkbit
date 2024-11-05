@@ -14,6 +14,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.concurrent.Callable;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
@@ -34,43 +37,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 @ExtendWith(SpringExtension.class)
 @Feature("Unit Tests - Repository")
 @Story("Placeholder resolution for virtual properties")
 public class VirtualPropertyResolverTest {
 
-    @Spy
-    private final VirtualPropertyResolver resolverUnderTest = new VirtualPropertyResolver();
-
-    @MockBean
-    private TenantConfigurationManagement confMgmt;
-
-    @MockBean
-    private SystemSecurityContext securityContext;
-
-    private StrSubstitutor substitutor;
-
     private static final TenantConfigurationValue<String> TEST_POLLING_TIME_INTERVAL = TenantConfigurationValue
             .<String> builder().value("00:05:00").build();
     private static final TenantConfigurationValue<String> TEST_POLLING_OVERDUE_TIME_INTERVAL = TenantConfigurationValue
             .<String> builder().value("00:07:37").build();
-
-    @Configuration
-    static class Config {
-        @Bean
-        TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
-            return TenantConfigurationManagementHolder.getInstance();
-        }
-
-        @Bean
-        SystemSecurityContextHolder systemSecurityContextHolder() {
-            return SystemSecurityContextHolder.getInstance();
-        }
-    }
+    @Spy
+    private final VirtualPropertyResolver resolverUnderTest = new VirtualPropertyResolver();
+    @MockBean
+    private TenantConfigurationManagement confMgmt;
+    @MockBean
+    private SystemSecurityContext securityContext;
+    private StrSubstitutor substitutor;
 
     @BeforeEach
     public void before() {
@@ -81,18 +63,6 @@ public class VirtualPropertyResolverTest {
 
         substitutor = new StrSubstitutor(resolverUnderTest, StrSubstitutor.DEFAULT_PREFIX,
                 StrSubstitutor.DEFAULT_SUFFIX, StrSubstitutor.DEFAULT_ESCAPE);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = { "${NOW_TS}", "${OVERDUE_TS}", "${overdue_ts}" })
-    @Description("Tests resolution of NOW_TS by using a StrSubstitutor configured with the VirtualPropertyResolver.")
-    void resolveNowTimestampPlaceholder(final String placeholder) {
-        when(securityContext.runAsSystem(Mockito.any())).thenAnswer(a -> ((Callable<?>) a.getArgument(0)).call());
-        final String testString = "lhs=lt=" + placeholder;
-
-        final String resolvedPlaceholders = substitutor.replace(testString);
-        assertThat(resolvedPlaceholders).as("'%s' placeholder was not replaced", placeholder)
-                .doesNotContain(placeholder);
     }
 
     @Test
@@ -114,5 +84,31 @@ public class VirtualPropertyResolverTest {
 
         final String resolvedPlaceholders = substitutor.replace(testString);
         assertThat(resolvedPlaceholders).as("Escaped OVERDUE_TS should not be resolved!").contains(placeholder);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "${NOW_TS}", "${OVERDUE_TS}", "${overdue_ts}" })
+    @Description("Tests resolution of NOW_TS by using a StrSubstitutor configured with the VirtualPropertyResolver.")
+    void resolveNowTimestampPlaceholder(final String placeholder) {
+        when(securityContext.runAsSystem(Mockito.any())).thenAnswer(a -> ((Callable<?>) a.getArgument(0)).call());
+        final String testString = "lhs=lt=" + placeholder;
+
+        final String resolvedPlaceholders = substitutor.replace(testString);
+        assertThat(resolvedPlaceholders).as("'%s' placeholder was not replaced", placeholder)
+                .doesNotContain(placeholder);
+    }
+
+    @Configuration
+    static class Config {
+
+        @Bean
+        TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
+            return TenantConfigurationManagementHolder.getInstance();
+        }
+
+        @Bean
+        SystemSecurityContextHolder systemSecurityContextHolder() {
+            return SystemSecurityContextHolder.getInstance();
+        }
     }
 }
