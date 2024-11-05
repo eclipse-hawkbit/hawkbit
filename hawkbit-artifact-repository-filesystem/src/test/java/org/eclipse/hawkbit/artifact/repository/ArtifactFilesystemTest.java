@@ -16,14 +16,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.junit.jupiter.api.Test;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @Feature("Unit Tests - Artifact File System Repository")
 @Story("Test storing artifact binaries in the file-system")

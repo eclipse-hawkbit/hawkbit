@@ -16,6 +16,7 @@ public class ArtifactFileNotFoundException extends RuntimeException {
 
     /**
      * Creates the Exception from it's cause
+     *
      * @param cause the original exception
      */
     public ArtifactFileNotFoundException(final Exception cause) {

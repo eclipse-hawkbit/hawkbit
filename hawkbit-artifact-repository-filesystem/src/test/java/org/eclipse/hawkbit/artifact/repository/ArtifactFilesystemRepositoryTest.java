@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Random;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -25,10 +28,6 @@ import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @Slf4j
 @Feature("Unit Tests - Artifact File System Repository")
@@ -121,17 +120,17 @@ public class ArtifactFilesystemRepositoryTest {
         }
     }
 
-    private AbstractDbArtifact storeRandomArtifact(final byte[] fileContent) {
-        final String fileName = "filename.tmp";
-        final ByteArrayInputStream inputStream = new ByteArrayInputStream(fileContent);
-        return artifactFilesystemRepository.store(TENANT, inputStream, fileName, "application/txt", null);
-    }
-
     private static byte[] randomBytes() {
         final byte[] randomBytes = new byte[20];
         final Random ran = new Random();
         ran.nextBytes(randomBytes);
         return randomBytes;
+    }
+
+    private AbstractDbArtifact storeRandomArtifact(final byte[] fileContent) {
+        final String fileName = "filename.tmp";
+        final ByteArrayInputStream inputStream = new ByteArrayInputStream(fileContent);
+        return artifactFilesystemRepository.store(TENANT, inputStream, fileName, "application/txt", null);
     }
 
 }

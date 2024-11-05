@@ -22,8 +22,7 @@ import org.springframework.context.annotation.Configuration;
 public class ArtifactFilesystemConfiguration {
 
     /**
-     * @param artifactFilesystemProperties
-     *            the artifact file system properties
+     * @param artifactFilesystemProperties the artifact file system properties
      * @return Default {@link ArtifactRepository} implementation.
      */
     @Bean
