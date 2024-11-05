@@ -35,9 +35,8 @@ public class AmqpDeadletterProperties {
 
     /**
      * Return the deadletter arguments.
-     * 
-     * @param exchange
-     *            the deadletter exchange
+     *
+     * @param exchange the deadletter exchange
      * @return map which holds the properties
      */
     public Map<String, Object> getDeadLetterExchangeArgs(final String exchange) {
@@ -48,7 +47,7 @@ public class AmqpDeadletterProperties {
 
     /**
      * Create a deadletter queue with ttl for messages
-     * 
+     *
      * @param queueName the deadletter queue name
      * @return the deadletter queue
      */

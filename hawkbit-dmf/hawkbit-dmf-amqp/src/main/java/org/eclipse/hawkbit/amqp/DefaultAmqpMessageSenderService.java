@@ -29,7 +29,7 @@ public class DefaultAmqpMessageSenderService extends BaseAmqpService implements 
 
     /**
      * Constructor.
-     * 
+     *
      * @param rabbitTemplate the AMQP template
      */
     public DefaultAmqpMessageSenderService(final RabbitTemplate rabbitTemplate) {

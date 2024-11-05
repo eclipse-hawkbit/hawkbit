@@ -9,6 +9,11 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
@@ -46,11 +51,6 @@ import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.ErrorHandler;
 
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Spring configuration for AMQP based DMF communication for indirect device
  * integration.
@@ -76,9 +76,7 @@ public class AmqpConfiguration {
     /**
      * Creates a custom error handler bean.
      *
-     *  @param handlers
-     *                  list of {@link AmqpErrorHandler} handlers
-
+     * @param handlers list of {@link AmqpErrorHandler} handlers
      * @return the delegating error handler bean
      */
     @Bean
@@ -253,15 +251,10 @@ public class AmqpConfiguration {
     /**
      * Create AMQP handler service bean.
      *
-     * @param rabbitTemplate
-     *            for converting messages
-     * @param amqpMessageDispatcherService
-     *            to sending events to DMF client
-     * @param controllerManagement
-     *            for target repo access
-     * @param entityFactory
-     *            to create entities
-     *
+     * @param rabbitTemplate for converting messages
+     * @param amqpMessageDispatcherService to sending events to DMF client
+     * @param controllerManagement for target repo access
+     * @param entityFactory to create entities
      * @return handler service bean
      */
     @Bean

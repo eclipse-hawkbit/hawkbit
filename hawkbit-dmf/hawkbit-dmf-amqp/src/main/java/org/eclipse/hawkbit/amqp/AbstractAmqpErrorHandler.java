@@ -31,19 +31,17 @@ public abstract class AbstractAmqpErrorHandler<T> implements AmqpErrorHandler {
     /**
      * Returns the class of the exception.
      *
-     * @return
-     *          the exception class
+     * @return the exception class
      */
     public abstract Class<T> getExceptionClass();
 
     /**
      * Returns the customized error message.
      *
-     * @return
-     *          the customized error message
+     * @return the customized error message
      */
-    public String getErrorMessage(Throwable throwable){
-      return AmqpErrorMessageComposer.constructErrorMessage(throwable);
+    public String getErrorMessage(Throwable throwable) {
+        return AmqpErrorMessageComposer.constructErrorMessage(throwable);
     }
 
 }

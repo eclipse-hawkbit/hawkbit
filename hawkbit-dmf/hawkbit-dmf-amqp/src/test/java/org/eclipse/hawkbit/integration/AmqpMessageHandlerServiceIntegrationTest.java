@@ -26,6 +26,12 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.amqp.AmqpMessageHandlerService;
 import org.eclipse.hawkbit.amqp.AmqpProperties;
@@ -37,12 +43,12 @@ import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
@@ -63,8 +69,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.eclipse.hawkbit.repository.test.util.TargetTestData;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
+import org.eclipse.hawkbit.repository.test.util.TargetTestData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
@@ -74,22 +80,14 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
-
 @Feature("Component Tests - Device Management Federation API")
 @Story("Amqp Message Handler Service")
 class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegrationTest {
-    private static final String TARGET_PREFIX = "Dmf_hand_";
+
     public static final String DMF_REGISTER_TEST_CONTROLLER_ID = "Dmf_hand_registerTargets_1";
     public static final String DMF_ATTR_TEST_CONTROLLER_ID = "Dmf_hand_updateAttributes";
     public static final String UPDATE_ATTR_TEST_CONTROLLER_ID = "ControllerAttributeTestTarget";
-
+    private static final String TARGET_PREFIX = "Dmf_hand_";
     @Autowired
     private AmqpProperties amqpProperties;
 
@@ -179,7 +177,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "Invalid Invalid"})
+    @ValueSource(strings = { "", "Invalid Invalid" })
     @NullSource
     @Description("Tests register invalid target with empty controller id.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
@@ -309,7 +307,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     }
 
     @ParameterizedTest
-    @ValueSource(strings={"", "NotExist"})
+    @ValueSource(strings = { "", "NotExist" })
     @NullSource
     @Description("Tests null type message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
@@ -323,7 +321,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"", "NotExist"})
+    @ValueSource(strings = { "", "NotExist" })
     @NullSource
     @Description("Tests null topic message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
@@ -347,7 +345,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "", "Invalid Content"})
+    @ValueSource(strings = { "", "Invalid Content" })
     @NullSource
     @Description("Tests invalid null message content. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
@@ -688,84 +686,6 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     }
 
-    @Step
-    private void updateAttributesWithUpdateModeRemove() {
-
-        // assemble the expected attributes
-        final Map<String, String> expectedAttributes = targetManagement
-                .getControllerAttributes(DMF_ATTR_TEST_CONTROLLER_ID);
-        expectedAttributes.remove("k1");
-        expectedAttributes.remove("k3");
-
-        // send an update message with update mode
-        final Map<String, String> removeAttributes = new HashMap<>();
-        removeAttributes.put("k1", "foo");
-        removeAttributes.put("k3", "bar");
-
-        final DmfAttributeUpdate remove = new DmfAttributeUpdate();
-        remove.setMode(DmfUpdateMode.REMOVE);
-        remove.getAttributes().putAll(removeAttributes);
-        sendUpdateAttributeMessage(remove);
-
-        // validate
-        assertUpdateAttributes(DMF_ATTR_TEST_CONTROLLER_ID, expectedAttributes);
-    }
-
-    @Step
-    private void updateAttributesWithUpdateModeMerge() {
-        // get the current attributes
-        final Map<String, String> attributes = new HashMap<>(
-                targetManagement.getControllerAttributes(DMF_ATTR_TEST_CONTROLLER_ID));
-
-        // send an update message with update mode MERGE
-        final Map<String, String> mergeAttributes = new HashMap<>();
-        mergeAttributes.put("k1", "v1_modified_again");
-        mergeAttributes.put("k4", "v4");
-
-        final DmfAttributeUpdate merge = new DmfAttributeUpdate();
-        merge.setMode(DmfUpdateMode.MERGE);
-        merge.getAttributes().putAll(mergeAttributes);
-        sendUpdateAttributeMessage(merge);
-
-        // validate
-        final Map<String, String> expectedAttributes = new HashMap<>();
-        expectedAttributes.putAll(attributes);
-        expectedAttributes.putAll(mergeAttributes);
-        assertUpdateAttributes(DMF_ATTR_TEST_CONTROLLER_ID, expectedAttributes);
-    }
-
-    @Step
-    private void updateAttributesWithUpdateModeReplace() {
-        // send an update message with update mode REPLACE
-        final Map<String, String> expectedAttributes = new HashMap<>();
-        expectedAttributes.put("k1", "v1_modified");
-        expectedAttributes.put("k2", "v2");
-        expectedAttributes.put("k3", "v3");
-
-        final DmfAttributeUpdate replace = new DmfAttributeUpdate();
-        replace.setMode(DmfUpdateMode.REPLACE);
-        replace.getAttributes().putAll(expectedAttributes);
-        sendUpdateAttributeMessage(replace);
-
-        // validate
-        assertUpdateAttributes(DMF_ATTR_TEST_CONTROLLER_ID, expectedAttributes);
-    }
-
-    @Step
-    private void updateAttributesWithoutUpdateMode() {
-        // send an update message which does not specify an update mode
-        final Map<String, String> expectedAttributes = new HashMap<>();
-        expectedAttributes.put("k0", "v0");
-        expectedAttributes.put("k1", "v1");
-
-        final DmfAttributeUpdate defaultUpdate = new DmfAttributeUpdate();
-        defaultUpdate.getAttributes().putAll(expectedAttributes);
-        sendUpdateAttributeMessage(defaultUpdate);
-
-        // validate
-        assertUpdateAttributes(DMF_ATTR_TEST_CONTROLLER_ID, expectedAttributes);
-    }
-
     @Test
     @Description("Verify that sending an update controller attribute message with no thingid header to an existing target does not work.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -917,6 +837,234 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         }
     }
 
+    @Test
+    @Description("Register a target and send a update action status (confirmed). Verify if the updated action status is correct.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+    void confirmedActionStatus() {
+        enableConfirmationFlow();
+        final String controllerId = TARGET_PREFIX + "confirmedActionStatus";
+
+        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
+        final Long actionId = getFirstAssignedActionId(assignmentResult);
+        createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.CONFIRMED);
+        assertActionStatusList(actionId, 2, Status.WAIT_FOR_CONFIRMATION, Status.RUNNING);
+
+        // assert download and install message
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.CONFIRM, EventTopic.DOWNLOAD_AND_INSTALL);
+        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId);
+    }
+
+    @Test
+    @Description("Verify the DMF confirmed feedback can be provided if confirmation flow is disabled")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1),
+            @Expect(type = TenantConfigurationUpdatedEvent.class, count = 1) })
+    void verifyActionCanBeConfirmedOnDisabledConfirmationFlow() {
+        enableConfirmationFlow();
+        final String controllerId = TARGET_PREFIX + "confirmedActionStatus";
+
+        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
+        final Long actionId = getFirstAssignedActionId(assignmentResult);
+        // verify action status is in WAIT_FOR_CONFIRMATION
+        assertActionStatusList(actionId, 1, Status.WAIT_FOR_CONFIRMATION);
+
+        disableConfirmationFlow();
+
+        createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.CONFIRMED);
+        assertActionStatusList(actionId, 2, Status.WAIT_FOR_CONFIRMATION, Status.RUNNING);
+
+        // assert download and install message
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.CONFIRM, EventTopic.DOWNLOAD_AND_INSTALL);
+        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId);
+    }
+
+    @Test
+    @Description("Verify the DMF confirmed feedback can be provided if confirmation flow is disabled")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 0),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1),
+            @Expect(type = TenantConfigurationUpdatedEvent.class, count = 1) })
+    void verifyActionCanBeDeniedOnDisabledConfirmationFlow() {
+        enableConfirmationFlow();
+        final String controllerId = TARGET_PREFIX + "confirmedActionStatus";
+
+        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
+        final Long actionId = getFirstAssignedActionId(assignmentResult);
+        // verify action status is in WAIT_FOR_CONFIRMATION
+        assertActionStatusList(actionId, 1, Status.WAIT_FOR_CONFIRMATION);
+
+        disableConfirmationFlow();
+
+        createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.DENIED);
+        assertActionStatusList(actionId, 2, Status.WAIT_FOR_CONFIRMATION);
+    }
+
+    @Test
+    @Description("Verify the DMF download and install message is send directly if auto-confirmation is active")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 0),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+    void verifyDownloadAndInstallDirectlySendOnAutoConfirmationEnabled() {
+        enableConfirmationFlow();
+        final String controllerId = TARGET_PREFIX + "confirmedActionStatus";
+
+        registerAndAssertTargetWithExistingTenant(controllerId);
+
+        confirmationManagement.activateAutoConfirmation(controllerId, null, null);
+
+        final DistributionSetAssignmentResult assignmentResult = prepareDistributionSetAndAssign(controllerId);
+        final Long actionId = getFirstAssignedActionId(assignmentResult);
+        // verify action status is in WAIT_FOR_CONFIRMATION
+        assertActionStatusList(actionId, 1, Status.WAIT_FOR_CONFIRMATION);
+
+        // assert download and install message
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.DOWNLOAD_AND_INSTALL);
+        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId);
+    }
+
+    @Test
+    @Description("Register a target and send a update action status (denied). Verify if the updated action status is correct.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class), @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+    void deniedActionStatus() {
+        enableConfirmationFlow();
+        final String controllerId = TARGET_PREFIX + "deniedActionStatus";
+        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
+        final Long actionId = getFirstAssignedActionId(assignmentResult);
+        assertActionStatusList(actionId, 1, Status.WAIT_FOR_CONFIRMATION);
+        createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.DENIED);
+        assertActionStatusList(actionId, 2, Status.WAIT_FOR_CONFIRMATION);
+    }
+
+    private static String getActionIdFromBody(final byte[] body) throws IOException {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        final ObjectNode node = objectMapper.readValue(new String(body, Charset.defaultCharset()), ObjectNode.class);
+        assertThat(node.has("actionId")).isTrue();
+        return node.get("actionId").asText();
+    }
+
+    @Step
+    private void updateAttributesWithUpdateModeRemove() {
+
+        // assemble the expected attributes
+        final Map<String, String> expectedAttributes = targetManagement
+                .getControllerAttributes(DMF_ATTR_TEST_CONTROLLER_ID);
+        expectedAttributes.remove("k1");
+        expectedAttributes.remove("k3");
+
+        // send an update message with update mode
+        final Map<String, String> removeAttributes = new HashMap<>();
+        removeAttributes.put("k1", "foo");
+        removeAttributes.put("k3", "bar");
+
+        final DmfAttributeUpdate remove = new DmfAttributeUpdate();
+        remove.setMode(DmfUpdateMode.REMOVE);
+        remove.getAttributes().putAll(removeAttributes);
+        sendUpdateAttributeMessage(remove);
+
+        // validate
+        assertUpdateAttributes(DMF_ATTR_TEST_CONTROLLER_ID, expectedAttributes);
+    }
+
+    @Step
+    private void updateAttributesWithUpdateModeMerge() {
+        // get the current attributes
+        final Map<String, String> attributes = new HashMap<>(
+                targetManagement.getControllerAttributes(DMF_ATTR_TEST_CONTROLLER_ID));
+
+        // send an update message with update mode MERGE
+        final Map<String, String> mergeAttributes = new HashMap<>();
+        mergeAttributes.put("k1", "v1_modified_again");
+        mergeAttributes.put("k4", "v4");
+
+        final DmfAttributeUpdate merge = new DmfAttributeUpdate();
+        merge.setMode(DmfUpdateMode.MERGE);
+        merge.getAttributes().putAll(mergeAttributes);
+        sendUpdateAttributeMessage(merge);
+
+        // validate
+        final Map<String, String> expectedAttributes = new HashMap<>();
+        expectedAttributes.putAll(attributes);
+        expectedAttributes.putAll(mergeAttributes);
+        assertUpdateAttributes(DMF_ATTR_TEST_CONTROLLER_ID, expectedAttributes);
+    }
+
+    @Step
+    private void updateAttributesWithUpdateModeReplace() {
+        // send an update message with update mode REPLACE
+        final Map<String, String> expectedAttributes = new HashMap<>();
+        expectedAttributes.put("k1", "v1_modified");
+        expectedAttributes.put("k2", "v2");
+        expectedAttributes.put("k3", "v3");
+
+        final DmfAttributeUpdate replace = new DmfAttributeUpdate();
+        replace.setMode(DmfUpdateMode.REPLACE);
+        replace.getAttributes().putAll(expectedAttributes);
+        sendUpdateAttributeMessage(replace);
+
+        // validate
+        assertUpdateAttributes(DMF_ATTR_TEST_CONTROLLER_ID, expectedAttributes);
+    }
+
+    @Step
+    private void updateAttributesWithoutUpdateMode() {
+        // send an update message which does not specify an update mode
+        final Map<String, String> expectedAttributes = new HashMap<>();
+        expectedAttributes.put("k0", "v0");
+        expectedAttributes.put("k1", "v1");
+
+        final DmfAttributeUpdate defaultUpdate = new DmfAttributeUpdate();
+        defaultUpdate.getAttributes().putAll(expectedAttributes);
+        sendUpdateAttributeMessage(defaultUpdate);
+
+        // validate
+        assertUpdateAttributes(DMF_ATTR_TEST_CONTROLLER_ID, expectedAttributes);
+    }
+
     @Step
     private void verifyAssignedDsAndInstalledDs(final Long assignedDsId, final Long installedDsId) {
         final Optional<Target> target = controllerManagement.getByControllerId(DMF_REGISTER_TEST_CONTROLLER_ID);
@@ -1014,6 +1162,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
             }
         });
     }
+
     private int getAuthenticationMessageCount() {
         return Integer
                 .parseInt(Objects.requireNonNull(getRabbitAdmin().getQueueProperties(amqpProperties.getReceiverQueue()))
@@ -1033,156 +1182,5 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         createConditionFactory().untilAsserted(() -> Mockito
                 .verify(getDeadletterListener(), Mockito.times(numberOfInvocations)).handleMessage(Mockito.any()));
         Mockito.reset(getDeadletterListener());
-    }
-
-    private static String getActionIdFromBody(final byte[] body) throws IOException {
-        final ObjectMapper objectMapper = new ObjectMapper();
-        final ObjectNode node = objectMapper.readValue(new String(body, Charset.defaultCharset()), ObjectNode.class);
-        assertThat(node.has("actionId")).isTrue();
-        return node.get("actionId").asText();
-    }
-
-    @Test
-    @Description("Register a target and send a update action status (confirmed). Verify if the updated action status is correct.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 1),
-            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
-    void confirmedActionStatus() {
-        enableConfirmationFlow();
-        final String controllerId = TARGET_PREFIX + "confirmedActionStatus";
-
-        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        final Long actionId = getFirstAssignedActionId(assignmentResult);
-        createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.CONFIRMED);
-        assertActionStatusList(actionId, 2, Status.WAIT_FOR_CONFIRMATION, Status.RUNNING);
-
-        // assert download and install message
-        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.CONFIRM, EventTopic.DOWNLOAD_AND_INSTALL);
-        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId);
-    }
-
-    @Test
-    @Description("Verify the DMF confirmed feedback can be provided if confirmation flow is disabled")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 1),
-            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1),
-            @Expect(type = TenantConfigurationUpdatedEvent.class, count = 1) })
-    void verifyActionCanBeConfirmedOnDisabledConfirmationFlow() {
-        enableConfirmationFlow();
-        final String controllerId = TARGET_PREFIX + "confirmedActionStatus";
-
-        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        final Long actionId = getFirstAssignedActionId(assignmentResult);
-        // verify action status is in WAIT_FOR_CONFIRMATION
-        assertActionStatusList(actionId, 1, Status.WAIT_FOR_CONFIRMATION);
-
-        disableConfirmationFlow();
-
-        createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.CONFIRMED);
-        assertActionStatusList(actionId, 2, Status.WAIT_FOR_CONFIRMATION, Status.RUNNING);
-
-        // assert download and install message
-        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.CONFIRM, EventTopic.DOWNLOAD_AND_INSTALL);
-        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId);
-    }
-
-
-    @Test
-    @Description("Verify the DMF confirmed feedback can be provided if confirmation flow is disabled")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-          @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-          @Expect(type = ActionUpdatedEvent.class, count = 0),
-          @Expect(type = ActionCreatedEvent.class, count = 1),
-          @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-          @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-          @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
-          @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
-          @Expect(type = TargetUpdatedEvent.class, count = 1),
-          @Expect(type = TargetPollEvent.class, count = 1),
-          @Expect(type = TenantConfigurationCreatedEvent.class, count = 1),
-          @Expect(type = TenantConfigurationUpdatedEvent.class, count = 1)})
-    void verifyActionCanBeDeniedOnDisabledConfirmationFlow() {
-        enableConfirmationFlow();
-        final String controllerId = TARGET_PREFIX + "confirmedActionStatus";
-
-        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        final Long actionId = getFirstAssignedActionId(assignmentResult);
-        // verify action status is in WAIT_FOR_CONFIRMATION
-        assertActionStatusList(actionId, 1, Status.WAIT_FOR_CONFIRMATION);
-
-        disableConfirmationFlow();
-
-        createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.DENIED);
-        assertActionStatusList(actionId, 2, Status.WAIT_FOR_CONFIRMATION);
-    }
-
-    @Test
-    @Description("Verify the DMF download and install message is send directly if auto-confirmation is active")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 0),
-            @Expect(type = ActionCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 2),
-            @Expect(type = TargetPollEvent.class, count = 1),
-            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
-    void verifyDownloadAndInstallDirectlySendOnAutoConfirmationEnabled() {
-        enableConfirmationFlow();
-        final String controllerId = TARGET_PREFIX + "confirmedActionStatus";
-
-        registerAndAssertTargetWithExistingTenant(controllerId);
-
-        confirmationManagement.activateAutoConfirmation(controllerId, null, null);
-
-        final DistributionSetAssignmentResult assignmentResult = prepareDistributionSetAndAssign(controllerId);
-        final Long actionId = getFirstAssignedActionId(assignmentResult);
-        // verify action status is in WAIT_FOR_CONFIRMATION
-        assertActionStatusList(actionId, 1, Status.WAIT_FOR_CONFIRMATION);
-
-        // assert download and install message
-        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.DOWNLOAD_AND_INSTALL);
-        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId);
-    }
-
-    @Test
-    @Description("Register a target and send a update action status (denied). Verify if the updated action status is correct.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class), @Expect(type = ActionCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 1),
-            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
-    void deniedActionStatus() {
-        enableConfirmationFlow();
-        final String controllerId = TARGET_PREFIX + "deniedActionStatus";
-        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        final Long actionId = getFirstAssignedActionId(assignmentResult);
-        assertActionStatusList(actionId, 1, Status.WAIT_FOR_CONFIRMATION);
-        createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.DENIED);
-        assertActionStatusList(actionId, 2, Status.WAIT_FOR_CONFIRMATION);
     }
 }

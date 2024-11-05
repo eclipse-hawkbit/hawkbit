@@ -32,29 +32,18 @@ public class BaseAmqpService {
 
     /**
      * Constructor.
-     * 
-     * @param rabbitTemplate
-     *            the rabbit template.
+     *
+     * @param rabbitTemplate the rabbit template.
      */
     public BaseAmqpService(final RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    protected static void checkContentTypeJson(final Message message) {
-        final MessageProperties messageProperties = message.getMessageProperties();
-        if (messageProperties.getContentType() != null && messageProperties.getContentType().contains("json")) {
-            return;
-        }
-        throw new AmqpRejectAndDontRequeueException("Content-Type is not JSON compatible");
-    }
-
     /**
      * Is needed to convert a incoming message to is originally object type.
      *
-     * @param message
-     *            the message to convert.
-     * @param clazz
-     *            the class of the originally object.
+     * @param message the message to convert.
+     * @param clazz the class of the originally object.
      * @return the converted object
      */
     @SuppressWarnings("unchecked")
@@ -65,12 +54,25 @@ public class BaseAmqpService {
         return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
 
-    protected MessageConverter getMessageConverter() {
-        return rabbitTemplate.getMessageConverter();
+    protected static void checkContentTypeJson(final Message message) {
+        final MessageProperties messageProperties = message.getMessageProperties();
+        if (messageProperties.getContentType() != null && messageProperties.getContentType().contains("json")) {
+            return;
+        }
+        throw new AmqpRejectAndDontRequeueException("Content-Type is not JSON compatible");
     }
 
     protected static boolean isMessageBodyEmpty(final Message message) {
         return message.getBody() == null || message.getBody().length == 0;
+    }
+
+    protected static final void logAndThrowMessageError(final Message message, final String error) {
+        log.debug("Warning! \"{}\" reported by message: {}", error, message);
+        throw new AmqpRejectAndDontRequeueException(error);
+    }
+
+    protected MessageConverter getMessageConverter() {
+        return rabbitTemplate.getMessageConverter();
     }
 
     protected void checkMessageBody(@NotNull final Message message) {
@@ -89,20 +91,14 @@ public class BaseAmqpService {
         return value.toString();
     }
 
-    protected static final void logAndThrowMessageError(final Message message, final String error) {
-        log.debug("Warning! \"{}\" reported by message: {}", error, message);
-        throw new AmqpRejectAndDontRequeueException(error);
-    }
-
     protected RabbitTemplate getRabbitTemplate() {
         return rabbitTemplate;
     }
 
     /**
      * Clean message properties before sending a message.
-     * 
-     * @param message
-     *            the message to cleaned up
+     *
+     * @param message the message to cleaned up
      */
     protected void cleanMessageHeaderProperties(final Message message) {
         message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
