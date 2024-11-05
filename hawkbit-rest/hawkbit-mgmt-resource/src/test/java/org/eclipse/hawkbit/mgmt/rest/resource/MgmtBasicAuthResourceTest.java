@@ -9,6 +9,12 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
@@ -43,12 +49,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * Test for {@link MgmtBasicAuthResource}.
  */
@@ -75,14 +75,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Story("Basic auth Userinfo Resource")
 public class MgmtBasicAuthResourceTest {
 
-    private static final String TEST_USER = "testUser";
-    private static final String DEFAULT = "default";
-
-    @Autowired
-    MockMvc defaultMock;
-
     @Autowired
     protected WebApplicationContext webApplicationContext;
+    @Autowired
+    MockMvc defaultMock;
+    private static final String TEST_USER = "testUser";
+    private static final String DEFAULT = "default";
 
     @Test
     @Description("Test of userinfo api with basic auth validation")
@@ -100,7 +98,7 @@ public class MgmtBasicAuthResourceTest {
     @Description("Test of userinfo api with invalid basic auth fails")
     public void validateBasicAuthFailsWithInvalidCredentials() throws Exception {
         defaultMock.perform(get(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING)
-                .header(HttpHeaders.AUTHORIZATION, getBasicAuth("wrongUser", "wrongSecret")))
+                        .header(HttpHeaders.AUTHORIZATION, getBasicAuth("wrongUser", "wrongSecret")))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnauthorized());
     }

@@ -136,14 +136,6 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         return ResponseEntity.ok(new ResponseList<>(response));
     }
 
-    private static MgmtRepresentationMode parseRepresentationMode(final String representationModeParam) {
-        return MgmtRepresentationMode.fromValue(representationModeParam).orElseGet(() -> {
-            // no need for a 400, just apply a safe fallback
-            log.warn("Received an invalid representation mode: {}", representationModeParam);
-            return MgmtRepresentationMode.COMPACT;
-        });
-    }
-
     @Override
     @ResponseBody
     // Exception squid:S3655 - Optional access is checked in
@@ -337,6 +329,14 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
                 MgmtSoftwareModuleMapper.fromRequestSwMetadata(entityFactory, softwareModuleId, metadataRest));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(MgmtSoftwareModuleMapper.toResponseSwMetadata(created));
+    }
+
+    private static MgmtRepresentationMode parseRepresentationMode(final String representationModeParam) {
+        return MgmtRepresentationMode.fromValue(representationModeParam).orElseGet(() -> {
+            // no need for a 400, just apply a safe fallback
+            log.warn("Received an invalid representation mode: {}", representationModeParam);
+            return MgmtRepresentationMode.COMPACT;
+        });
     }
 
     private SoftwareModule findSoftwareModuleWithExceptionIfNotFound(final Long softwareModuleId,

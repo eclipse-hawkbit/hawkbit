@@ -11,18 +11,18 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.io.IOException;
 
-import org.eclipse.hawkbit.mgmt.json.model.PagedList;
-import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
-import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.hawkbit.mgmt.json.model.PagedList;
+import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
+import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 
 /**
  * Utility additions for the REST API tests.
  */
 public final class ResourceUtility {
+
     private static final ObjectMapper mapper = new ObjectMapper();
 
     static ExceptionInfo convertException(final String jsonExceptionResponse)

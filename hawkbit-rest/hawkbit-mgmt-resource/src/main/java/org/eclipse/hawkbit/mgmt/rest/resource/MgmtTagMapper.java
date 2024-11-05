@@ -69,7 +69,7 @@ final class MgmtTagMapper {
         response.add(linkTo(methodOn(MgmtTargetTagRestApi.class).getAssignedTargets(targetTag.getId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("assignedTargets")
-                        .expand());
+                .expand());
 
     }
 
@@ -106,7 +106,7 @@ final class MgmtTagMapper {
         response.add(linkTo(methodOn(MgmtDistributionSetTagRestApi.class).getAssignedDistributionSets(
                 distributionSetTag.getId(), MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null))
-                        .withRel("assignedDistributionSets").expand());
+                .withRel("assignedDistributionSets").expand());
     }
 
     static List<TagCreate> mapTagFromRequest(final EntityFactory entityFactory,

@@ -46,20 +46,6 @@ public final class MgmtTargetTypeMapper {
                 .collect(Collectors.toList());
     }
 
-    private static TargetTypeCreate fromRequest(final EntityFactory entityFactory,
-            final MgmtTargetTypeRequestBodyPost targetTypesRest) {
-        return entityFactory.targetType().create()
-                .name(targetTypesRest.getName()).description(targetTypesRest.getDescription())
-                .key(targetTypesRest.getKey()).colour(targetTypesRest.getColour())
-                .compatible(getDistributionSets(targetTypesRest));
-    }
-
-    private static Collection<Long> getDistributionSets(final MgmtTargetTypeRequestBodyPost targetTypesRest) {
-        return Optional.ofNullable(targetTypesRest.getCompatibledistributionsettypes())
-                .map(ds -> ds.stream().map(MgmtDistributionSetTypeAssignment::getId).collect(Collectors.toList()))
-                .orElse(Collections.emptyList());
-    }
-
     static List<MgmtTargetType> toListResponse(final List<TargetType> types) {
         if (types == null) {
             return Collections.emptyList();
@@ -80,5 +66,19 @@ public final class MgmtTargetTypeMapper {
     static void addLinks(final MgmtTargetType result) {
         result.add(linkTo(methodOn(MgmtTargetTypeRestApi.class).getCompatibleDistributionSets(result.getTypeId()))
                 .withRel(MgmtRestConstants.TARGETTYPE_V1_DS_TYPES).expand());
+    }
+
+    private static TargetTypeCreate fromRequest(final EntityFactory entityFactory,
+            final MgmtTargetTypeRequestBodyPost targetTypesRest) {
+        return entityFactory.targetType().create()
+                .name(targetTypesRest.getName()).description(targetTypesRest.getDescription())
+                .key(targetTypesRest.getKey()).colour(targetTypesRest.getColour())
+                .compatible(getDistributionSets(targetTypesRest));
+    }
+
+    private static Collection<Long> getDistributionSets(final MgmtTargetTypeRequestBodyPost targetTypesRest) {
+        return Optional.ofNullable(targetTypesRest.getCompatibledistributionsettypes())
+                .map(ds -> ds.stream().map(MgmtDistributionSetTypeAssignment::getId).collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
     }
 }

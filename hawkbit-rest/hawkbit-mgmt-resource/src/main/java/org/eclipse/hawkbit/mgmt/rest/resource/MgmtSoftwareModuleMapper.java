@@ -48,13 +48,6 @@ import org.springframework.hateoas.Link;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtSoftwareModuleMapper {
 
-    private static SoftwareModuleCreate fromRequest(final EntityFactory entityFactory,
-            final MgmtSoftwareModuleRequestBodyPost smsRest) {
-        return entityFactory.softwareModule().create().type(smsRest.getType()).name(smsRest.getName())
-                .version(smsRest.getVersion()).description(smsRest.getDescription()).vendor(smsRest.getVendor())
-                .encrypted(smsRest.isEncrypted());
-    }
-
     static List<SoftwareModuleMetadataCreate> fromRequestSwMetadata(final EntityFactory entityFactory,
             final Long softwareModuleId, final Collection<MgmtSoftwareModuleMetadata> metadata) {
         if (metadata == null) {
@@ -130,12 +123,12 @@ public final class MgmtSoftwareModuleMapper {
 
         response.add(linkTo(
                 methodOn(MgmtSoftwareModuleTypeRestApi.class).getSoftwareModuleType(softwareModule.getType().getId()))
-                        .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_TYPE).expand());
+                .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_TYPE).expand());
 
         response.add(linkTo(methodOn(MgmtSoftwareModuleResource.class).getMetadata(response.getModuleId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata")
-                        .expand().expand());
+                .expand().expand());
     }
 
     static MgmtArtifact toResponse(final Artifact artifact) {
@@ -158,7 +151,7 @@ public final class MgmtSoftwareModuleMapper {
     static void addLinks(final Artifact artifact, final MgmtArtifact response) {
         response.add(linkTo(methodOn(MgmtDownloadArtifactResource.class)
                 .downloadArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("download")
-                        .expand());
+                .expand());
     }
 
     static void addLinks(final Artifact artifact, final MgmtArtifact response,
@@ -169,5 +162,12 @@ public final class MgmtSoftwareModuleMapper {
                         new URLPlaceholder.SoftwareData(artifact.getSoftwareModule().getId(), artifact.getFilename(),
                                 artifact.getId(), artifact.getSha1Hash())), ApiType.MGMT, null);
         urls.forEach(entry -> response.add(Link.of(entry.getRef()).withRel(entry.getRel()).expand()));
+    }
+
+    private static SoftwareModuleCreate fromRequest(final EntityFactory entityFactory,
+            final MgmtSoftwareModuleRequestBodyPost smsRest) {
+        return entityFactory.softwareModule().create().type(smsRest.getType()).name(smsRest.getName())
+                .version(smsRest.getVersion()).description(smsRest.getDescription()).vendor(smsRest.getVendor())
+                .encrypted(smsRest.isEncrypted());
     }
 }

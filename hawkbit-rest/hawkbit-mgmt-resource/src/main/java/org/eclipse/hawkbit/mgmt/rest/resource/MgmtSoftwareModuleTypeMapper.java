@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.rest.data.ResponseList;
 /**
  * A mapper which maps repository model to RESTful model representation and
  * back.
- *
  */
 final class MgmtSoftwareModuleTypeMapper {
 
@@ -44,13 +43,6 @@ final class MgmtSoftwareModuleTypeMapper {
         }
 
         return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).collect(Collectors.toList());
-    }
-
-    private static SoftwareModuleTypeCreate fromRequest(final EntityFactory entityFactory,
-            final MgmtSoftwareModuleTypeRequestBodyPost smsRest) {
-        return entityFactory.softwareModuleType().create().key(smsRest.getKey()).name(smsRest.getName())
-                .description(smsRest.getDescription()).colour(smsRest.getColour())
-                .maxAssignments(smsRest.getMaxAssignments());
     }
 
     static List<MgmtSoftwareModuleType> toTypesResponse(final Collection<SoftwareModuleType> types) {
@@ -73,6 +65,13 @@ final class MgmtSoftwareModuleTypeMapper {
                 .withSelfRel().expand());
 
         return result;
+    }
+
+    private static SoftwareModuleTypeCreate fromRequest(final EntityFactory entityFactory,
+            final MgmtSoftwareModuleTypeRequestBodyPost smsRest) {
+        return entityFactory.softwareModuleType().create().key(smsRest.getKey()).name(smsRest.getName())
+                .description(smsRest.getDescription()).colour(smsRest.getColour())
+                .maxAssignments(smsRest.getMaxAssignments());
     }
 
 }

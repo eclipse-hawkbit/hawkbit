@@ -30,9 +30,9 @@ import org.springframework.data.domain.Sort.Direction;
 
 /**
  * Utility class for for paged body generation.
- *
  */
 public final class PagingUtility {
+
     /*
      * utility constructor private.
      */

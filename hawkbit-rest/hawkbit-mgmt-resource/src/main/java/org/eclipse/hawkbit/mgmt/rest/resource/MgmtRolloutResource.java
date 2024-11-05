@@ -174,15 +174,6 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(MgmtRolloutMapper.toResponseRollout(rollout, true));
     }
-    private Optional<Boolean> isConfirmationRequiredForGroup(final MgmtRolloutGroup group,
-            final MgmtRolloutRestRequestBodyPost request) {
-        if (group.getConfirmationRequired() != null) {
-            return Optional.of(group.getConfirmationRequired());
-        } else if (request.getConfirmationRequired() != null) {
-            return Optional.of(request.getConfirmationRequired());
-        }
-        return Optional.empty();
-    }
 
     @Override
     public ResponseEntity<MgmtRolloutResponseBody> update(
@@ -282,12 +273,6 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
                 tenantConfigHelper.isConfirmationFlowEnabled()));
     }
 
-    private void findRolloutOrThrowException(final Long rolloutId) {
-        if (!rolloutManagement.exists(rolloutId)) {
-            throw new EntityNotFoundException(Rollout.class, rolloutId);
-        }
-    }
-
     @Override
     public ResponseEntity<PagedList<MgmtTarget>> getRolloutGroupTargets(@PathVariable("rolloutId") final Long rolloutId,
             @PathVariable("groupId") final Long groupId,
@@ -347,6 +332,22 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             log.warn("Received an invalid representation mode: {}", representationModeParam);
             return MgmtRepresentationMode.COMPACT;
         });
+    }
+
+    private Optional<Boolean> isConfirmationRequiredForGroup(final MgmtRolloutGroup group,
+            final MgmtRolloutRestRequestBodyPost request) {
+        if (group.getConfirmationRequired() != null) {
+            return Optional.of(group.getConfirmationRequired());
+        } else if (request.getConfirmationRequired() != null) {
+            return Optional.of(request.getConfirmationRequired());
+        }
+        return Optional.empty();
+    }
+
+    private void findRolloutOrThrowException(final Long rolloutId) {
+        if (!rolloutManagement.exists(rolloutId)) {
+            throw new EntityNotFoundException(Rollout.class, rolloutId);
+        }
     }
 
 }

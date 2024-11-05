@@ -1,6 +1,7 @@
-# Eclipse.IoT hawkBit - Mgmt Resource 
+# Eclipse.IoT hawkBit - Mgmt Resource
 
-This is the server-side implementation of the hawkBit Mgmt API that is used to manage and monitor the HawkBit Update Server via HTTP.
+This is the server-side implementation of the hawkBit Mgmt API that is used to manage and monitor the HawkBit Update
+Server via HTTP.
 
 # Compile
 

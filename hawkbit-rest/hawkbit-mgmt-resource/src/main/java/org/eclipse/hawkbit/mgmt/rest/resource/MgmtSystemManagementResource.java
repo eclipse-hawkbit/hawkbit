@@ -48,8 +48,7 @@ public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi
     /**
      * Deletes the tenant data of a given tenant. USE WITH CARE!
      *
-     * @param tenant
-     *            to delete
+     * @param tenant to delete
      * @return HttpStatus.OK
      */
     @Override
@@ -77,19 +76,6 @@ public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi
                 .collect(Collectors.toList()));
 
         return ResponseEntity.ok(result);
-    }
-
-    private static MgmtSystemTenantServiceUsage convertTenant(final TenantUsage tenant) {
-        final MgmtSystemTenantServiceUsage result = new MgmtSystemTenantServiceUsage();
-        result.setTenantName(tenant.getTenantName());
-        result.setActions(tenant.getActions());
-        result.setArtifacts(tenant.getArtifacts());
-        result.setOverallArtifactVolumeInBytes(tenant.getOverallArtifactVolumeInBytes());
-        result.setTargets(tenant.getTargets());
-        if (!tenant.getUsageData().isEmpty()) {
-            result.setUsageData(tenant.getUsageData());
-        }
-        return result;
     }
 
     /**
@@ -120,5 +106,18 @@ public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi
         log.info("Invalidating caches {}", cacheNames);
         cacheNames.forEach(cacheName -> cacheManager.getCache(cacheName).clear());
         return ResponseEntity.ok(cacheNames);
+    }
+
+    private static MgmtSystemTenantServiceUsage convertTenant(final TenantUsage tenant) {
+        final MgmtSystemTenantServiceUsage result = new MgmtSystemTenantServiceUsage();
+        result.setTenantName(tenant.getTenantName());
+        result.setActions(tenant.getActions());
+        result.setArtifacts(tenant.getArtifacts());
+        result.setOverallArtifactVolumeInBytes(tenant.getOverallArtifactVolumeInBytes());
+        result.setTargets(tenant.getTargets());
+        if (!tenant.getUsageData().isEmpty()) {
+            result.setUsageData(tenant.getUsageData());
+        }
+        return result;
     }
 }

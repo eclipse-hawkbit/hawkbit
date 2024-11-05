@@ -24,7 +24,7 @@ import org.springframework.stereotype.Controller;
  */
 @Configuration
 @ComponentScan
-@Import({RestConfiguration.class, OpenApiConfiguration.class})
+@Import({ RestConfiguration.class, OpenApiConfiguration.class })
 @PropertySource("classpath:/hawkbit-mgmt-api-defaults.properties")
 public class MgmtApiConfiguration {
 

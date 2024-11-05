@@ -51,7 +51,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     private final TargetFilterQueryManagement filterManagement;
 
     private final EntityFactory entityFactory;
-    
+
     private final TenantConfigHelper tenantConfigHelper;
 
     MgmtTargetFilterQueryResource(final TargetFilterQueryManagement filterManagement, final EntityFactory entityFactory,
@@ -80,7 +80,6 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT) String representationModeParam) {
-
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -142,6 +141,22 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
+    public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(
+            @PathVariable("filterId") final Long filterId) {
+        final TargetFilterQuery filter = findFilterWithExceptionIfNotFound(filterId);
+        final DistributionSet autoAssignDistributionSet = filter.getAutoAssignDistributionSet();
+
+        if (autoAssignDistributionSet == null) {
+            return ResponseEntity.noContent().build();
+        }
+
+        final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(autoAssignDistributionSet);
+        MgmtDistributionSetMapper.addLinks(autoAssignDistributionSet, response);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
     public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
             @PathVariable("filterId") final Long filterId,
             @RequestBody final MgmtDistributionSetAutoAssignment autoAssignRequest) {
@@ -163,31 +178,10 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(
-            @PathVariable("filterId") final Long filterId) {
-        final TargetFilterQuery filter = findFilterWithExceptionIfNotFound(filterId);
-        final DistributionSet autoAssignDistributionSet = filter.getAutoAssignDistributionSet();
-
-        if (autoAssignDistributionSet == null) {
-            return ResponseEntity.noContent().build();
-        }
-
-        final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(autoAssignDistributionSet);
-        MgmtDistributionSetMapper.addLinks(autoAssignDistributionSet, response);
-
-        return ResponseEntity.ok(response);
-    }
-
-    @Override
     public ResponseEntity<Void> deleteAssignedDistributionSet(@PathVariable("filterId") final Long filterId) {
         filterManagement.updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(null));
 
         return ResponseEntity.noContent().build();
-    }
-
-    private TargetFilterQuery findFilterWithExceptionIfNotFound(final Long filterId) {
-        return filterManagement.get(filterId)
-                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, filterId));
     }
 
     private static MgmtRepresentationMode parseRepresentationMode(final String representationModeParam) {
@@ -196,6 +190,11 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
             log.warn("Received an invalid representation mode: {}", representationModeParam);
             return MgmtRepresentationMode.COMPACT;
         });
+    }
+
+    private TargetFilterQuery findFilterWithExceptionIfNotFound(final Long filterId) {
+        return filterManagement.get(filterId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, filterId));
     }
 
 }

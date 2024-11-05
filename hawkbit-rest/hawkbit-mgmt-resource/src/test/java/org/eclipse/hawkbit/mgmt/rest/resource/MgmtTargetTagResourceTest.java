@@ -29,6 +29,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
@@ -52,19 +55,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 /**
  * Spring MVC Tests against the MgmtTargetTagResource.
- *
  */
 @Feature("Component Tests - Management API")
 @Story("Target Tag Resource")
 public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String TARGETTAGS_ROOT = "http://localhost" + MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/";
+    private static final Random RND = new Random();
 
     @Test
     @Description("Verfies that a paged result list of target tags reflects the content on the repository side.")
@@ -114,15 +113,15 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         // pass here q directly as a pure string because .queryParam method delimiters the parameters in q with ,
         // which is logical OR, we want AND here
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING +
-                "?" + MgmtRestConstants.REQUEST_PARAMETER_SEARCH + "=colour==" + tag2.getColour())
-                .accept(MediaType.APPLICATION_JSON))
-            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(applyTagMatcherOnPagedResult(tag2))
-            .andExpect(applySelfLinkMatcherOnPagedResult(tag2, TARGETTAGS_ROOT + tag2.getId()))
-            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(1)))
-            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(1)))
-            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
+                        "?" + MgmtRestConstants.REQUEST_PARAMETER_SEARCH + "=colour==" + tag2.getColour())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(applyTagMatcherOnPagedResult(tag2))
+                .andExpect(applySelfLinkMatcherOnPagedResult(tag2, TARGETTAGS_ROOT + tag2.getId()))
+                .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(1)))
+                .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(1)))
+                .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
     }
 
     @Test
@@ -133,7 +132,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final TargetTag assigned = tags.get(0);
 
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + assigned.getId())
-                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                        .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(applyTagMatcherOnSingleResult(assigned))
                 .andExpect(applySelfLinkMatcherOnSingleResult(TARGETTAGS_ROOT + assigned.getId()))
@@ -239,7 +238,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(targetsAssigned)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(limitSize)))
@@ -260,13 +259,14 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(targetsAssigned)))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(targetsAssigned)))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(targetsAssigned)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(expectedSize)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(expectedSize)));
     }
+
     @Test
     @Description("Verifies that tag assignments done through tag API command are correctly stored in the repository.")
     @ExpectEvents({
@@ -295,7 +295,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
         final List<Target> targets = testdataFactory.createTargets(2);
         final Target assigned0 = targets.get(0);
-        final Target assigned1 = targets.get(1);;
+        final Target assigned1 = targets.get(1);
+        ;
 
         mvc.perform(put(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .content(JsonBuilder.toArray(Arrays.asList(assigned0.getControllerId(), assigned1.getControllerId())))
@@ -307,12 +308,11 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .containsOnly(assigned0.getControllerId(), assigned1.getControllerId());
     }
 
-    private static final Random RND = new Random();
     @Test
     @Description("Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.")
     @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
-            @Expect(type = TargetCreatedEvent.class, count = 2)})
+            @Expect(type = TargetCreatedEvent.class, count = 2) })
     public void assignTargetsNotFound() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
         final List<String> targets = testdataFactory.createTargets(2).stream().map(Target::getControllerId).toList();
@@ -352,7 +352,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2),
-            @Expect(type = TargetUpdatedEvent.class, count = 2)})
+            @Expect(type = TargetUpdatedEvent.class, count = 2) })
     public void assignTargetsNotFoundTagAndFail() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
         final List<String> targets = testdataFactory.createTargets(2).stream().map(Target::getControllerId).toList();
@@ -394,7 +394,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2),
-            @Expect(type = TargetUpdatedEvent.class, count = 2)})
+            @Expect(type = TargetUpdatedEvent.class, count = 2) })
     public void assignTargetsNotFoundTagAndSuccess() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
         final List<String> targets = testdataFactory.createTargets(2).stream().map(Target::getControllerId).toList();
@@ -475,7 +475,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2),
-            @Expect(type = TargetUpdatedEvent.class, count = 2)})
+            @Expect(type = TargetUpdatedEvent.class, count = 2) })
     public void unassignTargetsNotFound() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
         final List<String> targets = testdataFactory.createTargets(2).stream().map(Target::getControllerId).toList();
@@ -518,7 +518,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2),
-            @Expect(type = TargetUpdatedEvent.class, count = 4)})
+            @Expect(type = TargetUpdatedEvent.class, count = 4) })
     public void unassignTargetsNotFoundUntagAndFail() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
         final List<String> targets = testdataFactory.createTargets(2).stream().map(Target::getControllerId).toList();
@@ -561,7 +561,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2),
-            @Expect(type = TargetUpdatedEvent.class, count = 4)})
+            @Expect(type = TargetUpdatedEvent.class, count = 4) })
     public void unassignTargetsNotFoundUntagAndSuccess() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
         final List<String> targets = testdataFactory.createTargets(2).stream().map(Target::getControllerId).toList();
@@ -620,17 +620,6 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         assertThat(targetManagement.findByTag(PAGE, tag.getId())).isEmpty();
     }
 
-    private ResultActions toggle(final TargetTag tag, final List<Target> targets) throws Exception {
-        return mvc
-                .perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId()
-                        + "/assigned/toggleTagAssignment")
-                        .content(controllerIdsOld(
-                                targets.stream().map(Target::getControllerId).collect(Collectors.toList())))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
-    }
-
     @Test
     @Description("Verfies that tag assignments done through tag API command are correctly stored in the repository.")
     @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 1),
@@ -656,6 +645,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         result.andExpect(applyTargetEntityMatcherOnArrayResult(updated.get(0)))
                 .andExpect(applyTargetEntityMatcherOnArrayResult(updated.get(1)));
     }
+
     private static String controllerIdsOld(final Collection<String> ids) throws JSONException {
         final JSONArray list = new JSONArray();
         for (final String smID : ids) {
@@ -663,5 +653,16 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         }
 
         return list.toString();
+    }
+
+    private ResultActions toggle(final TargetTag tag, final List<Target> targets) throws Exception {
+        return mvc
+                .perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId()
+                        + "/assigned/toggleTagAssignment")
+                        .content(controllerIdsOld(
+                                targets.stream().map(Target::getControllerId).collect(Collectors.toList())))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
     }
 }

@@ -9,6 +9,21 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.hasToString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,7 +35,6 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.assertj.core.util.Lists;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -38,24 +52,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * Spring MVC Tests against the MgmtTargetTypeResource.
- *
  */
 @Feature("Component Tests - Management API")
 @Story("Target Type Resource")
@@ -69,7 +67,6 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     private final static String TARGETTYPE_DSTYPE_SINGLE_ENDPOINT = TARGETTYPE_DSTYPES_ENDPOINT + "/{dstypeid}";
 
     private final static String TEST_USER = "targetTypeTester";
-
 
     @Test
     @WithUser(principal = "targetTypeTester", allSpPermissions = true, removeFromAllPermission = { SpPermission.READ_TARGET })
@@ -169,7 +166,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
         // descending
         mvc.perform(get(TARGETTYPES_ENDPOINT).accept(MediaType.APPLICATION_JSON)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "name:DESC")).andDo(MockMvcResultPrinter.print())
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "name:DESC")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.content.[0].id", equalTo(testTypeC.getId().intValue())))
                 .andExpect(jsonPath("$.content.[0].name", equalTo(typeNameC)))
@@ -190,7 +187,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
         // ascending
         mvc.perform(get(TARGETTYPES_ENDPOINT).accept(MediaType.APPLICATION_JSON)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "name:ASC")).andDo(MockMvcResultPrinter.print())
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "name:ASC")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.content.[0].id", equalTo(testTypeA.getId().intValue())))
                 .andExpect(jsonPath("$.content.[0].name", equalTo(typeNameA)))
@@ -221,7 +218,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         createTestTargetTypesInDB(typePrefix, count);
 
         mvc.perform(get(TARGETTYPES_ENDPOINT).param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
-                String.valueOf(limit))).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                        String.valueOf(limit))).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(count)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(limit)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(limit)));
@@ -238,8 +235,8 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         createTestTargetTypesInDB(typePrefix, count);
 
         mvc.perform(get(TARGETTYPES_ENDPOINT)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offset))
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(count)))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offset))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(count)))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(count)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(expectedSize)))
@@ -256,7 +253,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .put("name", "TestTypePUTupdated").put("colour", "#ffffff").toString();
 
         mvc.perform(
-                put(TARGETTYPE_SINGLE_ENDPOINT, testType.getId()).content(body).contentType(MediaType.APPLICATION_JSON))
+                        put(TARGETTYPE_SINGLE_ENDPOINT, testType.getId()).content(body).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.description", equalTo("updated description")))
@@ -307,7 +304,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
 
         mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId())
-                .content("[{\"id\":" + standardDsType.getId() + "}]").contentType(MediaType.APPLICATION_JSON))
+                        .content("[{\"id\":" + standardDsType.getId() + "}]").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         testType = targetTypeManagement.get(testType.getId()).get();
@@ -341,7 +338,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         final TargetType testType = createTestTargetTypeInDB(typeName);
 
         mvc.perform(get(TARGETTYPE_DSTYPE_SINGLE_ENDPOINT, testType.getId(), standardDsType.getId())
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
     }
@@ -354,7 +351,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         TargetType testType = createTestTargetTypeInDB(typeName, Collections.singletonList(standardDsType));
 
         mvc.perform(delete(TARGETTYPE_DSTYPE_SINGLE_ENDPOINT, testType.getId(), standardDsType.getId())
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         testType = targetTypeManagement.get(testType.getId()).get();
@@ -435,7 +432,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         final String body = new JSONObject().put("id", testType.getId()).put("deleted", true).toString();
 
         mvc.perform(
-                put(TARGETTYPE_SINGLE_ENDPOINT, testType.getId()).content(body).contentType(MediaType.APPLICATION_JSON))
+                        put(TARGETTYPE_SINGLE_ENDPOINT, testType.getId()).content(body).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.deleted", equalTo(false))); // don't delete with update
@@ -460,7 +457,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 Collections.singletonList(standardDsType));
 
         mvc.perform(post(TARGETTYPES_ENDPOINT).content(JsonBuilder.targetTypes(Collections.singletonList(testNewType)))
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnsupportedMediaType());
 
         // bad request - no content
@@ -469,18 +466,18 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
         // bad request - bad content
         mvc.perform(post(TARGETTYPES_ENDPOINT).content("sdfjsdlkjfskdjf".getBytes())
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         // Missing mandatory field name
         mvc.perform(post(TARGETTYPES_ENDPOINT).content("[{\"description\":\"Desc123\"}]")
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         final TargetType tooLongName = entityFactory.targetType().create()
                 .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1)).build();
         mvc.perform(post(TARGETTYPES_ENDPOINT).content(JsonBuilder.targetTypes(Collections.singletonList(tooLongName)))
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         // ds types
@@ -491,11 +488,11 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
         mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId()).content("{\"id\":1}")
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId()).content("[{\"id\":44456}]")
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
         // not allowed methods
@@ -515,7 +512,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
 
         mvc.perform(post(TARGETTYPE_DSTYPE_SINGLE_ENDPOINT, testType.getId(), 565765)
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(get(TARGETTYPE_DSTYPE_SINGLE_ENDPOINT, testType.getId(), 565765))
@@ -553,13 +550,13 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
         // verify quota enforcement for distribution set types
         mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId())
-                .content(JsonBuilder.ids(dsTypeIds.subList(0, dsTypeIds.size() - 1)))
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content(JsonBuilder.ids(dsTypeIds.subList(0, dsTypeIds.size() - 1)))
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId())
-                .content("[{\"id\":" + dsTypeIds.get(dsTypeIds.size() - 1) + "}]")
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content("[{\"id\":" + dsTypeIds.get(dsTypeIds.size() - 1) + "}]")
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
@@ -641,8 +638,8 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
             assertThat(JsonPath.compile("$[ ?(@.name=='" + name + "') ].id")
                     .read(mvcResult.getResponse().getContentAsString()).toString()).contains(String.valueOf(created.getId()));
             assertThat(JsonPath.compile("$[ ?(@.name=='" + name + "') ]._links.self.href")
-                    .read(mvcResult.getResponse().getContentAsString()).toString()).contains("/"+created.getId());
-             }
+                    .read(mvcResult.getResponse().getContentAsString()).toString()).contains("/" + created.getId());
+        }
 
         assertThat(targetTypeManagement.count()).isEqualTo(size);
     }
