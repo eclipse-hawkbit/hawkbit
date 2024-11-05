@@ -30,21 +30,16 @@ public class HttpControllerPreAuthenticatedSecurityHeaderFilter extends Abstract
      * from the HTTP request with the given URI pattern, in case the URI pattern
      * does not match the current request then only the existence of the
      * configured header field is checked.
-     * 
-     * @param caCommonNameHeader
-     *            the http-header which holds the common-name of the certificate
-     * @param caAuthorityNameHeader
-     *            the http-header which holds the ca-authority name of the
-     *            certificate
-     * @param tenantConfigurationManagement
-     *            the tenant configuration management service to retrieve
-     *            configuration properties to check if the header authentication
-     *            is enabled for this tenant
-     * @param tenantAware
-     *            the tenant aware service to get configuration for the specific
-     *            tenant
-     * @param systemSecurityContext
-     *            the system security context
+     *
+     * @param caCommonNameHeader the http-header which holds the common-name of the certificate
+     * @param caAuthorityNameHeader the http-header which holds the ca-authority name of the
+     *         certificate
+     * @param tenantConfigurationManagement the tenant configuration management service to retrieve
+     *         configuration properties to check if the header authentication
+     *         is enabled for this tenant
+     * @param tenantAware the tenant aware service to get configuration for the specific
+     *         tenant
+     * @param systemSecurityContext the system security context
      */
     public HttpControllerPreAuthenticatedSecurityHeaderFilter(final String caCommonNameHeader,
             final String caAuthorityNameHeader, final TenantConfigurationManagement tenantConfigurationManagement,

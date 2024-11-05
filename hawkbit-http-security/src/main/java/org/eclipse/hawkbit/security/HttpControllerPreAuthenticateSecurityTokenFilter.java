@@ -21,7 +21,7 @@ import org.slf4j.Logger;
  * security-token with the {@code Authorization} HTTP header.
  * {@code Example Header: Authorization: TargetToken
  * 5d8fSD54fdsFG98DDsa.}
- * 
+ *
  * The {@code Authorization} header is a HTTP standard and reverse proxy or
  * other proxies will keep the Authorization headers untouched instead of maybe
  * custom headers which have then weird side-effects. Furthermore frameworks are
@@ -35,18 +35,14 @@ public class HttpControllerPreAuthenticateSecurityTokenFilter extends AbstractHt
 
     /**
      * Constructor.
-     * 
-     * @param tenantConfigurationManagement
-     *            the system management service to retrieve configuration
-     *            properties
-     * @param tenantAware
-     *            the tenant aware service to get configuration for the specific
-     *            tenant
-     * @param controllerManagement
-     *            the controller management to retrieve the specific target
-     *            security token to verify
-     * @param systemSecurityContext
-     *            the system security context
+     *
+     * @param tenantConfigurationManagement the system management service to retrieve configuration
+     *         properties
+     * @param tenantAware the tenant aware service to get configuration for the specific
+     *         tenant
+     * @param controllerManagement the controller management to retrieve the specific target
+     *         security token to verify
+     * @param systemSecurityContext the system security context
      */
     public HttpControllerPreAuthenticateSecurityTokenFilter(
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,

@@ -27,15 +27,12 @@ public class HttpControllerPreAuthenticatedGatewaySecurityTokenFilter
 
     /**
      * Constructor.
-     * 
-     * @param tenantConfigurationManagement
-     *            the system management service to retrieve configuration
-     *            properties
-     * @param tenantAware
-     *            the tenant aware service to get configuration for the specific
-     *            tenant
-     * @param systemSecurityContext
-     *            the system security context
+     *
+     * @param tenantConfigurationManagement the system management service to retrieve configuration
+     *         properties
+     * @param tenantAware the tenant aware service to get configuration for the specific
+     *         tenant
+     * @param systemSecurityContext the system security context
      */
     public HttpControllerPreAuthenticatedGatewaySecurityTokenFilter(
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,

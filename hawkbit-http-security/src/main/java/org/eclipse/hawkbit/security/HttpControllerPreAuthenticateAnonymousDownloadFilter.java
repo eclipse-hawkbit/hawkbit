@@ -26,7 +26,7 @@ public class HttpControllerPreAuthenticateAnonymousDownloadFilter extends Abstra
 
     /**
      * Constructor.
-     * 
+     *
      * @param tenantConfigurationManagement the system management service to retrieve configuration properties
      * @param tenantAware the tenant aware service to get configuration for the specific tenant
      * @param systemSecurityContext the system security context
