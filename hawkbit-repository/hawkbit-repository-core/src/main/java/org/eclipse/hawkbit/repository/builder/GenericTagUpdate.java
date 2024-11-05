@@ -13,6 +13,7 @@ package org.eclipse.hawkbit.repository.builder;
  * Update implementation.
  */
 public class GenericTagUpdate extends AbstractTagUpdateCreate<TagUpdate> implements TagUpdate {
+
     public GenericTagUpdate(final Long id) {
         super.id = id;
     }

@@ -15,15 +15,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * {@link QuotaManagement} implementation based on spring boot
  * {@link ConfigurationProperties}.
- *
  */
 public class PropertiesQuotaManagement implements QuotaManagement {
 
     private final HawkbitSecurityProperties securityProperties;
 
     /**
-     * @param securityProperties
-     *            that holds the quota definitions
+     * @param securityProperties that holds the quota definitions
      */
     public PropertiesQuotaManagement(final HawkbitSecurityProperties securityProperties) {
         this.securityProperties = securityProperties;
@@ -85,11 +83,6 @@ public class PropertiesQuotaManagement implements QuotaManagement {
     }
 
     @Override
-    public int getMaxActionsPerTarget() {
-        return securityProperties.getDos().getMaxActionsPerTarget();
-    }
-
-    @Override
     public int getMaxTargetDistributionSetAssignmentsPerManualAssignment() {
         return securityProperties.getDos().getMaxTargetDistributionSetAssignmentsPerManualAssignment();
     }
@@ -97,6 +90,11 @@ public class PropertiesQuotaManagement implements QuotaManagement {
     @Override
     public int getMaxTargetsPerAutoAssignment() {
         return securityProperties.getDos().getMaxTargetsPerAutoAssignment();
+    }
+
+    @Override
+    public int getMaxActionsPerTarget() {
+        return securityProperties.getDos().getMaxActionsPerTarget();
     }
 
     @Override

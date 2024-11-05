@@ -14,10 +14,10 @@ import java.util.Optional;
 /**
  * Create and update builder DTO.
  *
- * @param <T>
- *            update or create builder interface
+ * @param <T> update or create builder interface
  */
 public abstract class AbstractSoftwareModuleMetadataUpdateCreate<T> extends AbstractMetadataUpdateCreate<T> {
+
     protected Boolean targetVisible;
     protected long softwareModuleId;
 

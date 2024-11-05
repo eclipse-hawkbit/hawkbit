@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
-import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.Null;
 import org.eclipse.hawkbit.repository.ValidString;
 import org.springframework.util.StringUtils;
 

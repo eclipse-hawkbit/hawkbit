@@ -16,10 +16,10 @@ import org.springframework.util.StringUtils;
 /**
  * Create builder DTO.
  *
- * @param <T>
- *            update or create builder interface
+ * @param <T> update or create builder interface
  */
 public abstract class AbstractRolloutGroupCreate<T> extends AbstractNamedEntityBuilder<T> {
+
     @ValidString
     protected String targetFilterQuery;
     protected Float targetPercentage;

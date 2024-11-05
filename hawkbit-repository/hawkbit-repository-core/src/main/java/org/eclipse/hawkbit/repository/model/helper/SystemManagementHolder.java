@@ -25,7 +25,8 @@ public final class SystemManagementHolder {
 
     private static final SystemManagementHolder INSTANCE = new SystemManagementHolder();
 
-    @Getter @Setter
+    @Getter
+    @Setter
     @Autowired
     private SystemManagement systemManagement;
 

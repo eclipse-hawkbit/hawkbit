@@ -33,7 +33,7 @@ public final class RolloutHelper {
 
     /**
      * Verifies that the required success condition and action are actually set.
-     * 
+     *
      * @param conditions input conditions and actions
      */
     public static void verifyRolloutGroupConditions(final RolloutGroupConditions conditions) {
@@ -48,7 +48,7 @@ public final class RolloutHelper {
     /**
      * Verifies that the group has the required success condition and action and a
      * valid target percentage.
-     * 
+     *
      * @param group the input group
      * @return the verified group
      */
@@ -68,7 +68,7 @@ public final class RolloutHelper {
 
     /**
      * Verify if the supplied amount of groups is in range
-     * 
+     *
      * @param amountGroup amount of groups
      * @param quotaManagement to retrieve maximum number of groups allowed
      */
@@ -81,7 +81,7 @@ public final class RolloutHelper {
 
     /**
      * Verify that the supplied percentage is in range
-     * 
+     *
      * @param percentage the percentage
      */
     public static void verifyRolloutGroupTargetPercentage(final float percentage) {
@@ -95,7 +95,7 @@ public final class RolloutHelper {
     /**
      * Modifies the target filter query to only match targets that were created
      * after the Rollout.
-     * 
+     *
      * @param rollout Rollout to derive the filter from
      * @return resulting target filter query
      */
@@ -117,7 +117,7 @@ public final class RolloutHelper {
 
     /**
      * Verifies that the Rollout is in the required status.
-     * 
+     *
      * @param rollout the Rollout
      * @param status the Status
      */
@@ -130,7 +130,7 @@ public final class RolloutHelper {
     /**
      * Filters the groups of a Rollout to match a specific status and adds a group
      * to the result.
-     * 
+     *
      * @param status the required status for the groups
      * @param group the group to add
      * @return list of groups
@@ -187,16 +187,6 @@ public final class RolloutHelper {
         return baseFilter;
     }
 
-    private static boolean isTargetFilterInGroups(final String groupFilter, final List<RolloutGroup> groups) {
-        return !StringUtils.isEmpty(groupFilter)
-                && groups.stream().anyMatch(prevGroup -> !StringUtils.isEmpty(prevGroup.getTargetFilterQuery())
-                        && prevGroup.getTargetFilterQuery().equals(groupFilter));
-    }
-
-    private static String concatAndTargetFilters(final String... filters) {
-        return "(" + Arrays.stream(filters).collect(Collectors.joining(");(")) + ")";
-    }
-
     /**
      * @param baseFilter the base filter from the rollout
      * @param group group for which the filter string should be created
@@ -211,7 +201,7 @@ public final class RolloutHelper {
 
     /**
      * Verifies that no targets are left
-     * 
+     *
      * @param targetCount the count of left targets
      */
     public static void verifyRemainingTargets(final long targetCount) {
@@ -253,5 +243,15 @@ public final class RolloutHelper {
 
     public static String getIdFromRetriedTargetFilter(final String targetFilter) {
         return targetFilter.substring("failedrollout==".length());
+    }
+
+    private static boolean isTargetFilterInGroups(final String groupFilter, final List<RolloutGroup> groups) {
+        return !StringUtils.isEmpty(groupFilter)
+                && groups.stream().anyMatch(prevGroup -> !StringUtils.isEmpty(prevGroup.getTargetFilterQuery())
+                && prevGroup.getTargetFilterQuery().equals(groupFilter));
+    }
+
+    private static String concatAndTargetFilters(final String... filters) {
+        return "(" + Arrays.stream(filters).collect(Collectors.joining(");(")) + ")";
     }
 }
