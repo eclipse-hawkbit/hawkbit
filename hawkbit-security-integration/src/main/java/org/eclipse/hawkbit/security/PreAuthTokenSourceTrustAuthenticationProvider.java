@@ -38,7 +38,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
  */
 @Slf4j
 public class PreAuthTokenSourceTrustAuthenticationProvider implements AuthenticationProvider {
-    
+
     private final List<String> authorizedSourceIps;
 
     /**
@@ -54,8 +54,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
      * source IP addresses which are trusted and should be checked against the
      * request remote IP address.
      *
-     * @param authorizedSourceIps
-     *            a list of IP addresses.
+     * @param authorizedSourceIps a list of IP addresses.
      */
     public PreAuthTokenSourceTrustAuthenticationProvider(final List<String> authorizedSourceIps) {
         this.authorizedSourceIps = authorizedSourceIps;
@@ -66,8 +65,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
      * source IP addresses which are trusted and should be checked against the
      * request remote IP address.
      *
-     * @param authorizedSourceIps
-     *            a list of IP addresses.
+     * @param authorizedSourceIps a list of IP addresses.
      */
     public PreAuthTokenSourceTrustAuthenticationProvider(final String... authorizedSourceIps) {
         this.authorizedSourceIps = new ArrayList<>();
@@ -104,8 +102,12 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
         throw new BadCredentialsException("The provided principal and credentials are not match");
     }
 
+    @Override
+    public boolean supports(final Class<?> authentication) {
+        return PreAuthenticatedAuthenticationToken.class.isAssignableFrom(authentication);
+    }
+
     /**
-     *
      * The credentials may either be of type HeaderAuthentication or of type
      * Collection<HeaderAuthentication> depending on the authentication mode in
      * use (the latter is used in case of trusted reverse-proxy). It is checked
@@ -115,13 +117,10 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
      * special header set by the reverse-proxy which extracted the CN from the
      * certificate.
      *
-     * @param principal
-     *            the {@link HeaderAuthentication} from the header
-     * @param credentials
-     *            a single {@link HeaderAuthentication} or a Collection of
-     *            HeaderAuthentication
-     * @param tokenDetails
-     *            authentication details
+     * @param principal the {@link HeaderAuthentication} from the header
+     * @param credentials a single {@link HeaderAuthentication} or a Collection of
+     *         HeaderAuthentication
+     * @param tokenDetails authentication details
      * @return <code>true</code> if authentication succeeded, otherwise
      *         <code>false</code>
      */
@@ -170,11 +169,6 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
 
         // no trusted IP check, because no authorizedSourceIPs configuration
         return true;
-    }
-
-    @Override
-    public boolean supports(final Class<?> authentication) {
-        return PreAuthenticatedAuthenticationToken.class.isAssignableFrom(authentication);
     }
 
 }

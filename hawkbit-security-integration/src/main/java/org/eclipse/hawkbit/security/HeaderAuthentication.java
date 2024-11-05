@@ -13,11 +13,9 @@ package org.eclipse.hawkbit.security;
  * The authentication principal and credentials object which holds the
  * controller-id and the authority name from the http-headers as principal or
  * from the http-url and tenant configuration for the credentials.
- * 
- *
- *
  */
 final class HeaderAuthentication {
+
     private final String controllerId;
     private final String headerAuth;
 

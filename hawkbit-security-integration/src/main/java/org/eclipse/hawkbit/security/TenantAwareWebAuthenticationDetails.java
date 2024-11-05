@@ -19,9 +19,6 @@ import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
  * authenticating the requested controller e.g. based on the security header and
  * trusted IP address we need the remote address of the http request to verify
  * the e.g. the reverse proxy is trusted and allowed to set the header.
- * 
- *
- *
  */
 public class TenantAwareWebAuthenticationDetails extends TenantAwareAuthenticationDetails {
 
@@ -29,13 +26,10 @@ public class TenantAwareWebAuthenticationDetails extends TenantAwareAuthenticati
     private final String remoteAddress;
 
     /**
-     * @param tenant
-     *            the current tenant
-     * @param remoteAddress
-     *            the remote address of this web request
-     * @param controller
-     *            {@code true} indicates this is an controller HTTP request
-     *            otherwise {@code false}.
+     * @param tenant the current tenant
+     * @param remoteAddress the remote address of this web request
+     * @param controller {@code true} indicates this is an controller HTTP request
+     *         otherwise {@code false}.
      */
     public TenantAwareWebAuthenticationDetails(final String tenant, final String remoteAddress,
             final boolean controller) {

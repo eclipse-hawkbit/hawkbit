@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 @Slf4j
 public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractControllerAuthenticationFilter {
-    
+
     private static final Logger LOG_SECURITY_AUTH = LoggerFactory.getLogger("server-security.authentication");
 
     private final GetSecurityAuthorityNameTenantRunner sslIssuerNameConfigTenantRunner = new GetSecurityAuthorityNameTenantRunner();
@@ -52,20 +52,15 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     /**
      * Constructor.
      *
-     * @param caCommonNameHeader
-     *            the http-header which holds the common-name of the certificate
-     * @param caAuthorityNameHeader
-     *            the http-header which holds the ca-authority name of the
-     *            certificate
-     * @param tenantConfigurationManagement
-     *            the tenant management service to retrieve configuration
-     *            properties
-     * @param tenantAware
-     *            the tenant aware service to get configuration for the specific
-     *            tenant
-     * @param systemSecurityContext
-     *            the system security context to get access to tenant
-     *            configuration
+     * @param caCommonNameHeader the http-header which holds the common-name of the certificate
+     * @param caAuthorityNameHeader the http-header which holds the ca-authority name of the
+     *         certificate
+     * @param tenantConfigurationManagement the tenant management service to retrieve configuration
+     *         properties
+     * @param tenantAware the tenant aware service to get configuration for the specific
+     *         tenant
+     * @param systemSecurityContext the system security context to get access to tenant
+     *         configuration
      */
     public ControllerPreAuthenticatedSecurityHeaderFilter(final String caCommonNameHeader,
             final String caAuthorityNameHeader, final TenantConfigurationManagement tenantConfigurationManagement,
@@ -113,6 +108,15 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
                 .collect(Collectors.toSet());
     }
 
+    @Override
+    protected String getTenantConfigurationKey() {
+        return TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED;
+    }
+
+    private static List<String> splitMultiHashBySemicolon(final String knownIssuerHashes) {
+        return Arrays.stream(knownIssuerHashes.split("[;,]")).map(String::toLowerCase).collect(Collectors.toList());
+    }
+
     /**
      * Iterates over the {@link #sslIssuerHashBasicHeader} basic header
      * {@code X-Ssl-Issuer-Hash-%d} and try to find the same hash as known. It's ok
@@ -142,20 +146,12 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
         return null;
     }
 
-    @Override
-    protected String getTenantConfigurationKey() {
-        return TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED;
-    }
-
     private final class GetSecurityAuthorityNameTenantRunner implements TenantAware.TenantRunner<String> {
+
         @Override
         public String run() {
             return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(
                     TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class).getValue());
         }
-    }
-
-    private static List<String> splitMultiHashBySemicolon(final String knownIssuerHashes) {
-        return Arrays.stream(knownIssuerHashes.split("[;,]")).map(String::toLowerCase).collect(Collectors.toList());
     }
 }

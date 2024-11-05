@@ -14,6 +14,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
@@ -23,10 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @Feature("Unit Tests - Security")
 @Story("Issuer hash based authentication")
@@ -74,7 +73,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         // use single known hash
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
-                        .thenReturn(CONFIG_VALUE_SINGLE_HASH);
+                .thenReturn(CONFIG_VALUE_SINGLE_HASH);
         assertThat(underTest.getPreAuthenticatedPrincipal(securityToken)).isNotNull();
     }
 
@@ -84,7 +83,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         // use multiple known hashes
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
-                        .thenReturn(CONFIG_VALUE_MULTI_HASH);
+                .thenReturn(CONFIG_VALUE_MULTI_HASH);
         assertThat(underTest.getPreAuthenticatedPrincipal(prepareSecurityToken(SINGLE_HASH))).isNotNull();
         assertThat(underTest.getPreAuthenticatedPrincipal(prepareSecurityToken(SECOND_HASH))).isNotNull();
         assertThat(underTest.getPreAuthenticatedPrincipal(prepareSecurityToken(THIRD_HASH))).isNotNull();
@@ -97,7 +96,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         // use single known hash
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
-                        .thenReturn(CONFIG_VALUE_MULTI_HASH);
+                .thenReturn(CONFIG_VALUE_MULTI_HASH);
         assertThat(underTest.getPreAuthenticatedPrincipal(securityToken)).isNull();
     }
 
@@ -112,7 +111,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
 
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
-                        .thenReturn(CONFIG_VALUE_MULTI_HASH);
+                .thenReturn(CONFIG_VALUE_MULTI_HASH);
 
         final Collection<HeaderAuthentication> credentials1 = (Collection<HeaderAuthentication>) underTest
                 .getPreAuthenticatedCredentials(securityToken1);
