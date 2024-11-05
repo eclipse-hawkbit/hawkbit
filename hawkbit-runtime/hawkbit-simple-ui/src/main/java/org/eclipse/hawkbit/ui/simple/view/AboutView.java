@@ -9,7 +9,8 @@
  */
 package org.eclipse.hawkbit.ui.simple.view;
 
-import org.eclipse.hawkbit.ui.simple.MainLayout;
+import jakarta.annotation.security.RolesAllowed;
+
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -17,12 +18,12 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
-import jakarta.annotation.security.RolesAllowed;
+import org.eclipse.hawkbit.ui.simple.MainLayout;
 
 @PageTitle("About")
 @Route(value = "about", layout = MainLayout.class)
 @RouteAlias(value = "", layout = MainLayout.class)
-@RolesAllowed({"ANONYMOUS"})
+@RolesAllowed({ "ANONYMOUS" })
 public class AboutView extends VerticalLayout {
 
     public AboutView() {

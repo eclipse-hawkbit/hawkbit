@@ -36,11 +36,9 @@ public class ErrorController extends BasicErrorController {
 
     /**
      * A new {@link ErrorController}.
-     * 
-     * @param errorAttributes
-     *            the error attributes
-     * @param serverProperties
-     *            configuration properties
+     *
+     * @param errorAttributes the error attributes
+     * @param serverProperties configuration properties
      */
     public ErrorController(final ErrorAttributes errorAttributes, final ServerProperties serverProperties) {
         super(errorAttributes, serverProperties.getError());

@@ -9,13 +9,8 @@
  */
 package org.eclipse.hawkbit.ui.simple;
 
-import org.eclipse.hawkbit.ui.simple.view.TargetView;
-import org.eclipse.hawkbit.ui.simple.view.RolloutView;
-import org.eclipse.hawkbit.ui.simple.security.AuthenticatedUser;
-import org.eclipse.hawkbit.ui.simple.view.AboutView;
-import org.eclipse.hawkbit.ui.simple.view.ConfigView;
-import org.eclipse.hawkbit.ui.simple.view.DistributionSetView;
-import org.eclipse.hawkbit.ui.simple.view.SoftwareModuleView;
+import java.util.Optional;
+
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -39,18 +34,22 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-
-import java.util.Optional;
+import org.eclipse.hawkbit.ui.simple.security.AuthenticatedUser;
+import org.eclipse.hawkbit.ui.simple.view.AboutView;
+import org.eclipse.hawkbit.ui.simple.view.ConfigView;
+import org.eclipse.hawkbit.ui.simple.view.DistributionSetView;
+import org.eclipse.hawkbit.ui.simple.view.RolloutView;
+import org.eclipse.hawkbit.ui.simple.view.SoftwareModuleView;
+import org.eclipse.hawkbit.ui.simple.view.TargetView;
 
 /**
  * The main view is a top-level placeholder for other views.
  */
 public class MainLayout extends AppLayout {
 
-    private H2 viewTitle;
-
     private final transient AuthenticatedUser authenticatedUser;
     private final AccessAnnotationChecker accessChecker;
+    private H2 viewTitle;
 
     public MainLayout(final AuthenticatedUser authenticatedUser, final AccessAnnotationChecker accessChecker) {
         this.authenticatedUser = authenticatedUser;
@@ -60,6 +59,15 @@ public class MainLayout extends AppLayout {
         addDrawerContent();
         setDrawerOpened(true);
         addHeaderContent();
+    }
+
+    @Override
+    protected void afterNavigation() {
+        super.afterNavigation();
+        viewTitle.setText(
+                Optional.ofNullable(getContent().getClass().getAnnotation(PageTitle.class))
+                        .map(PageTitle::value)
+                        .orElse(""));
     }
 
     private void addHeaderContent() {
@@ -142,14 +150,5 @@ public class MainLayout extends AppLayout {
         }
 
         return layout;
-    }
-
-    @Override
-    protected void afterNavigation() {
-        super.afterNavigation();
-        viewTitle.setText(
-                Optional.ofNullable(getContent().getClass().getAnnotation(PageTitle.class))
-                        .map(PageTitle::value)
-                        .orElse(""));
     }
 }

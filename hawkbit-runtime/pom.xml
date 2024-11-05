@@ -9,96 +9,97 @@
     SPDX-License-Identifier: EPL-2.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-   <modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-   <parent>
-      <groupId>org.eclipse.hawkbit</groupId>
-      <artifactId>hawkbit-parent</artifactId>
-      <version>${revision}</version>
-   </parent>
+    <parent>
+        <groupId>org.eclipse.hawkbit</groupId>
+        <artifactId>hawkbit-parent</artifactId>
+        <version>${revision}</version>
+    </parent>
 
-   <artifactId>hawkbit-runtime-parent</artifactId>
-   <name>hawkBit :: Runtime :: Parent</name>
-   <packaging>pom</packaging>
+    <artifactId>hawkbit-runtime-parent</artifactId>
+    <name>hawkBit :: Runtime :: Parent</name>
+    <packaging>pom</packaging>
 
-   <!-- Common runtime dependences -->
-   <dependencies>
-      <dependency>
-         <groupId>com.h2database</groupId>
-         <artifactId>h2</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>com.microsoft.sqlserver</groupId>
-         <artifactId>mssql-jdbc</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.postgresql</groupId>
-         <artifactId>postgresql</artifactId>
-      </dependency>
+    <!-- Common runtime dependences -->
+    <dependencies>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
 
-      <!-- Test -->
-      <dependency>
-         <groupId>io.qameta.allure</groupId>
-         <artifactId>allure-junit5</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-test</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.security</groupId>
-         <artifactId>spring-security-test</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.mariadb.jdbc</groupId>
-         <artifactId>mariadb-java-client</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-repository-test</artifactId>
-         <version>${project.version}</version>
-         <scope>test</scope>
-      </dependency>
-   </dependencies>
-
-   <build>
-      <plugins>
-         <plugin>
+        <!-- Test -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <executions>
-               <execution>
-                  <goals>
-                     <goal>repackage</goal>
-                  </goals>
-                  <configuration>
-                     <outputDirectory>${baseDir}</outputDirectory>
-                     <mainClass>${spring.app.class}</mainClass>
-                     <layout>JAR</layout>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
-      </plugins>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-repository-test</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-      <resources>
-         <resource>
-            <directory>src/main/resources</directory>
-         </resource>
-      </resources>
-   </build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${baseDir}</outputDirectory>
+                            <mainClass>${spring.app.class}</mainClass>
+                            <layout>JAR</layout>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
 
-   <modules>
-      <module>hawkbit-ddi-server</module>
-      <module>hawkbit-dmf-server</module>
-      <module>hawkbit-mgmt-server</module>
-	  <module>hawkbit-simple-ui</module>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+    </build>
 
-      <module>hawkbit-update-server</module>
-   </modules>
+    <modules>
+        <module>hawkbit-ddi-server</module>
+        <module>hawkbit-dmf-server</module>
+        <module>hawkbit-mgmt-server</module>
+        <module>hawkbit-simple-ui</module>
+
+        <module>hawkbit-update-server</module>
+    </modules>
 </project>

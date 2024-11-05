@@ -9,12 +9,17 @@
  */
 package org.eclipse.hawkbit.ui.simple.view;
 
-import org.eclipse.hawkbit.ui.simple.MainLayout;
-import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
-import org.eclipse.hawkbit.ui.simple.view.util.Filter;
-import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
-import org.eclipse.hawkbit.ui.simple.view.util.TableView;
-import org.eclipse.hawkbit.ui.simple.view.util.Utils;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
+
+import jakarta.annotation.security.RolesAllowed;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -33,26 +38,22 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import jakarta.annotation.security.RolesAllowed;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssigment;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
-
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
+import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
+import org.eclipse.hawkbit.ui.simple.MainLayout;
+import org.eclipse.hawkbit.ui.simple.view.util.Filter;
+import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
+import org.eclipse.hawkbit.ui.simple.view.util.TableView;
+import org.eclipse.hawkbit.ui.simple.view.util.Utils;
 
 @PageTitle("Distribution Sets")
 @Route(value = "distribution_sets", layout = MainLayout.class)
-@RolesAllowed({"DISTRIBUTION_SET_READ"})
+@RolesAllowed({ "DISTRIBUTION_SET_READ" })
 @Uses(Icon.class)
 public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
@@ -93,6 +94,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
         return new SelectionGrid<>(
                 new SelectionGrid.EntityRepresentation<>(
                         MgmtSoftwareModule.class, MgmtSoftwareModule::getModuleId) {
+
                     @Override
                     protected void addColumns(Grid<MgmtSoftwareModule> grid) {
                         grid.addColumn(MgmtSoftwareModule::getModuleId).setHeader(Constants.ID).setAutoWidth(true);
@@ -158,9 +160,9 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
             description.setMinLength(2);
             Stream.of(
-                    description,
-                    createdBy, createdAt,
-                    lastModifiedBy, lastModifiedAt)
+                            description,
+                            createdBy, createdAt,
+                            lastModifiedBy, lastModifiedAt)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -258,17 +260,17 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                 close();
                 final long distributionSetId = hawkbitClient.getDistributionSetRestApi()
                         .createDistributionSets(
-                                List.of((MgmtDistributionSetRequestBodyPost)new MgmtDistributionSetRequestBodyPost()
-                                                .setType(type.getValue().getKey())
-                                                .setName(name.getValue())
-                                                .setVersion(version.getValue())
-                                                .setDescription(description.getValue())
-                                                .setRequiredMigrationStep(requiredMigrationStep.getValue())))
-                                .getBody()
-                                .stream()
-                                .findFirst()
-                                .orElseThrow()
-                                .getDsId();
+                                List.of((MgmtDistributionSetRequestBodyPost) new MgmtDistributionSetRequestBodyPost()
+                                        .setType(type.getValue().getKey())
+                                        .setName(name.getValue())
+                                        .setVersion(version.getValue())
+                                        .setDescription(description.getValue())
+                                        .setRequiredMigrationStep(requiredMigrationStep.getValue())))
+                        .getBody()
+                        .stream()
+                        .findFirst()
+                        .orElseThrow()
+                        .getDsId();
                 new AddSoftwareModulesDialog(distributionSetId, hawkbitClient).open();
             });
         }
@@ -289,17 +291,17 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
             final Component addRemoveControls = Utils.addRemoveControls(
                     v -> new Utils.BaseDialog<Void>("Add Software Modules") {{
-                                final SoftwareModuleView softwareModulesView = new SoftwareModuleView(false, hawkbitClient);
-                                add(softwareModulesView);
-                                final Button addBtn = new Button("Add");
-                                addBtn.addClickListener(e -> {
-                                    softwareModules.addAll(softwareModulesView.getSelection());
-                                    softwareModulesGrid.refreshGrid(false);
-                                    close();
-                                });
-                                add(addBtn);
-                                open();
-                            }}.result(),
+                        final SoftwareModuleView softwareModulesView = new SoftwareModuleView(false, hawkbitClient);
+                        add(softwareModulesView);
+                        final Button addBtn = new Button("Add");
+                        addBtn.addClickListener(e -> {
+                            softwareModules.addAll(softwareModulesView.getSelection());
+                            softwareModulesGrid.refreshGrid(false);
+                            close();
+                        });
+                        add(addBtn);
+                        open();
+                    }}.result(),
                     v -> {
                         Utils.remove(softwareModulesGrid.getSelectedItems(), softwareModules, MgmtSoftwareModule::getModuleId);
                         softwareModulesGrid.refreshGrid(false);

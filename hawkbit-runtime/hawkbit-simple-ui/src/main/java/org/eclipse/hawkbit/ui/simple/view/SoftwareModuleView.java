@@ -9,12 +9,20 @@
  */
 package org.eclipse.hawkbit.ui.simple.view;
 
-import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
-import org.eclipse.hawkbit.ui.simple.MainLayout;
-import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
-import org.eclipse.hawkbit.ui.simple.view.util.TableView;
-import org.eclipse.hawkbit.ui.simple.view.util.Utils;
-import org.eclipse.hawkbit.ui.simple.view.util.Filter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
+
+import jakarta.annotation.security.RolesAllowed;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -35,30 +43,22 @@ import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import jakarta.annotation.security.RolesAllowed;
-
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
+import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
+import org.eclipse.hawkbit.ui.simple.MainLayout;
+import org.eclipse.hawkbit.ui.simple.view.util.Filter;
+import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
+import org.eclipse.hawkbit.ui.simple.view.util.TableView;
+import org.eclipse.hawkbit.ui.simple.view.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
-
 @PageTitle("Software Modules")
 @Route(value = "software_modules", layout = MainLayout.class)
-@RolesAllowed({"SOFTWARE_MODULE_READ"})
+@RolesAllowed({ "SOFTWARE_MODULE_READ" })
 @Uses(Icon.class)
 public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
@@ -73,6 +73,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
                 new SelectionGrid.EntityRepresentation<>(MgmtSoftwareModule.class, MgmtSoftwareModule::getModuleId) {
 
                     private final SoftwareModuleDetails details = new SoftwareModuleDetails(hawkbitClient);
+
                     @Override
                     protected void addColumns(final Grid<MgmtSoftwareModule> grid) {
                         grid.addColumn(MgmtSoftwareModule::getModuleId).setHeader(Constants.ID).setAutoWidth(true);
@@ -108,6 +109,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
     private static SelectionGrid<MgmtArtifact, Long> createArtifactGrid() {
         return new SelectionGrid<>(
                 new SelectionGrid.EntityRepresentation<>(MgmtArtifact.class, MgmtArtifact::getArtifactId) {
+
                     @Override
                     protected void addColumns(final Grid<MgmtArtifact> grid) {
                         grid.addColumn(MgmtArtifact::getArtifactId).setHeader(Constants.ID).setAutoWidth(true);
@@ -165,9 +167,9 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             description.setMinLength(2);
             artifactGrid = createArtifactGrid();
             Stream.of(
-                    description,
-                    createdBy, createdAt,
-                    lastModifiedBy, lastModifiedAt)
+                            description,
+                            createdBy, createdAt,
+                            lastModifiedBy, lastModifiedAt)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -260,7 +262,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             create.addClickListener(e -> {
                 close();
                 final long softwareModuleId = hawkbitClient.getSoftwareModuleRestApi().createSoftwareModules(
-                        List.of(new MgmtSoftwareModuleRequestBodyPost()
+                                List.of(new MgmtSoftwareModuleRequestBodyPost()
                                         .setType(type.getValue().getKey())
                                         .setName(name.getValue())
                                         .setVersion(version.getValue())
@@ -308,7 +310,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             });
 
             final Button finishBtn = Utils.tooltip(new Button("Finish"), "Finish (Enter)");
-            finishBtn.addClickListener(e ->  close());
+            finishBtn.addClickListener(e -> close());
             finishBtn.addClickShortcut(Key.ENTER);
             finishBtn.setHeightFull();
             final HorizontalLayout finish = new HorizontalLayout(finishBtn);
@@ -329,7 +331,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
             public MultipartFileImpl(final FileBuffer fileBuffer, final long contentLength, final String mimeType) {
                 this.fileBuffer = fileBuffer;
-                this. contentLength = contentLength;
+                this.contentLength = contentLength;
                 this.mimeType = mimeType;
             }
 

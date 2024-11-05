@@ -9,8 +9,8 @@
  */
 package org.eclipse.hawkbit.ui.simple;
 
-import org.eclipse.hawkbit.sdk.HawkbitClient;
-import org.eclipse.hawkbit.sdk.Tenant;
+import java.util.function.Supplier;
+
 import feign.FeignException;
 import lombok.Getter;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
@@ -24,8 +24,9 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTenantManagementRestApi;
+import org.eclipse.hawkbit.sdk.HawkbitClient;
+import org.eclipse.hawkbit.sdk.Tenant;
 import org.springframework.http.ResponseEntity;
-import java.util.function.Supplier;
 
 @Getter
 public class HawkbitMgmtClient {
@@ -49,7 +50,7 @@ public class HawkbitMgmtClient {
         this.tenant = tenant;
         this.hawkbitClient = hawkbitClient;
 
-        softwareModuleRestApi = service(MgmtSoftwareModuleRestApi .class);
+        softwareModuleRestApi = service(MgmtSoftwareModuleRestApi.class);
         softwareModuleTypeRestApi = service(MgmtSoftwareModuleTypeRestApi.class);
         distributionSetRestApi = service(MgmtDistributionSetRestApi.class);
         distributionSetTypeRestApi = service(MgmtDistributionSetTypeRestApi.class);
@@ -77,6 +78,7 @@ public class HawkbitMgmtClient {
     boolean hasTargetRead() {
         return hasRead(() -> targetRestApi.getTarget("_#ETE$ER"));
     }
+
     boolean hasConfigRead() {
         return hasRead(() -> tenantManagementRestApi.getTenantConfigurationValue("_#ETE$ER"));
     }

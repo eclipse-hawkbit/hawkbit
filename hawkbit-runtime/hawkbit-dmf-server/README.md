@@ -1,5 +1,7 @@
 # hawkBit DMF Server (EXPERIMENTAL!)
-The hawkBit DMF Server is a standalone spring-boot application with an embedded servlet container. It should be started with at least hawkbit-mgmt-server.
+
+The hawkBit DMF Server is a standalone spring-boot application with an embedded servlet container. It should be started
+with at least hawkbit-mgmt-server.
 
 ## On your own workstation
 
@@ -18,10 +20,17 @@ run org.eclipse.hawkbit.app.dmf.DMFStart
 ```
 
 ### Clustering (Experimental!!!)
-The micro-service instances are configured to communicate via Spring Cloud Bus. You could run multiple instances of any micro-service but hawkbit-mgmt-server. Management server run some schedulers which shall not run simultaneously - e.g. auto assignment checker and rollouts executor. To run multiple management server instances you shall do some extensions of hawkbit to ensure that they wont run schedulers simultaneously or you shall configure all instances but one to do not run schedulers!
+
+The micro-service instances are configured to communicate via Spring Cloud Bus. You could run multiple instances of any
+micro-service but hawkbit-mgmt-server. Management server run some schedulers which shall not run simultaneously - e.g.
+auto assignment checker and rollouts executor. To run multiple management server instances you shall do some extensions
+of hawkbit to ensure that they wont run schedulers simultaneously or you shall configure all instances but one to do not
+run schedulers!
 
 ## Optional Protostuff for Sprign cloud bus
-The micro-service instances are configured to communicate via Spring Cloud Bus. Optionally, you could use [Protostuff](https://github.com/protostuff/protostuff) based message payload serialization for improved performance.
+
+The micro-service instances are configured to communicate via Spring Cloud Bus. Optionally, you could
+use [Protostuff](https://github.com/protostuff/protostuff) based message payload serialization for improved performance.
 
 **Note**: If Protostuff is enabled it shall be enabled on all microservices!
 

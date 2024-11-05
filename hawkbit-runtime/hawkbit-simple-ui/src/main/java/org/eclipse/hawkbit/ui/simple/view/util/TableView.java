@@ -9,15 +9,15 @@
  */
 package org.eclipse.hawkbit.ui.simple.view.util;
 
-import org.eclipse.hawkbit.ui.simple.view.Constants;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.provider.Query;
-
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.provider.Query;
+import org.eclipse.hawkbit.ui.simple.view.Constants;
 
 public class TableView<T, ID> extends Div implements Constants {
 
@@ -30,12 +30,14 @@ public class TableView<T, ID> extends Div implements Constants {
             final BiFunction<Query<T, Void>, String, Stream<T>> queryFn) {
         this(rsql, null, entityRepresentation, queryFn, null, null);
     }
+
     public TableView(
             final Filter.Rsql rsql, final Filter.Rsql alternativeRsql,
             final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,
             final BiFunction<Query<T, Void>, String, Stream<T>> queryFn) {
-        this(rsql, alternativeRsql, entityRepresentation, queryFn,null, null);
+        this(rsql, alternativeRsql, entityRepresentation, queryFn, null, null);
     }
+
     public TableView(
             final Filter.Rsql rsql,
             final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,
@@ -44,6 +46,7 @@ public class TableView<T, ID> extends Div implements Constants {
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler) {
         this(rsql, null, entityRepresentation, queryFn, addHandler, removeHandler);
     }
+
     public TableView(
             final Filter.Rsql rsql, final Filter.Rsql alternativeRsql,
             final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,
@@ -55,7 +58,7 @@ public class TableView<T, ID> extends Div implements Constants {
 
         setSizeFull();
 
-        final VerticalLayout layout = new VerticalLayout(filter,  selectionGrid);
+        final VerticalLayout layout = new VerticalLayout(filter, selectionGrid);
         layout.setSizeFull();
         layout.setPadding(false);
         layout.setSpacing(false);

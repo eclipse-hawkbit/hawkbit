@@ -27,21 +27,21 @@ services:
   nginx:
     image: "jwilder/nginx-proxy"
     ports:
-    - 80:80
-    - 443:443
+      - 80:80
+      - 443:443
     networks:
-    - proxy
+      - proxy
     volumes:
-    - certificates:/etc/nginx/certs:ro
-    - vhost:/etc/nginx/vhost.d
-    - challange:/usr/share/nginx/html
-    - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certificates:/etc/nginx/certs:ro
+      - vhost:/etc/nginx/vhost.d
+      - challange:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
     deploy:
       replicas: 1
       restart_policy:
         condition: on-failure
     labels:
-    - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy"
+      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy"
 
   # ---------------------
   # lets encrypt nginx-proxy companion
@@ -49,12 +49,12 @@ services:
   letsencrypt:
     image: "jrcs/letsencrypt-nginx-proxy-companion"
     networks:
-    - proxy
+      - proxy
     volumes:
-    - certificates:/etc/nginx/certs:rw
-    - /var/run/docker.sock:/var/run/docker.sock:ro
-    - vhost:/etc/nginx/vhost.d
-    - challange:/usr/share/nginx/html
+      - certificates:/etc/nginx/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - vhost:/etc/nginx/vhost.d
+      - challange:/usr/share/nginx/html
     deploy:
       replicas: 1
       restart_policy:
