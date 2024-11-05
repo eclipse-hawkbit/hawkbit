@@ -21,6 +21,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.AbstractJavaTypeMapper;
 import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A base class which provide basis amqp staff.
@@ -63,7 +64,7 @@ public class BaseAmqpService {
     }
 
     protected static boolean isMessageBodyEmpty(final Message message) {
-        return message.getBody() == null || message.getBody().length == 0;
+        return ObjectUtils.isEmpty(message.getBody());
     }
 
     protected static final void logAndThrowMessageError(final Message message, final String error) {

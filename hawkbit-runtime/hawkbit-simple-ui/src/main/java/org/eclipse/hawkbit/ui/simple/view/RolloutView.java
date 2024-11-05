@@ -13,6 +13,7 @@ import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -86,12 +87,11 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                                 () -> details, RolloutDetails::setItem));
                     }
                 },
-                (query, rsqlFilter) -> hawkbitClient.getRolloutRestApi()
-                        .getRollouts(
-                                query.getOffset(), query.getPageSize(), Constants.NAME_ASC, rsqlFilter, "full")
-                        .getBody()
-                        .getContent()
-                        .stream(),
+                (query, rsqlFilter) -> Optional.ofNullable(
+                        hawkbitClient.getRolloutRestApi()
+                                .getRollouts(
+                                        query.getOffset(), query.getPageSize(), Constants.NAME_ASC, rsqlFilter, "full")
+                                .getBody()).stream().flatMap(page -> page.getContent().stream()),
                 selectionGrid -> new CreateDialog(hawkbitClient).result(),
                 selectionGrid -> {
                     selectionGrid.getSelectedItems().forEach(
@@ -163,7 +163,10 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
         private void refresh() {
             removeAll();
-            init(hawkbitClient.getRolloutRestApi().getRollout(rolloutId).getBody());
+            final MgmtRolloutResponseBody body = hawkbitClient.getRolloutRestApi().getRollout(rolloutId).getBody();
+            if (body != null) {
+                init(body);
+            }
         }
     }
 
@@ -236,7 +239,11 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             targetFilter.setValue(rollout.getTargetFilterQuery());
             final MgmtDistributionSet distributionSetMgmt = hawkbitClient.getDistributionSetRestApi()
                     .getDistributionSet(rollout.getDistributionSetId()).getBody();
-            distributionSet.setValue(distributionSetMgmt.getName() + ":" + distributionSetMgmt.getVersion());
+            if (distributionSetMgmt == null) { // should not be here
+                distributionSet.setValue("n/a (null)");
+            } else {
+                distributionSet.setValue(distributionSetMgmt.getName() + ":" + distributionSetMgmt.getVersion());
+            }
             actonType.setValue(switch (rollout.getType()) {
                 case SOFT -> Constants.SOFT;
                 case FORCED -> Constants.FORCED;
@@ -246,15 +253,16 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             startAt.setValue(ObjectUtils.isEmpty(rollout.getStartAt()) ? "" : new Date(rollout.getStartAt()).toString());
             dynamic.setValue(rollout.isDynamic());
 
-            groupGrid.setItems(query ->
-                    hawkbitClient.getRolloutRestApi()
-                            .getRolloutGroups(
-                                    rollout.getRolloutId(),
-                                    query.getOffset(), query.getPageSize(),
-                                    null, null, "full")
-                            .getBody().getContent().stream()
-                            .skip(query.getOffset())
-                            .limit(query.getPageSize()));
+            groupGrid.setItems(query -> Optional.ofNullable(
+                            hawkbitClient.getRolloutRestApi()
+                                    .getRolloutGroups(
+                                            rollout.getRolloutId(),
+                                            query.getOffset(), query.getPageSize(),
+                                            null, null, "full")
+                                    .getBody())
+                    .stream().flatMap(body -> body.getContent().stream())
+                    .skip(query.getOffset())
+                    .limit(query.getPageSize()));
             groupGrid.setSelectionMode(Grid.SelectionMode.NONE);
         }
     }
@@ -283,11 +291,12 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             distributionSet = new Select<>(
                     "Distribution Set",
                     this::readyToCreate,
-                    hawkbitClient.getDistributionSetRestApi()
-                            .getDistributionSets(0, 30, Constants.NAME_ASC, null)
-                            .getBody()
-                            .getContent()
-                            .toArray(new MgmtDistributionSet[0]));
+                    Optional.ofNullable(
+                                    hawkbitClient.getDistributionSetRestApi()
+                                            .getDistributionSets(0, 30, Constants.NAME_ASC, null)
+                                            .getBody())
+                            .map(body -> body.getContent().toArray(new MgmtDistributionSet[0]))
+                            .orElseGet(() -> new MgmtDistributionSet[0]));
             distributionSet.setRequiredIndicatorVisible(true);
             distributionSet.setItemLabelGenerator(distributionSetO ->
                     distributionSetO.getName() + ":" + distributionSetO.getVersion());
@@ -295,11 +304,12 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             targetFilter = new Select<>(
                     "Target Filter",
                     this::readyToCreate,
-                    hawkbitClient.getTargetFilterQueryRestApi()
-                            .getFilters(0, 30, Constants.NAME_ASC, null, null)
-                            .getBody()
-                            .getContent()
-                            .toArray(new MgmtTargetFilterQuery[0]));
+                    Optional.ofNullable(
+                                    hawkbitClient.getTargetFilterQueryRestApi()
+                                            .getFilters(0, 30, Constants.NAME_ASC, null, null)
+                                            .getBody())
+                            .map(body -> body.getContent().toArray(new MgmtTargetFilterQuery[0]))
+                            .orElseGet(() -> new MgmtTargetFilterQuery[0]));
             targetFilter.setRequiredIndicatorVisible(true);
             targetFilter.setItemLabelGenerator(MgmtTargetFilterQuery::getName);
             targetFilter.setWidthFull();

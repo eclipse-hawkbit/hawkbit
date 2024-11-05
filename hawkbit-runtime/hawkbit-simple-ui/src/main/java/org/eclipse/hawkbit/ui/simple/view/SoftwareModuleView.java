@@ -12,11 +12,13 @@ package org.eclipse.hawkbit.ui.simple.view;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -43,6 +45,7 @@ import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
@@ -87,12 +90,12 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
                     }
                 },
-                (query, rsqlFilter) -> hawkbitClient.getSoftwareModuleRestApi()
-                        .getSoftwareModules(
-                                query.getOffset(), query.getPageSize(), Constants.NAME_ASC, rsqlFilter)
-                        .getBody()
-                        .getContent()
-                        .stream(),
+                (query, rsqlFilter) -> Optional.ofNullable(
+                                hawkbitClient.getSoftwareModuleRestApi()
+                                        .getSoftwareModules(
+                                                query.getOffset(), query.getPageSize(), Constants.NAME_ASC, rsqlFilter)
+                                        .getBody())
+                        .stream().flatMap(body -> body.getContent().stream()),
                 isParent ? v -> new CreateDialog(hawkbitClient).result() : null,
                 isParent ? selectionGrid -> {
                     selectionGrid.getSelectedItems().forEach(
@@ -127,11 +130,11 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
         private SoftwareModuleFilter(final HawkbitMgmtClient hawkbitClient) {
             name.setPlaceholder("<name filter>");
             type.setItemLabelGenerator(MgmtSoftwareModuleType::getName);
-            type.setItems(
-                    hawkbitClient.getSoftwareModuleTypeRestApi()
-                            .getTypes(0, 20, Constants.NAME_ASC, null)
-                            .getBody()
-                            .getContent());
+            type.setItems(Optional.ofNullable(
+                            hawkbitClient.getSoftwareModuleTypeRestApi()
+                                    .getTypes(0, 20, Constants.NAME_ASC, null)
+                                    .getBody()).map(PagedList::getContent)
+                    .orElseGet(Collections::emptyList));
         }
 
         @Override
@@ -188,13 +191,14 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             lastModifiedBy.setValue(softwareModule.getLastModifiedBy());
             lastModifiedAt.setValue(new Date(softwareModule.getLastModifiedAt()).toString());
 
-            artifactGrid.setItems(query ->
-                    hawkbitClient.getSoftwareModuleRestApi()
-                            .getArtifacts(
-                                    softwareModule.getModuleId(), null, null)
-                            .getBody().stream()
-                            .skip(query.getOffset())
-                            .limit(query.getPageSize()));
+            artifactGrid.setItems(query -> Optional.ofNullable(
+                            hawkbitClient.getSoftwareModuleRestApi()
+                                    .getArtifacts(
+                                            softwareModule.getModuleId(), null, null)
+                                    .getBody())
+                    .stream().flatMap(Collection::stream)
+                    .skip(query.getOffset())
+                    .limit(query.getPageSize()));
             artifactGrid.setSelectionMode(Grid.SelectionMode.NONE);
         }
     }
@@ -215,11 +219,11 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             type = new Select<>(
                     Constants.TYPE,
                     this::readyToCreate,
-                    hawkbitClient.getSoftwareModuleTypeRestApi()
-                            .getTypes(0, 30, Constants.NAME_ASC, null)
-                            .getBody()
-                            .getContent()
-                            .toArray(new MgmtSoftwareModuleType[0]));
+                    Optional.ofNullable(
+                                    hawkbitClient.getSoftwareModuleTypeRestApi()
+                                            .getTypes(0, 30, Constants.NAME_ASC, null)
+                                            .getBody()).map(body -> body.getContent().toArray(new MgmtSoftwareModuleType[0]))
+                            .orElseGet(() -> new MgmtSoftwareModuleType[0]));
             type.setWidthFull();
             type.setRequiredIndicatorVisible(true);
             type.setItemLabelGenerator(MgmtSoftwareModuleType::getName);
@@ -261,16 +265,17 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
         private void addCreateClickListener(final HawkbitMgmtClient hawkbitClient) {
             create.addClickListener(e -> {
                 close();
-                final long softwareModuleId = hawkbitClient.getSoftwareModuleRestApi().createSoftwareModules(
-                                List.of(new MgmtSoftwareModuleRequestBodyPost()
-                                        .setType(type.getValue().getKey())
-                                        .setName(name.getValue())
-                                        .setVersion(version.getValue())
-                                        .setVendor(vendor.getValue())
-                                        .setDescription(description.getValue())
-                                        .setEncrypted(enableArtifactEncryption.getValue())))
-                        .getBody()
-                        .stream()
+                final long softwareModuleId = Optional.ofNullable(
+                                hawkbitClient.getSoftwareModuleRestApi().createSoftwareModules(
+                                                List.of(new MgmtSoftwareModuleRequestBodyPost()
+                                                        .setType(type.getValue().getKey())
+                                                        .setName(name.getValue())
+                                                        .setVersion(version.getValue())
+                                                        .setVendor(vendor.getValue())
+                                                        .setDescription(description.getValue())
+                                                        .setEncrypted(enableArtifactEncryption.getValue())))
+                                        .getBody())
+                        .stream().flatMap(Collection::stream)
                         .findFirst()
                         .orElseThrow()
                         .getModuleId();
