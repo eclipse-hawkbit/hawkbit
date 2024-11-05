@@ -37,6 +37,16 @@ import org.springframework.security.concurrent.DelegatingSecurityContextExecutor
 public class AmqpTestConfiguration {
 
     @Bean
+    @Primary
+    public RabbitTemplate rabbitTemplateForTest(final ConnectionFactory connectionFactory) {
+        final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
+        rabbitTemplate.setReplyTimeout(TimeUnit.SECONDS.toMillis(3));
+        rabbitTemplate.setReceiveTimeout(TimeUnit.SECONDS.toMillis(3));
+        return rabbitTemplate;
+    }
+
+    @Bean
     SystemSecurityContextHolder systemSecurityContextHolder() {
         return SystemSecurityContextHolder.getInstance();
     }
@@ -79,17 +89,7 @@ public class AmqpTestConfiguration {
     }
 
     @Bean
-    RabbitMqSetupService rabbitMqSetupService(){
+    RabbitMqSetupService rabbitMqSetupService() {
         return new RabbitMqSetupService();
-    }
-
-    @Bean
-    @Primary
-    public RabbitTemplate rabbitTemplateForTest(final ConnectionFactory connectionFactory) {
-        final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
-        rabbitTemplate.setReplyTimeout(TimeUnit.SECONDS.toMillis(3));
-        rabbitTemplate.setReceiveTimeout(TimeUnit.SECONDS.toMillis(3));
-        return rabbitTemplate;
     }
 }
