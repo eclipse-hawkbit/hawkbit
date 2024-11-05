@@ -30,6 +30,7 @@ public class MgmtRolloutSuccessAction {
     private SuccessAction action = SuccessAction.NEXTGROUP;
     @Schema(description = "The expression for the success action")
     private String expression;
+
     public MgmtRolloutSuccessAction(final SuccessAction action, final String expression) {
         this.action = action;
         this.expression = expression;

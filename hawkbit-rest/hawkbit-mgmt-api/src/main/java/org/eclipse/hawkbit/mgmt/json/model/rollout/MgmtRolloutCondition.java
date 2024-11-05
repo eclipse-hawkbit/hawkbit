@@ -31,6 +31,7 @@ public class MgmtRolloutCondition {
     @Schema(description = "The expression according to the condition, e.g. the value of threshold in percentage",
             example = "50")
     private String expression = "100";
+
     public MgmtRolloutCondition(final Condition condition, final String expression) {
         this.condition = condition;
         this.expression = expression;
