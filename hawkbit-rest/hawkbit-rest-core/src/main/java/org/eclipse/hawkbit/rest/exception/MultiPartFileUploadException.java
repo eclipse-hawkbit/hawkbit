@@ -14,15 +14,13 @@ import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Thrown if a multi part exception occurred.
- *
  */
 public final class MultiPartFileUploadException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * @param cause
-     *            for the exception
+     * @param cause for the exception
      */
     public MultiPartFileUploadException(final Throwable cause) {
         super(cause.getMessage(), SpServerError.SP_ARTIFACT_UPLOAD_FAILED, cause);

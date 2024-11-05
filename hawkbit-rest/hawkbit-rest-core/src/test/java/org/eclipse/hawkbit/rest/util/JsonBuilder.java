@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.rest.util;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +31,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.util.CollectionUtils;
-
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Builder class for building certain json strings.
@@ -71,12 +71,6 @@ public abstract class JsonBuilder {
 
         return builder.toString();
 
-    }
-
-    private static void createTagLine(final StringBuilder builder, final Tag tag) throws JSONException {
-        builder.append(new JSONObject().put("name", tag.getName()).put("description", tag.getDescription())
-                .put("colour", tag.getColour()).put("createdAt", "0").put("updatedAt", "0")
-                .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh").toString());
     }
 
     public static String tag(final Tag tag) throws JSONException {
@@ -185,16 +179,13 @@ public abstract class JsonBuilder {
         return builder.toString();
 
     }
-    
+
     /**
      * Build an invalid request body with missing result for feedback message.
-     * 
-     * @param id
-     *            id of the action
-     * @param execution
-     *            the execution
-     * @param message
-     *            the message
+     *
+     * @param id id of the action
+     * @param execution the execution
+     * @param message the message
      * @return a invalid request body
      * @throws JSONException
      */
@@ -209,13 +200,10 @@ public abstract class JsonBuilder {
     /**
      * Build an invalid request body with missing finished result for feedback
      * message.
-     * 
-     * @param id
-     *            id of the action
-     * @param execution
-     *            the execution
-     * @param message
-     *            the message
+     *
+     * @param id id of the action
+     * @param execution the execution
+     * @param message the message
      * @return a invalid request body
      * @throws JSONException
      */
@@ -486,7 +474,7 @@ public abstract class JsonBuilder {
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
             final String type) {
         return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, type,
-            null, null, null, null);
+                null, null, null, null);
     }
 
     public static String rolloutWithGroups(final String name, final String description, final Integer groupSize,
@@ -511,13 +499,13 @@ public abstract class JsonBuilder {
             final List<String> groupJsonList, final String type, final Integer weight, final Long startAt, final Long forceTime,
             final Boolean confirmationRequired) {
         return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, groupJsonList, type,
-            weight, startAt, forceTime, confirmationRequired, false, null, 0);
+                weight, startAt, forceTime, confirmationRequired, false, null, 0);
     }
 
     public static String rollout(final String name, final String description, final Integer groupSize,
-                                 final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
-                                 final List<String> groupJsonList, final String type, final Integer weight, final Long startAt, final Long forceTime,
-                                 final Boolean confirmationRequired, final boolean isDynamic, final String dynamicGroupSuffix, final int dynamicGroupTargetsCount) {
+            final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
+            final List<String> groupJsonList, final String type, final Integer weight, final Long startAt, final Long forceTime,
+            final Boolean confirmationRequired, final boolean isDynamic, final String dynamicGroupSuffix, final int dynamicGroupTargetsCount) {
         final JSONObject json = new JSONObject();
 
         try {
@@ -576,7 +564,8 @@ public abstract class JsonBuilder {
 
                 final JSONObject dynamicGroupTemplate = new JSONObject();
                 json.put("dynamicGroupTemplate", dynamicGroupTemplate);
-                dynamicGroupTemplate.put("nameSuffix", (dynamicGroupSuffix == null || dynamicGroupSuffix.isEmpty()) ? "-dynamic" : dynamicGroupSuffix);
+                dynamicGroupTemplate.put("nameSuffix",
+                        (dynamicGroupSuffix == null || dynamicGroupSuffix.isEmpty()) ? "-dynamic" : dynamicGroupSuffix);
                 dynamicGroupTemplate.put("targetCount", dynamicGroupTargetsCount < 0 ? 1 : dynamicGroupTargetsCount);
             }
 
@@ -602,14 +591,6 @@ public abstract class JsonBuilder {
 
     }
 
-    private static RolloutGroupConditions getConditions(final RolloutGroup rolloutGroup) {
-        return new RolloutGroupConditionBuilder()
-                .errorCondition(rolloutGroup.getErrorCondition(), rolloutGroup.getErrorConditionExp())
-                .errorAction(rolloutGroup.getErrorAction(), rolloutGroup.getErrorActionExp())
-                .successAction(rolloutGroup.getSuccessAction(), rolloutGroup.getSuccessActionExp())
-                .successCondition(rolloutGroup.getSuccessCondition(), rolloutGroup.getSuccessConditionExp()).build();
-    }
-    
     public static String rolloutGroup(final String name, final String description, final String targetFilterQuery,
             final Float targetPercentage, final Boolean confirmationRequired,
             final RolloutGroupConditions rolloutGroupConditions) {
@@ -704,5 +685,19 @@ public abstract class JsonBuilder {
             json.put("mode", mode);
         }
         return json;
+    }
+
+    private static void createTagLine(final StringBuilder builder, final Tag tag) throws JSONException {
+        builder.append(new JSONObject().put("name", tag.getName()).put("description", tag.getDescription())
+                .put("colour", tag.getColour()).put("createdAt", "0").put("updatedAt", "0")
+                .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh").toString());
+    }
+
+    private static RolloutGroupConditions getConditions(final RolloutGroup rolloutGroup) {
+        return new RolloutGroupConditionBuilder()
+                .errorCondition(rolloutGroup.getErrorCondition(), rolloutGroup.getErrorConditionExp())
+                .errorAction(rolloutGroup.getErrorAction(), rolloutGroup.getErrorActionExp())
+                .successAction(rolloutGroup.getSuccessAction(), rolloutGroup.getSuccessActionExp())
+                .successCondition(rolloutGroup.getSuccessCondition(), rolloutGroup.getSuccessConditionExp()).build();
     }
 }

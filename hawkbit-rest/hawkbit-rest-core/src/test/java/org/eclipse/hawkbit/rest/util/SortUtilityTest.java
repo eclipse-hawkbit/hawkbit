@@ -14,6 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.rest.exception.SortParameterSyntaxErrorException;
 import org.eclipse.hawkbit.rest.exception.SortParameterUnsupportedDirectionException;
@@ -21,16 +24,13 @@ import org.eclipse.hawkbit.rest.exception.SortParameterUnsupportedFieldException
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort.Order;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 /**
  *
  */
 @Feature("Component Tests - Management API")
 @Story("Sorting parameter")
 public class SortUtilityTest {
+
     private static final String SORT_PARAM_1 = "NAME:ASC";
     private static final String SORT_PARAM_2 = "NAME:ASC, DESCRIPTION:DESC";
     private static final String SYNTAX_FAILURE_SORT_PARAM = "NAME:ASC DESCRIPTION:DESC";

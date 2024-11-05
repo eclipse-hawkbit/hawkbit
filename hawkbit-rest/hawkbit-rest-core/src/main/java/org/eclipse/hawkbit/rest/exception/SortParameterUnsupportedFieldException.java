@@ -15,16 +15,12 @@ import org.eclipse.hawkbit.exception.SpServerError;
 /**
  * Exception used by the REST API in case of invalid field name in the sort
  * parameter.
- * 
- *
- *
- *
  */
 public class SortParameterUnsupportedFieldException extends AbstractServerRtException {
 
     /**
-    * 
-    */
+     *
+     */
     private static final long serialVersionUID = 1L;
 
     /**
@@ -38,11 +34,10 @@ public class SortParameterUnsupportedFieldException extends AbstractServerRtExce
     /**
      * Creates a new SortParameterSyntaxErrorException with
      * {@link SpServerError#SP_REST_SORT_PARAM_INVALID_FIELD} error.
-     * 
-     * @param cause
-     *            the cause (which is saved for later retrieval by the
-     *            getCause() method). (A null value is permitted, and indicates
-     *            that the cause is nonexistent or unknown.)
+     *
+     * @param cause the cause (which is saved for later retrieval by the
+     *         getCause() method). (A null value is permitted, and indicates
+     *         that the cause is nonexistent or unknown.)
      */
     public SortParameterUnsupportedFieldException(final Throwable cause) {
         super(SpServerError.SP_REST_SORT_PARAM_INVALID_FIELD, cause);

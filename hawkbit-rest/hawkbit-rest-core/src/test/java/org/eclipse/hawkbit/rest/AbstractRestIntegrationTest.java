@@ -32,19 +32,17 @@ import org.springframework.web.filter.CharacterEncodingFilter;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ContextConfiguration(classes = {
-        RestConfiguration.class, RepositoryApplicationConfiguration.class, TestConfiguration.class})
+        RestConfiguration.class, RepositoryApplicationConfiguration.class, TestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
 @WebAppConfiguration
 @AutoConfigureMockMvc
 public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTest {
 
     protected MockMvc mvc;
-
-    @Autowired
-    private CharacterEncodingFilter characterEncodingFilter;
-
     @Autowired
     protected WebApplicationContext webApplicationContext;
+    @Autowired
+    private CharacterEncodingFilter characterEncodingFilter;
 
     @BeforeEach
     public void before() throws Exception {

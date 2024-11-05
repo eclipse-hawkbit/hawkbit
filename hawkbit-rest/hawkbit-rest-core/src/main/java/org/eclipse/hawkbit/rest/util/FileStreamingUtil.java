@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.rest.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,19 +45,15 @@ public final class FileStreamingUtil {
      */
     public static final String ARTIFACT_MD5_DWNL_SUFFIX = ".MD5SUM";
     private static final int BUFFER_SIZE = 0x2000; // 8k
-    
+
     /**
      * Write a md5 file response.
      *
-     * @param response
-     *            the response
-     * @param md5Hash
-     *            of the artifact
-     * @param filename
-     *            as provided by the client
+     * @param response the response
+     * @param md5Hash of the artifact
+     * @param filename as provided by the client
      * @return the response
-     * @throws IOException
-     *             cannot write output stream
+     * @throws IOException cannot write output stream
      */
     public static ResponseEntity<Void> writeMD5FileResponse(final HttpServletResponse response, final String md5Hash,
             final String filename) throws IOException {
@@ -94,26 +89,16 @@ public final class FileStreamingUtil {
      * The request supports RFC7233 range requests.
      * </p>
      *
-     * @param artifact
-     *            the artifact
-     * @param filename
-     *            to be written to the client response
-     * @param lastModified
-     *            unix timestamp of the artifact
-     * @param response
-     *            to be sent back to the requesting client
-     * @param request
-     *            from the client
-     * @param progressListener
-     *            to write progress updates to
-     *
+     * @param artifact the artifact
+     * @param filename to be written to the client response
+     * @param lastModified unix timestamp of the artifact
+     * @param response to be sent back to the requesting client
+     * @param request from the client
+     * @param progressListener to write progress updates to
      * @return http response
-     *
+     * @throws FileStreamingFailedException if streaming fails
      * @see <a href="https://tools.ietf.org/html/rfc7233">https://tools.ietf.org
-     *      /html/rfc7233</a>
-     * 
-     * @throws FileStreamingFailedException
-     *             if streaming fails
+     *         /html/rfc7233</a>
      */
     public static ResponseEntity<InputStream> writeFileResponse(final DbArtifact artifact, final String filename,
             final long lastModified, final HttpServletResponse response, final HttpServletRequest request,
@@ -187,7 +172,7 @@ public final class FileStreamingUtil {
         return result;
     }
 
-    private static void resetResponseExceptHeaders(final HttpServletResponse response){
+    private static void resetResponseExceptHeaders(final HttpServletResponse response) {
         // do backup the current headers (like CORS related)
         final Map<String, String> storedHeaders = new HashMap<>();
         for (final String header : response.getHeaderNames()) {
@@ -359,7 +344,7 @@ public final class FileStreamingUtil {
             }
 
             if (progressListener != null) {
-                final int newPercent = (int)Math.floor(total * 100.0 / length);
+                final int newPercent = (int) Math.floor(total * 100.0 / length);
 
                 // every 10 percent an event
                 if (newPercent == 100 || newPercent > progressPercent + 10) {
@@ -383,6 +368,7 @@ public final class FileStreamingUtil {
     }
 
     private static final class ByteRange {
+
         private static final String MULTIPART_BOUNDARY = "THIS_STRING_SEPARATES_MULTIPART";
 
         private final long start;
@@ -395,22 +381,6 @@ public final class FileStreamingUtil {
             this.end = end;
             length = end - start + 1;
             this.total = total;
-        }
-
-        private long getStart() {
-            return start;
-        }
-
-        private long getEnd() {
-            return end;
-        }
-
-        private long getLength() {
-            return length;
-        }
-
-        private long getTotal() {
-            return total;
         }
 
         @Override
@@ -453,6 +423,22 @@ public final class FileStreamingUtil {
                 return false;
             }
             return true;
+        }
+
+        private long getStart() {
+            return start;
+        }
+
+        private long getEnd() {
+            return end;
+        }
+
+        private long getLength() {
+            return length;
+        }
+
+        private long getTotal() {
+            return total;
         }
 
     }

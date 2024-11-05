@@ -23,11 +23,8 @@ public final class HttpUtil {
     /**
      * Checks given CSV string for defined match value or wildcard.
      *
-     * @param matchHeader
-     *            to search through
-     * @param toMatch
-     *            to search for
-     *
+     * @param matchHeader to search through
+     * @param toMatch to search for
      * @return <code>true</code> if string matches.
      */
     public static boolean matchesHttpHeader(final String matchHeader, final String toMatch) {

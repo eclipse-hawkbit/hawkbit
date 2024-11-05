@@ -99,19 +99,12 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_STOP_ROLLOUT_FAILED, HttpStatus.LOCKED);
     }
 
-    private static HttpStatus getStatusOrDefault(final SpServerError error) {
-        return ERROR_TO_HTTP_STATUS.getOrDefault(error, DEFAULT_RESPONSE_STATUS);
-    }
-
     /**
      * method for handling exception of type AbstractServerRtException. Called
      * by the Spring-Framework for exception handling.
      *
-     * @param request
-     *            the Http request
-     * @param ex
-     *            the exception which occurred
-     *
+     * @param request the Http request
+     * @param ex the exception which occurred
      * @return the entity to be responded containing the exception information
      *         as entity.
      */
@@ -137,10 +130,8 @@ public class ResponseExceptionHandler {
      * ResponseStatus 500 is returned. Called by the Spring-Framework for
      * exception handling.
      *
-     * @param request
-     *            the Http request
-     * @param ex
-     *            the exception which occurred
+     * @param request the Http request
+     * @param ex the exception which occurred
      * @return the entity to be responded containing the response status 500
      */
     @ExceptionHandler(FileStreamingFailedException.class)
@@ -158,10 +149,8 @@ public class ResponseExceptionHandler {
      * cannot be deserialized. Called by the Spring-Framework for exception
      * handling.
      *
-     * @param request
-     *            the Http request
-     * @param ex
-     *            the exception which occurred
+     * @param request the Http request
+     * @param ex the exception which occurred
      * @return the entity to be responded containing the exception information
      *         as entity.
      */
@@ -181,10 +170,8 @@ public class ResponseExceptionHandler {
      * is thrown in case the request is rejected due to a constraint violation.
      * Called by the Spring-Framework for exception handling.
      *
-     * @param request
-     *            the Http request
-     * @param ex
-     *            the exception which occurred
+     * @param request the Http request
+     * @param ex the exception which occurred
      * @return the entity to be responded containing the exception information
      *         as entity.
      */
@@ -195,7 +182,7 @@ public class ResponseExceptionHandler {
 
         final ExceptionInfo response = new ExceptionInfo();
         response.setMessage(ex.getConstraintViolations().stream().map(
-                violation -> violation.getPropertyPath() + MESSAGE_FORMATTER_SEPARATOR + violation.getMessage() + ".")
+                        violation -> violation.getPropertyPath() + MESSAGE_FORMATTER_SEPARATOR + violation.getMessage() + ".")
                 .collect(Collectors.joining(MESSAGE_FORMATTER_SEPARATOR)));
         response.setExceptionClass(ex.getClass().getName());
         response.setErrorCode(SpServerError.SP_REPO_CONSTRAINT_VIOLATION.getKey());
@@ -208,10 +195,8 @@ public class ResponseExceptionHandler {
      * in case the request is rejected due to invalid requests. Called by the
      * Spring-Framework for exception handling.
      *
-     * @param request
-     *            the Http request
-     * @param ex
-     *            the exception which occurred
+     * @param request the Http request
+     * @param ex the exception which occurred
      * @return the entity to be responded containing the exception information
      *         as entity.
      */
@@ -233,10 +218,8 @@ public class ResponseExceptionHandler {
      * thrown in case the request body is not well formed and cannot be
      * deserialized. Called by the Spring-Framework for exception handling.
      *
-     * @param request
-     *            the Http request
-     * @param ex
-     *            the exception which occurred
+     * @param request the Http request
+     * @param ex the exception which occurred
      * @return the entity to be responded containing the exception information
      *         as entity.
      */
@@ -256,6 +239,10 @@ public class ResponseExceptionHandler {
 
         final ExceptionInfo response = createExceptionInfo(new MultiPartFileUploadException(responseCause));
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    private static HttpStatus getStatusOrDefault(final SpServerError error) {
+        return ERROR_TO_HTTP_STATUS.getOrDefault(error, DEFAULT_RESPONSE_STATUS);
     }
 
     private void logRequest(final HttpServletRequest request, final Exception ex) {

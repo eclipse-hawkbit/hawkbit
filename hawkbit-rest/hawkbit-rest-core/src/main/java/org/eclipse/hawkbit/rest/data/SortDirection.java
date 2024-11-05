@@ -26,12 +26,10 @@ public enum SortDirection {
 
     /**
      * Returns the sort direction for the given name.
-     * 
-     * @param name
-     *            the name of the enum
+     *
+     * @param name the name of the enum
      * @return the corresponding enum
-     * @throws SortParameterUnsupportedDirectionException
-     *             if there is no matching enum for the specified name
+     * @throws SortParameterUnsupportedDirectionException if there is no matching enum for the specified name
      */
     public static SortDirection getByName(final String name) {
         try {

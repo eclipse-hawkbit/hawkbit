@@ -15,16 +15,12 @@ import org.eclipse.hawkbit.exception.SpServerError;
 /**
  * Exception used by the REST API in case of invalid sort parameter direction
  * name.
- * 
- *
- *
- *
  */
 public class SortParameterUnsupportedDirectionException extends AbstractServerRtException {
 
     /**
-    * 
-    */
+     *
+     */
     private static final long serialVersionUID = 1L;
 
     /**
@@ -37,11 +33,10 @@ public class SortParameterUnsupportedDirectionException extends AbstractServerRt
     /**
      * Creates a new SortParameterSyntaxErrorException with
      * {@link SpServerError#SP_REST_SORT_PARAM_INVALID_DIRECTION} error.
-     * 
-     * @param cause
-     *            the cause (which is saved for later retrieval by the
-     *            getCause() method). (A null value is permitted, and indicates
-     *            that the cause is nonexistent or unknown.)
+     *
+     * @param cause the cause (which is saved for later retrieval by the
+     *         getCause() method). (A null value is permitted, and indicates
+     *         that the cause is nonexistent or unknown.)
      */
     public SortParameterUnsupportedDirectionException(final Throwable cause) {
         super(SpServerError.SP_REST_SORT_PARAM_INVALID_DIRECTION, cause);

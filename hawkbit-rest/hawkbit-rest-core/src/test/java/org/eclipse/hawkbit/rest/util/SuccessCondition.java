@@ -10,13 +10,11 @@
 package org.eclipse.hawkbit.rest.util;
 
 /**
- *
  * @param <T>
  */
 public interface SuccessCondition<T> {
 
     /**
-     * 
      * @param result
      * @return
      */
