@@ -34,6 +34,6 @@ public class H2TestDatabase extends AbstractSqlTestDatabase {
 
     @Override
     protected String getRandomSchemaUri() {
-        return "jdbc:h2:mem:" + context.getRandomSchemaName() +";MODE=MySQL;";
+        return "jdbc:h2:mem:" + context.getRandomSchemaName() + ";MODE=MySQL;";
     }
 }

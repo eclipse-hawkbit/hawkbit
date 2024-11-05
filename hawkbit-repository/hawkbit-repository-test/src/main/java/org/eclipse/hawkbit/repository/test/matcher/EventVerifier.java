@@ -52,14 +52,13 @@ public class EventVerifier extends AbstractTestExecutionListener {
      * {@code @Before} annotations which are actually counted to the executed
      * test-method and maybe fire events which are not covered / recognized by
      * the test-method itself and reset the counter again.
-     * 
+     *
      * Note that this approach is only working when using a single-thread
      * executor in the ApplicationEventMultiCaster, so the order of the events
      * keep the same.
-     * 
-     * @param publisher
-     *            the {@link ApplicationEventPublisher} to publish the marker
-     *            event to
+     *
+     * @param publisher the {@link ApplicationEventPublisher} to publish the marker
+     *         event to
      */
     public static void publishResetMarkerEvent(final ApplicationEventPublisher publisher) {
         publisher.publishEvent(new ResetCounterMarkerEvent());
@@ -175,6 +174,7 @@ public class EventVerifier extends AbstractTestExecutionListener {
     }
 
     private static final class ResetCounterMarkerEvent extends RemoteApplicationEvent {
+
         private static final long serialVersionUID = 1L;
 
         private ResetCounterMarkerEvent() {

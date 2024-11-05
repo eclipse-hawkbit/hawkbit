@@ -15,6 +15,7 @@ import java.util.Random;
 import org.eclipse.hawkbit.repository.model.Target;
 
 public class TargetTestData {
+
     public static final String ATTRIBUTE_KEY_TOO_LONG;
     public static final String ATTRIBUTE_KEY_VALID;
     public static final String ATTRIBUTE_VALUE_TOO_LONG;
@@ -28,6 +29,10 @@ public class TargetTestData {
         ATTRIBUTE_VALUE_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE, rand);
     }
 
+    private TargetTestData() {
+        // nothing to do here
+    }
+
     private static String generateRandomStringWithLength(final int length, final Random rand) {
         final StringBuilder randomStringBuilder = new StringBuilder(length);
         final int lowercaseACode = 97;
@@ -38,9 +43,5 @@ public class TargetTestData {
             randomStringBuilder.append(randomCharacter);
         }
         return randomStringBuilder.toString();
-    }
-
-    private TargetTestData() {
-        // nothing to do here
     }
 }
