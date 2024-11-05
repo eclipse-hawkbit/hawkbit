@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.security.oauth2.client.ClientsConfiguredCondition;
@@ -67,7 +66,7 @@ public class OidcUserManagementAutoConfiguration {
 
     /**
      * @return a jwt authorities extractor which interprets the roles of a user
-     * as their authorities.
+     *         as their authorities.
      */
     @Bean
     @ConditionalOnMissingBean
@@ -133,7 +132,7 @@ public class OidcUserManagementAutoConfiguration {
      */
     public interface JwtAuthoritiesExtractor {
 
-        Set<GrantedAuthority> extract(final Jwt token, final ClientRegistration clientRegistration );
+        Set<GrantedAuthority> extract(final Jwt token, final ClientRegistration clientRegistration);
     }
 
     /**

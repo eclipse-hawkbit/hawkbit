@@ -67,30 +67,6 @@ public class ExecutorAutoConfiguration {
     }
 
     /**
-     * @return central ThreadPoolExecutor for general purpose multi threaded
-     *         operations. Tries an orderly shutdown when destroyed.
-     */
-    private ThreadPoolExecutor threadPoolExecutor() {
-        final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(
-                asyncConfigurerProperties.getQueuesize());
-        return new ThreadPoolExecutor(asyncConfigurerProperties.getCorethreads(),
-                asyncConfigurerProperties.getMaxthreads(), asyncConfigurerProperties.getIdletimeout(),
-                TimeUnit.MILLISECONDS, blockingQueue,
-                threadFactory("central-executor-pool-%d"),
-                new PoolSizeExceededPolicy());
-    }
-
-    private static class PoolSizeExceededPolicy extends CallerRunsPolicy {
-        @Override
-        public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
-            log.warn(
-                    "Caller has to run on its own instead of centralExecutorService, reached limit of queue size {}",
-                    executor.getQueue().size());
-            super.rejectedExecution(r, executor);
-        }
-    }
-
-    /**
      * @return the executor for UI background processes.
      */
     @Bean(name = "uiExecutor")
@@ -131,5 +107,30 @@ public class ExecutorAutoConfiguration {
             thread.setName(String.format(Locale.ROOT, format, count.getAndIncrement()));
             return thread;
         };
+    }
+
+    /**
+     * @return central ThreadPoolExecutor for general purpose multi threaded
+     *         operations. Tries an orderly shutdown when destroyed.
+     */
+    private ThreadPoolExecutor threadPoolExecutor() {
+        final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(
+                asyncConfigurerProperties.getQueuesize());
+        return new ThreadPoolExecutor(asyncConfigurerProperties.getCorethreads(),
+                asyncConfigurerProperties.getMaxthreads(), asyncConfigurerProperties.getIdletimeout(),
+                TimeUnit.MILLISECONDS, blockingQueue,
+                threadFactory("central-executor-pool-%d"),
+                new PoolSizeExceededPolicy());
+    }
+
+    private static class PoolSizeExceededPolicy extends CallerRunsPolicy {
+
+        @Override
+        public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
+            log.warn(
+                    "Caller has to run on its own instead of centralExecutorService, reached limit of queue size {}",
+                    executor.getQueue().size());
+            super.rejectedExecution(r, executor);
+        }
     }
 }

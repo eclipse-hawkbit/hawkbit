@@ -13,7 +13,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Properties for the async configurer.
- * 
  */
 @ConfigurationProperties("hawkbit.threadpool")
 public class AsyncConfigurerThreadpoolProperties {

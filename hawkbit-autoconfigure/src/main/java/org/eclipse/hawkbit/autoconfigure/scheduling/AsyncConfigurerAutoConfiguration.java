@@ -21,7 +21,6 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
- *
  * Auto config fot the exception handler.
  */
 @Configuration

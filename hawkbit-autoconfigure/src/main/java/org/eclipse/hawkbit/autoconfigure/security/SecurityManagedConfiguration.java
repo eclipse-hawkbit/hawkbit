@@ -83,11 +83,74 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @PropertySource("classpath:hawkbit-security-defaults.properties")
 public class SecurityManagedConfiguration {
 
-    private static final int DOS_FILTER_ORDER = -200;
     public static final String ANONYMOUS_CONTROLLER_SECURITY_ENABLED_SHOULD_ONLY_BE_USED_FOR_DEVELOPMENT_PURPOSES = """
             ******************
             ** Anonymous controller security enabled, should only be used for development purposes **
             ******************""";
+    private static final int DOS_FILTER_ORDER = -200;
+
+    /**
+     * Filter to protect the hawkBit server system management interface against too many requests.
+     *
+     * @param securityProperties for filter configuration
+     * @return the spring filter registration bean for registering a denial of service protection filter in the filter chain
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
+    public FilterRegistrationBean<DosFilter> dosSystemFilter(final HawkbitSecurityProperties securityProperties) {
+        final FilterRegistrationBean<DosFilter> filterRegBean = dosFilter(Collections.emptyList(),
+                securityProperties.getDos().getFilter(), securityProperties.getClients());
+        filterRegBean.setUrlPatterns(List.of("/system/*"));
+        filterRegBean.setOrder(DOS_FILTER_ORDER);
+        filterRegBean.setName("dosSystemFilter");
+
+        return filterRegBean;
+    }
+
+    /**
+     * HttpFirewall which enables to define a list of allowed host names.
+     *
+     * @return the http firewall.
+     */
+    @Bean
+    public HttpFirewall httpFirewall(final HawkbitSecurityProperties hawkbitSecurityProperties) {
+        final List<String> allowedHostNames = hawkbitSecurityProperties.getAllowedHostNames();
+        final IgnorePathsStrictHttpFirewall firewall = new IgnorePathsStrictHttpFirewall(
+                hawkbitSecurityProperties.getHttpFirewallIgnoredPaths());
+
+        if (!CollectionUtils.isEmpty(allowedHostNames)) {
+            firewall.setAllowedHostnames(hostName -> {
+                log.debug("Firewall check host: {}, allowed: {}", hostName, allowedHostNames.contains(hostName));
+                return allowedHostNames.contains(hostName);
+            });
+        }
+        return firewall;
+    }
+
+    private static FilterRegistrationBean<DosFilter> dosFilter(final Collection<String> includeAntPaths,
+            final HawkbitSecurityProperties.Dos.Filter filterProperties,
+            final HawkbitSecurityProperties.Clients clientProperties) {
+        final FilterRegistrationBean<DosFilter> filterRegBean = new FilterRegistrationBean<>();
+
+        filterRegBean.setFilter(new DosFilter(includeAntPaths, filterProperties.getMaxRead(),
+                filterProperties.getMaxWrite(), filterProperties.getWhitelist(), clientProperties.getBlacklist(),
+                clientProperties.getRemoteIpHeader()));
+
+        return filterRegBean;
+    }
+
+    private static AuthenticationManager setAuthenticationManager(final HttpSecurity http, final DdiSecurityProperties ddiSecurityConfiguration)
+            throws Exception {
+        // configure authentication manager
+        final AuthenticationManager authenticationManager =
+                http
+                        .getSharedObject(AuthenticationManagerBuilder.class)
+                        .authenticationProvider(
+                                new PreAuthTokenSourceTrustAuthenticationProvider(ddiSecurityConfiguration.getRp().getTrustedIPs()))
+                        .build();
+        http.authenticationManager(authenticationManager);
+        return authenticationManager;
+    }
 
     /**
      * Security configuration for the hawkBit server DDI interface.
@@ -137,7 +200,7 @@ public class SecurityManagedConfiguration {
         protected FilterRegistrationBean<DosFilter> dosFilterDDI(final HawkbitSecurityProperties securityProperties) {
             final FilterRegistrationBean<DosFilter> filterRegBean =
                     dosFilter(List.of(DDI_ANT_MATCHERS),
-                        securityProperties.getDos().getFilter(), securityProperties.getClients());
+                            securityProperties.getDos().getFilter(), securityProperties.getClients());
             filterRegBean.setOrder(DOS_FILTER_ORDER);
             filterRegBean.setName("dosDDiFilter");
 
@@ -326,36 +389,6 @@ public class SecurityManagedConfiguration {
     }
 
     /**
-     * Filter to protect the hawkBit server system management interface against too many requests.
-     *
-     * @param securityProperties for filter configuration
-     * @return the spring filter registration bean for registering a denial of service protection filter in the filter chain
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
-    public FilterRegistrationBean<DosFilter> dosSystemFilter(final HawkbitSecurityProperties securityProperties) {
-        final FilterRegistrationBean<DosFilter> filterRegBean = dosFilter(Collections.emptyList(),
-                securityProperties.getDos().getFilter(), securityProperties.getClients());
-        filterRegBean.setUrlPatterns(List.of("/system/*"));
-        filterRegBean.setOrder(DOS_FILTER_ORDER);
-        filterRegBean.setName("dosSystemFilter");
-
-        return filterRegBean;
-    }
-
-    private static FilterRegistrationBean<DosFilter> dosFilter(final Collection<String> includeAntPaths,
-            final HawkbitSecurityProperties.Dos.Filter filterProperties,
-            final HawkbitSecurityProperties.Clients clientProperties) {
-        final FilterRegistrationBean<DosFilter> filterRegBean = new FilterRegistrationBean<>();
-
-        filterRegBean.setFilter(new DosFilter(includeAntPaths, filterProperties.getMaxRead(),
-                filterProperties.getMaxWrite(), filterProperties.getWhitelist(), clientProperties.getBlacklist(),
-                clientProperties.getRemoteIpHeader()));
-
-        return filterRegBean;
-    }
-
-    /**
      * Security configuration for the REST management API.
      */
     @Configuration
@@ -394,15 +427,13 @@ public class SecurityManagedConfiguration {
         SecurityFilterChain filterChainREST(
                 final HttpSecurity http,
                 @Autowired(required = false)
-                @Qualifier("hawkbitOAuth2ResourceServerCustomizer")
-                final Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer,
+                @Qualifier("hawkbitOAuth2ResourceServerCustomizer") final Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer,
                 // called just before build of the SecurityFilterChain.
                 // could be used for instance to set authentication provider
                 // Note: implementation of the customizer shall always take in account what is the already set by the
                 //       hawkBit
                 @Autowired(required = false)
-                @Qualifier("hawkbitHttpSecurityCustomizer")
-                final Customizer<HttpSecurity> httpSecurityCustomizer,
+                @Qualifier("hawkbitHttpSecurityCustomizer") final Customizer<HttpSecurity> httpSecurityCustomizer,
                 final SystemManagement systemManagement,
                 final SystemSecurityContext systemSecurityContext) throws Exception {
             http
@@ -410,9 +441,9 @@ public class SecurityManagedConfiguration {
                     .authorizeHttpRequests(amrmRegistry ->
                             amrmRegistry
                                     .requestMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
-                                        .hasAnyAuthority(SpPermission.SYSTEM_ADMIN)
+                                    .hasAnyAuthority(SpPermission.SYSTEM_ADMIN)
                                     .anyRequest()
-                                        .authenticated())
+                                    .authenticated())
                     .anonymous(AbstractHttpConfigurer::disable)
                     .csrf(AbstractHttpConfigurer::disable)
                     .requestCache(AbstractHttpConfigurer::disable)
@@ -469,27 +500,6 @@ public class SecurityManagedConfiguration {
         }
     }
 
-
-    /**
-     * HttpFirewall which enables to define a list of allowed host names.
-     *
-     * @return the http firewall.
-     */
-    @Bean
-    public HttpFirewall httpFirewall(final HawkbitSecurityProperties hawkbitSecurityProperties) {
-        final List<String> allowedHostNames = hawkbitSecurityProperties.getAllowedHostNames();
-        final IgnorePathsStrictHttpFirewall firewall = new IgnorePathsStrictHttpFirewall(
-                hawkbitSecurityProperties.getHttpFirewallIgnoredPaths());
-
-        if (!CollectionUtils.isEmpty(allowedHostNames)) {
-            firewall.setAllowedHostnames(hostName -> {
-                log.debug("Firewall check host: {}, allowed: {}", hostName, allowedHostNames.contains(hostName));
-                return allowedHostNames.contains(hostName);
-            });
-        }
-        return firewall;
-    }
-
     private static class IgnorePathsStrictHttpFirewall extends StrictHttpFirewall {
 
         private final Collection<String> pathsToIgnore;
@@ -503,6 +513,7 @@ public class SecurityManagedConfiguration {
         public FirewalledRequest getFirewalledRequest(final HttpServletRequest request) {
             if (pathsToIgnore != null && pathsToIgnore.contains(request.getRequestURI())) {
                 return new FirewalledRequest(request) {
+
                     @Override
                     public void reset() {
                         // nothing to do
@@ -511,17 +522,5 @@ public class SecurityManagedConfiguration {
             }
             return super.getFirewalledRequest(request);
         }
-    }
-
-    private static AuthenticationManager setAuthenticationManager(final HttpSecurity http, final DdiSecurityProperties ddiSecurityConfiguration) throws Exception {
-        // configure authentication manager
-        final AuthenticationManager authenticationManager =
-                http
-                        .getSharedObject(AuthenticationManagerBuilder.class)
-                        .authenticationProvider(
-                                new PreAuthTokenSourceTrustAuthenticationProvider(ddiSecurityConfiguration.getRp().getTrustedIPs()))
-                        .build();
-        http.authenticationManager(authenticationManager);
-        return authenticationManager;
     }
 }
