@@ -198,12 +198,22 @@ public final class SpPermission {
         public static final String BRACKET_CLOSE = ")";
         public static final String HAS_AUTH_PREFIX = "hasAuthority" + BRACKET_OPEN + "'";
         public static final String HAS_AUTH_SUFFIX = "'" + BRACKET_CLOSE;
+        public static final String HAS_AUTH_AND = " and ";
+        /**
+         * The role which contains the spring security context in case the
+         * system is executing code which is necessary to be privileged.
+         */
+        public static final String SYSTEM_ROLE = "ROLE_SYSTEM_CODE";
         /**
          * Spring security eval hasAnyRole expression to check if the spring
          * context contains system code role
          * {@link SpringEvalExpressions#SYSTEM_ROLE}.
          */
         public static final String IS_SYSTEM_CODE = HAS_AUTH_PREFIX + SYSTEM_ROLE + HAS_AUTH_SUFFIX;
+        /**
+         * The spring security eval expression operator {@code or}.
+         */
+        public static final String HAS_AUTH_OR = " or ";
         /**
          * Spring security eval hasAuthority expression to check if spring
          * context contains {@link SpPermission#UPDATE_TARGET} or
@@ -377,16 +387,6 @@ public final class SpPermission {
          */
         public static final String HAS_AUTH_TENANT_CONFIGURATION = HAS_AUTH_PREFIX + TENANT_CONFIGURATION
                 + HAS_AUTH_SUFFIX + HAS_AUTH_OR + IS_SYSTEM_CODE;
-        public static final String HAS_AUTH_AND = " and ";
-        /**
-         * The role which contains the spring security context in case the
-         * system is executing code which is necessary to be privileged.
-         */
-        public static final String SYSTEM_ROLE = "ROLE_SYSTEM_CODE";
-        /**
-         * The spring security eval expression operator {@code or}.
-         */
-        public static final String HAS_AUTH_OR = " or ";
         /**
          * The role which contains in the spring security context in case an
          * controller is authenticated.
