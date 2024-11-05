@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.T
  */
 @Slf4j
 public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends AbstractControllerAuthenticationFilter {
-    
+
     private static final String GATEWAY_SECURITY_TOKEN_AUTH_SCHEME = "GatewayToken ";
     private static final int OFFSET_GATEWAY_TOKEN = GATEWAY_SECURITY_TOKEN_AUTH_SCHEME.length();
 
@@ -33,16 +33,13 @@ public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends Abstra
 
     /**
      * Constructor.
-     * 
-     * @param tenantConfigurationManagement
-     *            the tenant management service to retrieve configuration
-     *            properties
-     * @param tenantAware
-     *            the tenant aware service to get configuration for the specific
-     *            tenant
-     * @param systemSecurityContext
-     *            the system security context to get access to tenant
-     *            configuration
+     *
+     * @param tenantConfigurationManagement the tenant management service to retrieve configuration
+     *         properties
+     * @param tenantAware the tenant aware service to get configuration for the specific
+     *         tenant
+     * @param systemSecurityContext the system security context to get access to tenant
+     *         configuration
      */
     public ControllerPreAuthenticatedGatewaySecurityTokenFilter(
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,

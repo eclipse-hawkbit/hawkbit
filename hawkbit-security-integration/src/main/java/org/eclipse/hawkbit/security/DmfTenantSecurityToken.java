@@ -28,22 +28,20 @@ import lombok.Data;
 public class DmfTenantSecurityToken {
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
-
-    @JsonProperty
-    private String tenant;
     @JsonProperty
     private final Long tenantId;
     @JsonProperty
     private final String controllerId;
     @JsonProperty
     private final Long targetId;
-
+    @JsonProperty
+    private String tenant;
     @JsonProperty
     private Map<String, String> headers;
 
     /**
      * Constructor.
-     * 
+     *
      * @param tenant the tenant for the security token
      * @param tenantId alternative tenant identification by technical ID
      * @param controllerId the ID of the controller for the security token
@@ -61,7 +59,7 @@ public class DmfTenantSecurityToken {
 
     /**
      * Constructor.
-     * 
+     *
      * @param tenant the tenant for the security token
      * @param controllerId the ID of the controller for the security token
      */
@@ -71,7 +69,7 @@ public class DmfTenantSecurityToken {
 
     /**
      * Constructor.
-     * 
+     *
      * @param tenantId the tenant for the security token
      * @param targetId target identification by technical ID
      */
@@ -81,9 +79,8 @@ public class DmfTenantSecurityToken {
 
     /**
      * Gets a header value.
-     * 
-     * @param name
-     *            of header
+     *
+     * @param name of header
      * @return the value
      */
     public String getHeader(final String name) {
@@ -96,10 +93,9 @@ public class DmfTenantSecurityToken {
 
     /**
      * Associates the specified header value with the specified name.
-     * 
+     *
      * @param name of the header
      * @param value of the header
-     * 
      * @return the previous value associated with the <tt>name</tt>, or <tt>null</tt> if there was no mapping for <tt>name</tt>.
      */
     public String putHeader(final String name, final String value) {

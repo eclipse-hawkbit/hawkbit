@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.security;
 /**
  * An anonymous controller filter which is only enabled in case of anonymous
  * access is granted. This should only be for development purposes.
- * 
+ *
  * @see DdiSecurityProperties
  */
 public class ControllerPreAuthenticatedAnonymousFilter implements PreAuthenticationFilter {
@@ -20,12 +20,16 @@ public class ControllerPreAuthenticatedAnonymousFilter implements PreAuthenticat
     private final DdiSecurityProperties ddiSecurityConfiguration;
 
     /**
-     * @param ddiSecurityConfiguration
-     *            the security configuration which holds the configuration if
-     *            anonymous is enabled or not
+     * @param ddiSecurityConfiguration the security configuration which holds the configuration if
+     *         anonymous is enabled or not
      */
     public ControllerPreAuthenticatedAnonymousFilter(final DdiSecurityProperties ddiSecurityConfiguration) {
         this.ddiSecurityConfiguration = ddiSecurityConfiguration;
+    }
+
+    @Override
+    public boolean isEnable(final DmfTenantSecurityToken securityToken) {
+        return ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled();
     }
 
     @Override
@@ -36,10 +40,5 @@ public class ControllerPreAuthenticatedAnonymousFilter implements PreAuthenticat
     @Override
     public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken securityToken) {
         return new HeaderAuthentication(securityToken.getControllerId(), securityToken.getControllerId());
-    }
-
-    @Override
-    public boolean isEnable(final DmfTenantSecurityToken securityToken) {
-        return ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled();
     }
 }

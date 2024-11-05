@@ -28,8 +28,8 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
 
     protected final TenantConfigurationManagement tenantConfigurationManagement;
     protected final TenantAware tenantAware;
-    private final SecurityConfigurationKeyTenantRunner configurationKeyTenantRunner;
     protected final SystemSecurityContext systemSecurityContext;
+    private final SecurityConfigurationKeyTenantRunner configurationKeyTenantRunner;
 
     protected AbstractControllerAuthenticationFilter(final TenantConfigurationManagement systemManagement,
             final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
@@ -39,14 +39,20 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
         this.configurationKeyTenantRunner = new SecurityConfigurationKeyTenantRunner();
     }
 
-    protected abstract String getTenantConfigurationKey();
-
     @Override
     public boolean isEnable(final DmfTenantSecurityToken securityToken) {
         return tenantAware.runAsTenant(securityToken.getTenant(), configurationKeyTenantRunner);
     }
 
+    @Override
+    public Collection<GrantedAuthority> getSuccessfulAuthenticationAuthorities() {
+        return Arrays.asList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE));
+    }
+
+    protected abstract String getTenantConfigurationKey();
+
     private final class SecurityConfigurationKeyTenantRunner implements TenantAware.TenantRunner<Boolean> {
+
         @Override
         public Boolean run() {
 
@@ -55,10 +61,5 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
                     .getConfigurationValue(getTenantConfigurationKey(), Boolean.class).getValue());
         }
 
-    }
-
-    @Override
-    public Collection<GrantedAuthority> getSuccessfulAuthenticationAuthorities() {
-        return Arrays.asList(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE));
     }
 }

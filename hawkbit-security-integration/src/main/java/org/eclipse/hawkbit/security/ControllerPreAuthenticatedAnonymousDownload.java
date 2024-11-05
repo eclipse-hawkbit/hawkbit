@@ -24,16 +24,13 @@ public class ControllerPreAuthenticatedAnonymousDownload extends AbstractControl
 
     /**
      * Constructor.
-     * 
-     * @param tenantConfigurationManagement
-     *            the tenant management service to retrieve configuration
-     *            properties
-     * @param tenantAware
-     *            the tenant aware service to get configuration for the specific
-     *            tenant
-     * @param systemSecurityContext
-     *            the system security context to get access to tenant
-     *            configuration
+     *
+     * @param tenantConfigurationManagement the tenant management service to retrieve configuration
+     *         properties
+     * @param tenantAware the tenant aware service to get configuration for the specific
+     *         tenant
+     * @param systemSecurityContext the system security context to get access to tenant
+     *         configuration
      */
     public ControllerPreAuthenticatedAnonymousDownload(
             final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,

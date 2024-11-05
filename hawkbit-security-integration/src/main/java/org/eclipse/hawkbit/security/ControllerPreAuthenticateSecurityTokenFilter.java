@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.T
  */
 @Slf4j
 public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractControllerAuthenticationFilter {
-    
+
     private static final String TARGET_SECURITY_TOKEN_AUTH_SCHEME = "TargetToken ";
     private static final int OFFSET_TARGET_TOKEN = TARGET_SECURITY_TOKEN_AUTH_SCHEME.length();
 
@@ -35,19 +35,15 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
 
     /**
      * Constructor.
-     * 
-     * @param tenantConfigurationManagement
-     *            the tenant management service to retrieve configuration
-     *            properties
-     * @param controllerManagement
-     *            the controller management to retrieve the specific target
-     *            security token to verify
-     * @param tenantAware
-     *            the tenant aware service to get configuration for the specific
-     *            tenant
-     * @param systemSecurityContext
-     *            the system security context to get access to tenant
-     *            configuration
+     *
+     * @param tenantConfigurationManagement the tenant management service to retrieve configuration
+     *         properties
+     * @param controllerManagement the controller management to retrieve the specific target
+     *         security token to verify
+     * @param tenantAware the tenant aware service to get configuration for the specific
+     *         tenant
+     * @param systemSecurityContext the system security context to get access to tenant
+     *         configuration
      */
     public ControllerPreAuthenticateSecurityTokenFilter(
             final TenantConfigurationManagement tenantConfigurationManagement,
@@ -82,8 +78,13 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
         }, securityToken.getTenant());
 
         return target.map(t -> new HeaderAuthentication(t.getControllerId(),
-                systemSecurityContext.runAsSystemAsTenant(() -> t.getSecurityToken(), securityToken.getTenant())))
+                        systemSecurityContext.runAsSystemAsTenant(() -> t.getSecurityToken(), securityToken.getTenant())))
                 .orElse(null);
+    }
+
+    @Override
+    protected String getTenantConfigurationKey() {
+        return TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED;
     }
 
     private String resolveControllerId(final DmfTenantSecurityToken securityToken) {
@@ -93,10 +94,5 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
         final Optional<Target> foundTarget = systemSecurityContext.runAsSystemAsTenant(
                 () -> controllerManagement.get(securityToken.getTargetId()), securityToken.getTenant());
         return foundTarget.map(Target::getControllerId).orElse(null);
-    }
-
-    @Override
-    protected String getTenantConfigurationKey() {
-        return TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED;
     }
 }
