@@ -26,7 +26,7 @@ public class SecurityTokenGenerator {
     /**
      * Generates a random secure token of {@link #TOKEN_LENGTH} bytes length as
      * hexadecimal string.
-     * 
+     *
      * @return a new generated random alphanumeric string.
      */
     public String generateToken() {

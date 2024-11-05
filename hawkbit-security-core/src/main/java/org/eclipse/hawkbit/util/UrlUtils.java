@@ -9,16 +9,16 @@
  */
 package org.eclipse.hawkbit.util;
 
+import java.nio.charset.StandardCharsets;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.web.util.UriUtils;
 
-import java.nio.charset.StandardCharsets;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UrlUtils {
 
-  public static String decodeUriValue(String value) {
-    return UriUtils.decode(value, StandardCharsets.UTF_8);
-  }
+    public static String decodeUriValue(String value) {
+        return UriUtils.decode(value, StandardCharsets.UTF_8);
+    }
 }

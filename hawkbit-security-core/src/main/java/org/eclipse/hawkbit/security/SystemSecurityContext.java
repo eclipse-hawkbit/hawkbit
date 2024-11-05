@@ -19,8 +19,8 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -43,7 +43,7 @@ public class SystemSecurityContext {
 
     /**
      * Autowired constructor.
-     * 
+     *
      * @param tenantAware the tenant aware bean to retrieve the current tenant
      */
     public SystemSecurityContext(final TenantAware tenantAware) {
@@ -68,13 +68,13 @@ public class SystemSecurityContext {
      * context e.g. if the current security context does not contain the
      * necessary permission it's necessary to execute code as system code to
      * execute necessary methods and functionality.
-     * 
+     *
      * The security context will be switched to the system code and back after
      * the callable is called.
-     * 
+     *
      * The system code is executed for a current tenant by using the
      * {@link TenantAware#getCurrentTenant()}.
-     * 
+     *
      * @param callable the callable to call within the system security context
      * @return the return value of the {@link Callable#call()} method.
      */
@@ -91,13 +91,13 @@ public class SystemSecurityContext {
      * context e.g. if the current security context does not contain the
      * necessary permission it's necessary to execute code as system code to
      * execute necessary methods and functionality.
-     * 
+     *
      * The security context will be switched to the system code and back after
      * the callable is called.
-     * 
+     *
      * The system code is executed for a specific given tenant by using the
      * {@link TenantAware}.
-     * 
+     *
      * @param callable the callable to call within the system security context
      * @param tenant the tenant to act as system code
      * @return the return value of the {@link Callable#call()} method.
@@ -122,10 +122,10 @@ public class SystemSecurityContext {
      * Runs a given {@link Callable} within a system security context, which has
      * the provided {@link GrantedAuthority}s to successfully run the
      * {@link Callable}.
-     * 
+     *
      * The security context will be switched to the a new
      * {@link SecurityContext} and back after the callable is called.
-     * 
+     *
      * @param tenant under which the {@link Callable#call()} must be executed.
      * @param callable to call within the security context
      * @return the return value of the {@link Callable#call()} method.

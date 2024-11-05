@@ -9,6 +9,14 @@
  */
 package org.eclipse.hawkbit.im.authentication;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -20,14 +28,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.util.ObjectUtils;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 /**
  * Authentication provider for configured via spring application properties users.
@@ -128,7 +128,7 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
         private static User clone(final User user) {
             if (user instanceof TenantAwareUser) {
                 return new TenantAwareUser(user.getUsername(), user.getPassword(), user.getAuthorities(),
-                        ((TenantAwareUser)user).getTenant());
+                        ((TenantAwareUser) user).getTenant());
             } else {
                 return new User(user.getUsername(), user.getPassword(), user.getAuthorities());
             }

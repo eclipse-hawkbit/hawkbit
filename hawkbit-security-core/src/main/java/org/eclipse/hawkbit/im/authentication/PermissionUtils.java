@@ -22,12 +22,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public final class PermissionUtils {
 
-	/**
-	 * Returns all authorities.
-	 * 
-	 * @return a list of {@link GrantedAuthority}
-	 */
-	public static List<GrantedAuthority> createAllAuthorityList() {
-		return SpPermission.getAllAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
-	}
+    /**
+     * Returns all authorities.
+     *
+     * @return a list of {@link GrantedAuthority}
+     */
+    public static List<GrantedAuthority> createAllAuthorityList() {
+        return SpPermission.getAllAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+    }
 }

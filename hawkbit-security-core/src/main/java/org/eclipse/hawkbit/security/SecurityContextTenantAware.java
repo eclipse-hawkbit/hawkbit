@@ -54,9 +54,8 @@ public class SecurityContextTenantAware implements ContextAware {
      * Creates the {@link SecurityContextTenantAware} based on the given
      * {@link UserAuthoritiesResolver}.
      *
-     * @param authoritiesResolver
-     *            Resolver to retrieve the authorities for a given user. Must
-     *            not be <code>null</code>..
+     * @param authoritiesResolver Resolver to retrieve the authorities for a given user. Must
+     *         not be <code>null</code>..
      */
     public SecurityContextTenantAware(final UserAuthoritiesResolver authoritiesResolver) {
         this.authoritiesResolver = authoritiesResolver;
@@ -66,11 +65,12 @@ public class SecurityContextTenantAware implements ContextAware {
     /**
      * Creates the {@link SecurityContextTenantAware} based on the given
      * {@link UserAuthoritiesResolver}.
-     * 
+     *
      * @param authoritiesResolver Resolver to retrieve the authorities for a given user. Must not be <code>null</code>.
-     * @param  securityContextSerializer Serializer that is used to serialize / deserialize {@link SecurityContext}s.
+     * @param securityContextSerializer Serializer that is used to serialize / deserialize {@link SecurityContext}s.
      */
-    public SecurityContextTenantAware(final UserAuthoritiesResolver authoritiesResolver, @Nullable final SecurityContextSerializer securityContextSerializer) {
+    public SecurityContextTenantAware(final UserAuthoritiesResolver authoritiesResolver,
+            @Nullable final SecurityContextSerializer securityContextSerializer) {
         this.authoritiesResolver = authoritiesResolver;
         this.securityContextSerializer = securityContextSerializer == null ? SecurityContextSerializer.NOP : securityContextSerializer;
     }
@@ -105,11 +105,6 @@ public class SecurityContextTenantAware implements ContextAware {
     }
 
     @Override
-    public Optional<String> getCurrentContext() {
-        return Optional.ofNullable(SecurityContextHolder.getContext()).map(securityContextSerializer::serialize);
-    }
-
-    @Override
     public <T> T runAsTenant(final String tenant, final TenantRunner<T> tenantRunner) {
         return runInContext(buildUserSecurityContext(tenant, SYSTEM_USER, SYSTEM_AUTHORITIES), tenantRunner::run);
     }
@@ -123,6 +118,11 @@ public class SecurityContextTenantAware implements ContextAware {
                 () -> authoritiesResolver.getUserAuthorities(tenant, username).stream().map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList()));
         return runInContext(buildUserSecurityContext(tenant, username, authorities), tenantRunner::run);
+    }
+
+    @Override
+    public Optional<String> getCurrentContext() {
+        return Optional.ofNullable(SecurityContextHolder.getContext()).map(securityContextSerializer::serialize);
     }
 
     @Override
@@ -153,7 +153,7 @@ public class SecurityContextTenantAware implements ContextAware {
         final SecurityContext currentContext = SecurityContextHolder.getContext();
         SystemSecurityContext.setSystemContext(currentContext);
         try {
-          return MdcHandler.getInstance().callWithAuthRE(tenantRunner::run);
+            return MdcHandler.getInstance().callWithAuthRE(tenantRunner::run);
         } finally {
             SecurityContextHolder.setContext(currentContext);
         }
@@ -189,6 +189,11 @@ public class SecurityContextTenantAware implements ContextAware {
         }
 
         @Override
+        public int hashCode() {
+            return delegate != null ? delegate.hashCode() : -1;
+        }
+
+        @Override
         public boolean equals(final Object another) {
             if (another instanceof Authentication anotherAuthentication) {
                 return Objects.equals(delegate, anotherAuthentication) &&
@@ -202,11 +207,6 @@ public class SecurityContextTenantAware implements ContextAware {
         @Override
         public String toString() {
             return delegate != null ? delegate.toString() : null;
-        }
-
-        @Override
-        public int hashCode() {
-            return delegate != null ? delegate.hashCode() : -1;
         }
 
         @Override
