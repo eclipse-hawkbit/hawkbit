@@ -25,7 +25,8 @@ When starting a rollout, for all targets within this rollout deployment actions 
 of the first group will be started immediately all other deployment actions will be scheduled.
 
 > Due rollouts might include a large number of targets and deployment group, creation as well as starting a rollout
-> might take some time and therefore the creation and starting of an rollout is executed asynchronously. The creation and
+> might take some time and therefore the creation and starting of an rollout is executed asynchronously. The creation
+> and
 > starting progress is reflected by the rollout's status attribute
 
 ### Rollout Creation

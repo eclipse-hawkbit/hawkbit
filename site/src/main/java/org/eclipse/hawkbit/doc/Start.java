@@ -16,7 +16,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * A {@link SpringBootApplication} annotated class with a main method to start.
  * The minimal configuration for the stand alone hawkBit server.
- *
  */
 @SpringBootApplication
 @EnableHawkbitManagedSecurityConfiguration
@@ -27,8 +26,7 @@ public class Start {
     /**
      * Main method to start the spring-boot application.
      *
-     * @param args
-     *            the VM arguments.
+     * @param args the VM arguments.
      */
     // Exception squid:S2095 - Spring boot standard behavior
     @SuppressWarnings({ "squid:S2095" })

@@ -13,7 +13,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.lang.NonNull;
 
-@ConfigurationProperties(prefix="hawkbit.server")
+@ConfigurationProperties(prefix = "hawkbit.server")
 @Data
 public class HawkbitServer {
 

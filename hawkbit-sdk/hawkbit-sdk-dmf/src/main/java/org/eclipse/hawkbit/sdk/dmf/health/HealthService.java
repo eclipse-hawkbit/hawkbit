@@ -9,17 +9,17 @@
  */
 package org.eclipse.hawkbit.sdk.dmf.health;
 
-import org.eclipse.hawkbit.sdk.dmf.DmfTenant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.Message;
-import org.springframework.scheduling.annotation.Scheduled;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import org.eclipse.hawkbit.sdk.dmf.DmfTenant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.Message;
+import org.springframework.scheduling.annotation.Scheduled;
 
 /**
  * Handle all incoming Messages from hawkBit update server.

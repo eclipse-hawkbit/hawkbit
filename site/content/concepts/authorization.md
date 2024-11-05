@@ -4,12 +4,22 @@ parent: Concepts
 weight: 52
 ---
 
-Authorization is handled separately for _Direct Device Integration (DDI) API_ and _Device Management Federation (DMF) API_ (where successful authentication includes full authorization) and _Management API_ and _UI_ which is based on Spring security [authorities](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/im/authentication/SpPermission.java).
+Authorization is handled separately for _Direct Device Integration (DDI) API_ and _Device Management Federation (DMF)
+API_ (where successful authentication includes full authorization) and _Management API_ and _UI_ which is based on
+Spring
+security [authorities](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/im/authentication/SpPermission.java).
 <!--more-->
 
-However, keep in mind that hawkBit does not offer an off the shelf authentication provider to leverage these permissions and the underlying multi user/tenant capabilities of hawkBit but it supports authentication providers offering an OpenID Connect interface. Check out [Spring security documentation](http://projects.spring.io/spring-security/) for further information. In hawkBit [SecurityAutoConfiguration](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-autoconfigure/src/main/java/org/eclipse/hawkbit/autoconfigure/security/SecurityAutoConfiguration.java) is a good starting point for integration.
+However, keep in mind that hawkBit does not offer an off the shelf authentication provider to leverage these permissions
+and the underlying multi user/tenant capabilities of hawkBit but it supports authentication providers offering an OpenID
+Connect interface. Check out [Spring security documentation](http://projects.spring.io/spring-security/) for further
+information. In
+hawkBit [SecurityAutoConfiguration](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-autoconfigure/src/main/java/org/eclipse/hawkbit/autoconfigure/security/SecurityAutoConfiguration.java)
+is a good starting point for integration.
 
-The default implementation is single user/tenant with basic auth and the logged in user is provided with all permissions. Additionally, the application properties may be configured for multiple static users; see [Multiple Users](#multiple-users) for details.
+The default implementation is single user/tenant with basic auth and the logged in user is provided with all
+permissions. Additionally, the application properties may be configured for multiple static users;
+see [Multiple Users](#multiple-users) for details.
 
 ## DDI API
 
@@ -19,13 +29,16 @@ An authenticated target is permitted to:
 - provide feedback to the the server
 - download artifacts that are assigned to it
 
-A target might be permitted to download artifacts without authentication (if enabled, see above). Only the download can be permitted to disable the authentication. This can be used in scenarios where the artifacts itself are e.g. signed and secured.  
+A target might be permitted to download artifacts without authentication (if enabled, see above). Only the download can
+be permitted to disable the authentication. This can be used in scenarios where the artifacts itself are e.g. signed and
+secured.
 
 ## Management API and UI
 
 ### Multiple Users
 
-hawkBit optionally supports configuring multiple static users through the application properties. In this case, the user and password Spring security properties are ignored.
+hawkBit optionally supports configuring multiple static users through the application properties. In this case, the user
+and password Spring security properties are ignored.
 An example configuration is given below.
 
     hawkbit.server.im.users[0].username=admin
@@ -42,46 +55,54 @@ An example configuration is given below.
     hawkbit.server.im.users[1].email=test@tester.com
     hawkbit.server.im.users[1].permissions=READ_TARGET,UPDATE_TARGET,CREATE_TARGET,DELETE_TARGET
 
-A permissions value of `ALL` will provide that user with all possible permissions. Passwords need to be specified with the used password encoder in brackets. In this example, `noop` is used as the plaintext encoder. For production use, it is recommended to use a hash function designed for passwords such as *bcrypt*. See this [blog post](https://spring.io/blog/2017/11/01/spring-security-5-0-0-rc1-released#password-storage-format) for more information on password encoders in Spring Security.
+A permissions value of `ALL` will provide that user with all possible permissions. Passwords need to be specified with
+the used password encoder in brackets. In this example, `noop` is used as the plaintext encoder. For production use, it
+is recommended to use a hash function designed for passwords such as *bcrypt*. See
+this [blog post](https://spring.io/blog/2017/11/01/spring-security-5-0-0-rc1-released#password-storage-format) for more
+information on password encoders in Spring Security.
 
 ### OpenID Connect
 
-hawkbit supports authentication providers which use the OpenID Connect standard, an authentication layer built on top of the OAuth 2.0 protocol.
+hawkbit supports authentication providers which use the OpenID Connect standard, an authentication layer built on top of
+the OAuth 2.0 protocol.
 An example configuration is given below.
 
     spring.security.oauth2.client.registration.oidc.client-id=clientID
     spring.security.oauth2.client.provider.oidc.issuer-uri=https://oidc-provider/issuer-uri
     spring.security.oauth2.client.provider.oidc.jwk-set-uri=https://oidc-provider/jwk-set-uri
 
-Note: at the moment only DEFAULT tenant is supported. By default the resource_access/<client id>/roles claim is mapped to hawkBit permissions. However, by registering a Spring bean _org.eclipse.hawkbit.autoconfigure.security.OidcUserManagementAutoConfiguration.JwtAuthoritiesExtractor_ a custom extractor permission mapper could be registered.
+Note: at the moment only DEFAULT tenant is supported. By default the resource_access/<client id>/roles claim is mapped
+to hawkBit permissions. However, by registering a Spring bean
+_org.eclipse.hawkbit.autoconfigure.security.OidcUserManagementAutoConfiguration.JwtAuthoritiesExtractor_ a custom
+extractor permission mapper could be registered.
 
 ### Delivered Permissions
 
 - READ_/UPDATE_/CREATE_/DELETE_TARGET for:
-  - Target entities including metadata (that includes also the installed and assigned distribution sets)
-  - Target tags
-  - Target actions
-  - Target registration rules
-  - Bulk operations
-  - Target filters
+    - Target entities including metadata (that includes also the installed and assigned distribution sets)
+    - Target tags
+    - Target actions
+    - Target registration rules
+    - Bulk operations
+    - Target filters
 
 - READ_/UPDATE_/CREATE_/DELETE_REPOSITORY for:
-  - Distribution sets
-  - Software Modules
-  - Artifacts
-  - DS tags
+    - Distribution sets
+    - Software Modules
+    - Artifacts
+    - DS tags
 
 - READ_TARGET_SECURITY_TOKEN
-  - Permission to read the target security token. The security token is security concerned and should be protected.
+    - Permission to read the target security token. The security token is security concerned and should be protected.
 
 - DOWNLOAD_REPOSITORY_ARTIFACT
-  - Permission to download artifacts of a software module (Note: READ_REPOSITORY allows only to read the metadata).
+    - Permission to download artifacts of a software module (Note: READ_REPOSITORY allows only to read the metadata).
 
 - TENANT_CONFIGURATION
-  - Permission to administrate the tenant settings.
+    - Permission to administrate the tenant settings.
 
 - READ_/UPDATE_/CREATE_/DELETE_/HANDLE_/APPROVE_ROLLOUT for:
-  - Managing rollouts and provision targets through a rollout.
+    - Managing rollouts and provision targets through a rollout.
 
 ### Permission Matrix for example uses cases that need more than one permission
 
@@ -95,4 +116,6 @@ Note: at the moment only DEFAULT tenant is supported. By default the resource_ac
 
 ## Device Management Federation API
 
-The provided _RabbitMQ_ [vhost and user](https://www.rabbitmq.com/access-control.html) should be provided with the necessary permissions to send messages to hawkBit through the exchange and receive messages from it through the specified queue.
+The provided _RabbitMQ_ [vhost and user](https://www.rabbitmq.com/access-control.html) should be provided with the
+necessary permissions to send messages to hawkBit through the exchange and receive messages from it through the
+specified queue.

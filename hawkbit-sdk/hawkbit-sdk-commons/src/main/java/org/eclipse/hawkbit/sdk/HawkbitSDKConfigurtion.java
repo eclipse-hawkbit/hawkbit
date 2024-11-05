@@ -9,6 +9,10 @@
  */
 package org.eclipse.hawkbit.sdk;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
+
 import feign.Contract;
 import feign.MethodMetadata;
 import feign.RequestInterceptor;
@@ -30,13 +34,9 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.WebConverters;
 import org.springframework.http.MediaType;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
-
 @Slf4j
 @Configuration
-@EnableConfigurationProperties({ HawkbitServer.class, Tenant.class})
+@EnableConfigurationProperties({ HawkbitServer.class, Tenant.class })
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @Import(FeignClientsConfiguration.class)
 @PropertySource("classpath:/hawkbit-sdk-defaults.properties")
@@ -62,7 +62,7 @@ public class HawkbitSDKConfigurtion {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnNotWebApplication
-    @ConditionalOnClass({ WebConverters.class})
+    @ConditionalOnClass({ WebConverters.class })
     public HttpMessageConverterCustomizer webConvertersCustomizerOverrider(WebConverters webConverters) {
         return new WebConvertersCustomizer(webConverters);
     }

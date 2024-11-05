@@ -42,6 +42,11 @@ public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<Rollou
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), rolloutId);
+    }
+
+    @Override
     public boolean equals(final Object o) {
         if (this == o)
             return true;
@@ -51,10 +56,5 @@ public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<Rollou
             return false;
         final AbstractRolloutGroupEvent that = (AbstractRolloutGroupEvent) o;
         return Objects.equals(rolloutId, that.rolloutId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), rolloutId);
     }
 }
