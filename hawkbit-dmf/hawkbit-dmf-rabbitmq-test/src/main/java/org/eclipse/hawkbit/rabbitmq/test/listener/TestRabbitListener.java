@@ -16,9 +16,8 @@ public interface TestRabbitListener {
 
     /**
      * handle incoming message
-     * 
-     * @param message
-     *            the message
+     *
+     * @param message the message
      */
     void handleMessage(Message message);
 }

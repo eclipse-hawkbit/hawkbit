@@ -37,13 +37,13 @@ import org.springframework.test.context.ContextConfiguration;
 @Slf4j
 @RabbitAvailable
 @ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class,
-        TestConfiguration.class})
+        TestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
 // Dirty context is necessary to create a new vhost and recreate all necessary
 // beans after every test class.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTest {
-    
+
     private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
     @Autowired
@@ -93,6 +93,14 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         return rabbitAdmin;
     }
 
+    protected String getVirtualHost() {
+        return connectionFactory.getVirtualHost();
+    }
+
+    protected int getPort() {
+        return connectionFactory.getPort();
+    }
+
     private RabbitTemplate createDmfClient() {
         final RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(new Jackson2JsonMessageConverter());
@@ -100,14 +108,6 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         template.setReplyTimeout(TimeUnit.SECONDS.toMillis(3));
         template.setExchange(getExchange());
         return template;
-    }
-
-    protected String getVirtualHost() {
-        return connectionFactory.getVirtualHost();
-    }
-
-    protected int getPort() {
-        return connectionFactory.getPort();
     }
 
 }

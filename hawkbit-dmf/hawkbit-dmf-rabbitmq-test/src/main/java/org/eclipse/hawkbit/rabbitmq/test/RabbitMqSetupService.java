@@ -16,13 +16,12 @@ import java.util.UUID;
 
 import jakarta.annotation.PreDestroy;
 
+import com.rabbitmq.http.client.Client;
+import com.rabbitmq.http.client.domain.UserPermissions;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.junit.BrokerRunningSupport;
 import org.springframework.util.ObjectUtils;
-
-import com.rabbitmq.http.client.Client;
-import com.rabbitmq.http.client.domain.UserPermissions;
 
 /**
  * Creates and deletes a new virtual host if the rabbit mq management api is
@@ -32,17 +31,12 @@ import com.rabbitmq.http.client.domain.UserPermissions;
 @SuppressWarnings("squid:S2068")
 public class RabbitMqSetupService {
 
-    private Client rabbitmqHttpClient;
-
     private final com.rabbitmq.client.ConnectionFactory connectionFactory;
-
-    private String virtualHost;
-
     private final String hostname;
-
     private final String username;
-
     private final String password;
+    private Client rabbitmqHttpClient;
+    private String virtualHost;
 
     public RabbitMqSetupService() {
 
@@ -51,18 +45,6 @@ public class RabbitMqSetupService {
         hostname = brokerSupport.getHostName();
         username = brokerSupport.getUser();
         password = brokerSupport.getPassword();
-    }
-
-    @SuppressWarnings("java:S112")
-    private synchronized Client getRabbitmqHttpClient() {
-        if (rabbitmqHttpClient == null) {
-            try {
-                rabbitmqHttpClient = new Client(new URL(getHttpApiUrl()), getUsername(), getPassword());
-            } catch (final MalformedURLException | URISyntaxException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return rabbitmqHttpClient;
     }
 
     public String getHttpApiUrl() {
@@ -83,6 +65,18 @@ public class RabbitMqSetupService {
             return;
         }
         getRabbitmqHttpClient().deleteVhost(virtualHost);
+    }
+
+    @SuppressWarnings("java:S112")
+    private synchronized Client getRabbitmqHttpClient() {
+        if (rabbitmqHttpClient == null) {
+            try {
+                rabbitmqHttpClient = new Client(new URL(getHttpApiUrl()), getUsername(), getPassword());
+            } catch (final MalformedURLException | URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return rabbitmqHttpClient;
     }
 
     private String getHostname() {
