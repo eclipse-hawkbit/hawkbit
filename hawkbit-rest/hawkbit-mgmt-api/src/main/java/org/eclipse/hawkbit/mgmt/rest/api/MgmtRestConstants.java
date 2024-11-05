@@ -36,7 +36,6 @@ public final class MgmtRestConstants {
      * The software module URL mapping rest resource.
      */
     public static final String SOFTWAREMODULE_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/softwaremodules";
-    public static final String SYSTEM_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + BASE_SYSTEM_MAPPING;
     /**
      * The target URL mapping rest resource.
      */
@@ -100,6 +99,7 @@ public final class MgmtRestConstants {
      * The base URL mapping for the spring acuator management context path.
      */
     public static final String BASE_SYSTEM_MAPPING = "/system";
+    public static final String SYSTEM_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + BASE_SYSTEM_MAPPING;
     /**
      * URL mapping for system admin operations.
      */
