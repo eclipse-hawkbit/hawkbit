@@ -15,7 +15,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -74,10 +73,10 @@ public class DdiSecurityProperties {
 
         /**
          * Target token authentication. Tokens are defined per target.
-         *
          */
         @Data
         public static class Targettoken {
+
             /**
              * Set to true to enable target token authentication.
              */

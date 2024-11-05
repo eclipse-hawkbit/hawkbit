@@ -16,13 +16,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.util.ReflectionUtils;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Test {@link SpPermission}.
@@ -31,17 +30,17 @@ import io.qameta.allure.Story;
 @Story("Permission Test")
 public final class SpPermissionTest {
 
-	@Test
-	@Description("Verify the get permission function")
-	public void testGetPermissions() {
-		final int allPermission = 20;
-		final Collection<String> allAuthorities = SpPermission.getAllAuthorities();
-		final List<GrantedAuthority> allAuthoritiesList = PermissionUtils.createAllAuthorityList();
-		assertThat(allAuthorities).hasSize(allPermission);
-		assertThat(allAuthoritiesList).hasSize(allPermission);
-		assertThat(allAuthoritiesList.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
-				.containsAll(allAuthorities);
-	}
+    @Test
+    @Description("Verify the get permission function")
+    public void testGetPermissions() {
+        final int allPermission = 20;
+        final Collection<String> allAuthorities = SpPermission.getAllAuthorities();
+        final List<GrantedAuthority> allAuthoritiesList = PermissionUtils.createAllAuthorityList();
+        assertThat(allAuthorities).hasSize(allPermission);
+        assertThat(allAuthoritiesList).hasSize(allPermission);
+        assertThat(allAuthoritiesList.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
+                .containsAll(allAuthorities);
+    }
 
     @Test
     @Description("Try to double check if all permissions works as expected")

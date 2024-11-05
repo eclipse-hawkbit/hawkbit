@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.security;
 
-import org.springframework.security.core.context.SecurityContext;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,6 +16,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Base64;
 import java.util.Objects;
+
+import org.springframework.security.core.context.SecurityContext;
 
 public interface SecurityContextSerializer {
 
@@ -57,7 +57,8 @@ public interface SecurityContextSerializer {
      */
     class Nop implements SecurityContextSerializer {
 
-        private Nop() {}
+        private Nop() {
+        }
 
         @Override
         public String serialize(final SecurityContext securityContext) {
@@ -75,13 +76,14 @@ public interface SecurityContextSerializer {
      */
     class JavaSerialization implements SecurityContextSerializer {
 
-        private JavaSerialization() {}
+        private JavaSerialization() {
+        }
 
         @Override
         public String serialize(final SecurityContext securityContext) {
             Objects.requireNonNull(securityContext);
             try (final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                 final ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+                    final ObjectOutputStream oos = new ObjectOutputStream(baos)) {
                 oos.writeObject(securityContext);
                 oos.flush();
                 return Base64.getEncoder().encodeToString(baos.toByteArray());
@@ -94,7 +96,7 @@ public interface SecurityContextSerializer {
         public SecurityContext deserialize(String securityContextString) {
             Objects.requireNonNull(securityContextString);
             try (final ByteArrayInputStream bais = new ByteArrayInputStream(Base64.getDecoder().decode(securityContextString));
-                 final ObjectInputStream ois = new ObjectInputStream(bais)) {
+                    final ObjectInputStream ois = new ObjectInputStream(bais)) {
                 return (SecurityContext) ois.readObject();
             } catch (final IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);

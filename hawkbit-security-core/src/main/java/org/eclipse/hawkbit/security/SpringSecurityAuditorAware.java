@@ -29,6 +29,19 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
     // So this thread local variable provides option to override explicitly the auditor.
     private static final ThreadLocal<String> AUDITOR_OVERRIDE = new ThreadLocal<>();
 
+    // Always shall be followed by {@link #clearAuditorOverride}
+    public static void setAuditorOverride(final String auditor) {
+        if (auditor == null) {
+            AUDITOR_OVERRIDE.remove();
+        } else {
+            AUDITOR_OVERRIDE.set(auditor);
+        }
+    }
+
+    public static void clearAuditorOverride() {
+        AUDITOR_OVERRIDE.remove();
+    }
+
     @Override
     public Optional<String> getCurrentAuditor() {
         if (AUDITOR_OVERRIDE.get() != null) {
@@ -42,19 +55,6 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
         }
 
         return Optional.ofNullable(getCurrentAuditor(authentication));
-    }
-
-    // Always shall be followed by {@link #clearAuditorOverride}
-    public static void setAuditorOverride(final String auditor) {
-        if (auditor == null) {
-            AUDITOR_OVERRIDE.remove();
-        } else {
-            AUDITOR_OVERRIDE.set(auditor);
-        }
-    }
-
-    public static void clearAuditorOverride() {
-        AUDITOR_OVERRIDE.remove();
     }
 
     protected String getCurrentAuditor(final Authentication authentication) {

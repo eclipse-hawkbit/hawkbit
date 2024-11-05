@@ -39,18 +39,17 @@ public final class IpUtil {
             .compile("([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})(:[0-9]{1,5})?");
     private static final Pattern IPV6_ADDRESS_PATTERN = Pattern.compile("([0-9a-f]{1,4}:){7}([0-9a-f]){1,4}");
     // v6 address with [] amd (optionally) port
-    private static final Pattern IPV6_ADDRESS_WITH_PORT_PATTERN = Pattern.compile("\\[(?<address>([0-9a-f]{1,4}:){7}([0-9a-f]){1,4})](:[0-9]{1,5})?");
+    private static final Pattern IPV6_ADDRESS_WITH_PORT_PATTERN = Pattern.compile(
+            "\\[(?<address>([0-9a-f]{1,4}:){7}([0-9a-f]){1,4})](:[0-9]{1,5})?");
 
     /**
      * Retrieves the string based IP address from a given
      * {@link HttpServletRequest} by either the configured {@link HawkbitSecurityProperties.Clients#getRemoteIpHeader()}
      * (by default X-Forwarded-For) or by the {@link HttpServletRequest#getRemoteAddr()} method.
      *
-     * @param request
-     *            the {@link HttpServletRequest} to determine the IP address
-     *            where this request has been sent from
-     * @param securityProperties
-     *            hawkBit security properties.
+     * @param request the {@link HttpServletRequest} to determine the IP address
+     *         where this request has been sent from
+     * @param securityProperties hawkBit security properties.
      * @return the {@link URI} based IP address from the client which sent the
      *         request
      */
@@ -65,17 +64,85 @@ public final class IpUtil {
      * Retrieves the string based IP address from a given {@link HttpServletRequest} by either the
      * forward header or by the {@link HttpServletRequest#getRemoteAddr()} method.
      *
-     * @param request
-     *            the {@link HttpServletRequest} to determine the IP address
-     *            where this request has been sent from
-     * @param forwardHeader
-     *            the header name containing the IP address e.g. forwarded by a
-     *            proxy {@code x-forwarded-for}
+     * @param request the {@link HttpServletRequest} to determine the IP address
+     *         where this request has been sent from
+     * @param forwardHeader the header name containing the IP address e.g. forwarded by a
+     *         proxy {@code x-forwarded-for}
      * @return the {@link URI} based IP address from the client which sent the
      *         request
      */
     public static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader) {
         return getClientIpFromRequest(request, forwardHeader, true);
+    }
+
+    /**
+     * Create a {@link URI} with scheme and host.
+     *
+     * @param scheme the scheme
+     * @param host the host
+     * @return the {@link URI}
+     * @throws IllegalArgumentException If the given string not parsable
+     */
+    public static URI createUri(final String scheme, final String host) {
+        final boolean isIpV6 = host.indexOf(':') >= 0 && host.indexOf('.') == -1 && host.charAt(0) != '[';
+        if (isIpV6) {
+            return URI.create(scheme + SCHEME_SEPARATOR + "[" + host + "]");
+        }
+        return URI.create(scheme + SCHEME_SEPARATOR + host);
+    }
+
+    /**
+     * Create a {@link URI} with amqp scheme and host.
+     *
+     * @param host the host
+     * @param exchange the exchange will store in the path
+     * @return the {@link URI}
+     * @throws IllegalArgumentException If the given string not parse able
+     */
+    public static URI createAmqpUri(final String host, final String exchange) {
+        return createUri(AMQP_SCHEME, host).resolve("/" + exchange);
+    }
+
+    /**
+     * Create a {@link URI} with http scheme and host.
+     *
+     * @param host the host
+     * @return the {@link URI}
+     * @throws IllegalArgumentException If the given string not parsable
+     */
+    public static URI createHttpUri(final String host) {
+        return createUri(HTTP_SCHEME, host);
+    }
+
+    /**
+     * Check if scheme contains http and uri ist not <code>null</code>.
+     *
+     * @param uri the uri
+     * @return true = is http host false = not
+     */
+    public static boolean isHttpUri(final URI uri) {
+        return uri != null && HTTP_SCHEME.equals(uri.getScheme());
+    }
+
+    /**
+     * Check if host scheme amqp and uri ist not <code>null</code>.
+     *
+     * @param uri the uri
+     * @return true = is http host false = not
+     */
+    public static boolean isAmqpUri(final URI uri) {
+        return uri != null && AMQP_SCHEME.equals(uri.getScheme());
+    }
+
+    /**
+     * Check if the IP address of that {@link URI} is known, i.e. not an AQMP
+     * exchange in DMF case and not HIDDEN_IP in DDI case.
+     *
+     * @param uri the uri
+     * @return <code>true</code> if IP address is actually known by the server
+     */
+    public static boolean isIpAddresKnown(final URI uri) {
+        return uri != null && !(AMQP_SCHEME.equals(uri.getScheme()) || HIDDEN_IP.equals(uri.getHost()));
     }
 
     private static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader,
@@ -111,87 +178,6 @@ public final class IpUtil {
         }
 
         return null;
-    }
-
-    /**
-     * Create a {@link URI} with scheme and host.
-     *
-     * @param scheme
-     *            the scheme
-     * @param host
-     *            the host
-     * @return the {@link URI}
-     * @throws IllegalArgumentException
-     *             If the given string not parsable
-     */
-    public static URI createUri(final String scheme, final String host) {
-        final boolean isIpV6 = host.indexOf(':') >= 0 && host.indexOf('.') == -1 && host.charAt(0) != '[';
-        if (isIpV6) {
-            return URI.create(scheme + SCHEME_SEPARATOR + "[" + host + "]");
-        }
-        return URI.create(scheme + SCHEME_SEPARATOR + host);
-    }
-
-    /**
-     * Create a {@link URI} with amqp scheme and host.
-     *
-     * @param host
-     *            the host
-     * @param exchange
-     *            the exchange will store in the path
-     * @return the {@link URI}
-     * @throws IllegalArgumentException
-     *             If the given string not parse able
-     */
-    public static URI createAmqpUri(final String host, final String exchange) {
-        return createUri(AMQP_SCHEME, host).resolve("/" + exchange);
-    }
-
-    /**
-     * Create a {@link URI} with http scheme and host.
-     *
-     * @param host
-     *            the host
-     * @return the {@link URI}
-     * @throws IllegalArgumentException
-     *             If the given string not parsable
-     */
-    public static URI createHttpUri(final String host) {
-        return createUri(HTTP_SCHEME, host);
-    }
-
-    /**
-     * Check if scheme contains http and uri ist not <code>null</code>.
-     *
-     * @param uri
-     *            the uri
-     * @return true = is http host false = not
-     */
-    public static boolean isHttpUri(final URI uri) {
-        return uri != null && HTTP_SCHEME.equals(uri.getScheme());
-    }
-
-    /**
-     * Check if host scheme amqp and uri ist not <code>null</code>.
-     *
-     * @param uri
-     *            the uri
-     * @return true = is http host false = not
-     */
-    public static boolean isAmqpUri(final URI uri) {
-        return uri != null && AMQP_SCHEME.equals(uri.getScheme());
-    }
-
-    /**
-     * Check if the IP address of that {@link URI} is known, i.e. not an AQMP
-     * exchange in DMF case and not HIDDEN_IP in DDI case.
-     *
-     * @param uri
-     *            the uri
-     * @return <code>true</code> if IP address is actually known by the server
-     */
-    public static boolean isIpAddresKnown(final URI uri) {
-        return uri != null && !(AMQP_SCHEME.equals(uri.getScheme()) || HIDDEN_IP.equals(uri.getHost()));
     }
 
 }

@@ -104,6 +104,8 @@ public class HawkbitSecurityProperties {
     @Data
     public static class Dos {
 
+        private final Filter filter = new Filter();
+        private final Filter uiFilter = new Filter();
         /**
          * Maximum number of status updates that the controller can report for
          * an action (0 to disable).
@@ -175,9 +177,6 @@ public class HawkbitSecurityProperties {
          * Maximum number of distribution set types per target types
          */
         private int maxDistributionSetTypesPerTargetType = 50;
-
-        private final Filter filter = new Filter();
-        private final Filter uiFilter = new Filter();
 
         /**
          * Configuration for hawkBits DOS prevention filter. This is usually an

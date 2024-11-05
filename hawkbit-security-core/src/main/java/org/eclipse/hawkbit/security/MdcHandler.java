@@ -9,10 +9,15 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.io.IOException;
+import java.util.Objects;
+import java.util.concurrent.Callable;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
@@ -24,10 +29,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
-import java.util.Objects;
-import java.util.concurrent.Callable;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MdcHandler {

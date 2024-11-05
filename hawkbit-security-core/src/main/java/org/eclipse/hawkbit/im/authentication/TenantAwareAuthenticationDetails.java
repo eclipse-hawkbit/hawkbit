@@ -31,12 +31,10 @@ public class TenantAwareAuthenticationDetails implements Serializable {
     private final boolean controller;
 
     /**
-     * @param tenant
-     *            the current tenant
-     * @param controller
-     *            boolean flag to indicate if this authenticated token is a
-     *            controller authentication. {@code true} in case of
-     *            authenticated controller otherwise {@code false}
+     * @param tenant the current tenant
+     * @param controller boolean flag to indicate if this authenticated token is a
+     *         controller authentication. {@code true} in case of
+     *         authenticated controller otherwise {@code false}
      */
     public TenantAwareAuthenticationDetails(final String tenant, final boolean controller) {
         this.tenant = tenant;
