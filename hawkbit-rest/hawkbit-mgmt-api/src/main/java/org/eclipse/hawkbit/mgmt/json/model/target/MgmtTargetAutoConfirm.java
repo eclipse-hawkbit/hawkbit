@@ -9,9 +9,10 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.target;
 
+import jakarta.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -19,8 +20,6 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.springframework.hateoas.RepresentationModel;
-
-import jakarta.validation.constraints.NotNull;
 
 /**
  * Response representing the current state of auto-confirmation for a specific target
@@ -33,20 +32,20 @@ import jakarta.validation.constraints.NotNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "active", "initiator", "remark", "activatedAt" })
 @Schema(description = """
-    **_links**:
-    * **deactivate** - Reference link to deactivate auto confirm (present if active)
-    """, example = """
-    {
-      "active" : true,
-      "initiator" : "custom_initiator_value",
-      "remark" : "custom_remark",
-      "activatedAt" : 1682408577704,
-      "_links" : {
-        "deactivate" : {
-          "href" : "https://management-api.host.com/rest/v1/targets/137/autoConfirm/deactivate"
-        }
-      }
-    }""")
+        **_links**:
+        * **deactivate** - Reference link to deactivate auto confirm (present if active)
+        """, example = """
+        {
+          "active" : true,
+          "initiator" : "custom_initiator_value",
+          "remark" : "custom_remark",
+          "activatedAt" : 1682408577704,
+          "_links" : {
+            "deactivate" : {
+              "href" : "https://management-api.host.com/rest/v1/targets/137/autoConfirm/deactivate"
+            }
+          }
+        }""")
 public class MgmtTargetAutoConfirm extends RepresentationModel<MgmtTargetAutoConfirm> {
 
     @NotNull

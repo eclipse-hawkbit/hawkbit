@@ -11,6 +11,10 @@ package org.eclipse.hawkbit.mgmt.json.model.rollout;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,11 +23,6 @@ import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtDynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Model for request containing a rollout body e.g. in a POST request of
@@ -36,33 +35,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(example = """
-    {
-      "distributionSetId" : 6,
-      "targetFilterQuery" : "id==targets-*",
-      "description" : "Rollout for all named targets",
-      "amountGroups" : 5,
-      "type" : "forced",
-      "successCondition" : {
-        "condition" : "THRESHOLD",
-        "expression" : "50"
-      },
-      "successAction" : {
-        "expression" : "",
-        "action" : "NEXTGROUP"
-      },
-      "name" : "exampleRollout",
-      "forcetime" : 1682408571791,
-      "errorAction" : {
-        "expression" : "",
-        "action" : "PAUSE"
-      },
-      "confirmationRequired" : false,
-      "errorCondition" : {
-        "condition" : "THRESHOLD",
-        "expression" : "80"
-      },
-      "startAt" : 1682408570791
-    }""")
+        {
+          "distributionSetId" : 6,
+          "targetFilterQuery" : "id==targets-*",
+          "description" : "Rollout for all named targets",
+          "amountGroups" : 5,
+          "type" : "forced",
+          "successCondition" : {
+            "condition" : "THRESHOLD",
+            "expression" : "50"
+          },
+          "successAction" : {
+            "expression" : "",
+            "action" : "NEXTGROUP"
+          },
+          "name" : "exampleRollout",
+          "forcetime" : 1682408571791,
+          "errorAction" : {
+            "expression" : "",
+            "action" : "PAUSE"
+          },
+          "confirmationRequired" : false,
+          "errorCondition" : {
+            "condition" : "THRESHOLD",
+            "expression" : "80"
+          },
+          "startAt" : 1682408570791
+        }""")
 public class MgmtRolloutRestRequestBodyPost extends AbstractMgmtRolloutConditionsEntity {
 
     @Schema(description = "Target filter query language expression", example = "id==targets-*")
@@ -94,8 +93,8 @@ public class MgmtRolloutRestRequestBodyPost extends AbstractMgmtRolloutCondition
 
     @JsonProperty
     @Schema(description = """
-        (Available with user consent flow active) If the confirmation is required for this rollout. Value will be used
-        if confirmation options are missing in the rollout group definitions. Confirmation is required per default""",
+            (Available with user consent flow active) If the confirmation is required for this rollout. Value will be used
+            if confirmation options are missing in the rollout group definitions. Confirmation is required per default""",
             example = "false")
     private Boolean confirmationRequired;
 

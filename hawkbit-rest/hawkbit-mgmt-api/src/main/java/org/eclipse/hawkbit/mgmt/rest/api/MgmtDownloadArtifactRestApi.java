@@ -30,7 +30,6 @@ public interface MgmtDownloadArtifactRestApi {
      *
      * @param softwareModuleId of the parent SoftwareModule
      * @param artifactId of the related LocalArtifact
-     *
      * @return responseEntity with status ok if successful
      */
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING

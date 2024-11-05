@@ -32,9 +32,8 @@ public class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSe
     /**
      * Constructor for an object that contains a single distribution set
      * assignment
-     * 
-     * @param assignment
-     *            the assignment
+     *
+     * @param assignment the assignment
      */
     public MgmtDistributionSetAssignments(final MgmtDistributionSetAssignment assignment) {
         add(assignment);
@@ -43,9 +42,8 @@ public class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSe
     /**
      * Constructor for an object that contains multiple distribution set
      * assignments
-     * 
-     * @param assignments
-     *            the assignments
+     *
+     * @param assignments the assignments
      */
     public MgmtDistributionSetAssignments(final List<MgmtDistributionSetAssignment> assignments) {
         super(assignments);

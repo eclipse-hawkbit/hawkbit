@@ -27,13 +27,13 @@ public enum MgmtRepresentationMode {
         this.mode = mode;
     }
 
+    public static Optional<MgmtRepresentationMode> fromValue(final String value) {
+        return Arrays.stream(MgmtRepresentationMode.values()).filter(v -> v.mode.equalsIgnoreCase(value)).findFirst();
+    }
+
     @Override
     public String toString() {
         return mode;
-    }
-
-    public static Optional<MgmtRepresentationMode> fromValue(final String value) {
-        return Arrays.stream(MgmtRepresentationMode.values()).filter(v -> v.mode.equalsIgnoreCase(value)).findFirst();
     }
 
 }

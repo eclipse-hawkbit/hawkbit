@@ -12,6 +12,10 @@ package org.eclipse.hawkbit.mgmt.json.model.rollout;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -22,11 +26,6 @@ import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 @Data
 @Accessors(chain = true)
 @EqualsAndHashCode(callSuper = true)
@@ -34,72 +33,72 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = """
-    **_links**:
-    * **start** - Link to start the rollout in sync mode
-    * **pause** - Link to pause a running rollout
-    * **triggerNextGroup** - Link for triggering next rollout group on a running rollout
-    * **resume** - Link to resume a paused rollout
-    * **groups** - Link to retrieve the groups a rollout
-    * **approve** - Link to approve a rollout
-    * **deny** - Link to deny a rollout
-    * **distributionset** - The link to the distribution set
-    """, example = """
-    {
-      "createdBy" : "bumlux",
-      "createdAt" : 1682408568812,
-      "lastModifiedBy" : "bumlux",
-      "lastModifiedAt" : 1682408568812,
-      "name" : "exampleRollout",
-      "description" : "Rollout for all named targets",
-      "targetFilterQuery" : "id==targets-*",
-      "distributionSetId" : 6,
-      "status" : "creating",
-      "totalTargets" : 20,
-      "totalTargetsPerStatus" : {
-        "running" : 0,
-        "notstarted" : 20,
-        "scheduled" : 0,
-        "cancelled" : 0,
-        "finished" : 0,
-        "error" : 0
-      },
-      "totalGroups" : 5,
-      "startAt" : 1682408570791,
-      "forcetime" : 1682408571791,
-      "deleted" : false,
-      "type" : "forced",
-      "_links" : {
-        "start" : {
-          "href" : "https://management-api.host.com/rest/v1/rollouts/6/start"
-        },
-        "pause" : {
-          "href" : "https://management-api.host.com/rest/v1/rollouts/6/pause"
-        },
-        "resume" : {
-          "href" : "https://management-api.host.com/rest/v1/rollouts/6/resume"
-        },
-        "triggerNextGroup" : {
-          "href" : "https://management-api.host.com/rest/v1/rollouts/6/triggerNextGroup"
-        },
-        "approve" : {
-          "href" : "https://management-api.host.com/rest/v1/rollouts/6/approve"
-        },
-        "deny" : {
-          "href" : "https://management-api.host.com/rest/v1/rollouts/6/deny"
-        },
-        "groups" : {
-          "href" : "https://management-api.host.com/rest/v1/rollouts/6/deploygroups?offset=0&limit=50"
-        },
-        "distributionset" : {
-          "href" : "https://management-api.host.com/rest/v1/distributionsets/6",
-          "name" : "bd3a71cb-6c8f-445c-adbb-e221414dcd96:1.0"
-        },
-        "self" : {
-          "href" : "https://management-api.host.com/rest/v1/rollouts/6"
-        }
-      },
-      "id" : 6
-    }""")
+        **_links**:
+        * **start** - Link to start the rollout in sync mode
+        * **pause** - Link to pause a running rollout
+        * **triggerNextGroup** - Link for triggering next rollout group on a running rollout
+        * **resume** - Link to resume a paused rollout
+        * **groups** - Link to retrieve the groups a rollout
+        * **approve** - Link to approve a rollout
+        * **deny** - Link to deny a rollout
+        * **distributionset** - The link to the distribution set
+        """, example = """
+        {
+          "createdBy" : "bumlux",
+          "createdAt" : 1682408568812,
+          "lastModifiedBy" : "bumlux",
+          "lastModifiedAt" : 1682408568812,
+          "name" : "exampleRollout",
+          "description" : "Rollout for all named targets",
+          "targetFilterQuery" : "id==targets-*",
+          "distributionSetId" : 6,
+          "status" : "creating",
+          "totalTargets" : 20,
+          "totalTargetsPerStatus" : {
+            "running" : 0,
+            "notstarted" : 20,
+            "scheduled" : 0,
+            "cancelled" : 0,
+            "finished" : 0,
+            "error" : 0
+          },
+          "totalGroups" : 5,
+          "startAt" : 1682408570791,
+          "forcetime" : 1682408571791,
+          "deleted" : false,
+          "type" : "forced",
+          "_links" : {
+            "start" : {
+              "href" : "https://management-api.host.com/rest/v1/rollouts/6/start"
+            },
+            "pause" : {
+              "href" : "https://management-api.host.com/rest/v1/rollouts/6/pause"
+            },
+            "resume" : {
+              "href" : "https://management-api.host.com/rest/v1/rollouts/6/resume"
+            },
+            "triggerNextGroup" : {
+              "href" : "https://management-api.host.com/rest/v1/rollouts/6/triggerNextGroup"
+            },
+            "approve" : {
+              "href" : "https://management-api.host.com/rest/v1/rollouts/6/approve"
+            },
+            "deny" : {
+              "href" : "https://management-api.host.com/rest/v1/rollouts/6/deny"
+            },
+            "groups" : {
+              "href" : "https://management-api.host.com/rest/v1/rollouts/6/deploygroups?offset=0&limit=50"
+            },
+            "distributionset" : {
+              "href" : "https://management-api.host.com/rest/v1/distributionsets/6",
+              "name" : "bd3a71cb-6c8f-445c-adbb-e221414dcd96:1.0"
+            },
+            "self" : {
+              "href" : "https://management-api.host.com/rest/v1/rollouts/6"
+            }
+          },
+          "id" : 6
+        }""")
 public class MgmtRolloutResponseBody extends MgmtNamedEntity {
 
     @Schema(description = "Target filter query language expression", example = "controllerId==exampleTarget*")

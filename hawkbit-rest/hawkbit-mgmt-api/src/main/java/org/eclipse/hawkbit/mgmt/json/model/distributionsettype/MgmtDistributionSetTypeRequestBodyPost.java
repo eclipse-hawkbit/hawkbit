@@ -11,14 +11,13 @@ package org.eclipse.hawkbit.mgmt.json.model.distributionsettype;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssigment;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Request Body for DistributionSetType POST.

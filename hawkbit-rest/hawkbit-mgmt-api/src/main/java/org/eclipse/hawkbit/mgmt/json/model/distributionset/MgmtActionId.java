@@ -12,8 +12,9 @@ package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import java.util.Objects;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,10 +23,6 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.springframework.hateoas.RepresentationModel;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Representation of an Action Id as a Json Object with link to the Action
@@ -39,14 +36,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = """
-    {
-      "id" : 13,
-      "_links" : {
-         "self" : {
-           "href" : "https://management-api.host.com/rest/v1/targets/target2/actions/13"
-         }
-      }
-    }""")
+        {
+          "id" : 13,
+          "_links" : {
+             "self" : {
+               "href" : "https://management-api.host.com/rest/v1/targets/target2/actions/13"
+             }
+          }
+        }""")
 public class MgmtActionId extends RepresentationModel<MgmtActionId> {
 
     @JsonProperty("id")
@@ -55,7 +52,7 @@ public class MgmtActionId extends RepresentationModel<MgmtActionId> {
 
     /**
      * Constructor
-     * 
+     *
      * @param actionId the actionId
      * @param controllerId the controller Id
      */

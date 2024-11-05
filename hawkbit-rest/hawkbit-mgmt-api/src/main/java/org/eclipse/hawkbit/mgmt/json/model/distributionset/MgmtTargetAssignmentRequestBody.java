@@ -9,14 +9,13 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Request Body of Target for assignment operations (ID only).
@@ -42,7 +41,7 @@ public class MgmtTargetAssignmentRequestBody {
 
     /**
      * JsonCreator Constructor
-     * 
+     *
      * @param id Mandatory ID of the target that should be assigned
      */
     @JsonCreator

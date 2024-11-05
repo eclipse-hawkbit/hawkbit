@@ -9,14 +9,14 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @Feature("Unit Tests - Management API")
 @Story("Serialization")

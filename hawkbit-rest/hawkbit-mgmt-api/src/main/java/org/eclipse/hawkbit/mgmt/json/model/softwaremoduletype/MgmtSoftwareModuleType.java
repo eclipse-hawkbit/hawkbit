@@ -9,12 +9,11 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -32,23 +31,23 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(example = """
-    {
-      "createdBy" : "system",
-      "createdAt" : 1682408579390,
-      "lastModifiedBy" : "bumlux",
-      "lastModifiedAt" : 1682408579394,
-      "name" : "Application",
-      "description" : "Updated description.",
-      "key" : "application",
-      "maxAssignments" : 2147483647,
-      "deleted" : false,
-      "_links" : {
-        "self" : {
-          "href" : "https://management-api.host.com/rest/v1/softwaremoduletypes/4"
-        }
-      },
-      "id" : 4
-    }""")
+        {
+          "createdBy" : "system",
+          "createdAt" : 1682408579390,
+          "lastModifiedBy" : "bumlux",
+          "lastModifiedAt" : 1682408579394,
+          "name" : "Application",
+          "description" : "Updated description.",
+          "key" : "application",
+          "maxAssignments" : 2147483647,
+          "deleted" : false,
+          "_links" : {
+            "self" : {
+              "href" : "https://management-api.host.com/rest/v1/softwaremoduletypes/4"
+            }
+          },
+          "id" : 4
+        }""")
 public class MgmtSoftwareModuleType extends MgmtTypeEntity {
 
     @JsonProperty(value = "id", required = true)

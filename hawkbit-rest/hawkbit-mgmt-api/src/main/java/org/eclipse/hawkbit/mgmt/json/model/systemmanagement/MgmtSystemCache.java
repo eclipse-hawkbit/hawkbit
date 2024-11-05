@@ -30,10 +30,8 @@ public class MgmtSystemCache {
     private final Collection<String> keys;
 
     /**
-     * @param name
-     *            the name of the cache
-     * @param cacheKeys
-     *            the keys which contains in the cache
+     * @param name the name of the cache
+     * @param cacheKeys the keys which contains in the cache
      */
     public MgmtSystemCache(final String name, final Collection<String> cacheKeys) {
         this.name = name;

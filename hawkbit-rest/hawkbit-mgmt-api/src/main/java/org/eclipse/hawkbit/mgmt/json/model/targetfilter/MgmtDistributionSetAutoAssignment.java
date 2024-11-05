@@ -9,14 +9,13 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.targetfilter;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Request Body of DistributionSet Id and Action Type for target filter auto

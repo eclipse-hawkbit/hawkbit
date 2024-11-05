@@ -10,19 +10,15 @@
 
 package org.eclipse.hawkbit.mgmt.json.model.system;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.experimental.Accessors;
-import org.springframework.hateoas.RepresentationModel;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * A json annotated rest model for a tenant configuration value to RESTful API
@@ -57,15 +53,15 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
         * **batch.assignments.enabled** - Boolean, The configuration key 'batch.assignments.enabled' defines if distribution set can be assigned to multiple targets in a single batch message.
         * **implicit.lock.enabled** - Boolean (true by default), The configuration key 'implicit.lock.enabled' defines if distribution set and their software modules shall be implicitly locked when assigned to target, rollout or target filter.
         """, example = """
-    {
-      "value" : "",
-      "global" : true,
-      "_links" : {
-        "self" : {
-          "href" : "https://management-api.host.com/rest/v1/system/configs/authentication.gatewaytoken.key"
-        }
-      }
-    }""")
+        {
+          "value" : "",
+          "global" : true,
+          "_links" : {
+            "self" : {
+              "href" : "https://management-api.host.com/rest/v1/system/configs/authentication.gatewaytoken.key"
+            }
+          }
+        }""")
 public class MgmtSystemTenantConfigurationValue extends RepresentationModel<MgmtSystemTenantConfigurationValue> {
 
     @JsonInclude

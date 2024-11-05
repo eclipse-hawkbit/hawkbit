@@ -29,8 +29,7 @@ public interface MgmtSystemManagementRestApi {
     /**
      * Deletes the tenant data of a given tenant. USE WITH CARE!
      *
-     * @param tenant
-     *            to delete
+     * @param tenant to delete
      * @return HttpStatus.OK
      */
     @DeleteMapping(value = MgmtRestConstants.SYSTEM_ADMIN_MAPPING + "/tenants/{tenant}")

@@ -9,18 +9,16 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.tag;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A json annotated rest model for Tag to RESTful API representation.
@@ -32,27 +30,27 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = """
-    **_links**:
-    * **assignedDistributionSets** - Links to assigned distribution sets
-    """, example = """
-    {
-      "createdBy" : "bumlux",
-      "createdAt" : 1682408561990,
-      "lastModifiedBy" : "bumlux",
-      "lastModifiedAt" : 1682408561992,
-      "name" : "DsTag",
-      "description" : "My name is DsTag",
-      "colour" : "default",
-      "_links" : {
-        "self" : {
-          "href" : "https://management-api.host.com/rest/v1/distributionsettags/6"
-        },
-        "assignedDistributionSets" : {
-          "href" : "https://management-api.host.com/rest/v1/distributionsettags/6/assigned?offset=0&limit=50"
-        }
-      },
-      "id" : 6
-    }""")
+        **_links**:
+        * **assignedDistributionSets** - Links to assigned distribution sets
+        """, example = """
+        {
+          "createdBy" : "bumlux",
+          "createdAt" : 1682408561990,
+          "lastModifiedBy" : "bumlux",
+          "lastModifiedAt" : 1682408561992,
+          "name" : "DsTag",
+          "description" : "My name is DsTag",
+          "colour" : "default",
+          "_links" : {
+            "self" : {
+              "href" : "https://management-api.host.com/rest/v1/distributionsettags/6"
+            },
+            "assignedDistributionSets" : {
+              "href" : "https://management-api.host.com/rest/v1/distributionsettags/6/assigned?offset=0&limit=50"
+            }
+          },
+          "id" : 6
+        }""")
 public class MgmtTag extends MgmtNamedEntity {
 
     @JsonProperty(value = "id", required = true)

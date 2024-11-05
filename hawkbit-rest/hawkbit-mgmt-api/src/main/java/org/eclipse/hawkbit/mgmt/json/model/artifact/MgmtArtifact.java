@@ -9,18 +9,16 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.artifact;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtBaseEntity;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A json annotated rest model for Artifact to RESTful API representation.
@@ -32,31 +30,31 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = """
-    **_links**:
-    * **download** - Download link of the artifact
-    """, example = """
-    {
-      "createdBy" : "bumlux",
-      "createdAt" : 1682408572660,
-      "lastModifiedBy" : "bumlux",
-      "lastModifiedAt" : 1682408572660,
-      "hashes" : {
-        "sha1" : "70686514bec4a9f8188f88d470fb3d7999728fad",
-        "md5" : "f7c5b155e3636406cbc53c61f4692637",
-        "sha256" : "efbbd71e3aa3c1db9ff3905c81f1220adb0e5db3c5438732eedf98ab006ca742"
-      },
-      "providedFilename" : "origFilename",
-      "size" : 11,
-      "_links" : {
-        "self" : {
-          "href" : "https://management-api.host.com/rest/v1/softwaremodules/1/artifacts/1"
-        },
-        "download" : {
-          "href" : "https://management-api.host.com/rest/v1/softwaremodules/1/artifacts/1/download"
-        }
-      },
-      "id" : 1
-    }""")
+        **_links**:
+        * **download** - Download link of the artifact
+        """, example = """
+        {
+          "createdBy" : "bumlux",
+          "createdAt" : 1682408572660,
+          "lastModifiedBy" : "bumlux",
+          "lastModifiedAt" : 1682408572660,
+          "hashes" : {
+            "sha1" : "70686514bec4a9f8188f88d470fb3d7999728fad",
+            "md5" : "f7c5b155e3636406cbc53c61f4692637",
+            "sha256" : "efbbd71e3aa3c1db9ff3905c81f1220adb0e5db3c5438732eedf98ab006ca742"
+          },
+          "providedFilename" : "origFilename",
+          "size" : 11,
+          "_links" : {
+            "self" : {
+              "href" : "https://management-api.host.com/rest/v1/softwaremodules/1/artifacts/1"
+            },
+            "download" : {
+              "href" : "https://management-api.host.com/rest/v1/softwaremodules/1/artifacts/1/download"
+            }
+          },
+          "id" : 1
+        }""")
 public class MgmtArtifact extends MgmtBaseEntity {
 
     @JsonProperty("id")

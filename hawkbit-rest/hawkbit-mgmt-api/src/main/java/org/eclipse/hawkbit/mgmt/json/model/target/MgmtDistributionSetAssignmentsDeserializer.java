@@ -38,7 +38,7 @@ public class MgmtDistributionSetAssignmentsDeserializer extends StdDeserializer<
     protected MgmtDistributionSetAssignmentsDeserializer(final Class<?> vc) {
         super(vc);
     }
-    
+
     @Override
     public MgmtDistributionSetAssignments deserialize(final JsonParser jp, final DeserializationContext ctx)
             throws IOException {

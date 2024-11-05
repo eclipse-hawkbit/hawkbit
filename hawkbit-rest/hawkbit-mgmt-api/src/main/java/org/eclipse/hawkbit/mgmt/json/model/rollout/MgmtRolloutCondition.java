@@ -26,18 +26,17 @@ import lombok.experimental.Accessors;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtRolloutCondition {
 
-    public enum Condition {
-        THRESHOLD
-    }
-
     @Schema(description = "The type of the condition")
     private Condition condition = Condition.THRESHOLD;
     @Schema(description = "The expression according to the condition, e.g. the value of threshold in percentage",
             example = "50")
     private String expression = "100";
-
     public MgmtRolloutCondition(final Condition condition, final String expression) {
         this.condition = condition;
         this.expression = expression;
+    }
+
+    public enum Condition {
+        THRESHOLD
     }
 }
