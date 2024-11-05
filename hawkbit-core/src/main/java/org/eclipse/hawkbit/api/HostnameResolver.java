@@ -13,7 +13,6 @@ import java.net.URL;
 
 /**
  * Resolve to reach the server url.
- *
  */
 @FunctionalInterface
 public interface HostnameResolver {

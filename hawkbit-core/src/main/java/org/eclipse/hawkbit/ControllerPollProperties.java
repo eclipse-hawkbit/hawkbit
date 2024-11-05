@@ -12,19 +12,19 @@ package org.eclipse.hawkbit;
 import java.io.Serializable;
 
 import lombok.Data;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Defines global configuration for the controllers/clients on the provisioning
  * targets/devices.
- * 
+ *
  * Note: many of the controller related properties can be overridden on tenant
  * level.
  */
 @Data
 @ConfigurationProperties(prefix = "hawkbit.controller")
 public class ControllerPollProperties implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     /**

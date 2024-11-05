@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.api;
 
 import lombok.Data;
 
-import java.util.Objects;
-
 /**
  * Container for variables available to the {@link ArtifactUrlHandler}.
  */
@@ -27,18 +25,13 @@ public class URLPlaceholder {
 
     /**
      * Constructor.
-     * 
-     * @param tenant
-     *            of the client
-     * @param tenantId
-     *            of teh tenant
-     * @param controllerId
-     *            of the target
-     * @param targetId
-     *            of the target
-     * @param softwareData
-     *            information about the artifact and software module that can be
-     *            accessed by the URL.
+     *
+     * @param tenant of the client
+     * @param tenantId of teh tenant
+     * @param controllerId of the target
+     * @param targetId of the target
+     * @param softwareData information about the artifact and software module that can be
+     *         accessed by the URL.
      */
     public URLPlaceholder(final String tenant, final Long tenantId, final String controllerId, final Long targetId,
             final SoftwareData softwareData) {
@@ -64,14 +57,10 @@ public class URLPlaceholder {
         /**
          * Constructor.
          *
-         * @param softwareModuleId
-         *            of the module the artifact belongs to
-         * @param filename
-         *            of the artifact
-         * @param artifactId
-         *            of the artifact
-         * @param sha1Hash
-         *            of the artifact
+         * @param softwareModuleId of the module the artifact belongs to
+         * @param filename of the artifact
+         * @param artifactId of the artifact
+         * @param sha1Hash of the artifact
          */
         public SoftwareData(final Long softwareModuleId, final String filename, final Long artifactId,
                 final String sha1Hash) {

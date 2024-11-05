@@ -15,7 +15,6 @@ import java.util.List;
 /**
  * Interface declaration of the {@link ArtifactUrlHandler} which generates the
  * URLs to specific artifacts.
- *
  */
 public interface ArtifactUrlHandler {
 
@@ -23,11 +22,8 @@ public interface ArtifactUrlHandler {
      * Returns a generated download URL for a given artifact parameters for a
      * specific protocol.
      *
-     * @param placeholder
-     *            data for URL generation
-     * @param api
-     *            given protocol that URL needs to support
-     * 
+     * @param placeholder data for URL generation
+     * @param api given protocol that URL needs to support
      * @return an URL for the given artifact parameters in a given protocol
      */
     List<ArtifactUrl> getUrls(URLPlaceholder placeholder, ApiType api);
@@ -36,14 +32,10 @@ public interface ArtifactUrlHandler {
      * Returns a generated download URL for a given artifact parameters for a
      * specific protocol.
      *
-     * @param placeholder
-     *            data for URL generation
-     * @param api
-     *            given protocol that URL needs to support
-     * @param requestUri
-     *            of the request that allows the handler to align the generated
-     *            URL to the original request.
-     * 
+     * @param placeholder data for URL generation
+     * @param api given protocol that URL needs to support
+     * @param requestUri of the request that allows the handler to align the generated
+     *         URL to the original request.
      * @return an URL for the given artifact parameters in a given protocol
      */
     List<ArtifactUrl> getUrls(URLPlaceholder placeholder, ApiType api, URI requestUri);

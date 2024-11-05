@@ -9,13 +9,13 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import lombok.Getter;
-
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
+
+import lombok.Getter;
 
 /**
  * Describing the fields of the Target model which can be used in the REST API

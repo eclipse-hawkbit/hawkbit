@@ -22,8 +22,7 @@ public interface TenancyCacheManager extends CacheManager {
      * tenant key. This is necessary e.g. for retrieving caches not for the
      * current tenant.
      *
-     * @param name
-     *            the name of the cache to retrieve directly
+     * @param name the name of the cache to retrieve directly
      * @return the cache associated with the name without tenancy separation
      */
     Cache getDirectCache(String name);
@@ -32,8 +31,7 @@ public interface TenancyCacheManager extends CacheManager {
      * Evicts all caches for a given tenant. All caches under a certain tenant
      * gets evicted.
      *
-     * @param tenant
-     *            the tenant to evict caches
+     * @param tenant the tenant to evict caches
      */
     void evictCaches(final String tenant);
 }

@@ -38,10 +38,8 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
     /**
      * Constructor.
      *
-     * @param delegate
-     *            the {@link CacheManager} to delegate to.
-     * @param tenantAware
-     *            the tenant aware to retrieve the current tenant
+     * @param delegate the {@link CacheManager} to delegate to.
+     * @param tenantAware the tenant aware to retrieve the current tenant
      */
     public TenantAwareCacheManager(final CacheManager delegate, final TenantAware tenantAware) {
         this.tenantAware = tenantAware;
