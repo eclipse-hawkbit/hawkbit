@@ -11,10 +11,10 @@ package org.eclipse.hawkbit.ui.simple.view;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.annotation.security.RolesAllowed;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -42,50 +42,47 @@ public class ConfigView extends VerticalLayout {
     public ConfigView(final HawkbitMgmtClient hawkbitClient) {
         setSpacing(false);
         final Button saveButton = new Button("Save");
-        hawkbitClient.getTenantManagementRestApi().getTenantConfiguration().getBody().forEach((k, v) -> {
-            Component value = null;
-            if (v.getValue() instanceof String strValue) {
-                TextField tf = new TextField(k, strValue, event -> {
-                    final MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
-                    vre.setValue(event.getValue());
-                    configValue.put(k, vre);
-                });
-                tf.getElement().getStyle().set(WIDTH, PX_300);
-                value = tf;
-            } else if (v.getValue() instanceof Boolean boolValue) {
-                value = new Checkbox(k, boolValue, event -> {
-                    final MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
-                    vre.setValue(event.getValue());
-                    configValue.put(k, vre);
-                });
-            } else if (v.getValue() instanceof Long longValue) {
-                final NumberField nf = new NumberField(k, (double) longValue, event -> {
-                    final MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
-                    vre.setValue(event.getValue());
-                    configValue.put(k, vre);
-                });
-                nf.getElement().getStyle().set(WIDTH, PX_300);
-                value = nf;
-            } else if (v.getValue() instanceof Integer intValue) {
-                final NumberField nf = new NumberField(k, (double) intValue, event -> {
-                    MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
-                    vre.setValue(event.getValue());
-                    configValue.put(k, vre);
-                });
-                nf.getElement().getStyle().set(WIDTH, PX_300);
-                value = nf;
-            } else {
-                log.debug("Unexpected value type: {} -> {} (class: {})", k, v.getValue(),
-                        v.getValue() == null ? "null" : v.getValue().getClass());
-            }
-            if (value != null) {
-                add(value);
-            }
-        });
+        Optional.ofNullable(
+                hawkbitClient.getTenantManagementRestApi().getTenantConfiguration().getBody()).ifPresent(config ->
+                config.forEach((k, v) -> {
+                    if (v.getValue() instanceof String strValue) {
+                        final TextField tf = new TextField(k, strValue, event -> {
+                            final MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
+                            vre.setValue(event.getValue());
+                            configValue.put(k, vre);
+                        });
+                        tf.getElement().getStyle().set(WIDTH, PX_300);
+                        add(tf);
+                    } else if (v.getValue() instanceof Boolean boolValue) {
+                        add(new Checkbox(k, boolValue, event -> {
+                            final MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
+                            vre.setValue(event.getValue());
+                            configValue.put(k, vre);
+                        }));
+                    } else if (v.getValue() instanceof Long longValue) {
+                        final NumberField nf = new NumberField(k, (double) longValue, event -> {
+                            final MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
+                            vre.setValue(event.getValue());
+                            configValue.put(k, vre);
+                        });
+                        nf.getElement().getStyle().set(WIDTH, PX_300);
+                        add(nf);
+                    } else if (v.getValue() instanceof Integer intValue) {
+                        final NumberField nf = new NumberField(k, (double) intValue, event -> {
+                            MgmtSystemTenantConfigurationValueRequest vre = new MgmtSystemTenantConfigurationValueRequest();
+                            vre.setValue(event.getValue());
+                            configValue.put(k, vre);
+                        });
+                        nf.getElement().getStyle().set(WIDTH, PX_300);
+                        add(nf);
+                    } else {
+                        log.debug("Unexpected value type: {} -> {} (class: {})",
+                                k, v.getValue(), v.getValue() == null ? "null" : v.getValue().getClass());
+                    }
+                }));
 
-        saveButton.addClickListener(click ->
-                configValue.forEach((key, value) ->
-                        hawkbitClient.getTenantManagementRestApi().updateTenantConfigurationValue(key, value)));
+        saveButton.addClickListener(click -> configValue.forEach(
+                (key, value) -> hawkbitClient.getTenantManagementRestApi().updateTenantConfigurationValue(key, value)));
         saveButton.addClickShortcut(Key.ENTER);
         add(saveButton);
     }

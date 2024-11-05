@@ -9,11 +9,13 @@
  */
 package org.eclipse.hawkbit.ui.simple.view;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -38,6 +40,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
@@ -75,12 +78,11 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                                 () -> details, DistributionSetDetails::setItem));
                     }
                 },
-                (query, rsqlFilter) -> hawkbitClient.getDistributionSetRestApi()
-                        .getDistributionSets(
-                                query.getOffset(), query.getPageSize(), Constants.NAME_ASC, rsqlFilter)
-                        .getBody()
-                        .getContent()
-                        .stream(),
+                (query, rsqlFilter) -> Optional.ofNullable(
+                                hawkbitClient.getDistributionSetRestApi()
+                                        .getDistributionSets(query.getOffset(), query.getPageSize(), Constants.NAME_ASC, rsqlFilter)
+                                        .getBody())
+                        .stream().flatMap(body -> body.getContent().stream()),
                 e -> new CreateDialog(hawkbitClient).result(),
                 selectionGrid -> {
                     selectionGrid.getSelectedItems().forEach(
@@ -115,17 +117,19 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
         private DistributionSetFilter(final HawkbitMgmtClient hawkbitClient) {
             name.setPlaceholder("<name filter>");
             type.setItemLabelGenerator(MgmtDistributionSetType::getName);
-            type.setItems(
-                    hawkbitClient.getDistributionSetTypeRestApi()
-                            .getDistributionSetTypes(0, 20, Constants.NAME_ASC, null)
-                            .getBody()
-                            .getContent());
+            type.setItems(Optional.ofNullable(
+                            hawkbitClient.getDistributionSetTypeRestApi()
+                                    .getDistributionSetTypes(0, 20, Constants.NAME_ASC, null)
+                                    .getBody())
+                    .map(PagedList::getContent)
+                    .orElseGet(Collections::emptyList));
             tag.setItemLabelGenerator(MgmtTag::getName);
-            tag.setItems(
-                    hawkbitClient.getDistributionSetTagRestApi()
-                            .getDistributionSetTags(0, 20, Constants.NAME_ASC, null)
-                            .getBody()
-                            .getContent());
+            tag.setItems(Optional.ofNullable(
+                            hawkbitClient.getDistributionSetTagRestApi()
+                                    .getDistributionSetTags(0, 20, Constants.NAME_ASC, null)
+                                    .getBody())
+                    .map(PagedList::getContent)
+                    .orElseGet(Collections::emptyList));
         }
 
         @Override
@@ -181,14 +185,12 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             lastModifiedBy.setValue(distributionSet.getLastModifiedBy());
             lastModifiedAt.setValue(new Date(distributionSet.getLastModifiedAt()).toString());
 
-            softwareModulesGrid.setItems(query ->
+            softwareModulesGrid.setItems(query -> Optional.ofNullable(
                     hawkbitClient.getDistributionSetRestApi()
                             .getAssignedSoftwareModules(
                                     distributionSet.getDsId(),
                                     query.getOffset(), query.getLimit(), Constants.NAME_ASC)
-                            .getBody()
-                            .getContent()
-                            .stream());
+                            .getBody()).stream().flatMap(body -> body.getContent().stream()));
             softwareModulesGrid.setSelectionMode(Grid.SelectionMode.NONE);
         }
     }
@@ -211,11 +213,12 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             type = new Select<>(
                     "Type",
                     this::readyToCreate,
-                    hawkbitClient.getDistributionSetTypeRestApi()
-                            .getDistributionSetTypes(0, 30, Constants.NAME_ASC, null)
-                            .getBody()
-                            .getContent()
-                            .toArray(new MgmtDistributionSetType[0]));
+                    Optional.ofNullable(
+                                    hawkbitClient.getDistributionSetTypeRestApi()
+                                            .getDistributionSetTypes(0, 30, Constants.NAME_ASC, null)
+                                            .getBody())
+                            .map(body -> body.getContent().toArray(new MgmtDistributionSetType[0]))
+                            .orElseGet(() -> new MgmtDistributionSetType[0]));
             type.focus();
             type.setWidthFull();
             type.setRequiredIndicatorVisible(true);
@@ -258,16 +261,18 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
         private void addCreateClickListener() {
             create.addClickListener(e -> {
                 close();
-                final long distributionSetId = hawkbitClient.getDistributionSetRestApi()
-                        .createDistributionSets(
-                                List.of((MgmtDistributionSetRequestBodyPost) new MgmtDistributionSetRequestBodyPost()
-                                        .setType(type.getValue().getKey())
-                                        .setName(name.getValue())
-                                        .setVersion(version.getValue())
-                                        .setDescription(description.getValue())
-                                        .setRequiredMigrationStep(requiredMigrationStep.getValue())))
-                        .getBody()
+                final long distributionSetId = Optional.ofNullable(
+                                hawkbitClient.getDistributionSetRestApi()
+                                        .createDistributionSets(
+                                                List.of((MgmtDistributionSetRequestBodyPost) new MgmtDistributionSetRequestBodyPost()
+                                                        .setType(type.getValue().getKey())
+                                                        .setName(name.getValue())
+                                                        .setVersion(version.getValue())
+                                                        .setDescription(description.getValue())
+                                                        .setRequiredMigrationStep(requiredMigrationStep.getValue())))
+                                        .getBody())
                         .stream()
+                        .flatMap(Collection::stream)
                         .findFirst()
                         .orElseThrow()
                         .getDsId();
