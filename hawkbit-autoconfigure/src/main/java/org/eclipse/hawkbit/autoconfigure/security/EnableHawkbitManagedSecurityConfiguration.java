@@ -18,8 +18,6 @@ import org.springframework.context.annotation.Import;
 
 /**
  * Annotation to enable the managed security configuration.
- * 
- *
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

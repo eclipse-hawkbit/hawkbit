@@ -19,8 +19,8 @@ import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties;
 import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties.User;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
-import org.eclipse.hawkbit.security.InMemoryUserAuthoritiesResolver;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+import org.eclipse.hawkbit.security.InMemoryUserAuthoritiesResolver;
 import org.eclipse.hawkbit.security.MdcHandler;
 import org.eclipse.hawkbit.security.SecurityContextSerializer;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
@@ -64,7 +64,6 @@ public class SecurityAutoConfiguration {
      *
      * @param authoritiesResolver The user authorities/roles resolver
      * @param securityContextSerializer The security context serializer.
-     *
      * @return the {@link ContextAware} singleton bean.
      */
     @Bean
@@ -111,8 +110,7 @@ public class SecurityAutoConfiguration {
     }
 
     /**
-     * @param tenantAware
-     *            singleton bean
+     * @param tenantAware singleton bean
      * @return tenantAware {@link SystemSecurityContext}
      */
     @Bean

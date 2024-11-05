@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.autoconfigure.cache;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -21,8 +22,6 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-
-import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * A configuration for configuring the spring {@link CacheManager} for specific

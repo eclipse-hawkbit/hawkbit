@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.autoconfigure.repository.event;
 
 import java.util.concurrent.Executor;
 
+import io.protostuff.ProtostuffIOUtil;
+import io.protostuff.Schema;
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
@@ -35,18 +37,15 @@ import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.messaging.converter.MessageConverter;
 
-import io.protostuff.ProtostuffIOUtil;
-import io.protostuff.Schema;
-
 /**
  * Auto configuration for the event bus.
- *
  */
 @Configuration
 @RemoteApplicationEventScan(basePackages = "org.eclipse.hawkbit.repository.event.remote")
 @PropertySource("classpath:/hawkbit-eventbus-defaults.properties")
 @EnableConfigurationProperties(BusProperties.class)
 public class EventPublisherAutoConfiguration {
+
     /**
      * Server internal event publisher that allows parallel event processing if
      * the event listener is marked as so.
@@ -65,7 +64,7 @@ public class EventPublisherAutoConfiguration {
     /**
      * Bean for creating a singleton instance of the
      * {@link EventPublisherHolder}
-     * 
+     *
      * @return the singleton instance of the {@link EventPublisherHolder}
      */
     @Bean
@@ -94,9 +93,8 @@ public class EventPublisherAutoConfiguration {
 
         /**
          * Constructor.
-         * 
-         * @param tenantAware
-         *            the tenant ware
+         *
+         * @param tenantAware the tenant ware
          */
         protected TenantAwareApplicationEventPublisher(final TenantAware tenantAware,
                 final ApplicationEventFilter applicationEventFilter) {
@@ -136,8 +134,8 @@ public class EventPublisherAutoConfiguration {
     @ConditionalOnBusEnabled
     @ConditionalOnClass({ Schema.class, ProtostuffIOUtil.class })
     protected static class BusProtoStuffAutoConfiguration {
+
         /**
-         * 
          * @return the protostuff io message converter
          */
         @Bean

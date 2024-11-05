@@ -34,8 +34,7 @@ import org.springframework.context.annotation.PropertySource;
 public class PropertyHostnameResolverAutoConfiguration {
 
     /**
-     * @param serverProperties
-     *            to get the servers URL
+     * @param serverProperties to get the servers URL
      * @return the default autoconfigure hostname resolver implementation which
      *         is property based specified by the property {@link #url}
      */
@@ -52,8 +51,7 @@ public class PropertyHostnameResolverAutoConfiguration {
     }
 
     /**
-     * @param urlHandlerProperties
-     *            for bean configuration
+     * @param urlHandlerProperties for bean configuration
      * @return PropertyBasedArtifactUrlHandler bean
      */
     @Bean

@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Import;
 
 /**
  * Auto-Configuration for enabling the DDI REST-Resources.
- *
  */
 @Configuration
 @ConditionalOnClass(DdiApiConfiguration.class)

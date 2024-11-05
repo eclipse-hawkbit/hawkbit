@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Import;
 
 /**
  * Auto-Configuration for enabling the Management API REST-Resources.
- *
  */
 @Configuration
 @ConditionalOnClass(MgmtApiConfiguration.class)
