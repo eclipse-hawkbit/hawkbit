@@ -14,11 +14,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.Test;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Management API")
 @Story("Error Handling")

@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.rest;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.eclipse.hawkbit.rest.exception.ResponseExceptionHandler;
 import org.eclipse.hawkbit.rest.filter.ExcludePathAwareShallowETagFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -20,7 +18,6 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Configuration for Rest api.

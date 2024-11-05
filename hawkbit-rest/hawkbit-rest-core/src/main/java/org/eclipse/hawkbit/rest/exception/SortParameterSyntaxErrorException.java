@@ -14,16 +14,12 @@ import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Exception used by the REST API in case of invalid sort parameter syntax.
- * 
- *
- *
- *
  */
 public class SortParameterSyntaxErrorException extends AbstractServerRtException {
 
     /**
-    * 
-    */
+     *
+     */
     private static final long serialVersionUID = 1L;
 
     /**

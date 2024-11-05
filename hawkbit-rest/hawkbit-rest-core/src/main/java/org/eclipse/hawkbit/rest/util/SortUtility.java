@@ -23,9 +23,6 @@ import org.springframework.data.domain.Sort.Order;
 /**
  * A utility class for parsing query parameters which define the sorting of
  * elements.
- * 
- *
- *
  */
 public final class SortUtility {
 
@@ -47,25 +44,19 @@ public final class SortUtility {
      * of sorting: http://localhost/entity?s=field1:ASC, field2:DESC The fields
      * will be split into the keys of the returned map. The direction of the
      * sorting will be mapped into the {@link Direction} enum.
-     * 
-     * @param enumType
-     *            the class of the enum which the fields in the sort string
-     *            should be related to.
-     * @param <T>
-     *            the type of the enumeration which must be derived from
-     *            {@link RsqlQueryField}
-     * @param sortString
-     *            the string representation of the query parameters. Might be
-     *            {@code null} or an empty string.
+     *
+     * @param enumType the class of the enum which the fields in the sort string
+     *         should be related to.
+     * @param <T> the type of the enumeration which must be derived from
+     *         {@link RsqlQueryField}
+     * @param sortString the string representation of the query parameters. Might be
+     *         {@code null} or an empty string.
      * @return a list which holds the {@link RsqlQueryField} and the specific
      *         {@link Direction} for them as a tuple. Never {@code null}. In
      *         case of no sorting parameters an empty map will be returned.
-     * @throws SortParameterSyntaxErrorException
-     *             if the sorting query parameter is not well-formed
-     * @throws SortParameterUnsupportedFieldException
-     *             if a field name cannot be mapped to the enum type
-     * @throws SortParameterUnsupportedDirectionException
-     *             if the given direction is not "ASC" or "DESC"
+     * @throws SortParameterSyntaxErrorException if the sorting query parameter is not well-formed
+     * @throws SortParameterUnsupportedFieldException if a field name cannot be mapped to the enum type
+     * @throws SortParameterUnsupportedDirectionException if the given direction is not "ASC" or "DESC"
      */
     public static <T extends Enum<T> & RsqlQueryField> List<Order> parse(final Class<T> enumType,
             final String sortString) throws SortParameterSyntaxErrorException {
@@ -95,18 +86,14 @@ public final class SortUtility {
 
     /**
      * Returns the attribute identifier for the given name.
-     * 
-     * @param enumType
-     *            the class of the enum which the fields in the sort string
-     *            should be related to.
-     * @param name
-     *            the name of the enum
-     * @param <T>
-     *            the type of the enumeration which must be derived from
-     *            {@link RsqlQueryField}
+     *
+     * @param enumType the class of the enum which the fields in the sort string
+     *         should be related to.
+     * @param name the name of the enum
+     * @param <T> the type of the enumeration which must be derived from
+     *         {@link RsqlQueryField}
      * @return the corresponding enum
-     * @throws SortParameterUnsupportedFieldException
-     *             if there is no matching enum for the specified name
+     * @throws SortParameterUnsupportedFieldException if there is no matching enum for the specified name
      */
     private static <T extends Enum<T> & RsqlQueryField> T getAttributeIdentifierByName(final Class<T> enumType,
             final String name) {

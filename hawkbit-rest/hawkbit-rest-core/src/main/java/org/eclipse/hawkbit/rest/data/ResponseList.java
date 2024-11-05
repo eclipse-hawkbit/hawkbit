@@ -18,7 +18,7 @@ import org.springframework.hateoas.RepresentationModel;
 
 /**
  * List that extends RepresentationModel to ensure that links in content are in HAL format.
- * 
+ *
  * @param <T> of the response content
  */
 public class ResponseList<T> extends RepresentationModel<ResponseList<T>> implements List<T> {
@@ -26,8 +26,7 @@ public class ResponseList<T> extends RepresentationModel<ResponseList<T>> implem
     private final List<T> content;
 
     /**
-     * @param content
-     *            to delegate
+     * @param content to delegate
      */
     public ResponseList(final List<T> content) {
         this.content = content;
@@ -104,16 +103,6 @@ public class ResponseList<T> extends RepresentationModel<ResponseList<T>> implem
     }
 
     @Override
-    public boolean equals(final Object o) {
-        return content.equals(o);
-    }
-
-    @Override
-    public int hashCode() {
-        return content.hashCode();
-    }
-
-    @Override
     public T get(final int index) {
         return content.get(index);
     }
@@ -161,6 +150,16 @@ public class ResponseList<T> extends RepresentationModel<ResponseList<T>> implem
     @Override
     public String toString() {
         return "ResponseList [content=" + content + "]";
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        return content.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return content.hashCode();
     }
 
 }

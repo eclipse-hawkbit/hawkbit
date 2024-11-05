@@ -9,10 +9,10 @@
  */
 package org.eclipse.hawkbit.rest.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
-
-import java.io.Serial;
 
 /**
  * Exception which is thrown in case an request body is not well formatted and
