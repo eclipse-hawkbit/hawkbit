@@ -39,10 +39,12 @@ import org.springframework.util.AntPathMatcher;
  * based on this information.
  */
 public abstract class AbstractHttpControllerAuthenticationFilter extends AbstractPreAuthenticatedProcessingFilter {
-    
+
+    protected TenantConfigurationManagement tenantConfigurationManagement;
+    protected TenantAware tenantAware;
+    protected SystemSecurityContext systemSecurityContext;
     private static final String TENANT_PLACE_HOLDER = "tenant";
     private static final String CONTROLLER_ID_PLACE_HOLDER = "controllerId";
-
     /**
      * requestURIPathPattern the request URI path pattern in ANT style
      * containing the placeholder key for retrieving the principal from the URI
@@ -50,20 +52,15 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
      */
     private static final String CONTROLLER_REQUEST_ANT_PATTERN = "/{" + TENANT_PLACE_HOLDER + "}/controller/v1" + "/{"
             + CONTROLLER_ID_PLACE_HOLDER + "}/**";
-
     private static final String CONTROLLER_DL_REQUEST_ANT_PATTERN = "/{" + TENANT_PLACE_HOLDER
             + "}/controller/artifacts/v1/**";
-    protected TenantConfigurationManagement tenantConfigurationManagement;
-    protected TenantAware tenantAware;
-    protected SystemSecurityContext systemSecurityContext;
-
     private final AntPathMatcher pathExtractor;
 
     private PreAuthenticationFilter abstractControllerAuthenticationFilter;
 
     /**
      * Constructor for subclasses.
-     * 
+     *
      * @param tenantConfigurationManagement the tenant configuration service
      * @param tenantAware the tenant aware service
      * @param systemSecurityContext the system security context
@@ -106,8 +103,6 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
         }
     }
 
-    protected abstract PreAuthenticationFilter createControllerAuthenticationFilter();
-
     @Override
     protected void successfulAuthentication(final HttpServletRequest request, final HttpServletResponse response,
             final Authentication authResult) throws IOException, ServletException {
@@ -120,11 +115,31 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
         super.successfulAuthentication(request, response, authTokenWithGrantedAuthorities);
     }
 
+    @Override
+    protected Object getPreAuthenticatedPrincipal(final HttpServletRequest request) {
+        final DmfTenantSecurityToken securityToken = createTenantSecurityTokenVariables(request);
+        if (securityToken == null) {
+            return null;
+        }
+        return abstractControllerAuthenticationFilter.getPreAuthenticatedPrincipal(securityToken);
+    }
+
+    @Override
+    protected Object getPreAuthenticatedCredentials(final HttpServletRequest request) {
+        final DmfTenantSecurityToken securityToken = createTenantSecurityTokenVariables(request);
+        if (securityToken == null) {
+            return null;
+        }
+        return abstractControllerAuthenticationFilter.getPreAuthenticatedCredentials(securityToken);
+    }
+
+    protected abstract PreAuthenticationFilter createControllerAuthenticationFilter();
+
     protected abstract Logger log();
 
     /**
      * Extracts tenant and controllerId from the request URI as path variables.
-     * 
+     *
      * @param request the Http request to extract the path variables.
      * @return the extracted {@link DmfTenantSecurityToken} or {@code null} if the
      *         request does not match the pattern and no variables could be
@@ -150,37 +165,19 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
             return createTenantSecurityTokenVariables(request, tenant, "anonymous");
         } else {
             log().trace("request {} does not match the path pattern {}, request gets ignored", requestURI,
-                        CONTROLLER_REQUEST_ANT_PATTERN);
+                    CONTROLLER_REQUEST_ANT_PATTERN);
             return null;
         }
     }
 
     private DmfTenantSecurityToken createTenantSecurityTokenVariables(final HttpServletRequest request,
-                                                                      final String tenant, final String controllerId) {
+            final String tenant, final String controllerId) {
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(tenant, null, controllerId, null);
 
         Collections.list(request.getHeaderNames())
                 .forEach(header -> securityToken.putHeader(header, request.getHeader(header)));
 
         return securityToken;
-    }
-
-    @Override
-    protected Object getPreAuthenticatedPrincipal(final HttpServletRequest request) {
-        final DmfTenantSecurityToken securityToken = createTenantSecurityTokenVariables(request);
-        if (securityToken == null) {
-            return null;
-        }
-        return abstractControllerAuthenticationFilter.getPreAuthenticatedPrincipal(securityToken);
-    }
-
-    @Override
-    protected Object getPreAuthenticatedCredentials(final HttpServletRequest request) {
-        final DmfTenantSecurityToken securityToken = createTenantSecurityTokenVariables(request);
-        if (securityToken == null) {
-            return null;
-        }
-        return abstractControllerAuthenticationFilter.getPreAuthenticatedCredentials(securityToken);
     }
 
 }

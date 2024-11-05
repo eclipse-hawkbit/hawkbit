@@ -20,6 +20,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
@@ -28,9 +30,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * Filter for protection against denial of service attacks. It reduces the
@@ -65,24 +64,17 @@ public class DosFilter extends OncePerRequestFilter {
 
     /**
      * Filter constructor including configuration.
-     * 
-     * @param includeAntPaths
-     *            paths where filter should hit
      *
-     * @param maxRead
-     *            Maximum number of allowed REST read/GET requests per second
-     *            per client
-     * @param maxWrite
-     *            Maximum number of allowed REST write/(PUT/POST/etc.) requests
-     *            per second per client
-     * @param ipDosWhiteListPattern
-     *            {@link Pattern} with with white list of peer IP addresses for
-     *            DOS filter
-     * @param ipBlackListPattern
-     *            {@link Pattern} with black listed IP addresses
-     * @param forwardHeader
-     *            the header containing the forwarded IP address e.g.
-     *            {@code x-forwarded-for}
+     * @param includeAntPaths paths where filter should hit
+     * @param maxRead Maximum number of allowed REST read/GET requests per second
+     *         per client
+     * @param maxWrite Maximum number of allowed REST write/(PUT/POST/etc.) requests
+     *         per second per client
+     * @param ipDosWhiteListPattern {@link Pattern} with with white list of peer IP addresses for
+     *         DOS filter
+     * @param ipBlackListPattern {@link Pattern} with black listed IP addresses
+     * @param forwardHeader the header containing the forwarded IP address e.g.
+     *         {@code x-forwarded-for}
      */
     public DosFilter(final Collection<String> includeAntPaths, final int maxRead, final int maxWrite,
             final String ipDosWhiteListPattern, final String ipBlackListPattern, final String forwardHeader) {
@@ -102,15 +94,6 @@ public class DosFilter extends OncePerRequestFilter {
         } else {
             whitelist = null;
         }
-    }
-
-    private boolean shouldInclude(final HttpServletRequest request) {
-        if (includeAntPaths == null || includeAntPaths.isEmpty()) {
-            return true;
-        }
-
-        return includeAntPaths.stream()
-                .anyMatch(pattern -> antMatcher.match(request.getContextPath() + pattern, request.getRequestURI()));
     }
 
     @Override
@@ -148,6 +131,25 @@ public class DosFilter extends OncePerRequestFilter {
         }
     }
 
+    private static boolean checkIpFails(final String ip) {
+        return ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip);
+    }
+
+    private static boolean handleMissingIpAddress(final HttpServletResponse response) {
+        log.error("Failed to get peer IP address");
+        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return false;
+    }
+
+    private boolean shouldInclude(final HttpServletRequest request) {
+        if (includeAntPaths == null || includeAntPaths.isEmpty()) {
+            return true;
+        }
+
+        return includeAntPaths.stream()
+                .anyMatch(pattern -> antMatcher.match(request.getContextPath() + pattern, request.getRequestURI()));
+    }
+
     /**
      * @return false if the given ip address is on the blacklist and further
      *         processing of the request if forbidden
@@ -159,16 +161,6 @@ public class DosFilter extends OncePerRequestFilter {
             return false;
         }
         return true;
-    }
-
-    private static boolean checkIpFails(final String ip) {
-        return ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip);
-    }
-
-    private static boolean handleMissingIpAddress(final HttpServletResponse response) {
-        log.error("Failed to get peer IP address");
-        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return false;
     }
 
     private boolean handleWriteRequest(final HttpServletResponse response, final String ip) {
