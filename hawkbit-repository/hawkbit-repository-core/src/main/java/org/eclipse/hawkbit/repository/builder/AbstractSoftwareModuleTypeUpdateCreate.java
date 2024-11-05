@@ -12,8 +12,7 @@ package org.eclipse.hawkbit.repository.builder;
 /**
  * Create and update builder DTO.
  *
- * @param <T>
- *            update or create builder interface
+ * @param <T> update or create builder interface
  */
 public abstract class AbstractSoftwareModuleTypeUpdateCreate<T> extends AbstractTypeUpdateCreate<T> {
 

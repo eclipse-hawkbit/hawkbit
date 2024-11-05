@@ -9,56 +9,57 @@
     SPDX-License-Identifier: EPL-2.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-   <modelVersion>4.0.0</modelVersion>
-   <parent>
-      <groupId>org.eclipse.hawkbit</groupId>
-      <artifactId>hawkbit-repository</artifactId>
-      <version>${revision}</version>
-   </parent>
-   <artifactId>hawkbit-repository-core</artifactId>
-   <name>hawkBit :: Repository :: Core Implementation Support</name>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.eclipse.hawkbit</groupId>
+        <artifactId>hawkbit-repository</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <artifactId>hawkbit-repository-core</artifactId>
+    <name>hawkBit :: Repository :: Core Implementation Support</name>
 
-   <dependencies>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-repository-api</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.commons</groupId>
-         <artifactId>commons-lang3</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>com.github.ben-manes.caffeine</groupId>
-         <artifactId>caffeine</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework</groupId>
-         <artifactId>spring-context-support</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>io.protostuff</groupId>
-         <artifactId>protostuff-core</artifactId>
-         <optional>true</optional>
-      </dependency>
-      <dependency>
-         <groupId>io.protostuff</groupId>
-         <artifactId>protostuff-runtime</artifactId>
-         <optional>true</optional>
-      </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-repository-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-runtime</artifactId>
+            <optional>true</optional>
+        </dependency>
 
-      <!-- TEST -->
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-test</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>io.qameta.allure</groupId>
-         <artifactId>allure-junit5</artifactId>
-         <scope>test</scope>
-      </dependency>
-   </dependencies>
+        <!-- TEST -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>

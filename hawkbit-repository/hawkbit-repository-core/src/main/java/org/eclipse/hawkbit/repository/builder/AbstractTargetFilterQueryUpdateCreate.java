@@ -23,10 +23,10 @@ import org.springframework.util.StringUtils;
 /**
  * Create and update builder DTO.
  *
- * @param <T>
- *            update or create builder interface
+ * @param <T> update or create builder interface
  */
 public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractBaseEntityBuilder {
+
     @ValidString
     protected String name;
 
@@ -40,14 +40,13 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
     @Min(Action.WEIGHT_MIN)
     @Max(Action.WEIGHT_MAX)
     protected Integer weight;
-    
+
     protected Boolean confirmationRequired;
 
     /**
      * Set DS ID of the {@link Action} created during auto assignment
-     * 
-     * @param distributionSetId
-     *            of the {@link TargetFilterQuery}
+     *
+     * @param distributionSetId of the {@link TargetFilterQuery}
      * @return this builder
      */
     public T autoAssignDistributionSet(final Long distributionSetId) {
@@ -62,9 +61,8 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
     /**
      * Set {@link ActionType} of the {@link Action} created during auto
      * assignment
-     * 
-     * @param actionType
-     *            of the {@link TargetFilterQuery}
+     *
+     * @param actionType of the {@link TargetFilterQuery}
      * @return this builder
      */
     public T autoAssignActionType(final ActionType actionType) {
@@ -74,9 +72,8 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
 
     /**
      * Set weight of the {@link Action} created during auto assignment
-     * 
-     * @param weight
-     *            of the {@link TargetFilterQuery}
+     *
+     * @param weight of the {@link TargetFilterQuery}
      * @return this builder
      */
     public T autoAssignWeight(final Integer weight) {
@@ -94,9 +91,8 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
 
     /**
      * Set name of the filter
-     * 
-     * @param name
-     *            of the {@link TargetFilterQuery}
+     *
+     * @param name of the {@link TargetFilterQuery}
      * @return this builder
      */
     public T name(final String name) {
@@ -110,9 +106,8 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
 
     /**
      * Set query used by the filter
-     * 
-     * @param query
-     *            of the {@link TargetFilterQuery}
+     *
+     * @param query of the {@link TargetFilterQuery}
      * @return this builder
      */
     public T query(final String query) {
@@ -125,9 +120,8 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
     }
 
     /**
-     * @param confirmationRequired
-     *            if confirmation is required for configured auto assignment
-     *            (considered with confirmation flow active)
+     * @param confirmationRequired if confirmation is required for configured auto assignment
+     *         (considered with confirmation flow active)
      * @return updated builder instance
      */
     public T confirmationRequired(final boolean confirmationRequired) {

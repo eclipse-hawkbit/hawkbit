@@ -17,7 +17,6 @@ import org.springframework.context.annotation.PropertySource;
 
 /**
  * Default configuration that is common to all repository implementations.
- *
  */
 @Configuration
 @EnableConfigurationProperties({ RepositoryProperties.class, ControllerPollProperties.class,

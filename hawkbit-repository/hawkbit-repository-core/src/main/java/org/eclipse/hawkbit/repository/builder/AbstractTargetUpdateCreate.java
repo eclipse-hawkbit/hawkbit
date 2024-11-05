@@ -21,10 +21,10 @@ import org.springframework.util.StringUtils;
 /**
  * Create and update builder DTO.
  *
- * @param <T>
- *            update or create builder interface
+ * @param <T> update or create builder interface
  */
 public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
+
     @ValidString
     protected String controllerId;
 
@@ -37,7 +37,7 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
     protected Long lastTargetQuery;
     protected TargetUpdateStatus status;
 
-    protected  Boolean requestAttributes;
+    protected Boolean requestAttributes;
 
     protected Long targetTypeId;
 

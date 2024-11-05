@@ -10,12 +10,11 @@
 package org.eclipse.hawkbit.repository.builder;
 
 import jakarta.annotation.Nullable;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-
-import java.util.Optional;
 
 /**
  * Update implementation.

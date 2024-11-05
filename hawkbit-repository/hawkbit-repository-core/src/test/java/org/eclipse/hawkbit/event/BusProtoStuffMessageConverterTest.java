@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 
+import io.qameta.allure.Description;
 import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -27,8 +28,6 @@ import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.MessageConversionException;
-
-import io.qameta.allure.Description;
 
 @ExtendWith(MockitoExtension.class)
 public class BusProtoStuffMessageConverterTest {

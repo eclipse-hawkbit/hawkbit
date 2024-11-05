@@ -16,8 +16,7 @@ public class GenericTargetTypeUpdate extends AbstractTargetTypeUpdateCreate<Targ
         implements TargetTypeUpdate {
 
     /**
-     * @param id
-     *          Target type ID
+     * @param id Target type ID
      */
     public GenericTargetTypeUpdate(final Long id) {
         super.id = id;

@@ -9,25 +9,20 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
-import org.eclipse.hawkbit.repository.ValidString;
-import org.springframework.util.StringUtils;
-
 import java.util.Collection;
 import java.util.Optional;
 
 /**
  * Create and update builder DTO.
  *
- * @param <T>
- *            update or create builder interface
+ * @param <T> update or create builder interface
  */
 public abstract class AbstractTargetTypeUpdateCreate<T> extends AbstractTypeUpdateCreate<T> {
 
     protected Collection<Long> compatible;
 
     /**
-     * @param compatible
-     *          list of ID
+     * @param compatible list of ID
      * @return generic type
      */
     public T compatible(final Collection<Long> compatible) {
@@ -36,7 +31,7 @@ public abstract class AbstractTargetTypeUpdateCreate<T> extends AbstractTypeUpda
     }
 
     /**
-     * @return  List of ID
+     * @return List of ID
      */
     public Optional<Collection<Long>> getCompatible() {
         return Optional.ofNullable(compatible);
