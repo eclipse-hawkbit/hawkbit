@@ -40,6 +40,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RestController
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi {
+
     @Autowired
     private SoftwareModuleManagement softwareModuleManagement;
 
@@ -49,11 +50,8 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
     /**
      * Handles the GET request for downloading an artifact.
      *
-     * @param softwareModuleId
-     *            of the parent SoftwareModule
-     * @param artifactId
-     *            of the related Artifact
-     *
+     * @param softwareModuleId of the parent SoftwareModule
+     * @param artifactId of the related Artifact
      * @return responseEntity with status ok if successful
      */
     @Override

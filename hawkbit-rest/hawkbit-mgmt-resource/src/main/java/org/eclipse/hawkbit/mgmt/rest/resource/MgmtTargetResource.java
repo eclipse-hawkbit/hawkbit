@@ -74,7 +74,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 public class MgmtTargetResource implements MgmtTargetRestApi {
-    
+
     private static final String ACTION_TARGET_MISSING_ASSIGN_WARN = "given action ({}) is not assigned to given target ({}).";
 
     private final TargetManagement targetManagement;
@@ -163,14 +163,15 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             this.targetManagement.unassignType(targetId);
             // update target without targetType here ...
             updateTarget = this.targetManagement.update(entityFactory.target().update(targetId)
-                .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
-                .securityToken(targetRest.getSecurityToken()).requestAttributes(targetRest.getRequestAttributes()));
+                    .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
+                    .securityToken(targetRest.getSecurityToken()).requestAttributes(targetRest.getRequestAttributes()));
 
         } else {
             updateTarget = this.targetManagement.update(
-                entityFactory.target().update(targetId).name(targetRest.getName()).description(targetRest.getDescription())
-                    .address(targetRest.getAddress()).targetType(targetRest.getTargetType()).securityToken(targetRest.getSecurityToken())
-                    .requestAttributes(targetRest.getRequestAttributes()));
+                    entityFactory.target().update(targetId).name(targetRest.getName()).description(targetRest.getDescription())
+                            .address(targetRest.getAddress()).targetType(targetRest.getTargetType())
+                            .securityToken(targetRest.getSecurityToken())
+                            .requestAttributes(targetRest.getRequestAttributes()));
 
         }
 
@@ -279,6 +280,26 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
+    public ResponseEntity<MgmtAction> updateAction(@PathVariable("targetId") final String targetId,
+            @PathVariable("actionId") final Long actionId, @RequestBody final MgmtActionRequestBodyPut actionUpdate) {
+
+        Action action = deploymentManagement.findAction(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+        if (!action.getTarget().getControllerId().equals(targetId)) {
+            log.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
+            return ResponseEntity.notFound().build();
+        }
+
+        if (MgmtActionType.FORCED != actionUpdate.getActionType()) {
+            throw new ValidationException("Resource supports only switch to FORCED.");
+        }
+
+        action = deploymentManagement.forceTargetAction(actionId);
+
+        return ResponseEntity.ok(MgmtTargetMapper.toResponseWithLinks(targetId, action));
+    }
+
+    @Override
     public ResponseEntity<PagedList<MgmtActionStatus>> getActionStatusList(
             @PathVariable("targetId") final String targetId, @PathVariable("actionId") final Long actionId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
@@ -370,31 +391,6 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         return ResponseEntity.ok(distributionSetRest);
     }
 
-    private Target findTargetWithExceptionIfNotFound(final String targetId) {
-        return targetManagement.getByControllerID(targetId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, targetId));
-    }
-
-    @Override
-    public ResponseEntity<MgmtAction> updateAction(@PathVariable("targetId") final String targetId,
-            @PathVariable("actionId") final Long actionId, @RequestBody final MgmtActionRequestBodyPut actionUpdate) {
-
-        Action action = deploymentManagement.findAction(actionId)
-                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
-        if (!action.getTarget().getControllerId().equals(targetId)) {
-            log.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
-            return ResponseEntity.notFound().build();
-        }
-
-        if (MgmtActionType.FORCED != actionUpdate.getActionType()) {
-            throw new ValidationException("Resource supports only switch to FORCED.");
-        }
-
-        action = deploymentManagement.forceTargetAction(actionId);
-
-        return ResponseEntity.ok(MgmtTargetMapper.toResponseWithLinks(targetId, action));
-    }
-
     @Override
     public ResponseEntity<List<MgmtTag>> getTags(@PathVariable("targetId") String targetId) {
         final Set<TargetTag> tags = targetManagement.getTagsByControllerId(targetId);
@@ -473,14 +469,19 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private <T, R> R getNullIfEmpty(final T object, final Function<T, R> extractMethod) {
-        return object == null ? null : extractMethod.apply(object);
-    }
-
     @Override
     public ResponseEntity<Void> deactivateAutoConfirm(@PathVariable("targetId") final String targetId) {
         confirmationManagement.deactivateAutoConfirmation(targetId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private Target findTargetWithExceptionIfNotFound(final String targetId) {
+        return targetManagement.getByControllerID(targetId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, targetId));
+    }
+
+    private <T, R> R getNullIfEmpty(final T object, final Function<T, R> extractMethod) {
+        return object == null ? null : extractMethod.apply(object);
     }
 
 }

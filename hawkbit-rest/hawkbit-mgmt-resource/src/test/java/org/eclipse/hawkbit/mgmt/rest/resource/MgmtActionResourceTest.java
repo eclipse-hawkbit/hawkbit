@@ -27,6 +27,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
@@ -39,11 +43,6 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.jupiter.api.Test;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
 import org.springframework.test.web.servlet.ResultActions;
 
 /**
@@ -65,6 +64,18 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     private static final String JSON_PATH_PAGED_LIST_TOTAL = JSON_PATH_ROOT + JSON_PATH_FIELD_TOTAL;
 
     private static final String JSON_PATH_ACTION_ID = JSON_PATH_ROOT + JSON_PATH_FIELD_ID;
+
+    @Test
+    @Description("Handles the GET request of retrieving a specific action.")
+    public void getAction() throws Exception {
+        getAction(false);
+    }
+
+    @Test
+    @Description("Handles the GET request of retrieving a specific action with external reference.")
+    public void getActionExtRef() throws Exception {
+        getAction(true);
+    }
 
     @Test
     @Description("Verifies that actions can be filtered based on action status.")
@@ -214,7 +225,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final String rsqlDsId = "distributionSet.id==" + ds.getId();
 
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlDsName)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
                 .andExpect(jsonPath("size", equalTo(1))).andExpect(jsonPath("content.[0]._links.distributionset.name",
                         equalTo(ds.getName() + ":" + ds.getVersion())));
@@ -258,14 +269,14 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final String rsqlRolloutId = "rollout.id==" + rollout.getId();
 
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlRolloutName)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
                 .andExpect(jsonPath("size", equalTo(1)))
                 .andExpect(jsonPath("content.[0]._links.target.name", equalTo(target1.getName()))).andExpect(jsonPath(
                         "content.[0]._links.distributionset.name", equalTo(ds.getName() + ":" + ds.getVersion())));
 
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlRolloutId)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
                 .andExpect(jsonPath("size", equalTo(1)))
                 .andExpect(jsonPath("content.[0]._links.target.name", equalTo(target1.getName()))).andExpect(jsonPath(
@@ -292,18 +303,6 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         verifyResultsByTargetPropertyFilter(target, ds, rsqlTargetAddress);
     }
 
-    @Step
-    private void verifyResultsByTargetPropertyFilter(final Target target, final DistributionSet ds,
-            final String rsqlTargetFilter) throws Exception {
-        // pending status one result
-        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlTargetFilter)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
-                .andExpect(jsonPath("size", equalTo(1)))
-                .andExpect(jsonPath("content.[0]._links.target.name", equalTo(target.getName()))).andExpect(jsonPath(
-                        "content.[0]._links.distributionset.name", equalTo(ds.getName() + ":" + ds.getVersion())));
-    }
-
     @Test
     @Description("Verifies that all available actions are returned if the complete collection is requested.")
     void getActions() throws Exception {
@@ -316,55 +315,6 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         getActions(true);
     }
 
-    private void getActions(final boolean withExternalRef ) throws Exception {
-        final String knownTargetId = "targetId";
-        final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
-
-        final Action action0 = actions.get(0);
-        final Action action1 = actions.get(1);
-
-        final List<String> externalRefs = new ArrayList<>(2);
-        if (withExternalRef) {
-            externalRefs.add("extRef#123_0");
-            externalRefs.add("extRef#123_1");
-            controllerManagement.updateActionExternalRef(action0.getId(), externalRefs.get(0));
-            controllerManagement.updateActionExternalRef(action1.getId(), externalRefs.get(1));
-        }
-
-        final ResultActions resultActions =
-                mvc.perform(
-                        get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
-                                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING,"ID:ASC"))
-                        .andDo(MockMvcResultPrinter.print())
-                        .andExpect(status().isOk())
-                        // verify action 1
-                        .andExpect(jsonPath("content.[1].id", equalTo(action1.getId().intValue())))
-                        .andExpect(jsonPath("content.[1].type", equalTo("update")))
-                        .andExpect(jsonPath("content.[1].status", equalTo("pending")))
-                        .andExpect(jsonPath("content.[1].detailStatus", equalTo("running")))
-                        .andExpect(jsonPath("content.[1]._links.self.href",
-                                equalTo(generateActionLink(knownTargetId, action1.getId()))))
-
-                        // verify action 0
-                        .andExpect(jsonPath("content.[0].id", equalTo(action0.getId().intValue())))
-                        .andExpect(jsonPath("content.[0].type", equalTo("cancel")))
-                        .andExpect(jsonPath("content.[0].status", equalTo("pending")))
-                        .andExpect(jsonPath("content.[1].detailStatus", equalTo("running")))
-                        .andExpect(jsonPath("content.[0]._links.self.href",
-                                equalTo(generateActionLink(knownTargetId, action0.getId()))))
-
-                        // verify collection properties
-                        .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
-                        .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
-                        .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
-
-        if (withExternalRef) {
-            resultActions
-                    .andExpect(jsonPath("content.[1].externalRef", equalTo(externalRefs.get(1))))
-                    .andExpect(jsonPath("content.[0].externalRef", equalTo(externalRefs.get(0))));
-        }
-    }
-
     @Test
     @Description("Verifies that a full representation of all actions is returned if the collection is requested for representation mode 'full'.")
     void getActionsFullRepresentation() throws Exception {
@@ -374,8 +324,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final Action action0 = actions.get(0);
         final Action action1 = actions.get(1);
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
-                .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
 
                 // verify action 1
@@ -415,47 +365,6 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
-    @Description("Handles the GET request of retrieving a specific action.")
-    public void getAction() throws Exception {
-        getAction(false);
-    }
-
-    @Test
-    @Description("Handles the GET request of retrieving a specific action with external reference.")
-    public void getActionExtRef() throws Exception {
-        getAction(true);
-    }
-
-    private void getAction(final boolean withExternalRef) throws Exception {
-        final String knownTargetId = "targetId";
-        // prepare ds
-        final DistributionSet ds = testdataFactory.createDistributionSet();
-        // rollout
-        final Target target = testdataFactory.createTarget(knownTargetId);
-        final Rollout rollout = testdataFactory.createRolloutByVariables("TestRollout", "TestDesc", 1,
-                "name==" + target.getName(), ds, "50", "5");
-        rolloutManagement.start(rollout.getId());
-        rolloutHandler.handleAll();
-
-        final List<Action> actions = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE)
-                .getContent();
-        assertThat(actions).hasSize(1);
-        final String externalRef = "externalRef#123";
-        if (withExternalRef) {
-            controllerManagement.updateActionExternalRef(actions.get(0).getId(), externalRef);
-        }
-
-        final ResultActions resultActions =
-                mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/{actionId}", actions.get(0).getId()))
-                    .andDo(MockMvcResultPrinter.print())
-                    .andExpect(status().isOk());
-
-        if (withExternalRef) {
-            resultActions.andExpect(jsonPath("externalRef", equalTo(externalRef)));
-        }
-    }
-
-    @Test
     @Description("Verifies paging is respected as expected.")
     void getMultipleActionsWithPagingLimitRequestParameter() throws Exception {
         final String knownTargetId = "targetId";
@@ -464,8 +373,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         // page 1: one entry
         final Action action0 = actions.get(0);
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
-                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")).andDo(MockMvcResultPrinter.print())
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
 
                 // verify action 0
@@ -484,10 +393,10 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         // page 2: one entry
         final Action action1 = actions.get(1);
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1))
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1))
-                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")).andDo(MockMvcResultPrinter.print())
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(1))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(1))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
 
                 // verify action 1
@@ -541,6 +450,110 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
+    private static String generateActionLink(final String targetId, final Long actionId) {
+        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetId + "/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId;
+    }
+
+    private static String generateTargetLink(final String targetId) {
+        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetId;
+    }
+
+    private static String generateDistributionSetLink(final Action action) {
+        return "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/"
+                + action.getDistributionSet().getId();
+    }
+
+    @Step
+    private void verifyResultsByTargetPropertyFilter(final Target target, final DistributionSet ds,
+            final String rsqlTargetFilter) throws Exception {
+        // pending status one result
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlTargetFilter)
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
+                .andExpect(jsonPath("size", equalTo(1)))
+                .andExpect(jsonPath("content.[0]._links.target.name", equalTo(target.getName()))).andExpect(jsonPath(
+                        "content.[0]._links.distributionset.name", equalTo(ds.getName() + ":" + ds.getVersion())));
+    }
+
+    private void getActions(final boolean withExternalRef) throws Exception {
+        final String knownTargetId = "targetId";
+        final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
+
+        final Action action0 = actions.get(0);
+        final Action action1 = actions.get(1);
+
+        final List<String> externalRefs = new ArrayList<>(2);
+        if (withExternalRef) {
+            externalRefs.add("extRef#123_0");
+            externalRefs.add("extRef#123_1");
+            controllerManagement.updateActionExternalRef(action0.getId(), externalRefs.get(0));
+            controllerManagement.updateActionExternalRef(action1.getId(), externalRefs.get(1));
+        }
+
+        final ResultActions resultActions =
+                mvc.perform(
+                                get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)
+                                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
+                        .andDo(MockMvcResultPrinter.print())
+                        .andExpect(status().isOk())
+                        // verify action 1
+                        .andExpect(jsonPath("content.[1].id", equalTo(action1.getId().intValue())))
+                        .andExpect(jsonPath("content.[1].type", equalTo("update")))
+                        .andExpect(jsonPath("content.[1].status", equalTo("pending")))
+                        .andExpect(jsonPath("content.[1].detailStatus", equalTo("running")))
+                        .andExpect(jsonPath("content.[1]._links.self.href",
+                                equalTo(generateActionLink(knownTargetId, action1.getId()))))
+
+                        // verify action 0
+                        .andExpect(jsonPath("content.[0].id", equalTo(action0.getId().intValue())))
+                        .andExpect(jsonPath("content.[0].type", equalTo("cancel")))
+                        .andExpect(jsonPath("content.[0].status", equalTo("pending")))
+                        .andExpect(jsonPath("content.[1].detailStatus", equalTo("running")))
+                        .andExpect(jsonPath("content.[0]._links.self.href",
+                                equalTo(generateActionLink(knownTargetId, action0.getId()))))
+
+                        // verify collection properties
+                        .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
+                        .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
+                        .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
+
+        if (withExternalRef) {
+            resultActions
+                    .andExpect(jsonPath("content.[1].externalRef", equalTo(externalRefs.get(1))))
+                    .andExpect(jsonPath("content.[0].externalRef", equalTo(externalRefs.get(0))));
+        }
+    }
+
+    private void getAction(final boolean withExternalRef) throws Exception {
+        final String knownTargetId = "targetId";
+        // prepare ds
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        // rollout
+        final Target target = testdataFactory.createTarget(knownTargetId);
+        final Rollout rollout = testdataFactory.createRolloutByVariables("TestRollout", "TestDesc", 1,
+                "name==" + target.getName(), ds, "50", "5");
+        rolloutManagement.start(rollout.getId());
+        rolloutHandler.handleAll();
+
+        final List<Action> actions = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE)
+                .getContent();
+        assertThat(actions).hasSize(1);
+        final String externalRef = "externalRef#123";
+        if (withExternalRef) {
+            controllerManagement.updateActionExternalRef(actions.get(0).getId(), externalRef);
+        }
+
+        final ResultActions resultActions =
+                mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/{actionId}", actions.get(0).getId()))
+                        .andDo(MockMvcResultPrinter.print())
+                        .andExpect(status().isOk());
+
+        if (withExternalRef) {
+            resultActions.andExpect(jsonPath("externalRef", equalTo(externalRef)));
+        }
+    }
+
     private List<Action> generateTargetWithTwoUpdatesWithOneOverride(final String knownTargetId) {
         return generateTargetWithTwoUpdatesWithOneOverrideWithMaintenanceWindow(knownTargetId, null, null, null);
     }
@@ -566,7 +579,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         } else {
             final List<Target> updatedTargets = assignDistributionSetWithMaintenanceWindow(one.getId(),
                     target.getControllerId(), schedule, duration, timezone).getAssignedEntity().stream()
-                            .map(Action::getTarget).collect(Collectors.toList());
+                    .map(Action::getTarget).collect(Collectors.toList());
             // 2nd update
             // sleep 10ms to ensure that we can sort by reportedAt
             Awaitility.await().atMost(Duration.ofMillis(100)).atLeast(5, TimeUnit.MILLISECONDS)
@@ -582,19 +595,5 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
 
         assertThat(actions).hasSize(2);
         return actions;
-    }
-
-    private static String generateActionLink(final String targetId, final Long actionId) {
-        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetId + "/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId;
-    }
-
-    private static String generateTargetLink(final String targetId) {
-        return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetId;
-    }
-
-    private static String generateDistributionSetLink(final Action action) {
-        return "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/"
-                + action.getDistributionSet().getId();
     }
 }

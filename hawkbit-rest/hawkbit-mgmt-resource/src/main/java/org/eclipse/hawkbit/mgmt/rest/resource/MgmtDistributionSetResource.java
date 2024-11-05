@@ -52,10 +52,10 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -98,7 +98,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     private final SystemSecurityContext systemSecurityContext;
 
     private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
-    
+
     private final TenantConfigHelper tenantConfigHelper;
 
     MgmtDistributionSetResource(final SoftwareModuleManagement softwareModuleManagement,

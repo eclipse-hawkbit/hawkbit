@@ -28,8 +28,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.jayway.jsonpath.JsonPath;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.assertj.core.util.Lists;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
@@ -45,16 +49,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.jayway.jsonpath.JsonPath;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
-
 /**
  * Test for {@link MgmtDistributionSetTypeResource}.
- *
  */
 @Feature("Component Tests - Management API")
 @Story("Distribution Set Type Resource")
@@ -108,7 +104,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         // descending
         mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "KEY:DESC")).andDo(MockMvcResultPrinter.print())
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "KEY:DESC")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.content.[0].id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.content.[0].name", equalTo("TestName123")))
@@ -123,7 +119,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         // ascending
         mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "KEY:ASC")).andDo(MockMvcResultPrinter.print())
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "KEY:ASC")).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.content.[4].id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.content.[4].name", equalTo("TestName123")))
@@ -149,68 +145,6 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         verifyCreatedDistributionSetTypes(mvcResult);
     }
 
-    @Step
-    private void verifyCreatedDistributionSetTypes(final MvcResult mvcResult) throws UnsupportedEncodingException {
-        final DistributionSetType created1 = distributionSetTypeManagement.getByKey("testKey1").get();
-        final DistributionSetType created2 = distributionSetTypeManagement.getByKey("testKey2").get();
-        final DistributionSetType created3 = distributionSetTypeManagement.getByKey("testKey3").get();
-
-        assertThat(created1.getMandatoryModuleTypes()).containsOnly(osType);
-        assertThat(created1.getOptionalModuleTypes()).containsOnly(runtimeType);
-        assertThat(created2.getOptionalModuleTypes()).containsOnly(osType, runtimeType, appType);
-        assertThat(created3.getMandatoryModuleTypes()).containsOnly(osType, runtimeType);
-
-        assertThat(
-                JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                        .isEqualTo("http://localhost/rest/v1/distributionsettypes/" + created1.getId());
-        assertThat(
-                JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                        .isEqualTo("http://localhost/rest/v1/distributionsettypes/" + created2.getId());
-        assertThat(
-                JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                        .isEqualTo("http://localhost/rest/v1/distributionsettypes/" + created3.getId());
-
-        assertThat(distributionSetTypeManagement.count()).isEqualTo(7);
-    }
-
-    @Step
-    private MvcResult runPostDistributionSetType(final List<DistributionSetType> types) throws Exception {
-        return mvc
-                .perform(post("/rest/v1/distributionsettypes").content(JsonBuilder.distributionSetTypes(types))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("[0].name", equalTo("TestName1")))
-                .andExpect(jsonPath("[0].key", equalTo("testKey1")))
-                .andExpect(jsonPath("[0].description", equalTo("Desc1")))
-                .andExpect(jsonPath("[0].colour", equalTo("col")))
-                .andExpect(jsonPath("[0].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("[1].name", equalTo("TestName2")))
-                .andExpect(jsonPath("[1].key", equalTo("testKey2")))
-                .andExpect(jsonPath("[1].description", equalTo("Desc2")))
-                .andExpect(jsonPath("[1].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("[2].name", equalTo("TestName3")))
-                .andExpect(jsonPath("[2].key", equalTo("testKey3")))
-                .andExpect(jsonPath("[2].description", equalTo("Desc3")))
-                .andExpect(jsonPath("[2].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("[2].createdAt", not(equalTo(0)))).andReturn();
-    }
-
-    @Step
-    private List<DistributionSetType> createTestDistributionSetTestTypes() {
-        assertThat(distributionSetTypeManagement.count()).isEqualTo(DEFAULT_DS_TYPES);
-
-        return Arrays.asList(
-                entityFactory.distributionSetType().create().key("testKey1").name("TestName1").description("Desc1")
-                        .colour("col").mandatory(Arrays.asList(osType.getId()))
-                        .optional(Arrays.asList(runtimeType.getId())).build(),
-                entityFactory.distributionSetType().create().key("testKey2").name("TestName2").description("Desc2")
-                        .colour("col").optional(Arrays.asList(runtimeType.getId(), osType.getId(), appType.getId()))
-                        .build(),
-                entityFactory.distributionSetType().create().key("testKey3").name("TestName3").description("Desc3")
-                        .colour("col").mandatory(Arrays.asList(runtimeType.getId(), osType.getId())).build());
-    }
-
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes POST requests.")
@@ -220,7 +154,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
 
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType.getId())
-                .content("{\"id\":" + osType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                        .content("{\"id\":" + osType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         testType = distributionSetTypeManagement.get(testType.getId()).get();
@@ -239,7 +173,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         assertThat(testType.getOptLockRevision()).isEqualTo(1);
 
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
-                .content("{\"id\":" + osType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                        .content("{\"id\":" + osType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         testType = distributionSetTypeManagement.get(testType.getId()).get();
@@ -272,13 +206,13 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         for (int i = 0; i < moduleTypeIds.size() - 1; ++i) {
             mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
-                    .content("{\"id\":" + moduleTypeIds.get(i) + "}").contentType(MediaType.APPLICATION_JSON))
+                            .content("{\"id\":" + moduleTypeIds.get(i) + "}").contentType(MediaType.APPLICATION_JSON))
                     .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         }
 
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
-                .content("{\"id\":" + moduleTypeIds.get(moduleTypeIds.size() - 1) + "}")
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content("{\"id\":" + moduleTypeIds.get(moduleTypeIds.size() - 1) + "}")
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
@@ -291,13 +225,13 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         for (int i = 0; i < moduleTypeIds.size() - 1; ++i) {
             mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType2.getId())
-                    .content("{\"id\":" + moduleTypeIds.get(i) + "}").contentType(MediaType.APPLICATION_JSON))
+                            .content("{\"id\":" + moduleTypeIds.get(i) + "}").contentType(MediaType.APPLICATION_JSON))
                     .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         }
 
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType2.getId())
-                .content("{\"id\":" + moduleTypeIds.get(moduleTypeIds.size() - 1) + "}")
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content("{\"id\":" + moduleTypeIds.get(moduleTypeIds.size() - 1) + "}")
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
@@ -311,7 +245,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType.getId())
-                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                        .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("[0].name", equalTo(osType.getName())))
                 .andExpect(jsonPath("[0].description", equalTo(osType.getDescription())))
@@ -325,7 +259,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
-                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                        .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("[0].name", equalTo(appType.getName())))
                 .andExpect(jsonPath("[0].description", equalTo(appType.getDescription())))
@@ -340,7 +274,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes/{smtId}", testType.getId(),
-                osType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        osType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$.id", equalTo(osType.getId().intValue())))
                 .andExpect(jsonPath("$.name", equalTo(osType.getName())))
                 .andExpect(jsonPath("$.description", equalTo(osType.getDescription())))
@@ -350,16 +284,6 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(osType.getLastModifiedAt())));
     }
 
-    private DistributionSetType generateTestType() {
-        final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
-                .create().key("test123").name("TestName123").description("Desc123").colour("col")
-                .mandatory(Arrays.asList(osType.getId())).optional(Arrays.asList(appType.getId())));
-        assertThat(testType.getOptLockRevision()).isEqualTo(1);
-        assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
-        assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
-        return testType;
-    }
-
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes/{ID} GET requests.")
@@ -367,7 +291,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes/{smtId}", testType.getId(),
-                appType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        appType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$.id", equalTo(appType.getId().intValue())))
                 .andExpect(jsonPath("$.name", equalTo(appType.getName())))
                 .andExpect(jsonPath("$.description", equalTo(appType.getDescription())))
@@ -384,7 +308,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         DistributionSetType testType = generateTestType();
 
         mvc.perform(delete("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes/{smtId}", testType.getId(),
-                osType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        osType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         testType = distributionSetTypeManagement.get(testType.getId()).get();
@@ -401,7 +325,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         DistributionSetType testType = generateTestType();
 
         mvc.perform(delete("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes/{smtId}", testType.getId(),
-                appType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        appType.getId()).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         testType = distributionSetTypeManagement.get(testType.getId()).get();
@@ -501,7 +425,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .put("name", "nameShouldNotBeChanged").toString();
 
         mvc.perform(put("/rest/v1/distributionsettypes/{smId}", testType.getId()).content(body)
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.description", equalTo("foobardesc")))
                 .andExpect(jsonPath("$.colour", equalTo("updatedColour")))
@@ -533,7 +457,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         final String body = new JSONObject().put("id", testType.getId()).put("deleted", true).toString();
 
         mvc.perform(put("/rest/v1/distributionsettypes/{dstId}", testType.getId()).content(body)
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.deleted", equalTo(false)));
     }
@@ -558,7 +482,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         final int types = DEFAULT_DS_TYPES;
         final int limitSize = 1;
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(types)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(limitSize)))
@@ -573,8 +497,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         final int offsetParam = 2;
         final int expectedSize = types - offsetParam;
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(types)))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(types)))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(types)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(expectedSize)))
@@ -607,17 +531,17 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
         mvc.perform(get(
-                "/rest/v1/distributionsettypes/" + standardDsType.getId() + "/mandatorymoduletypes/" + osType.getId()))
+                        "/rest/v1/distributionsettypes/" + standardDsType.getId() + "/mandatorymoduletypes/" + osType.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         mvc.perform(get("/rest/v1/distributionsettypes/" + standardDsType.getId() + "/mandatorymoduletypes/"
                 + testSmType.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
         mvc.perform(get(
-                "/rest/v1/distributionsettypes/" + standardDsType.getId() + "/optionalmoduletypes/" + osType.getId()))
+                        "/rest/v1/distributionsettypes/" + standardDsType.getId() + "/optionalmoduletypes/" + osType.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
         mvc.perform(get(
-                "/rest/v1/distributionsettypes/" + standardDsType.getId() + "/optionalmoduletypes/" + appType.getId()))
+                        "/rest/v1/distributionsettypes/" + standardDsType.getId() + "/optionalmoduletypes/" + appType.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
 
         mvc.perform(get("/rest/v1/distributionsettypes/" + standardDsType.getId() + "/optionalmoduletypes/"
@@ -630,8 +554,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .optional(Collections.emptyList()).build();
 
         mvc.perform(post("/rest/v1/distributionsettypes")
-                .content(JsonBuilder.distributionSetTypes(Arrays.asList(testNewType)))
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)).andDo(MockMvcResultPrinter.print())
+                        .content(JsonBuilder.distributionSetTypes(Arrays.asList(testNewType)))
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnsupportedMediaType());
 
         // bad request - no content
@@ -640,19 +564,19 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         // bad request - bad content
         mvc.perform(post("/rest/v1/distributionsettypes").content("sdfjsdlkjfskdjf".getBytes())
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         // Missing mandatory field name
         mvc.perform(post("/rest/v1/distributionsettypes").content("[{\"description\":\"Desc123\",\"key\":\"test123\"}]")
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         final DistributionSetType toLongName = entityFactory.distributionSetType().create().key("test123")
                 .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1)).build();
         mvc.perform(post("/rest/v1/distributionsettypes")
-                .content(JsonBuilder.distributionSetTypes(Arrays.asList(toLongName)))
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content(JsonBuilder.distributionSetTypes(Arrays.asList(toLongName)))
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         // not allowed methods
@@ -665,7 +589,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         mvc.perform(put("/rest/v1/distributionsettypes/" + standardDsType.getId() + "/mandatorymoduletypes"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
         mvc.perform(put(
-                "/rest/v1/distributionsettypes/" + standardDsType.getId() + "/optionalmoduletypes/" + osType.getId()))
+                        "/rest/v1/distributionsettypes/" + standardDsType.getId() + "/optionalmoduletypes/" + osType.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
     }
 
@@ -683,6 +607,78 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andExpect(status().isOk()).andExpect(jsonPath("size", equalTo(2)))
                 .andExpect(jsonPath("total", equalTo(2))).andExpect(jsonPath("content[0].name", equalTo("TestName123")))
                 .andExpect(jsonPath("content[1].name", equalTo("TestName1234")));
+    }
+
+    @Step
+    private void verifyCreatedDistributionSetTypes(final MvcResult mvcResult) throws UnsupportedEncodingException {
+        final DistributionSetType created1 = distributionSetTypeManagement.getByKey("testKey1").get();
+        final DistributionSetType created2 = distributionSetTypeManagement.getByKey("testKey2").get();
+        final DistributionSetType created3 = distributionSetTypeManagement.getByKey("testKey3").get();
+
+        assertThat(created1.getMandatoryModuleTypes()).containsOnly(osType);
+        assertThat(created1.getOptionalModuleTypes()).containsOnly(runtimeType);
+        assertThat(created2.getOptionalModuleTypes()).containsOnly(osType, runtimeType, appType);
+        assertThat(created3.getMandatoryModuleTypes()).containsOnly(osType, runtimeType);
+
+        assertThat(
+                JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+                .isEqualTo("http://localhost/rest/v1/distributionsettypes/" + created1.getId());
+        assertThat(
+                JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+                .isEqualTo("http://localhost/rest/v1/distributionsettypes/" + created2.getId());
+        assertThat(
+                JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+                .isEqualTo("http://localhost/rest/v1/distributionsettypes/" + created3.getId());
+
+        assertThat(distributionSetTypeManagement.count()).isEqualTo(7);
+    }
+
+    @Step
+    private MvcResult runPostDistributionSetType(final List<DistributionSetType> types) throws Exception {
+        return mvc
+                .perform(post("/rest/v1/distributionsettypes").content(JsonBuilder.distributionSetTypes(types))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("[0].name", equalTo("TestName1")))
+                .andExpect(jsonPath("[0].key", equalTo("testKey1")))
+                .andExpect(jsonPath("[0].description", equalTo("Desc1")))
+                .andExpect(jsonPath("[0].colour", equalTo("col")))
+                .andExpect(jsonPath("[0].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("[1].name", equalTo("TestName2")))
+                .andExpect(jsonPath("[1].key", equalTo("testKey2")))
+                .andExpect(jsonPath("[1].description", equalTo("Desc2")))
+                .andExpect(jsonPath("[1].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("[2].name", equalTo("TestName3")))
+                .andExpect(jsonPath("[2].key", equalTo("testKey3")))
+                .andExpect(jsonPath("[2].description", equalTo("Desc3")))
+                .andExpect(jsonPath("[2].createdBy", equalTo("uploadTester")))
+                .andExpect(jsonPath("[2].createdAt", not(equalTo(0)))).andReturn();
+    }
+
+    @Step
+    private List<DistributionSetType> createTestDistributionSetTestTypes() {
+        assertThat(distributionSetTypeManagement.count()).isEqualTo(DEFAULT_DS_TYPES);
+
+        return Arrays.asList(
+                entityFactory.distributionSetType().create().key("testKey1").name("TestName1").description("Desc1")
+                        .colour("col").mandatory(Arrays.asList(osType.getId()))
+                        .optional(Arrays.asList(runtimeType.getId())).build(),
+                entityFactory.distributionSetType().create().key("testKey2").name("TestName2").description("Desc2")
+                        .colour("col").optional(Arrays.asList(runtimeType.getId(), osType.getId(), appType.getId()))
+                        .build(),
+                entityFactory.distributionSetType().create().key("testKey3").name("TestName3").description("Desc3")
+                        .colour("col").mandatory(Arrays.asList(runtimeType.getId(), osType.getId())).build());
+    }
+
+    private DistributionSetType generateTestType() {
+        final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
+                .create().key("test123").name("TestName123").description("Desc123").colour("col")
+                .mandatory(Arrays.asList(osType.getId())).optional(Arrays.asList(appType.getId())));
+        assertThat(testType.getOptLockRevision()).isEqualTo(1);
+        assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
+        assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
+        return testType;
     }
 
     private void createSoftwareModulesAlphabetical(final int amount) {

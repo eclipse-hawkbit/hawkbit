@@ -54,32 +54,6 @@ public final class MgmtDistributionSetMapper {
         return sets.stream().map(dsRest -> fromRequest(dsRest, entityFactory)).collect(Collectors.toList());
     }
 
-    /**
-     * {@link MgmtDistributionSetRequestBodyPost} to {@link DistributionSet}.
-     *
-     * @param dsRest to convert
-     * @return converted {@link DistributionSet}
-     */
-    private static DistributionSetCreate fromRequest(final MgmtDistributionSetRequestBodyPost dsRest,
-            final EntityFactory entityFactory) {
-        final List<Long> modules = new ArrayList<>();
-        if (dsRest.getOs() != null) {
-            modules.add(dsRest.getOs().getId());
-        }
-        if (dsRest.getApplication() != null) {
-            modules.add(dsRest.getApplication().getId());
-        }
-        if (dsRest.getRuntime() != null) {
-            modules.add(dsRest.getRuntime().getId());
-        }
-        if (dsRest.getModules() != null) {
-            dsRest.getModules().forEach(module -> modules.add(module.getId()));
-        }
-        return entityFactory.distributionSet().create().name(dsRest.getName()).version(dsRest.getVersion())
-                .description(dsRest.getDescription()).type(dsRest.getType()).modules(modules)
-                .requiredMigrationStep(dsRest.getRequiredMigrationStep());
-    }
-
     static List<MetaData> fromRequestDsMetadata(final List<MgmtMetadata> metadata, final EntityFactory entityFactory) {
         if (metadata == null) {
             return Collections.emptyList();
@@ -122,7 +96,7 @@ public final class MgmtDistributionSetMapper {
         response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getAssignedSoftwareModules(response.getDsId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null))
-                        .withRel(MgmtRestConstants.DISTRIBUTIONSET_V1_MODULE).expand());
+                .withRel(MgmtRestConstants.DISTRIBUTIONSET_V1_MODULE).expand());
 
         response.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class)
                 .getDistributionSetType(distributionSet.getType().getId())).withRel("type").expand());
@@ -130,7 +104,7 @@ public final class MgmtDistributionSetMapper {
         response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getMetadata(response.getDsId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata")
-                        .expand());
+                .expand());
     }
 
     static MgmtTargetAssignmentResponseBody toResponse(final DistributionSetAssignmentResult dsAssignmentResult) {
@@ -185,5 +159,31 @@ public final class MgmtDistributionSetMapper {
         }
 
         return sets.stream().map(MgmtDistributionSetMapper::toResponse).collect(Collectors.toList());
+    }
+
+    /**
+     * {@link MgmtDistributionSetRequestBodyPost} to {@link DistributionSet}.
+     *
+     * @param dsRest to convert
+     * @return converted {@link DistributionSet}
+     */
+    private static DistributionSetCreate fromRequest(final MgmtDistributionSetRequestBodyPost dsRest,
+            final EntityFactory entityFactory) {
+        final List<Long> modules = new ArrayList<>();
+        if (dsRest.getOs() != null) {
+            modules.add(dsRest.getOs().getId());
+        }
+        if (dsRest.getApplication() != null) {
+            modules.add(dsRest.getApplication().getId());
+        }
+        if (dsRest.getRuntime() != null) {
+            modules.add(dsRest.getRuntime().getId());
+        }
+        if (dsRest.getModules() != null) {
+            dsRest.getModules().forEach(module -> modules.add(module.getId()));
+        }
+        return entityFactory.distributionSet().create().name(dsRest.getName()).version(dsRest.getVersion())
+                .description(dsRest.getDescription()).type(dsRest.getType()).modules(modules)
+                .requiredMigrationStep(dsRest.getRequiredMigrationStep());
     }
 }

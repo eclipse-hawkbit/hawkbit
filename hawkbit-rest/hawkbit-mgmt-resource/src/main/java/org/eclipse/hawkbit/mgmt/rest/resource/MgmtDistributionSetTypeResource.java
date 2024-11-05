@@ -131,11 +131,6 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
                 .body(MgmtDistributionSetTypeMapper.toListResponse(createdSoftwareModules));
     }
 
-    private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final Long distributionSetTypeId) {
-        return distributionSetTypeManagement.get(distributionSetTypeId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distributionSetTypeId));
-    }
-
     @Override
     public ResponseEntity<List<MgmtSoftwareModuleType>> getMandatoryModules(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
@@ -217,6 +212,11 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
                 Arrays.asList(smtId.getId()));
 
         return ResponseEntity.ok().build();
+    }
+
+    private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final Long distributionSetTypeId) {
+        return distributionSetTypeManagement.get(distributionSetTypeId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distributionSetTypeId));
     }
 
     private SoftwareModuleType findSoftwareModuleTypeWithExceptionIfNotFound(final Long softwareModuleTypeId) {

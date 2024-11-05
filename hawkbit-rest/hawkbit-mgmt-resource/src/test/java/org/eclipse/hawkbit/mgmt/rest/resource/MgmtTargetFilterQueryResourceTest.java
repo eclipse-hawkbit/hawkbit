@@ -26,6 +26,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Stream;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -49,20 +53,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
 import org.springframework.web.util.UriUtils;
 
 /**
  * Spring MVC Tests against the MgmtTargetResource.
- *
  */
 @Feature("Component Tests - Management API")
 @Story("Target Filter Query Resource")
-public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiIntegrationTest {
+public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String JSON_PATH_ROOT = "$";
 
@@ -72,19 +70,17 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
     private static final String JSON_PATH_FIELD_QUERY = ".query";
     private static final String JSON_PATH_FIELD_CONFIRMATION_REQUIRED = ".confirmationRequired";
     private static final String JSON_PATH_FIELD_CONTENT = ".content";
+    // target
+    // $.field
+    static final String JSON_PATH_PAGED_LIST_CONTENT = JSON_PATH_ROOT + JSON_PATH_FIELD_CONTENT;
     private static final String JSON_PATH_FIELD_SIZE = ".size";
+    static final String JSON_PATH_PAGED_LIST_SIZE = JSON_PATH_ROOT + JSON_PATH_FIELD_SIZE;
     private static final String JSON_PATH_FIELD_TOTAL = ".total";
+    static final String JSON_PATH_PAGED_LIST_TOTAL = JSON_PATH_ROOT + JSON_PATH_FIELD_TOTAL;
     private static final String JSON_PATH_FIELD_AUTO_ASSIGN_DS = ".autoAssignDistributionSet";
     private static final String JSON_PATH_FIELD_AUTO_ASSIGN_ACTION_TYPE = ".autoAssignActionType";
     private static final String JSON_PATH_FIELD_EXCEPTION_CLASS = ".exceptionClass";
     private static final String JSON_PATH_FIELD_ERROR_CODE = ".errorCode";
-
-    // target
-    // $.field
-    static final String JSON_PATH_PAGED_LIST_CONTENT = JSON_PATH_ROOT + JSON_PATH_FIELD_CONTENT;
-    static final String JSON_PATH_PAGED_LIST_SIZE = JSON_PATH_ROOT + JSON_PATH_FIELD_SIZE;
-    static final String JSON_PATH_PAGED_LIST_TOTAL = JSON_PATH_ROOT + JSON_PATH_FIELD_TOTAL;
-
     private static final String JSON_PATH_NAME = JSON_PATH_ROOT + JSON_PATH_FIELD_NAME;
     private static final String JSON_PATH_ID = JSON_PATH_ROOT + JSON_PATH_FIELD_ID;
     private static final String JSON_PATH_QUERY = JSON_PATH_ROOT + JSON_PATH_FIELD_QUERY;
@@ -170,7 +166,7 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(filterName, filterQuery);
 
         mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()).content(body)
-                .contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
                 .andExpect(jsonPath(JSON_PATH_ID, equalTo(tfq.getId().intValue())))
                 .andExpect(jsonPath(JSON_PATH_QUERY, equalTo(filterQuery2)))
                 .andExpect(jsonPath(JSON_PATH_NAME, equalTo(filterName)))
@@ -194,7 +190,7 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
                 .create(entityFactory.targetFilterQuery().create().name(filterName).query(filterQuery));
 
         mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId()).content(body)
-                .contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
                 .andExpect(jsonPath(JSON_PATH_ID, equalTo(tfq.getId().intValue())))
                 .andExpect(jsonPath(JSON_PATH_QUERY, equalTo(filterQuery)))
                 .andExpect(jsonPath(JSON_PATH_NAME, equalTo(filterName2)))
@@ -249,7 +245,7 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
         createSingleTargetFilterQuery(idC, testQuery);
 
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
                 .andExpect(status().isOk()).andDo(print())
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(knownTargetAmount)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(limitSize)))
@@ -266,38 +262,38 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
         final DistributionSet set = testdataFactory.createDistributionSet();
         final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("a", testQuery);
         final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
-            + filterQuery.getId();
+                + filterQuery.getId();
         final String distributionsetHrefPrefix = "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING;
 
         final String dsQuery = "?offset=0&limit=50&q=name==" + set.getName() + ";" + "version==" + set.getVersion();
 
         mvc.perform(
-                post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
-                    .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
-            .andDo(print()).andExpect(status().isOk());
+                        post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
+                                .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(print()).andExpect(status().isOk());
 
         final String result = mvc.perform(
-                get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId()))
-            .andExpect(jsonPath("$._links.autoAssignDS.href", equalTo(hrefPrefix + "/autoAssignDS")))
-            .andExpect(jsonPath("$._links.DS.href", startsWith(distributionsetHrefPrefix)))
-            .andReturn().getResponse().getContentAsString();
+                        get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId()))
+                .andExpect(jsonPath("$._links.autoAssignDS.href", equalTo(hrefPrefix + "/autoAssignDS")))
+                .andExpect(jsonPath("$._links.DS.href", startsWith(distributionsetHrefPrefix)))
+                .andReturn().getResponse().getContentAsString();
 
         final String multipleResult = mvc.perform(
-                get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "?representation=full"))
-            .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)))
-            .andExpect(jsonPath("$.content[0]._links.DS.href", startsWith(distributionsetHrefPrefix)))
-            .andReturn().getResponse().getContentAsString();
+                        get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "?representation=full"))
+                .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("$.content[0]._links.DS.href", startsWith(distributionsetHrefPrefix)))
+                .andReturn().getResponse().getContentAsString();
 
         final JSONObject singleJson = new JSONObject(result);
         final JSONObject multipleJson = new JSONObject(multipleResult);
 
         final String resultDSURI = singleJson.getJSONObject("_links").getJSONObject("DS").getString("href");
         final String resultDSURIFromMultipleJson = multipleJson.getJSONArray("content").getJSONObject(0)
-            .getJSONObject("_links").getJSONObject("DS").getString("href");
+                .getJSONObject("_links").getJSONObject("DS").getString("href");
 
         Assertions.assertEquals(distributionsetHrefPrefix + dsQuery, UriUtils.decode(resultDSURI, StandardCharsets.UTF_8));
         Assertions.assertEquals(distributionsetHrefPrefix + dsQuery,
-            UriUtils.decode(resultDSURIFromMultipleJson, StandardCharsets.UTF_8));
+                UriUtils.decode(resultDSURIFromMultipleJson, StandardCharsets.UTF_8));
     }
 
     @Test
@@ -318,8 +314,8 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
         createSingleTargetFilterQuery(idE, testQuery);
 
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(knownTargetAmount)))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(knownTargetAmount)))
                 .andExpect(status().isOk()).andDo(print())
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(knownTargetAmount)))
                 .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(expectedSize)))
@@ -413,10 +409,9 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
         final DistributionSet set = testdataFactory.createDistributionSet();
         final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("1", "controllerId==target*");
 
-
         mvc.perform(
-                post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
-                        .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                        post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
+                                .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isForbidden())
                 .andExpect(
                         jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(AssignmentQuotaExceededException.class.getName())))
@@ -438,8 +433,8 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
 
         // assign the auto-assign distribution set, this should work
         mvc.perform(
-                post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
-                        .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                        post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
+                                .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isOk());
         implicitLock(set);
 
@@ -450,7 +445,7 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
 
         // update the query of the filter query to trigger a quota hit
         mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId())
-                .content("{\"query\":\"controllerId==target*\"}").contentType(MediaType.APPLICATION_JSON))
+                        .content("{\"query\":\"controllerId==target*\"}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isForbidden())
                 .andExpect(
                         jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(AssignmentQuotaExceededException.class.getName())))
@@ -485,145 +480,6 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
         verifyAutoAssignmentWithSoftDeletedDs(tfq);
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = { true, false })
-    @Description("Verify the confirmation required flag will be set based on the feature state")
-    void verifyConfirmationStateIfNotProvided(final boolean confirmationFlowActive) throws Exception {
-        final String knownQuery = "name==test05";
-        final String knownName = "filter05";
-
-        if (confirmationFlowActive) {
-            enableConfirmationFlow();
-        }
-
-        final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
-        final DistributionSet set = testdataFactory.createDistributionSet();
-
-        // do not provide something about the confirmation
-        verifyAutoAssignmentByActionType(tfq, set, null, null);
-
-        assertThat(targetFilterQueryManagement.get(tfq.getId())).hasValueSatisfying(filter -> {
-            assertThat(filter.isConfirmationRequired()).isEqualTo(confirmationFlowActive);
-        });
-    }
-
-    private static Stream<Arguments> confirmationOptions() {
-        return Stream.of(Arguments.of(true, false), Arguments.of(true, true), Arguments.of(false, true),
-                Arguments.of(true, null), Arguments.of(false, null));
-    }
-
-    @Step
-    private void verifyAutoAssignmentWithoutActionType(final TargetFilterQuery tfq, final DistributionSet set,
-            final Boolean confirmationRequired) throws Exception {
-        verifyAutoAssignmentByActionType(tfq, set, null, confirmationRequired);
-    }
-
-    @Step
-    private void verifyAutoAssignmentWithForcedActionType(final TargetFilterQuery tfq, final DistributionSet set,
-            final Boolean confirmationRequired) throws Exception {
-        verifyAutoAssignmentByActionType(tfq, set, MgmtActionType.FORCED, confirmationRequired);
-    }
-
-    @Step
-    private void verifyAutoAssignmentWithSoftActionType(final TargetFilterQuery tfq, final DistributionSet set,
-            final Boolean confirmationRequired) throws Exception {
-        verifyAutoAssignmentByActionType(tfq, set, MgmtActionType.SOFT, confirmationRequired);
-    }
-
-    private void verifyAutoAssignmentByActionType(final TargetFilterQuery tfq, final DistributionSet set,
-            final MgmtActionType actionType, final Boolean confirmationRequired) throws Exception {
-        final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
-                + tfq.getId();
-
-        final JSONObject jsonObject = new JSONObject();
-        jsonObject.put("id", set.getId());
-        if (actionType != null) {
-            jsonObject.put("type", actionType.getName());
-        }
-        if (confirmationRequired != null) {
-            jsonObject.put("confirmationRequired", confirmationRequired);
-        }
-
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
-                .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON)).andDo(print())
-                .andExpect(status().isOk());
-        implicitLock(set);
-
-        final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.get(tfq.getId()).get();
-        final MgmtActionType expectedActionType = actionType != null ? actionType : MgmtActionType.FORCED;
-
-        assertThat(updatedFilterQuery.getAutoAssignDistributionSet()).isEqualTo(set);
-        assertThat(updatedFilterQuery.getAutoAssignActionType())
-                .isEqualTo(MgmtRestModelMapper.convertActionType(expectedActionType));
-
-        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId())).andDo(print())
-                .andExpect(status().isOk()).andExpect(jsonPath(JSON_PATH_NAME, equalTo(tfq.getName())))
-                .andExpect(jsonPath(JSON_PATH_QUERY, equalTo(tfq.getQuery())))
-                .andExpect(isConfirmationFlowEnabled()
-                        ? jsonPath(JSON_PATH_CONFIRMATION_REQUIRED,
-                                equalTo(confirmationRequired == null || confirmationRequired))
-                        : jsonPath(JSON_PATH_CONFIRMATION_REQUIRED).doesNotExist())
-                .andExpect(jsonPath(JSON_PATH_AUTO_ASSIGN_DS, equalTo(set.getId().intValue())))
-                .andExpect(jsonPath(JSON_PATH_AUTO_ASSIGN_ACTION_TYPE, equalTo(expectedActionType.getName())))
-                .andExpect(jsonPath("$._links.self.href", equalTo(hrefPrefix)))
-                .andExpect(jsonPath("$._links.autoAssignDS.href", equalTo(hrefPrefix + "/autoAssignDS")));
-    }
-
-    @Step
-    private void verifyAutoAssignmentWithTimeForcedActionType(final TargetFilterQuery tfq, final DistributionSet set)
-            throws Exception {
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
-                .content("{\"id\":" + set.getId() + ", \"type\":\"" + MgmtActionType.TIMEFORCED.getName() + "\"}")
-                .contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
-                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS,
-                        equalTo(InvalidAutoAssignActionTypeException.class.getName())))
-                .andExpect(jsonPath(JSON_PATH_ERROR_CODE,
-                        equalTo(SpServerError.SP_AUTO_ASSIGN_ACTION_TYPE_INVALID.getKey())));
-    }
-
-    @Step
-    private void verifyAutoAssignmentWithDownloadOnlyActionType(final TargetFilterQuery tfq, final DistributionSet set,
-            final Boolean confirmationRequired) throws Exception {
-        verifyAutoAssignmentByActionType(tfq, set, MgmtActionType.DOWNLOAD_ONLY, confirmationRequired);
-    }
-
-    @Step
-    private void verifyAutoAssignmentWithUnknownActionType(final TargetFilterQuery tfq, final DistributionSet set)
-            throws Exception {
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
-                .content("{\"id\":" + set.getId() + ", \"type\":\"unknown\"}").contentType(MediaType.APPLICATION_JSON))
-                .andDo(print()).andExpect(status().isBadRequest())
-                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(MessageNotReadableException.class.getName())))
-                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_REST_BODY_NOT_READABLE.getKey())));
-    }
-
-    @Step
-    private void verifyAutoAssignmentWithIncompleteDs(final TargetFilterQuery tfq) throws Exception {
-        final DistributionSet incompleteDistributionSet = distributionSetManagement
-                .create(entityFactory.distributionSet().create().name("incomplete").version("1")
-                        .type(testdataFactory.findOrCreateDefaultTestDsType()));
-
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
-                .content("{\"id\":" + incompleteDistributionSet.getId() + "}").contentType(MediaType.APPLICATION_JSON))
-                .andDo(print()).andExpect(status().isBadRequest())
-                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS,
-                        equalTo(IncompleteDistributionSetException.class.getName())))
-                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_DS_INCOMPLETE.getKey())));
-    }
-
-    @Step
-    private void verifyAutoAssignmentWithSoftDeletedDs(final TargetFilterQuery tfq) throws Exception {
-        final DistributionSet softDeletedDs = testdataFactory.createDistributionSet("softDeleted");
-        assignDistributionSet(softDeletedDs, testdataFactory.createTarget("forSoftDeletedDs"));
-        distributionSetManagement.delete(softDeletedDs.getId());
-
-        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
-                .content("{\"id\":" + softDeletedDs.getId() + "}").contentType(MediaType.APPLICATION_JSON))
-                .andDo(print()).andExpect(status().isNotFound())
-                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(DeletedException.class.getName())))
-                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_DELETED.getKey())));
-    }
-
     @Test
     @Description("Handles the GET request of retrieving a the auto assign distribution set of a target filter query within SP.")
     public void getAssignDS() throws Exception {
@@ -631,7 +487,7 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
         final DistributionSet ds = testdataFactory.createDistributionSet("ds");
         targetFilterQueryManagement
                 .updateAutoAssignDS(entityFactory.targetFilterQuery()
-                .updateAutoAssign(filterQuery.getId()).ds(ds.getId()));
+                        .updateAutoAssign(filterQuery.getId()).ds(ds.getId()));
 
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
                         filterQuery.getId()))
@@ -653,7 +509,7 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
 
         mvc
                 .perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
-                                filterQuery.getId()).contentType(MediaType.APPLICATION_JSON).content(autoAssignBody.toString()))
+                        filterQuery.getId()).contentType(MediaType.APPLICATION_JSON).content(autoAssignBody.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
@@ -716,20 +572,159 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
         final String valideWeightRequest = new JSONObject().put("id", dsId).put("weight", 45).toString();
 
         mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
-                filterId).content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON)).andDo(print())
+                        filterId).content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON)).andDo(print())
                 .andExpect(status().isOk());
         enableMultiAssignments();
         mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
-                filterId).content(invalideWeightRequest).contentType(MediaType.APPLICATION_JSON)).andDo(print())
+                        filterId).content(invalideWeightRequest).contentType(MediaType.APPLICATION_JSON)).andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
         mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
-                filterId).content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON)).andDo(print())
+                        filterId).content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON)).andDo(print())
                 .andExpect(status().isOk());
 
         final List<TargetFilterQuery> filters = targetFilterQueryManagement.findAll(PAGE).getContent();
         assertThat(filters).hasSize(1);
         assertThat(filters.get(0).getAutoAssignWeight().get()).isEqualTo(45);
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    @Description("Verify the confirmation required flag will be set based on the feature state")
+    void verifyConfirmationStateIfNotProvided(final boolean confirmationFlowActive) throws Exception {
+        final String knownQuery = "name==test05";
+        final String knownName = "filter05";
+
+        if (confirmationFlowActive) {
+            enableConfirmationFlow();
+        }
+
+        final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
+        final DistributionSet set = testdataFactory.createDistributionSet();
+
+        // do not provide something about the confirmation
+        verifyAutoAssignmentByActionType(tfq, set, null, null);
+
+        assertThat(targetFilterQueryManagement.get(tfq.getId())).hasValueSatisfying(filter -> {
+            assertThat(filter.isConfirmationRequired()).isEqualTo(confirmationFlowActive);
+        });
+    }
+
+    private static Stream<Arguments> confirmationOptions() {
+        return Stream.of(Arguments.of(true, false), Arguments.of(true, true), Arguments.of(false, true),
+                Arguments.of(true, null), Arguments.of(false, null));
+    }
+
+    @Step
+    private void verifyAutoAssignmentWithoutActionType(final TargetFilterQuery tfq, final DistributionSet set,
+            final Boolean confirmationRequired) throws Exception {
+        verifyAutoAssignmentByActionType(tfq, set, null, confirmationRequired);
+    }
+
+    @Step
+    private void verifyAutoAssignmentWithForcedActionType(final TargetFilterQuery tfq, final DistributionSet set,
+            final Boolean confirmationRequired) throws Exception {
+        verifyAutoAssignmentByActionType(tfq, set, MgmtActionType.FORCED, confirmationRequired);
+    }
+
+    @Step
+    private void verifyAutoAssignmentWithSoftActionType(final TargetFilterQuery tfq, final DistributionSet set,
+            final Boolean confirmationRequired) throws Exception {
+        verifyAutoAssignmentByActionType(tfq, set, MgmtActionType.SOFT, confirmationRequired);
+    }
+
+    private void verifyAutoAssignmentByActionType(final TargetFilterQuery tfq, final DistributionSet set,
+            final MgmtActionType actionType, final Boolean confirmationRequired) throws Exception {
+        final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
+                + tfq.getId();
+
+        final JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", set.getId());
+        if (actionType != null) {
+            jsonObject.put("type", actionType.getName());
+        }
+        if (confirmationRequired != null) {
+            jsonObject.put("confirmationRequired", confirmationRequired);
+        }
+
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
+                        .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON)).andDo(print())
+                .andExpect(status().isOk());
+        implicitLock(set);
+
+        final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.get(tfq.getId()).get();
+        final MgmtActionType expectedActionType = actionType != null ? actionType : MgmtActionType.FORCED;
+
+        assertThat(updatedFilterQuery.getAutoAssignDistributionSet()).isEqualTo(set);
+        assertThat(updatedFilterQuery.getAutoAssignActionType())
+                .isEqualTo(MgmtRestModelMapper.convertActionType(expectedActionType));
+
+        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId())).andDo(print())
+                .andExpect(status().isOk()).andExpect(jsonPath(JSON_PATH_NAME, equalTo(tfq.getName())))
+                .andExpect(jsonPath(JSON_PATH_QUERY, equalTo(tfq.getQuery())))
+                .andExpect(isConfirmationFlowEnabled()
+                        ? jsonPath(JSON_PATH_CONFIRMATION_REQUIRED,
+                        equalTo(confirmationRequired == null || confirmationRequired))
+                        : jsonPath(JSON_PATH_CONFIRMATION_REQUIRED).doesNotExist())
+                .andExpect(jsonPath(JSON_PATH_AUTO_ASSIGN_DS, equalTo(set.getId().intValue())))
+                .andExpect(jsonPath(JSON_PATH_AUTO_ASSIGN_ACTION_TYPE, equalTo(expectedActionType.getName())))
+                .andExpect(jsonPath("$._links.self.href", equalTo(hrefPrefix)))
+                .andExpect(jsonPath("$._links.autoAssignDS.href", equalTo(hrefPrefix + "/autoAssignDS")));
+    }
+
+    @Step
+    private void verifyAutoAssignmentWithTimeForcedActionType(final TargetFilterQuery tfq, final DistributionSet set)
+            throws Exception {
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
+                        .content("{\"id\":" + set.getId() + ", \"type\":\"" + MgmtActionType.TIMEFORCED.getName() + "\"}")
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest())
+                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS,
+                        equalTo(InvalidAutoAssignActionTypeException.class.getName())))
+                .andExpect(jsonPath(JSON_PATH_ERROR_CODE,
+                        equalTo(SpServerError.SP_AUTO_ASSIGN_ACTION_TYPE_INVALID.getKey())));
+    }
+
+    @Step
+    private void verifyAutoAssignmentWithDownloadOnlyActionType(final TargetFilterQuery tfq, final DistributionSet set,
+            final Boolean confirmationRequired) throws Exception {
+        verifyAutoAssignmentByActionType(tfq, set, MgmtActionType.DOWNLOAD_ONLY, confirmationRequired);
+    }
+
+    @Step
+    private void verifyAutoAssignmentWithUnknownActionType(final TargetFilterQuery tfq, final DistributionSet set)
+            throws Exception {
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
+                        .content("{\"id\":" + set.getId() + ", \"type\":\"unknown\"}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(print()).andExpect(status().isBadRequest())
+                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(MessageNotReadableException.class.getName())))
+                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_REST_BODY_NOT_READABLE.getKey())));
+    }
+
+    @Step
+    private void verifyAutoAssignmentWithIncompleteDs(final TargetFilterQuery tfq) throws Exception {
+        final DistributionSet incompleteDistributionSet = distributionSetManagement
+                .create(entityFactory.distributionSet().create().name("incomplete").version("1")
+                        .type(testdataFactory.findOrCreateDefaultTestDsType()));
+
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
+                        .content("{\"id\":" + incompleteDistributionSet.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(print()).andExpect(status().isBadRequest())
+                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS,
+                        equalTo(IncompleteDistributionSetException.class.getName())))
+                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_DS_INCOMPLETE.getKey())));
+    }
+
+    @Step
+    private void verifyAutoAssignmentWithSoftDeletedDs(final TargetFilterQuery tfq) throws Exception {
+        final DistributionSet softDeletedDs = testdataFactory.createDistributionSet("softDeleted");
+        assignDistributionSet(softDeletedDs, testdataFactory.createTarget("forSoftDeletedDs"));
+        distributionSetManagement.delete(softDeletedDs.getId());
+
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
+                        .content("{\"id\":" + softDeletedDs.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(print()).andExpect(status().isNotFound())
+                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(DeletedException.class.getName())))
+                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_DELETED.getKey())));
     }
 
     private TargetFilterQuery createSingleTargetFilterQuery(final String name, final String query) {

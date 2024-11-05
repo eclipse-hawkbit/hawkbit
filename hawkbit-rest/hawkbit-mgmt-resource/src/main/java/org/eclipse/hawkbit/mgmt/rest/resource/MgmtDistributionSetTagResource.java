@@ -202,17 +202,6 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         return ResponseEntity.ok().build();
     }
 
-    private DistributionSetTag findDistributionTagById(final Long distributionsetTagId) {
-        return distributionSetTagManagement.get(distributionsetTagId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, distributionsetTagId));
-    }
-
-    private static List<Long> findDistributionSetIds(
-            final List<MgmtAssignedDistributionSetRequestBody> assignedDistributionSetRequestBodies) {
-        return assignedDistributionSetRequestBodies.stream()
-                .map(MgmtAssignedDistributionSetRequestBody::getDistributionSetId).collect(Collectors.toList());
-    }
-
     @Override
     public ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignment(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
@@ -246,5 +235,16 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
                 .assignTag(findDistributionSetIds(assignedDSRequestBodies), distributionsetTagId);
         log.debug("Assigned DistributionSet {}", assignedDs.size());
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDistributionSets(assignedDs));
+    }
+
+    private static List<Long> findDistributionSetIds(
+            final List<MgmtAssignedDistributionSetRequestBody> assignedDistributionSetRequestBodies) {
+        return assignedDistributionSetRequestBodies.stream()
+                .map(MgmtAssignedDistributionSetRequestBody::getDistributionSetId).collect(Collectors.toList());
+    }
+
+    private DistributionSetTag findDistributionTagById(final Long distributionsetTagId) {
+        return distributionSetTagManagement.get(distributionsetTagId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, distributionsetTagId));
     }
 }

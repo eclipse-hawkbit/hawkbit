@@ -21,17 +21,16 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
  * A mapper for assignment requests
  */
 public final class MgmtDeploymentRequestMapper {
+
     private MgmtDeploymentRequestMapper() {
         // Utility class
     }
 
     /**
      * Convert assignment information to an {@link DeploymentRequestBuilder}
-     * 
-     * @param dsAssignment
-     *            DS assignment information
-     * @param targetId
-     *            target to assign the DS to
+     *
+     * @param dsAssignment DS assignment information
+     * @param targetId target to assign the DS to
      * @return resulting {@link DeploymentRequestBuilder}
      */
     public static DeploymentRequestBuilder createAssignmentRequestBuilder(
@@ -43,11 +42,9 @@ public final class MgmtDeploymentRequestMapper {
 
     /**
      * Convert assignment information to an {@link DeploymentRequestBuilder}
-     * 
-     * @param targetAssignment
-     *            target assignment information
-     * @param dsId
-     *            DS to assign the target to
+     *
+     * @param targetAssignment target assignment information
+     * @param dsId DS to assign the target to
      * @return resulting {@link DeploymentRequestBuilder}
      */
     public static DeploymentRequestBuilder createAssignmentRequestBuilder(

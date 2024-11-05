@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 
@@ -19,6 +20,7 @@ import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
  * back.
  */
 public final class MgmtTenantManagementMapper {
+
     public static String DEFAULT_DISTRIBUTION_SET_TYPE_KEY = "default.ds.type";
 
     private MgmtTenantManagementMapper() {
@@ -43,7 +45,7 @@ public final class MgmtTenantManagementMapper {
         restConfValue.setValue(defaultDistributionSetType);
         restConfValue.setGlobal(Boolean.FALSE);
         restConfValue.add(linkTo(methodOn(MgmtTenantManagementResource.class).getTenantConfigurationValue(DEFAULT_DISTRIBUTION_SET_TYPE_KEY))
-            .withSelfRel().expand());
+                .withSelfRel().expand());
         return restConfValue;
     }
 }

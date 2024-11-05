@@ -65,19 +65,19 @@ public class MgmtActionResource implements MgmtActionRestApi {
     @Override
     public ResponseEntity<MgmtAction> getAction(final Long actionId) {
 
-       final Action action = deploymentManagement.findAction(actionId)
-            .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+        final Action action = deploymentManagement.findAction(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
-       return ResponseEntity.ok(MgmtActionMapper.toResponse(action, MgmtRepresentationMode.FULL));
+        return ResponseEntity.ok(MgmtActionMapper.toResponse(action, MgmtRepresentationMode.FULL));
     }
 
     private MgmtRepresentationMode getRepresentationModeFromString(final String representationModeParam) {
         return MgmtRepresentationMode.fromValue(representationModeParam)
-            .orElseGet(() -> {
-                // no need for a 400, just apply a safe fallback
-                log.warn("Received an invalid representation mode: {}", representationModeParam);
-                return MgmtRepresentationMode.COMPACT;
-            });
+                .orElseGet(() -> {
+                    // no need for a 400, just apply a safe fallback
+                    log.warn("Received an invalid representation mode: {}", representationModeParam);
+                    return MgmtRepresentationMode.COMPACT;
+                });
     }
 
 }

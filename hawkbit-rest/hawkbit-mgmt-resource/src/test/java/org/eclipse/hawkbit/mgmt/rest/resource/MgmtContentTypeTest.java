@@ -9,6 +9,15 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Arrays;
+
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
@@ -26,15 +35,6 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.Arrays;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-
 /**
  * With Spring Boot 2.2.x the default charset encoding became deprecated. In
  * hawkBit we want to keep the old behavior for now and still return the charset
@@ -47,8 +47,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Story("Response Content-Type")
 public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
 
-    private DistributionSet ds;
     private final String dsName = "DS-ö";
+    private DistributionSet ds;
 
     @BeforeEach
     public void setupBeforeTest() {
@@ -58,8 +58,9 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Test
     @Description("The response of a POST request shall contain charset=utf-8")
     public void postDistributionSet_ContentTypeJsonUtf8_woAccept() throws Exception {
-        final MvcResult result = mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(Arrays.asList(ds)))
-                .contentType(MediaType.APPLICATION_JSON_UTF8)).andDo(MockMvcResultPrinter.print())
+        final MvcResult result = mvc.perform(
+                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(Arrays.asList(ds)))
+                                .contentType(MediaType.APPLICATION_JSON_UTF8)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated()).andExpect(jsonPath("[0]name", equalTo(dsName))).andReturn();
 
         assertEquals(MediaTypes.HAL_JSON_VALUE + ";charset=UTF-8", getResponseHeaderContentType(result));
@@ -68,8 +69,9 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Test
     @Description("The response of a POST request shall contain charset=utf-8")
     public void postDistributionSet_ContentTypeJsonUtf8_wAcceptJson() throws Exception {
-        final MvcResult result = mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(Arrays.asList(ds)))
-                .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaType.APPLICATION_JSON))
+        final MvcResult result = mvc.perform(
+                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(Arrays.asList(ds)))
+                                .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(jsonPath("[0]name", equalTo(dsName))).andReturn();
 
@@ -79,8 +81,9 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Test
     @Description("The response of a POST request shall contain charset=utf-8")
     public void postDistributionSet_ContentTypeJsonUtf8_wAcceptJsonUtf8() throws Exception {
-        final MvcResult result = mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(Arrays.asList(ds)))
-                .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaType.APPLICATION_JSON_UTF8))
+        final MvcResult result = mvc.perform(
+                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(Arrays.asList(ds)))
+                                .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(jsonPath("[0]name", equalTo(dsName))).andReturn();
 
@@ -90,8 +93,9 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Test
     @Description("The response of a POST request shall contain charset=utf-8")
     public void postDistributionSet_ContentTypeJsonUtf8_wAcceptHalJson() throws Exception {
-        final MvcResult result = mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(Arrays.asList(ds)))
-                .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaTypes.HAL_JSON))
+        final MvcResult result = mvc.perform(
+                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(Arrays.asList(ds)))
+                                .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaTypes.HAL_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(jsonPath("[0]name", equalTo(dsName))).andReturn();
 
@@ -101,8 +105,9 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Test
     @Description("The response of a POST request shall contain charset=utf-8")
     public void postDistributionSet_ContentTypeJson_woAccept() throws Exception {
-        final MvcResult result = mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(Arrays.asList(ds)))
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+        final MvcResult result = mvc.perform(
+                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(Arrays.asList(ds)))
+                                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("[0]name", equalTo(dsName))).andReturn();
 
@@ -112,8 +117,9 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Test
     @Description("The response of a POST request shall contain charset=utf-8")
     public void postDistributionSet_ContentTypeJson_wAcceptJson() throws Exception {
-        final MvcResult result = mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(Arrays.asList(ds)))
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        final MvcResult result = mvc.perform(
+                        post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(Arrays.asList(ds)))
+                                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(jsonPath("[0]name", equalTo(dsName))).andReturn();
 
@@ -124,8 +130,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Description("The response of a POST request shall contain charset=utf-8")
     public void postDistributionSet_ContentTypeJson_wAcceptJsonUtf8() throws Exception {
         final MvcResult result = mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING)
-                .content(JsonBuilder.distributionSets(Arrays.asList(ds))).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON_UTF8)).andDo(MockMvcResultPrinter.print())
+                        .content(JsonBuilder.distributionSets(Arrays.asList(ds))).contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON_UTF8)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("[0]name", equalTo(dsName))).andReturn();
 
@@ -136,8 +142,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     @Description("The response of a POST request shall contain charset=utf-8")
     public void postDistributionSet_ContentTypeJson_wAcceptHalJson() throws Exception {
         final MvcResult result = mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING)
-                .content(JsonBuilder.distributionSets(Arrays.asList(ds))).contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaTypes.HAL_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content(JsonBuilder.distributionSets(Arrays.asList(ds))).contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaTypes.HAL_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("[0]name", equalTo(dsName))).andReturn();
 

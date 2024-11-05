@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValue;
@@ -45,7 +44,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
 
     MgmtTenantManagementResource(final TenantConfigurationManagement tenantConfigurationManagement,
             final TenantConfigurationProperties tenantConfigurationProperties,
-        final SystemManagement systemManagement) {
+            final SystemManagement systemManagement) {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.tenantConfigurationProperties = tenantConfigurationProperties;
         this.systemManagement = systemManagement;
@@ -64,30 +63,13 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
         });
 
         // Load and Add Default DistributionSetType
-        final MgmtSystemTenantConfigurationValue defaultDsTypeId = loadTenantConfigurationValueBy(MgmtTenantManagementMapper.DEFAULT_DISTRIBUTION_SET_TYPE_KEY);
+        final MgmtSystemTenantConfigurationValue defaultDsTypeId = loadTenantConfigurationValueBy(
+                MgmtTenantManagementMapper.DEFAULT_DISTRIBUTION_SET_TYPE_KEY);
         tenantConfigurationValueMap.put(MgmtTenantManagementMapper.DEFAULT_DISTRIBUTION_SET_TYPE_KEY, defaultDsTypeId);
 
         // return combined TenantConfiguration and TenantMetadata
         log.debug("getTenantConfiguration, return status {}", HttpStatus.OK);
         return ResponseEntity.ok(tenantConfigurationValueMap);
-    }
-
-    @Override
-    public ResponseEntity<MgmtSystemTenantConfigurationValue> getTenantConfigurationValue(
-        @PathVariable("keyName") final String keyName) {
-        return ResponseEntity.ok(loadTenantConfigurationValueBy(keyName));
-    }
-
-    private MgmtSystemTenantConfigurationValue loadTenantConfigurationValueBy(String keyName) {
-
-        //Check if requested key is TenantConfiguration or TenantMetadata, load it and return it as rest response
-        MgmtSystemTenantConfigurationValue response;
-        if (isDefaultDistributionSetTypeKey(keyName)) {
-            response = MgmtTenantManagementMapper.toResponseDefaultDsType(systemManagement.getTenantMetadata().getDefaultDsType().getId());
-        } else {
-            response = MgmtTenantManagementMapper.toResponseTenantConfigurationValue(keyName, tenantConfigurationManagement.getConfigurationValue(keyName));
-        }
-        return response;
     }
 
     @Override
@@ -105,16 +87,22 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
     }
 
     @Override
+    public ResponseEntity<MgmtSystemTenantConfigurationValue> getTenantConfigurationValue(
+            @PathVariable("keyName") final String keyName) {
+        return ResponseEntity.ok(loadTenantConfigurationValueBy(keyName));
+    }
+
+    @Override
     public ResponseEntity<MgmtSystemTenantConfigurationValue> updateTenantConfigurationValue(
             @PathVariable("keyName") final String keyName,
             @RequestBody final MgmtSystemTenantConfigurationValueRequest configurationValueRest) {
-        Serializable                  configurationValue            = configurationValueRest.getValue();
+        Serializable configurationValue = configurationValueRest.getValue();
         final MgmtSystemTenantConfigurationValue responseUpdatedValue;
         if (isDefaultDistributionSetTypeKey(keyName)) {
             responseUpdatedValue = updateDefaultDsType(configurationValue);
         } else {
             final TenantConfigurationValue<? extends Serializable> updatedTenantConfigurationValue = tenantConfigurationManagement
-                .addOrUpdateConfiguration(keyName, configurationValueRest.getValue());
+                    .addOrUpdateConfiguration(keyName, configurationValueRest.getValue());
             responseUpdatedValue = MgmtTenantManagementMapper.toResponseTenantConfigurationValue(keyName, updatedTenantConfigurationValue);
         }
 
@@ -126,7 +114,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
             Map<String, Serializable> configurationValueMap) {
 
         boolean containsNull = configurationValueMap.keySet().stream()
-                        .anyMatch(Objects::isNull);
+                .anyMatch(Objects::isNull);
 
         if (containsNull) {
             return ResponseEntity.badRequest().build();
@@ -152,30 +140,44 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
             throw ex;
         }
 
-        List<MgmtSystemTenantConfigurationValue> tenantConfigurationListUpdated = new java.util.ArrayList<>(tenantConfigurationValues.entrySet().stream()
-            .map(entry -> MgmtTenantManagementMapper.toResponseTenantConfigurationValue(entry.getKey(), entry.getValue())).toList());
+        List<MgmtSystemTenantConfigurationValue> tenantConfigurationListUpdated = new java.util.ArrayList<>(
+                tenantConfigurationValues.entrySet().stream()
+                        .map(entry -> MgmtTenantManagementMapper.toResponseTenantConfigurationValue(entry.getKey(), entry.getValue()))
+                        .toList());
         if (updatedDefaultDsType != null) {
             tenantConfigurationListUpdated.add(updatedDefaultDsType);
         }
 
-
         return ResponseEntity.ok(tenantConfigurationListUpdated);
-    }
-    private MgmtSystemTenantConfigurationValue updateDefaultDsType(Serializable defaultDsType) {
-        long updateDefaultDsType;
-        try {
-            updateDefaultDsType = ((Number) defaultDsType).longValue();
-        } catch (ClassCastException cce) {
-            throw new TenantConfigurationValidatorException(String.format(
-                "Default DistributionSetType Value Type is incorrect. Expected Long, received %s", defaultDsType.getClass().getName()));
-        }
-        systemManagement.updateTenantMetadata(updateDefaultDsType);
-        return MgmtTenantManagementMapper.toResponseDefaultDsType(updateDefaultDsType);
     }
 
     private static boolean isDefaultDistributionSetTypeKey(String keyName) {
         return MgmtTenantManagementMapper.DEFAULT_DISTRIBUTION_SET_TYPE_KEY.equals(keyName);
     }
 
+    private MgmtSystemTenantConfigurationValue loadTenantConfigurationValueBy(String keyName) {
+
+        //Check if requested key is TenantConfiguration or TenantMetadata, load it and return it as rest response
+        MgmtSystemTenantConfigurationValue response;
+        if (isDefaultDistributionSetTypeKey(keyName)) {
+            response = MgmtTenantManagementMapper.toResponseDefaultDsType(systemManagement.getTenantMetadata().getDefaultDsType().getId());
+        } else {
+            response = MgmtTenantManagementMapper.toResponseTenantConfigurationValue(keyName,
+                    tenantConfigurationManagement.getConfigurationValue(keyName));
+        }
+        return response;
+    }
+
+    private MgmtSystemTenantConfigurationValue updateDefaultDsType(Serializable defaultDsType) {
+        long updateDefaultDsType;
+        try {
+            updateDefaultDsType = ((Number) defaultDsType).longValue();
+        } catch (ClassCastException cce) {
+            throw new TenantConfigurationValidatorException(String.format(
+                    "Default DistributionSetType Value Type is incorrect. Expected Long, received %s", defaultDsType.getClass().getName()));
+        }
+        systemManagement.updateTenantMetadata(updateDefaultDsType);
+        return MgmtTenantManagementMapper.toResponseDefaultDsType(updateDefaultDsType);
+    }
 
 }

@@ -52,8 +52,6 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 /**
  * A mapper which maps repository model to RESTful model representation and
  * back.
- *
- *
  */
 final class MgmtRolloutMapper {
 
@@ -116,7 +114,7 @@ final class MgmtRolloutMapper {
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRolloutGroups(rollout.getId(),
                     MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                     MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null, null)).withRel("groups")
-                            .expand());
+                    .expand());
 
             final DistributionSet distributionSet = rollout.getDistributionSet();
             body.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(distributionSet.getId()))

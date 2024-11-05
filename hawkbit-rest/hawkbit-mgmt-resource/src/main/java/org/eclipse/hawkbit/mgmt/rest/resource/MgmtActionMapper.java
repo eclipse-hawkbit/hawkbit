@@ -31,11 +31,8 @@ public final class MgmtActionMapper {
     /**
      * Create a response for actions.
      *
-     * @param actions
-     *            list of actions
-     * @param repMode
-     *            the representation mode
-     * 
+     * @param actions list of actions
+     * @param repMode the representation mode
      * @return the response
      */
     public static List<MgmtAction> toResponse(final Collection<Action> actions, final MgmtRepresentationMode repMode) {

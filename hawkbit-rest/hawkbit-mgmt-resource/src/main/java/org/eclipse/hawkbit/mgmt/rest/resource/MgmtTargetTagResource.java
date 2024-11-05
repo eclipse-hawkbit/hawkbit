@@ -162,24 +162,6 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(
-            @PathVariable("targetTagId") final Long targetTagId,
-            @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
-        log.debug("Toggle Target assignment {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
-
-        final TargetTag targetTag = findTargetTagById(targetTagId);
-        final TargetTagAssignmentResult assigmentResult = this.targetManagement
-                .toggleTagAssignment(findTargetControllerIds(assignedTargetRequestBodies), targetTag.getName());
-
-        final MgmtTargetTagAssigmentResult tagAssigmentResultRest = new MgmtTargetTagAssigmentResult();
-        tagAssigmentResultRest.setAssignedTargets(
-                MgmtTargetMapper.toResponse(assigmentResult.getAssignedEntity(), tenantConfigHelper));
-        tagAssigmentResultRest.setUnassignedTargets(
-                MgmtTargetMapper.toResponse(assigmentResult.getUnassignedEntity(), tenantConfigHelper));
-        return ResponseEntity.ok(tagAssigmentResultRest);
-    }
-
-    @Override
     public ResponseEntity<Void> assignTarget(final Long targetTagId, final String controllerId) {
         log.debug("Assign target {} for target tag {}", controllerId, targetTagId);
         this.targetManagement.assignTag(List.of(controllerId), targetTagId);
@@ -187,7 +169,8 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> assignTargets(final Long targetTagId, final OnNotFoundPolicy onNotFoundPolicy, final List<String> controllerIds) {
+    public ResponseEntity<Void> assignTargets(final Long targetTagId, final OnNotFoundPolicy onNotFoundPolicy,
+            final List<String> controllerIds) {
         log.debug("Assign {} targets for target tag {}", controllerIds.size(), targetTagId);
         if (onNotFoundPolicy == OnNotFoundPolicy.FAIL) {
             this.targetManagement.assignTag(controllerIds, targetTagId);
@@ -213,7 +196,8 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> unassignTargets(final Long targetTagId, final OnNotFoundPolicy onNotFoundPolicy, final List<String> controllerIds) {
+    public ResponseEntity<Void> unassignTargets(final Long targetTagId, final OnNotFoundPolicy onNotFoundPolicy,
+            final List<String> controllerIds) {
         log.debug("Unassign {} targets for target tag {}", controllerIds.size(), targetTagId);
         if (onNotFoundPolicy == OnNotFoundPolicy.FAIL) {
             this.targetManagement.unassignTag(controllerIds, targetTagId);
@@ -228,6 +212,24 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
             }
         }
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(
+            @PathVariable("targetTagId") final Long targetTagId,
+            @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
+        log.debug("Toggle Target assignment {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
+
+        final TargetTag targetTag = findTargetTagById(targetTagId);
+        final TargetTagAssignmentResult assigmentResult = this.targetManagement
+                .toggleTagAssignment(findTargetControllerIds(assignedTargetRequestBodies), targetTag.getName());
+
+        final MgmtTargetTagAssigmentResult tagAssigmentResultRest = new MgmtTargetTagAssigmentResult();
+        tagAssigmentResultRest.setAssignedTargets(
+                MgmtTargetMapper.toResponse(assigmentResult.getAssignedEntity(), tenantConfigHelper));
+        tagAssigmentResultRest.setUnassignedTargets(
+                MgmtTargetMapper.toResponse(assigmentResult.getUnassignedEntity(), tenantConfigHelper));
+        return ResponseEntity.ok(tagAssigmentResultRest);
     }
 
     @Override

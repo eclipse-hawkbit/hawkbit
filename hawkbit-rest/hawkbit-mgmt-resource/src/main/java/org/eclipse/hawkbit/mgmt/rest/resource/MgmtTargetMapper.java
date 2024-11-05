@@ -59,7 +59,6 @@ import org.springframework.util.ObjectUtils;
 /**
  * A mapper which maps repository model to RESTful model representation and
  * back.
- *
  */
 public final class MgmtTargetMapper {
 
@@ -70,8 +69,7 @@ public final class MgmtTargetMapper {
     /**
      * Add links to a target response.
      *
-     * @param response
-     *            the target response
+     * @param response the target response
      */
     public static void addTargetLinks(final MgmtTarget response) {
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getAssignedDistributionSet(response.getControllerId()))
@@ -83,11 +81,11 @@ public final class MgmtTargetMapper {
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionHistory(response.getControllerId(), 0,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
                 ActionFields.ID.getJpaEntityFieldName() + ":" + SortDirection.DESC, null))
-                        .withRel(MgmtRestConstants.TARGET_V1_ACTIONS).expand());
+                .withRel(MgmtRestConstants.TARGET_V1_ACTIONS).expand());
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getMetadata(response.getControllerId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata")
-                        .expand());
+                .expand());
         if (response.getTargetType() != null) {
             response.add(linkTo(methodOn(MgmtTargetTypeRestApi.class).getTargetType(response.getTargetType()))
                     .withRel(MgmtRestConstants.TARGET_V1_ASSIGNED_TARGET_TYPE).expand());
@@ -115,24 +113,10 @@ public final class MgmtTargetMapper {
         return response;
     }
 
-    private static void addPollStatus(final Target target, final MgmtTarget targetRest, final Function<Target, PollStatus> pollStatusResolver) {
-        final PollStatus pollStatus = pollStatusResolver == null ? target.getPollStatus() : pollStatusResolver.apply(target);
-        if (pollStatus != null) {
-            final MgmtPollStatus pollStatusRest = new MgmtPollStatus();
-            pollStatusRest.setLastRequestAt(
-                    Date.from(pollStatus.getLastPollDate().atZone(ZoneId.systemDefault()).toInstant()).getTime());
-            pollStatusRest.setNextExpectedRequestAt(
-                    Date.from(pollStatus.getNextPollDate().atZone(ZoneId.systemDefault()).toInstant()).getTime());
-            pollStatusRest.setOverdue(pollStatus.isOverdue());
-            targetRest.setPollStatus(pollStatusRest);
-        }
-    }
-
     /**
      * Create a response for targets.
      *
-     * @param targets
-     *            list of targets
+     * @param targets list of targets
      * @return the response
      */
     public static List<MgmtTarget> toResponse(final Collection<Target> targets, final TenantConfigHelper configHelper) {
@@ -148,11 +132,11 @@ public final class MgmtTargetMapper {
     /**
      * Create a response for target.
      *
-     * @param target
-     *            the target
+     * @param target the target
      * @return the response
      */
-    public static MgmtTarget toResponse(final Target target, final TenantConfigHelper configHelper, final Function<Target, PollStatus> pollStatusResolver) {
+    public static MgmtTarget toResponse(final Target target, final TenantConfigHelper configHelper,
+            final Function<Target, PollStatus> pollStatusResolver) {
         if (target == null) {
             return null;
         }
@@ -215,12 +199,6 @@ public final class MgmtTargetMapper {
                 .collect(Collectors.toList());
     }
 
-    private static TargetCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
-        return entityFactory.target().create().controllerId(targetRest.getControllerId()).name(targetRest.getName())
-                .description(targetRest.getDescription()).securityToken(targetRest.getSecurityToken())
-                .address(targetRest.getAddress()).targetType(targetRest.getTargetType());
-    }
-
     static List<MetaData> fromRequestTargetMetadata(final List<MgmtMetadata> metadata,
             final EntityFactory entityFactory) {
         if (metadata == null) {
@@ -228,7 +206,7 @@ public final class MgmtTargetMapper {
         }
 
         return metadata.stream().map(
-                metadataRest -> entityFactory.generateTargetMetadata(metadataRest.getKey(), metadataRest.getValue()))
+                        metadataRest -> entityFactory.generateTargetMetadata(metadataRest.getKey(), metadataRest.getValue()))
                 .collect(Collectors.toList());
     }
 
@@ -241,7 +219,7 @@ public final class MgmtTargetMapper {
         return actionStatus.stream()
                 .map(status -> toResponse(status,
                         deploymentManagement.findMessagesByActionStatusId(
-                                PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), status.getId())
+                                        PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), status.getId())
                                 .getContent()))
                 .collect(Collectors.toList());
     }
@@ -317,7 +295,7 @@ public final class MgmtTargetMapper {
         result.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionStatusList(controllerId, action.getId(), 0,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
                 ActionStatusFields.ID.getJpaEntityFieldName() + ":" + SortDirection.DESC))
-                        .withRel(MgmtRestConstants.TARGET_V1_ACTION_STATUS).expand());
+                .withRel(MgmtRestConstants.TARGET_V1_ACTION_STATUS).expand());
 
         final Rollout rollout = action.getRollout();
         if (rollout != null) {
@@ -334,6 +312,36 @@ public final class MgmtTargetMapper {
         }
 
         return actions.stream().map(action -> toResponse(targetId, action)).collect(Collectors.toList());
+    }
+
+    static MgmtMetadata toResponseTargetMetadata(final TargetMetadata metadata) {
+        final MgmtMetadata metadataRest = new MgmtMetadata();
+        metadataRest.setKey(metadata.getKey());
+        metadataRest.setValue(metadata.getValue());
+        return metadataRest;
+    }
+
+    static List<MgmtMetadata> toResponseTargetMetadata(final List<TargetMetadata> metadata) {
+        return metadata.stream().map(MgmtTargetMapper::toResponseTargetMetadata).collect(Collectors.toList());
+    }
+
+    private static void addPollStatus(final Target target, final MgmtTarget targetRest, final Function<Target, PollStatus> pollStatusResolver) {
+        final PollStatus pollStatus = pollStatusResolver == null ? target.getPollStatus() : pollStatusResolver.apply(target);
+        if (pollStatus != null) {
+            final MgmtPollStatus pollStatusRest = new MgmtPollStatus();
+            pollStatusRest.setLastRequestAt(
+                    Date.from(pollStatus.getLastPollDate().atZone(ZoneId.systemDefault()).toInstant()).getTime());
+            pollStatusRest.setNextExpectedRequestAt(
+                    Date.from(pollStatus.getNextPollDate().atZone(ZoneId.systemDefault()).toInstant()).getTime());
+            pollStatusRest.setOverdue(pollStatus.isOverdue());
+            targetRest.setPollStatus(pollStatusRest);
+        }
+    }
+
+    private static TargetCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
+        return entityFactory.target().create().controllerId(targetRest.getControllerId()).name(targetRest.getName())
+                .description(targetRest.getDescription()).securityToken(targetRest.getSecurityToken())
+                .address(targetRest.getAddress()).targetType(targetRest.getTargetType());
     }
 
     private static String getType(final Action action) {
@@ -356,16 +364,5 @@ public final class MgmtTargetMapper {
         actionStatus.getCode().ifPresent(result::setCode);
 
         return result;
-    }
-
-    static MgmtMetadata toResponseTargetMetadata(final TargetMetadata metadata) {
-        final MgmtMetadata metadataRest = new MgmtMetadata();
-        metadataRest.setKey(metadata.getKey());
-        metadataRest.setValue(metadata.getValue());
-        return metadataRest;
-    }
-
-    static List<MgmtMetadata> toResponseTargetMetadata(final List<TargetMetadata> metadata) {
-        return metadata.stream().map(MgmtTargetMapper::toResponseTargetMetadata).collect(Collectors.toList());
     }
 }
