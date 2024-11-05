@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.model.Action;
  * Defines the remote event of updated a {@link Action}.
  */
 public class ActionUpdatedEvent extends AbstractActionEvent implements EntityUpdatedEvent {
+
     private static final long serialVersionUID = 2L;
 
     /**
@@ -27,17 +28,12 @@ public class ActionUpdatedEvent extends AbstractActionEvent implements EntityUpd
 
     /**
      * Constructor
-     * 
-     * @param action
-     *            the updated action
-     * @param targetId
-     *            targetId identifier (optional)
-     * @param rolloutId
-     *            rollout identifier (optional)
-     * @param rolloutGroupId
-     *            rollout group identifier (optional)
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param action the updated action
+     * @param targetId targetId identifier (optional)
+     * @param rolloutId rollout identifier (optional)
+     * @param rolloutGroupId rollout group identifier (optional)
+     * @param applicationId the origin application id
      */
     public ActionUpdatedEvent(final Action action, final Long targetId, final Long rolloutId, final Long rolloutGroupId,
             final String applicationId) {

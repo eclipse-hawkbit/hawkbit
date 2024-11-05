@@ -21,15 +21,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Service for managing {@link SoftwareModuleType}s.
- *
  */
 public interface SoftwareModuleTypeManagement
         extends RepositoryManagement<SoftwareModuleType, SoftwareModuleTypeCreate, SoftwareModuleTypeUpdate> {
 
     /**
-     *
-     * @param key
-     *            to search for
+     * @param key to search for
      * @return {@link SoftwareModuleType} in the repository with given
      *         {@link SoftwareModuleType#getKey()}
      */
@@ -37,9 +34,7 @@ public interface SoftwareModuleTypeManagement
     Optional<SoftwareModuleType> getByKey(@NotEmpty String key);
 
     /**
-     *
-     * @param name
-     *            to search for
+     * @param name to search for
      * @return all {@link SoftwareModuleType}s in the repository with given
      *         {@link SoftwareModuleType#getName()}
      */

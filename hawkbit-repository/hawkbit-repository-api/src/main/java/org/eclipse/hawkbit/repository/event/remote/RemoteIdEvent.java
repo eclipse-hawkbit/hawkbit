@@ -9,15 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import java.io.Serial;
+import java.util.Arrays;
+
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-
-import java.io.Serial;
-import java.util.Arrays;
 
 /**
  * An base definition class for an event which contains an id.
@@ -39,15 +39,11 @@ public class RemoteIdEvent extends RemoteTenantAwareEvent {
 
     /**
      * Constructor for json serialization.
-     * 
-     * @param entityId
-     *            the entity Id
-     * @param tenant
-     *            the tenant
-     * @param entityClass
-     *            the entity class
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param entityId the entity Id
+     * @param tenant the tenant
+     * @param entityClass the entity class
+     * @param applicationId the origin application id
      */
     protected RemoteIdEvent(final Long entityId, final String tenant,
             final Class<? extends TenantAwareBaseEntity> entityClass, final String applicationId) {

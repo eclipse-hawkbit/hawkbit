@@ -9,14 +9,13 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import org.eclipse.hawkbit.repository.Identifiable;
-
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.hawkbit.repository.Identifiable;
+
 /**
  * Core information of all entities.
- *
  */
 public interface BaseEntity extends Serializable, Identifiable<Long> {
 

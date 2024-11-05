@@ -17,14 +17,12 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 
-import java.util.Optional;
-
 /**
  * Builder to update an existing {@link DistributionSet} entry. Defines all
  * fields that can be updated.
- *
  */
 public interface DistributionSetUpdate {
+
     /**
      * @param name for {@link DistributionSet#getName()}
      * @return updated builder instance

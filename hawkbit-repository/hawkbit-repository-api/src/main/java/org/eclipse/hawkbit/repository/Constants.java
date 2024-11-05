@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
  * Repository API constants.
- *
  */
 public final class Constants {
 

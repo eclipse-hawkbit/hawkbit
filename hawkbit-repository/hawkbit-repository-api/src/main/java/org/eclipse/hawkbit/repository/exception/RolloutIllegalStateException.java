@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.exception.SpServerError;
  * the {@link RolloutIllegalStateException} is thrown when a rollout is changing
  * it's state which is not valid. E.g. trying to start a already running
  * rollout, or trying to resume a already finished rollout.
- * 
  */
 public class RolloutIllegalStateException extends AbstractServerRtException {
 
@@ -32,9 +31,8 @@ public class RolloutIllegalStateException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
-     * @param cause
-     *            of the exception
+     *
+     * @param cause of the exception
      */
     public RolloutIllegalStateException(final Throwable cause) {
         super(THIS_ERROR, cause);
@@ -42,11 +40,9 @@ public class RolloutIllegalStateException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
-     * @param cause
-     *            of the exception
+     *
+     * @param message of the exception
+     * @param cause of the exception
      */
     public RolloutIllegalStateException(final String message, final Throwable cause) {
         super(message, THIS_ERROR, cause);
@@ -54,9 +50,8 @@ public class RolloutIllegalStateException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
+     *
+     * @param message of the exception
      */
     public RolloutIllegalStateException(final String message) {
         super(message, THIS_ERROR);

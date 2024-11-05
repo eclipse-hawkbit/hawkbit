@@ -14,14 +14,12 @@ import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  *
- *
- *
  */
 public final class ArtifactBinaryNotFoundException extends AbstractServerRtException {
 
     /**
-    *
-    */
+     *
+     */
     private static final long serialVersionUID = 1L;
 
     /**
@@ -33,16 +31,14 @@ public final class ArtifactBinaryNotFoundException extends AbstractServerRtExcep
     }
 
     /**
-     * @param cause
-     *            for the exception
+     * @param cause for the exception
      */
     public ArtifactBinaryNotFoundException(final Throwable cause) {
         super(SpServerError.SP_ARTIFACT_LOAD_FAILED, cause);
     }
 
     /**
-     * @param message
-     *            of the error
+     * @param message of the error
      */
     public ArtifactBinaryNotFoundException(final String message) {
         super(message, SpServerError.SP_ARTIFACT_LOAD_FAILED);

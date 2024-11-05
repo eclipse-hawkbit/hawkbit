@@ -13,13 +13,11 @@ import org.eclipse.hawkbit.repository.model.Tag;
 
 /**
  * Builder for {@link Tag}.
- *
  */
 public interface TagBuilder {
 
     /**
-     * @param id
-     *            of the updatable entity
+     * @param id of the updatable entity
      * @return builder instance
      */
     TagUpdate update(long id);

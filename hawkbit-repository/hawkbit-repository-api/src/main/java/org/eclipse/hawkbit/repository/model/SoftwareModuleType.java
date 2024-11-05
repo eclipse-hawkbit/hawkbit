@@ -13,7 +13,6 @@ package org.eclipse.hawkbit.repository.model;
  * {@link SoftwareModuleType} is an abstract definition used in
  * {@link DistributionSetType}s and includes additional {@link SoftwareModule}
  * specific information.
- *
  */
 public interface SoftwareModuleType extends Type {
 

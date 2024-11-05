@@ -25,12 +25,10 @@ public class SoftwareModuleTypeNotInDistributionSetTypeException extends EntityN
 
     /**
      * Constructor
-     * 
-     * @param moduleTypeId
-     *            thats is not part of given {@link DistributionSetType}
-     * @param distributionSetTypeId
-     *            of the {@link DistributionSetType} where given
-     *            {@link SoftwareModuleType} is not part of
+     *
+     * @param moduleTypeId thats is not part of given {@link DistributionSetType}
+     * @param distributionSetTypeId of the {@link DistributionSetType} where given
+     *         {@link SoftwareModuleType} is not part of
      */
     public SoftwareModuleTypeNotInDistributionSetTypeException(final Long moduleTypeId,
             final Long distributionSetTypeId) {

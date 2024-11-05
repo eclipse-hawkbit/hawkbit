@@ -14,7 +14,6 @@ import lombok.Data;
 /**
  * Represents rollout or rollout group statuses and count of targets in each
  * status.
- * 
  */
 @Data
 public class TotalTargetCountActionStatus {

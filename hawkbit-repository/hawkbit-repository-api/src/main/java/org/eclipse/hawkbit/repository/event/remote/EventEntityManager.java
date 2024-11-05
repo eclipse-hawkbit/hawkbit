@@ -19,13 +19,10 @@ public interface EventEntityManager {
 
     /**
      * Find an entity by given id and return it.
-     * 
-     * @param tenant
-     *            the tenant
-     * @param id
-     *            the id
-     * @param entityType
-     *            the entity type
+     *
+     * @param tenant the tenant
+     * @param id the id
+     * @param entityType the entity type
      * @return the entity
      */
     <E extends TenantAwareBaseEntity> E findEntity(String tenant, Long id, Class<E> entityType);

@@ -12,12 +12,11 @@ package org.eclipse.hawkbit.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import org.eclipse.hawkbit.repository.exception.ArtifactEncryptionUnsupportedException;
-import org.junit.jupiter.api.Test;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.eclipse.hawkbit.repository.exception.ArtifactEncryptionUnsupportedException;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test class to verify that no {@link ArtifactEncryptionService} required beans

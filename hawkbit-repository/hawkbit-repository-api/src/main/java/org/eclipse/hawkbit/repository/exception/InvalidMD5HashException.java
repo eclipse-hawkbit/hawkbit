@@ -14,15 +14,12 @@ import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Thrown if MD5 checksum check fails.
- *
- *
- *
- *
  */
 public class InvalidMD5HashException extends AbstractServerRtException {
+
     /**
-    *
-    */
+     *
+     */
     private static final long serialVersionUID = 1L;
 
     /**
@@ -34,18 +31,15 @@ public class InvalidMD5HashException extends AbstractServerRtException {
     }
 
     /**
-     * @param message
-     *            of the error
-     * @param cause
-     *            for the exception
+     * @param message of the error
+     * @param cause for the exception
      */
     public InvalidMD5HashException(final String message, final Throwable cause) {
         super(message, SpServerError.SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH, cause);
     }
 
     /**
-     * @param message
-     *            of the error
+     * @param message of the error
      */
     public InvalidMD5HashException(final String message) {
         super(message, SpServerError.SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH);

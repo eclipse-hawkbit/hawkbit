@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * Defines the remote event for updating a {@link SoftwareModule}.
- *
  */
 public class SoftwareModuleUpdatedEvent extends RemoteEntityEvent<SoftwareModule> implements EntityUpdatedEvent {
 
@@ -29,11 +28,9 @@ public class SoftwareModuleUpdatedEvent extends RemoteEntityEvent<SoftwareModule
 
     /**
      * Constructor.
-     * 
-     * @param baseEntity
-     *            the software module
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param baseEntity the software module
+     * @param applicationId the origin application id
      */
     public SoftwareModuleUpdatedEvent(final SoftwareModule baseEntity, final String applicationId) {
         super(baseEntity, applicationId);

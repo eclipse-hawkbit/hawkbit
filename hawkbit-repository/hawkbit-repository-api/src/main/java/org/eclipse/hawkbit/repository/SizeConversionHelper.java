@@ -25,8 +25,7 @@ public final class SizeConversionHelper {
     /**
      * Convert byte values to human readable strings with units
      *
-     * @param byteValue
-     *            Value to convert in bytes
+     * @param byteValue Value to convert in bytes
      */
     public static String byteValueToReadableString(final long byteValue) {
         double outputValue = byteValue / 1024.0;

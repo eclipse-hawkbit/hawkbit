@@ -13,13 +13,11 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * Builder for {@link SoftwareModule}.
- *
  */
 public interface SoftwareModuleBuilder {
 
     /**
-     * @param id
-     *            of the updatable entity
+     * @param id of the updatable entity
      * @return builder instance
      */
     SoftwareModuleUpdate update(long id);

@@ -29,15 +29,11 @@ public class DistributionSetTagDeletedEvent extends RemoteIdEvent implements Ent
 
     /**
      * Constructor for json serialization.
-     * 
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param entityClass
-     *            the entity class
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param tenant the tenant
+     * @param entityId the entity id
+     * @param entityClass the entity class
+     * @param applicationId the origin application id
      */
 
     public DistributionSetTagDeletedEvent(final String tenant, final Long entityId,

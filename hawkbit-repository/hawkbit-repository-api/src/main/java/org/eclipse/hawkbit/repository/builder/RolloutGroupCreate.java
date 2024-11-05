@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
  * automatically, e.g. {@link BaseEntity#getCreatedAt()}.
  */
 public interface RolloutGroupCreate {
+
     /**
      * @param name for {@link Rollout#getName()}
      * @return updated builder instance
@@ -59,7 +60,7 @@ public interface RolloutGroupCreate {
 
     /**
      * @param confirmationRequired if confirmation is required for this rollout group (considered
-     *            with confirmation flow active)
+     *         with confirmation flow active)
      * @return updated builder instance
      */
     RolloutGroupCreate confirmationRequired(boolean confirmationRequired);

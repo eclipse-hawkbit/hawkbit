@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
  * Defines the remote event for updating a {@link SoftwareModuleType}.
- *
  */
 public class DistributionSetTypeUpdatedEvent extends RemoteEntityEvent<DistributionSetType>
         implements EntityUpdatedEvent {
@@ -31,11 +30,9 @@ public class DistributionSetTypeUpdatedEvent extends RemoteEntityEvent<Distribut
 
     /**
      * Constructor.
-     * 
-     * @param baseEntity
-     *            DistributionSetType
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param baseEntity DistributionSetType
+     * @param applicationId the origin application id
      */
     public DistributionSetTypeUpdatedEvent(final DistributionSetType baseEntity, final String applicationId) {
         super(baseEntity, applicationId);

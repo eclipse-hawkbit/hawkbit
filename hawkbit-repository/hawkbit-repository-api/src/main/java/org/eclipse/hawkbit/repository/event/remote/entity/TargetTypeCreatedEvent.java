@@ -14,10 +14,10 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 
 /**
  * Defines the remote event of creating a new {@link TargetType}.
- *
  */
 public class TargetTypeCreatedEvent extends RemoteEntityEvent<TargetType>
         implements EntityCreatedEvent {
+
     private static final long serialVersionUID = 1L;
 
     /**
@@ -30,10 +30,8 @@ public class TargetTypeCreatedEvent extends RemoteEntityEvent<TargetType>
     /**
      * Constructor.
      *
-     * @param baseEntity
-     *            the TargetType
-     * @param applicationId
-     *            the origin application id
+     * @param baseEntity the TargetType
+     * @param applicationId the origin application id
      */
     public TargetTypeCreatedEvent(final TargetType baseEntity, final String applicationId) {
         super(baseEntity, applicationId);

@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 
 /**
  * Managed filter entity.
- * 
+ *
  * Supported operators.
  * <ul>
  * <li>{@code Equal to : ==}</li>
@@ -38,9 +38,9 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
  * <li>{@code name==targetId1,description==plugAndPlay,updateStatus==UNKNOWN}</li>
  * <li>{@code name==targetId1 or description==plugAndPlay or updateStatus==UNKNOWN}</li>
  * </ul>
- *
  */
 public interface TargetFilterQuery extends TenantAwareBaseEntity {
+
     /**
      * Maximum length of query filter string.
      */

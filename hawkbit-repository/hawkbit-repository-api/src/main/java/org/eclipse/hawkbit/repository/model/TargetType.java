@@ -14,7 +14,6 @@ import java.util.Set;
 /**
  * A {@link TargetType} is an abstract definition for
  * {@link Target}
- *
  */
 public interface TargetType extends Type {
 
@@ -37,8 +36,7 @@ public interface TargetType extends Type {
      * Checks if the given {@link DistributionSetType} is in
      * {@link #getCompatibleDistributionSetTypes()}.
      *
-     * @param distributionSetTypeId
-     *            search by {@link DistributionSetType#getId()}
+     * @param distributionSetTypeId search by {@link DistributionSetType#getId()}
      * @return <code>true</code> if found
      */
     default boolean containsCompatibleDistributionSetType(final Long distributionSetTypeId) {
@@ -47,9 +45,8 @@ public interface TargetType extends Type {
 
     /**
      * Unassigns a {@link DistributionSetType} from {@link TargetType}
-     * 
-     * @param dsTypeId
-     *            that will be removed from {@link TargetType}
+     *
+     * @param dsTypeId that will be removed from {@link TargetType}
      * @return the resulting target type
      */
     TargetType removeDistributionSetType(final Long dsTypeId);

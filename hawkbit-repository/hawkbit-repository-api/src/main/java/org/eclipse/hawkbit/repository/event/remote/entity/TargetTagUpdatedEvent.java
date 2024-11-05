@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 
 /**
  * Defines the remote event for updating a {@link TargetTag}.
- *
  */
 public class TargetTagUpdatedEvent extends RemoteEntityEvent<TargetTag> implements EntityUpdatedEvent {
 
@@ -29,11 +28,9 @@ public class TargetTagUpdatedEvent extends RemoteEntityEvent<TargetTag> implemen
 
     /**
      * Constructor.
-     * 
-     * @param tag
-     *            the tag which is updated
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param tag the tag which is updated
+     * @param applicationId the origin application id
      */
     public TargetTagUpdatedEvent(final TargetTag tag, final String applicationId) {
         super(tag, applicationId);

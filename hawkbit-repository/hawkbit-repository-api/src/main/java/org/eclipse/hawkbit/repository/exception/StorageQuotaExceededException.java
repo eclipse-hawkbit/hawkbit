@@ -27,8 +27,7 @@ public class StorageQuotaExceededException extends AbstractServerRtException {
     /**
      * Creates a new StorageQuotaExceededException with a quota value.
      *
-     * @param exceededQuotaValue
-     *            Value by how much the quota was exceeded
+     * @param exceededQuotaValue Value by how much the quota was exceeded
      */
     public StorageQuotaExceededException(final long exceededQuotaValue) {
         super(createQuotaErrorMessage(exceededQuotaValue), errorType);
@@ -37,7 +36,7 @@ public class StorageQuotaExceededException extends AbstractServerRtException {
 
     /**
      * Get a readable string of size quota including unit
-     * 
+     *
      * @return file size quota with unit
      */
     public String getExceededQuotaValueString() {

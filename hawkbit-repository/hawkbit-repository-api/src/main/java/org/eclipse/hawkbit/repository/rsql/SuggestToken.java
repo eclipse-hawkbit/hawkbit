@@ -22,16 +22,12 @@ public class SuggestToken {
 
     /**
      * Constructor.
-     * 
-     * @param start
-     *            the character position of the start of the token
-     * @param end
-     *            the character position of the end of the token
-     * @param tokenImageName
-     *            the entered name of the token, e.g. could be the beginning of
-     *            the suggestion like 'na' or 'name'
-     * @param suggestion
-     *            the token suggestion
+     *
+     * @param start the character position of the start of the token
+     * @param end the character position of the end of the token
+     * @param tokenImageName the entered name of the token, e.g. could be the beginning of
+     *         the suggestion like 'na' or 'name'
+     * @param suggestion the token suggestion
      */
     public SuggestToken(final int start, final int end, final String tokenImageName, final String suggestion) {
         this.start = start;

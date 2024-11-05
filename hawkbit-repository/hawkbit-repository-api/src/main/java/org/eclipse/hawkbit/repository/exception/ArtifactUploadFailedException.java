@@ -14,8 +14,6 @@ import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  *
- *
- *
  */
 public final class ArtifactUploadFailedException extends AbstractServerRtException {
 
@@ -30,26 +28,22 @@ public final class ArtifactUploadFailedException extends AbstractServerRtExcepti
     }
 
     /**
-     * @param cause
-     *            for the exception
+     * @param cause for the exception
      */
     public ArtifactUploadFailedException(final Throwable cause) {
         super(SpServerError.SP_ARTIFACT_UPLOAD_FAILED, cause);
     }
 
     /**
-     * @param message
-     *            of the error
+     * @param message of the error
      */
     public ArtifactUploadFailedException(final String message) {
         super(message, SpServerError.SP_ARTIFACT_UPLOAD_FAILED);
     }
 
     /**
-     * @param message
-     *            for the error
-     * @param cause
-     *            of the error
+     * @param message for the error
+     * @param cause of the error
      */
     public ArtifactUploadFailedException(final String message, final Throwable cause) {
         super(message, SpServerError.SP_ARTIFACT_UPLOAD_FAILED, cause);

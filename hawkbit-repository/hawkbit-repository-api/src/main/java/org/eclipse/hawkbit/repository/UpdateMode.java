@@ -15,7 +15,7 @@ import java.util.Optional;
 /**
  * Enumerates the supported update modes. Each mode represents an attribute
  * update strategy.
- * 
+ *
  * @see ControllerManagement
  */
 public enum UpdateMode {

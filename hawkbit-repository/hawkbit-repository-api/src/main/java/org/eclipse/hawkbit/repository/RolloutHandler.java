@@ -46,7 +46,6 @@ public interface RolloutHandler {
      * case rollout was already {@link Rollout.RolloutStatus#RUNNING} which results
      * in status change {@link Rollout.RolloutStatus#DELETED} or hard delete from
      * the persistence otherwise.
-     *
      */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     void handleAll();

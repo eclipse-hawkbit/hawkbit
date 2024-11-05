@@ -13,12 +13,11 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 
 /**
  * Builder for {@link TargetType}.
- *
  */
 public interface TargetTypeBuilder {
+
     /**
-     * @param id
-     *            of the updatable entity
+     * @param id of the updatable entity
      * @return builder instance
      */
     TargetTypeUpdate update(long id);

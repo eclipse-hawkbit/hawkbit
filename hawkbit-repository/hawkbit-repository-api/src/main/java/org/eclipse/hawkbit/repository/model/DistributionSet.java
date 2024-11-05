@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -21,7 +20,6 @@ import java.util.Set;
  * <p>
  * A {@link Target} has exactly one target {@link DistributionSet} assigned.
  * </p>
- *
  */
 public interface DistributionSet extends NamedVersionedEntity {
 
@@ -31,7 +29,6 @@ public interface DistributionSet extends NamedVersionedEntity {
     DistributionSetType getType();
 
     /**
-     *
      * @return unmodifiableSet of {@link SoftwareModule}.
      */
     Set<SoftwareModule> getModules();
@@ -71,8 +68,7 @@ public interface DistributionSet extends NamedVersionedEntity {
     /**
      * Searches through modules for the given type.
      *
-     * @param type
-     *            to search for
+     * @param type to search for
      * @return SoftwareModule of given type
      */
     default Optional<SoftwareModule> findFirstModuleByType(final SoftwareModuleType type) {

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.model;
 
 /**
  * {@link Tag} of a {@link DistributionSet}.
- *
  */
 public interface DistributionSetTag extends Tag {
 

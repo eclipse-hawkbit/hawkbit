@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
  * updated
  */
 public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<RolloutGroup> {
+
     private static final long serialVersionUID = 1L;
 
     private final Long rolloutId;

@@ -15,9 +15,9 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 /**
  * TenantAwareEvent definition which is been published in case a rollout group
  * has been created for a specific rollout.
- *
  */
 public class RolloutGroupCreatedEvent extends AbstractRolloutGroupEvent implements EntityCreatedEvent {
+
     private static final long serialVersionUID = 1L;
 
     /**
@@ -29,13 +29,10 @@ public class RolloutGroupCreatedEvent extends AbstractRolloutGroupEvent implemen
 
     /**
      * Constructor
-     * 
-     * @param rolloutGroup
-     *            the updated rolloutGroup
-     * @param rolloutId
-     *            of the related rollout
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param rolloutGroup the updated rolloutGroup
+     * @param rolloutId of the related rollout
+     * @param applicationId the origin application id
      */
     public RolloutGroupCreatedEvent(final RolloutGroup rolloutGroup, final Long rolloutId, final String applicationId) {
         super(rolloutGroup, rolloutId, applicationId);

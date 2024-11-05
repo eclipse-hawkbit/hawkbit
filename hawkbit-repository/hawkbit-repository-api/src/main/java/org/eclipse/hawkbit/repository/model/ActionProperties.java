@@ -9,10 +9,10 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-
-import java.io.Serializable;
 
 /**
  * Holds properties for {@link Action}
@@ -34,8 +34,8 @@ public class ActionProperties implements Serializable {
 
     /**
      * Constructor
-     * @param action
-     *              the action to populate the properties from
+     *
+     * @param action the action to populate the properties from
      */
     public ActionProperties(final Action action) {
         this.id = action.getId();

@@ -13,7 +13,6 @@ package org.eclipse.hawkbit.repository.model;
  * The core functionality of a {@link Rollout} is the cascading processing of
  * (sub) deployment groups. The group defines under which conditions the
  * following group is processed.
- *
  */
 public interface RolloutGroup extends NamedEntity {
 
@@ -123,7 +122,6 @@ public interface RolloutGroup extends NamedEntity {
 
     /**
      * Rollout group state machine.
-     *
      */
     enum RolloutGroupStatus {
 

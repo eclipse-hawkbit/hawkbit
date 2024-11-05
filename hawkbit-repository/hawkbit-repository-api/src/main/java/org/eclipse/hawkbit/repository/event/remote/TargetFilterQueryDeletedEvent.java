@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 /**
- *
  * Defines the remote event of deleting a {@link TargetFilterQuery}.
  */
 public class TargetFilterQueryDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
@@ -29,15 +28,10 @@ public class TargetFilterQueryDeletedEvent extends RemoteIdEvent implements Enti
     }
 
     /**
-     *
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param entityClass
-     *            the entity class
-     * @param applicationId
-     *            the origin application id
+     * @param tenant the tenant
+     * @param entityId the entity id
+     * @param entityClass the entity class
+     * @param applicationId the origin application id
      */
     public TargetFilterQueryDeletedEvent(final String tenant, final Long entityId,
             final Class<? extends TenantAwareBaseEntity> entityClass, final String applicationId) {

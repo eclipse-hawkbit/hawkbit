@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 /**
  * Central service for defined limits of the repository.
- *
  */
 public interface QuotaManagement {
 

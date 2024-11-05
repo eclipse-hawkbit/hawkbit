@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
  * {@link Target} or is added by the update server itself. This can be the start
  * of the {@link Action} life cycle, the end and update notifications in
  * between.
- *
  */
 public interface ActionStatus extends TenantAwareBaseEntity {
 

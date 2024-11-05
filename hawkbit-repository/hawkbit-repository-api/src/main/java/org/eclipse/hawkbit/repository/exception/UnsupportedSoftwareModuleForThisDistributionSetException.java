@@ -33,16 +33,14 @@ public class UnsupportedSoftwareModuleForThisDistributionSetException extends Ab
     }
 
     /**
-     * @param cause
-     *            for the exception
+     * @param cause for the exception
      */
     public UnsupportedSoftwareModuleForThisDistributionSetException(final Throwable cause) {
         super(SpServerError.SP_DS_MODULE_UNSUPPORTED, cause);
     }
 
     /**
-     * @param message
-     *            of the error
+     * @param message of the error
      */
     public UnsupportedSoftwareModuleForThisDistributionSetException(final String message) {
         super(message, SpServerError.SP_DS_MODULE_UNSUPPORTED);

@@ -9,11 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.report.model;
 
-import lombok.Data;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import lombok.Data;
 
 /**
  * System usage stats element for a tenant.
@@ -31,8 +31,7 @@ public class TenantUsage {
     /**
      * Constructor.
      *
-     * @param tenantName
-     *            name of the tenant
+     * @param tenantName name of the tenant
      */
     public TenantUsage(final String tenantName) {
         this.tenantName = tenantName;
@@ -42,24 +41,22 @@ public class TenantUsage {
         return Collections.unmodifiableMap(getLazyUsageData());
     }
 
-    private Map<String, String> getLazyUsageData() {
-        if (usageData == null) {
-            usageData = new HashMap<>();
-        }
-        return usageData;
-    }
-
     /**
      * Add a key and value as usage data to the system usage stats.
-     * 
-     * @param key
-     *            the key to set
-     * @param value
-     *            the value to set
+     *
+     * @param key the key to set
+     * @param value the value to set
      * @return tenant stats element with new usage added
      */
     public TenantUsage addUsageData(final String key, final String value) {
         getLazyUsageData().put(key, value);
         return this;
+    }
+
+    private Map<String, String> getLazyUsageData() {
+        if (usageData == null) {
+            usageData = new HashMap<>();
+        }
+        return usageData;
     }
 }

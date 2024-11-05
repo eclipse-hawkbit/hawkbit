@@ -28,13 +28,10 @@ public class RolloutGroupUpdatedEvent extends AbstractRolloutGroupEvent implemen
 
     /**
      * Constructor
-     * 
-     * @param rolloutGroup
-     *            the updated rolloutGroup
-     * @param rolloutId
-     *            of the related rollout
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param rolloutGroup the updated rolloutGroup
+     * @param rolloutId of the related rollout
+     * @param applicationId the origin application id
      */
     public RolloutGroupUpdatedEvent(final RolloutGroup rolloutGroup, final Long rolloutId, final String applicationId) {
         super(rolloutGroup, rolloutId, applicationId);

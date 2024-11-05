@@ -14,9 +14,9 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
  * Defines the remote event of creating a new {@link TargetFilterQuery}.
- *
  */
 public class TargetFilterQueryCreatedEvent extends RemoteEntityEvent<TargetFilterQuery> implements EntityCreatedEvent {
+
     private static final long serialVersionUID = 1L;
 
     /**
@@ -28,11 +28,9 @@ public class TargetFilterQueryCreatedEvent extends RemoteEntityEvent<TargetFilte
 
     /**
      * Constructor.
-     * 
-     * @param baseEntity
-     *            the TargetFilterQuery
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param baseEntity the TargetFilterQuery
+     * @param applicationId the origin application id
      */
     public TargetFilterQueryCreatedEvent(final TargetFilterQuery baseEntity, final String applicationId) {
         super(baseEntity, applicationId);

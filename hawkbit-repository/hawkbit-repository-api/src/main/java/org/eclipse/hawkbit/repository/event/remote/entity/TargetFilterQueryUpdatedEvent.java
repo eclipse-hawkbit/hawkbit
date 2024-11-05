@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
  * Defines the remote event for updating a {@link TargetFilterQuery}.
- *
  */
 public class TargetFilterQueryUpdatedEvent extends RemoteEntityEvent<TargetFilterQuery> implements EntityUpdatedEvent {
 
@@ -29,11 +28,9 @@ public class TargetFilterQueryUpdatedEvent extends RemoteEntityEvent<TargetFilte
 
     /**
      * Constructor.
-     * 
-     * @param baseEntity
-     *            TargetFilterQuery entity
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param baseEntity TargetFilterQuery entity
+     * @param applicationId the origin application id
      */
     public TargetFilterQueryUpdatedEvent(final TargetFilterQuery baseEntity, final String applicationId) {
         super(baseEntity, applicationId);

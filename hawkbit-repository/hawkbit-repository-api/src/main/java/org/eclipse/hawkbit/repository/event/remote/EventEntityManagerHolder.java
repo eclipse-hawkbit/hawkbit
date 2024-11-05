@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * A singleton bean which holds the event entity manager to have autowiring in
  * the events.
- *
  */
 public final class EventEntityManagerHolder {
 

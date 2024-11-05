@@ -33,9 +33,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Service for {@link Artifact} management operations.
- *
  */
 public interface ArtifactManagement {
+
     /**
      * @return the total amount of local artifacts stored in the artifact
      *         management
@@ -47,23 +47,14 @@ public interface ArtifactManagement {
      * Persists artifact binary as provided by given InputStream. assign the
      * artifact in addition to given {@link SoftwareModule}.
      *
-     * @param artifactUpload
-     *            {@link ArtifactUpload} containing the upload information
-     * 
+     * @param artifactUpload {@link ArtifactUpload} containing the upload information
      * @return uploaded {@link Artifact}
-     *
-     * @throws EntityNotFoundException
-     *             if given software module does not exist
-     * @throws EntityAlreadyExistsException
-     *             if File with that name already exists in the Software Module
-     * @throws ArtifactUploadFailedException
-     *             if upload fails with internal server errors
-     * @throws InvalidMD5HashException
-     *             if check against provided MD5 checksum failed
-     * @throws InvalidSHA1HashException
-     *             if check against provided SHA1 checksum failed
-     * @throws ConstraintViolationException
-     *             if {@link ArtifactUpload} contains invalid values
+     * @throws EntityNotFoundException if given software module does not exist
+     * @throws EntityAlreadyExistsException if File with that name already exists in the Software Module
+     * @throws ArtifactUploadFailedException if upload fails with internal server errors
+     * @throws InvalidMD5HashException if check against provided MD5 checksum failed
+     * @throws InvalidSHA1HashException if check against provided SHA1 checksum failed
+     * @throws ConstraintViolationException if {@link ArtifactUpload} contains invalid values
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     Artifact create(@NotNull @Valid ArtifactUpload artifactUpload);
@@ -71,12 +62,9 @@ public interface ArtifactManagement {
     /**
      * Deletes {@link Artifact} based on given id.
      *
-     * @param id
-     *            of the {@link Artifact} that has to be deleted.
-     * @throws ArtifactDeleteFailedException
-     *             if deletion failed (MongoDB is not available)
-     * @throws EntityNotFoundException
-     *             if artifact with given ID does not exist
+     * @param id of the {@link Artifact} that has to be deleted.
+     * @throws ArtifactDeleteFailedException if deletion failed (MongoDB is not available)
+     * @throws EntityNotFoundException if artifact with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void delete(long id);
@@ -84,8 +72,7 @@ public interface ArtifactManagement {
     /**
      * Searches for {@link Artifact} with given {@link Identifiable}.
      *
-     * @param id
-     *            to search for
+     * @param id to search for
      * @return found {@link Artifact}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
@@ -95,14 +82,10 @@ public interface ArtifactManagement {
     /**
      * Find by artifact by software module id and filename.
      *
-     * @param filename
-     *            file name
-     * @param softwareModuleId
-     *            software module id.
+     * @param filename file name
+     * @param softwareModuleId software module id.
      * @return found {@link Artifact}
-     * 
-     * @throws EntityNotFoundException
-     *             if software module with given ID does not exist
+     * @throws EntityNotFoundException if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
@@ -111,8 +94,7 @@ public interface ArtifactManagement {
     /**
      * Find all local artifact by sha1 and return the first artifact.
      *
-     * @param sha1
-     *            the sha1
+     * @param sha1 the sha1
      * @return the first local artifact
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
@@ -122,8 +104,7 @@ public interface ArtifactManagement {
     /**
      * Searches for {@link Artifact} with given file name.
      *
-     * @param filename
-     *            to search for
+     * @param filename to search for
      * @return found List of {@link Artifact}s.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
@@ -133,14 +114,10 @@ public interface ArtifactManagement {
     /**
      * Get local artifact for a base software module.
      *
-     * @param pageReq
-     *            Pageable parameter
-     * @param softwareModuleId
-     *            software module id
+     * @param pageReq Pageable parameter
+     * @param softwareModuleId software module id
      * @return Page<Artifact>
-     * 
-     * @throws EntityNotFoundException
-     *             if software module with given ID does not exist
+     * @throws EntityNotFoundException if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<Artifact> findBySoftwareModule(@NotNull Pageable pageReq, long softwareModuleId);
@@ -148,12 +125,9 @@ public interface ArtifactManagement {
     /**
      * Count local artifacts for a base software module.
      *
-     * @param softwareModuleId
-     *            software module id
+     * @param softwareModuleId software module id
      * @return count by software module
-     * 
-     * @throws EntityNotFoundException
-     *             if software module with given ID does not exist
+     * @throws EntityNotFoundException if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     long countBySoftwareModule(long softwareModuleId);
@@ -161,14 +135,10 @@ public interface ArtifactManagement {
     /**
      * Loads {@link DbArtifact} from store for given {@link Artifact}.
      *
-     * @param sha1Hash
-     *            to search for
-     * @param softwareModuleId
-     *            software module id.
-     * @param isEncrypted
-     *            flag to indicate if artifact is encrypted.
+     * @param sha1Hash to search for
+     * @param softwareModuleId software module id.
+     * @param isEncrypted flag to indicate if artifact is encrypted.
      * @return loaded {@link DbArtifact}
-     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DOWNLOAD_ARTIFACT + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)

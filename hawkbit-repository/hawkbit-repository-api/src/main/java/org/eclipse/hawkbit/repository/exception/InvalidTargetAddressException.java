@@ -16,22 +16,19 @@ import org.eclipse.hawkbit.exception.SpServerError;
  * Exception which is thrown when trying to set an invalid target address.
  */
 public class InvalidTargetAddressException extends AbstractServerRtException {
+
     private static final long serialVersionUID = 1L;
 
     /**
-     * @param message
-     *            the message for this exception
+     * @param message the message for this exception
      */
     public InvalidTargetAddressException(final String message) {
         super(message, SpServerError.SP_REPO_INVALID_TARGET_ADDRESS);
     }
 
     /**
-     * 
-     * @param message
-     *            the message for this exception
-     * @param cause
-     *            the cause for this exception
+     * @param message the message for this exception
+     * @param cause the cause for this exception
      */
     public InvalidTargetAddressException(final String message, final Throwable cause) {
         super(message, SpServerError.SP_REPO_INVALID_TARGET_ADDRESS, cause);

@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.exception.SpServerError;
 /**
  * The {@link #InvalidTenantConfigurationKeyException} is thrown when an invalid
  * configuration key is used.
- *
  */
 public class InvalidTenantConfigurationKeyException extends AbstractServerRtException {
 
@@ -31,9 +30,8 @@ public class InvalidTenantConfigurationKeyException extends AbstractServerRtExce
 
     /**
      * Parameterized constructor.
-     * 
-     * @param cause
-     *            of the exception
+     *
+     * @param cause of the exception
      */
     public InvalidTenantConfigurationKeyException(final Throwable cause) {
         super(THIS_ERROR, cause);
@@ -41,11 +39,9 @@ public class InvalidTenantConfigurationKeyException extends AbstractServerRtExce
 
     /**
      * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
-     * @param cause
-     *            of the exception
+     *
+     * @param message of the exception
+     * @param cause of the exception
      */
     public InvalidTenantConfigurationKeyException(final String message, final Throwable cause) {
         super(message, THIS_ERROR, cause);
@@ -53,9 +49,8 @@ public class InvalidTenantConfigurationKeyException extends AbstractServerRtExce
 
     /**
      * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
+     *
+     * @param message of the exception
      */
     public InvalidTenantConfigurationKeyException(final String message) {
         super(message, THIS_ERROR);

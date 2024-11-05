@@ -25,48 +25,41 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
  * Builder to create a new {@link DistributionSetType} entry. Defines all fields
  * that can be set at creation time. Other fields are set by the repository
  * automatically, e.g. {@link BaseEntity#getCreatedAt()}.
- *
  */
 public interface DistributionSetTypeCreate {
 
     /**
-     * @param key
-     *            for {@link DistributionSetType#getKey()}
+     * @param key for {@link DistributionSetType#getKey()}
      * @return updated builder instance
      */
     DistributionSetTypeCreate key(@Size(min = 1, max = DistributionSetType.KEY_MAX_SIZE) @NotNull String key);
 
     /**
-     * @param name
-     *            for {@link DistributionSetType#getName()}
+     * @param name for {@link DistributionSetType#getName()}
      * @return updated builder instance
      */
     DistributionSetTypeCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
-     * @param description
-     *            for {@link DistributionSetType#getDescription()}
+     * @param description for {@link DistributionSetType#getDescription()}
      * @return updated builder instance
      */
     DistributionSetTypeCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
-     * @param colour
-     *            for {@link DistributionSetType#getColour()}
+     * @param colour for {@link DistributionSetType#getColour()}
      * @return updated builder instance
      */
     DistributionSetTypeCreate colour(@Size(max = DistributionSetType.COLOUR_MAX_SIZE) String colour);
 
     /**
-     * @param mandatory
-     *            for {@link DistributionSetType#getMandatoryModuleTypes()}
+     * @param mandatory for {@link DistributionSetType#getMandatoryModuleTypes()}
      * @return updated builder instance
      */
     DistributionSetTypeCreate mandatory(Collection<Long> mandatory);
 
     /**
-     * @param mandatory
-     *            for {@link DistributionSetType#getMandatoryModuleTypes()}
+     * @param mandatory for {@link DistributionSetType#getMandatoryModuleTypes()}
      * @return updated builder instance
      */
     default DistributionSetTypeCreate mandatory(final Long mandatory) {
@@ -74,8 +67,7 @@ public interface DistributionSetTypeCreate {
     }
 
     /**
-     * @param mandatory
-     *            for {@link DistributionSetType#getOptionalModuleTypes()}
+     * @param mandatory for {@link DistributionSetType#getOptionalModuleTypes()}
      * @return updated builder instance
      */
     default DistributionSetTypeCreate mandatory(final SoftwareModuleType mandatory) {
@@ -83,15 +75,13 @@ public interface DistributionSetTypeCreate {
     }
 
     /**
-     * @param optional
-     *            for {@link DistributionSetType#getOptionalModuleTypes()}
+     * @param optional for {@link DistributionSetType#getOptionalModuleTypes()}
      * @return updated builder instance
      */
     DistributionSetTypeCreate optional(Collection<Long> optional);
 
     /**
-     * @param optional
-     *            for {@link DistributionSetType#getOptionalModuleTypes()}
+     * @param optional for {@link DistributionSetType#getOptionalModuleTypes()}
      * @return updated builder instance
      */
     default DistributionSetTypeCreate optional(final Long optional) {
@@ -99,8 +89,7 @@ public interface DistributionSetTypeCreate {
     }
 
     /**
-     * @param optional
-     *            for {@link DistributionSetType#getOptionalModuleTypes()}
+     * @param optional for {@link DistributionSetType#getOptionalModuleTypes()}
      * @return updated builder instance
      */
     default DistributionSetTypeCreate optional(final SoftwareModuleType optional) {

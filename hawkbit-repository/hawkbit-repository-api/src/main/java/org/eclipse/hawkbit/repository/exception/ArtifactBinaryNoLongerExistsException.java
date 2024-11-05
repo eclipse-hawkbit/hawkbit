@@ -16,14 +16,14 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 /**
  * Exception indicating that an artifact's binary does not exist anymore. This
  * might be caused due to the soft deletion of a {@link SoftwareModule}.
- *
  */
 public class ArtifactBinaryNoLongerExistsException extends AbstractServerRtException {
+
     private static final SpServerError THIS_ERROR = SpServerError.SP_ARTIFACT_BINARY_DELETED;
 
     /**
-    *
-    */
+     *
+     */
     private static final long serialVersionUID = 1L;
 
     /**
@@ -35,9 +35,8 @@ public class ArtifactBinaryNoLongerExistsException extends AbstractServerRtExcep
 
     /**
      * Creates a new ArtifactBinaryGoneException error with cause.
-     * 
-     * @param cause
-     *            for the exception
+     *
+     * @param cause for the exception
      */
     public ArtifactBinaryNoLongerExistsException(final Throwable cause) {
         super(THIS_ERROR, cause);
@@ -45,9 +44,8 @@ public class ArtifactBinaryNoLongerExistsException extends AbstractServerRtExcep
 
     /**
      * Creates a new ArtifactBinaryGoneException error with message.
-     * 
-     * @param message
-     *            of the error
+     *
+     * @param message of the error
      */
     public ArtifactBinaryNoLongerExistsException(final String message) {
         super(message, THIS_ERROR);

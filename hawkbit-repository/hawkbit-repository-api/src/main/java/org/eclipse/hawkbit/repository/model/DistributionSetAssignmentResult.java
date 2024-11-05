@@ -9,16 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import lombok.Data;
-
 import java.util.Collections;
 import java.util.List;
+
+import lombok.Data;
 
 /**
  * A bean which holds a complex result of an service operation to combine the
  * information of an assignment and how much of the assignment has been done and
  * how much of the assignments had already been existed.
- *
  */
 @Data
 public class DistributionSetAssignmentResult extends AbstractAssignmentResult<Action> {
@@ -26,14 +25,11 @@ public class DistributionSetAssignmentResult extends AbstractAssignmentResult<Ac
     private final DistributionSet distributionSet;
 
     /**
-     *
      * Constructor.
-     *  @param distributionSet
-     *            that has been assigned
-     * @param alreadyAssigned
-     *            the the count of already assigned targets
-     * @param assigned
-     *            the assigned actions
+     *
+     * @param distributionSet that has been assigned
+     * @param alreadyAssigned the the count of already assigned targets
+     * @param assigned the assigned actions
      */
     public DistributionSetAssignmentResult(final DistributionSet distributionSet, final int alreadyAssigned,
             final List<? extends Action> assigned) {

@@ -13,13 +13,11 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 
 /**
  * Builder for {@link DistributionSetType}.
- *
  */
 public interface DistributionSetTypeBuilder {
 
     /**
-     * @param id
-     *            of the updatable entity
+     * @param id of the updatable entity
      * @return builder instance
      */
     DistributionSetTypeUpdate update(long id);

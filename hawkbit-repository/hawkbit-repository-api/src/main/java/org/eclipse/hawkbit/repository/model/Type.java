@@ -14,6 +14,7 @@ package org.eclipse.hawkbit.repository.model;
  * {@link SoftwareModuleType}s
  */
 public interface Type extends NamedEntity {
+
     /**
      * Maximum length of key.
      */

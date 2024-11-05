@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.util.Objects;
-
 import jakarta.validation.Valid;
 
 import lombok.Data;
@@ -31,43 +29,32 @@ public class DeploymentRequest {
      * Constructor that also accepts maintenance schedule parameters and checks for
      * validity of the specified maintenance schedule.
      *
-     * @param controllerId
-     *            for which the action is created.
-     * @param distributionSetId
-     *            of the distribution set that that should be assigned to the
-     *            controller.
-     * @param actionType
-     *            specified for the action.
-     * @param forceTime
-     *            at what time the type soft turns into forced.
-     * @param weight
-     *            the priority of an {@link Action}.
-     * @param maintenanceSchedule
-     *            is the cron expression to be used for scheduling maintenance
-     *            windows. Expression has 6 mandatory fields and 1 last optional
-     *            field: "second minute hour dayofmonth month weekday year"
-     * @param maintenanceWindowDuration
-     *            in HH:mm:ss format specifying the duration of a maintenance
-     *            window, for example 00:30:00 for 30 minutes
-     * @param maintenanceWindowTimeZone
-     *            is the time zone specified as +/-hh:mm offset from UTC, for
-     *            example +02:00 for CET summer time and +00:00 for UTC. The start
-     *            time of a maintenance window calculated based on the cron
-     *            expression is relative to this time zone.
-     *
-     * @param confirmationRequired
-     *            is a flag whether the confirmation should be required for the
-     *            resulting {@link Action} or not. In case the confirmation is not
-     *            required, the action will be automatically confirmed and put in
-     *            the
-     *            {@link org.eclipse.hawkbit.repository.model.Action.Status#RUNNING}
-     *            state. Otherwise the confirmation flow will be triggered
-     *            and the {@link Action} will stay in the
-     *            {@link org.eclipse.hawkbit.repository.model.Action.Status#WAIT_FOR_CONFIRMATION}
-     *            state until the confirmation is given. (Only considered
-     *            with CONFIRMATION_FLOW active via tenant configuration)
-     * @throws InvalidMaintenanceScheduleException
-     *             if the parameters do not define a valid maintenance schedule.
+     * @param controllerId for which the action is created.
+     * @param distributionSetId of the distribution set that that should be assigned to the
+     *         controller.
+     * @param actionType specified for the action.
+     * @param forceTime at what time the type soft turns into forced.
+     * @param weight the priority of an {@link Action}.
+     * @param maintenanceSchedule is the cron expression to be used for scheduling maintenance
+     *         windows. Expression has 6 mandatory fields and 1 last optional
+     *         field: "second minute hour dayofmonth month weekday year"
+     * @param maintenanceWindowDuration in HH:mm:ss format specifying the duration of a maintenance
+     *         window, for example 00:30:00 for 30 minutes
+     * @param maintenanceWindowTimeZone is the time zone specified as +/-hh:mm offset from UTC, for
+     *         example +02:00 for CET summer time and +00:00 for UTC. The start
+     *         time of a maintenance window calculated based on the cron
+     *         expression is relative to this time zone.
+     * @param confirmationRequired is a flag whether the confirmation should be required for the
+     *         resulting {@link Action} or not. In case the confirmation is not
+     *         required, the action will be automatically confirmed and put in
+     *         the
+     *         {@link org.eclipse.hawkbit.repository.model.Action.Status#RUNNING}
+     *         state. Otherwise the confirmation flow will be triggered
+     *         and the {@link Action} will stay in the
+     *         {@link org.eclipse.hawkbit.repository.model.Action.Status#WAIT_FOR_CONFIRMATION}
+     *         state until the confirmation is given. (Only considered
+     *         with CONFIRMATION_FLOW active via tenant configuration)
+     * @throws InvalidMaintenanceScheduleException if the parameters do not define a valid maintenance schedule.
      */
     public DeploymentRequest(final String controllerId, final Long distributionSetId, final ActionType actionType,
             final long forceTime, final Integer weight, final String maintenanceSchedule,

@@ -43,7 +43,7 @@ public abstract class AbstractActionEvent extends RemoteEntityEvent<Action> {
 
     /**
      * Constructor
-     * 
+     *
      * @param action the created action
      * @param targetId targetId identifier (optional)
      * @param rolloutId rollout identifier (optional)

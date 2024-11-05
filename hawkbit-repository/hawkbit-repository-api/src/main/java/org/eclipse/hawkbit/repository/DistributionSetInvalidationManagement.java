@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
 /**
  * A DistributionSetInvalidationManagement service provides operations to
  * invalidate {@link DistributionSet}s.
- *
  */
 public interface DistributionSetInvalidationManagement {
 
@@ -26,9 +25,8 @@ public interface DistributionSetInvalidationManagement {
      * can not be undone. Optionally, all rollouts and actions referring this
      * {@link DistributionSet} can be canceled.
      *
-     * @param distributionSetInvalidation
-     *            defines the {@link DistributionSet} and options what should be
-     *            canceled
+     * @param distributionSetInvalidation defines the {@link DistributionSet} and options what should be
+     *         canceled
      */
     void invalidateDistributionSet(final DistributionSetInvalidation distributionSetInvalidation);
 
@@ -36,10 +34,8 @@ public interface DistributionSetInvalidationManagement {
      * Counts all entities for a list of {@link DistributionSet}s that will be
      * canceled when invalidation is called for those {@link DistributionSet}s.
      *
-     *
-     * @param distributionSetInvalidation
-     *            defines the {@link DistributionSet} and options what should be
-     *            canceled
+     * @param distributionSetInvalidation defines the {@link DistributionSet} and options what should be
+     *         canceled
      * @return The {@link DistributionSetInvalidationCount} object that holds
      *         information about the count of affected rollouts,
      *         auto-assignments and actions

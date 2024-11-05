@@ -14,10 +14,10 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 
 /**
  * Defines the remote event of creating a new {@link DistributionSetType}.
- *
  */
 public class DistributionSetTypeCreatedEvent extends RemoteEntityEvent<DistributionSetType>
         implements EntityCreatedEvent {
+
     private static final long serialVersionUID = 1L;
 
     /**
@@ -29,11 +29,9 @@ public class DistributionSetTypeCreatedEvent extends RemoteEntityEvent<Distribut
 
     /**
      * Constructor.
-     * 
-     * @param baseEntity
-     *            the DistributionSetType
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param baseEntity the DistributionSetType
+     * @param applicationId the origin application id
      */
     public DistributionSetTypeCreatedEvent(final DistributionSetType baseEntity, final String applicationId) {
         super(baseEntity, applicationId);

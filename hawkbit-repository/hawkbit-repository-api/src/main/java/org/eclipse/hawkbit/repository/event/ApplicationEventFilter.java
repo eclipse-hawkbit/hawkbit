@@ -14,15 +14,12 @@ import org.springframework.context.ApplicationEvent;
 /**
  * ApplicationEventFilter for hawkBit internal {@link ApplicationEvent}
  * publishing.
- *
  */
 @FunctionalInterface
 public interface ApplicationEventFilter {
 
     /**
-     * 
-     * @param event
-     *            to verify
+     * @param event to verify
      * @return true if event should be filtered
      */
     boolean filter(final ApplicationEvent event);

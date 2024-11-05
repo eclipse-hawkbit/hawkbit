@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.model;
 
 /**
  * {@link AutoConfirmationStatus} of a {@link Target}.
- *
  */
 public interface AutoConfirmationStatus extends BaseEntity {
 

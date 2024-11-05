@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * Defines the remote event for updating a {@link Target}.
- *
  */
 public class TargetUpdatedEvent extends RemoteEntityEvent<Target> implements EntityUpdatedEvent {
 
@@ -29,11 +28,9 @@ public class TargetUpdatedEvent extends RemoteEntityEvent<Target> implements Ent
 
     /**
      * Constructor.
-     * 
-     * @param baseEntity
-     *            Target entity
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param baseEntity Target entity
+     * @param applicationId the origin application id
      */
     public TargetUpdatedEvent(final Target baseEntity, final String applicationId) {
         super(baseEntity, applicationId);

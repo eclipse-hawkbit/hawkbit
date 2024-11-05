@@ -14,9 +14,9 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * Defines the remote event of creating a new {@link SoftwareModule}.
- *
  */
 public class SoftwareModuleCreatedEvent extends RemoteEntityEvent<SoftwareModule> implements EntityCreatedEvent {
+
     private static final long serialVersionUID = 1L;
 
     /**
@@ -28,11 +28,9 @@ public class SoftwareModuleCreatedEvent extends RemoteEntityEvent<SoftwareModule
 
     /**
      * Constructor.
-     * 
-     * @param baseEntity
-     *            the software module
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param baseEntity the software module
+     * @param applicationId the origin application id
      */
     public SoftwareModuleCreatedEvent(final SoftwareModule baseEntity, final String applicationId) {
         super(baseEntity, applicationId);
