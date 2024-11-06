@@ -443,4 +443,19 @@ public final class FileStreamingUtil {
 
     }
 
+    /**
+     * Listener for progress on artifact file streaming.
+     */
+    @FunctionalInterface
+    public interface FileStreamingProgressListener {
+
+        /**
+         * Called multiple times during streaming.
+         *
+         * @param requestedBytes requested bytes of the request
+         * @param shippedBytesSinceLast since the last report
+         * @param shippedBytesOverall during the request
+         */
+        void progress(long requestedBytes, long shippedBytesSinceLast, long shippedBytesOverall);
+    }
 }

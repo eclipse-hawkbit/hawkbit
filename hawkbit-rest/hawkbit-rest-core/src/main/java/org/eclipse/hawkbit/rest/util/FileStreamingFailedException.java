@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.rest.util;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
@@ -17,24 +19,8 @@ import org.eclipse.hawkbit.exception.SpServerError;
  */
 public final class FileStreamingFailedException extends AbstractServerRtException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Creates a new FileUploadFailedException with
-     * {@link SpServerError#SP_ARTIFACT_LOAD_FAILED} error.
-     */
-    public FileStreamingFailedException() {
-        super(SpServerError.SP_ARTIFACT_LOAD_FAILED);
-    }
-
-    /**
-     * Constructor with Throwable.
-     *
-     * @param cause for the exception
-     */
-    public FileStreamingFailedException(final Throwable cause) {
-        super(SpServerError.SP_ARTIFACT_LOAD_FAILED, cause);
-    }
 
     /**
      * Constructor with error string.

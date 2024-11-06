@@ -9,21 +9,20 @@
  */
 package org.eclipse.hawkbit.rest.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * Thrown if a multi part exception occurred.
+ * Thrown if a multipart exception occurred.
  */
 public final class MultiPartFileUploadException extends AbstractServerRtException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
-    /**
-     * @param cause for the exception
-     */
     public MultiPartFileUploadException(final Throwable cause) {
         super(cause.getMessage(), SpServerError.SP_ARTIFACT_UPLOAD_FAILED, cause);
     }
-
 }

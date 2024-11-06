@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.rest;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
-import org.eclipse.hawkbit.rest.filter.ExcludePathAwareShallowETagFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -55,7 +54,7 @@ public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTes
         // CharacterEncodingFilter is needed for the encoding properties to be imported properly
         createMvcWebAppContext.addFilter(characterEncodingFilter);
         createMvcWebAppContext.addFilter(
-                new ExcludePathAwareShallowETagFilter("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
+                new RestConfiguration.ExcludePathAwareShallowETagFilter("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
                         "/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/**",
                         "/api/v1/downloadserver/**"));
 

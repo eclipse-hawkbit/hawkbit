@@ -11,14 +11,14 @@ package org.eclipse.hawkbit.rest.util;
 
 import java.util.Arrays;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * Utility class for the Rest Source API.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class HttpUtil {
-
-    private HttpUtil() {
-
-    }
 
     /**
      * Checks given CSV string for defined match value or wildcard.
@@ -32,5 +32,4 @@ public final class HttpUtil {
         Arrays.sort(matchValues);
         return Arrays.binarySearch(matchValues, toMatch) > -1 || Arrays.binarySearch(matchValues, "*") > -1;
     }
-
 }

@@ -38,7 +38,7 @@ import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
-import org.eclipse.hawkbit.rest.data.ResponseList;
+import org.eclipse.hawkbit.rest.json.model.ResponseList;
 import org.springframework.hateoas.Link;
 
 /**

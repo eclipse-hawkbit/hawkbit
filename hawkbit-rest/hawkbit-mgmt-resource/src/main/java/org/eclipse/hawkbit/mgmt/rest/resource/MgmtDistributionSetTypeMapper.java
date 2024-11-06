@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.rest.data.ResponseList;
+import org.eclipse.hawkbit.rest.json.model.ResponseList;
 
 /**
  * A mapper which maps repository model to RESTful model representation and

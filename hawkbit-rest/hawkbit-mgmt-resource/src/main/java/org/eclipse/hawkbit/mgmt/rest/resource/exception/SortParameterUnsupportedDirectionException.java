@@ -7,36 +7,26 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.rest.exception;
+package org.eclipse.hawkbit.mgmt.rest.resource.exception;
+
+import java.io.Serial;
 
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * Exception used by the REST API in case of invalid sort parameter direction
- * name.
+ * Exception used by the REST API in case of invalid sort parameter direction name.
  */
 public class SortParameterUnsupportedDirectionException extends AbstractServerRtException {
 
-    /**
-     *
-     */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates a new SortParameterSyntaxErrorException.
-     */
-    public SortParameterUnsupportedDirectionException() {
-        super(SpServerError.SP_REST_SORT_PARAM_INVALID_DIRECTION);
-    }
-
-    /**
-     * Creates a new SortParameterSyntaxErrorException with
-     * {@link SpServerError#SP_REST_SORT_PARAM_INVALID_DIRECTION} error.
+     * Creates a new SortParameterSyntaxErrorException with {@link SpServerError#SP_REST_SORT_PARAM_INVALID_DIRECTION} error.
      *
-     * @param cause the cause (which is saved for later retrieval by the
-     *         getCause() method). (A null value is permitted, and indicates
-     *         that the cause is nonexistent or unknown.)
+     * @param cause the cause (which is saved for later retrieval by the getCause() method). (A null value is permitted, and indicates
+     *              that the cause is nonexistent or unknown.)
      */
     public SortParameterUnsupportedDirectionException(final Throwable cause) {
         super(SpServerError.SP_REST_SORT_PARAM_INVALID_DIRECTION, cause);

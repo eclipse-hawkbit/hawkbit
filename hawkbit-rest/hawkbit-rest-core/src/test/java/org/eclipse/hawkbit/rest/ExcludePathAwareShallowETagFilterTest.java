@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.rest.filter;
+package org.eclipse.hawkbit.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mockingDetails;
@@ -55,7 +55,7 @@ public class ExcludePathAwareShallowETagFilterTest {
         when(servletRequestMock.getContextPath()).thenReturn(knownContextPath);
         when(servletRequestMock.getRequestURI()).thenReturn(knownUri);
 
-        final ExcludePathAwareShallowETagFilter filterUnderTest = new ExcludePathAwareShallowETagFilter(
+        final RestConfiguration.ExcludePathAwareShallowETagFilter filterUnderTest = new RestConfiguration.ExcludePathAwareShallowETagFilter(
                 antPathExclusion);
 
         filterUnderTest.doFilterInternal(servletRequestMock, servletResponseMock, filterChainMock);
@@ -77,7 +77,7 @@ public class ExcludePathAwareShallowETagFilterTest {
         when(servletRequestMock.getContextPath()).thenReturn(knownContextPath);
         when(servletRequestMock.getRequestURI()).thenReturn(knownUri);
 
-        final ExcludePathAwareShallowETagFilter filterUnderTest = new ExcludePathAwareShallowETagFilter(
+        final RestConfiguration.ExcludePathAwareShallowETagFilter filterUnderTest = new RestConfiguration.ExcludePathAwareShallowETagFilter(
                 antPathExclusion);
 
         final ArgumentCaptor<HttpServletResponse> responseArgumentCaptor = ArgumentCaptor

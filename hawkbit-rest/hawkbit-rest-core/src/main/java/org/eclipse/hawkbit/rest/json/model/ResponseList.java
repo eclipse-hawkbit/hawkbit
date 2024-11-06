@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.rest.data;
+package org.eclipse.hawkbit.rest.json.model;
 
 import java.util.Collection;
 import java.util.Iterator;
