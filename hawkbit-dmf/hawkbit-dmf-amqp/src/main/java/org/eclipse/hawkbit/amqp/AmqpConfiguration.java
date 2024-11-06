@@ -52,8 +52,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.ErrorHandler;
 
 /**
- * Spring configuration for AMQP based DMF communication for indirect device
- * integration.
+ * Spring configuration for AMQP based DMF communication for indirect device integration.
  */
 @Slf4j
 @EnableConfigurationProperties({ AmqpProperties.class, AmqpDeadletterProperties.class })
@@ -63,13 +62,10 @@ public class AmqpConfiguration {
 
     @Autowired
     private AmqpProperties amqpProperties;
-
     @Autowired
     private AmqpDeadletterProperties amqpDeadletterProperties;
-
     @Autowired
     private ConnectionFactory rabbitConnectionFactory;
-
     @Autowired(required = false)
     private ServiceMatcher serviceMatcher;
 
@@ -82,8 +78,9 @@ public class AmqpConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ErrorHandler errorHandler(final List<AmqpErrorHandler> handlers) {
-        return new DelegatingConditionalErrorHandler(handlers, new ConditionalRejectingErrorHandler(
-                new DelayedRequeueExceptionStrategy(amqpProperties.getRequeueDelay())));
+        return new DelegatingConditionalErrorHandler(
+                handlers,
+                new ConditionalRejectingErrorHandler(new DelayedRequeueExceptionStrategy(amqpProperties.getRequeueDelay())));
     }
 
     /**
@@ -160,7 +157,9 @@ public class AmqpConfiguration {
      */
     @Bean
     public Queue dmfReceiverQueue() {
-        return new Queue(amqpProperties.getReceiverQueue(), true, false, false,
+        return new Queue(
+                amqpProperties.getReceiverQueue(),
+                true, false, false,
                 amqpDeadletterProperties.getDeadLetterExchangeArgs(amqpProperties.getDeadLetterExchange()));
     }
 
@@ -172,8 +171,10 @@ public class AmqpConfiguration {
      */
     @Bean
     public Queue authenticationReceiverQueue() {
-        return QueueBuilder.nonDurable(amqpProperties.getAuthenticationReceiverQueue()).autoDelete()
-                .withArguments(getTTLMaxArgsAuthenticationQueue()).build();
+        return QueueBuilder.nonDurable(amqpProperties.getAuthenticationReceiverQueue())
+                .autoDelete()
+                .withArguments(getTTLMaxArgsAuthenticationQueue())
+                .build();
     }
 
     /**
@@ -195,27 +196,6 @@ public class AmqpConfiguration {
     @Bean
     public Binding bindDmfSenderExchangeToDmfQueue() {
         return BindingBuilder.bind(dmfReceiverQueue()).to(dmfSenderExchange());
-    }
-
-    /**
-     * Create authentication exchange.
-     *
-     * @return the fanout exchange
-     */
-    @Bean
-    public FanoutExchange authenticationExchange() {
-        return new FanoutExchange(AmqpSettings.AUTHENTICATION_EXCHANGE, false, true);
-    }
-
-    /**
-     * Create the Binding {@link AmqpConfiguration#authenticationReceiverQueue()} to
-     * {@link AmqpConfiguration#authenticationExchange()}.
-     *
-     * @return the binding and create the queue and exchange
-     */
-    @Bean
-    public Binding bindAuthenticationSenderExchangeToAuthenticationQueue() {
-        return BindingBuilder.bind(authenticationReceiverQueue()).to(authenticationExchange());
     }
 
     /**
@@ -259,7 +239,8 @@ public class AmqpConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public AmqpMessageHandlerService amqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
+    public AmqpMessageHandlerService amqpMessageHandlerService(
+            final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
             final ControllerManagement controllerManagement, final EntityFactory entityFactory,
             final SystemSecurityContext systemSecurityContext,

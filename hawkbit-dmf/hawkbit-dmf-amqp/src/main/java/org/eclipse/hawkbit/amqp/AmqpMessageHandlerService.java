@@ -93,7 +93,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      * @param tenantConfigurationManagement the tenant configuration Management
      * @param confirmationManagement the confirmation management
      */
-    public AmqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
+    public AmqpMessageHandlerService(
+            final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
             final ControllerManagement controllerManagement, final EntityFactory entityFactory,
             final SystemSecurityContext systemSecurityContext,
