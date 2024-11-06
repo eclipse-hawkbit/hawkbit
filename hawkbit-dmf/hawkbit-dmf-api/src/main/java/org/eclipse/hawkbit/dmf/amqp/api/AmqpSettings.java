@@ -19,5 +19,4 @@ import lombok.NoArgsConstructor;
 public final class AmqpSettings {
 
     public static final String DMF_EXCHANGE = "dmf.exchange";
-    public static final String AUTHENTICATION_EXCHANGE = "authentication.exchange";
 }
