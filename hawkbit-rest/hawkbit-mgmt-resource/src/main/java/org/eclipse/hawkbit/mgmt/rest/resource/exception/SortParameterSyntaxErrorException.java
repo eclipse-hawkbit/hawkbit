@@ -7,7 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.rest.exception;
+package org.eclipse.hawkbit.mgmt.rest.resource.exception;
+
+import java.io.Serial;
 
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
@@ -17,14 +19,11 @@ import org.eclipse.hawkbit.exception.SpServerError;
  */
 public class SortParameterSyntaxErrorException extends AbstractServerRtException {
 
-    /**
-     *
-     */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates a new SortParameterSyntaxErrorException with
-     * {@link SpServerError#SP_REST_SORT_PARAM_SYNTAX} error.
+     * Creates a new SortParameterSyntaxErrorException with {@link SpServerError#SP_REST_SORT_PARAM_SYNTAX} error.
      */
     public SortParameterSyntaxErrorException() {
         super(SpServerError.SP_REST_SORT_PARAM_SYNTAX);

@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.rest.util;
+package org.eclipse.hawkbit.mgmt.rest.resource.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -17,16 +17,13 @@ import java.util.List;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterUnsupportedDirectionException;
 import org.eclipse.hawkbit.repository.TargetFields;
-import org.eclipse.hawkbit.rest.exception.SortParameterSyntaxErrorException;
-import org.eclipse.hawkbit.rest.exception.SortParameterUnsupportedDirectionException;
-import org.eclipse.hawkbit.rest.exception.SortParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterSyntaxErrorException;
+import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterUnsupportedFieldException;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort.Order;
 
-/**
- *
- */
 @Feature("Component Tests - Management API")
 @Story("Sorting parameter")
 public class SortUtilityTest {

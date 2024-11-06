@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.rest.data.ResponseList;
+import org.eclipse.hawkbit.rest.json.model.ResponseList;
 
 /**
  * A mapper which maps repository model to RESTful model representation and

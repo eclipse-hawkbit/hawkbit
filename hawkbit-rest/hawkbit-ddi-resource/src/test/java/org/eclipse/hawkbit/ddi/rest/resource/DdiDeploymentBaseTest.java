@@ -711,7 +711,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 Collections.singletonList("test"));
         postDeploymentFeedback("1080", action.getId(), missingResultInFeedback, status().isBadRequest())
                 .andExpect(jsonPath("$.*", hasSize(3)))
-                .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getCanonicalName())));
+                .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getName())));
     }
 
     @Test
@@ -736,7 +736,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         postDeploymentFeedback("1080", action.getId(), missingFinishedResultInFeedback, status().isBadRequest())
                 .andExpect(jsonPath("$.*", hasSize(3)))
-                .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getCanonicalName())));
+                .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getName())));
     }
 
     public long countActionStatusAll() {

@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.rest.resource;
+package org.eclipse.hawkbit.mgmt.rest.resource.util;
 
 import java.io.IOException;
 
@@ -25,18 +25,18 @@ public final class ResourceUtility {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    static ExceptionInfo convertException(final String jsonExceptionResponse)
+    public static ExceptionInfo convertException(final String jsonExceptionResponse)
             throws JsonParseException, JsonMappingException, IOException {
         return mapper.readValue(jsonExceptionResponse, ExceptionInfo.class);
     }
 
-    static MgmtArtifact convertArtifactResponse(final String jsonResponse)
+    public static MgmtArtifact convertArtifactResponse(final String jsonResponse)
             throws JsonParseException, JsonMappingException, IOException {
         return mapper.readValue(jsonResponse, MgmtArtifact.class);
 
     }
 
-    static <T> PagedList<T> mapResponse(final Class<T> clazz, final String responseBody)
+    public static <T> PagedList<T> mapResponse(final Class<T> clazz, final String responseBody)
             throws JsonParseException, JsonMappingException, IOException {
         return mapper.readValue(responseBody, PagedList.class);
     }

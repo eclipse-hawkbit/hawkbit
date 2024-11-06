@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
+import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;

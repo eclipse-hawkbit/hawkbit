@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.rest.data.ResponseList;
+import org.eclipse.hawkbit.rest.json.model.ResponseList;
 
 /**
  * A mapper which maps repository model to RESTful model representation and

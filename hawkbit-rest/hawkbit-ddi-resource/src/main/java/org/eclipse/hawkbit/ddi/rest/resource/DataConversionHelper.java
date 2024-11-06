@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.rest.data.ResponseList;
+import org.eclipse.hawkbit.rest.json.model.ResponseList;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
