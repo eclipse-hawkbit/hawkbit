@@ -8,6 +8,9 @@ on:
       - '.3rd-party/**'
       - 'site/**'
   pull_request:
+    paths-ignore:
+      - '.3rd-party/**'
+      - 'site/**'
 
 jobs:
   verify:
