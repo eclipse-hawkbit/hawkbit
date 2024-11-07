@@ -17,10 +17,10 @@ import java.util.List;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterUnsupportedDirectionException;
-import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterSyntaxErrorException;
+import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterUnsupportedDirectionException;
 import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.TargetFields;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort.Order;
 

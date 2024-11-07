@@ -15,10 +15,10 @@ import java.util.StringTokenizer;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterUnsupportedDirectionException;
-import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterSyntaxErrorException;
+import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterUnsupportedDirectionException;
 import org.eclipse.hawkbit.mgmt.rest.resource.exception.SortParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 

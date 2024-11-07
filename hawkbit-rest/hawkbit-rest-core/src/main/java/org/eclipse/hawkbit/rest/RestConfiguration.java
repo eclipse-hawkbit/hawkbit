@@ -215,7 +215,8 @@ public class RestConfiguration {
          * @return the entity to be responded containing the exception information as entity.
          */
         @ExceptionHandler(ConstraintViolationException.class)
-        public ResponseEntity<ExceptionInfo> handleConstraintViolationException(final HttpServletRequest request, final ConstraintViolationException ex) {
+        public ResponseEntity<ExceptionInfo> handleConstraintViolationException(final HttpServletRequest request,
+                final ConstraintViolationException ex) {
             logRequest(request, ex);
 
             final ExceptionInfo response = new ExceptionInfo();
