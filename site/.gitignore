@@ -2,6 +2,7 @@
 content/rest-api/*.json
 content/rest-api/*.html
 content/rest-api/*.yaml
+static/rest-api/*.html
 # npm leftover
 node_modules
 package.json

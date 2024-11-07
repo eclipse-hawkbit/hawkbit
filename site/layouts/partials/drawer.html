@@ -1,89 +1,82 @@
 <nav aria-label="Navigation">
-    <a class="project" href="{{ with .Site.BaseURL }}{{ . }}{{ else }}{{ .Site.BaseURL }}{{ end }}">
-        <div class="banner">
-            {{ with .Site.Params.logo }}
-            <div class="logo">
-                <img src="{{ $.Site.BaseURL }}{{ . }}">
-            </div>
-            {{ end }}
-            <div class="name">
-                <strong>{{ .Site.Title }}&trade; {{ with .Site.Params.version }}<span class="version">{{ . }}</span>{{
-                    end }}</strong>
-                {{ with .Scratch.Get "repo_id" }}
-                <br>
-                {{ . }}
-                {{ end }}
-            </div>
+  <a href="{{ with .Site.BaseURL }}{{ . }}{{ else }}{{ .Site.BaseURL }}{{ end }}" class="project">
+    <div class="banner">
+      {{ with .Site.Params.logo }}
+        <div class="logo">
+          <img src="{{ $.Site.BaseURL }}{{ . }}">
         </div>
-    </a>
-
-    <div class="scrollable">
-        <div class="wrapper">
-            {{ if (eq (trim .Site.Params.provider " " | lower) "github") | and (isset .Site.Params "repo_url") }}
-            <ul class="repo">
-                <li class="repo-download">
-                    <a data-action="sandbox" href="https://hawkbit.eclipseprojects.io" target="_blank"
-                       title="hawkBit Sandbox">
-                        <i class="fas fa-desktop"></i> &nbsp; Sandbox
-                    </a>
-                </li>
-                <li class="repo-stars">
-                    <a data-action="star" href="{{ .Site.Params.repo_url }}/stargazers" target="_blank"
-                       title="Stargazers">
-                        <i class="icon icon-star"></i> Stars
-                        <span class="count">&ndash;</span>
-                    </a>
-                </li>
-            </ul>
-            <hr>
-            {{ end }}
-
-            <div class="toc">
-                {{ if gt (len .Site.Menus.main) 0 }}
-                <ul>
-                    {{ partial "nav" . }}
-                </ul>
-                {{ end }}
-
-                {{ if isset .Site.Params "author" }}
-                <hr>
-
-                <ul>
-                    <li>
-                        <a href="https://opensource.org/licenses/EPL-2.0" target="_blank" title="License">
-                            <img src="https://img.shields.io/badge/License-EPL%202.0-green.svg"/>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="https://github.com/eclipse-hawkbit/hawkbit/actions/workflows/verify.yml"
-                           target="_blank" title="License">
-                            <img src="https://github.com/eclipse-hawkbit/hawkbit/actions/workflows/verify.yml/badge.svg?branch=master"/>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="https://sonarcloud.io/summary/new_code?id=eclipse-hawkbit_hawkbit"
-                           target="_blank" title="Sonarcloud Status">
-                            <img src="https://sonarcloud.io/api/project_badges/measure?project=eclipse-hawkbit_hawkbit&metric=alert_status"/>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="https://search.maven.org/search?q=g:org.eclipse.hawkbit" target="_blank"
-                           title="Maven Central Status">
-                            <img src="https://img.shields.io/maven-central/v/org.eclipse.hawkbit/hawkbit-parent?label=maven-central&color=blue"/>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="https://gitter.im/eclipse/hawkbit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"
-                           target="_blank" title="Chat on Gitter">
-                            <img src="https://badges.gitter.im/eclipse/hawkbit.svg"/>
-                        </a>
-                    </li>
-                </ul>
-                {{ end }}
-            </div>
-        </div>
+      {{ end }}
+      <div class="name">
+        <strong>{{ .Site.Title }}&trade; {{ with .Site.Params.version }}<span class="version">{{ . }}</span>{{ end }}</strong>
+        {{ with .Scratch.Get "repo_id" }}
+          <br>
+          {{ . }}
+        {{ end }}
+      </div>
     </div>
+  </a>
+
+  <div class="scrollable">
+    <div class="wrapper">
+      {{ if (eq (trim .Site.Params.provider " " | lower) "github") | and (isset .Site.Params "repo_url") }}
+        <ul class="repo">
+          <li class="repo-download">
+            <a href="https://hawkbit.eclipseprojects.io" target="_blank" title="hawkBit Sandbox" data-action="sandbox">
+              <i class="fas fa-desktop"></i> &nbsp; Sandbox
+            </a>
+          </li>
+          <li class="repo-stars">
+            <a href="{{ .Site.Params.repo_url }}/stargazers" target="_blank" title="Stargazers" data-action="star">
+              <i class="icon icon-star"></i> Stars
+              <span class="count">&ndash;</span>
+            </a>
+          </li>
+        </ul>
+        <hr>
+      {{ end }}
+
+      <div class="toc">
+        {{ if gt (len .Site.Menus.main) 0 }}
+        <ul>
+          {{ partial "nav" . }}
+        </ul>
+        {{ end }}
+
+        {{ if isset .Site.Params "author" }}
+        <hr>
+
+        <ul>
+          <li>
+            <a href="https://opensource.org/licenses/EPL-2.0" title="License" target="_blank">
+              <img src="https://img.shields.io/badge/License-EPL%202.0-green.svg" />
+            </a>
+          </li>
+
+          <li>
+            <a href="https://github.com/eclipse-hawkbit/hawkbit/actions/workflows/verify.yml" title="License" target="_blank">
+              <img src="https://github.com/eclipse-hawkbit/hawkbit/actions/workflows/verify.yml/badge.svg?branch=master" />
+            </a>
+          </li>
+          <li>
+            <a href="https://sonarcloud.io/summary/new_code?id=eclipse-hawkbit_hawkbit" title="Sonarcloud Status" target="_blank">
+              <img src="https://sonarcloud.io/api/project_badges/measure?project=eclipse-hawkbit_hawkbit&metric=alert_status" />
+            </a>
+          </li>
+
+          <li>
+            <a href="https://search.maven.org/search?q=g:org.eclipse.hawkbit" title="Maven Central Status" target="_blank">
+              <img src="https://img.shields.io/maven-central/v/org.eclipse.hawkbit/hawkbit-parent?label=maven-central&color=blue" />
+            </a>
+          </li>
+
+          <li>
+            <a href="https://gitter.im/eclipse/hawkbit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge" title="Chat on Gitter" target="_blank">
+              <img src="https://badges.gitter.im/eclipse/hawkbit.svg" />
+            </a>
+          </li>
+        </ul>
+        {{ end }}
+      </div>
+    </div>
+  </div>
 </nav>

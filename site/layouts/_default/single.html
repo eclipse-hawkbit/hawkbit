@@ -1,49 +1,49 @@
 {{ partial "head" . }}
 
 {{ if (eq (trim .Site.Params.provider " " | lower) "github") | and (isset .Site.Params "repo_url") }}
-{{ $repo_id := replace .Site.Params.repo_url "https://github.com/" ""}}
-{{ .Scratch.Set "repo_id" $repo_id }}
+	{{ $repo_id := replace .Site.Params.repo_url "https://github.com/" ""}}
+	{{ .Scratch.Set "repo_id" $repo_id }}
 {{ end }}
 
 <div class="backdrop">
-    <div class="backdrop-paper"></div>
+	<div class="backdrop-paper"></div>
 </div>
 
-<input class="toggle" id="toggle-drawer" type="checkbox">
-<input class="toggle" id="toggle-search" type="checkbox">
+<input class="toggle" type="checkbox" id="toggle-drawer">
+<input class="toggle" type="checkbox" id="toggle-search">
 <label class="toggle-button overlay" for="toggle-drawer"></label>
 
 <header class="header">
-    {{ partial "header" . }}
+	{{ partial "header" . }}
 </header>
 
 <main class="main">
-    <div class="drawer">
-        {{ partial "drawer" . }}
-    </div>
+	<div class="drawer">
+		{{ partial "drawer" . }}
+	</div>
 
-    <article class="article">
-        <div class="wrapper">
-            <h1>{{ .Title }} {{ if .Draft }} (Draft){{ end }}</h1>
+	<article class="article">
+		<div class="wrapper">
+			<h1>{{ .Title }} {{ if .Draft }} (Draft){{ end }}</h1>
 
-            {{ .Content }}
+			{{ .Content }}
 
-            {{ partial "copyright.html" . }}
+			{{ partial "copyright.html" . }}
 
-            <footer class="footer">
-                {{ partial "footer" . }}
-            </footer>
-        </div>
-    </article>
+			<footer class="footer">
+				{{ partial "footer" . }}
+			</footer>
+		</div>
+	</article>
 
-    <div aria-live="polite" class="results" role="status">
-        <div class="scrollable">
-            <div class="wrapper">
-                <div class="meta"></div>
-                <div class="list"></div>
-            </div>
-        </div>
-    </div>
+	<div class="results" role="status" aria-live="polite">
+		<div class="scrollable">
+			<div class="wrapper">
+				<div class="meta"></div>
+				<div class="list"></div>
+			</div>
+		</div>
+	</div>
 </main>
 
 {{ partial "footer_js" . }}
