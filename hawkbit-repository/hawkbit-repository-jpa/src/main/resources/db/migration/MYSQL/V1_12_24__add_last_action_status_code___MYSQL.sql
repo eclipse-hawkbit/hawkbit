@@ -1,2 +1,1 @@
-ALTER TABLE sp_action
-    ADD COLUMN last_action_status_code integer;
+ALTER TABLE sp_action ADD COLUMN last_action_status_code integer;
