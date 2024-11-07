@@ -1,1 +1,1 @@
-ALTER TABLE sp_target_type MODIFY name VARCHAR (128);
+ALTER TABLE sp_target_type MODIFY name VARCHAR(128);
