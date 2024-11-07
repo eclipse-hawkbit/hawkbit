@@ -367,6 +367,22 @@ public final class FileStreamingUtil {
         return total;
     }
 
+    /**
+     * Listener for progress on artifact file streaming.
+     */
+    @FunctionalInterface
+    public interface FileStreamingProgressListener {
+
+        /**
+         * Called multiple times during streaming.
+         *
+         * @param requestedBytes requested bytes of the request
+         * @param shippedBytesSinceLast since the last report
+         * @param shippedBytesOverall during the request
+         */
+        void progress(long requestedBytes, long shippedBytesSinceLast, long shippedBytesOverall);
+    }
+
     private static final class ByteRange {
 
         private static final String MULTIPART_BOUNDARY = "THIS_STRING_SEPARATES_MULTIPART";
@@ -441,21 +457,5 @@ public final class FileStreamingUtil {
             return total;
         }
 
-    }
-
-    /**
-     * Listener for progress on artifact file streaming.
-     */
-    @FunctionalInterface
-    public interface FileStreamingProgressListener {
-
-        /**
-         * Called multiple times during streaming.
-         *
-         * @param requestedBytes requested bytes of the request
-         * @param shippedBytesSinceLast since the last report
-         * @param shippedBytesOverall during the request
-         */
-        void progress(long requestedBytes, long shippedBytesSinceLast, long shippedBytesOverall);
     }
 }
