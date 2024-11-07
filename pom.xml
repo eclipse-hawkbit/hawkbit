@@ -408,11 +408,8 @@
                                 </validHeaders>
                                 <excludes>
                                     <exclude>.3rd-party/**</exclude>
-                                    <exclude>.azure-pipelines/*</exclude>
-                                    <exclude>.devcontainer/*</exclude>
                                     <exclude>.git*</exclude>
                                     <exclude>.github/**</exclude>
-                                    <exclude>.sonar</exclude>
                                     <exclude>licenses/LICENSE*</exclude>
                                     <exclude>eclipse_codeformatter.xml</exclude>
                                     <exclude>intellij_codeformatter.xml</exclude>
@@ -422,7 +419,6 @@
                                     <exclude>**/.git*</exclude>
                                     <exclude>**/*.sql</exclude>
                                     <exclude>**/docker/**</exclude>
-                                    <exclude>**/.sonar/**</exclude>
                                     <exclude>**/frontend/**</exclude>
                                     <exclude>site/content/**</exclude>
                                     <exclude>site/layouts/**</exclude>
