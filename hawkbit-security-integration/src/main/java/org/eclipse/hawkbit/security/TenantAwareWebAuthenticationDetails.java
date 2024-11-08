@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.security;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 
 /**
  * Extends the {@link TenantAwareAuthenticationDetails} to web information to

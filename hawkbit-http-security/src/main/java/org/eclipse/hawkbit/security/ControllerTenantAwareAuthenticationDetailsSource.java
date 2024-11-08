@@ -14,7 +14,7 @@ import java.util.Map;
 import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.util.UrlUtils;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.util.AntPathMatcher;

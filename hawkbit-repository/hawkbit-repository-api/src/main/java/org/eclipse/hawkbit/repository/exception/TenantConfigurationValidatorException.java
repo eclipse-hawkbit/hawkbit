@@ -7,7 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.tenancy.configuration.validator;
+package org.eclipse.hawkbit.repository.exception;
+
+import java.io.Serial;
 
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
@@ -18,34 +20,10 @@ import org.eclipse.hawkbit.exception.SpServerError;
  */
 public class TenantConfigurationValidatorException extends AbstractServerRtException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private static final SpServerError THIS_ERROR = SpServerError.SP_CONFIGURATION_VALUE_INVALID;
-
-    /**
-     * Default constructor.
-     */
-    public TenantConfigurationValidatorException() {
-        super(THIS_ERROR);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param cause of the exception
-     */
-    public TenantConfigurationValidatorException(final Throwable cause) {
-        super(THIS_ERROR, cause);
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param message of the exception
-     * @param cause of the exception
-     */
-    public TenantConfigurationValidatorException(final String message, final Throwable cause) {
-        super(message, THIS_ERROR, cause);
-    }
 
     /**
      * Parameterized constructor.
@@ -55,5 +33,4 @@ public class TenantConfigurationValidatorException extends AbstractServerRtExcep
     public TenantConfigurationValidatorException(final String message) {
         super(message, THIS_ERROR);
     }
-
 }
