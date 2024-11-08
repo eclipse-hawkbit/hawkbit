@@ -21,8 +21,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.User;
 
 /**
- * A software provisioning user principal definition stored in the
- * {@link SecurityContext} which contains the user specific attributes.
+ * A software provisioning user principal definition stored in the {@link SecurityContext} which contains the user specific attributes.
  */
 @Getter
 @EqualsAndHashCode(callSuper = true)
@@ -34,26 +33,11 @@ public class TenantAwareUser extends User {
 
     private final String tenant;
 
-    /**
-     * @param username the username of the user
-     * @param password the password of the user
-     * @param authorities the authorities which the user has
-     * @param tenant the tenant of the user
-     */
-    public TenantAwareUser(final String username, final String password,
-            final Collection<? extends GrantedAuthority> authorities, final String tenant) {
+    public TenantAwareUser(
+            final String username, final String password, final Collection<? extends GrantedAuthority> authorities,
+            final String tenant) {
         super(username, password, authorities == null ? Collections.emptyList() : authorities);
         this.tenant = tenant;
-    }
-
-    /**
-     * Create user without password and any credentials. For test purposes only.
-     *
-     * @param username the username of the user
-     * @param tenant the tenant of the user
-     */
-    public TenantAwareUser(final String username, String tenant) {
-        this(username, "***", null, tenant);
     }
 
     @Override

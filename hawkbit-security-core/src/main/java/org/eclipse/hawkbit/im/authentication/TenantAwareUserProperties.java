@@ -19,7 +19,7 @@ import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Configuration for hawwkBit static users.
+ * Configuration for hawkBit static users.
  */
 @Data
 @ToString

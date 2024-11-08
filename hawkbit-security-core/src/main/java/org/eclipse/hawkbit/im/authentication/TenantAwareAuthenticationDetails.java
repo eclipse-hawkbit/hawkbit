@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.im.authentication;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import lombok.Getter;
@@ -25,6 +26,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 @ToString
 public class TenantAwareAuthenticationDetails implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final String tenant;
@@ -32,8 +34,7 @@ public class TenantAwareAuthenticationDetails implements Serializable {
 
     /**
      * @param tenant the current tenant
-     * @param controller boolean flag to indicate if this authenticated token is a
-     *         controller authentication. {@code true} in case of
+     * @param controller boolean flag to indicate if this authenticated token is a controller authentication. {@code true} in case of
      *         authenticated controller otherwise {@code false}
      */
     public TenantAwareAuthenticationDetails(final String tenant, final boolean controller) {

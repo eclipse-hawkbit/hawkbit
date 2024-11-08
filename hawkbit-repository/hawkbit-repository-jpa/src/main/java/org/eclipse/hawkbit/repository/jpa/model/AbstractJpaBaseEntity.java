@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.Column;
@@ -19,6 +21,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Version;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.springframework.data.annotation.CreatedBy;
@@ -31,32 +36,38 @@ import org.springframework.security.core.context.SecurityContextHolder;
 /**
  * Holder of the base attributes common to all entities.
  */
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // Default constructor needed for JPA entities.
 @MappedSuperclass
 @Access(AccessType.FIELD)
 @EntityListeners({ AuditingEntityListener.class, EntityPropertyChangeListener.class, EntityInterceptorListener.class })
 public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     protected static final int USERNAME_FIELD_LENGTH = 64;
+
+    @Serial
     private static final long serialVersionUID = 1L;
+
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
     private String createdBy;
-    private String lastModifiedBy;
     private long createdAt;
+    private String lastModifiedBy;
     private long lastModifiedAt;
 
+    @Setter
     @Version
     @Column(name = "optlock_revision")
     private int optLockRevision;
 
-    /**
-     * Default constructor needed for JPA entities.
-     */
-    protected AbstractJpaBaseEntity() {
-        // Default constructor needed for JPA entities.
+    @Override
+    @Access(AccessType.PROPERTY)
+    @Column(name = "created_by", updatable = false, nullable = false, length = USERNAME_FIELD_LENGTH)
+    public String getCreatedBy() {
+        return createdBy;
     }
 
     @Override
@@ -68,9 +79,9 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "created_by", updatable = false, nullable = false, length = USERNAME_FIELD_LENGTH)
-    public String getCreatedBy() {
-        return createdBy;
+    @Column(name = "last_modified_by", nullable = false, length = USERNAME_FIELD_LENGTH)
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
     }
 
     @Override
@@ -81,38 +92,8 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     }
 
     @Override
-    @Access(AccessType.PROPERTY)
-    @Column(name = "last_modified_by", nullable = false, length = USERNAME_FIELD_LENGTH)
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    @LastModifiedBy
-    public void setLastModifiedBy(final String lastModifiedBy) {
-        if (isController()) {
-            return;
-        }
-
-        this.lastModifiedBy = lastModifiedBy;
-    }
-
-    @Override
     public int getOptLockRevision() {
         return optLockRevision;
-    }
-
-    public void setOptLockRevision(final int optLockRevision) {
-        this.optLockRevision = optLockRevision;
-    }
-
-    @LastModifiedDate
-    public void setLastModifiedAt(final long lastModifiedAt) {
-
-        if (isController()) {
-            return;
-        }
-
-        this.lastModifiedAt = lastModifiedAt;
     }
 
     @CreatedBy
@@ -142,13 +123,27 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         }
     }
 
+    @LastModifiedBy
+    public void setLastModifiedBy(final String lastModifiedBy) {
+        if (isController()) {
+            return;
+        }
+
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    @LastModifiedDate
+    public void setLastModifiedAt(final long lastModifiedAt) {
+        if (isController()) {
+            return;
+        }
+
+        this.lastModifiedAt = lastModifiedAt;
+    }
+
     @Override
     public Long getId() {
         return id;
-    }
-
-    public void setId(final Long id) {
-        this.id = id;
     }
 
     /**
@@ -206,10 +201,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     private boolean isController() {
         return SecurityContextHolder.getContext().getAuthentication() != null
-                && SecurityContextHolder.getContext().getAuthentication()
-                .getDetails() instanceof TenantAwareAuthenticationDetails
-                && ((TenantAwareAuthenticationDetails) SecurityContextHolder.getContext().getAuthentication()
-                .getDetails()).isController();
+                && SecurityContextHolder.getContext().getAuthentication().getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails
+                && tenantAwareDetails.isController();
     }
-
 }

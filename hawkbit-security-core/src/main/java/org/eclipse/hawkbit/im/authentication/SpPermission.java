@@ -22,15 +22,13 @@ import org.springframework.security.core.GrantedAuthority;
 
 /**
  * <p>
- * Software provisioning permissions that are technically available as
- * {@linkplain GrantedAuthority} based on the authenticated users identity
- * context.
+ * Software provisioning permissions that are technically available as {@linkplain GrantedAuthority} based on
+ * the authenticated users identity context.
  * </p>
  *
  * <p>
- * The permissions cover CRUD operations for various areas within eclipse
- * hawkBit, like targets, software-artifacts, distribution sets, config-options
- * etc.
+ * The permissions cover CRUD operations for various areas within eclipse hawkBit, like targets, software-artifacts,
+ * distribution sets, config-options etc.
  * </p>
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -167,8 +165,7 @@ public final class SpPermission {
 
     /**
      * <p>
-     * Contains all the spring security evaluation expressions for the
-     * {@link PreAuthorize} annotation for method security.
+     * Contains all the spring security evaluation expressions for the {@link PreAuthorize} annotation for method security.
      * </p>
      *
      * <p>
@@ -199,6 +196,7 @@ public final class SpPermission {
         public static final String HAS_AUTH_PREFIX = "hasAuthority" + BRACKET_OPEN + "'";
         public static final String HAS_AUTH_SUFFIX = "'" + BRACKET_CLOSE;
         public static final String HAS_AUTH_AND = " and ";
+        
         /**
          * The role which contains the spring security context in case the
          * system is executing code which is necessary to be privileged.

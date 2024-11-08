@@ -31,40 +31,36 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Authentication provider for configured via spring application properties users.
- * The users could be tenant scoped or global.
+ * The users could be tenant scoped ({@link TenantAwareUserProperties}) or global ({@link SecurityProperties}).
  */
 public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
 
     public StaticAuthenticationProvider(
             final TenantAwareUserProperties tenantAwareUserProperties, final SecurityProperties securityProperties) {
-        setUserDetailsService(userDetailsService(securityProperties, tenantAwareUserProperties));
+        setUserDetailsService(userDetailsService(tenantAwareUserProperties, securityProperties));
     }
 
     @Override
-    protected Authentication createSuccessAuthentication(final Object principal,
-            final Authentication authentication, final UserDetails user) {
+    protected Authentication createSuccessAuthentication(final Object principal, final Authentication authentication, final UserDetails user) {
         final UsernamePasswordAuthenticationToken result = new UsernamePasswordAuthenticationToken(
                 principal, authentication.getCredentials(), user.getAuthorities());
-        result.setDetails(
-                user instanceof TenantAwareUser tenantAwareUser ?
-                        new TenantAwareAuthenticationDetails(tenantAwareUser.getTenant(), false) :
-                        user);
+        result.setDetails(user instanceof TenantAwareUser tenantAwareUser
+                ? new TenantAwareAuthenticationDetails(tenantAwareUser.getTenant(), false)
+                : user);
         return result;
     }
 
     private static UserDetailsService userDetailsService(
-            final SecurityProperties securityProperties,
-            final TenantAwareUserProperties tenantAwareUserProperties) {
+            final TenantAwareUserProperties tenantAwareUserProperties, final SecurityProperties securityProperties) {
         final List<User> userPrincipals = new ArrayList<>();
         tenantAwareUserProperties.getUser().forEach((username, user) -> {
             final String password = password(user.getPassword());
+
             final List<GrantedAuthority> credentials =
                     createAuthorities(user.getRoles(), user.getPermissions(), Collections::emptyList);
-            if (ObjectUtils.isEmpty(user.getTenant())) {
-                userPrincipals.add(new User(username, password, credentials));
-            } else {
-                userPrincipals.add(new TenantAwareUser(username, password, credentials, user.getTenant()));
-            }
+            userPrincipals.add(ObjectUtils.isEmpty(user.getTenant())
+                    ? new User(username, password, credentials)
+                    : new TenantAwareUser(username, password, credentials, user.getTenant()));
         });
 
         if (securityProperties != null && securityProperties.getUser() != null &&
@@ -130,8 +126,7 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
 
         private static User clone(final User user) {
             if (user instanceof TenantAwareUser) {
-                return new TenantAwareUser(user.getUsername(), user.getPassword(), user.getAuthorities(),
-                        ((TenantAwareUser) user).getTenant());
+                return new TenantAwareUser(user.getUsername(), user.getPassword(), user.getAuthorities(), ((TenantAwareUser) user).getTenant());
             } else {
                 return new User(user.getUsername(), user.getPassword(), user.getAuthorities());
             }
