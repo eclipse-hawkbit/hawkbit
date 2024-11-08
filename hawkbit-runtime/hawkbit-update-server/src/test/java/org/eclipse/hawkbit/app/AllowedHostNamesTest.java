@@ -19,8 +19,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(properties = { "hawkbit.server.security.allowedHostNames=localhost",
-        "hawkbit.server.security.httpFirewallIgnoredPaths=/index.html" })
+@TestPropertySource(properties = {
+        "hawkbit.server.security.allowedHostNames=localhost",
+        "hawkbit.server.security.httpFirewallIgnoredPaths=/index.html"
+})
 @Feature("Integration Test - Security")
 @Story("Allowed Host Names")
 public class AllowedHostNamesTest extends AbstractSecurityTest {
