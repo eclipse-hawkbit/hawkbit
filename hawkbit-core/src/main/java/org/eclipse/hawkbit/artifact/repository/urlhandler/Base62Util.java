@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.api;
+package org.eclipse.hawkbit.artifact.repository.urlhandler;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
  * Utility class for Base10 to Base62 conversion and vice versa. Base62 has the benefit of being shorter in ASCII representation than Base10.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class Base62Util {
+final class Base62Util {
 
     private static final String BASE62_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final int BASE62_BASE = BASE62_ALPHABET.length();
@@ -25,7 +25,7 @@ public final class Base62Util {
      * @param l number
      * @return converted number into Base62 ASCII string
      */
-    public static String fromBase10(final long l) {
+    static String fromBase10(final long l) {
         if (l == 0) {
             return "0";
         }
@@ -43,11 +43,11 @@ public final class Base62Util {
      * @param base62 number
      * @return converted number into Base10
      */
-    public static Long toBase10(final String base62) {
+    static Long toBase10(final String base62) {
         return toBase10(new StringBuilder(base62).reverse().toString().toCharArray());
     }
 
-    private static Long fromBase10(final long l, final StringBuilder sb) {
+    static Long fromBase10(final long l, final StringBuilder sb) {
         final int rem = (int) (l % BASE62_BASE);
         sb.append(BASE62_ALPHABET.charAt(rem));
         return l / BASE62_BASE;

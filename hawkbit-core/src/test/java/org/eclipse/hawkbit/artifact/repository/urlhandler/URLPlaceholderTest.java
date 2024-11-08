@@ -7,13 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.api;
+package org.eclipse.hawkbit.artifact.repository.urlhandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.URLPlaceholder;
 import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Artifact URL Handler")

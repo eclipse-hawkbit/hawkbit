@@ -18,8 +18,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.ControllerPollProperties;
-import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
-import org.eclipse.hawkbit.api.PropertyBasedArtifactUrlHandler;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandlerProperties;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.PropertyBasedArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
 import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemRepository;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;

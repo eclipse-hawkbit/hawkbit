@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.api;
+package org.eclipse.hawkbit.artifact.repository.urlhandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,8 +18,14 @@ import java.util.List;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
-import org.eclipse.hawkbit.api.URLPlaceholder.SoftwareData;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ApiType;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrl;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandlerProperties;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandlerProperties.UrlProtocol;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.PropertyBasedArtifactUrlHandler;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.URLPlaceholder;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.URLPlaceholder.SoftwareData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

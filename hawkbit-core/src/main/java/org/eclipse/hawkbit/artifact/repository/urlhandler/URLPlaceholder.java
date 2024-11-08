@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.api;
+package org.eclipse.hawkbit.artifact.repository.urlhandler;
 
 import lombok.Data;
 
@@ -30,8 +30,7 @@ public class URLPlaceholder {
      * @param tenantId of teh tenant
      * @param controllerId of the target
      * @param targetId of the target
-     * @param softwareData information about the artifact and software module that can be
-     *         accessed by the URL.
+     * @param softwareData information about the artifact and software module that can be accessed by the URL.
      */
     public URLPlaceholder(final String tenant, final Long tenantId, final String controllerId, final Long targetId,
             final SoftwareData softwareData) {
@@ -62,8 +61,7 @@ public class URLPlaceholder {
          * @param artifactId of the artifact
          * @param sha1Hash of the artifact
          */
-        public SoftwareData(final Long softwareModuleId, final String filename, final Long artifactId,
-                final String sha1Hash) {
+        public SoftwareData(final Long softwareModuleId, final String filename, final Long artifactId, final String sha1Hash) {
             this.softwareModuleId = softwareModuleId;
             this.filename = filename;
             this.artifactId = artifactId;
