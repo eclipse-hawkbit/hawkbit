@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.api.ApiType;
-import org.eclipse.hawkbit.api.ArtifactUrlHandler;
-import org.eclipse.hawkbit.api.URLPlaceholder;
-import org.eclipse.hawkbit.api.URLPlaceholder.SoftwareData;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ApiType;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.URLPlaceholder;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.URLPlaceholder.SoftwareData;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifactHash;
 import org.eclipse.hawkbit.ddi.json.model.DdiAutoConfirmationState;

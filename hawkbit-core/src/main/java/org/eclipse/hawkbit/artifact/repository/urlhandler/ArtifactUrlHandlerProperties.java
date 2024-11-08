@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.api;
+package org.eclipse.hawkbit.artifact.repository.urlhandler;
 
 import java.util.Arrays;
 import java.util.Collections;

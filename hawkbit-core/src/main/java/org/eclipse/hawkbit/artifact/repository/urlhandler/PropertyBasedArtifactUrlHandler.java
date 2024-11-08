@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.api;
+package org.eclipse.hawkbit.artifact.repository.urlhandler;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -21,21 +21,20 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandlerProperties.UrlProtocol;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Implementation for ArtifactUrlHandler for creating urls to download resource
- * based on patterns configured by {@link ArtifactUrlHandlerProperties}.
+ * Implementation for ArtifactUrlHandler for creating urls to download resource based on patterns configured by
+ * {@link ArtifactUrlHandlerProperties}.
  *
- * This mechanism can be used to generate links to arbitrary file hosting
- * infrastructure. However, the hawkBit update server supports hosting files as
- * well in the following {@link UrlProtocol#getRef()} patterns:
+ * This mechanism can be used to generate links to arbitrary file hosting infrastructure. However, the hawkBit update server
+ * supports hosting files as well in the following {@link UrlProtocol#getRef()} patterns:
  *
  * Default:
- * {protocol}://{hostname}:{port}{contextPath}/{tenant}/controller/v1/{controllerId}/
- * softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}
+ * {protocol}://{hostname}:{port}{contextPath}/{tenant}/controller/v1/{controllerId}
+ * /softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}
  *
  * Default (MD5SUM files):
  * {protocol}://{hostname}:{port}{contextPath}/{tenant}/controller/v1/{controllerId}/

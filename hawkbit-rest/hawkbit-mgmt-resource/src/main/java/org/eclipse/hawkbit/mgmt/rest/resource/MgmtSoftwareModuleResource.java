@@ -19,7 +19,7 @@ import java.util.Optional;
 import jakarta.validation.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.api.ArtifactUrlHandler;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
