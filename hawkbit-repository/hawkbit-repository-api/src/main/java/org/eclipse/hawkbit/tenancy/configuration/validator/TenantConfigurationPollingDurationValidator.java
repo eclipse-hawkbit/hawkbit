@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.tenancy.configuration.validator;
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
 
-import org.eclipse.hawkbit.ControllerPollProperties;
+import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
 import org.springframework.beans.factory.annotation.Autowired;
