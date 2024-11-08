@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import lombok.Data;
@@ -25,39 +26,34 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "hawkbit.controller")
 public class ControllerPollProperties implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * Maximum polling time that can be configured system wide and by tenant in
-     * HH:MM:SS notation.
+     * Maximum polling time that can be configured system-wide and by tenant in HH:MM:SS notation.
      */
     private String maxPollingTime = "23:59:59";
 
     /**
-     * Minimum polling time that can be configured by a tenant in HH:MM:SS
-     * notation.
+     * Minimum polling time that can be configured by a tenant in HH:MM:SS notation.
      */
     private String minPollingTime = "00:00:30";
 
     /**
-     * Controller polling time that can be configured system wide and by tenant
-     * in HH:MM:SS notation.
+     * Controller polling time that can be configured system-wide and by tenant in HH:MM:SS notation.
      */
     private String pollingTime = "00:05:00";
 
     /**
-     * Controller polling overdue time that can be configured system wide and by
-     * tenant in HH:MM:SS notation.
+     * Controller polling overdue time that can be configured system-wide and by tenant in HH:MM:SS notation.
      */
     private String pollingOverdueTime = "00:05:00";
 
     /**
-     * This configuration value is used to change the polling interval so that
-     * controller tries to poll at least these many times between the last
-     * polling and before start of maintenance window. The polling interval is
-     * bounded by configured pollingTime and minPollingTime. The polling
-     * interval is modified as per following scheme: pollingTime(@time=t) =
-     * (maintenanceWindowStartTime - t)/maintenanceWindowPollCount.
+     * This configuration value is used to change the polling interval so that controller tries to poll at least these
+     * many times between the last polling and before start of maintenance window. The polling interval is
+     * bounded by configured pollingTime and minPollingTime. The polling interval is modified as per following scheme:
+     * pollingTime(@time=t) = (maintenanceWindowStartTime - t)/maintenanceWindowPollCount.
      */
     private int maintenanceWindowPollCount = 3;
 }
