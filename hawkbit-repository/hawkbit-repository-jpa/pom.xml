@@ -98,11 +98,6 @@
             <artifactId>javax.el-api</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-junit5</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
