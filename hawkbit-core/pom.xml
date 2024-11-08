@@ -33,11 +33,6 @@
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
-        </dependency>
 
         <!-- TEST -->
         <dependency>
@@ -56,5 +51,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 </project>
