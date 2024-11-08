@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit;
+package org.eclipse.hawkbit.tenancy.configuration;
 
 import java.io.Serial;
 import java.io.Serializable;

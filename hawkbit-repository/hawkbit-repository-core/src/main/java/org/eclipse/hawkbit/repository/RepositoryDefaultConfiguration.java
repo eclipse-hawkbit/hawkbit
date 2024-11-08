@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import org.eclipse.hawkbit.ControllerPollProperties;
+import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

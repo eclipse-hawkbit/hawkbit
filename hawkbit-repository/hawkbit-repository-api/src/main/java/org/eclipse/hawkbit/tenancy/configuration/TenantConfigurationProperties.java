@@ -16,7 +16,6 @@ import java.util.Map;
 
 import lombok.Data;
 import lombok.ToString;
-import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.repository.exception.InvalidTenantConfigurationKeyException;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationStringValidator;
