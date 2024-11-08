@@ -34,5 +34,4 @@ public abstract class AbstractSecurityTest {
                 .apply(SecurityMockMvcConfigurers.springSecurity()).dispatchOptions(true);
         mvc = builder.build();
     }
-
 }

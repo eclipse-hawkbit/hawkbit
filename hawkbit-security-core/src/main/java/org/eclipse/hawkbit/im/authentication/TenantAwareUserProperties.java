@@ -33,11 +33,10 @@ public class TenantAwareUserProperties {
     @ToString
     public static class User {
 
+        private String tenant;
         @ToString.Exclude
         private String password;
         private List<String> roles = new ArrayList<>();
         private List<String> permissions = new ArrayList<>();
-        @NonNull
-        private String tenant;
     }
 }
