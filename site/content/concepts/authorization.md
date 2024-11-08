@@ -72,9 +72,7 @@ An example configuration is given below.
     spring.security.oauth2.client.provider.oidc.jwk-set-uri=https://oidc-provider/jwk-set-uri
 
 Note: at the moment only DEFAULT tenant is supported. By default the resource_access/<client id>/roles claim is mapped
-to hawkBit permissions. However, by registering a Spring bean
-_org.eclipse.hawkbit.autoconfigure.security.OidcUserManagementAutoConfiguration.JwtAuthoritiesExtractor_ a custom
-extractor permission mapper could be registered.
+to hawkBit permissions. 
 
 ### Delivered Permissions
 
