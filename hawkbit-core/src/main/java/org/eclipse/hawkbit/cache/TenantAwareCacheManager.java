@@ -32,7 +32,6 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
     private static final String TENANT_CACHE_DELIMITER = "|";
 
     private final CacheManager delegate;
-
     private final TenantAware tenantAware;
 
     /**
@@ -71,7 +70,7 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
     }
 
     /**
-     * A direct access for retrieving all cache names overall tenants.
+     * A direct-access for retrieving all cache names overall tenants.
      *
      * @return all cache names without tenant check
      */
@@ -86,7 +85,7 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
 
     @Override
     public void evictCaches(final String tenant) {
-        getCacheNames(tenant).forEach(cachename -> delegate.getCache(buildKey(tenant, cachename)).clear());
+        getCacheNames(tenant).forEach(cacheName -> delegate.getCache(buildKey(tenant, cacheName)).clear());
     }
 
     private static boolean isTenantInvalid(final String tenant) {
@@ -99,7 +98,9 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
 
     private Collection<String> getCacheNames(final String tenant) {
         final String tenantWithDelimiter = tenant + TENANT_CACHE_DELIMITER;
-        return delegate.getCacheNames().parallelStream().filter(cacheName -> cacheName.startsWith(tenantWithDelimiter))
-                .map(cacheName -> cacheName.substring(tenantWithDelimiter.length())).collect(Collectors.toList());
+        return delegate.getCacheNames().parallelStream()
+                .filter(cacheName -> cacheName.startsWith(tenantWithDelimiter))
+                .map(cacheName -> cacheName.substring(tenantWithDelimiter.length()))
+                .toList();
     }
 }

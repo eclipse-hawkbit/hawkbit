@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -38,11 +39,11 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
     private static final String TEMP_FILE_SUFFIX = "artifactrepo";
 
     @Override
-    // suppress warning, of not strong enough hashing algorithm, SHA-1 and MD5
-    // is not used security related
+    // suppress warning, of not strong enough hashing algorithm, SHA-1 and MD5 is not used security related
     @SuppressWarnings("squid:S2070")
-    public AbstractDbArtifact store(final String tenant, final InputStream content, final String filename,
-            final String contentType, final DbArtifactHash providedHashes) {
+    public AbstractDbArtifact store(final String tenant,
+            final InputStream content, final String filename, final String contentType,
+            final DbArtifactHash providedHashes) {
         final MessageDigest mdSHA1;
         final MessageDigest mdMD5;
         final MessageDigest mdSHA256;
@@ -56,7 +57,6 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
 
         String tempFile = null;
         try (final DigestInputStream inputStream = wrapInDigestInputStream(content, mdSHA1, mdMD5, mdSHA256)) {
-
             tempFile = storeTempFile(inputStream);
 
             final HexFormat hexFormat = HexFormat.of().withLowerCase();
@@ -65,19 +65,18 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
             final String md5Hash16 = hexFormat.formatHex(mdMD5.digest());
             final String sha256Hash16 = hexFormat.formatHex(mdSHA256.digest());
 
-            checkHashes(sha1Hash16, md5Hash16, sha256Hash16, providedHashes);
+            checkHashes(providedHashes, sha1Hash16, md5Hash16, sha256Hash16);
 
             // Check if file with same sha1 hash exists and if so return it
             if (existsByTenantAndSha1(tenant, sha1Hash16)) {
                 return addMissingHashes(getArtifactBySha1(tenant, sha1Hash16), sha1Hash16, md5Hash16, sha256Hash16);
             }
 
-            return store(sanitizeTenant(tenant), new DbArtifactHash(sha1Hash16, md5Hash16, sha256Hash16), contentType,
-                    tempFile);
+            return store(sanitizeTenant(tenant), new DbArtifactHash(sha1Hash16, md5Hash16, sha256Hash16), contentType, tempFile);
         } catch (final IOException e) {
             throw new ArtifactStoreException(e.getMessage(), e);
         } finally {
-            if (!StringUtils.isEmpty(tempFile)) {
+            if (!ObjectUtils.isEmpty(tempFile)) {
                 deleteTempFile(tempFile);
             }
         }
@@ -91,7 +90,7 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
         final File file = new File(tempFile);
         try {
             Files.deleteIfExists(file.toPath());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.error("Could not delete temp file {} ({})", file, e.getMessage());
         }
     }
@@ -110,30 +109,31 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
 
     private static File createTempFile() {
         try {
-            return Files.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX).toFile();
+            final File file = Files.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX).toFile();
+            file.deleteOnExit();
+            return file;
         } catch (final IOException e) {
-            throw new ArtifactStoreException("Cannot create tempfile", e);
+            throw new ArtifactStoreException("Cannot create temp file", e);
         }
     }
 
-    private static void checkHashes(final String sha1Hash16, final String md5Hash16, final String sha256Hash16,
-            final DbArtifactHash providedHashes) {
+    private static void checkHashes(final DbArtifactHash providedHashes,
+            final String sha1Hash16, final String md5Hash16, final String sha256Hash16) {
         if (providedHashes == null) {
             return;
         }
+
         if (areHashesNotMatching(providedHashes.getSha1(), sha1Hash16)) {
-            throw new HashNotMatchException("The given sha1 hash " + providedHashes.getSha1()
-                    + " does not match the calculated sha1 hash " + sha1Hash16, HashNotMatchException.SHA1);
+            throw new HashNotMatchException("The given sha1 hash " + providedHashes.getSha1() +
+                    " does not match the calculated sha1 hash " + sha1Hash16, HashNotMatchException.SHA1);
         }
         if (areHashesNotMatching(providedHashes.getMd5(), md5Hash16)) {
-            throw new HashNotMatchException("The given md5 hash " + providedHashes.getMd5()
-                    + " does not match the calculated md5 hash " + md5Hash16, HashNotMatchException.MD5);
+            throw new HashNotMatchException("The given md5 hash " + providedHashes.getMd5() +
+                    " does not match the calculated md5 hash " + md5Hash16, HashNotMatchException.MD5);
         }
         if (areHashesNotMatching(providedHashes.getSha256(), sha256Hash16)) {
-            throw new HashNotMatchException(
-                    "The given sha256 hash " + providedHashes.getSha256()
-                            + " does not match the calculated sha256 hash " + sha256Hash16,
-                    HashNotMatchException.SHA256);
+            throw new HashNotMatchException("The given sha256 hash " + providedHashes.getSha256() +
+                    " does not match the calculated sha256 hash " + sha256Hash16, HashNotMatchException.SHA256);
         }
     }
 
@@ -141,14 +141,13 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
         return providedHashValue != null && !hashValue.equals(providedHashValue);
     }
 
-    private static DigestInputStream wrapInDigestInputStream(final InputStream input, final MessageDigest mdSHA1,
-            final MessageDigest mdMD5, final MessageDigest mdSHA256) {
+    private static DigestInputStream wrapInDigestInputStream(final InputStream input,
+            final MessageDigest mdSHA1, final MessageDigest mdMD5, final MessageDigest mdSHA256) {
         return new DigestInputStream(new DigestInputStream(new DigestInputStream(input, mdSHA256), mdMD5), mdSHA1);
     }
 
-    private AbstractDbArtifact addMissingHashes(final AbstractDbArtifact existing, final String calculatedSha1,
-            final String calculatedMd5, final String calculatedSha256) {
-
+    private AbstractDbArtifact addMissingHashes(final AbstractDbArtifact existing,
+            final String calculatedSha1, final String calculatedMd5, final String calculatedSha256) {
         final String sha1 = checkEmpty(existing.getHashes().getSha1(), calculatedSha1);
         final String md5 = checkEmpty(existing.getHashes().getMd5(), calculatedMd5);
         final String sha256 = checkEmpty(existing.getHashes().getSha256(), calculatedSha256);
@@ -158,6 +157,6 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
     }
 
     private String checkEmpty(final String value, final String fallback) {
-        return StringUtils.isEmpty(value) ? fallback : value;
+        return ObjectUtils.isEmpty(value) ? fallback : value;
     }
 }
