@@ -18,7 +18,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.ControllerPollProperties;
-import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
 import org.eclipse.hawkbit.api.PropertyBasedArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystemProperties;
@@ -75,7 +74,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
  */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.PROXY, proxyTargetClass = false, securedEnabled = true)
-@EnableConfigurationProperties({ HawkbitServerProperties.class, DdiSecurityProperties.class,
+@EnableConfigurationProperties({ DdiSecurityProperties.class,
         ArtifactUrlHandlerProperties.class, ArtifactFilesystemProperties.class, HawkbitSecurityProperties.class,
         ControllerPollProperties.class, TenantConfigurationProperties.class })
 @Profile("test")
