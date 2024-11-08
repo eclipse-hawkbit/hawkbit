@@ -154,7 +154,7 @@ public class SecurityContextSwitch {
                 authorities = annotation.authorities();
             }
             final TestingAuthenticationToken testingAuthenticationToken = new TestingAuthenticationToken(
-                    new TenantAwareUser(annotation.principal(), annotation.tenantId()),
+                    new TenantAwareUser(annotation.principal(), "***", null, annotation.tenantId()),
                     annotation.credentials(), authorities);
             testingAuthenticationToken.setDetails(
                     new TenantAwareAuthenticationDetails(annotation.tenantId(), annotation.controller()));
