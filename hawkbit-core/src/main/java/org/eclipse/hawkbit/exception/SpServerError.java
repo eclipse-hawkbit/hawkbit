@@ -9,10 +9,13 @@
  */
 package org.eclipse.hawkbit.exception;
 
+import lombok.Data;
+import lombok.Getter;
+
 /**
  * Define the Error code for Error handling
  */
-
+@Getter
 public enum SpServerError {
 
     SP_REPO_GENERIC_ERROR("hawkbit.server.error.repo.genericError", "unknown error occurred"),
@@ -147,30 +150,11 @@ public enum SpServerError {
     private final String key;
     private final String message;
 
-    /*
+    /**
      * Repository side Error codes
      */
-    SpServerError(final String errorKey, final String message) {
-        key = errorKey;
+    SpServerError(final String key, final String message) {
+        this.key = key;
         this.message = message;
     }
-
-    /**
-     * Gets the key of the error
-     *
-     * @return the key of the error
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * Gets the message of the error
-     *
-     * @return message of the error
-     */
-    public String getMessage() {
-        return message;
-    }
-
 }
