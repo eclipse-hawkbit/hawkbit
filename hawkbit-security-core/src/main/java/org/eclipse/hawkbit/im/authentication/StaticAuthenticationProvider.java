@@ -75,7 +75,10 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
                     password(securityProperties.getUser().getPassword()),
                     createAuthorities(
                             securityProperties.getUser().getRoles(), Collections.emptyList(),
-                            PermissionUtils::createAllAuthorityList)));
+                            () -> SpPermission.getAllAuthorities().stream()
+                                    .map(SimpleGrantedAuthority::new)
+                                    .map(GrantedAuthority.class::cast)
+                                    .toList())));
         }
 
         return new FixedInMemoryTenantAwareUserDetailsService(userPrincipals);

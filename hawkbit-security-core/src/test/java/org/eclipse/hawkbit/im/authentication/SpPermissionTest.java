@@ -31,18 +31,6 @@ import org.springframework.util.ReflectionUtils;
 public final class SpPermissionTest {
 
     @Test
-    @Description("Verify the get permission function")
-    public void testGetPermissions() {
-        final int allPermission = 20;
-        final Collection<String> allAuthorities = SpPermission.getAllAuthorities();
-        final List<GrantedAuthority> allAuthoritiesList = PermissionUtils.createAllAuthorityList();
-        assertThat(allAuthorities).hasSize(allPermission);
-        assertThat(allAuthoritiesList).hasSize(allPermission);
-        assertThat(allAuthoritiesList.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
-                .containsAll(allAuthorities);
-    }
-
-    @Test
     @Description("Try to double check if all permissions works as expected")
     void shouldReturnAllPermissions() {
         List<String> expected = new LinkedList<>();
@@ -55,6 +43,8 @@ public final class SpPermissionTest {
                 }
             }
         });
-        assertThat(SpPermission.getAllAuthorities()).containsAll(expected);
+        final Collection<String> allAuthorities = SpPermission.getAllAuthorities();
+        assertThat(allAuthorities).hasSize(20);
+        assertThat(allAuthorities).containsAll(expected);
     }
 }
