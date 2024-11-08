@@ -9,5 +9,4 @@ org.eclipse.hawkbit.autoconfigure.scheduling.AsyncConfigurerAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.scheduling.ExecutorAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.security.SecurityAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.security.InMemoryUserManagementAutoConfiguration
-org.eclipse.hawkbit.autoconfigure.security.OidcUserManagementAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.PropertyHostnameResolverAutoConfiguration
