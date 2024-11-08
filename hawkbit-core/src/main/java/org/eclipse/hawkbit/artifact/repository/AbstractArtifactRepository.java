@@ -22,11 +22,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Abstract utility class for ArtifactRepository implementations with common
@@ -98,7 +96,7 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
     protected String storeTempFile(final InputStream content) throws IOException {
         final File file = createTempFile();
         try (final OutputStream outputstream = new BufferedOutputStream(new FileOutputStream(file))) {
-            IOUtils.copy(content, outputstream);
+            content.transferTo(outputstream);
             outputstream.flush();
         }
         return file.getPath();
