@@ -9,12 +9,14 @@
  */
 package org.eclipse.hawkbit.artifact.repository;
 
+import java.io.Serial;
+
 /**
- * {@link ArtifactStoreException} is thrown in case storing of an artifact was
- * not successful.
+ * {@link ArtifactStoreException} is thrown in case storing of an artifact was not successful.
  */
 public class ArtifactStoreException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -25,23 +27,5 @@ public class ArtifactStoreException extends RuntimeException {
      */
     public ArtifactStoreException(final String message, final Throwable cause) {
         super(message, cause);
-    }
-
-    /**
-     * Constructs a ArtifactStoreException with message.
-     *
-     * @param message the message of the exception
-     */
-    public ArtifactStoreException(final String message) {
-        super(message);
-    }
-
-    /**
-     * Constructs a ArtifactStoreException with cause.
-     *
-     * @param cause of the exception
-     */
-    public ArtifactStoreException(final Throwable cause) {
-        super(cause);
     }
 }

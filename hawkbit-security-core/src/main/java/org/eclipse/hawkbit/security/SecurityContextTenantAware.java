@@ -17,7 +17,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -36,14 +35,13 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 /**
  * A {@link ContextAware} (hence of {@link TenantAware}) that uses spring security context propagation
- * mechanisms and  which retrieves the ID of the tenant
- * from the {@link SecurityContext#getAuthentication()}
- * {@link Authentication#getDetails()} which holds the
- * {@link TenantAwareAuthenticationDetails} object.
+ * mechanisms and  which retrieves the ID of the tenant from the {@link SecurityContext#getAuthentication()}
+ * {@link Authentication#getDetails()} which holds the {@link TenantAwareAuthenticationDetails} object.
  */
 public class SecurityContextTenantAware implements ContextAware {
 
     public static final String SYSTEM_USER = "system";
+
     private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES =
             Collections.singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
 
@@ -51,8 +49,7 @@ public class SecurityContextTenantAware implements ContextAware {
     private final SecurityContextSerializer securityContextSerializer;
 
     /**
-     * Creates the {@link SecurityContextTenantAware} based on the given
-     * {@link UserAuthoritiesResolver}.
+     * Creates the {@link SecurityContextTenantAware} based on the given {@link UserAuthoritiesResolver}.
      *
      * @param authoritiesResolver Resolver to retrieve the authorities for a given user. Must
      *         not be <code>null</code>..
@@ -63,8 +60,7 @@ public class SecurityContextTenantAware implements ContextAware {
     }
 
     /**
-     * Creates the {@link SecurityContextTenantAware} based on the given
-     * {@link UserAuthoritiesResolver}.
+     * Creates the {@link SecurityContextTenantAware} based on the given {@link UserAuthoritiesResolver}.
      *
      * @param authoritiesResolver Resolver to retrieve the authorities for a given user. Must not be <code>null</code>.
      * @param securityContextSerializer Serializer that is used to serialize / deserialize {@link SecurityContext}s.
@@ -115,8 +111,9 @@ public class SecurityContextTenantAware implements ContextAware {
         Objects.requireNonNull(username);
 
         final List<SimpleGrantedAuthority> authorities = runAsSystem(
-                () -> authoritiesResolver.getUserAuthorities(tenant, username).stream().map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList()));
+                () -> authoritiesResolver.getUserAuthorities(tenant, username).stream()
+                        .map(SimpleGrantedAuthority::new)
+                        .toList());
         return runInContext(buildUserSecurityContext(tenant, username, authorities), tenantRunner::run);
     }
 

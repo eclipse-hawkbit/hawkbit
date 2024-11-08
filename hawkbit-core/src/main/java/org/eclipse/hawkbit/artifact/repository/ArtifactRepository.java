@@ -29,15 +29,14 @@ public interface ArtifactRepository {
      * @param content the content to store
      * @param filename the filename of the artifact
      * @param contentType the content type of the artifact
-     * @param hash the hashes of the artifact to do hash-checks after storing the
-     *         artifact, might be {@code null}
+     * @param hash the hashes of the artifact to do hash-checks after storing the artifact, might be {@code null}
      * @return the stored artifact
-     * @throws MethodNotSupportedException if implementation does not support the operation
+     * @throws UnsupportedOperationException if implementation does not support the operation
      * @throws ArtifactStoreException in case storing of the artifact was not successful
-     * @throws HashNotMatchException in case {@code hash} is provided and not matching to the
-     *         calculated hashes during storing
+     * @throws HashNotMatchException in case {@code hash} is provided and not matching to the calculated hashes during storing
      */
-    AbstractDbArtifact store(@NotEmpty String tenant, @NotNull InputStream content, @NotEmpty String filename,
+    AbstractDbArtifact store(
+            @NotEmpty String tenant, @NotNull InputStream content, @NotEmpty String filename,
             String contentType, DbArtifactHash hash);
 
     /**
@@ -45,7 +44,7 @@ public interface ArtifactRepository {
      *
      * @param tenant the tenant to store the artifact
      * @param sha1Hash the sha1-hash of the artifact to delete
-     * @throws MethodNotSupportedException if implementation does not support the operation
+     * @throws UnsupportedOperationException if implementation does not support the operation
      */
     void deleteBySha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
 
@@ -55,7 +54,7 @@ public interface ArtifactRepository {
      * @param tenant the tenant to store the artifact
      * @param sha1Hash the sha1-hash of the file to lookup.
      * @return The artifact file object or {@code null} if no file exists.
-     * @throws MethodNotSupportedException if implementation does not support the operation
+     * @throws UnsupportedOperationException if implementation does not support the operation
      */
     AbstractDbArtifact getArtifactBySha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
 
