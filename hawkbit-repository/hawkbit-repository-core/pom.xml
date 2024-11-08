@@ -48,18 +48,5 @@
             <artifactId>protostuff-runtime</artifactId>
             <optional>true</optional>
         </dependency>
-
-        <!-- TEST -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-junit5</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
-
 </project>
