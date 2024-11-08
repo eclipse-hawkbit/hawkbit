@@ -9,13 +9,9 @@
  */
 package org.eclipse.hawkbit.autoconfigure;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
-import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.api.PropertyBasedArtifactUrlHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -25,30 +21,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 /**
- * Auto configuration for {@link HostnameResolver} and
- * {@link ArtifactUrlHandler} based on a properties.
+ * Auto-configuration for {@link ArtifactUrlHandler} based on a properties.
  */
 @Configuration
 @EnableConfigurationProperties({ HawkbitServerProperties.class, ArtifactUrlHandlerProperties.class })
 @PropertySource("classpath:/hawkbit-artifactdl-defaults.properties")
-public class PropertyHostnameResolverAutoConfiguration {
-
-    /**
-     * @param serverProperties to get the servers URL
-     * @return the default autoconfigure hostname resolver implementation which
-     *         is property based specified by the property {@link #url}
-     */
-    @Bean
-    @ConditionalOnMissingBean(value = HostnameResolver.class)
-    HostnameResolver hostnameResolver(final HawkbitServerProperties serverProperties) {
-        return () -> {
-            try {
-                return new URL(serverProperties.getUrl());
-            } catch (final MalformedURLException e) {
-                throw new IllegalArgumentException("URL not valid: " + serverProperties.getUrl(), e);
-            }
-        };
-    }
+public class ArtifactUrlHandlerAutoConfiguration {
 
     /**
      * @param urlHandlerProperties for bean configuration
@@ -61,5 +39,4 @@ public class PropertyHostnameResolverAutoConfiguration {
             @Value("${server.servlet.context-path:}") final String contextPath) {
         return new PropertyBasedArtifactUrlHandler(urlHandlerProperties, contextPath);
     }
-
 }

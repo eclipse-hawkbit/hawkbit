@@ -17,7 +17,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.HawkbitServerProperties;
-import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -69,18 +68,6 @@ public class AmqpTestConfiguration {
     @Bean
     ThreadPoolTaskScheduler threadPoolTaskScheduler() {
         return new ThreadPoolTaskScheduler();
-    }
-
-    @SuppressWarnings("java:S112")
-    @Bean
-    HostnameResolver hostnameResolver(final HawkbitServerProperties serverProperties) {
-        return () -> {
-            try {
-                return new URL(serverProperties.getUrl());
-            } catch (final MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
-        };
     }
 
     @Bean
