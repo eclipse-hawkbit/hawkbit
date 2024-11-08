@@ -93,17 +93,9 @@ public abstract class AbstractServerRtException extends RuntimeException {
      * @param error detail
      * @param cause of the exception
      */
-    protected AbstractServerRtException(final String message, final SpServerError error, final Throwable cause,
-            final Map<String, Object> info) {
+    protected AbstractServerRtException(final String message, final SpServerError error, final Throwable cause, final Map<String, Object> info) {
         super(message, cause);
         this.error = error;
         this.info = info;
-    }
-
-    /**
-     * @return the SpServerError which is wrapped by this exception
-     */
-    public SpServerError getError() {
-        return error;
     }
 }
