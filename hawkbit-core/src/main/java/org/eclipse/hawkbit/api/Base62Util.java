@@ -13,8 +13,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 /**
- * Utility class for Base10 to Base62 conversion and vice versa. Base62 has the
- * benefit of being shorter in ASCII representation than Base10.
+ * Utility class for Base10 to Base62 conversion and vice versa. Base62 has the benefit of being shorter in ASCII representation than Base10.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Base62Util {
@@ -23,15 +22,15 @@ public final class Base62Util {
     private static final int BASE62_BASE = BASE62_ALPHABET.length();
 
     /**
-     * @param base10 number
+     * @param l number
      * @return converted number into Base62 ASCII string
      */
-    public static String fromBase10(final long base10) {
-        if (base10 == 0) {
+    public static String fromBase10(final long l) {
+        if (l == 0) {
             return "0";
         }
 
-        long temp = base10;
+        long temp = l;
         final StringBuilder sb = new StringBuilder();
 
         while (temp > 0) {
@@ -48,10 +47,10 @@ public final class Base62Util {
         return toBase10(new StringBuilder(base62).reverse().toString().toCharArray());
     }
 
-    private static Long fromBase10(final long base10, final StringBuilder sb) {
-        final int rem = (int) (base10 % BASE62_BASE);
+    private static Long fromBase10(final long l, final StringBuilder sb) {
+        final int rem = (int) (l % BASE62_BASE);
         sb.append(BASE62_ALPHABET.charAt(rem));
-        return base10 / BASE62_BASE;
+        return l / BASE62_BASE;
     }
 
     private static Long toBase10(final char[] chars) {
