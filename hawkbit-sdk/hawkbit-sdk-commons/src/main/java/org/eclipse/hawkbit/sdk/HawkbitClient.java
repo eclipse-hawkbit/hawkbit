@@ -61,7 +61,7 @@ public class HawkbitClient {
         log.trace("REST API call failed!", e);
         return e;
     };
-    private final HawkbitServer hawkBitServerProperties;
+    private final HawkbitServer hawkBitServer;
 
     private final Client client;
     private final Encoder encoder;
@@ -72,20 +72,20 @@ public class HawkbitClient {
     private final BiFunction<Tenant, Controller, RequestInterceptor> requestInterceptorFn;
 
     public HawkbitClient(
-            final HawkbitServer hawkBitServerProperties,
+            final HawkbitServer hawkBitServer,
             final Client client, final Encoder encoder, final Decoder decoder, final Contract contract) {
-        this(hawkBitServerProperties, client, encoder, decoder, contract, null, null);
+        this(hawkBitServer, client, encoder, decoder, contract, null, null);
     }
 
     /**
      * Customizers gets default ones and could
      */
     public HawkbitClient(
-            final HawkbitServer hawkBitServerProperties,
+            final HawkbitServer hawkBitServer,
             final Client client, final Encoder encoder, final Decoder decoder, final Contract contract,
             final ErrorDecoder errorDecoder,
             final BiFunction<Tenant, Controller, RequestInterceptor> requestInterceptorFn) {
-        this.hawkBitServerProperties = hawkBitServerProperties;
+        this.hawkBitServer = hawkBitServer;
         this.client = client;
         this.encoder = encoder;
         this.decoder = decoder;
@@ -112,7 +112,7 @@ public class HawkbitClient {
                 .requestInterceptor(requestInterceptorFn.apply(tenant, controller))
                 .target(serviceType,
                         controller == null ?
-                                hawkBitServerProperties.getMgmtUrl() :
-                                hawkBitServerProperties.getDdiUrl());
+                                hawkBitServer.getMgmtUrl() :
+                                hawkBitServer.getDdiUrl());
     }
 }

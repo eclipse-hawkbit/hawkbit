@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.autoconfigure;
 
-import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
 import org.eclipse.hawkbit.api.PropertyBasedArtifactUrlHandler;
@@ -24,7 +23,7 @@ import org.springframework.context.annotation.PropertySource;
  * Auto-configuration for {@link ArtifactUrlHandler} based on a properties.
  */
 @Configuration
-@EnableConfigurationProperties({ HawkbitServerProperties.class, ArtifactUrlHandlerProperties.class })
+@EnableConfigurationProperties({ ArtifactUrlHandlerProperties.class })
 @PropertySource("classpath:/hawkbit-artifactdl-defaults.properties")
 public class ArtifactUrlHandlerAutoConfiguration {
 
