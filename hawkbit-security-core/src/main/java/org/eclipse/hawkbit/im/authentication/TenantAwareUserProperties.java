@@ -17,6 +17,7 @@ import java.util.Map;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.lang.NonNull;
 
 /**
  * Configuration for hawkBit static users.
@@ -36,6 +37,7 @@ public class TenantAwareUserProperties {
         private String password;
         private List<String> roles = new ArrayList<>();
         private List<String> permissions = new ArrayList<>();
+        @NonNull
         private String tenant;
     }
 }
