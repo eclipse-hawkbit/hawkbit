@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

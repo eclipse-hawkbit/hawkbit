@@ -19,9 +19,9 @@ import lombok.ToString;
 import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.HawkbitServerProperties.Anonymous.Download;
 import org.eclipse.hawkbit.repository.exception.InvalidTenantConfigurationKeyException;
+import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationStringValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidator;
-import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 

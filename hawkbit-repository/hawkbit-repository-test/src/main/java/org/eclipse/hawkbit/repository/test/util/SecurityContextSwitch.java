@@ -17,8 +17,8 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.im.authentication.TenantAwareUser;
+import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;

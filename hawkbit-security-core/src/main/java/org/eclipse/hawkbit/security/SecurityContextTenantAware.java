@@ -20,8 +20,8 @@ import java.util.function.Supplier;
 
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
-import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.im.authentication.TenantAwareUser;
+import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.springframework.lang.Nullable;

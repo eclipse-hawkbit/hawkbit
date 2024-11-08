@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
+import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.env.Environment;
 import org.springframework.security.access.prepost.PreAuthorize;
