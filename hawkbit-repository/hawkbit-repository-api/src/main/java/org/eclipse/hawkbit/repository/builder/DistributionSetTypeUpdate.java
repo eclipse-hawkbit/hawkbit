@@ -15,6 +15,7 @@ import jakarta.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.Type;
 
 /**
  * Builder to update an existing {@link DistributionSetType} entry. Defines all
@@ -32,7 +33,7 @@ public interface DistributionSetTypeUpdate {
      * @param colour for {@link DistributionSetType#getColour()}
      * @return updated builder instance
      */
-    DistributionSetTypeUpdate colour(@Size(max = DistributionSetType.COLOUR_MAX_SIZE) String colour);
+    DistributionSetTypeUpdate colour(@Size(max = Type.COLOUR_MAX_SIZE) String colour);
 
     /**
      * @param mandatory for {@link DistributionSetType#getMandatoryModuleTypes()}

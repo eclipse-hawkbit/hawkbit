@@ -214,7 +214,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
                 .as("targetType with too long colour should not be created")
                 .isThrownBy(() -> targetTypeManagement.create(
                         entityFactory.targetType().create().name("a")
-                                .colour(RandomStringUtils.randomAlphanumeric(TargetType.COLOUR_MAX_SIZE + 1))));
+                                .colour(RandomStringUtils.randomAlphanumeric(Type.COLOUR_MAX_SIZE + 1))));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid colour should not be created").isThrownBy(() -> targetTypeManagement
@@ -224,7 +224,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
                 .as("targetType with too long colour should not be updated")
                 .isThrownBy(() -> targetTypeManagement.update(
                         entityFactory.targetType().update(targetType.getId())
-                                .colour(RandomStringUtils.randomAlphanumeric(TargetType.COLOUR_MAX_SIZE + 1))));
+                                .colour(RandomStringUtils.randomAlphanumeric(Type.COLOUR_MAX_SIZE + 1))));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid colour should not be updated").isThrownBy(() -> targetTypeManagement

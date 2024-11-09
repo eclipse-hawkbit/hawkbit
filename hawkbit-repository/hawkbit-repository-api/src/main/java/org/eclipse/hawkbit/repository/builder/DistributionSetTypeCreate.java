@@ -9,8 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 import jakarta.validation.constraints.NotNull;
@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.Type;
 
 /**
  * Builder to create a new {@link DistributionSetType} entry. Defines all fields
@@ -32,7 +33,7 @@ public interface DistributionSetTypeCreate {
      * @param key for {@link DistributionSetType#getKey()}
      * @return updated builder instance
      */
-    DistributionSetTypeCreate key(@Size(min = 1, max = DistributionSetType.KEY_MAX_SIZE) @NotNull String key);
+    DistributionSetTypeCreate key(@Size(min = 1, max = Type.KEY_MAX_SIZE) @NotNull String key);
 
     /**
      * @param name for {@link DistributionSetType#getName()}
@@ -50,7 +51,7 @@ public interface DistributionSetTypeCreate {
      * @param colour for {@link DistributionSetType#getColour()}
      * @return updated builder instance
      */
-    DistributionSetTypeCreate colour(@Size(max = DistributionSetType.COLOUR_MAX_SIZE) String colour);
+    DistributionSetTypeCreate colour(@Size(max = Type.COLOUR_MAX_SIZE) String colour);
 
     /**
      * @param mandatory for {@link DistributionSetType#getMandatoryModuleTypes()}
@@ -63,7 +64,7 @@ public interface DistributionSetTypeCreate {
      * @return updated builder instance
      */
     default DistributionSetTypeCreate mandatory(final Long mandatory) {
-        return mandatory(Arrays.asList(mandatory));
+        return mandatory(Collections.singletonList(mandatory));
     }
 
     /**
@@ -85,7 +86,7 @@ public interface DistributionSetTypeCreate {
      * @return updated builder instance
      */
     default DistributionSetTypeCreate optional(final Long optional) {
-        return optional(Arrays.asList(optional));
+        return optional(Collections.singletonList(optional));
     }
 
     /**
@@ -97,8 +98,7 @@ public interface DistributionSetTypeCreate {
     }
 
     /**
-     * @return peek on current state of {@link DistributionSetType} in the
-     *         builder
+     * @return peek on current state of {@link DistributionSetType} in the builder
      */
     DistributionSetType build();
 }

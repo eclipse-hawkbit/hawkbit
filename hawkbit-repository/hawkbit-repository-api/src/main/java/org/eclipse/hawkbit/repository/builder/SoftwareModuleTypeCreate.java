@@ -15,6 +15,7 @@ import jakarta.validation.constraints.Size;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.Type;
 
 /**
  * Builder to create a new {@link SoftwareModuleType} entry. Defines all fields
@@ -27,7 +28,7 @@ public interface SoftwareModuleTypeCreate {
      * @param key for {@link SoftwareModuleType#getKey()}
      * @return updated builder instance
      */
-    SoftwareModuleTypeCreate key(@Size(min = 1, max = SoftwareModuleType.KEY_MAX_SIZE) @NotNull String key);
+    SoftwareModuleTypeCreate key(@Size(min = 1, max = Type.KEY_MAX_SIZE) @NotNull String key);
 
     /**
      * @param name for {@link SoftwareModuleType#getName()}
@@ -45,7 +46,7 @@ public interface SoftwareModuleTypeCreate {
      * @param colour for {@link SoftwareModuleType#getColour()}
      * @return updated builder instance
      */
-    SoftwareModuleTypeCreate colour(@Size(max = SoftwareModuleType.COLOUR_MAX_SIZE) String colour);
+    SoftwareModuleTypeCreate colour(@Size(max = Type.COLOUR_MAX_SIZE) String colour);
 
     /**
      * @param maxAssignments for {@link SoftwareModuleType#getMaxAssignments()}

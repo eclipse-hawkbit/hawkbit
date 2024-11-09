@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.repository.model.Type;
 
 /**
  * Builder to create a new {@link DistributionSet} entry. Defines all fields
@@ -50,7 +51,7 @@ public interface DistributionSetCreate {
      * @param typeKey for {@link DistributionSet#getType()}
      * @return updated builder instance
      */
-    DistributionSetCreate type(@Size(min = 1, max = DistributionSetType.KEY_MAX_SIZE) @NotNull String typeKey);
+    DistributionSetCreate type(@Size(min = 1, max = Type.KEY_MAX_SIZE) @NotNull String typeKey);
 
     /**
      * @param type for {@link DistributionSet#getType()}

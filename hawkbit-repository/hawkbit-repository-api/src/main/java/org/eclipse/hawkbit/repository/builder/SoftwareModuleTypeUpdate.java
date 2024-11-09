@@ -13,6 +13,7 @@ import jakarta.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.Type;
 
 /**
  * Builder to update an existing {@link SoftwareModuleType} entry. Defines all
@@ -30,5 +31,5 @@ public interface SoftwareModuleTypeUpdate {
      * @param colour for {@link SoftwareModuleType#getColour()}
      * @return updated builder instance
      */
-    SoftwareModuleTypeUpdate colour(@Size(max = SoftwareModuleType.COLOUR_MAX_SIZE) String colour);
+    SoftwareModuleTypeUpdate colour(@Size(max = Type.COLOUR_MAX_SIZE) String colour);
 }
