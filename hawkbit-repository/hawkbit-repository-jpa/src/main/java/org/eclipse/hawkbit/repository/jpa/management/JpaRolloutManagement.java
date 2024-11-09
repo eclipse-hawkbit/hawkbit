@@ -578,7 +578,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.CREATING);
         RolloutHelper.verifyRolloutGroupConditions(conditions);
 
-        RolloutGroup lastSavedGroup = null;
+        JpaRolloutGroup lastSavedGroup = null;
         if (amountOfGroups == 0) {
             if (dynamicRolloutGroupTemplate == null) {
                 throw new ConstraintDeclarationException(
