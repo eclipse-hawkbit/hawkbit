@@ -1913,9 +1913,10 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Creating a rollout with a weight causes an error when multi assignment in disabled.")
     void weightAllowedWhenMultiAssignmentModeNotEnabled() {
-        testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 2, "50",
-                "80",
-                ActionType.FORCED, 66);
+        assertThat(
+                testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(
+                        10, 10, 2, "50", "80", ActionType.FORCED, 66))
+                .isNotNull();
     }
 
     @Test
