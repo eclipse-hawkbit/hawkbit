@@ -646,7 +646,7 @@ public interface MgmtTargetRestApi {
                     defaults set in factory, manual updates or migrations from other update systems. A completed action
                     is added to the history of the target(s). Target is set to IN_SYNC state as both assigned and
                     installed DS are set. Note: only executed if the target has currently no running update""")
-            boolean offline);
+            Boolean offline);
 
     /**
      * Handles the GET request of retrieving the installed distribution set of

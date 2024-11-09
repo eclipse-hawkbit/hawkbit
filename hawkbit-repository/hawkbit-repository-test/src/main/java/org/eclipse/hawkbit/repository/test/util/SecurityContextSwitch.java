@@ -136,7 +136,8 @@ public class SecurityContextSwitch {
 
         @Serial
         private static final long serialVersionUID = 1L;
-        private final WithUser annotation;
+
+        private transient final WithUser annotation;
 
         public WithUserSecurityContext(final WithUser annotation) {
             this.annotation = annotation;
