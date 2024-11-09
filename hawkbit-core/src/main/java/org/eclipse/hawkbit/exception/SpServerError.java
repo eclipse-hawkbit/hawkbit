@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.exception;
 
-import lombok.Data;
 import lombok.Getter;
 
 /**

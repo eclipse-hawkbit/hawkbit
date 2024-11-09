@@ -800,7 +800,7 @@ public interface TargetManagement {
      * @throws EntityNotFoundException if tag with given name does not exist
      * @deprecated since 0.6.0 - not very usable with very unclear logic
      */
-    @Deprecated
+    @Deprecated(forRemoval = true, since = "0.6.0")
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
 
@@ -813,7 +813,7 @@ public interface TargetManagement {
      * @throws EntityNotFoundException if TAG with given ID does not exist
      * @deprecated since 0.6.0 - use {@link #unassignTag(Collection, long)} (List, long)} instead
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated(forRemoval = true, since = "0.6.0")
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     Target unassignTag(@NotEmpty String controllerId, long targetTagId);
 }

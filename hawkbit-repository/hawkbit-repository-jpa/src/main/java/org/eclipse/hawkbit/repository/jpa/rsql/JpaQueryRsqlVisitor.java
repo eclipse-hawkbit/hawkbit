@@ -65,7 +65,7 @@ import org.springframework.util.ObjectUtils;
  *         It will be kept for some time in order to keep backward compatibility and to allow for a smooth transition. Also, in case of
  *         problems with the new implementation, this one can be used as a fallback.
  */
-@Deprecated(forRemoval = true)
+@Deprecated(forRemoval = true, since = "0.6.0")
 @Slf4j
 public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends AbstractRSQLVisitor<A>
         implements RSQLVisitor<List<Predicate>, String> {

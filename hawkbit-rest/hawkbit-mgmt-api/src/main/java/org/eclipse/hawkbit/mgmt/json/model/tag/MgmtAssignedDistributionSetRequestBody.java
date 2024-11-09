@@ -28,7 +28,7 @@ import lombok.experimental.Accessors;
 @ToString
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Deprecated(forRemoval = true)
+@Deprecated(forRemoval = true, since = "0.6.0")
 public class MgmtAssignedDistributionSetRequestBody {
 
     @JsonProperty(value = "id", required = true)

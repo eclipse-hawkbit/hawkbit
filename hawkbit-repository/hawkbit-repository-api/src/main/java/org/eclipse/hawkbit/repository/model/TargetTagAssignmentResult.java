@@ -18,7 +18,7 @@ import lombok.Data;
  *
  * @deprecated since 0.6.0 with deprecation of toggle assignments
  */
-@Deprecated(forRemoval = true)
+@Deprecated(forRemoval = true, since = "0.6.0")
 @Data
 public class TargetTagAssignmentResult extends AbstractAssignmentResult<Target> {
 

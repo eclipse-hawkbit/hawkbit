@@ -514,7 +514,7 @@ public interface MgmtDistributionSetTagRestApi {
     })
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
             + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING + "/toggleTagAssignment")
-    @Deprecated(forRemoval = true)
+    @Deprecated(forRemoval = true, since = "0.6.0")
     ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignment(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
             List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies);
@@ -558,7 +558,7 @@ public interface MgmtDistributionSetTagRestApi {
             + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING, consumes = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    @Deprecated(forRemoval = true)
+    @Deprecated(forRemoval = true, since = "0.6.0")
     ResponseEntity<List<MgmtDistributionSet>> assignDistributionSetsByRequestBody(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
             List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies);
