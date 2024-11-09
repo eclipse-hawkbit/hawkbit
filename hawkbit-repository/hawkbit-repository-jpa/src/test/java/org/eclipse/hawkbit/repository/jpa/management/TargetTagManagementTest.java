@@ -56,7 +56,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that tagging of set containing missing DS throws meaningful and correct exception.")
-    public void failOnMissingDs() {
+    void failOnMissingDs() {
         final Collection<String> group = testdataFactory.createTargets(5).stream()
                 .map(Target::getControllerId)
                 .collect(Collectors.toList());

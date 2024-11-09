@@ -193,7 +193,6 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
                 sb.delete(sb.length() - 2, sb.length());
                 throw new LockedException(JpaSoftwareModule.class, getId(), "DELETE", sb.toString());
             }
-            ;
         }
         this.deleted = deleted;
     }
