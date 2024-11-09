@@ -232,7 +232,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         if (readyGroups == rolloutGroups.size()) {
             if (rollout.isDynamic() && !rolloutGroups.get(rolloutGroups.size() - 1).isDynamic()) {
                 // add first dynamic group one by using the last as a parent and as a pattern
-                createDynamicGroup(rollout, rolloutGroups.get(rolloutGroups.size() - 1), rolloutGroups.size(), RolloutGroupStatus.READY);
+                createDynamicGroup(rollout, (JpaRolloutGroup) rolloutGroups.get(rolloutGroups.size() - 1), rolloutGroups.size(), RolloutGroupStatus.READY);
             }
 
             if (!rolloutApprovalStrategy.isApprovalNeeded(rollout)) {
@@ -583,7 +583,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         return scheduledGroups == groupsToBeScheduled.size();
     }
 
-    private RolloutGroup fillRolloutGroupWithTargets(final JpaRollout rollout, final JpaRolloutGroup group,
+    private JpaRolloutGroup fillRolloutGroupWithTargets(final JpaRollout rollout, final JpaRolloutGroup group,
             final List<RolloutGroup> rolloutGroups) {
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.CREATING);
 
@@ -735,7 +735,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         return false;
     }
 
-    private void createDynamicGroup(final JpaRollout rollout, final RolloutGroup lastGroup, final int groupCount,
+    private void createDynamicGroup(final JpaRollout rollout, final JpaRolloutGroup lastGroup, final int groupCount,
             final RolloutGroupStatus status) {
         try {
             RolloutHelper.verifyRolloutGroupAmount(groupCount + 1, quotaManagement);
