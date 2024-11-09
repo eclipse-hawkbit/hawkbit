@@ -137,6 +137,8 @@ public class TestdataFactory {
 
     public static final String DEFAULT_COLOUR = "#000000";
 
+    private static final String SPACE_AND_DESCRIPTION = " description";
+
     @Autowired
     private ControllerManagement controllerManagament;
 
@@ -1070,7 +1072,7 @@ public class TestdataFactory {
     public Rollout createRollout(final String prefix) {
         createTargets(quotaManagement.getMaxTargetsPerRolloutGroup() * quotaManagement.getMaxRolloutGroupsPerRollout(),
                 prefix);
-        return createRolloutByVariables(prefix, prefix + " description",
+        return createRolloutByVariables(prefix, prefix + SPACE_AND_DESCRIPTION,
                 quotaManagement.getMaxRolloutGroupsPerRollout(), "controllerId==" + prefix + "*",
                 createDistributionSet(prefix), "50", "5");
     }
@@ -1085,7 +1087,7 @@ public class TestdataFactory {
         final String prefix = RandomStringUtils.randomAlphanumeric(5);
         createTargets(quotaManagement.getMaxTargetsPerRolloutGroup() * quotaManagement.getMaxRolloutGroupsPerRollout(),
                 prefix);
-        return createRolloutByVariables(prefix, prefix + " description",
+        return createRolloutByVariables(prefix, prefix + SPACE_AND_DESCRIPTION,
                 quotaManagement.getMaxRolloutGroupsPerRollout(), "controllerId==" + prefix + "*",
                 createDistributionSet(prefix), "50", "5");
     }
@@ -1187,7 +1189,7 @@ public class TestdataFactory {
     public TargetType findOrCreateTargetType(final String targetTypeName) {
         return targetTypeManagement.getByName(targetTypeName)
                 .orElseGet(() -> targetTypeManagement.create(entityFactory.targetType().create()
-                        .name(targetTypeName).description(targetTypeName + " description")
+                        .name(targetTypeName).description(targetTypeName + SPACE_AND_DESCRIPTION)
                         .key(targetTypeName + " key").colour(DEFAULT_COLOUR)));
     }
 
@@ -1201,7 +1203,7 @@ public class TestdataFactory {
      */
     public TargetType createTargetType(final String targetTypeName, final List<DistributionSetType> compatibleDsTypes) {
         return targetTypeManagement.create(entityFactory.targetType().create().name(targetTypeName)
-                .description(targetTypeName + " description").colour(DEFAULT_COLOUR)
+                .description(targetTypeName + SPACE_AND_DESCRIPTION).colour(DEFAULT_COLOUR)
                 .compatible(compatibleDsTypes.stream().map(DistributionSetType::getId).collect(Collectors.toList())));
     }
 
@@ -1216,7 +1218,7 @@ public class TestdataFactory {
         final List<TargetTypeCreate> result = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             result.add(entityFactory.targetType().create()
-                    .name(targetTypePrefix + i).description(targetTypePrefix + " description")
+                    .name(targetTypePrefix + i).description(targetTypePrefix + SPACE_AND_DESCRIPTION)
                     .key(targetTypePrefix + i + " key").colour(DEFAULT_COLOUR));
         }
         return targetTypeManagement.create(result);

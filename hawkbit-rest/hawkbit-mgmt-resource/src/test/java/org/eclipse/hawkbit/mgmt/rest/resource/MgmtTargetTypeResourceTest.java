@@ -59,14 +59,15 @@ import org.springframework.test.web.servlet.ResultActions;
 @Story("Target Type Resource")
 class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
-    private final static String TARGETTYPES_ENDPOINT = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING;
-    private final static String TARGETTYPE_SINGLE_ENDPOINT = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING
+    private static final String TARGETTYPES_ENDPOINT = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING;
+    private static final String TARGETTYPE_SINGLE_ENDPOINT = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING
             + "/{typeid}";
-    private final static String TARGETTYPE_DSTYPES_ENDPOINT = TARGETTYPE_SINGLE_ENDPOINT + "/"
+    private static final String TARGETTYPE_DSTYPES_ENDPOINT = TARGETTYPE_SINGLE_ENDPOINT + "/"
             + MgmtRestConstants.TARGETTYPE_V1_DS_TYPES;
-    private final static String TARGETTYPE_DSTYPE_SINGLE_ENDPOINT = TARGETTYPE_DSTYPES_ENDPOINT + "/{dstypeid}";
+    private static final String TARGETTYPE_DSTYPE_SINGLE_ENDPOINT = TARGETTYPE_DSTYPES_ENDPOINT + "/{dstypeid}";
 
-    private final static String TEST_USER = "targetTypeTester";
+    private static final String TEST_USER = "targetTypeTester";
+    private static final String SPACE_AND_DESCRIPTION = " description";
 
     @Test
     @WithUser(principal = "targetTypeTester", allSpPermissions = true, removeFromAllPermission = { SpPermission.READ_TARGET })
@@ -89,7 +90,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.id", is(typeId), Long.class)).andExpect(jsonPath("$.name", equalTo(typeName)))
                 .andExpect(jsonPath("$.colour", is("#000000")))
-                .andExpect(jsonPath("$.description", equalTo(typeName + " description")))
+                .andExpect(jsonPath("$.description", equalTo(typeName + SPACE_AND_DESCRIPTION)))
                 .andExpect(jsonPath("$.createdBy", equalTo(TEST_USER)))
                 .andExpect(jsonPath("$.createdAt", equalTo(testType.getCreatedAt())))
                 .andExpect(jsonPath("$.lastModifiedBy", equalTo(TEST_USER)))
@@ -119,7 +120,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                     .andExpect(jsonPath("$.content.[?(@.id=='" + typeId + "')].name", contains(typeName + index)))
                     .andExpect(jsonPath("$.content.[?(@.id=='" + typeId + "')].colour", contains("#000000")))
                     .andExpect(jsonPath("$.content.[?(@.id=='" + typeId + "')].description",
-                            contains(typeName + " description")))
+                            contains(typeName + SPACE_AND_DESCRIPTION)))
                     .andExpect(jsonPath("$.content.[?(@.id=='" + typeId + "')].createdBy", contains(TEST_USER)))
                     .andExpect(jsonPath("$.content.[?(@.id=='" + typeId + "')].createdAt",
                             contains(testTypes.get(index).getCreatedAt())))
@@ -171,7 +172,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.content.[0].id", equalTo(testTypeC.getId().intValue())))
                 .andExpect(jsonPath("$.content.[0].name", equalTo(typeNameC)))
                 .andExpect(jsonPath("$.content.[0].colour", equalTo("#000000")))
-                .andExpect(jsonPath("$.content.[0].description", equalTo(typeNameC + " description")))
+                .andExpect(jsonPath("$.content.[0].description", equalTo(typeNameC + SPACE_AND_DESCRIPTION)))
                 .andExpect(jsonPath("$.content.[0].createdBy", equalTo(TEST_USER)))
                 .andExpect(jsonPath("$.content.[0].createdAt", equalTo(testTypeC.getCreatedAt())))
                 .andExpect(jsonPath("$.content.[0].lastModifiedBy", equalTo(TEST_USER)))

@@ -53,9 +53,10 @@ import org.springframework.data.domain.Slice;
 @Story("Auto assign checker")
 class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
+    private static final String SPACE_AND_DESCRIPTION = " description";
+
     @Autowired
     private AutoAssignChecker autoAssignChecker;
-
     @Autowired
     private DeploymentManagement deploymentManagement;
 
@@ -120,7 +121,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
         final String targetDsAIdPref = "targ";
         final List<Target> targets = testdataFactory.createTargets(25, targetDsAIdPref,
-                targetDsAIdPref.concat(" description"));
+                targetDsAIdPref.concat(SPACE_AND_DESCRIPTION));
         final int targetsCount = targets.size();
 
         // assign set A to first 10 targets
@@ -199,7 +200,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
         final String targetDsAIdPref = "targ";
         final List<Target> targets = testdataFactory.createTargets(20, targetDsAIdPref,
-                targetDsAIdPref.concat(" description"));
+                targetDsAIdPref.concat(SPACE_AND_DESCRIPTION));
 
         // Run the check
         autoAssignChecker.checkAllTargets();
@@ -262,10 +263,10 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         implicitLock(setA);
 
         final List<Target> targetsF = testdataFactory.createTargets(10, targetDsFIdPref,
-                targetDsFIdPref.concat(" description"));
+                targetDsFIdPref.concat(SPACE_AND_DESCRIPTION));
 
         final List<Target> targetsA = testdataFactory.createTargets(10, targetDsAIdPref,
-                targetDsAIdPref.concat(" description"));
+                targetDsAIdPref.concat(SPACE_AND_DESCRIPTION));
 
         final int targetsCount = targetsA.size() + targetsF.size();
 
@@ -475,7 +476,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
             final DistributionSet distributionSet, final ActionType actionType) {
 
         final List<Target> targets = testdataFactory.createTargets(targetCount, "target" + prefix,
-                prefix.concat(" description"));
+                prefix.concat(SPACE_AND_DESCRIPTION));
         targetFilterQueryManagement.create(
                 entityFactory.targetFilterQuery().create().name("filter" + prefix).query("id==target" + prefix + "*")
                         .autoAssignDistributionSet(distributionSet).autoAssignActionType(actionType));

@@ -19,6 +19,8 @@ import org.junit.jupiter.api.extension.Extension;
 @Slf4j
 public class MsSqlTestDatabase extends AbstractSqlTestDatabase {
 
+    private static final String DATABASE_AND_SURROUNDINGS = ";database=";
+
     public MsSqlTestDatabase(final DatasourceContext context) {
         super(context);
     }
@@ -28,14 +30,14 @@ public class MsSqlTestDatabase extends AbstractSqlTestDatabase {
         final String uri = context.getDatasourceUrl();
         log.info("\033[0;33mCreating mssql schema {} \033[0m", context.getRandomSchemaName());
 
-        executeStatement(uri.split(";database=")[0], "CREATE DATABASE " + context.getRandomSchemaName() + ";");
+        executeStatement(uri.split(DATABASE_AND_SURROUNDINGS)[0], "CREATE DATABASE " + context.getRandomSchemaName() + ";");
         return this;
     }
 
     @Override
     protected void dropRandomSchema() {
         final String uri = context.getDatasourceUrl();
-        final String dbServerUri = uri.split(";database=")[0];
+        final String dbServerUri = uri.split(DATABASE_AND_SURROUNDINGS)[0];
         log.info("\033[0;33mDropping mssql schema {} \033[0m", context.getRandomSchemaName());
 
         // Needed to avoid the DROP is rejected with "database still in use"
@@ -46,6 +48,6 @@ public class MsSqlTestDatabase extends AbstractSqlTestDatabase {
     @Override
     protected String getRandomSchemaUri() {
         final String uri = context.getDatasourceUrl();
-        return uri.substring(0, uri.indexOf(';')) + ";database=" + context.getRandomSchemaName();
+        return uri.substring(0, uri.indexOf(';')) + DATABASE_AND_SURROUNDINGS + context.getRandomSchemaName();
     }
 }
