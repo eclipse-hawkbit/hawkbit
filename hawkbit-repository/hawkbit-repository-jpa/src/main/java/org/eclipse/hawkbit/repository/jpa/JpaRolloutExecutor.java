@@ -85,7 +85,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
      * Max amount of targets that are handled in one transaction.
      */
     private static final int TRANSACTION_TARGETS = 5_000;
-
     /**
      * Maximum amount of actions that are deleted in one transaction.
      */
@@ -94,14 +93,16 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     /**
      * Action statuses that result in a terminated action
      */
-    private static final List<Status> DEFAULT_ACTION_TERMINATION_STATUSES = Arrays.asList(Status.ERROR, Status.FINISHED,
-            Status.CANCELED);
+    private static final List<Status> DEFAULT_ACTION_TERMINATION_STATUSES = List.of(
+            Status.ERROR, Status.FINISHED, Status.CANCELED);
     /**
      * In case of DOWNLOAD_ONLY, actions can be finished with DOWNLOADED status.
      */
-    private static final List<Status> DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES = Arrays.asList(Status.ERROR,
-            Status.FINISHED, Status.CANCELED, Status.DOWNLOADED);
+    private static final List<Status> DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES = List.of(
+            Status.ERROR, Status.FINISHED, Status.CANCELED, Status.DOWNLOADED);
     private static final Comparator<RolloutGroup> DESC_COMP = Comparator.comparingLong(RolloutGroup::getId).reversed();
+    private static final String TRANSACTION_ASSIGNING_TARGETS_TO_ROLLOUT_GROUP_FAILED = "Transaction assigning Targets to RolloutGroup failed";
+
     private final ActionRepository actionRepository;
     private final RolloutGroupRepository rolloutGroupRepository;
     private final RolloutTargetGroupRepository rolloutTargetGroupRepository;
@@ -343,11 +344,9 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private void handleRunningRollout(final JpaRollout rollout) {
         log.debug("handleRunningRollout called for rollout {}", rollout.getId());
 
-        if (rollout.isDynamic()) {
-            if (fillDynamicRolloutGroupsWithTargets(rollout)) {
-                log.debug("Dynamic group created for rollout {}", rollout.getId());
-                return;
-            }
+        if (rollout.isDynamic() && fillDynamicRolloutGroupsWithTargets(rollout)) {
+            log.debug("Dynamic group created for rollout {}", rollout.getId());
+            return;
         }
 
         final List<JpaRolloutGroup> runningGroups =
@@ -382,9 +381,9 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
         if (hasScheduledActions) {
             try {
-                final Iterable<JpaAction> iterable = scheduledActions::iterator;
-                final List<Long> actionIds = StreamSupport.stream(iterable.spliterator(), false).map(Action::getId)
-                        .collect(Collectors.toList());
+                final List<Long> actionIds = StreamSupport.stream(scheduledActions.spliterator(), false)
+                        .map(Action::getId)
+                        .toList();
                 actionRepository.deleteByIdIn(actionIds);
                 afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
                         .publishEvent(new RolloutUpdatedEvent(rollout, eventPublisherHolder.getApplicationId())));
@@ -647,7 +646,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             return rolloutGroupRepository.save(group);
 
         } catch (final TransactionException e) {
-            log.warn("Transaction assigning Targets to RolloutGroup failed", e);
+            log.warn(TRANSACTION_ASSIGNING_TARGETS_TO_ROLLOUT_GROUP_FAILED, e);
             return group;
         }
     }
@@ -728,7 +727,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 return true;
             }
         } catch (final TransactionException e) {
-            log.warn("Transaction assigning Targets to RolloutGroup failed", e);
+            log.warn(TRANSACTION_ASSIGNING_TARGETS_TO_ROLLOUT_GROUP_FAILED, e);
         }
 
         // set to skip for some time
@@ -839,7 +838,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             } while (actionsCreated > 0);
 
         } catch (final TransactionException e) {
-            log.warn("Transaction assigning Targets to RolloutGroup failed", e);
+            log.warn(TRANSACTION_ASSIGNING_TARGETS_TO_ROLLOUT_GROUP_FAILED, e);
             return 0;
         }
         return totalActionsCreated;
@@ -878,7 +877,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         // is already scheduled and a next action is created then cancel the
         // current scheduled action to cancel. E.g. a new scheduled action is
         // created.
-        final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
+        final List<Long> targetIds = targets.stream().map(Target::getId).toList();
         deploymentManagement.cancelInactiveScheduledActionsForTargets(targetIds);
         return targets.stream()
                 .map(target -> {
