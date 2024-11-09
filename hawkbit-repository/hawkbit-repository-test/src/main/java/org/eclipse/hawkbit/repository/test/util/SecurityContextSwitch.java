@@ -137,9 +137,10 @@ public class SecurityContextSwitch {
         @Serial
         private static final long serialVersionUID = 1L;
 
-        private transient final WithUser annotation;
+        // could be serializable and could be serialized, must not be made transient
+        private final WithUser annotation;
 
-        public WithUserSecurityContext(final WithUser annotation) {
+        WithUserSecurityContext(final WithUser annotation) {
             this.annotation = annotation;
             if (annotation.autoCreateTenant()) {
                 createTenant(annotation.tenantId());
