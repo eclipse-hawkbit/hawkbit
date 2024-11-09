@@ -18,8 +18,7 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 
 /**
- * Builder to update an existing {@link DistributionSet} entry. Defines all
- * fields that can be updated.
+ * Builder to update an existing {@link DistributionSet} entry. Defines all fields that can be updated.
  */
 public interface DistributionSetUpdate {
 

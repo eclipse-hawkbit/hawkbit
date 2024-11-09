@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.Type;
 
 /**
  * Builder to create a new {@link SoftwareModule} entry. Defines all fields that
@@ -55,7 +56,7 @@ public interface SoftwareModuleCreate {
      * @param typeKey for {@link SoftwareModule#getType()}
      * @return updated builder instance
      */
-    SoftwareModuleCreate type(@Size(min = 1, max = SoftwareModuleType.KEY_MAX_SIZE) @NotNull String typeKey);
+    SoftwareModuleCreate type(@Size(min = 1, max = Type.KEY_MAX_SIZE) @NotNull String typeKey);
 
     /**
      * @param type for {@link SoftwareModule#getType()}

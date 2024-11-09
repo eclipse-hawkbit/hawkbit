@@ -13,6 +13,7 @@ import jakarta.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.model.Type;
 
 /**
  * Builder to update an existing {@link TargetType} entry. Defines all
@@ -30,7 +31,7 @@ public interface TargetTypeUpdate {
      * @param colour for {@link TargetType#getColour()}
      * @return updated builder instance
      */
-    TargetTypeUpdate colour(@Size(max = TargetType.COLOUR_MAX_SIZE) String colour);
+    TargetTypeUpdate colour(@Size(max = Type.COLOUR_MAX_SIZE) String colour);
 
     /**
      * @param name Name

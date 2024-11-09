@@ -26,5 +26,4 @@ public interface DistributionSetTypeBuilder {
      * @return builder instance
      */
     DistributionSetTypeCreate create();
-
 }
