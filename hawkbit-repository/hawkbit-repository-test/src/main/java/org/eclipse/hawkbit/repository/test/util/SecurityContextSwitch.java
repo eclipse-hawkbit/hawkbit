@@ -137,7 +137,9 @@ public class SecurityContextSwitch {
         @Serial
         private static final long serialVersionUID = 1L;
 
-        // could be serializable and could be serialized, must not be made transient
+        // in some cases it could be serializable, e.g. if got via {@link java.lang.reflect.AnnotatedElement} (see javadoc),
+        // and in some cases it used to be serialized, e.g. in {@link SecurityContextSerializer#JavaSerialization.serialize},
+        // must not be made transient!
         private final WithUser annotation;
 
         WithUserSecurityContext(final WithUser annotation) {
