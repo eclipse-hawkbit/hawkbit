@@ -289,10 +289,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<MgmtTargetAssignmentResponseBody> createAssignedTarget(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestBody final List<MgmtTargetAssignmentRequestBody> assignments,
-            @RequestParam(value = "offline", required = false) final boolean offline) {
-        if (offline) {
+            @RequestParam(value = "offline", required = false) final Boolean offline) {
+        if (offline != null && offline) {
             final List<Entry<String, Long>> offlineAssignments = assignments.stream()
-                    .map(assignment -> new SimpleEntry<String, Long>(assignment.getId(), distributionSetId))
+                    .map(assignment -> new SimpleEntry<>(assignment.getId(), distributionSetId))
                     .collect(Collectors.toList());
             return ResponseEntity.ok(MgmtDistributionSetMapper
                     .toResponse(deployManagament.offlineAssignedDistributionSets(offlineAssignments)));

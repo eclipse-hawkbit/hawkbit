@@ -495,12 +495,12 @@ public interface MgmtDistributionSetRestApi {
     ResponseEntity<MgmtTargetAssignmentResponseBody> createAssignedTarget(
             @PathVariable("distributionSetId") Long distributionSetId,
             final List<MgmtTargetAssignmentRequestBody> targetIds,
-            @RequestParam(value = "offline", required = false) boolean offline);
+            @RequestParam(value = "offline", required = false) Boolean offline);
 
     /**
-     * Gets a paged list of meta data for a distribution set.
+     * Gets a paged list of meta-data for a distribution set.
      *
-     * @param distributionSetId the ID of the distribution set for the meta data
+     * @param distributionSetId the ID of the distribution set for the meta-data
      * @param pagingOffsetParam the offset of list of targets for pagination, might not be
      *         present in the rest request then default value will be applied
      * @param pagingLimitParam the limit of the paged request, might not be present in the
