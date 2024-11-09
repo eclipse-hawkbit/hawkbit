@@ -354,10 +354,14 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final Long filterId = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("a").query("name==*")).getId();
 
-        targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("b").query("name==*").autoAssignDistributionSet(ds));
-        targetFilterQueryManagement
-                .updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId()));
+        assertThat(
+                targetFilterQueryManagement.create(
+                        entityFactory.targetFilterQuery().create().name("b").query("name==*").autoAssignDistributionSet(ds)))
+                .isNotNull();
+        assertThat(
+                targetFilterQueryManagement
+                        .updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId())))
+                .isNotNull();
     }
 
     @Test
@@ -367,10 +371,15 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final Long filterId = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("a").query("name==*")).getId();
 
-        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create()
-                .name("b").query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(342));
-        targetFilterQueryManagement.updateAutoAssignDS(
-                entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId()).weight(343));
+        assertThat(
+                targetFilterQueryManagement.create(
+                        entityFactory.targetFilterQuery().create()
+                                .name("b").query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(342)))
+                .isNotNull();
+        assertThat(
+                targetFilterQueryManagement.updateAutoAssignDS(
+                        entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId()).weight(343)))
+                .isNotNull();
     }
 
     @Test
@@ -378,10 +387,13 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     public void removeDsFromFilterWhenMultiAssignmentModeNotEnabled() {
         enableMultiAssignments();
         final DistributionSet ds = testdataFactory.createDistributionSet();
-        final Long filterId = targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("a")
+        final Long filterId = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("a")
                 .query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(23)).getId();
-        targetFilterQueryManagement
-                .updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(null).weight(null));
+        assertThat(
+                targetFilterQueryManagement
+                        .updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(null).weight(null)))
+                .isNotNull();
     }
 
     @Test
