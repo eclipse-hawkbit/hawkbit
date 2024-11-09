@@ -108,6 +108,11 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
     private static File createTempFile() {
         try {
             final File file = Files.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX).toFile();
+            if (!(file.setReadable(true, true) &&
+                    file.setWritable(true, true) &&
+                    file.setExecutable(false))) {
+                throw new IOException("Can't set proper permissions!");
+            }
             file.deleteOnExit();
             return file;
         } catch (final IOException e) {
