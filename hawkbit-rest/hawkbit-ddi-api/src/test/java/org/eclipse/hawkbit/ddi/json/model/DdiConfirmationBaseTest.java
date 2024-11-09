@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 @Story("CHeck JSON serialization of DDI api confirmation models")
 class DdiConfirmationBaseTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
@@ -49,8 +49,8 @@ class DdiConfirmationBaseTest {
                 ddiActionHistory);
 
         // Test
-        String serializedDdiConfirmationBase = mapper.writeValueAsString(ddiConfirmationBaseAction);
-        final DdiConfirmationBaseAction deserializedDdiConfigurationBase = mapper
+        String serializedDdiConfirmationBase = OBJECT_MAPPER.writeValueAsString(ddiConfirmationBaseAction);
+        final DdiConfirmationBaseAction deserializedDdiConfigurationBase = OBJECT_MAPPER
                 .readValue(serializedDdiConfirmationBase, DdiConfirmationBaseAction.class);
 
         assertThat(serializedDdiConfirmationBase).contains(id, FORCED.getName(), ATTEMPT.getName(),
@@ -68,13 +68,15 @@ class DdiConfirmationBaseTest {
     @Description("Verify the correct deserialization of a model with a additional unknown property")
     void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
-        String serializedDdiConfirmationBase = "{\"id\":\"1234\",\"confirmation\":{\"download\":\"forced\","
-                + "\"update\":\"attempt\",\"maintenanceWindow\":\"available\",\"chunks\":[]},"
-                + "\"actionHistory\":{\"status\":\"TestAction\",\"messages\":[\"Action status message 1\","
-                + "\"Action status message 2\"]},\"links\":[],\"unknownProperty\":\"test\"}";
+        final String serializedDdiConfirmationBase = "{" +
+                "\"id\":\"1234\",\"confirmation\":{\"download\":\"forced\"," +
+                "\"update\":\"attempt\",\"maintenanceWindow\":\"available\",\"chunks\":[]}," +
+                "\"actionHistory\":{\"status\":\"TestAction\",\"messages\":[\"Action status message 1\"," +
+                "\"Action status message 2\"]},\"links\":[],\"unknownProperty\":\"test\"" +
+                "}";
 
         // Test
-        DdiConfirmationBaseAction ddiConfirmationBaseAction = mapper.readValue(serializedDdiConfirmationBase,
+        final DdiConfirmationBaseAction ddiConfirmationBaseAction = OBJECT_MAPPER.readValue(serializedDdiConfirmationBase,
                 DdiConfirmationBaseAction.class);
 
         assertThat(ddiConfirmationBaseAction.getConfirmation().getDownload().getName()).isEqualTo(FORCED.getName());
@@ -87,13 +89,15 @@ class DdiConfirmationBaseTest {
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
-        String serializedDdiConfirmationBase = "{\"id\":[\"1234\"],\"confirmation\":{\"download\":\"forced\","
-                + "\"update\":\"attempt\",\"maintenanceWindow\":\"available\",\"chunks\":[]},"
-                + "\"actionHistory\":{\"status\":\"TestAction\",\"messages\":[\"Action status message 1\","
-                + "\"Action status message 2\"]},\"links\":[]}";
+        final String serializedDdiConfirmationBase = "{" +
+                "\"id\":[\"1234\"],\"confirmation\":{\"download\":\"forced\"," +
+                "\"update\":\"attempt\",\"maintenanceWindow\":\"available\",\"chunks\":[]}," +
+                "\"actionHistory\":{\"status\":\"TestAction\",\"messages\":[\"Action status message 1\"," +
+                "\"Action status message 2\"]},\"links\":[]" +
+                "}";
 
         // Test
         assertThatExceptionOfType(MismatchedInputException.class)
-                .isThrownBy(() -> mapper.readValue(serializedDdiConfirmationBase, DdiConfirmationBaseAction.class));
+                .isThrownBy(() -> OBJECT_MAPPER.readValue(serializedDdiConfirmationBase, DdiConfirmationBaseAction.class));
     }
 }
