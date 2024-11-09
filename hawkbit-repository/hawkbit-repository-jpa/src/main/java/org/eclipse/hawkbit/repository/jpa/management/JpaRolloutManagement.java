@@ -664,7 +664,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
 
         // create and persist the groups (w/o filling them with targets)
-        RolloutGroup lastSavedGroup = null;
+        JpaRolloutGroup lastSavedGroup = null;
         for (final RolloutGroup srcGroup : groups) {
             final JpaRolloutGroup group = new JpaRolloutGroup();
             group.setName(srcGroup.getName());
