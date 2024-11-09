@@ -37,5 +37,5 @@ public interface TargetTypeUpdate {
      * @param name Name
      * @return updated builder instance
      */
-    TargetTypeUpdate name(@Size(max = TargetType.NAME_MAX_SIZE) String name);
+    TargetTypeUpdate name(@Size(max = NamedEntity.NAME_MAX_SIZE) String name);
 }
