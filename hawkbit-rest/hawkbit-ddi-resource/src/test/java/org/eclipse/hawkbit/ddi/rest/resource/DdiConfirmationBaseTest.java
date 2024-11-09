@@ -155,18 +155,13 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
                 .getContent().get(0);
 
         // get confirmation base
-        assertThat(
-                performGet(
-                        CONFIRMATION_BASE_ACTION, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR),
-                        status().isOk(), tenantAware.getCurrentTenant(), target.getControllerId(), action.getId().toString()))
-                .isNotNull();
+        performGet(CONFIRMATION_BASE_ACTION, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR),
+                status().isOk(), tenantAware.getCurrentTenant(), target.getControllerId(), action.getId().toString());
 
         // get artifacts
-        assertThat(
-                performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR),
-                        status().isOk(), tenantAware.getCurrentTenant(), target.getControllerId(),
-                        String.valueOf(softwareModuleId)))
-                .isNotNull();
+        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR),
+                status().isOk(), tenantAware.getCurrentTenant(), target.getControllerId(),
+                String.valueOf(softwareModuleId));
     }
 
     @Test
@@ -501,5 +496,4 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
                 post(CONFIRMATION_FEEDBACK, tenantAware.getCurrentTenant(), target.getControllerId(), action.getId())
                         .content(feedback).contentType(MediaType.APPLICATION_JSON));
     }
-
 }
