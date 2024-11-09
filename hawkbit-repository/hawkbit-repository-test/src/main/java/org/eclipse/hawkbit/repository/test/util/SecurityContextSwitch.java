@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.test.util;
 
 import java.io.Serial;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
@@ -81,63 +82,19 @@ public class SecurityContextSwitch {
         }
     }
 
-    private static WithUser createWithUser(final String principal, final String tenant, final boolean autoCreateTenant,
+    private static WithUser createWithUser(
+            final String principal, final String tenant, final boolean autoCreateTenant,
             final boolean allSpPermission, final boolean controller, final String... authorities) {
-        return new WithUser() {
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return WithUser.class;
-            }
-
-            @Override
-            public String principal() {
-                return principal;
-            }
-
-            @Override
-            public String credentials() {
-                return null;
-            }
-
-            @Override
-            public String tenantId() {
-                return tenant;
-            }
-
-            @Override
-            public boolean autoCreateTenant() {
-                return autoCreateTenant;
-            }
-
-            @Override
-            public String[] authorities() {
-                return authorities;
-            }
-
-            @Override
-            public boolean allSpPermissions() {
-                return allSpPermission;
-            }
-
-            @Override
-            public String[] removeFromAllPermission() {
-                return new String[0];
-            }
-
-            @Override
-            public boolean controller() {
-                return controller;
-            }
-        };
+        return new WithUserImpl(principal, tenant, autoCreateTenant, allSpPermission, controller, authorities);
     }
 
+    // should be used only for test purposes and taking in account 'annotation' non-transient field in a Serializable
     static class WithUserSecurityContext implements SecurityContext {
 
         @Serial
         private static final long serialVersionUID = 1L;
 
-        // in some cases it could be serializable, e.g. if got via {@link java.lang.reflect.AnnotatedElement} (see javadoc),
+        // in some cases it could be serializable, e.g. if got via {@link java.lang.reflect.AnnotatedElement} (see javadoc) or WithUserImpl,
         // and in some cases it used to be serialized, e.g. in {@link SecurityContextSerializer#JavaSerialization.serialize},
         // must not be made transient!
         private final WithUser annotation;
@@ -193,6 +150,72 @@ public class SecurityContextSwitch {
                 permissions.addAll(Arrays.asList(additionalAuthorities));
             }
             return permissions.toArray(new String[0]);
+        }
+    }
+
+    private static class WithUserImpl implements WithUser, Serializable {
+
+        private final String principal;
+        private final String tenant;
+        private final boolean autoCreateTenant;
+        private final boolean allSpPermission;
+        private final boolean controller;
+        private final String[] authorities;
+
+        private WithUserImpl(
+                final String principal, final String tenant, final boolean autoCreateTenant,
+                final boolean allSpPermission, final boolean controller, final String... authorities) {
+            this.principal = principal;
+            this.tenant = tenant;
+            this.autoCreateTenant = autoCreateTenant;
+            this.allSpPermission = allSpPermission;
+            this.controller = controller;
+            this.authorities = authorities;
+        }
+
+        @Override
+        public Class<? extends Annotation> annotationType() {
+            return WithUser.class;
+        }
+
+        @Override
+        public String principal() {
+            return principal;
+        }
+
+        @Override
+        public String credentials() {
+            return null;
+        }
+
+        @Override
+        public String tenantId() {
+            return tenant;
+        }
+
+        @Override
+        public boolean autoCreateTenant() {
+            return autoCreateTenant;
+        }
+
+        @Override
+        public String[] authorities() {
+            return authorities;
+        }
+
+        @Override
+        public boolean allSpPermissions() {
+            return allSpPermission;
+        }
+
+        @Override
+        public String[] removeFromAllPermission() {
+            return new String[0];
+        }
+
+        @Override
+        public boolean controller() {
+            return controller;
         }
     }
 }
