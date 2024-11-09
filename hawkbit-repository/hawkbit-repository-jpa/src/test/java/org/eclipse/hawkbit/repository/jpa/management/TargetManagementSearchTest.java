@@ -47,6 +47,8 @@ import org.springframework.data.domain.Sort.Direction;
 @Story("Target Management Searches")
 class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
+    private static final String SPACE_AND_DESCRIPTION = " description";
+
     @Test
     @Description("Verifies that targets with given target type are returned from repository.")
     public void findTargetByTargetType() {
@@ -92,7 +94,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         final String targetDsAIdPref = "targ-A";
         List<Target> targAs = testdataFactory.createTargets(100, targetDsAIdPref,
-                targetDsAIdPref.concat(" description"), lastTargetQueryNotOverdue);
+                targetDsAIdPref.concat(SPACE_AND_DESCRIPTION), lastTargetQueryNotOverdue);
         targAs = assignTag(targAs, targTagX);
 
         final Target targSpecialName = targetManagement
@@ -100,21 +102,21 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         final String targetDsBIdPref = "targ-B";
         List<Target> targBs = testdataFactory.createTargets(100, targetDsBIdPref,
-                targetDsBIdPref.concat(" description"), lastTargetQueryAlwaysOverdue);
+                targetDsBIdPref.concat(SPACE_AND_DESCRIPTION), lastTargetQueryAlwaysOverdue);
 
         targBs = assignTag(targBs, targTagY);
         targBs = assignTag(targBs, targTagW);
 
         final String targetDsCIdPref = "targ-C";
         List<Target> targCs = testdataFactory.createTargets(100, targetDsCIdPref,
-                targetDsCIdPref.concat(" description"), lastTargetQueryAlwaysOverdue);
+                targetDsCIdPref.concat(SPACE_AND_DESCRIPTION), lastTargetQueryAlwaysOverdue);
 
         targCs = assignTag(targCs, targTagZ);
         targCs = assignTag(targCs, targTagW);
 
         final String targetDsDIdPref = "targ-D";
         final List<Target> targDs = testdataFactory.createTargets(100, targetDsDIdPref,
-                targetDsDIdPref.concat(" description"), null);
+                targetDsDIdPref.concat(SPACE_AND_DESCRIPTION), null);
 
         final String targetDsEIdPref = "targ-E";
         final List<Target> targEs = testdataFactory.createTargetsWithType(100, targetDsEIdPref, targetTypeX);
