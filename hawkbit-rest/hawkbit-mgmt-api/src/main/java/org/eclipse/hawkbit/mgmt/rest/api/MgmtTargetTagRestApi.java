@@ -427,7 +427,7 @@ public interface MgmtTargetTagRestApi {
             + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING + "/toggleTagAssignment", consumes = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    @Deprecated(forRemoval = true)
+    @Deprecated(forRemoval = true, since = "0.6.0")
     ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(@PathVariable("targetTagId") Long targetTagId,
             List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
 
@@ -461,7 +461,7 @@ public interface MgmtTargetTagRestApi {
             + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING, consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
-    @Deprecated(forRemoval = true)
+    @Deprecated(forRemoval = true, since = "0.6.0")
     ResponseEntity<List<MgmtTarget>> assignTargetsByRequestBody(@PathVariable("targetTagId") Long targetTagId,
             List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
 

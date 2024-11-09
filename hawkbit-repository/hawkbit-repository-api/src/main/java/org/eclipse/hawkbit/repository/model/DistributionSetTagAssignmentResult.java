@@ -18,7 +18,7 @@ import lombok.Data;
  *
  * @deprecated since 0.6.0 with toggle deprecation
  */
-@Deprecated(forRemoval = true)
+@Deprecated(forRemoval = true, since = "0.6.0")
 @Data
 public class DistributionSetTagAssignmentResult extends AbstractAssignmentResult<DistributionSet> {
 
