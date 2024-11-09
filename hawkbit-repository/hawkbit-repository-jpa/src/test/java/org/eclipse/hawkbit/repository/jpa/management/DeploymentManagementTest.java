@@ -954,11 +954,10 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
         final DeploymentRequest assignWithoutWeight = DeploymentManagement.deploymentRequest(targetId, dsId).build();
-        final DeploymentRequest assignWithWeight = DeploymentManagement.deploymentRequest(targetId, dsId).setWeight(567)
-                .build();
+        final DeploymentRequest assignWithWeight = DeploymentManagement.deploymentRequest(targetId, dsId).setWeight(567).build();
 
         enableMultiAssignments();
-        deploymentManagement.assignDistributionSets(Arrays.asList(assignWithoutWeight, assignWithWeight));
+        assertThat(deploymentManagement.assignDistributionSets(List.of(assignWithoutWeight, assignWithWeight))).isNotNull();
     }
 
     @Test
