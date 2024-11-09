@@ -69,14 +69,13 @@ import org.springframework.test.web.servlet.ResultActions;
  */
 @Feature("Component Tests - Direct Device Integration API")
 @Story("Confirmation Action Resource")
-public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
+class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
 
     private static final String DEFAULT_CONTROLLER_ID = "4747";
 
     @Test
-    @Description("Forced deployment to a controller. Checks if the confirmation resource response payload for a given"
-            + " deployment is as expected.")
-    public void verifyConfirmationReferencesInControllerBase(@Autowired ActionStatusRepository actionStatusRepository) throws Exception {
+    @Description("Forced deployment to a controller. Checks if the confirmation resource response payload for a given deployment is as expected.")
+    void verifyConfirmationReferencesInControllerBase(@Autowired ActionStatusRepository actionStatusRepository) throws Exception {
         enableConfirmationFlow();
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
@@ -142,7 +141,7 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensure that the deployment resource is available as CBOR")
-    public void confirmationResourceCbor() throws Exception {
+    void confirmationResourceCbor() throws Exception {
         enableConfirmationFlow();
         final Target target = testdataFactory.createTarget();
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("");
@@ -156,19 +155,23 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
                 .getContent().get(0);
 
         // get confirmation base
-        performGet(CONFIRMATION_BASE_ACTION, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR),
-                status().isOk(), tenantAware.getCurrentTenant(), target.getControllerId(), action.getId().toString());
+        assertThat(
+                performGet(
+                        CONFIRMATION_BASE_ACTION, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR),
+                        status().isOk(), tenantAware.getCurrentTenant(), target.getControllerId(), action.getId().toString()))
+                .isNotNull();
 
         // get artifacts
-        performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR),
-                status().isOk(), tenantAware.getCurrentTenant(), target.getControllerId(),
-                String.valueOf(softwareModuleId));
-
+        assertThat(
+                performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR),
+                        status().isOk(), tenantAware.getCurrentTenant(), target.getControllerId(),
+                        String.valueOf(softwareModuleId)))
+                .isNotNull();
     }
 
     @Test
     @Description("Ensure that the confirmation endpoint is not available.")
-    public void confirmationEndpointNotExposed() throws Exception {
+    void confirmationEndpointNotExposed() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("988");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
@@ -190,7 +193,7 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensure that the deploymentBase endpoint is not available for action ins WFC state.")
-    public void deploymentEndpointNotAccessibleForActionsWFC() throws Exception {
+    void deploymentEndpointNotAccessibleForActionsWFC() throws Exception {
         enableConfirmationFlow();
 
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -218,7 +221,7 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensure that the confirmation endpoints are still available after deactivating the confirmation flow.")
-    public void verifyConfirmationBaseEndpointsArePresentAfterDisablingConfirmationFlow() throws Exception {
+    void verifyConfirmationBaseEndpointsArePresentAfterDisablingConfirmationFlow() throws Exception {
         enableConfirmationFlow();
 
         final DistributionSet ds = testdataFactory.createDistributionSet("");
