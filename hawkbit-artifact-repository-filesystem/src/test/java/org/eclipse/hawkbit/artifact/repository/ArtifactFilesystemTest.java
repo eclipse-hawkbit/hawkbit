@@ -26,15 +26,15 @@ import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Artifact File System Repository")
 @Story("Test storing artifact binaries in the file-system")
-public class ArtifactFilesystemTest {
+class ArtifactFilesystemTest {
 
     @Test
     @Description("Verifies that an exception is thrown on opening an InputStream when file does not exists")
-    public void getInputStreamOfNonExistingFileThrowsException() {
+    void getInputStreamOfNonExistingFileThrowsException() {
         final File file = new File("fileWhichTotalDoesNotExists");
-        final ArtifactFilesystem underTest = new ArtifactFilesystem(file, "fileWhichTotalDoesNotExists",
+        final ArtifactFilesystem underTest = new ArtifactFilesystem(
+                file, "fileWhichTotalDoesNotExists",
                 new DbArtifactHash("1", "2", "3"), 0L, null);
-
         try {
             underTest.getFileInputStream();
             Assertions.fail("Expected a FileNotFoundException because file does not exists");
@@ -45,13 +45,13 @@ public class ArtifactFilesystemTest {
 
     @Test
     @Description("Verifies that an InputStream can be opened if file exists")
-    public void getInputStreamOfExistingFile() throws IOException {
+    void getInputStreamOfExistingFile() throws IOException {
         final File createTempFile = Files.createTempFile(ArtifactFilesystemTest.class.getSimpleName(), "").toFile();
         createTempFile.deleteOnExit();
 
-        final ArtifactFilesystem underTest = new ArtifactFilesystem(createTempFile,
-                ArtifactFilesystemTest.class.getSimpleName(), new DbArtifactHash("1", "2", "3"), 0L, null);
+        final ArtifactFilesystem underTest = new ArtifactFilesystem(
+                createTempFile, ArtifactFilesystemTest.class.getSimpleName(), new DbArtifactHash("1", "2", "3"), 0L, null);
         final byte[] buffer = new byte[1024];
-        IOUtils.read(underTest.getFileInputStream(), buffer);
+        assertThat(IOUtils.read(underTest.getFileInputStream(), buffer)).isEqualTo(0);
     }
 }

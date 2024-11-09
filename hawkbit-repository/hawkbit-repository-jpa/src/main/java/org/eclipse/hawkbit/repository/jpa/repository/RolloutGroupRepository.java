@@ -80,9 +80,9 @@ public interface RolloutGroupRepository
      *         states
      */
     long countByRolloutIdAndStatusNotAndStatusNotAndStatusNot(@Param("rolloutId") long rolloutId,
-            @Param("status1") JpaRolloutGroup.RolloutGroupStatus status1,
-            @Param("status2") JpaRolloutGroup.RolloutGroupStatus status2,
-            @Param("status3") JpaRolloutGroup.RolloutGroupStatus status3);
+            @Param("status1") RolloutGroup.RolloutGroupStatus status1,
+            @Param("status2") RolloutGroup.RolloutGroupStatus status2,
+            @Param("status3") RolloutGroup.RolloutGroupStatus status3);
 
     /**
      * Retrieves all {@link RolloutGroup} for a specific parent in a specific
