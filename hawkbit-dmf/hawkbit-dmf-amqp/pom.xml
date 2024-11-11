@@ -18,6 +18,7 @@
         <artifactId>hawkbit-dmf-parent</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-dmf-amqp</artifactId>
     <name>hawkBit :: DMF :: AMQP 0.9 Implementation</name>
 

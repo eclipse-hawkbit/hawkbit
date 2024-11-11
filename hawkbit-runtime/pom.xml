@@ -86,7 +86,6 @@
 
     <modules>
         <module>hawkbit-ddi-server</module>
-        <module>hawkbit-dmf-server</module>
         <module>hawkbit-mgmt-server</module>
         <module>hawkbit-simple-ui</module>
 

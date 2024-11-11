@@ -14,9 +14,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-runtime-parent</artifactId>
+        <artifactId>hawkbit-dmf-parent</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-dmf-server</artifactId>
     <name>hawkBit :: Runtime :: DMF Server</name>
 
@@ -36,4 +37,31 @@
             <artifactId>spring-cloud-stream-binder-rabbit</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${baseDir}</outputDirectory>
+                            <mainClass>${spring.app.class}</mainClass>
+                            <layout>JAR</layout>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+    </build>
 </project>

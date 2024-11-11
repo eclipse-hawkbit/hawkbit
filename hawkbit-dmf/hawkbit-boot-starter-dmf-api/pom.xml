@@ -14,13 +14,32 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-starters</artifactId>
+        <artifactId>hawkbit-dmf-parent</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-boot-starter-dmf-api</artifactId>
     <name>hawkBit :: Spring Boot Starter DMF API</name>
 
     <dependencies>
+        <!-- hawkBit - START -->
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-repository-jpa</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-autoconfigure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-dmf-amqp</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- hawkBit - END -->
+
         <!-- Spring - START -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -36,23 +55,22 @@
         </dependency>
         <!-- Spring - END -->
 
-        <!-- hawkBit - START -->
         <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-dmf-amqp</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-repository-jpa</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-autoconfigure</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>
-        <!-- hawkBit - END -->
 
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+        </dependency>
     </dependencies>
 </project>
