@@ -12,19 +12,31 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-parent</artifactId>
+        <artifactId>hawkbit-ddi-parent</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>hawkbit-runtime-parent</artifactId>
-    <name>hawkBit :: Runtime :: Parent</name>
-    <packaging>pom</packaging>
+    <artifactId>hawkbit-ddi-server</artifactId>
+    <name>hawkBit :: Runtime :: DDI Server</name>
 
-    <!-- Common runtime dependences -->
+    <properties>
+        <spring.app.class>org.eclipse.hawkbit.app.ddi.DDIStart</spring.app.class>
+    </properties>
+
     <dependencies>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-boot-starter-ddi-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-stream-binder-rabbit</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -40,19 +52,15 @@
 
         <!-- Test -->
         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mariadb.jdbc</groupId>
-            <artifactId>mariadb-java-client</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-repository-test</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- if run against mysql -->
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -83,11 +91,4 @@
             </resource>
         </resources>
     </build>
-
-    <modules>
-        <module>hawkbit-mgmt-server</module>
-        <module>hawkbit-simple-ui</module>
-
-        <module>hawkbit-update-server</module>
-    </modules>
 </project>

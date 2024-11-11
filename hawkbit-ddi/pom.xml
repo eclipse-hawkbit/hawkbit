@@ -18,16 +18,14 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>hawkbit-dmf-parent</artifactId>
-    <name>hawkBit :: DMF</name>
+    <artifactId>hawkbit-ddi-parent</artifactId>
+    <name>hawkBit :: DDI</name>
     <packaging>pom</packaging>
 
     <modules>
-        <module>hawkbit-dmf-api</module>
-        <module>hawkbit-dmf-amqp</module>
-        <module>hawkbit-boot-starter-dmf-api</module>
-        <module>hawkbit-dmf-server</module>
-
-        <module>hawkbit-dmf-rabbitmq-test</module>
+        <module>hawkbit-ddi-api</module>
+        <module>hawkbit-ddi-resource</module>
+        <module>hawkbit-boot-starter-ddi-api</module>
+        <module>hawkbit-ddi-server</module>
     </modules>
 </project>

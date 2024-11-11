@@ -14,9 +14,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-starters</artifactId>
+        <artifactId>hawkbit-ddi-parent</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-boot-starter-ddi-api</artifactId>
     <name>hawkBit :: Spring Boot Starter DDI API</name>
 
@@ -71,6 +72,5 @@
             <version>${project.version}</version>
         </dependency>
         <!-- hawkBit - END -->
-
     </dependencies>
 </project>
