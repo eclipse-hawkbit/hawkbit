@@ -139,7 +139,8 @@
         <module>hawkbit-repository</module>
         <module>hawkbit-artifact-repository-filesystem</module>
         <module>hawkbit-autoconfigure</module>
-        <module>hawkbit-rest</module>
+        <module>hawkbit-rest-core</module>
+        <module>hawkbit-mgmt</module>
         <module>hawkbit-ddi</module>
         <module>hawkbit-dmf</module>
         <module>hawkbit-test-report</module>

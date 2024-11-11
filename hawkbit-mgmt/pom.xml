@@ -17,13 +17,15 @@
         <artifactId>hawkbit-parent</artifactId>
         <version>${revision}</version>
     </parent>
-    <artifactId>hawkbit-rest-parent</artifactId>
+
+    <artifactId>hawkbit-mgmt-parent</artifactId>
     <name>hawkBit :: REST</name>
     <packaging>pom</packaging>
 
     <modules>
-        <module>hawkbit-rest-core</module>
         <module>hawkbit-mgmt-api</module>
         <module>hawkbit-mgmt-resource</module>
+        <module>hawkbit-boot-starter-mgmt-api</module>
+        <module>hawkbit-mgmt-server</module>
     </modules>
 </project>

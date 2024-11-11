@@ -15,9 +15,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-rest-parent</artifactId>
+        <artifactId>hawkbit-mgmt-parent</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-mgmt-resource</artifactId>
     <name>hawkBit :: REST :: Management Resources</name>
 
@@ -37,6 +38,7 @@
             <artifactId>hawkbit-rest-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.plugin</groupId>
             <artifactId>spring-plugin-core</artifactId>

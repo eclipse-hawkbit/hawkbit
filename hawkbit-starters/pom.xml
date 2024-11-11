@@ -22,6 +22,5 @@
     <packaging>pom</packaging>
     <modules>
         <module>hawkbit-boot-starter</module>
-        <module>hawkbit-boot-starter-mgmt-api</module>
     </modules>
 </project>

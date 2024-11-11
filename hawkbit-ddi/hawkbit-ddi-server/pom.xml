@@ -37,6 +37,7 @@
             <artifactId>spring-cloud-stream-binder-rabbit</artifactId>
         </dependency>
 
+        <!-- Database -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -57,8 +58,7 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- if run against mysql -->
-        <dependency>
+        <dependency> <!-- if run against mysql -->
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
             <scope>test</scope>
