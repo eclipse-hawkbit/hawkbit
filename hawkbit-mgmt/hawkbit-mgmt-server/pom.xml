@@ -14,21 +14,21 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-dmf-parent</artifactId>
+        <artifactId>hawkbit-mgmt-parent</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>hawkbit-dmf-server</artifactId>
-    <name>hawkBit :: Runtime :: DMF Server</name>
+    <artifactId>hawkbit-mgmt-server</artifactId>
+    <name>hawkBit :: Runtime :: Management Server</name>
 
     <properties>
-        <spring.app.class>org.eclipse.hawkbit.app.ddi.DMFStart</spring.app.class>
+        <spring.app.class>org.eclipse.hawkbit.app.mgmt.UpdateServerStart</spring.app.class>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-boot-starter-dmf-api</artifactId>
+            <artifactId>hawkbit-boot-starter-mgmt-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -51,9 +51,17 @@
             <artifactId>postgresql</artifactId>
         </dependency>
 
+        <!-- Test -->
         <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-repository-test</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency> <!-- if run against mysql -->
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

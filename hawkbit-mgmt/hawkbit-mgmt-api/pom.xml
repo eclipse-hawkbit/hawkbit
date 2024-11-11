@@ -14,14 +14,14 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-rest-parent</artifactId>
+        <artifactId>hawkbit-mgmt-parent</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-mgmt-api</artifactId>
     <name>hawkBit :: REST :: Management API</name>
 
     <dependencies>
-
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-rest-core</artifactId>
