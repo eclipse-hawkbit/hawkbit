@@ -52,6 +52,5 @@
 
     <modules>
         <module>hawkbit-update-server</module>
-        <module>hawkbit-simple-ui</module>
     </modules>
 </project>

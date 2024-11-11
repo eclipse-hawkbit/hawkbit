@@ -15,7 +15,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-runtime-parent</artifactId>
+        <artifactId>hawkbit-parent</artifactId>
         <version>${revision}</version>
     </parent>
 
