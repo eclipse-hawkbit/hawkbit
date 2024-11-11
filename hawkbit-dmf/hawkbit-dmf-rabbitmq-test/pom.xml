@@ -19,6 +19,7 @@
         <artifactId>hawkbit-dmf-parent</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-dmf-rabbitmq-test</artifactId>
     <name>hawkBit :: DMF :: RabbitMq Test module</name>
 

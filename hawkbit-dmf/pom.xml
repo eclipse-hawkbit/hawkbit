@@ -24,6 +24,9 @@
     <modules>
         <module>hawkbit-dmf-api</module>
         <module>hawkbit-dmf-amqp</module>
+        <module>hawkbit-boot-starter-dmf-api</module>
+        <module>hawkbit-dmf-server</module>
+
         <module>hawkbit-dmf-rabbitmq-test</module>
     </modules>
 </project>
