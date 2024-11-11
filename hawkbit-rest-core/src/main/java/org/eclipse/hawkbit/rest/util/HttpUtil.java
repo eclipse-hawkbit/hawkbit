@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.rest.util;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -28,8 +29,6 @@ public final class HttpUtil {
      * @return <code>true</code> if string matches.
      */
     public static boolean matchesHttpHeader(final String matchHeader, final String toMatch) {
-        final String[] matchValues = matchHeader.split("\\s*,\\s*");
-        Arrays.sort(matchValues);
-        return Arrays.binarySearch(matchValues, toMatch) > -1 || Arrays.binarySearch(matchValues, "*") > -1;
+        return Stream.of(matchHeader.split(",")).map(String::trim).anyMatch(chunk -> chunk.equals(toMatch) || chunk.equals("*"));
     }
 }
