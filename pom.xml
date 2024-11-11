@@ -144,10 +144,9 @@
         <module>hawkbit-mgmt</module>
         <module>hawkbit-ddi</module>
         <module>hawkbit-dmf</module>
-        <module>hawkbit-runtime</module>
-        <module>hawkbit-simple-ui</module>
+        <module>hawkbit-monolith</module>
 
-        <module>hawkbit-starters</module>
+        <module>hawkbit-simple-ui</module>
 
         <module>hawkbit-sdk</module>
 
