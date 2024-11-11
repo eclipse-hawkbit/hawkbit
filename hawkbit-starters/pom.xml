@@ -23,6 +23,5 @@
     <modules>
         <module>hawkbit-boot-starter</module>
         <module>hawkbit-boot-starter-mgmt-api</module>
-        <module>hawkbit-boot-starter-ddi-api</module>
     </modules>
 </project>

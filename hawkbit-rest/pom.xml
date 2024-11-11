@@ -25,7 +25,5 @@
         <module>hawkbit-rest-core</module>
         <module>hawkbit-mgmt-api</module>
         <module>hawkbit-mgmt-resource</module>
-        <module>hawkbit-ddi-api</module>
-        <module>hawkbit-ddi-resource</module>
     </modules>
 </project>
