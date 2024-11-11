@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.autoconfigure.scheduling;
 import java.util.Locale;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +30,6 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
-import org.springframework.security.concurrent.DelegatingSecurityContextExecutor;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.concurrent.DelegatingSecurityContextScheduledExecutorService;
 
@@ -41,15 +38,17 @@ import org.springframework.security.concurrent.DelegatingSecurityContextSchedule
  */
 @Slf4j
 @Configuration
-@EnableConfigurationProperties(AsyncConfigurerThreadpoolProperties.class)
+@EnableConfigurationProperties(AsyncConfigurerThreadPoolProperties.class)
 public class ExecutorAutoConfiguration {
 
-    @Autowired
-    private AsyncConfigurerThreadpoolProperties asyncConfigurerProperties;
+    private final AsyncConfigurerThreadPoolProperties asyncConfigurerProperties;
+
+    public ExecutorAutoConfiguration(final AsyncConfigurerThreadPoolProperties asyncConfigurerProperties) {
+        this.asyncConfigurerProperties = asyncConfigurerProperties;
+    }
 
     /**
-     * @return ExecutorService with security context availability in thread
-     *         execution.
+     * @return ExecutorService with security context availability in thread execution.
      */
     @Bean(destroyMethod = "shutdown")
     @ConditionalOnMissingBean
@@ -67,28 +66,13 @@ public class ExecutorAutoConfiguration {
     }
 
     /**
-     * @return the executor for UI background processes.
-     */
-    @Bean(name = "uiExecutor")
-    @ConditionalOnMissingBean(name = "uiExecutor")
-    public Executor uiExecutor() {
-        final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(20);
-        final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 20, 10000, TimeUnit.MILLISECONDS,
-                blockingQueue, threadFactory("ui-executor-pool-%d"));
-        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        return new DelegatingSecurityContextExecutor(threadPoolExecutor);
-    }
-
-    /**
-     * @return {@link ScheduledExecutorService} with security context
-     *         availability in thread execution.
+     * @return {@link ScheduledExecutorService} with security context availability in thread execution.
      */
     @Bean(destroyMethod = "shutdown")
     @ConditionalOnMissingBean
     public ScheduledExecutorService scheduledExecutorService() {
-        return new DelegatingSecurityContextScheduledExecutorService(
-                Executors.newScheduledThreadPool(asyncConfigurerProperties.getSchedulerThreads(),
-                        threadFactory("central-scheduled-executor-pool-%d")));
+        return new DelegatingSecurityContextScheduledExecutorService(Executors.newScheduledThreadPool(
+                asyncConfigurerProperties.getSchedulerThreads(), threadFactory("central-scheduled-executor-pool-%d")));
     }
 
     /**
@@ -110,14 +94,12 @@ public class ExecutorAutoConfiguration {
     }
 
     /**
-     * @return central ThreadPoolExecutor for general purpose multi threaded
-     *         operations. Tries an orderly shutdown when destroyed.
+     * @return central ThreadPoolExecutor for general purpose multithreaded operations. Tries an orderly shutdown when destroyed.
      */
     private ThreadPoolExecutor threadPoolExecutor() {
-        final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(
-                asyncConfigurerProperties.getQueuesize());
-        return new ThreadPoolExecutor(asyncConfigurerProperties.getCorethreads(),
-                asyncConfigurerProperties.getMaxthreads(), asyncConfigurerProperties.getIdletimeout(),
+        final BlockingQueue<Runnable> blockingQueue = new ArrayBlockingQueue<>(asyncConfigurerProperties.getQueueSize());
+        return new ThreadPoolExecutor(asyncConfigurerProperties.getCoreThreads(),
+                asyncConfigurerProperties.getMaxThreads(), asyncConfigurerProperties.getIdleTimeout(),
                 TimeUnit.MILLISECONDS, blockingQueue,
                 threadFactory("central-executor-pool-%d"),
                 new PoolSizeExceededPolicy());
