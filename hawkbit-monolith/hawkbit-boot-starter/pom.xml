@@ -14,9 +14,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-starters</artifactId>
+        <artifactId>hawkbit-monolith-parent</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-boot-starter</artifactId>
     <name>hawkBit :: Spring Boot Starter</name>
     <description>Complete starter, including auto-configuration, logging and all hawkBit interfaces</description>

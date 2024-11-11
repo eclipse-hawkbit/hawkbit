@@ -12,15 +12,19 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
         <artifactId>hawkbit-parent</artifactId>
         <version>${revision}</version>
     </parent>
-    <artifactId>hawkbit-starters</artifactId>
-    <name>hawkBit :: Spring Boot Starters</name>
+
+    <artifactId>hawkbit-monolith-parent</artifactId>
+    <name>hawkBit :: Runtime :: Parent</name>
     <packaging>pom</packaging>
+
     <modules>
         <module>hawkbit-boot-starter</module>
+        <module>hawkbit-update-server</module>
     </modules>
 </project>
