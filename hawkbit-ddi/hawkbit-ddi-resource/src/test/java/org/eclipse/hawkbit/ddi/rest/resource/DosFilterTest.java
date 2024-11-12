@@ -23,7 +23,7 @@ import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.security.DosFilter;
+import org.eclipse.hawkbit.rest.security.DosFilter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;

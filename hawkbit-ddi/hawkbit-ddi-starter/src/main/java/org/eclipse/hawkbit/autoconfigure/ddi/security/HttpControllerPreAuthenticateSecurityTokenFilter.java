@@ -7,11 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.autoconfigure.ddi.security;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.ControllerPreAuthenticateSecurityTokenFilter;
+import org.eclipse.hawkbit.security.PreAuthenticationFilter;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 

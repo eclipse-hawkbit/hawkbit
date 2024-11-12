@@ -20,6 +20,6 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @ConditionalOnClass(DdiApiConfiguration.class)
 @Import(DdiApiConfiguration.class)
-public class DDiApiAutoConfiguration {
+public class DdiApiAutoConfiguration {
 
 }

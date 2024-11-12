@@ -46,7 +46,7 @@ This has to be kept in mind e.g. if the scheduler executes critical code which h
 ### Denial-of-Service (DoS) filter
 
 hawkBit owns the feature of guarding itself from DoS attacks,
-a [DoS filter](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-http-security/src/main/java/org/eclipse/hawkbit/security/DosFilter.java).
+a [DoS filter](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-rest-core/src/main/java/org/eclipse/hawkbit/rest/security/DosFilter.java).
 It reduces the maximum number of requests per seconds which can be configured for read and write requests.
 This mechanism is only working for every node separately, i.e. in a cluster environment the worst-case behaviour would
 be that the maximum number of requests per seconds will be increased to its product if every request is handled by a

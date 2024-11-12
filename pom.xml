@@ -135,7 +135,6 @@
         <module>hawkbit-core</module>
         <module>hawkbit-security-core</module>
         <module>hawkbit-security-integration</module>
-        <module>hawkbit-http-security</module>
         <module>hawkbit-artifact</module>
         <module>hawkbit-repository</module>
         <module>hawkbit-autoconfigure</module>

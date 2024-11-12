@@ -1,1 +1,3 @@
 org.eclipse.hawkbit.autoconfigure.mgmt.MgmtApiAutoConfiguration
+org.eclipse.hawkbit.rest.SecurityManagedConfiguration
+org.eclipse.hawkbit.autoconfigure.mgmt.MgmtSecurityConfiguration

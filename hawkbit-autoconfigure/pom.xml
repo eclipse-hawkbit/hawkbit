@@ -35,12 +35,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-http-security</artifactId>
-            <version>${project.version}</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-security-core</artifactId>
             <version>${project.version}</version>
             <optional>true</optional>

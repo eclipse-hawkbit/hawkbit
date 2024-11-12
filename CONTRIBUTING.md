@@ -33,7 +33,7 @@ dependencies on hawkBit users. We in fact are looking into reducing them in futu
 So we kindly ask contributors:
 
 * not introduce extra utility library dependencies
-* keep them out of the core modules (e.g. hawkbit-core, hawkbit-rest-core, hawkbit-http-security) to avoid that all
+* keep them out of the core modules (e.g. hawkbit-core, hawkbit-rest-core) to avoid that all
   modules have them as transitive dependency
 * use utility functions in general based in the following priority:
     * use utility functions from JDK if feasible

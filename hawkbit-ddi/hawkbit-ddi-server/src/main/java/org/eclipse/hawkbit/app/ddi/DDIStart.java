@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.app.ddi;
 
-import org.eclipse.hawkbit.autoconfigure.security.EnableHawkbitManagedSecurityConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +23,6 @@ import org.springframework.web.servlet.view.RedirectView;
  * The minimal configuration for the stand alone hawkBit DDI server.
  */
 @SpringBootApplication(scanBasePackages = "org.eclipse.hawkbit")
-@EnableHawkbitManagedSecurityConfiguration
 public class DDIStart {
 
     /**

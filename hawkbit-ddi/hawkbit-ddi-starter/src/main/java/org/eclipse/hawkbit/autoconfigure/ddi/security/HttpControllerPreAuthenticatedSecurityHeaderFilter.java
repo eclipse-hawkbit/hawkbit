@@ -7,10 +7,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.autoconfigure.ddi.security;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.ControllerPreAuthenticatedSecurityHeaderFilter;
+import org.eclipse.hawkbit.security.PreAuthenticationFilter;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 
@@ -25,7 +28,7 @@ public class HttpControllerPreAuthenticatedSecurityHeaderFilter extends Abstract
     private final String caAuthorityNameHeader;
 
     /**
-     * Creates a new {@link ControllerPreAuthenticatedSecurityHeaderFilter}, in
+     * Creates a new {@link org.eclipse.hawkbit.security.ControllerPreAuthenticatedSecurityHeaderFilter}, in
      * case the HTTP request matches the given pattern the principal is parsed
      * from the HTTP request with the given URI pattern, in case the URI pattern
      * does not match the current request then only the existence of the
@@ -51,7 +54,8 @@ public class HttpControllerPreAuthenticatedSecurityHeaderFilter extends Abstract
 
     @Override
     protected PreAuthenticationFilter createControllerAuthenticationFilter() {
-        return new ControllerPreAuthenticatedSecurityHeaderFilter(caCommonNameHeader, caAuthorityNameHeader,
+        return new ControllerPreAuthenticatedSecurityHeaderFilter(
+                caCommonNameHeader, caAuthorityNameHeader,
                 tenantConfigurationManagement, tenantAware, systemSecurityContext);
     }
 

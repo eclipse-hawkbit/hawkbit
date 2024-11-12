@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.autoconfigure.ddi.security;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,6 +23,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
+import org.eclipse.hawkbit.security.PreAuthenticationFilter;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.util.UrlUtils;
 import org.slf4j.Logger;
