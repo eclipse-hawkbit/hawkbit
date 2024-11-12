@@ -14,7 +14,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-parent</artifactId>
+        <artifactId>hawkbit-security-parent</artifactId>
         <version>${revision}</version>
     </parent>
 
@@ -32,6 +32,7 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
         </dependency>
+
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
