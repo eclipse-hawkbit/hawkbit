@@ -14,11 +14,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-parent</artifactId>
+        <artifactId>hawkbit-security-parent</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-security-core</artifactId>
-    <name>hawkBit :: Core Security</name>
+    <name>hawkBit :: Security :: Core</name>
 
     <dependencies>
         <dependency>
