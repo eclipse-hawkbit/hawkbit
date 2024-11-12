@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.security.controller;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A pre-authenticated processing filter which extracts the principal from a
  * request URI and the credential from a request header in a the
- * {@link DmfTenantSecurityToken}.
+ * {@link ControllerSecurityToken}.
  */
 @Slf4j
 public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractControllerAuthenticationFilter {
@@ -71,7 +72,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken securityToken) {
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final ControllerSecurityToken securityToken) {
         // retrieve the common name header and the authority name header from
         // the http request and combine them together
         final String commonNameValue = securityToken.getHeader(caCommonNameHeader);
@@ -92,7 +93,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     @Override
-    public Object getPreAuthenticatedCredentials(final DmfTenantSecurityToken securityToken) {
+    public Object getPreAuthenticatedCredentials(final ControllerSecurityToken securityToken) {
         final String authorityNameConfigurationValue = tenantAware.runAsTenant(securityToken.getTenant(),
                 sslIssuerNameConfigTenantRunner);
 
@@ -124,7 +125,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
      * this tenant.
      */
     @SuppressWarnings("java:S2629") // check if debug is enabled is maybe heavier then evaluation
-    private String getIssuerHashHeader(final DmfTenantSecurityToken securityToken, final String knownIssuerHashes) {
+    private String getIssuerHashHeader(final ControllerSecurityToken securityToken, final String knownIssuerHashes) {
         // there may be several knownIssuerHashes configured for the tenant
         final List<String> knownHashes = splitMultiHashBySemicolon(knownIssuerHashes);
 

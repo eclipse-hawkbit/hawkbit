@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.security.controller;
 
 import java.util.Optional;
 
@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 
@@ -54,9 +55,9 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken securityToken) {
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final ControllerSecurityToken securityToken) {
         final String controllerId = resolveControllerId(securityToken);
-        final String authHeader = securityToken.getHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER);
+        final String authHeader = securityToken.getHeader(ControllerSecurityToken.AUTHORIZATION_HEADER);
         if ((authHeader != null) && authHeader.startsWith(TARGET_SECURITY_TOKEN_AUTH_SCHEME)) {
             log.debug("found authorization header with scheme {} using target security token for authentication",
                     TARGET_SECURITY_TOKEN_AUTH_SCHEME);
@@ -69,7 +70,7 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken securityToken) {
+    public HeaderAuthentication getPreAuthenticatedCredentials(final ControllerSecurityToken securityToken) {
         final Optional<Target> target = systemSecurityContext.runAsSystemAsTenant(() -> {
             if (securityToken.getTargetId() != null) {
                 return controllerManagement.get(securityToken.getTargetId());
@@ -87,7 +88,7 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
         return TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED;
     }
 
-    private String resolveControllerId(final DmfTenantSecurityToken securityToken) {
+    private String resolveControllerId(final ControllerSecurityToken securityToken) {
         if (securityToken.getControllerId() != null) {
             return securityToken.getControllerId();
         }

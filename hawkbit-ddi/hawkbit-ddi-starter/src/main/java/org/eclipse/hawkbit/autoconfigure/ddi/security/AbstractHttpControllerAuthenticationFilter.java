@@ -23,9 +23,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
-import org.eclipse.hawkbit.security.PreAuthenticationFilter;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.security.controller.ControllerSecurityToken;
+import org.eclipse.hawkbit.security.controller.PreAuthenticationFilter;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.util.UrlUtils;
 import org.slf4j.Logger;
@@ -46,6 +46,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
     protected TenantConfigurationManagement tenantConfigurationManagement;
     protected TenantAware tenantAware;
     protected SystemSecurityContext systemSecurityContext;
+
     private static final String TENANT_PLACE_HOLDER = "tenant";
     private static final String CONTROLLER_ID_PLACE_HOLDER = "controllerId";
     /**
@@ -53,12 +54,11 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
      * containing the placeholder key for retrieving the principal from the URI
      * request. e.g."/{tenant}/controller/v1/{controllerId}
      */
-    private static final String CONTROLLER_REQUEST_ANT_PATTERN = "/{" + TENANT_PLACE_HOLDER + "}/controller/v1" + "/{"
-            + CONTROLLER_ID_PLACE_HOLDER + "}/**";
-    private static final String CONTROLLER_DL_REQUEST_ANT_PATTERN = "/{" + TENANT_PLACE_HOLDER
-            + "}/controller/artifacts/v1/**";
-    private final AntPathMatcher pathExtractor;
+    private static final String CONTROLLER_REQUEST_ANT_PATTERN = "/{" + TENANT_PLACE_HOLDER + "}/controller/v1" +
+            "/{" + CONTROLLER_ID_PLACE_HOLDER + "}/**";
+    private static final String CONTROLLER_DL_REQUEST_ANT_PATTERN = "/{" + TENANT_PLACE_HOLDER + "}/controller/artifacts/v1/**";
 
+    private final AntPathMatcher pathExtractor;
     private PreAuthenticationFilter abstractControllerAuthenticationFilter;
 
     /**
@@ -91,7 +91,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
             return;
         }
 
-        final DmfTenantSecurityToken securityToken = createTenantSecurityTokenVariables((HttpServletRequest) request);
+        final ControllerSecurityToken securityToken = createTenantSecurityTokenVariables((HttpServletRequest) request);
         if (securityToken == null) {
             chain.doFilter(request, response);
             return;
@@ -120,7 +120,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
 
     @Override
     protected Object getPreAuthenticatedPrincipal(final HttpServletRequest request) {
-        final DmfTenantSecurityToken securityToken = createTenantSecurityTokenVariables(request);
+        final ControllerSecurityToken securityToken = createTenantSecurityTokenVariables(request);
         if (securityToken == null) {
             return null;
         }
@@ -129,7 +129,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
 
     @Override
     protected Object getPreAuthenticatedCredentials(final HttpServletRequest request) {
-        final DmfTenantSecurityToken securityToken = createTenantSecurityTokenVariables(request);
+        final ControllerSecurityToken securityToken = createTenantSecurityTokenVariables(request);
         if (securityToken == null) {
             return null;
         }
@@ -144,11 +144,11 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
      * Extracts tenant and controllerId from the request URI as path variables.
      *
      * @param request the Http request to extract the path variables.
-     * @return the extracted {@link DmfTenantSecurityToken} or {@code null} if the
+     * @return the extracted {@link ControllerSecurityToken} or {@code null} if the
      *         request does not match the pattern and no variables could be
      *         extracted
      */
-    protected DmfTenantSecurityToken createTenantSecurityTokenVariables(final HttpServletRequest request) {
+    protected ControllerSecurityToken createTenantSecurityTokenVariables(final HttpServletRequest request) {
         final String requestURI = request.getRequestURI();
 
         if (pathExtractor.match(request.getContextPath() + CONTROLLER_REQUEST_ANT_PATTERN, requestURI)) {
@@ -173,14 +173,10 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
         }
     }
 
-    private DmfTenantSecurityToken createTenantSecurityTokenVariables(final HttpServletRequest request,
+    private ControllerSecurityToken createTenantSecurityTokenVariables(final HttpServletRequest request,
             final String tenant, final String controllerId) {
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(tenant, null, controllerId, null);
-
-        Collections.list(request.getHeaderNames())
-                .forEach(header -> securityToken.putHeader(header, request.getHeader(header)));
-
+        final ControllerSecurityToken securityToken = new ControllerSecurityToken(tenant, null, controllerId, null);
+        Collections.list(request.getHeaderNames()).forEach(header -> securityToken.putHeader(header, request.getHeader(header)));
         return securityToken;
     }
-
 }

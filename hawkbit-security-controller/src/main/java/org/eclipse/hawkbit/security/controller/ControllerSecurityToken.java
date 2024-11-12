@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.security.controller;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -25,15 +25,16 @@ import lombok.Data;
 @Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DmfTenantSecurityToken {
+public class ControllerSecurityToken {
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
+
     @JsonProperty
     private final Long tenantId;
     @JsonProperty
-    private final String controllerId;
-    @JsonProperty
     private final Long targetId;
+    @JsonProperty
+    private final String controllerId;
     @JsonProperty
     private String tenant;
     @JsonProperty
@@ -48,7 +49,8 @@ public class DmfTenantSecurityToken {
      * @param targetId alternative target identification by technical ID
      */
     @JsonCreator
-    public DmfTenantSecurityToken(@JsonProperty("tenant") final String tenant,
+    public ControllerSecurityToken(
+            @JsonProperty("tenant") final String tenant,
             @JsonProperty("tenantId") final Long tenantId, @JsonProperty("controllerId") final String controllerId,
             @JsonProperty("targetId") final Long targetId) {
         this.tenant = tenant;
@@ -63,18 +65,8 @@ public class DmfTenantSecurityToken {
      * @param tenant the tenant for the security token
      * @param controllerId the ID of the controller for the security token
      */
-    public DmfTenantSecurityToken(final String tenant, final String controllerId) {
+    public ControllerSecurityToken(final String tenant, final String controllerId) {
         this(tenant, null, controllerId, null);
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param tenantId the tenant for the security token
-     * @param targetId target identification by technical ID
-     */
-    public DmfTenantSecurityToken(final Long tenantId, final Long targetId) {
-        this(null, tenantId, null, targetId);
     }
 
     /**
@@ -96,12 +88,12 @@ public class DmfTenantSecurityToken {
      *
      * @param name of the header
      * @param value of the header
-     * @return the previous value associated with the <tt>name</tt>, or <tt>null</tt> if there was no mapping for <tt>name</tt>.
      */
-    public String putHeader(final String name, final String value) {
+    public void putHeader(final String name, final String value) {
         if (headers == null) {
             headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         }
-        return headers.put(name, value);
+
+        headers.put(name, value);
     }
 }

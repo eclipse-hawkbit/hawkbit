@@ -7,7 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.security.controller;
+
+import java.io.Serial;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -22,7 +24,9 @@ import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
  */
 public class TenantAwareWebAuthenticationDetails extends TenantAwareAuthenticationDetails {
 
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private final String remoteAddress;
 
     /**

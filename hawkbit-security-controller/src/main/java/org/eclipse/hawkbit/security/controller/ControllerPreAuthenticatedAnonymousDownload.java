@@ -7,15 +7,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.security.controller;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 
 /**
- * An pre-authenticated processing filter which add the
+ * A pre-authenticated processing filter which add the
  * {@link SpringEvalExpressions#CONTROLLER_DOWNLOAD_ROLE_ANONYMOUS} to the
  * security context in case the anonymous download is allowed through
  * configuration.
@@ -39,12 +40,12 @@ public class ControllerPreAuthenticatedAnonymousDownload extends AbstractControl
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken securityToken) {
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final ControllerSecurityToken securityToken) {
         return new HeaderAuthentication(securityToken.getControllerId(), securityToken.getControllerId());
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken securityToken) {
+    public HeaderAuthentication getPreAuthenticatedCredentials(final ControllerSecurityToken securityToken) {
         return new HeaderAuthentication(securityToken.getControllerId(), securityToken.getControllerId());
     }
 
