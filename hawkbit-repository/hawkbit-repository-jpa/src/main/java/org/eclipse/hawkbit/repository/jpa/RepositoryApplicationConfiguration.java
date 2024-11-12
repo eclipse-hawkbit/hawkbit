@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.sql.DataSource;
@@ -173,6 +174,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -181,6 +183,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
@@ -872,9 +875,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     ArtifactManagement artifactManagement(
             final EntityManager entityManager, final LocalArtifactRepository localArtifactRepository,
-            final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
+            final SoftwareModuleRepository softwareModuleRepository, final Optional<ArtifactRepository> artifactRepository,
             final QuotaManagement quotaManagement, final TenantAware tenantAware) {
-        return new JpaArtifactManagement(entityManager, localArtifactRepository, softwareModuleRepository, artifactRepository,
+        return new JpaArtifactManagement(entityManager, localArtifactRepository, softwareModuleRepository, artifactRepository.orElse(null),
                 quotaManagement, tenantAware);
     }
 

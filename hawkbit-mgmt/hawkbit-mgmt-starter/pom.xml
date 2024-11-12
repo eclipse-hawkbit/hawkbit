@@ -19,15 +19,10 @@
     </parent>
 
     <artifactId>hawkbit-mgmt-starter</artifactId>
-    <name>hawkBit :: Spring Boot Starter Management API</name>
+    <name>hawkBit :: Management API :: Spring Boot Starter</name>
 
     <dependencies>
         <!-- hawkBit - START -->
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-mgmt-resource</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-security-controller</artifactId>
@@ -35,7 +30,17 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-artifact-repository-filesystem</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-repository-jpa</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-mgmt-resource</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
