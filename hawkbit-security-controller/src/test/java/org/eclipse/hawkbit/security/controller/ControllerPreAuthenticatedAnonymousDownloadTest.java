@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.security.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,6 +15,7 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

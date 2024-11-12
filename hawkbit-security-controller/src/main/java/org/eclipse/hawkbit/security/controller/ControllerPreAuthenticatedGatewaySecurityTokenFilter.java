@@ -7,10 +7,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.security.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 
@@ -48,8 +49,8 @@ public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends Abstra
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken securityToken) {
-        final String authHeader = securityToken.getHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER);
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final ControllerSecurityToken securityToken) {
+        final String authHeader = securityToken.getHeader(ControllerSecurityToken.AUTHORIZATION_HEADER);
         if (authHeader != null &&
                 authHeader.startsWith(GATEWAY_SECURITY_TOKEN_AUTH_SCHEME) &&
                 authHeader.length() > OFFSET_GATEWAY_TOKEN) { // disables empty string token
@@ -65,7 +66,7 @@ public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends Abstra
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken securityToken) {
+    public HeaderAuthentication getPreAuthenticatedCredentials(final ControllerSecurityToken securityToken) {
         final String gatewayToken = tenantAware.runAsTenant(securityToken.getTenant(),
                 gatewaySecurityTokenKeyConfigRunner);
         return new HeaderAuthentication(securityToken.getControllerId(), gatewayToken);

@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.security.controller;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -26,7 +26,7 @@ public interface PreAuthenticationFilter {
      * @param securityToken the secruity info
      * @return <code>true</code> is enabled <code>false</code> diabled
      */
-    boolean isEnable(DmfTenantSecurityToken securityToken);
+    boolean isEnable(ControllerSecurityToken securityToken);
 
     /**
      * Extract the principal information from the current securityToken.
@@ -34,7 +34,7 @@ public interface PreAuthenticationFilter {
      * @param securityToken the securityToken
      * @return the extracted tenant and controller id
      */
-    HeaderAuthentication getPreAuthenticatedPrincipal(DmfTenantSecurityToken securityToken);
+    HeaderAuthentication getPreAuthenticatedPrincipal(ControllerSecurityToken securityToken);
 
     /**
      * Extract the principal credentials from the current securityToken.
@@ -42,7 +42,7 @@ public interface PreAuthenticationFilter {
      * @param securityToken the securityToken
      * @return the extracted tenant and controller id
      */
-    Object getPreAuthenticatedCredentials(DmfTenantSecurityToken securityToken);
+    Object getPreAuthenticatedCredentials(ControllerSecurityToken securityToken);
 
     /**
      * Allows to add additional authorities to the successful authenticated token.

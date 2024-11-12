@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.security.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -19,6 +19,9 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
+import org.eclipse.hawkbit.security.SecurityContextSerializer;
+import org.eclipse.hawkbit.security.SecurityContextTenantAware;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,14 +65,15 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @BeforeEach
     public void before() {
         final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer);
-        underTest = new ControllerPreAuthenticatedSecurityHeaderFilter(CA_COMMON_NAME, "X-Ssl-Issuer-Hash-%d",
+        underTest = new ControllerPreAuthenticatedSecurityHeaderFilter(
+                CA_COMMON_NAME, "X-Ssl-Issuer-Hash-%d",
                 tenantConfigurationManagementMock, tenantAware, new SystemSecurityContext(tenantAware));
     }
 
     @Test
     @Description("Tests the filter for issuer hash based authentication with a single known hash")
     public void testIssuerHashBasedAuthenticationWithSingleKnownHash() {
-        final DmfTenantSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
+        final ControllerSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
         // use single known hash
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
@@ -92,7 +96,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @Test
     @Description("Tests the filter for issuer hash based authentication with unknown hash")
     public void testIssuerHashBasedAuthenticationWithUnknownHash() {
-        final DmfTenantSecurityToken securityToken = prepareSecurityToken(UNKNOWN_HASH);
+        final ControllerSecurityToken securityToken = prepareSecurityToken(UNKNOWN_HASH);
         // use single known hash
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
@@ -103,8 +107,8 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @Test
     @Description("Tests different values for issuer hash header and inspects the credentials")
     public void useDifferentValuesForIssuerHashHeader() {
-        final DmfTenantSecurityToken securityToken1 = prepareSecurityToken(SINGLE_HASH);
-        final DmfTenantSecurityToken securityToken2 = prepareSecurityToken(SECOND_HASH);
+        final ControllerSecurityToken securityToken1 = prepareSecurityToken(SINGLE_HASH);
+        final ControllerSecurityToken securityToken2 = prepareSecurityToken(SECOND_HASH);
 
         final HeaderAuthentication expected1 = new HeaderAuthentication(CA_COMMON_NAME_VALUE, SINGLE_HASH);
         final HeaderAuthentication expected2 = new HeaderAuthentication(CA_COMMON_NAME_VALUE, SECOND_HASH);
@@ -129,8 +133,8 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
 
     }
 
-    private static DmfTenantSecurityToken prepareSecurityToken(final String issuerHashHeaderValue) {
-        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken("DEFAULT", CA_COMMON_NAME_VALUE);
+    private static ControllerSecurityToken prepareSecurityToken(final String issuerHashHeaderValue) {
+        final ControllerSecurityToken securityToken = new ControllerSecurityToken("DEFAULT", CA_COMMON_NAME_VALUE);
         securityToken.putHeader(CA_COMMON_NAME, CA_COMMON_NAME_VALUE);
         securityToken.putHeader(X_SSL_ISSUER_HASH_1, issuerHashHeaderValue);
         return securityToken;

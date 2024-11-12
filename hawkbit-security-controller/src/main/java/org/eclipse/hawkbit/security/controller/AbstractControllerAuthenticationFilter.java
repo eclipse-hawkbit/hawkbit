@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.security.controller;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,6 +15,7 @@ import java.util.Collection;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -31,8 +32,9 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
     protected final SystemSecurityContext systemSecurityContext;
     private final SecurityConfigurationKeyTenantRunner configurationKeyTenantRunner;
 
-    protected AbstractControllerAuthenticationFilter(final TenantConfigurationManagement systemManagement,
-            final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
+    protected AbstractControllerAuthenticationFilter(
+            final TenantConfigurationManagement systemManagement, final TenantAware tenantAware,
+            final SystemSecurityContext systemSecurityContext) {
         this.tenantConfigurationManagement = systemManagement;
         this.tenantAware = tenantAware;
         this.systemSecurityContext = systemSecurityContext;
@@ -40,7 +42,7 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
     }
 
     @Override
-    public boolean isEnable(final DmfTenantSecurityToken securityToken) {
+    public boolean isEnable(final ControllerSecurityToken securityToken) {
         return tenantAware.runAsTenant(securityToken.getTenant(), configurationKeyTenantRunner);
     }
 

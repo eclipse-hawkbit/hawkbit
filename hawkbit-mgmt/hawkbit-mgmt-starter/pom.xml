@@ -30,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-security-integration</artifactId>
+            <artifactId>hawkbit-security-controller</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

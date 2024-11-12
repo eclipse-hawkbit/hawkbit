@@ -7,13 +7,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.security.controller;
+
+import org.eclipse.hawkbit.security.DdiSecurityProperties;
 
 /**
  * An anonymous controller filter which is only enabled in case of anonymous
  * access is granted. This should only be for development purposes.
  *
- * @see DdiSecurityProperties
+ * @see org.eclipse.hawkbit.security.DdiSecurityProperties
  */
 public class ControllerPreAuthenticatedAnonymousFilter implements PreAuthenticationFilter {
 
@@ -28,17 +30,17 @@ public class ControllerPreAuthenticatedAnonymousFilter implements PreAuthenticat
     }
 
     @Override
-    public boolean isEnable(final DmfTenantSecurityToken securityToken) {
+    public boolean isEnable(final ControllerSecurityToken securityToken) {
         return ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled();
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken securityToken) {
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final ControllerSecurityToken securityToken) {
         return new HeaderAuthentication(securityToken.getControllerId(), securityToken.getControllerId());
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken securityToken) {
+    public HeaderAuthentication getPreAuthenticatedCredentials(final ControllerSecurityToken securityToken) {
         return new HeaderAuthentication(securityToken.getControllerId(), securityToken.getControllerId());
     }
 }
