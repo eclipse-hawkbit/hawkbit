@@ -136,8 +136,8 @@
         <module>hawkbit-security-core</module>
         <module>hawkbit-security-integration</module>
         <module>hawkbit-http-security</module>
+        <module>hawkbit-artifact</module>
         <module>hawkbit-repository</module>
-        <module>hawkbit-artifact-repository-filesystem</module>
         <module>hawkbit-autoconfigure</module>
 
         <module>hawkbit-rest-core</module>
@@ -798,6 +798,10 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

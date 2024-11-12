@@ -23,9 +23,15 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-artifact-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-security-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
