@@ -11,8 +11,10 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 import java.util.Optional;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +76,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private final SoftwareModuleRepository softwareModuleRepository;
 
+    @Nullable
     private final ArtifactRepository artifactRepository;
 
     private final TenantAware tenantAware;
@@ -82,7 +85,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     public JpaArtifactManagement(final EntityManager entityManager,
             final LocalArtifactRepository localArtifactRepository,
-            final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
+            final SoftwareModuleRepository softwareModuleRepository, @Nullable final ArtifactRepository artifactRepository,
             final QuotaManagement quotaManagement, final TenantAware tenantAware) {
         this.entityManager = entityManager;
         this.localArtifactRepository = localArtifactRepository;
@@ -102,6 +105,10 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Artifact create(final ArtifactUpload artifactUpload) {
+        if (artifactRepository == null) {
+            throw new UnsupportedOperationException("ArtifactRepository is unavailable");
+        }
+
         final long moduleId = artifactUpload.getModuleId();
         assertArtifactQuota(moduleId, 1);
         final JpaSoftwareModule softwareModule =
@@ -190,8 +197,11 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash, final long softwareModuleId,
-            final boolean isEncrypted) {
+    public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash, final long softwareModuleId, final boolean isEncrypted) {
+        if (artifactRepository == null) {
+            throw new UnsupportedOperationException("ArtifactRepository is unavailable");
+        }
+
         assertSoftwareModuleExists(softwareModuleId);
 
         final String tenant = tenantAware.getCurrentTenant();
@@ -217,10 +227,13 @@ public class JpaArtifactManagement implements ArtifactManagement {
      * Software module related UPDATE permission shall be checked by the callers!
      *
      * @param sha1Hash no longer needed
-     * @param softwareModuleId the garbage collection call is made for
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void clearArtifactBinary(final String sha1Hash) {
+        if (artifactRepository == null) {
+            throw new UnsupportedOperationException("ArtifactRepository is unavailable");
+        }
+
         // countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse will skip ACM checks and
         // will return total count as it should be
         final long count = localArtifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(

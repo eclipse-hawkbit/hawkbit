@@ -19,9 +19,37 @@
     </parent>
 
     <artifactId>hawkbit-ddi-starter</artifactId>
-    <name>hawkBit :: Spring Boot Starter DDI API</name>
+    <name>hawkBit :: DDI API :: Spring Boot Starter</name>
 
     <dependencies>
+        <!-- hawkBit - START -->
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-security-controller</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-artifact-repository-filesystem</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-repository-jpa</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-ddi-resource</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-autoconfigure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- hawkBit - END -->
+
         <!-- Spring - START -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -44,28 +72,5 @@
             <artifactId>spring-security-aspects</artifactId>
         </dependency>
         <!-- Spring - END -->
-
-        <!-- hawkBit - START -->
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-ddi-resource</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-security-controller</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-repository-jpa</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-autoconfigure</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!-- hawkBit - END -->
     </dependencies>
 </project>
