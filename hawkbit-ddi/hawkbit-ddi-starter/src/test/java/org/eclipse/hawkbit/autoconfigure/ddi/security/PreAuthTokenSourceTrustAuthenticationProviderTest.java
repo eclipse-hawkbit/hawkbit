@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.autoconfigure.ddi.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -18,6 +18,8 @@ import java.util.Collections;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.eclipse.hawkbit.security.PreAuthTokenSourceTrustAuthenticationProvider;
+import org.eclipse.hawkbit.security.TenantAwareWebAuthenticationDetails;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -34,9 +36,10 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
     private static final String REQUEST_SOURCE_IP = "127.0.0.1";
 
-    private final PreAuthTokenSourceTrustAuthenticationProvider underTestWithoutSourceIpCheck = new PreAuthTokenSourceTrustAuthenticationProvider();
-    private final PreAuthTokenSourceTrustAuthenticationProvider underTestWithSourceIpCheck = new PreAuthTokenSourceTrustAuthenticationProvider(
-            REQUEST_SOURCE_IP);
+    private final PreAuthTokenSourceTrustAuthenticationProvider underTestWithoutSourceIpCheck =
+            new PreAuthTokenSourceTrustAuthenticationProvider();
+    private final PreAuthTokenSourceTrustAuthenticationProvider underTestWithSourceIpCheck =
+            new PreAuthTokenSourceTrustAuthenticationProvider(REQUEST_SOURCE_IP);
 
     @Mock
     private TenantAwareWebAuthenticationDetails webAuthenticationDetailsMock;

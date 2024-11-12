@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.app.dmf;
 
-import org.eclipse.hawkbit.autoconfigure.security.EnableHawkbitManagedSecurityConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -18,7 +17,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * The minimal configuration for the stand alone hawkBit DMF server.
  */
 @SpringBootApplication(scanBasePackages = "org.eclipse.hawkbit")
-@EnableHawkbitManagedSecurityConfiguration
 public class DMFStart {
 
     /**

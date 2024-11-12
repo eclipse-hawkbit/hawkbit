@@ -7,11 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.autoconfigure.ddi.security;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.ControllerPreAuthenticatedAnonymousDownload;
+import org.eclipse.hawkbit.security.PreAuthenticationFilter;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 
@@ -39,8 +42,7 @@ public class HttpControllerPreAuthenticateAnonymousDownloadFilter extends Abstra
 
     @Override
     protected PreAuthenticationFilter createControllerAuthenticationFilter() {
-        return new ControllerPreAuthenticatedAnonymousDownload(tenantConfigurationManagement, tenantAware,
-                systemSecurityContext);
+        return new ControllerPreAuthenticatedAnonymousDownload(tenantConfigurationManagement, tenantAware, systemSecurityContext);
     }
 
     @Override

@@ -7,13 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.security;
+package org.eclipse.hawkbit.autoconfigure.ddi.security;
 
 import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.security.TenantAwareWebAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.util.UrlUtils;
 import org.springframework.security.authentication.AuthenticationDetailsSource;
