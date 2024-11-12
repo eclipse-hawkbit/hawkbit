@@ -14,18 +14,20 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-parent</artifactId>
+        <artifactId>hawkbit-artifact-parent</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-artifact-repository-filesystem</artifactId>
     <name>hawkBit :: Artifact Repository :: Filesystem</name>
 
     <dependencies>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-core</artifactId>
+            <artifactId>hawkbit-artifact-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
