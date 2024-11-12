@@ -28,7 +28,7 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-boot-starter</artifactId>
+            <artifactId>hawkbit-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -18,24 +18,24 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>hawkbit-boot-starter</artifactId>
+    <artifactId>hawkbit-starter</artifactId>
     <name>hawkBit :: Spring Boot Starter</name>
     <description>Complete starter, including auto-configuration, logging and all hawkBit interfaces</description>
 
     <dependencies>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-boot-starter-ddi-api</artifactId>
+            <artifactId>hawkbit-ddi-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-boot-starter-dmf-api</artifactId>
+            <artifactId>hawkbit-dmf-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-boot-starter-mgmt-api</artifactId>
+            <artifactId>hawkbit-mgmt-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

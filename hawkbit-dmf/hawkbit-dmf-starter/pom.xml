@@ -14,30 +14,15 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
-        <artifactId>hawkbit-mgmt-parent</artifactId>
+        <artifactId>hawkbit-dmf-parent</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>hawkbit-boot-starter-mgmt-api</artifactId>
-    <name>hawkBit :: Spring Boot Starter Management API</name>
+    <artifactId>hawkbit-dmf-starter</artifactId>
+    <name>hawkBit :: Spring Boot Starter DMF API</name>
 
     <dependencies>
         <!-- hawkBit - START -->
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-mgmt-resource</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-security-integration</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-http-security</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-repository-jpa</artifactId>
@@ -48,20 +33,17 @@
             <artifactId>hawkbit-autoconfigure</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-dmf-amqp</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- hawkBit - END -->
 
         <!-- Spring - START -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
