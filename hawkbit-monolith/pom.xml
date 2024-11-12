@@ -24,7 +24,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>hawkbit-boot-starter</module>
+        <module>hawkbit-starter</module>
         <module>hawkbit-update-server</module>
     </modules>
 </project>

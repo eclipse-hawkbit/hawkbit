@@ -25,7 +25,7 @@
     <modules>
         <module>hawkbit-mgmt-api</module>
         <module>hawkbit-mgmt-resource</module>
-        <module>hawkbit-boot-starter-mgmt-api</module>
+        <module>hawkbit-mgmt-starter</module>
         <module>hawkbit-mgmt-server</module>
     </modules>
 </project>

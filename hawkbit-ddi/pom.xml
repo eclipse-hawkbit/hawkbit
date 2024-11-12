@@ -25,7 +25,7 @@
     <modules>
         <module>hawkbit-ddi-api</module>
         <module>hawkbit-ddi-resource</module>
-        <module>hawkbit-boot-starter-ddi-api</module>
+        <module>hawkbit-ddi-starter</module>
         <module>hawkbit-ddi-server</module>
     </modules>
 </project>

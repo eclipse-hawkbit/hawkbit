@@ -18,7 +18,7 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>hawkbit-boot-starter-ddi-api</artifactId>
+    <artifactId>hawkbit-ddi-starter</artifactId>
     <name>hawkBit :: Spring Boot Starter DDI API</name>
 
     <dependencies>

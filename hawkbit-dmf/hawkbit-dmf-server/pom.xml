@@ -28,7 +28,7 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-boot-starter-dmf-api</artifactId>
+            <artifactId>hawkbit-dmf-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
 

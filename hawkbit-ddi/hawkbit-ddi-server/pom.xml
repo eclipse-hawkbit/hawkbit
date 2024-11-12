@@ -28,7 +28,7 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-boot-starter-ddi-api</artifactId>
+            <artifactId>hawkbit-ddi-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
 
