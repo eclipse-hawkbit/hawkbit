@@ -782,18 +782,16 @@ public class DdiRootController implements DdiRootControllerRestApi {
      * @return the response
      * @throws IOException cannot write output stream
      */
-    private static ResponseEntity<Void> writeMD5FileResponse(
+    private static void writeMD5FileResponse(
             final HttpServletResponse response, final String md5Hash, final String filename) throws IOException {
         if (md5Hash == null) {
-            return ResponseEntity.notFound().build();
+            throw new IllegalArgumentException("MD5 hash must not be null");
         }
 
         final byte[] content = (md5Hash + "  " + filename).getBytes(StandardCharsets.US_ASCII);
+        response.setContentType("text/plain");
         response.setContentLength(content.length);
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename + ARTIFACT_MD5_DWNL_SUFFIX);
-
         response.getOutputStream().write(content);
-
-        return ResponseEntity.ok().build();
     }
 }
