@@ -11,19 +11,21 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionHistory;
 import org.eclipse.hawkbit.ddi.json.model.DdiActivateAutoConfirmation;
@@ -240,8 +242,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         checkAndLogDownload(RequestResponseContextHolder.getHttpServletRequest(), target, module.getId());
 
         try {
-            FileStreamingUtil.writeMD5FileResponse(RequestResponseContextHolder.getHttpServletResponse(),
-                    artifact.getMd5Hash(), fileName);
+            writeMD5FileResponse(RequestResponseContextHolder.getHttpServletResponse(), artifact.getMd5Hash(), fileName);
         } catch (final IOException e) {
             log.error("Failed to stream MD5 File", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -765,5 +766,43 @@ public class DdiRootController implements DdiRootControllerRestApi {
             log.trace("Returning state auto-conf state disabled for device {}", controllerId);
             return DdiAutoConfirmationState.disabled();
         });
+    }
+
+    /**
+     * File suffix for MDH hash download (see Linux md5sum).
+     */
+    private static final String ARTIFACT_MD5_DWNL_SUFFIX = ".MD5SUM";
+
+    /**
+     * Write a md5 file response.
+     *
+     * @param response the response
+     * @param md5Hash of the artifact
+     * @param filename as provided by the client
+     * @return the response
+     * @throws IOException cannot write output stream
+     */
+    private static ResponseEntity<Void> writeMD5FileResponse(
+            final HttpServletResponse response, final String md5Hash,
+            final String filename) throws IOException {
+        if (md5Hash == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        final StringBuilder builder = new StringBuilder();
+        builder.append(md5Hash);
+        builder.append("  ");
+        builder.append(filename);
+        final byte[] content = builder.toString().getBytes(StandardCharsets.US_ASCII);
+
+        final StringBuilder header = new StringBuilder().append("attachment;filename=").append(filename)
+                .append(ARTIFACT_MD5_DWNL_SUFFIX);
+
+        response.setContentLength(content.length);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, header.toString());
+
+        response.getOutputStream().write(content);
+
+        return ResponseEntity.ok().build();
     }
 }

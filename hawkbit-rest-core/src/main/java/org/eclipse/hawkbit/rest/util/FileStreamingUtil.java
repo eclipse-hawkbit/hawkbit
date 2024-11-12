@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.rest.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,44 +39,7 @@ import org.springframework.http.ResponseEntity;
 @Slf4j
 public final class FileStreamingUtil {
 
-    /**
-     * File suffix for MDH hash download (see Linux md5sum).
-     */
-    public static final String ARTIFACT_MD5_DWNL_SUFFIX = ".MD5SUM";
     private static final int BUFFER_SIZE = 0x2000; // 8k
-
-    /**
-     * Write a md5 file response.
-     *
-     * @param response the response
-     * @param md5Hash of the artifact
-     * @param filename as provided by the client
-     * @return the response
-     * @throws IOException cannot write output stream
-     */
-    public static ResponseEntity<Void> writeMD5FileResponse(final HttpServletResponse response, final String md5Hash,
-            final String filename) throws IOException {
-
-        if (md5Hash == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        final StringBuilder builder = new StringBuilder();
-        builder.append(md5Hash);
-        builder.append("  ");
-        builder.append(filename);
-        final byte[] content = builder.toString().getBytes(StandardCharsets.US_ASCII);
-
-        final StringBuilder header = new StringBuilder().append("attachment;filename=").append(filename)
-                .append(ARTIFACT_MD5_DWNL_SUFFIX);
-
-        response.setContentLength(content.length);
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, header.toString());
-
-        response.getOutputStream().write(content);
-
-        return ResponseEntity.ok().build();
-    }
 
     /**
      * <p>
