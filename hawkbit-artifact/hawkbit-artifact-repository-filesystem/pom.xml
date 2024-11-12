@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-artifact-repository-filesystem</artifactId>
-    <name>hawkBit :: Artifact Repository :: Filesystem</name>
+    <name>hawkBit :: Artifact :: Filesystem Artifact Repository</name>
 
     <dependencies>
         <dependency>

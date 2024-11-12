@@ -23,7 +23,7 @@
 
     <artifactId>hawkbit-sdk-mgmt</artifactId>
 
-    <name>hawkBit :: SDK :: Management Api SDK</name>
+    <name>hawkBit :: SDK :: Management API SDK</name>
     <description>Management Api SDK</description>
 
     <dependencies>

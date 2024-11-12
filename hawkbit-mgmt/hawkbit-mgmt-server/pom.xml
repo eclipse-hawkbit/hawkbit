@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-mgmt-server</artifactId>
-    <name>hawkBit :: Runtime :: Management Server</name>
+    <name>hawkBit :: Management :: Server</name>
 
     <properties>
         <spring.app.class>org.eclipse.hawkbit.app.mgmt.UpdateServerStart</spring.app.class>

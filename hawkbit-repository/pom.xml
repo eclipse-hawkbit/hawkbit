@@ -18,7 +18,7 @@
         <version>${revision}</version>
     </parent>
     <artifactId>hawkbit-repository</artifactId>
-    <name>hawkBit :: Repository</name>
+    <name>hawkBit :: Repository :: Parent</name>
     <packaging>pom</packaging>
 
     <modules>

@@ -17,6 +17,7 @@
         <version>${revision}</version>
         <artifactId>hawkbit-repository</artifactId>
     </parent>
+
     <artifactId>hawkbit-repository-jpa</artifactId>
     <name>hawkBit :: Repository :: JPA Implementation</name>
 

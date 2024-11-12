@@ -17,6 +17,7 @@
         <artifactId>hawkbit-repository</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-repository-test</artifactId>
     <name>hawkBit :: Repository :: Test Utilities</name>
 

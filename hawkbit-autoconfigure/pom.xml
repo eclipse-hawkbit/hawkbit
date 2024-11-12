@@ -18,7 +18,7 @@
         <version>${revision}</version>
     </parent>
     <artifactId>hawkbit-autoconfigure</artifactId>
-    <name>hawkBit :: Spring Boot Autoconfigure</name>
+    <name>hawkBit :: Core :: Spring Boot Auto-configurations</name>
 
     <dependencies>
         <dependency>

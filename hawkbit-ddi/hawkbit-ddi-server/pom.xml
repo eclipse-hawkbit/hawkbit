@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-ddi-server</artifactId>
-    <name>hawkBit :: Runtime :: DDI Server</name>
+    <name>hawkBit :: DDI :: Server</name>
 
     <properties>
         <spring.app.class>org.eclipse.hawkbit.app.ddi.DDIStart</spring.app.class>

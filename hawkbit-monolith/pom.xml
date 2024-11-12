@@ -20,7 +20,7 @@
     </parent>
 
     <artifactId>hawkbit-monolith-parent</artifactId>
-    <name>hawkBit :: Runtime :: Parent</name>
+    <name>hawkBit :: Monolith :: Parent</name>
     <packaging>pom</packaging>
 
     <modules>

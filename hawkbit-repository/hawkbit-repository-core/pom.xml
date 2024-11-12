@@ -17,8 +17,9 @@
         <artifactId>hawkbit-repository</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-repository-core</artifactId>
-    <name>hawkBit :: Repository :: Core Implementation Support</name>
+    <name>hawkBit :: Repository :: Core</name>
 
     <dependencies>
         <dependency>

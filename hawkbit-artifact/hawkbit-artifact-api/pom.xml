@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-artifact-api</artifactId>
-    <name>hawkBit :: Artifact Repository :: API</name>
+    <name>hawkBit :: Artifact :: API</name>
 
     <dependencies>
         <dependency>

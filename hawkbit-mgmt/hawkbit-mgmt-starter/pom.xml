@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-mgmt-starter</artifactId>
-    <name>hawkBit :: Management API :: Spring Boot Starter</name>
+    <name>hawkBit :: Management :: Spring Boot Starter</name>
 
     <dependencies>
         <!-- hawkBit - START -->

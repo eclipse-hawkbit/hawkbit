@@ -22,7 +22,7 @@
     <artifactId>hawkbit-simple-ui</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
-    <name>hawkBit :: Runtime :: Simple UI</name>
+    <name>hawkBit :: Simple UI</name>
 
     <properties>
         <vaadin.version>24.3.7</vaadin.version>

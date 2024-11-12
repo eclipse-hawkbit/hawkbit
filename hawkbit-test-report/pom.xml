@@ -17,6 +17,7 @@
         <artifactId>hawkbit-parent</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-test-report</artifactId>
     <name>hawkBit :: Test Report</name>
 

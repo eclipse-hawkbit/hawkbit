@@ -21,7 +21,7 @@
     </parent>
 
     <artifactId>hawkbit-ddi-resource</artifactId>
-    <name>hawkBit :: REST :: DDI Resources</name>
+    <name>hawkBit :: DDI :: REST Resources</name>
 
     <dependencies>
         <dependency>

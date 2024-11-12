@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-starter</artifactId>
-    <name>hawkBit :: Spring Boot Starter</name>
+    <name>hawkBit :: Monolith :: Spring Boot Starter</name>
     <description>Complete starter, including auto-configuration, logging and all hawkBit interfaces</description>
 
     <dependencies>
