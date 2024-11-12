@@ -1,7 +1,6 @@
 org.eclipse.hawkbit.autoconfigure.artifact.ArtifactUrlHandlerAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.cache.CacheAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.repository.event.EventPublisherAutoConfiguration
-org.eclipse.hawkbit.autoconfigure.repository.ArtifactFilesystemAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.repository.JpaRepositoryAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.scheduling.AsyncConfigurerAutoConfiguration
 org.eclipse.hawkbit.autoconfigure.scheduling.ExecutorAutoConfiguration
