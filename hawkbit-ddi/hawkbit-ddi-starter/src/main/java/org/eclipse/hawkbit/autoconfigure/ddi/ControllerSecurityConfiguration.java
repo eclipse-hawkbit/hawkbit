@@ -54,13 +54,7 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 class ControllerSecurityConfiguration {
 
     private static final String[] DDI_ANT_MATCHERS = {
-            DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}",
-            DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/confirmationBase/**",
-            DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/deploymentBase/**",
-            DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/installedBase/**",
-            DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/cancelAction/**",
-            DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/configData",
-            DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts" };
+            DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/**" };
 
     private final ControllerManagement controllerManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
@@ -101,7 +95,7 @@ class ControllerSecurityConfiguration {
     }
 
     @Bean
-    @Order(300)
+    @Order(301)
     protected SecurityFilterChain filterChainDDI(final HttpSecurity http) throws Exception {
         final AuthenticationManager authenticationManager = setAuthenticationManager(http, ddiSecurityConfiguration);
 
@@ -146,15 +140,13 @@ class ControllerSecurityConfiguration {
             gatewaySecurityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
             http
-                    .authorizeHttpRequests(amrmRegistry ->
-                            amrmRegistry.anyRequest().authenticated())
+                    .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())
                     .anonymous(AbstractHttpConfigurer::disable)
                     .addFilter(securityHeaderFilter)
                     .addFilter(securityTokenFilter)
                     .addFilter(gatewaySecurityTokenFilter)
                     .exceptionHandling(configurer -> configurer.authenticationEntryPoint(
-                            (request, response, authException) ->
-                                    response.setStatus(HttpStatus.UNAUTHORIZED.value())))
+                            (request, response, authException) -> response.setStatus(HttpStatus.UNAUTHORIZED.value())))
                     .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         }
 
