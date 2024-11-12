@@ -116,7 +116,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private PlatformTransactionManager txManager;
     @Autowired
     private RolloutStatusCache rolloutStatusCache;
-    @Autowired
+    @Autowired(required = false) // it's not required on dmf/ddi only instances
     private ArtifactRepository artifactRepository;
     @Autowired
     private RepositoryProperties repositoryProperties;
@@ -156,6 +156,10 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteTenant(final String t) {
+        if (artifactRepository == null) {
+            throw new IllegalStateException("Artifact repository is not available. Can't delete tenant.");
+        }
+
         final String tenant = t.toUpperCase();
         cacheManager.evictCaches(tenant);
         rolloutStatusCache.evictCaches(tenant);
