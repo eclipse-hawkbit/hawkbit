@@ -91,7 +91,7 @@ class ControllerDownloadSecurityConfiguration {
     }
 
     @Bean
-    @Order(301)
+    @Order(300) // higher priority than HawkBit DDI security, so that the DDI DL security is applied first
     protected SecurityFilterChain filterChainDDIDL(final HttpSecurity http) throws Exception {
         final AuthenticationManager authenticationManager = ControllerSecurityConfiguration.setAuthenticationManager(
                 http, ddiSecurityConfiguration);
