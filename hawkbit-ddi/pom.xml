@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-ddi-parent</artifactId>
-    <name>hawkBit :: DDI</name>
+    <name>hawkBit :: DDI :: Parent</name>
     <packaging>pom</packaging>
 
     <modules>

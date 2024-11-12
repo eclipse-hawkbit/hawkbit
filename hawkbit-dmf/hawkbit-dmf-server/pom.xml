@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-dmf-server</artifactId>
-    <name>hawkBit :: Runtime :: DMF Server</name>
+    <name>hawkBit :: DMF :: Server</name>
 
     <properties>
         <spring.app.class>org.eclipse.hawkbit.app.ddi.DMFStart</spring.app.class>

@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-artifact-parent</artifactId>
-    <name>hawkBit :: Artifact Repository</name>
+    <name>hawkBit :: Artifact :: Parent</name>
     <packaging>pom</packaging>
 
     <modules>

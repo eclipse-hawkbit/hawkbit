@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-mgmt-api</artifactId>
-    <name>hawkBit :: REST :: Management API</name>
+    <name>hawkBit :: Management :: REST API</name>
 
     <dependencies>
         <dependency>

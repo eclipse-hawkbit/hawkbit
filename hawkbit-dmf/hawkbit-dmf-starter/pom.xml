@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-dmf-starter</artifactId>
-    <name>hawkBit :: Spring Boot Starter DMF API</name>
+    <name>hawkBit :: DMF :: Spring Boot Starter</name>
 
     <dependencies>
         <!-- hawkBit - START -->

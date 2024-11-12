@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-mgmt-parent</artifactId>
-    <name>hawkBit :: REST</name>
+    <name>hawkBit :: Management</name>
     <packaging>pom</packaging>
 
     <modules>

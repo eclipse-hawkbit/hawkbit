@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-dmf-parent</artifactId>
-    <name>hawkBit :: DMF</name>
+    <name>hawkBit :: DMF :: Parent</name>
     <packaging>pom</packaging>
 
     <modules>

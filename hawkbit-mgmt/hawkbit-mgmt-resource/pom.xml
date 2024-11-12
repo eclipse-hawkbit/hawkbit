@@ -20,7 +20,7 @@
     </parent>
 
     <artifactId>hawkbit-mgmt-resource</artifactId>
-    <name>hawkBit :: REST :: Management Resources</name>
+    <name>hawkBit :: Management :: REST Resources</name>
 
     <dependencies>
         <dependency>

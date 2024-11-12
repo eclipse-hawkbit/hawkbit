@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-security-parent</artifactId>
-    <name>hawkBit :: Security</name>
+    <name>hawkBit :: Security :: Parent</name>
     <packaging>pom</packaging>
 
     <modules>

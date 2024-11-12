@@ -17,6 +17,7 @@
         <artifactId>hawkbit-repository</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-repository-api</artifactId>
     <name>hawkBit :: Repository :: API</name>
 

@@ -21,6 +21,7 @@
 
     <artifactId>hawkbit-sdk</artifactId>
     <packaging>pom</packaging>
+    <name>hawkBit :: SDK :: Parent</name>
 
     <properties>
         <spring-cloud-starter-openfeign.version>4.1.0</spring-cloud-starter-openfeign.version>

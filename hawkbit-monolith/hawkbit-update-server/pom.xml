@@ -19,7 +19,7 @@
     </parent>
 
     <artifactId>hawkbit-update-server</artifactId>
-    <name>hawkBit :: Runtime :: Update Server (Monolith)</name>
+    <name>hawkBit :: Monolith :: Server</name>
 
     <properties>
         <spring.app.class>org.eclipse.hawkbit.doc.Start</spring.app.class>
