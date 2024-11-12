@@ -75,9 +75,9 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
     @Override
     protected AbstractDbArtifact store(final String tenant, final DbArtifactHash base16Hashes, final String contentType, final String tempFile)
             throws IOException {
-
         final File file = new File(tempFile);
-        return renameFileToSHA1Naming(tenant, file,
+        return renameFileToSHA1Naming(
+                tenant, file,
                 new ArtifactFilesystem(file, base16Hashes.getSha1(), base16Hashes, file.length(), contentType));
     }
 
@@ -90,11 +90,16 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
             Files.move(file.toPath(), fileSHA1Naming.toPath());
         }
 
-        return new ArtifactFilesystem(fileSHA1Naming, artifact.getArtifactId(), artifact.getHashes(),
-                artifact.getSize(), artifact.getContentType());
+        return new ArtifactFilesystem(
+                fileSHA1Naming, artifact.getArtifactId(), artifact.getHashes(), artifact.getSize(), artifact.getContentType());
     }
 
     private File getFile(final String tenant, final String sha1) {
+        // ensure that the sha1 is not a path traversal attack
+        if (sha1.indexOf('/') >= 0 || sha1.indexOf('\\') >= 0) {
+            throw new IllegalArgumentException("Invalid sha1 hash: " + sha1);
+        }
+
         final File aritfactDirectory = getSha1DirectoryPath(tenant, sha1).toFile();
         aritfactDirectory.mkdirs();
         return new File(aritfactDirectory, sha1);
