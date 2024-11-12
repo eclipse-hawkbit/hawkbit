@@ -53,9 +53,7 @@ import org.springframework.util.CollectionUtils;
  * {@link EnableAutoConfiguration Auto-configuration} for security.
  */
 @Configuration
-@EnableConfigurationProperties({
-        SecurityProperties.class,
-        DdiSecurityProperties.class, HawkbitSecurityProperties.class, TenantAwareUserProperties.class })
+@EnableConfigurationProperties({ SecurityProperties.class, HawkbitSecurityProperties.class, TenantAwareUserProperties.class })
 public class SecurityAutoConfiguration {
 
     /**

@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.autoconfigure;
+package org.eclipse.hawkbit.autoconfigure.artifact;
 
 import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandlerProperties;
@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 /**
- * Auto-configuration for {@link ArtifactUrlHandler} based on a properties.
+ * Autoconfiguration for {@link ArtifactUrlHandler} based on a properties.
  */
 @Configuration
 @EnableConfigurationProperties({ ArtifactUrlHandlerProperties.class })
