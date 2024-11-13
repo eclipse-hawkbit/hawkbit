@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
 import java.util.Optional;
 
 import jakarta.annotation.Nullable;
@@ -105,9 +104,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Artifact create(final ArtifactUpload artifactUpload) {
-        if (artifactRepository == null) {
-            throw new UnsupportedOperationException("ArtifactRepository is unavailable");
-        }
+        assertArtifactRepositoryAvailable();
 
         final long moduleId = artifactUpload.getModuleId();
         assertArtifactQuota(moduleId, 1);
@@ -198,9 +195,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash, final long softwareModuleId, final boolean isEncrypted) {
-        if (artifactRepository == null) {
-            throw new UnsupportedOperationException("ArtifactRepository is unavailable");
-        }
+        assertArtifactRepositoryAvailable();
 
         assertSoftwareModuleExists(softwareModuleId);
 
@@ -230,9 +225,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void clearArtifactBinary(final String sha1Hash) {
-        if (artifactRepository == null) {
-            throw new UnsupportedOperationException("ArtifactRepository is unavailable");
-        }
+        assertArtifactRepositoryAvailable();
 
         // countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse will skip ACM checks and
         // will return total count as it should be
@@ -337,6 +330,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
     private void assertSoftwareModuleExists(final long softwareModuleId) {
         if (!softwareModuleRepository.existsById(softwareModuleId)) {
             throw new EntityNotFoundException(SoftwareModule.class, softwareModuleId);
+        }
+    }
+
+    private void assertArtifactRepositoryAvailable() {
+        if (artifactRepository == null) {
+            throw new UnsupportedOperationException("ArtifactRepository is unavailable");
         }
     }
 }
