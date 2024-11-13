@@ -62,6 +62,10 @@
             <artifactId>flyway-mysql</artifactId>
         </dependency>
         <dependency>
+             <groupId>org.flywaydb</groupId>
+             <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+        <dependency>
             <groupId>cz.jirutka.rsql</groupId>
             <artifactId>rsql-parser</artifactId>
         </dependency>
