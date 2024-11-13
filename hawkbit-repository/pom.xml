@@ -22,10 +22,11 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>hawkbit-repository-jpa</module>
         <module>hawkbit-repository-api</module>
-        <module>hawkbit-repository-test</module>
         <module>hawkbit-repository-core</module>
-    </modules>
+        <module>hawkbit-repository-jpa</module>
+        <module>hawkbit-repository-jpa-flyway</module>
 
+        <module>hawkbit-repository-test</module>
+    </modules>
 </project>
