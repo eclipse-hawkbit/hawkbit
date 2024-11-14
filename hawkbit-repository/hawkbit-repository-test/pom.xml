@@ -38,6 +38,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-repository-jpa-flyway</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-security-core</artifactId>
             <version>${project.version}</version>
         </dependency>
