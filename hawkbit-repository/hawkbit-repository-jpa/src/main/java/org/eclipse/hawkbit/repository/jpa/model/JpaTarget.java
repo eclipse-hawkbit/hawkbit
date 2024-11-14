@@ -61,7 +61,6 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.annotations.ConversionValue;
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.ObjectTypeConverter;
@@ -96,8 +95,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @Pattern(regexp = "[\\S]*", message = "has whitespaces which are not allowed")
     private String controllerId;
 
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, targetEntity = JpaAction.class)
+    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaAction.class)
     private List<JpaAction> actions;
 
     /**
@@ -109,8 +107,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @NotNull
     private String securityToken;
 
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
+    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private List<RolloutTargetGroup> rolloutTargetGroup;
 
     @Column(name = "address", length = Target.ADDRESS_MAX_SIZE)
@@ -154,8 +151,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @JoinColumn(name = "target_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_relation_target_type"))
     private TargetType targetType;
 
-    @CascadeOnDelete
-    @ManyToMany(targetEntity = JpaTargetTag.class)
+    @ManyToMany(cascade = { CascadeType.REMOVE }, targetEntity = JpaTargetTag.class)
     @JoinTable(
             name = "sp_target_target_tag",
             joinColumns = {
@@ -172,7 +168,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     /**
      * Supplied / committed by the controller. Read-only via management API.
      */
-    @CascadeOnDelete
+    // no cascade option on an ElementCollection, the target objects are always persisted, merged, removed with their parent.
     @ElementCollection
     @Column(name = "attribute_value", length = Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE)
     @MapKeyColumn(name = "attribute_key", nullable = false, length = Target.CONTROLLER_ATTRIBUTE_KEY_SIZE)
@@ -182,8 +178,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
     private Map<String, String> controllerAttributes;
 
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, targetEntity = JpaTargetMetadata.class)
+    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaTargetMetadata.class)
     private List<TargetMetadata> metadata;
 
     /**

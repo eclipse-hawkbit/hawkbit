@@ -46,7 +46,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.queries.UpdateObjectQuery;
 import org.eclipse.persistence.sessions.changesets.DirectToFieldChangeRecord;
@@ -82,9 +81,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @NotNull
     private JpaSoftwareModuleType type;
 
-    @CascadeOnDelete
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule", cascade = {
-            CascadeType.PERSIST }, targetEntity = JpaArtifact.class, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule", cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, targetEntity = JpaArtifact.class, orphanRemoval = true)
     private List<JpaArtifact> artifacts;
 
     @Setter
@@ -97,8 +94,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     private boolean encrypted;
 
     @ToString.Exclude
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "softwareModule", fetch = FetchType.LAZY, targetEntity = JpaSoftwareModuleMetadata.class)
+    @OneToMany(mappedBy = "softwareModule", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaSoftwareModuleMetadata.class)
     private List<JpaSoftwareModuleMetadata> metadata;
 
     @Column(name = "locked")
@@ -109,8 +105,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     @ToString.Exclude
     @Getter(AccessLevel.NONE)
-    @CascadeOnDelete
-    @ManyToMany(mappedBy = "modules", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "modules", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE })
     private List<DistributionSet> assignedTo;
 
     /**

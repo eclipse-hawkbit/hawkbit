@@ -36,7 +36,6 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.annotations.ConversionValue;
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.ObjectTypeConverter;
@@ -72,8 +71,7 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     @Convert("rolloutgroupstatus")
     private RolloutGroupStatus status = RolloutGroupStatus.CREATING;
 
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "rolloutGroup", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST }, targetEntity = RolloutTargetGroup.class)
+    @OneToMany(mappedBy = "rolloutGroup", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, targetEntity = RolloutTargetGroup.class)
     private List<RolloutTargetGroup> rolloutTargetGroup;
 
     // No foreign key to avoid to many nested cascades on delete which some DBs cannot handle

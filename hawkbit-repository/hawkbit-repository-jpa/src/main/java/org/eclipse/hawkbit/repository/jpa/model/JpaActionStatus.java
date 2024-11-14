@@ -32,7 +32,6 @@ import jakarta.validation.constraints.NotNull;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.annotations.ConversionValue;
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.ObjectTypeConverter;
@@ -82,7 +81,7 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     @NotNull
     private Status status;
 
-    @CascadeOnDelete
+    // no cascade option on an ElementCollection, the target objects are always persisted, merged, removed with their parent.
     @ElementCollection(fetch = FetchType.LAZY, targetClass = String.class)
     @CollectionTable(
             name = "sp_action_status_messages",
