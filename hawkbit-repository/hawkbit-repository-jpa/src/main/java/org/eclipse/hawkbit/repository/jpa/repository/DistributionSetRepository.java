@@ -75,7 +75,7 @@ public interface DistributionSetRepository
      */
     @Modifying
     @Transactional
-    @Query("update JpaDistributionSet d set d.deleted = 1 where d.id in :ids")
+    @Query("update JpaDistributionSet d set d.deleted = true where d.id in :ids")
     void deleteDistributionSet(@Param("ids") Long... ids);
 
     /**

@@ -88,16 +88,30 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @CascadeOnDelete
     @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
-    @JoinTable(name = "sp_ds_module", joinColumns = {
-            @JoinColumn(name = "ds_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) }, inverseJoinColumns = {
-            @JoinColumn(name = "module_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
+    @JoinTable(
+            name = "sp_ds_module",
+            joinColumns = {
+                    @JoinColumn(
+                            name = "ds_id", nullable = false, insertable = false, updatable = false, foreignKey =
+                    @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) },
+            inverseJoinColumns = {
+                    @JoinColumn(
+                            name = "module_id", nullable = false, insertable = false, updatable = false,
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
     private Set<SoftwareModule> modules;
 
     @CascadeOnDelete
     @ManyToMany(targetEntity = JpaDistributionSetTag.class)
-    @JoinTable(name = "sp_ds_dstag", joinColumns = {
-            @JoinColumn(name = "ds", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds")) }, inverseJoinColumns = {
-            @JoinColumn(name = "TAG", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag")) })
+    @JoinTable(
+            name = "sp_ds_dstag",
+            joinColumns = {
+                    @JoinColumn(
+                            name = "ds", nullable = false, insertable = false, updatable = false,
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds")) },
+            inverseJoinColumns = {
+                    @JoinColumn(
+                            name = "TAG", nullable = false, insertable = false, updatable = false,
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag")) })
     private Set<DistributionSetTag> tags;
 
     @ToString.Exclude
