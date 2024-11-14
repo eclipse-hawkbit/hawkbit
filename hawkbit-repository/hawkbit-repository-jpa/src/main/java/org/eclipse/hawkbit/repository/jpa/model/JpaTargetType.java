@@ -53,9 +53,16 @@ public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, 
 
     @CascadeOnDelete
     @ManyToMany(targetEntity = JpaDistributionSetType.class)
-    @JoinTable(name = "sp_target_type_ds_type_relation", joinColumns = {
-            @JoinColumn(name = "target_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_target_type")) }, inverseJoinColumns = {
-            @JoinColumn(name = "distribution_set_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_ds_type")) })
+    @JoinTable(
+            name = "sp_target_type_ds_type_relation",
+            joinColumns = {
+                    @JoinColumn(
+                            name = "target_type", nullable = false, insertable = false, updatable = false,
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_target_type")) },
+            inverseJoinColumns = {
+                    @JoinColumn(
+                            name = "distribution_set_type", nullable = false, insertable = false, updatable = false,
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_ds_type")) })
     private Set<DistributionSetType> distributionSetTypes;
 
     public JpaTargetType(final String key, final String name, final String description, final String colour) {

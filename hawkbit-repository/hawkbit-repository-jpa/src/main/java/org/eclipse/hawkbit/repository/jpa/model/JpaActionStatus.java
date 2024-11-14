@@ -58,7 +58,9 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     private long occurredAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "action", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_act_stat_action"))
+    @JoinColumn(
+            name = "action", nullable = false, updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_act_stat_action"))
     @NotNull
     private JpaAction action;
 
@@ -82,9 +84,14 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
 
     @CascadeOnDelete
     @ElementCollection(fetch = FetchType.LAZY, targetClass = String.class)
-    @CollectionTable(name = "sp_action_status_messages", joinColumns = @JoinColumn(name = "action_status_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_stat_msg_act_stat"), updatable = false, nullable = false), indexes = {
-            @Index(name = "sp_idx_action_status_msgs_01", columnList = "action_status_id") })
-    @Column(name = "detail_message", length = MESSAGE_ENTRY_LENGTH, nullable = false, updatable = false)
+    @CollectionTable(
+            name = "sp_action_status_messages",
+            joinColumns = @JoinColumn(
+                    name = "action_status_id", insertable = false, updatable = false, nullable = false,
+                    foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_stat_msg_act_stat")),
+            indexes = {
+                    @Index(name = "sp_idx_action_status_msgs_01", columnList = "action_status_id") })
+    @Column(name = "detail_message", length = MESSAGE_ENTRY_LENGTH, nullable = false, insertable = false, updatable = false)
     private List<String> messages;
 
     @Column(name = "code", nullable = true, updatable = false)

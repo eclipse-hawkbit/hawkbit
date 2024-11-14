@@ -56,8 +56,8 @@ public class RolloutTargetGroup implements Serializable {
 
     @OneToMany(targetEntity = JpaAction.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
     @JoinColumns(value = {
-            @JoinColumn(name = "rolloutgroup", nullable = false, updatable = false, referencedColumnName = "rolloutGroup_Id"),
-            @JoinColumn(name = "target", nullable = false, updatable = false, referencedColumnName = "target_id") })
+            @JoinColumn(name = "rolloutgroup", nullable = false, insertable = false, updatable = false, referencedColumnName = "rolloutGroup_Id"),
+            @JoinColumn(name = "target", nullable = false, insertable = false, updatable = false, referencedColumnName = "target_id") })
     private List<JpaAction> actions;
 
     /**
