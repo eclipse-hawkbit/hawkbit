@@ -287,8 +287,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         rollout.setStatus(RolloutStatus.DELETED);
         rollout.setDeleted(true);
         rolloutRepository.save(rollout);
-
-        sendRolloutGroupDeletedEvents(rollout);
+//
+//        sendRolloutGroupDeletedEvents(rollout);
     }
 
     private void handleStopRollout(final JpaRollout rollout) {
@@ -372,7 +372,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void hardDeleteRollout(final JpaRollout rollout) {
-        sendRolloutGroupDeletedEvents(rollout);
+//        sendRolloutGroupDeletedEvents(rollout);
         rolloutRepository.delete(rollout);
     }
 
@@ -397,13 +397,13 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         return actionRepository.findByRolloutIdAndStatus(PageRequest.of(0, TRANSACTION_ACTIONS), rollout.getId(),
                 Status.SCHEDULED);
     }
-
-    private void sendRolloutGroupDeletedEvents(final JpaRollout rollout) {
-        final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId).toList();
-        afterCommit.afterCommit(() -> groupIds.forEach(rolloutGroupId -> eventPublisherHolder.getEventPublisher()
-                .publishEvent(new RolloutGroupDeletedEvent(tenantAware.getCurrentTenant(), rolloutGroupId,
-                        JpaRolloutGroup.class, eventPublisherHolder.getApplicationId()))));
-    }
+//
+//    private void sendRolloutGroupDeletedEvents(final JpaRollout rollout) {
+//        final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId).toList();
+//        afterCommit.afterCommit(() -> groupIds.forEach(rolloutGroupId -> eventPublisherHolder.getEventPublisher()
+//                .publishEvent(new RolloutGroupDeletedEvent(tenantAware.getCurrentTenant(), rolloutGroupId,
+//                        JpaRolloutGroup.class, eventPublisherHolder.getApplicationId()))));
+//    }
 
     private boolean isRolloutComplete(final JpaRollout rollout) {
         // ensure that changes in the same transaction count

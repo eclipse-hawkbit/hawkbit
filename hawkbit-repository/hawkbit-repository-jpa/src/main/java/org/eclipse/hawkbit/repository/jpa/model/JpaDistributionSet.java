@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -51,7 +52,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.queries.UpdateObjectQuery;
 import org.eclipse.persistence.sessions.changesets.DirectToFieldChangeRecord;
@@ -86,8 +86,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @NotNull
     private DistributionSetType type;
 
-    @CascadeOnDelete
-    @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
+    @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE })
     @JoinTable(
             name = "sp_ds_module",
             joinColumns = {
@@ -100,8 +99,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
     private Set<SoftwareModule> modules;
 
-    @CascadeOnDelete
-    @ManyToMany(targetEntity = JpaDistributionSetTag.class)
+    @ManyToMany(cascade = { CascadeType.REMOVE }, targetEntity = JpaDistributionSetTag.class)
     @JoinTable(
             name = "sp_ds_dstag",
             joinColumns = {
@@ -115,8 +113,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     private Set<DistributionSetTag> tags;
 
     @ToString.Exclude
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "distributionSet", fetch = FetchType.LAZY, targetEntity = JpaDistributionSetMetadata.class)
+    @OneToMany(mappedBy = "distributionSet", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaDistributionSetMetadata.class)
     private List<DistributionSetMetadata> metadata;
 
     @Column(name = "complete")

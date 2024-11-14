@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -123,8 +124,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @NotNull
     private Status status;
 
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "action", targetEntity = JpaActionStatus.class, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "action", targetEntity = JpaActionStatus.class, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE })
     private List<JpaActionStatus> actionStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -58,15 +58,12 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "dsType", targetEntity = DistributionSetTypeElement.class, cascade = {
-            CascadeType.PERSIST }, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "dsType", targetEntity = DistributionSetTypeElement.class, fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, orphanRemoval = true)
     private Set<DistributionSetTypeElement> elements;
 
     @Column(name = "deleted")
     private boolean deleted;
 
-    @CascadeOnDelete
     @ManyToMany(mappedBy = "distributionSetTypes", targetEntity = JpaTargetType.class, fetch = FetchType.LAZY)
     private List<TargetType> compatibleToTargetTypes;
 

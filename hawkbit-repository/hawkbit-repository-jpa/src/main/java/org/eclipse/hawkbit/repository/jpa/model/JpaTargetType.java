@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
@@ -51,7 +50,6 @@ public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @CascadeOnDelete
     @ManyToMany(targetEntity = JpaDistributionSetType.class)
     @JoinTable(
             name = "sp_target_type_ds_type_relation",
