@@ -29,6 +29,9 @@ public class MapAttributeConverter<JAVA_TYPE extends Enum<JAVA_TYPE>, DB_TYPE> i
 
     @Override
     public DB_TYPE convertToDatabaseColumn(final JAVA_TYPE attribute) {
+        if (attribute == null) {
+            return null;
+        }
         return javaToDbMap.get(attribute);
     }
 
