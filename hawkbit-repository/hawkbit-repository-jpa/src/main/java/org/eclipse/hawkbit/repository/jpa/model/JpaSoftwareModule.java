@@ -105,7 +105,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     @ToString.Exclude
     @Getter(AccessLevel.NONE)
-    @ManyToMany(mappedBy = "modules", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE })
+    @ManyToMany(mappedBy = "modules", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY)
     private List<DistributionSet> assignedTo;
 
     /**
