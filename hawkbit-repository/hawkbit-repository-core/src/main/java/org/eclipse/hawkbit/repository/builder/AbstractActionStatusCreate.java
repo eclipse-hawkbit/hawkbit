@@ -57,11 +57,11 @@ public abstract class AbstractActionStatusCreate<T> {
     }
 
     public T messages(final Collection<String> messages) {
-        final List<String> newMessages = messages.stream().map(String::strip).toList();
         if (this.messages == null) {
-            this.messages = newMessages;
+            // create modifiable list
+            this.messages = messages.stream().map(String::strip).collect(Collectors.toCollection(ArrayList::new));
         } else {
-            this.messages.addAll(newMessages);
+            this.messages.addAll(messages.stream().map(String::strip).toList());
         }
 
         return (T) this;
