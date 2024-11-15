@@ -236,9 +236,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         // soft delete assigned
         if (!assigned.isEmpty()) {
-            final Long[] dsIds = assigned.toArray(new Long[0]);
-            distributionSetRepository.deleteDistributionSet(dsIds);
-            targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(dsIds);
+            distributionSetRepository.saveAll(
+                    setsFound.stream()
+                            .filter(set -> assigned.contains(set.getId()))
+                            .peek(toSoftDelete -> toSoftDelete.setDeleted(true))
+                            .toList());
+            targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(assigned.toArray(new Long[0]));
         }
 
         // mark the rest as hard delete
