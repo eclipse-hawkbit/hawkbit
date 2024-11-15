@@ -69,7 +69,7 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
                     RolloutGroupStatus.ERROR, 3,
                     RolloutGroupStatus.RUNNING, 4,
                     RolloutGroupStatus.CREATING, 5
-            ));
+            ), null);
         }
     }
 

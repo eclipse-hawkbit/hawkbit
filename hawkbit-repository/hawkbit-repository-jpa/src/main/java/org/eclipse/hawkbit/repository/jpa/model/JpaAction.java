@@ -103,7 +103,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
                     ActionType.SOFT, 1,
                     ActionType.TIMEFORCED, 2,
                     ActionType.DOWNLOAD_ONLY, 3
-            ));
+            ), null);
         }
     }
     @Column(name = "action_type", nullable = false)
@@ -136,7 +136,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
                 put(Status.CANCEL_REJECTED, 9);
                 put(Status.DOWNLOADED, 10);
                 put(Status.WAIT_FOR_CONFIRMATION, 11);
-            }});
+            }}, null);
         }
     }
     @Column(name = "status", nullable = false)

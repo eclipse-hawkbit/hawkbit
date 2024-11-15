@@ -92,7 +92,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
                 put(RolloutStatus.WAITING_FOR_APPROVAL, 11);
                 put(RolloutStatus.APPROVAL_DENIED, 12);
                 put(RolloutStatus.STOPPING, 13);
-            }});
+            }}, null);
         }
     }
     @Column(name = "status", nullable = false)

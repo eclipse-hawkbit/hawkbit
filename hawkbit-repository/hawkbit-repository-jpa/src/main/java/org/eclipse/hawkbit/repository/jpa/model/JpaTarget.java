@@ -129,7 +129,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
                     TargetUpdateStatus.PENDING, 2,
                     TargetUpdateStatus.ERROR, 3,
                     TargetUpdateStatus.REGISTERED, 4
-            ));
+            ), null);
         }
     }
     @Column(name = "update_status", nullable = false)
