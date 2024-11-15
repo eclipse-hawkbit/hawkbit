@@ -24,8 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link SoftwareModule} repository.
  */
 @Transactional(readOnly = true)
-public interface SoftwareModuleRepository
-        extends BaseEntityRepository<JpaSoftwareModule> {
+public interface SoftwareModuleRepository extends BaseEntityRepository<JpaSoftwareModule> {
 
     /**
      * Counts all {@link SoftwareModule}s based on the given {@link JpaSoftwareModuleType}.
