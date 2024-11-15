@@ -9,15 +9,22 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -45,28 +52,30 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.annotations.ConversionValue;
-import org.eclipse.persistence.annotations.Convert;
-import org.eclipse.persistence.annotations.ObjectTypeConverter;
 
 /**
  * JPA implementation of {@link Action}.
  */
-@Table(name = "sp_action", indexes = { @Index(name = "sp_idx_action_01", columnList = "tenant,distribution_set"),
-        @Index(name = "sp_idx_action_02", columnList = "tenant,target,active"),
-        @Index(name = "sp_idx_action_prim", columnList = "tenant,id") })
+@Table(
+        name = "sp_action",
+        indexes = {
+                @Index(name = "sp_idx_action_01", columnList = "tenant,distribution_set"),
+                @Index(name = "sp_idx_action_02", columnList = "tenant,target,active"),
+                @Index(name = "sp_idx_action_prim", columnList = "tenant,id")
+        })
 @NamedEntityGraphs({
         @NamedEntityGraph(name = "Action.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }),
         @NamedEntityGraph(name = "Action.all", attributeNodes = {
                 @NamedAttributeNode("distributionSet"),
                 @NamedAttributeNode(value = "target", subgraph = "target.ds") },
-                subgraphs = @NamedSubgraph(name = "target.ds", attributeNodes = @NamedAttributeNode("assignedDistributionSet"))) })
+                subgraphs = @NamedSubgraph(name = "target.ds", attributeNodes = @NamedAttributeNode("assignedDistributionSet")))
+})
 @Entity
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Action, EventAwareEntity {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -86,13 +95,20 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Column(name = "active")
     private boolean active;
 
+    @Converter
+    public static class ActionTypeConverter extends MapTypeConverter<ActionType, Integer> {
+
+        public ActionTypeConverter() {
+            super(Map.of(
+                    ActionType.FORCED, 0,
+                    ActionType.SOFT, 1,
+                    ActionType.TIMEFORCED, 2,
+                    ActionType.DOWNLOAD_ONLY, 3
+            ));
+        }
+    }
     @Column(name = "action_type", nullable = false)
-    @ObjectTypeConverter(name = "actionType", objectType = Action.ActionType.class, dataType = Integer.class, conversionValues = {
-            @ConversionValue(objectValue = "FORCED", dataValue = "0"),
-            @ConversionValue(objectValue = "SOFT", dataValue = "1"),
-            @ConversionValue(objectValue = "TIMEFORCED", dataValue = "2"),
-            @ConversionValue(objectValue = "DOWNLOAD_ONLY", dataValue = "3") })
-    @Convert("actionType")
+    @Convert(converter = ActionTypeConverter.class)
     @NotNull
     private ActionType actionType;
 
@@ -104,21 +120,28 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Max(Action.WEIGHT_MAX)
     private Integer weight;
 
+    @Converter
+    public static class StatusConverter extends MapTypeConverter<Status, Integer> {
+
+        public StatusConverter() {
+            super(new HashMap<>() {{
+                put(Status.FINISHED, 0);
+                put(Status.ERROR, 1);
+                put(Status.WARNING, 2);
+                put(Status.RUNNING, 3);
+                put(Status.CANCELED, 4);
+                put(Status.CANCELING, 5);
+                put(Status.RETRIEVED, 6);
+                put(Status.DOWNLOAD, 7);
+                put(Status.SCHEDULED, 8);
+                put(Status.CANCEL_REJECTED, 9);
+                put(Status.DOWNLOADED, 10);
+                put(Status.WAIT_FOR_CONFIRMATION, 11);
+            }});
+        }
+    }
     @Column(name = "status", nullable = false)
-    @ObjectTypeConverter(name = "status", objectType = Action.Status.class, dataType = Integer.class, conversionValues = {
-            @ConversionValue(objectValue = "FINISHED", dataValue = "0"),
-            @ConversionValue(objectValue = "ERROR", dataValue = "1"),
-            @ConversionValue(objectValue = "WARNING", dataValue = "2"),
-            @ConversionValue(objectValue = "RUNNING", dataValue = "3"),
-            @ConversionValue(objectValue = "CANCELED", dataValue = "4"),
-            @ConversionValue(objectValue = "CANCELING", dataValue = "5"),
-            @ConversionValue(objectValue = "RETRIEVED", dataValue = "6"),
-            @ConversionValue(objectValue = "DOWNLOAD", dataValue = "7"),
-            @ConversionValue(objectValue = "SCHEDULED", dataValue = "8"),
-            @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9"),
-            @ConversionValue(objectValue = "DOWNLOADED", dataValue = "10"),
-            @ConversionValue(objectValue = "WAIT_FOR_CONFIRMATION", dataValue = "11") })
-    @Convert("status")
+    @Convert(converter = StatusConverter.class)
     @NotNull
     private Status status;
 
@@ -400,5 +423,29 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     private Optional<ZonedDateTime> getMaintenanceWindowEndTime() {
         return getMaintenanceWindowStartTime()
                 .map(start -> start.plus(MaintenanceScheduleHelper.convertToISODuration(maintenanceWindowDuration)));
+    }
+
+    private static class MapTypeConverter<JAVA_TYPE extends Enum, DB_TYPE> implements AttributeConverter<JAVA_TYPE, DB_TYPE> {
+
+        private final Map<JAVA_TYPE, DB_TYPE> javaToDbMap;
+        private final Map<DB_TYPE, JAVA_TYPE> dbToJavaMap;
+
+        protected MapTypeConverter(final Map<JAVA_TYPE, DB_TYPE> javaToDbMap) {
+            this.javaToDbMap = javaToDbMap;
+            this.dbToJavaMap = javaToDbMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+            if (javaToDbMap.size() != dbToJavaMap.size()) {
+                throw new IllegalArgumentException("Duplicate values in javaToDbMap");
+            }
+        }
+
+        @Override
+        public DB_TYPE convertToDatabaseColumn(final JAVA_TYPE attribute) {
+            return javaToDbMap.get(attribute);
+        }
+
+        @Override
+        public JAVA_TYPE convertToEntityAttribute(final DB_TYPE dbData) {
+            return dbToJavaMap.get(dbData);
+        }
     }
 }

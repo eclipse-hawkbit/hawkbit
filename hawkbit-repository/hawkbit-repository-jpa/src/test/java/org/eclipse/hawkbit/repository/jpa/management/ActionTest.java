@@ -17,13 +17,16 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.awaitility.Awaitility;
+import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Repository")
 @Story("Deployment Management")
-public class ActionTest {
+public class ActionTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Ensures that timeforced moded switch from soft to forces after defined timeframe.")
@@ -40,5 +43,43 @@ public class ActionTest {
         // wait until timeforce time is hit
         Awaitility.await().atMost(Duration.ofSeconds(2)).pollInterval(Duration.ofMillis(100))
                 .until(timeforcedAction::isForcedOrTimeForced);
+    }
+
+    @Test
+    public void testActionTypeConvert() {
+        final long id = createAction().getId();
+        for (final ActionType actionType : ActionType.values()) {
+            final JpaAction action = actionRepository
+                    .findById(id).orElseThrow(() -> new IllegalStateException("Action not found"));
+            action.setActionType(actionType);
+            actionRepository.save(action);
+            assertThat(actionRepository.findById(id).orElseThrow(() -> new IllegalStateException("Action not found"))
+                    .getActionType()).isEqualTo(actionType);
+        }
+    }
+
+    @Test
+    public void testStatusConvert() {
+        final long id = createAction().getId();
+        for (final Status status : Status.values()) {
+            final JpaAction action = actionRepository
+                    .findById(id).orElseThrow(() -> new IllegalStateException("Action not found"));
+            action.setStatus(status);
+            actionRepository.save(action);
+            assertThat(actionRepository.findById(id).orElseThrow(() -> new IllegalStateException("Action not found"))
+                    .getStatus()).isEqualTo(status);
+        }
+    }
+
+    private Action createAction() {
+        final ActionType[] actionTypes = ActionType.values();
+        final JpaAction action = new JpaAction();
+        action.setTarget(testdataFactory.createTarget("testActionTypeMappingTarget"));
+        action.setDistributionSet(testdataFactory.createDistributionSet("testActionTypeMappingDS"));
+        action.setActionType(actionTypes[0]);
+        action.setStatus(Status.SCHEDULED);
+        action.setWeight(100);
+        action.setInitiatedBy("none");
+        return actionRepository.save(action);
     }
 }
