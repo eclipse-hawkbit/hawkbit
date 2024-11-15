@@ -45,10 +45,6 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.ConversionValue;
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.ObjectTypeConverter;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
-import org.eclipse.persistence.queries.UpdateObjectQuery;
-import org.eclipse.persistence.sessions.changesets.DirectToFieldChangeRecord;
-import org.eclipse.persistence.sessions.changesets.ObjectChangeSet;
 
 /**
  * JPA implementation of a {@link Rollout}.
@@ -176,24 +172,24 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     }
 
     @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new RolloutCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new RolloutUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
 
-        if (isSoftDeleted(descriptorEvent)) {
+        if (deleted) {
             EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(),
                     getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
         }
     }
 
     @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+    public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(),
                 getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }
@@ -333,15 +329,5 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
-    }
-
-    private static boolean isSoftDeleted(final DescriptorEvent event) {
-        final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
-        final List<DirectToFieldChangeRecord> changes = changeSet.getChanges().stream()
-                .filter(DirectToFieldChangeRecord.class::isInstance).map(DirectToFieldChangeRecord.class::cast)
-                .collect(Collectors.toList());
-
-        return changes.stream().anyMatch(changeRecord -> DELETED_PROPERTY.equals(changeRecord.getAttribute())
-                && Boolean.parseBoolean(changeRecord.getNewValue().toString()));
     }
 }

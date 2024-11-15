@@ -46,10 +46,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
-import org.eclipse.persistence.queries.UpdateObjectQuery;
-import org.eclipse.persistence.sessions.changesets.DirectToFieldChangeRecord;
-import org.eclipse.persistence.sessions.changesets.ObjectChangeSet;
 
 /**
  * Base Software Module that is supported by OS level provisioning mechanism on
@@ -193,35 +189,25 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     }
 
     @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new SoftwareModuleCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new SoftwareModuleUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
 
-        if (isSoftDeleted(descriptorEvent)) {
+        if (deleted) {
             EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleDeletedEvent(
                     getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
         }
     }
 
     @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+    public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleDeletedEvent(getTenant(),
                 getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
-    }
-
-    private static boolean isSoftDeleted(final DescriptorEvent event) {
-        final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
-        final List<DirectToFieldChangeRecord> changes = changeSet.getChanges().stream()
-                .filter(DirectToFieldChangeRecord.class::isInstance).map(DirectToFieldChangeRecord.class::cast)
-                .toList();
-
-        return changes.stream().anyMatch(changeRecord -> DELETED_PROPERTY.equals(changeRecord.getAttribute())
-                && Boolean.parseBoolean(changeRecord.getNewValue().toString()));
     }
 }

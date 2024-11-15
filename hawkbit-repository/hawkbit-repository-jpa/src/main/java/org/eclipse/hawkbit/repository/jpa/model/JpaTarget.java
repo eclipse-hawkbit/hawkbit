@@ -64,7 +64,6 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.persistence.annotations.ConversionValue;
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.ObjectTypeConverter;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * JPA implementation of {@link Target}.
@@ -468,19 +467,19 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     }
 
     @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new TargetCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new TargetUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+    public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new TargetDeletedEvent(getTenant(), getId(), getControllerId(), address,
                         getClass(), EventPublisherHolder.getInstance().getApplicationId()));

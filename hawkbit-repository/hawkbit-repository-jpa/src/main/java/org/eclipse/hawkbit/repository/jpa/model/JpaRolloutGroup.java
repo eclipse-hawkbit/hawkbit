@@ -39,7 +39,6 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.ConversionValue;
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.ObjectTypeConverter;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * JPA entity definition of persisting a group of an rollout.
@@ -196,18 +195,18 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     }
 
     @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent() {
         // there is no RolloutGroup created event
     }
 
     @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new RolloutGroupUpdatedEvent(this, getRollout().getId(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+    public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new RolloutGroupDeletedEvent(getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }
