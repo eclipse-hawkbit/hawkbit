@@ -38,5 +38,4 @@ public interface TagUpdate {
      * @return updated builder instance
      */
     TagUpdate colour(@Size(max = Tag.COLOUR_MAX_SIZE) String colour);
-
 }

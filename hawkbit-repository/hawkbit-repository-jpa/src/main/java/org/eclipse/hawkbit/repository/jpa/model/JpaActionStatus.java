@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +31,10 @@ import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -37,20 +42,23 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 /**
  * Entity to store the status for a specific action.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // JPA default constructor
 @Table(name = "sp_action_status", indexes = {
         @Index(name = "sp_idx_action_status_02", columnList = "tenant,action,status"),
-        @Index(name = "sp_idx_action_status_prim", columnList = "tenant,id") })
+        @Index(name = "sp_idx_action_status_prim", columnList = "tenant,id")
+})
 @NamedEntityGraph(name = "ActionStatus.withMessages", attributeNodes = { @NamedAttributeNode("messages") })
 @Entity
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements ActionStatus {
 
-    private static final int MESSAGE_ENTRY_LENGTH = 512;
-
+    @Serial
     private static final long serialVersionUID = 1L;
 
+    private static final int MESSAGE_ENTRY_LENGTH = 512;
+
+    @Setter @Getter
     @Column(name = "target_occurred_at", nullable = false, updatable = false)
     private long occurredAt;
 
@@ -61,11 +69,13 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     @NotNull
     private JpaAction action;
 
+    @Setter @Getter
     @Column(name = "status", nullable = false, updatable = false)
     @Convert(converter = JpaAction.StatusConverter.class)
     @NotNull
     private Status status;
 
+    // TODO - messages is not used yet. Check and verify if to remove or expose via REST API
     // no cascade option on an ElementCollection, the target objects are always persisted, merged, removed with their parent.
     @ElementCollection(fetch = FetchType.LAZY, targetClass = String.class)
     @CollectionTable(
@@ -78,6 +88,7 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     @Column(name = "detail_message", length = MESSAGE_ENTRY_LENGTH, nullable = false, insertable = false, updatable = false)
     private List<String> messages;
 
+    @Setter
     @Column(name = "code", nullable = true, updatable = false)
     private Integer code;
 
@@ -120,22 +131,6 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
         this.occurredAt = occurredAt;
     }
 
-    /**
-     * JPA default constructor.
-     */
-    public JpaActionStatus() {
-        // JPA default constructor.
-    }
-
-    @Override
-    public long getOccurredAt() {
-        return occurredAt;
-    }
-
-    public void setOccurredAt(final long occurredAt) {
-        this.occurredAt = occurredAt;
-    }
-
     @Override
     public Action getAction() {
         return action;
@@ -145,21 +140,8 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
         this.action = (JpaAction) action;
     }
 
-    @Override
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(final Status status) {
-        this.status = status;
-    }
-
     public Optional<Integer> getCode() {
         return Optional.ofNullable(code);
-    }
-
-    public void setCode(final Integer code) {
-        this.code = code;
     }
 
     public final void addMessage(final String message) {

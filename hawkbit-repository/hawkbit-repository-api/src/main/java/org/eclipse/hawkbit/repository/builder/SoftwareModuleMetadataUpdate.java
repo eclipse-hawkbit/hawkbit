@@ -32,5 +32,4 @@ public interface SoftwareModuleMetadataUpdate {
      * @return updated builder instance
      */
     SoftwareModuleMetadataUpdate targetVisible(Boolean visible);
-
 }

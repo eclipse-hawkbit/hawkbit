@@ -14,8 +14,7 @@ import java.util.Objects;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 /**
- * Event which is published in case a {@linkplain RolloutGroup} is created or
- * updated
+ * Event which is published in case a {@linkplain RolloutGroup} is created or updated
  */
 public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<RolloutGroup> {
 

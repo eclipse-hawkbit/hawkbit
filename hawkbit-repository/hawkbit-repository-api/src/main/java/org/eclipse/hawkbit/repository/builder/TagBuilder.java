@@ -26,5 +26,4 @@ public interface TagBuilder {
      * @return builder instance
      */
     TagCreate create();
-
 }
