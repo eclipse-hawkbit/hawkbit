@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.utils;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.AttributeConverter;
@@ -18,9 +19,11 @@ public class MapAttributeConverter<JAVA_TYPE extends Enum<JAVA_TYPE>, DB_TYPE> i
 
     private final Map<JAVA_TYPE, DB_TYPE> javaToDbMap;
     private final Map<DB_TYPE, JAVA_TYPE> dbToJavaMap;
+    private final DB_TYPE nullMapping;
 
-    protected MapAttributeConverter(final Map<JAVA_TYPE, DB_TYPE> javaToDbMap) {
+    protected MapAttributeConverter(final Map<JAVA_TYPE, DB_TYPE> javaToDbMap, final DB_TYPE nullMapping) {
         this.javaToDbMap = javaToDbMap;
+        this.nullMapping = nullMapping;
         this.dbToJavaMap = javaToDbMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
         if (javaToDbMap.size() != dbToJavaMap.size()) {
             throw new IllegalArgumentException("Duplicate values in javaToDbMap");
@@ -30,13 +33,16 @@ public class MapAttributeConverter<JAVA_TYPE extends Enum<JAVA_TYPE>, DB_TYPE> i
     @Override
     public DB_TYPE convertToDatabaseColumn(final JAVA_TYPE attribute) {
         if (attribute == null) {
-            return null;
+            return nullMapping;
         }
         return javaToDbMap.get(attribute);
     }
 
     @Override
     public JAVA_TYPE convertToEntityAttribute(final DB_TYPE dbData) {
+        if (Objects.equals(dbData, nullMapping)) {
+            return null;
+        }
         return dbToJavaMap.get(dbData);
     }
 }
