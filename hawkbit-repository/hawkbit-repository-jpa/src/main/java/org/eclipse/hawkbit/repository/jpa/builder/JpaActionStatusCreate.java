@@ -16,8 +16,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 /**
  * Create/build implementation.
  */
-public class JpaActionStatusCreate extends AbstractActionStatusCreate<ActionStatusCreate>
-        implements ActionStatusCreate {
+public class JpaActionStatusCreate extends AbstractActionStatusCreate<ActionStatusCreate> implements ActionStatusCreate {
 
     JpaActionStatusCreate(final Long actionId) {
         super.actionId = actionId;

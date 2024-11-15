@@ -30,5 +30,4 @@ public interface SoftwareModuleMetadataBuilder {
      * @return builder instance
      */
     SoftwareModuleMetadataCreate create(long softwareModuleId);
-
 }

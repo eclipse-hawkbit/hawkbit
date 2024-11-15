@@ -41,5 +41,4 @@ public interface ActionStatus extends TenantAwareBaseEntity {
     Status getStatus();
 
     Optional<Integer> getCode();
-
 }

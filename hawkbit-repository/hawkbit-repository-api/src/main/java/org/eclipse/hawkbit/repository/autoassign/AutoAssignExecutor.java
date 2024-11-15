@@ -28,5 +28,4 @@ public interface AutoAssignExecutor {
      * @param controllerId of the device to check
      */
     void checkSingleTarget(String controllerId);
-
 }

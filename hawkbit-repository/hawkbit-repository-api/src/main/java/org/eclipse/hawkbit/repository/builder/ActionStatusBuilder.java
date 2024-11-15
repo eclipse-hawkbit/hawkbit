@@ -22,5 +22,4 @@ public interface ActionStatusBuilder {
      * @return create builder
      */
     ActionStatusCreate create(long actionId);
-
 }

@@ -46,5 +46,4 @@ public interface SoftwareModuleMetadataCreate {
      *         builder
      */
     SoftwareModuleMetadata build();
-
 }
