@@ -30,8 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link DistributionSet} repository.
  */
 @Transactional(readOnly = true)
-public interface DistributionSetRepository
-        extends BaseEntityRepository<JpaDistributionSet> {
+public interface DistributionSetRepository extends BaseEntityRepository<JpaDistributionSet> {
 
     /**
      * Count {@link Rollout}s by Status for Distribution set.
@@ -65,18 +64,6 @@ public interface DistributionSetRepository
      */
     @Query(value = "SELECT COUNT(f.autoAssignDistributionSet) FROM JpaTargetFilterQuery f WHERE f.autoAssignDistributionSet.id = :dsId GROUP BY f.autoAssignDistributionSet")
     Long countAutoAssignmentsForDistributionSet(@Param("dsId") Long dsId);
-
-    /**
-     * deletes the {@link DistributionSet}s with the given IDs.
-     * <p/>
-     * No access control applied.
-     *
-     * @param ids to be deleted
-     */
-    @Modifying
-    @Transactional
-    @Query("update JpaDistributionSet d set d.deleted = true where d.id in :ids")
-    void deleteDistributionSet(@Param("ids") Long... ids);
 
     /**
      * Finds {@link DistributionSet}s where given {@link SoftwareModule} is
