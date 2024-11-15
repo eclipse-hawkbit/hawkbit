@@ -9,14 +9,17 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -34,6 +37,7 @@ import jakarta.validation.constraints.Size;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
+import org.eclipse.hawkbit.repository.jpa.utils.MapAttributeConverter;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -42,9 +46,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.annotations.ConversionValue;
-import org.eclipse.persistence.annotations.Convert;
-import org.eclipse.persistence.annotations.ObjectTypeConverter;
 
 /**
  * JPA implementation of a {@link Rollout}.
@@ -52,14 +53,12 @@ import org.eclipse.persistence.annotations.ObjectTypeConverter;
 @Entity
 @Table(name = "sp_rollout", uniqueConstraints = @UniqueConstraint(columnNames = { "name",
         "tenant" }, name = "uk_rollout"))
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, EventAwareEntity {
 
+    @Serial
     private static final long serialVersionUID = 1L;
-
-    private static final String DELETED_PROPERTY = "deleted";
 
     @OneToMany(targetEntity = JpaRolloutGroup.class, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, mappedBy = "rollout")
     private List<JpaRolloutGroup> rolloutGroups;
@@ -74,35 +73,37 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @NotNull
     private JpaDistributionSet distributionSet;
 
+    @Converter
+    public static class RolloutStatusConverter extends MapAttributeConverter<RolloutStatus, Integer> {
+
+        public RolloutStatusConverter() {
+            super(new HashMap<>() {{
+                put(RolloutStatus.CREATING, 0);
+                put(RolloutStatus.READY, 1);
+                put(RolloutStatus.PAUSED, 2);
+                put(RolloutStatus.STARTING, 3);
+                put(RolloutStatus.STOPPED, 4);
+                put(RolloutStatus.RUNNING, 5);
+                put(RolloutStatus.FINISHED, 6);
+                put(RolloutStatus.ERROR_CREATING, 7);
+                put(RolloutStatus.ERROR_STARTING, 8);
+                put(RolloutStatus.DELETING, 9);
+                put(RolloutStatus.DELETED, 10);
+                put(RolloutStatus.WAITING_FOR_APPROVAL, 11);
+                put(RolloutStatus.APPROVAL_DENIED, 12);
+                put(RolloutStatus.STOPPING, 13);
+            }});
+        }
+    }
     @Column(name = "status", nullable = false)
-    @ObjectTypeConverter(name = "rolloutstatus", objectType = Rollout.RolloutStatus.class, dataType = Integer.class, conversionValues = {
-            @ConversionValue(objectValue = "CREATING", dataValue = "0"),
-            @ConversionValue(objectValue = "READY", dataValue = "1"),
-            @ConversionValue(objectValue = "PAUSED", dataValue = "2"),
-            @ConversionValue(objectValue = "STARTING", dataValue = "3"),
-            @ConversionValue(objectValue = "STOPPED", dataValue = "4"),
-            @ConversionValue(objectValue = "RUNNING", dataValue = "5"),
-            @ConversionValue(objectValue = "FINISHED", dataValue = "6"),
-            @ConversionValue(objectValue = "ERROR_CREATING", dataValue = "7"),
-            @ConversionValue(objectValue = "ERROR_STARTING", dataValue = "8"),
-            @ConversionValue(objectValue = "DELETING", dataValue = "9"),
-            @ConversionValue(objectValue = "DELETED", dataValue = "10"),
-            @ConversionValue(objectValue = "WAITING_FOR_APPROVAL", dataValue = "11"),
-            @ConversionValue(objectValue = "APPROVAL_DENIED", dataValue = "12"),
-            @ConversionValue(objectValue = "STOPPING", dataValue = "13") })
-    @Convert("rolloutstatus")
+    @Convert(converter = RolloutStatusConverter.class)
     @NotNull
     private RolloutStatus status = RolloutStatus.CREATING;
     @Column(name = "last_check")
     private long lastCheck;
 
     @Column(name = "action_type", nullable = false)
-    @ObjectTypeConverter(name = "actionType", objectType = Action.ActionType.class, dataType = Integer.class, conversionValues = {
-            @ConversionValue(objectValue = "FORCED", dataValue = "0"),
-            @ConversionValue(objectValue = "SOFT", dataValue = "1"),
-            @ConversionValue(objectValue = "TIMEFORCED", dataValue = "2"),
-            @ConversionValue(objectValue = "DOWNLOAD_ONLY", dataValue = "3") })
-    @Convert("actionType")
+    @Convert(converter = JpaAction.ActionTypeConverter.class)
     @NotNull
     private ActionType actionType = ActionType.FORCED;
 
