@@ -17,6 +17,7 @@ import java.util.Optional;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.Convert;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -32,9 +33,6 @@ import jakarta.validation.constraints.NotNull;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.persistence.annotations.ConversionValue;
-import org.eclipse.persistence.annotations.Convert;
-import org.eclipse.persistence.annotations.ObjectTypeConverter;
 
 /**
  * Entity to store the status for a specific action.
@@ -64,20 +62,7 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     private JpaAction action;
 
     @Column(name = "status", nullable = false, updatable = false)
-    @ObjectTypeConverter(name = "status", objectType = Action.Status.class, dataType = Integer.class, conversionValues = {
-            @ConversionValue(objectValue = "FINISHED", dataValue = "0"),
-            @ConversionValue(objectValue = "ERROR", dataValue = "1"),
-            @ConversionValue(objectValue = "WARNING", dataValue = "2"),
-            @ConversionValue(objectValue = "RUNNING", dataValue = "3"),
-            @ConversionValue(objectValue = "CANCELED", dataValue = "4"),
-            @ConversionValue(objectValue = "CANCELING", dataValue = "5"),
-            @ConversionValue(objectValue = "RETRIEVED", dataValue = "6"),
-            @ConversionValue(objectValue = "DOWNLOAD", dataValue = "7"),
-            @ConversionValue(objectValue = "SCHEDULED", dataValue = "8"),
-            @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9"),
-            @ConversionValue(objectValue = "DOWNLOADED", dataValue = "10"),
-            @ConversionValue(objectValue = "WAIT_FOR_CONFIRMATION", dataValue = "11") })
-    @Convert("status")
+    @Convert(converter = JpaAction.StatusConverter.class)
     @NotNull
     private Status status;
 

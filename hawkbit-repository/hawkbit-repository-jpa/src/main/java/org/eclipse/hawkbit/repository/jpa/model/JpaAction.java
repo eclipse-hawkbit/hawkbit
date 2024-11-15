@@ -423,5 +423,4 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         return getMaintenanceWindowStartTime()
                 .map(start -> start.plus(MaintenanceScheduleHelper.convertToISODuration(maintenanceWindowDuration)));
     }
-
 }
