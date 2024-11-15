@@ -12,10 +12,13 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import java.io.Serial;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -32,13 +35,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
+import org.eclipse.hawkbit.repository.jpa.utils.MapAttributeConverter;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.annotations.ConversionValue;
-import org.eclipse.persistence.annotations.Convert;
-import org.eclipse.persistence.annotations.ObjectTypeConverter;
 
 /**
  * JPA entity definition of persisting a group of an rollout.
@@ -57,17 +58,25 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     @JoinColumn(name = "rollout", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolloutgroup_rollout"))
     private JpaRollout rollout;
 
+    @Converter
+    public static class RolloutGroupStatusConverter extends MapAttributeConverter<RolloutGroupStatus, Integer> {
+
+        public RolloutGroupStatusConverter() {
+            super(Map.of(
+                    RolloutGroupStatus.READY, 0,
+                    RolloutGroupStatus.SCHEDULED, 1,
+                    RolloutGroupStatus.FINISHED, 2,
+                    RolloutGroupStatus.ERROR, 3,
+                    RolloutGroupStatus.RUNNING, 4,
+                    RolloutGroupStatus.CREATING, 5
+            ));
+        }
+    }
+
     @Setter
     @Getter
     @Column(name = "status", nullable = false)
-    @ObjectTypeConverter(name = "rolloutgroupstatus", objectType = RolloutGroup.RolloutGroupStatus.class, dataType = Integer.class, conversionValues = {
-            @ConversionValue(objectValue = "READY", dataValue = "0"),
-            @ConversionValue(objectValue = "SCHEDULED", dataValue = "1"),
-            @ConversionValue(objectValue = "FINISHED", dataValue = "2"),
-            @ConversionValue(objectValue = "ERROR", dataValue = "3"),
-            @ConversionValue(objectValue = "RUNNING", dataValue = "4"),
-            @ConversionValue(objectValue = "CREATING", dataValue = "5") })
-    @Convert("rolloutgroupstatus")
+    @Convert(converter = RolloutGroupStatusConverter.class)
     private RolloutGroupStatus status = RolloutGroupStatus.CREATING;
 
     @OneToMany(mappedBy = "rolloutGroup", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, targetEntity = RolloutTargetGroup.class)
