@@ -17,9 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -44,6 +42,7 @@ import jakarta.validation.constraints.NotNull;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
+import org.eclipse.hawkbit.repository.jpa.utils.MapAttributeConverter;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
@@ -96,7 +95,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     private boolean active;
 
     @Converter
-    public static class ActionTypeConverter extends MapTypeConverter<ActionType, Integer> {
+    public static class ActionTypeConverter extends MapAttributeConverter<ActionType, Integer> {
 
         public ActionTypeConverter() {
             super(Map.of(
@@ -121,7 +120,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     private Integer weight;
 
     @Converter
-    public static class StatusConverter extends MapTypeConverter<Status, Integer> {
+    public static class StatusConverter extends MapAttributeConverter<Status, Integer> {
 
         public StatusConverter() {
             super(new HashMap<>() {{
@@ -425,27 +424,4 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
                 .map(start -> start.plus(MaintenanceScheduleHelper.convertToISODuration(maintenanceWindowDuration)));
     }
 
-    private static class MapTypeConverter<JAVA_TYPE extends Enum, DB_TYPE> implements AttributeConverter<JAVA_TYPE, DB_TYPE> {
-
-        private final Map<JAVA_TYPE, DB_TYPE> javaToDbMap;
-        private final Map<DB_TYPE, JAVA_TYPE> dbToJavaMap;
-
-        protected MapTypeConverter(final Map<JAVA_TYPE, DB_TYPE> javaToDbMap) {
-            this.javaToDbMap = javaToDbMap;
-            this.dbToJavaMap = javaToDbMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
-            if (javaToDbMap.size() != dbToJavaMap.size()) {
-                throw new IllegalArgumentException("Duplicate values in javaToDbMap");
-            }
-        }
-
-        @Override
-        public DB_TYPE convertToDatabaseColumn(final JAVA_TYPE attribute) {
-            return javaToDbMap.get(attribute);
-        }
-
-        @Override
-        public JAVA_TYPE convertToEntityAttribute(final DB_TYPE dbData) {
-            return dbToJavaMap.get(dbData);
-        }
-    }
 }
