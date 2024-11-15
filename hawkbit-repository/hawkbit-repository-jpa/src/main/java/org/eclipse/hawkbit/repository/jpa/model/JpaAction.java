@@ -45,11 +45,9 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.annotations.ConversionValue;
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.ObjectTypeConverter;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * JPA implementation of {@link Action}.
@@ -372,7 +370,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     }
 
     @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new ActionCreatedEvent(this, BaseEntity.getIdOrNull(target),
                         BaseEntity.getIdOrNull(rollout), BaseEntity.getIdOrNull(rolloutGroup),
@@ -380,7 +378,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     }
 
     @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new ActionUpdatedEvent(this, BaseEntity.getIdOrNull(target),
                         BaseEntity.getIdOrNull(rollout), BaseEntity.getIdOrNull(rolloutGroup),
@@ -388,7 +386,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     }
 
     @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+    public void fireDeleteEvent() {
         // there is no action deletion
     }
 

@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCre
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * A JPA entity which stores the tenant specific configuration.
@@ -85,19 +84,19 @@ public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity
     }
 
     @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new TenantConfigurationCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new TenantConfigurationUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+    public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new TenantConfigurationDeletedEvent(getTenant(), getId(), getKey(), getValue(),
                         getClass(), EventPublisherHolder.getInstance().getApplicationId()));

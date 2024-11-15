@@ -35,7 +35,6 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.ConversionValue;
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.ObjectTypeConverter;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * Stored target filter.
@@ -182,19 +181,19 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
     }
 
     @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new TargetFilterQueryCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new TargetFilterQueryUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+    public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetFilterQueryDeletedEvent(
                 getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }

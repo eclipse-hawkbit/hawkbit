@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleTypeCrea
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * Type of a software modules.
@@ -108,19 +107,19 @@ public class JpaSoftwareModuleType extends AbstractJpaTypeEntity implements Soft
     }
 
     @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new SoftwareModuleTypeCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new SoftwareModuleTypeUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+    public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleTypeDeletedEvent(
                 getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }

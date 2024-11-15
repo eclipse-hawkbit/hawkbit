@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * A target type defines which distribution set types can or have to be
@@ -112,19 +111,19 @@ public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, 
     }
 
     @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new TargetTypeCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new TargetTypeUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+    public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetTypeDeletedEvent(
                 getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
@@ -25,7 +24,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpda
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * A {@link DistributionSetTag} is used to describe DistributionSet attributes
@@ -62,19 +60,19 @@ public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag,
     }
 
     @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new DistributionSetTagCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new DistributionSetTagUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+    public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionSetTagDeletedEvent(
                 getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
 

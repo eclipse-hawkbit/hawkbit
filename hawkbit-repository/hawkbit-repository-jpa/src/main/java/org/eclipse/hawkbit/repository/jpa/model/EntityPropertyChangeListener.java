@@ -24,7 +24,7 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
     public void postDelete(final DescriptorEvent event) {
         final Object object = event.getObject();
         if (isEventAwareEntity(object)) {
-            doNotifiy(() -> ((EventAwareEntity) object).fireDeleteEvent(event));
+            doNotify(() -> ((EventAwareEntity) object).fireDeleteEvent());
         }
     }
 
@@ -32,26 +32,23 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
     public void postInsert(final DescriptorEvent event) {
         final Object object = event.getObject();
         if (isEventAwareEntity(object)) {
-            doNotifiy(() -> ((EventAwareEntity) object).fireCreateEvent(event));
+            doNotify(() -> ((EventAwareEntity) object).fireCreateEvent());
         }
     }
 
     @Override
     public void postUpdate(final DescriptorEvent event) {
-
         final Object object = event.getObject();
-        if (isEventAwareEntity(object)
-                && isFireUpdate((EventAwareEntity) object, (UpdateObjectQuery) event.getQuery())) {
-            doNotifiy(() -> ((EventAwareEntity) object).fireUpdateEvent(event));
+        if (isEventAwareEntity(object) && isFireUpdate((EventAwareEntity) object, (UpdateObjectQuery) event.getQuery())) {
+            doNotify(() -> ((EventAwareEntity) object).fireUpdateEvent());
         }
-
     }
 
     private static boolean isEventAwareEntity(final Object object) {
         return object instanceof EventAwareEntity;
     }
 
-    private static void doNotifiy(final Runnable runnable) {
+    private static void doNotify(final Runnable runnable) {
         AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(runnable);
     }
 
@@ -59,5 +56,4 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
         return entity.getUpdateIgnoreFields().isEmpty() || query.getObjectChangeSet().getChangedAttributeNames()
                 .stream().anyMatch(field -> !entity.getUpdateIgnoreFields().contains(field));
     }
-
 }
