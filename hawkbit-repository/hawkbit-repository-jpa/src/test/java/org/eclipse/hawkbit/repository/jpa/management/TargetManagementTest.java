@@ -76,6 +76,7 @@ import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
@@ -1206,6 +1207,19 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(
                 () -> targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, 123, "name==*"));
+    }
+
+    @Test
+    @Description("Test update status convert")
+    void testUpdateStatusConvert() {
+        final long id = testdataFactory.createTarget().getId();
+        for (final TargetUpdateStatus status : TargetUpdateStatus.values()) {
+            final JpaTarget target = targetRepository.findById(id).orElseThrow(() -> new IllegalStateException("Target not found"));
+            target.setUpdateStatus(status);
+            targetRepository.save(target);
+            assertThat(targetRepository.findById(target.getId()).orElseThrow(() -> new IllegalStateException("Target not found"))
+                    .getUpdateStatus()).isEqualTo(status);
+        }
     }
 
     @Step
