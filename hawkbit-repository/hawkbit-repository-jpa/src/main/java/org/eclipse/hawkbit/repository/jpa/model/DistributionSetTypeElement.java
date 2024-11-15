@@ -44,12 +44,12 @@ public class DistributionSetTypeElement implements Serializable {
     private boolean mandatory;
 
     @MapsId("dsType")
-    @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE })
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "distribution_set_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_element"))
     private JpaDistributionSetType dsType;
 
     @MapsId("smType")
-    @ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE })
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "software_module_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_smtype"))
     private JpaSoftwareModuleType smType;
 
