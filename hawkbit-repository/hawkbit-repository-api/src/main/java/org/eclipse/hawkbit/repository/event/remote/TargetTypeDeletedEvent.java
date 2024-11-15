@@ -9,6 +9,10 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import java.io.Serial;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityDeletedEvent;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
@@ -16,16 +20,11 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 /**
  * Defines the remote event of deleting a {@link TargetType}.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
 public class TargetTypeDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Default constructor.
-     */
-    public TargetTypeDeletedEvent() {
-        // for serialization libs like jackson
-    }
 
     /**
      * Constructor for json serialization.

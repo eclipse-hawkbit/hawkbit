@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
@@ -21,19 +23,18 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
  */
 public class SoftwareModuleTypeNotInDistributionSetTypeException extends EntityNotFoundException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructor
      *
-     * @param moduleTypeId thats is not part of given {@link DistributionSetType}
-     * @param distributionSetTypeId of the {@link DistributionSetType} where given
-     *         {@link SoftwareModuleType} is not part of
+     * @param moduleTypeId that is not part of given {@link DistributionSetType}
+     * @param distributionSetTypeId of the {@link DistributionSetType} where given {@link SoftwareModuleType} is not part of
      */
     public SoftwareModuleTypeNotInDistributionSetTypeException(final Long moduleTypeId,
             final Long distributionSetTypeId) {
         super(SoftwareModuleType.class.getSimpleName() + " with id {" + moduleTypeId + "} is not part of "
                 + DistributionSetType.class.getSimpleName() + " with id {" + distributionSetTypeId + "}.");
     }
-
 }

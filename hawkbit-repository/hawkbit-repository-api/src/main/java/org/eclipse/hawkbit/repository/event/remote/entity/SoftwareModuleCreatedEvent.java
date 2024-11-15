@@ -9,22 +9,21 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.io.Serial;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * Defines the remote event of creating a new {@link SoftwareModule}.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
 public class SoftwareModuleCreatedEvent extends RemoteEntityEvent<SoftwareModule> implements EntityCreatedEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Default constructor.
-     */
-    public SoftwareModuleCreatedEvent() {
-        // for serialization libs like jackson
-    }
 
     /**
      * Constructor.
@@ -35,5 +34,4 @@ public class SoftwareModuleCreatedEvent extends RemoteEntityEvent<SoftwareModule
     public SoftwareModuleCreatedEvent(final SoftwareModule baseEntity, final String applicationId) {
         super(baseEntity, applicationId);
     }
-
 }

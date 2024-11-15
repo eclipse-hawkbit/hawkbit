@@ -26,5 +26,4 @@ public interface EventEntityManager {
      * @return the entity
      */
     <E extends TenantAwareBaseEntity> E findEntity(String tenant, Long id, Class<E> entityType);
-
 }

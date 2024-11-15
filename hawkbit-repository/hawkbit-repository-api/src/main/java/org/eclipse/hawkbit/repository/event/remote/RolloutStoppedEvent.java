@@ -9,39 +9,42 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import java.io.Serial;
 import java.util.Collection;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 /**
  * Event that is published when a rollout is stopped due to invalidation of a
  * {@link DistributionSet}.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
 @Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class RolloutStoppedEvent extends RemoteTenantAwareEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private Collection<Long> rolloutGroupIds;
     private long rolloutId;
 
     /**
-     * Default constructor.
-     */
-    public RolloutStoppedEvent() {
-        // for serialization libs like jackson
-    }
-
-    /**
      * Constructor for json serialization.
      *
      * @param tenant the tenant
-     * @param entityId the entity id
-     * @param entityClass the entity class
-     * @param applicationId the origin application id
+     * @param applicationId the entity id
+     * @param rolloutId the entity class (and source)
+     * @param rolloutGroupIds the rollouts group ids
      */
-    public RolloutStoppedEvent(final String tenant, final String applicationId, final long rolloutId,
+    public RolloutStoppedEvent(
+            final String tenant, final String applicationId, final long rolloutId,
             final Collection<Long> rolloutGroupIds) {
         super(rolloutId, tenant, applicationId);
         this.rolloutId = rolloutId;

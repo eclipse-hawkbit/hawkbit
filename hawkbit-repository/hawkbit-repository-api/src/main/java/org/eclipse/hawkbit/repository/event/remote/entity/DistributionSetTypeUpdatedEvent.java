@@ -9,6 +9,10 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.io.Serial;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -16,17 +20,11 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 /**
  * Defines the remote event for updating a {@link SoftwareModuleType}.
  */
-public class DistributionSetTypeUpdatedEvent extends RemoteEntityEvent<DistributionSetType>
-        implements EntityUpdatedEvent {
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
+public class DistributionSetTypeUpdatedEvent extends RemoteEntityEvent<DistributionSetType> implements EntityUpdatedEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Default constructor.
-     */
-    public DistributionSetTypeUpdatedEvent() {
-        // for serialization libs like jackson
-    }
 
     /**
      * Constructor.
@@ -37,5 +35,4 @@ public class DistributionSetTypeUpdatedEvent extends RemoteEntityEvent<Distribut
     public DistributionSetTypeUpdatedEvent(final DistributionSetType baseEntity, final String applicationId) {
         super(baseEntity, applicationId);
     }
-
 }

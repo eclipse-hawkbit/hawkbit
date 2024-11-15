@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -22,6 +24,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
  */
 public class UnsupportedSoftwareModuleForThisDistributionSetException extends AbstractServerRtException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

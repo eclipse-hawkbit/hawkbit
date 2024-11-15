@@ -12,8 +12,10 @@ package org.eclipse.hawkbit.repository.event.remote;
 import java.io.Serial;
 
 import com.cronutils.utils.StringUtils;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
@@ -26,19 +28,13 @@ import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // for serialization libs like jackson
 public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements TenantAwareEvent {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     private String tenant;
-
-    /**
-     * Default constructor.
-     */
-    protected RemoteTenantAwareEvent() {
-        // for serialization libs like jackson
-    }
 
     /**
      * Constructor.

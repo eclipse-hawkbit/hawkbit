@@ -9,22 +9,20 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A singleton bean which holds the event entity manager to have autowiring in
- * the events.
+ * A singleton bean which holds the event entity manager to have autowiring in the events.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class EventEntityManagerHolder {
 
     private static final EventEntityManagerHolder SINGLETON = new EventEntityManagerHolder();
 
     @Autowired
     private EventEntityManager eventEntityManager;
-
-    private EventEntityManagerHolder() {
-
-    }
 
     /**
      * @return the cache manager holder singleton instance

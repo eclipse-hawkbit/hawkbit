@@ -9,23 +9,22 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.io.Serial;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 /**
- * TenantAwareEvent definition which is been published in case a rollout group
+ * TenantAwareEvent definition which is being published in case a rollout group
  * has been created for a specific rollout.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
 public class RolloutGroupCreatedEvent extends AbstractRolloutGroupEvent implements EntityCreatedEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Default constructor.
-     */
-    public RolloutGroupCreatedEvent() {
-        // for serialization libs like jackson
-    }
 
     /**
      * Constructor

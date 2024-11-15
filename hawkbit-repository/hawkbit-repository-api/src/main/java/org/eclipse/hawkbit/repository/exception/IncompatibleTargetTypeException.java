@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -24,7 +25,9 @@ import org.eclipse.hawkbit.repository.model.TargetType;
  */
 public class IncompatibleTargetTypeException extends AbstractServerRtException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
+    
     private final Collection<String> targetTypeNames;
     private final Collection<String> distributionSetTypeNames;
 
