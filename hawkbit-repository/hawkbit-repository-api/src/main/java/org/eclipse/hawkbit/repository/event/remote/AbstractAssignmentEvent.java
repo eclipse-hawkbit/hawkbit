@@ -9,13 +9,18 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 
@@ -23,18 +28,15 @@ import org.eclipse.hawkbit.repository.model.ActionProperties;
  * Abstract class providing information about an assignment.
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // for serialization libs like jackson
 public abstract class AbstractAssignmentEvent extends RemoteTenantAwareEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final Map<String, ActionProperties> actions = new HashMap<>();
-
-    /**
-     * Default constructor.
-     */
-    protected AbstractAssignmentEvent() {
-        // for serialization libs like jackson
-    }
 
     protected AbstractAssignmentEvent(final Object source, final Action a, final String applicationId) {
         super(source, a.getTenant(), applicationId);

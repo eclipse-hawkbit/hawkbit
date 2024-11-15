@@ -12,6 +12,4 @@ package org.eclipse.hawkbit.repository.event.entity;
 /**
  * Marker interface to indicate event has deleted an entity.
  */
-public interface EntityDeletedEvent extends EntityIdEvent {
-
-}
+public interface EntityDeletedEvent extends EntityIdEvent {}

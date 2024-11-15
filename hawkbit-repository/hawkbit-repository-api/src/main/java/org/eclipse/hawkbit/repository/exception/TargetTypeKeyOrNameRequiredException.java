@@ -21,6 +21,7 @@ public class TargetTypeKeyOrNameRequiredException extends AbstractServerRtExcept
 
     @Serial
     private static final long serialVersionUID = 1L;
+
     private static final SpServerError THIS_ERROR = SpServerError.SP_TARGET_TYPE_KEY_OR_NAME_REQUIRED;
 
     /**

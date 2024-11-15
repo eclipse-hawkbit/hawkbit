@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import java.io.Serial;
 import java.util.List;
 
 import lombok.AccessLevel;
@@ -25,6 +26,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class MultiActionAssignEvent extends MultiActionEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

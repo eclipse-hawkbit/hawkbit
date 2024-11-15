@@ -12,8 +12,7 @@ package org.eclipse.hawkbit.repository.event;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * ApplicationEventFilter for hawkBit internal {@link ApplicationEvent}
- * publishing.
+ * ApplicationEventFilter for hawkBit internal {@link ApplicationEvent} publishing.
  */
 @FunctionalInterface
 public interface ApplicationEventFilter {

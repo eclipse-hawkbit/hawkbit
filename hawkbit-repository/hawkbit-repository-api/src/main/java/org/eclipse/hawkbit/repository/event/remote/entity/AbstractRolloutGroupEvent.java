@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.io.Serial;
 import java.util.Objects;
 
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -18,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
  */
 public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<RolloutGroup> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final Long rolloutId;

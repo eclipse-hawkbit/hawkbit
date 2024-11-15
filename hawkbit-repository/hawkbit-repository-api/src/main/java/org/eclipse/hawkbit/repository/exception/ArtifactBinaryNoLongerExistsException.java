@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -19,12 +21,10 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
  */
 public class ArtifactBinaryNoLongerExistsException extends AbstractServerRtException {
 
-    private static final SpServerError THIS_ERROR = SpServerError.SP_ARTIFACT_BINARY_DELETED;
-
-    /**
-     *
-     */
+    @Serial
     private static final long serialVersionUID = 1L;
+
+    private static final SpServerError THIS_ERROR = SpServerError.SP_ARTIFACT_BINARY_DELETED;
 
     /**
      * Creates a new ArtifactBinaryGoneException error.

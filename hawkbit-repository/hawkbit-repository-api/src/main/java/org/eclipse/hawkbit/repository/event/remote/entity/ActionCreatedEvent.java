@@ -9,22 +9,21 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.io.Serial;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 
 /**
  * Defines the remote event of creating a new {@link Action}.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
 public class ActionCreatedEvent extends AbstractActionEvent implements EntityCreatedEvent {
 
+    @Serial
     private static final long serialVersionUID = 2L;
-
-    /**
-     * Default constructor.
-     */
-    public ActionCreatedEvent() {
-        // for serialization libs like jackson
-    }
 
     /**
      * Constructor
@@ -35,9 +34,8 @@ public class ActionCreatedEvent extends AbstractActionEvent implements EntityCre
      * @param rolloutGroupId rollout group identifier (optional)
      * @param applicationId the origin application id
      */
-    public ActionCreatedEvent(final Action action, final Long targetId, final Long rolloutId, final Long rolloutGroupId,
-            final String applicationId) {
+    public ActionCreatedEvent(
+            final Action action, final Long targetId, final Long rolloutId, final Long rolloutGroupId, final String applicationId) {
         super(action, targetId, rolloutId, rolloutGroupId, applicationId);
     }
-
 }

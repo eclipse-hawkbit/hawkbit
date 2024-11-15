@@ -9,18 +9,17 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * Thrown when force quitting an actions is not allowed. e.g. the action is not
- * active or it is not canceled before.
+ * Thrown when force quitting an actions is not allowed. e.g. the action is not active, or it is not canceled before.
  */
 public final class ForceQuitActionNotAllowedException extends AbstractServerRtException {
 
-    /**
-     *
-     */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

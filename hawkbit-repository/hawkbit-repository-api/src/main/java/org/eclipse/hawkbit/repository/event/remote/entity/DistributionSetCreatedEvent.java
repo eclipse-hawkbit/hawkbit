@@ -9,22 +9,21 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.io.Serial;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 /**
- * Defines the the remote of creating a new {@link DistributionSet}.
+ * Defines the remote of creating a new {@link DistributionSet}.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
 public class DistributionSetCreatedEvent extends RemoteEntityEvent<DistributionSet> implements EntityCreatedEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Default constructor.
-     */
-    public DistributionSetCreatedEvent() {
-        // for serialization libs like jackson
-    }
 
     /**
      * Constructor.
@@ -35,5 +34,4 @@ public class DistributionSetCreatedEvent extends RemoteEntityEvent<DistributionS
     public DistributionSetCreatedEvent(final DistributionSet distributionSet, final String applicationId) {
         super(distributionSet, applicationId);
     }
-
 }

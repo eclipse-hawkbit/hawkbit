@@ -9,22 +9,21 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.io.Serial;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * Defines the remote event for updating a {@link Target}.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
 public class TargetUpdatedEvent extends RemoteEntityEvent<Target> implements EntityUpdatedEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Default constructor.
-     */
-    public TargetUpdatedEvent() {
-        // for serialization libs like jackson
-    }
 
     /**
      * Constructor.
@@ -35,5 +34,4 @@ public class TargetUpdatedEvent extends RemoteEntityEvent<Target> implements Ent
     public TargetUpdatedEvent(final Target baseEntity, final String applicationId) {
         super(baseEntity, applicationId);
     }
-
 }

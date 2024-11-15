@@ -11,8 +11,10 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import java.io.Serial;
 
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
@@ -20,6 +22,7 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 /**
  * Defines the remote event of triggering attribute updates of a {@link Target}.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -30,13 +33,6 @@ public class TargetAttributesRequestedEvent extends RemoteIdEvent {
 
     private String controllerId;
     private String targetAddress;
-
-    /**
-     * Default constructor.
-     */
-    public TargetAttributesRequestedEvent() {
-        // for serialization libs like jackson
-    }
 
     /**
      * Constructor json serialization
