@@ -86,7 +86,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @NotNull
     private DistributionSetType type;
 
-    @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE })
+    @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
     @JoinTable(
             name = "sp_ds_module",
             joinColumns = {
@@ -99,7 +99,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
     private Set<SoftwareModule> modules;
 
-    @ManyToMany(cascade = { CascadeType.REMOVE }, targetEntity = JpaDistributionSetTag.class)
+    @ManyToMany(targetEntity = JpaDistributionSetTag.class)
     @JoinTable(
             name = "sp_ds_dstag",
             joinColumns = {

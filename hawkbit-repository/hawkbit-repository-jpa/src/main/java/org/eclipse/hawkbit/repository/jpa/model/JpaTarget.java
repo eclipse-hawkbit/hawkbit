@@ -151,7 +151,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @JoinColumn(name = "target_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_relation_target_type"))
     private TargetType targetType;
 
-    @ManyToMany(cascade = { CascadeType.REMOVE }, targetEntity = JpaTargetTag.class)
+    @ManyToMany(targetEntity = JpaTargetTag.class)
     @JoinTable(
             name = "sp_target_target_tag",
             joinColumns = {
