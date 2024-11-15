@@ -23,6 +23,8 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -48,6 +50,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
+import org.eclipse.hawkbit.repository.jpa.utils.MapAttributeConverter;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -61,9 +64,6 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.persistence.annotations.ConversionValue;
-import org.eclipse.persistence.annotations.Convert;
-import org.eclipse.persistence.annotations.ObjectTypeConverter;
 
 /**
  * JPA implementation of {@link Target}.
@@ -119,14 +119,21 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @Column(name = "install_date")
     private Long installationDate;
 
+    @Converter
+    public static class TargetUpdateStatusConverter extends MapAttributeConverter<TargetUpdateStatus, Integer> {
+
+        public TargetUpdateStatusConverter() {
+            super(Map.of(
+                    TargetUpdateStatus.UNKNOWN, 0,
+                    TargetUpdateStatus.IN_SYNC, 1,
+                    TargetUpdateStatus.PENDING, 2,
+                    TargetUpdateStatus.ERROR, 3,
+                    TargetUpdateStatus.REGISTERED, 4
+            ));
+        }
+    }
     @Column(name = "update_status", nullable = false)
-    @ObjectTypeConverter(name = "updateStatus", objectType = TargetUpdateStatus.class, dataType = Integer.class, conversionValues = {
-            @ConversionValue(objectValue = "UNKNOWN", dataValue = "0"),
-            @ConversionValue(objectValue = "IN_SYNC", dataValue = "1"),
-            @ConversionValue(objectValue = "PENDING", dataValue = "2"),
-            @ConversionValue(objectValue = "ERROR", dataValue = "3"),
-            @ConversionValue(objectValue = "REGISTERED", dataValue = "4") })
-    @Convert("updateStatus")
+    @Convert(converter = TargetUpdateStatusConverter.class)
     @NotNull
     private TargetUpdateStatus updateStatus = TargetUpdateStatus.UNKNOWN;
 

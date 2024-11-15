@@ -53,6 +53,7 @@ class ActionTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Tests the action type mapping.")
     void testActionTypeConvert() {
         final long id = createAction().getId();
         for (final ActionType actionType : ActionType.values()) {
@@ -66,6 +67,7 @@ class ActionTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Tests the status mapping.")
     void testStatusConvert() {
         final long id = createAction().getId();
         for (final Status status : Status.values()) {
@@ -79,6 +81,7 @@ class ActionTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Tests the action status status mapping.")
     void testActionsStatusStatusConvert() {
         for (final Status status : Status.values()) {
             final long id = createAction().getId();
