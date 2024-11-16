@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
 import java.util.Optional;
 
 import jakarta.persistence.Column;
@@ -37,14 +38,14 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
  * Stored target filter.
  */
 @Entity
-@Table(name = "sp_target_filter_query", uniqueConstraints = @UniqueConstraint(columnNames = { "name",
-        "tenant" }, name = "uk_tenant_custom_filter_name"))
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+@Table(
+        name = "sp_target_filter_query",
+        uniqueConstraints = @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_tenant_custom_filter_name"))
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
-        implements TargetFilterQuery, EventAwareEntity {
+public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity implements TargetFilterQuery, EventAwareEntity {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Column(name = "name", length = NamedEntity.NAME_MAX_SIZE, nullable = false)
