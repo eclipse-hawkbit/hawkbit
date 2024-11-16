@@ -24,8 +24,7 @@ import org.springframework.cache.CacheManager;
  * {@link TenantAware#getCurrentTenant()} when accessing a cache, so caches are
  * seperated.
  *
- * Additionally it also provide functionality to retrieve all caches overall
- * tenants at once, for monitoring and system access.
+ * Additionally, it also provides functionality to retrieve all caches overall tenants at once, for monitoring and system access.
  */
 public class TenantAwareCacheManager implements TenancyCacheManager {
 
@@ -41,41 +40,28 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
      * @param tenantAware the tenant aware to retrieve the current tenant
      */
     public TenantAwareCacheManager(final CacheManager delegate, final TenantAware tenantAware) {
-        this.tenantAware = tenantAware;
         this.delegate = delegate;
+        this.tenantAware = tenantAware;
     }
 
     @Override
     public Cache getCache(final String name) {
-        String currentTenant = tenantAware.getCurrentTenant();
+        final String currentTenant = tenantAware.getCurrentTenant();
         if (isTenantInvalid(currentTenant)) {
             return null;
         }
 
-        currentTenant = currentTenant.toUpperCase();
-
-        return delegate.getCache(buildKey(currentTenant, name));
+        return delegate.getCache(buildKey(currentTenant.toUpperCase(), name));
     }
 
     @Override
     public Collection<String> getCacheNames() {
-        String currentTenant = tenantAware.getCurrentTenant();
+        final String currentTenant = tenantAware.getCurrentTenant();
         if (isTenantInvalid(currentTenant)) {
             return Collections.emptyList();
         }
 
-        currentTenant = currentTenant.toUpperCase();
-
-        return getCacheNames(currentTenant);
-    }
-
-    /**
-     * A direct-access for retrieving all cache names overall tenants.
-     *
-     * @return all cache names without tenant check
-     */
-    public Collection<String> getDirectCacheNames() {
-        return delegate.getCacheNames();
+        return getCacheNames(currentTenant.toUpperCase());
     }
 
     @Override
@@ -86,6 +72,15 @@ public class TenantAwareCacheManager implements TenancyCacheManager {
     @Override
     public void evictCaches(final String tenant) {
         getCacheNames(tenant).forEach(cacheName -> delegate.getCache(buildKey(tenant, cacheName)).clear());
+    }
+
+    /**
+     * A direct-access for retrieving all cache names overall tenants.
+     *
+     * @return all cache names without tenant check
+     */
+    public Collection<String> getDirectCacheNames() {
+        return delegate.getCacheNames();
     }
 
     private static boolean isTenantInvalid(final String tenant) {

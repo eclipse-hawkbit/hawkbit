@@ -26,9 +26,8 @@ public interface FieldValueConverter<T extends Enum<T>> {
      *
      * @param e the enum to build the value for
      * @param value the value in string representation
-     * @return the converted object or {@code null} if conversation fails, if
-     *         given enum does not need to be converted the the unmodified
-     *         {@code value} is returned.
+     * @return the converted object or {@code null} if conversation fails, if given enum does not need to be converted the
+     *         unmodified {@code value} is returned.
      */
     Object convertValue(final T e, final String value);
 

@@ -57,8 +57,8 @@ import org.springframework.util.CollectionUtils;
 public class SecurityAutoConfiguration {
 
     /**
-     * Creates a {@link ContextAware} (hence {@link TenantAware}) bean based on the given
-     * {@link UserAuthoritiesResolver} and {@link SecurityContextSerializer}.
+     * Creates a {@link ContextAware} (hence {@link TenantAware}) bean based on the given {@link UserAuthoritiesResolver} and
+     * {@link SecurityContextSerializer}.
      *
      * @param authoritiesResolver The user authorities/roles resolver
      * @param securityContextSerializer The security context serializer.
@@ -73,8 +73,7 @@ public class SecurityAutoConfiguration {
     }
 
     /**
-     * Creates a {@link UserAuthoritiesResolver} bean that is responsible for
-     * resolving user authorities/roles.
+     * Creates a {@link UserAuthoritiesResolver} bean that is responsible for resolving user authorities/roles.
      *
      * @param securityProperties The Spring {@link SecurityProperties} for the security user
      * @param tenantAwareUserProperties The {@link TenantAwareUserProperties} for the managed users
@@ -82,7 +81,8 @@ public class SecurityAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public UserAuthoritiesResolver inMemoryAuthoritiesResolver(final SecurityProperties securityProperties,
+    public UserAuthoritiesResolver inMemoryAuthoritiesResolver(
+            final SecurityProperties securityProperties,
             final TenantAwareUserProperties tenantAwareUserProperties) {
         final Map<String, User> tenantAwareUsers = tenantAwareUserProperties.getUser();
         final Map<String, List<String>> usersToPermissions;
@@ -113,8 +113,7 @@ public class SecurityAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public SystemSecurityContext systemSecurityContext(
-            final TenantAware tenantAware, final RoleHierarchy roleHierarchy) {
+    public SystemSecurityContext systemSecurityContext(final TenantAware tenantAware, final RoleHierarchy roleHierarchy) {
         return new SystemSecurityContext(tenantAware, roleHierarchy);
     }
 

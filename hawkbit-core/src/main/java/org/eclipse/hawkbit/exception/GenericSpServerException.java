@@ -12,9 +12,8 @@ package org.eclipse.hawkbit.exception;
 import java.io.Serial;
 
 /**
- * {@link GenericSpServerException} is thrown when a given entity in's actual
- * and cannot be stored within the current session. Reason could be that it has
- * been changed within another session.
+ * {@link GenericSpServerException} is thrown when a given entity in's actual and cannot be stored within the current session. Reason could be
+ * that it has been changed within another session.
  */
 public class GenericSpServerException extends AbstractServerRtException {
 

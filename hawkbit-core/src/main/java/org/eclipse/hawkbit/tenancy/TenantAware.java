@@ -15,8 +15,7 @@ package org.eclipse.hawkbit.tenancy;
 public interface TenantAware {
 
     /**
-     * Implementation might retrieve the current tenant from a session or
-     * thread-local.
+     * Implementation might retrieve the current tenant from a session or thread-local.
      *
      * @return the current tenant
      */
@@ -28,11 +27,9 @@ public interface TenantAware {
     String getCurrentUsername();
 
     /**
-     * Gives the possibility to run a certain code under a specific given
-     * {@code tenant}. Only the given {@link TenantRunner} is executed under the
-     * specific tenant e.g. under control of an {@link ThreadLocal}. After the
-     * {@link TenantRunner} it must be ensured that the original tenant before
-     * this invocation is reset.
+     * Gives the possibility to run a certain code under a specific given {@code tenant}. Only the given {@link TenantRunner} is executed
+     * under the specific tenant e.g. under control of an {@link ThreadLocal}. After the {@link TenantRunner} it must be ensured that the
+     * original tenant before this invocation is reset.
      *
      * @param tenant the tenant which the specific code should run
      * @param tenantRunner the runner which is implemented to run this specific code
