@@ -20,18 +20,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
 /**
  * New update actions require confirmation when confirmation flow is switched on. This is the feedback channel for
  * confirmation messages for DDI API. The confirmation message has a mandatory field confirmation with possible values:
  * "confirmed" and "denied".
  */
-@Getter
-@EqualsAndHashCode
-@ToString
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiConfirmationFeedback {
 
@@ -39,13 +35,15 @@ public class DdiConfirmationFeedback {
     @Valid
     @Schema(description = "Action confirmation state")
     private final Confirmation confirmation;
+
     @Schema(description = "(Optional) Individual status code", example = "200")
     private final Integer code;
+
     @Schema(description = "List of detailed message information", example = "[ \"Feedback message\" ]")
     private final List<String> details;
 
     /**
-     * Constructs an confirmation-feedback
+     * Constructs a confirmation-feedback
      *
      * @param confirmation confirmation value for the action. Valid values are "Confirmed" and "Denied
      * @param code code for confirmation

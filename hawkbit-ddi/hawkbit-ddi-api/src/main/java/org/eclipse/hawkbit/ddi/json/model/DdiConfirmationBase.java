@@ -58,11 +58,6 @@ public class DdiConfirmationBase extends RepresentationModel<DdiConfirmationBase
     @NotNull
     private DdiAutoConfirmationState autoConfirm;
 
-    /**
-     * Constructor.
-     *
-     * @param autoConfirmState
-     */
     public DdiConfirmationBase(final DdiAutoConfirmationState autoConfirmState) {
         this.autoConfirm = autoConfirmState;
     }

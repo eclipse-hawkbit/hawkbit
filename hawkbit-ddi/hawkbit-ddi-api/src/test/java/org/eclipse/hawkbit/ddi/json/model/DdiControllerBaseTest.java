@@ -29,22 +29,19 @@ import org.junit.jupiter.api.Test;
 @Story("Serializability of DDI api Models")
 public class DdiControllerBaseTest {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
     public void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
-        // Setup
-        DdiPolling ddiPolling = new DdiPolling("10");
-        DdiConfig ddiConfig = new DdiConfig(ddiPolling);
-        DdiControllerBase ddiControllerBase = new DdiControllerBase(ddiConfig);
+        final DdiPolling ddiPolling = new DdiPolling("10");
+        final DdiConfig ddiConfig = new DdiConfig(ddiPolling);
+        final DdiControllerBase ddiControllerBase = new DdiControllerBase(ddiConfig);
 
         // Test
-        String serializedDdiControllerBase = mapper.writeValueAsString(ddiControllerBase);
-        DdiControllerBase deserializedDdiControllerBase = mapper.readValue(serializedDdiControllerBase,
-                DdiControllerBase.class);
-
+        final String serializedDdiControllerBase = OBJECT_MAPPER.writeValueAsString(ddiControllerBase);
+        final DdiControllerBase deserializedDdiControllerBase = OBJECT_MAPPER.readValue(serializedDdiControllerBase, DdiControllerBase.class);
         assertThat(serializedDdiControllerBase).contains(ddiPolling.getSleep());
         assertThat(deserializedDdiControllerBase.getConfig().getPolling().getSleep()).isEqualTo(ddiPolling.getSleep());
     }
@@ -53,11 +50,10 @@ public class DdiControllerBaseTest {
     @Description("Verify the correct deserialization of a model with a additional unknown property")
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
-        String serializedDdiControllerBase = "{\"config\":{\"polling\":{\"sleep\":\"123\"}},\"links\":[],\"unknownProperty\":\"test\"}";
+        final String serializedDdiControllerBase = "{\"config\":{\"polling\":{\"sleep\":\"123\"}},\"links\":[],\"unknownProperty\":\"test\"}";
 
         // Test
-        DdiControllerBase ddiControllerBase = mapper.readValue(serializedDdiControllerBase, DdiControllerBase.class);
-
+        final DdiControllerBase ddiControllerBase = OBJECT_MAPPER.readValue(serializedDdiControllerBase, DdiControllerBase.class);
         assertThat(ddiControllerBase.getConfig().getPolling().getSleep()).isEqualTo("123");
     }
 
@@ -65,10 +61,10 @@ public class DdiControllerBaseTest {
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
-        String serializedDdiControllerBase = "{\"config\":{\"polling\":{\"sleep\":[\"123\"]}},\"links\":[],\"unknownProperty\":\"test\"}";
+        final String serializedDdiControllerBase = "{\"config\":{\"polling\":{\"sleep\":[\"123\"]}},\"links\":[],\"unknownProperty\":\"test\"}";
 
         // Test
-        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
-                () -> mapper.readValue(serializedDdiControllerBase, DdiControllerBase.class));
+        assertThatExceptionOfType(MismatchedInputException.class)
+                .isThrownBy(() -> OBJECT_MAPPER.readValue(serializedDdiControllerBase, DdiControllerBase.class));
     }
 }

@@ -17,16 +17,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
 /**
  * Feedback channel for ConfigData action.
  */
-@Getter
-@EqualsAndHashCode
-@ToString
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(example = """
         {

@@ -29,18 +29,17 @@ import org.junit.jupiter.api.Test;
 @Story("Serializability of DDI api Models")
 public class DdiPollingTest {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
     public void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
-        DdiPolling ddiPolling = new DdiPolling("10");
+        final DdiPolling ddiPolling = new DdiPolling("10");
 
         // Test
-        String serializedDdiPolling = mapper.writeValueAsString(ddiPolling);
-        DdiPolling deserializedDdiPolling = mapper.readValue(serializedDdiPolling, DdiPolling.class);
-
+        final String serializedDdiPolling = OBJECT_MAPPER.writeValueAsString(ddiPolling);
+        final DdiPolling deserializedDdiPolling = OBJECT_MAPPER.readValue(serializedDdiPolling, DdiPolling.class);
         assertThat(serializedDdiPolling).contains(ddiPolling.getSleep());
         assertThat(deserializedDdiPolling.getSleep()).isEqualTo(ddiPolling.getSleep());
     }
@@ -49,11 +48,10 @@ public class DdiPollingTest {
     @Description("Verify the correct deserialization of a model with a additional unknown property")
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
-        String serializedDdiPolling = "{\"sleep\":\"10\",\"unknownProperty\":\"test\"}";
+        final String serializedDdiPolling = "{\"sleep\":\"10\",\"unknownProperty\":\"test\"}";
 
         // Test
-        DdiPolling ddiPolling = mapper.readValue(serializedDdiPolling, DdiPolling.class);
-
+        final DdiPolling ddiPolling = OBJECT_MAPPER.readValue(serializedDdiPolling, DdiPolling.class);
         assertThat(ddiPolling.getSleep()).isEqualTo("10");
     }
 
@@ -61,10 +59,10 @@ public class DdiPollingTest {
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
-        String serializedDdiPolling = "{\"sleep\":[\"10\"]}";
+        final String serializedDdiPolling = "{\"sleep\":[\"10\"]}";
 
         // Test
-        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
-                () -> mapper.readValue(serializedDdiPolling, DdiPolling.class));
+        assertThatExceptionOfType(MismatchedInputException.class)
+                .isThrownBy(() -> OBJECT_MAPPER.readValue(serializedDdiPolling, DdiPolling.class));
     }
 }

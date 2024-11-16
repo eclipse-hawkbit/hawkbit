@@ -39,14 +39,17 @@ public class DdiDeployment {
             Handling for the download part of the provisioning process ('skip': do not download yet, 'attempt': server asks
             to download, 'forced': server requests immediate download)""")
     private HandlingType download;
+
     @Schema(description = """
             Handling for the update part of the provisioning process ('skip': do not update yet,
             'attempt': server asks to update, 'forced': server requests immediate update)""")
     private HandlingType update;
+
     @JsonProperty("chunks")
     @NotNull
     @Schema(description = "Software chunks of an update. In server mapped by Software Module")
     private List<DdiChunk> chunks;
+
     @Schema(description = """
             Separation of download and installation by defining a maintenance window for the installation. Status shows if
             currently in a window""")
@@ -59,14 +62,12 @@ public class DdiDeployment {
      * @param update handling type
      * @param chunks to handle.
      * @param maintenanceWindow specifying whether there is a maintenance schedule associated.
-     *         If it is, the value is either 'available' (i.e. the
-     *         maintenance window is now available as per defined schedule
-     *         and the update can progress) or 'unavailable' (implying that
-     *         maintenance window is not available now and update should not
-     *         be attempted). If there is no maintenance schedule defined,
-     *         the parameter is null.
+     *         If it is, the value is either 'available' (i.e. the maintenance window is now available as per defined schedule
+     *         and the update can progress) or 'unavailable' (implying that maintenance window is not available now and update should not
+     *         be attempted). If there is no maintenance schedule defined, the parameter is null.
      */
-    public DdiDeployment(final HandlingType download, final HandlingType update, final List<DdiChunk> chunks,
+    public DdiDeployment(
+            final HandlingType download, final HandlingType update, final List<DdiChunk> chunks,
             final DdiMaintenanceWindowStatus maintenanceWindow) {
         this.download = download;
         this.update = update;

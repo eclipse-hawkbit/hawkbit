@@ -36,24 +36,21 @@ import org.junit.jupiter.params.provider.MethodSource;
 @Story("Serializability of DDI api Models")
 public class DdiStatusTest {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @ParameterizedTest
     @MethodSource("ddiStatusPossibilities")
     @Description("Verify the correct serialization and deserialization of the model")
     public void shouldSerializeAndDeserializeObject(final DdiResult ddiResult, final DdiStatus ddiStatus) throws IOException {
         // Test
-        String serializedDdiStatus = mapper.writeValueAsString(ddiStatus);
-        DdiStatus deserializedDdiStatus = mapper.readValue(serializedDdiStatus, DdiStatus.class);
-
+        final String serializedDdiStatus = OBJECT_MAPPER.writeValueAsString(ddiStatus);
+        final DdiStatus deserializedDdiStatus = OBJECT_MAPPER.readValue(serializedDdiStatus, DdiStatus.class);
         assertThat(serializedDdiStatus).contains(ddiStatus.getExecution().getName(), ddiResult.getFinished().getName(),
                 ddiResult.getProgress().getCnt().toString(), ddiResult.getProgress().getOf().toString());
         assertThat(deserializedDdiStatus.getExecution()).isEqualTo(ddiStatus.getExecution());
         assertThat(deserializedDdiStatus.getResult().getFinished()).isEqualTo(ddiStatus.getResult().getFinished());
-        assertThat(deserializedDdiStatus.getResult().getProgress().getCnt()).isEqualTo(
-                ddiStatus.getResult().getProgress().getCnt());
-        assertThat(deserializedDdiStatus.getResult().getProgress().getOf()).isEqualTo(
-                ddiStatus.getResult().getProgress().getOf());
+        assertThat(deserializedDdiStatus.getResult().getProgress().getCnt()).isEqualTo(ddiStatus.getResult().getProgress().getCnt());
+        assertThat(deserializedDdiStatus.getResult().getProgress().getOf()).isEqualTo(ddiStatus.getResult().getProgress().getOf());
         assertThat(deserializedDdiStatus.getDetails()).isEqualTo(ddiStatus.getDetails());
     }
 
@@ -61,12 +58,11 @@ public class DdiStatusTest {
     @Description("Verify the correct deserialization of a model with a additional unknown property")
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
-        final String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\","
-                + "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[],\"unknownProperty\":\"test\"}";
+        final String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\"," +
+                "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[],\"unknownProperty\":\"test\"}";
 
         // Test
-        final DdiStatus ddiStatus = mapper.readValue(serializedDdiStatus, DdiStatus.class);
-
+        final DdiStatus ddiStatus = OBJECT_MAPPER.readValue(serializedDdiStatus, DdiStatus.class);
         assertThat(ddiStatus.getExecution()).isEqualTo(PROCEEDING);
         assertThat(ddiStatus.getCode()).isNull();
         assertThat(ddiStatus.getResult().getFinished()).isEqualTo(NONE);
@@ -78,12 +74,11 @@ public class DdiStatusTest {
     @Description("Verify the correct deserialization of a model with a provided code (optional)")
     public void shouldDeserializeObjectWithOptionalCode() throws IOException {
         // Setup
-        String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\","
-                + "\"progress\":{\"cnt\":30,\"of\":100}},\"code\": 12,\"details\":[]}";
+        final String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\"," +
+                "\"progress\":{\"cnt\":30,\"of\":100}},\"code\": 12,\"details\":[]}";
 
         // Test
-        DdiStatus ddiStatus = mapper.readValue(serializedDdiStatus, DdiStatus.class);
-
+        final DdiStatus ddiStatus = OBJECT_MAPPER.readValue(serializedDdiStatus, DdiStatus.class);
         assertThat(ddiStatus.getExecution()).isEqualTo(PROCEEDING);
         assertThat(ddiStatus.getCode()).isEqualTo(12);
         assertThat(ddiStatus.getResult().getFinished()).isEqualTo(NONE);
@@ -95,12 +90,12 @@ public class DdiStatusTest {
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
-        String serializedDdiStatus = "{\"execution\":[\"proceeding\"],\"result\":{\"finished\":\"none\","
-                + "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[]}";
+        final String serializedDdiStatus = "{\"execution\":[\"proceeding\"],\"result\":{\"finished\":\"none\","  +
+                "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[]}";
 
         // Test
-        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
-                () -> mapper.readValue(serializedDdiStatus, DdiStatus.class));
+        assertThatExceptionOfType(MismatchedInputException.class)
+                .isThrownBy(() -> OBJECT_MAPPER.readValue(serializedDdiStatus, DdiStatus.class));
     }
 
     private static Stream<Arguments> ddiStatusPossibilities() {

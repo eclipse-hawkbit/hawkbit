@@ -13,22 +13,18 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
-@Getter
-@EqualsAndHashCode
-@ToString
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiActivateAutoConfirmation {
 
-    @JsonProperty(required = false)
+    @JsonProperty
     @Schema(description = "Individual value (e.g. username) stored as initiator and automatically used as confirmed" +
             " user in future actions", example = "exampleUser")
     private final String initiator;
 
-    @JsonProperty(required = false)
+    @JsonProperty
     @Schema(description = "Individual value to attach a remark which will be persisted when automatically " +
             "confirming future actions", example = "exampleRemark")
     private final String remark;
@@ -40,7 +36,8 @@ public class DdiActivateAutoConfirmation {
      * @param remark can be null
      */
     @JsonCreator
-    public DdiActivateAutoConfirmation(@JsonProperty(value = "initiator") final String initiator,
+    public DdiActivateAutoConfirmation(
+            @JsonProperty(value = "initiator") final String initiator,
             @JsonProperty(value = "remark") final String remark) {
         this.initiator = initiator;
         this.remark = remark;

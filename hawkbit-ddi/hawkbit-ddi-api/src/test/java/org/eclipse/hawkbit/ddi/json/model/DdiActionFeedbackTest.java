@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -39,7 +38,7 @@ class DdiActionFeedbackTest {
     @Description("Verify the correct serialization and deserialization of the model with minimal payload")
     void shouldSerializeAndDeserializeObjectWithoutOptionalValues() throws IOException {
         // Setup
-        final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null, null, Lists.emptyList());
+        final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null, null, Collections.emptyList());
         final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(null, ddiStatus);
 
         // Test
@@ -61,8 +60,7 @@ class DdiActionFeedbackTest {
 
         // Test
         final String serializedDdiActionFeedback = mapper.writeValueAsString(ddiActionFeedback);
-        final DdiActionFeedback deserializedDdiActionFeedback = mapper.readValue(serializedDdiActionFeedback,
-                DdiActionFeedback.class);
+        final DdiActionFeedback deserializedDdiActionFeedback = mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class);
 
         assertThat(serializedDdiActionFeedback).contains(time);
         assertThat(deserializedDdiActionFeedback.getTime()).isEqualTo(time);
@@ -104,5 +102,4 @@ class DdiActionFeedbackTest {
             assertThat(deserializedDdiActionFeedback.getStatus().getDetails()).hasSize(1);
         });
     }
-
 }

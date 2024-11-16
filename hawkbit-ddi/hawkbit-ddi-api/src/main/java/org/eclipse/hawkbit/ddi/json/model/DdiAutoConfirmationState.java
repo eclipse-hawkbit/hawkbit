@@ -33,8 +33,10 @@ public class DdiAutoConfirmationState extends RepresentationModel<DdiAutoConfirm
     @NotNull
     @Schema(example = "true")
     private boolean active;
+
     @Schema(example = "exampleUserId")
     private String initiator;
+
     @Schema(example = "exampleRemark")
     private String remark;
 

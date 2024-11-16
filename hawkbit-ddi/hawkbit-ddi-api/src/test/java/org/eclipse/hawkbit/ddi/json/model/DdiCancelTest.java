@@ -29,20 +29,19 @@ import org.junit.jupiter.api.Test;
 @Story("Serializability of DDI api Models")
 public class DdiCancelTest {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
     public void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
-        String ddiCancelId = "1234";
-        DdiCancelActionToStop ddiCancelActionToStop = new DdiCancelActionToStop("1234");
-        DdiCancel ddiCancel = new DdiCancel(ddiCancelId, ddiCancelActionToStop);
+        final String ddiCancelId = "1234";
+        final DdiCancelActionToStop ddiCancelActionToStop = new DdiCancelActionToStop("1234");
+        final DdiCancel ddiCancel = new DdiCancel(ddiCancelId, ddiCancelActionToStop);
 
         // Test
-        String serializedDdiCancel = mapper.writeValueAsString(ddiCancel);
-        DdiCancel deserializedDdiCancel = mapper.readValue(serializedDdiCancel, DdiCancel.class);
-
+        final String serializedDdiCancel = OBJECT_MAPPER.writeValueAsString(ddiCancel);
+        final DdiCancel deserializedDdiCancel = OBJECT_MAPPER.readValue(serializedDdiCancel, DdiCancel.class);
         assertThat(serializedDdiCancel).contains(ddiCancelId, ddiCancelActionToStop.getStopId());
         assertThat(deserializedDdiCancel.getId()).isEqualTo(ddiCancelId);
         assertThat(deserializedDdiCancel.getCancelAction().getStopId()).isEqualTo(ddiCancelActionToStop.getStopId());
@@ -52,11 +51,10 @@ public class DdiCancelTest {
     @Description("Verify the correct deserialization of a model with a additional unknown property")
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
-        String serializedDdiCancel = "{\"id\":\"1234\",\"cancelAction\":{\"stopId\":\"1234\"}, \"unknownProperty\": \"test\"}";
+        final String serializedDdiCancel = "{\"id\":\"1234\",\"cancelAction\":{\"stopId\":\"1234\"}, \"unknownProperty\": \"test\"}";
 
         // Test
-        DdiCancel ddiCancel = mapper.readValue(serializedDdiCancel, DdiCancel.class);
-
+        final DdiCancel ddiCancel = OBJECT_MAPPER.readValue(serializedDdiCancel, DdiCancel.class);
         assertThat(ddiCancel.getId()).isEqualTo("1234");
         assertThat(ddiCancel.getCancelAction().getStopId()).matches("1234");
     }
@@ -65,10 +63,10 @@ public class DdiCancelTest {
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
-        String serializedDdiCancel = "{\"id\":[\"1234\"],\"cancelAction\":{\"stopId\":\"1234\"}}";
+        final String serializedDdiCancel = "{\"id\":[\"1234\"],\"cancelAction\":{\"stopId\":\"1234\"}}";
 
         // Test
-        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
-                () -> mapper.readValue(serializedDdiCancel, DdiCancel.class));
+        assertThatExceptionOfType(MismatchedInputException.class)
+                .isThrownBy(() -> OBJECT_MAPPER.readValue(serializedDdiCancel, DdiCancel.class));
     }
 }

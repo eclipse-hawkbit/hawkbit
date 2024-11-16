@@ -35,7 +35,7 @@ public enum DdiUpdateMode {
      */
     REMOVE("remove");
 
-    private String name;
+    private final String name;
 
     DdiUpdateMode(final String name) {
         this.name = name;

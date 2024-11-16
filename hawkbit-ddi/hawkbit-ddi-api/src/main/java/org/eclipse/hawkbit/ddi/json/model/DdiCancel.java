@@ -15,16 +15,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
 /**
  * Cancel action to be provided to the target.
  */
-@Getter
-@EqualsAndHashCode
-@ToString
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiCancel {
 
@@ -42,7 +38,8 @@ public class DdiCancel {
      * @param cancelAction the action
      */
     @JsonCreator
-    public DdiCancel(@JsonProperty("id") final String id,
+    public DdiCancel(
+            @JsonProperty("id") final String id,
             @JsonProperty("cancelAction") final DdiCancelActionToStop cancelAction) {
         this.id = id;
         this.cancelAction = cancelAction;

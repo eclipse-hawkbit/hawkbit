@@ -29,22 +29,20 @@ import org.junit.jupiter.api.Test;
 @Story("Serializability of DDI api Models")
 public class DdiArtifactHashTest {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
     public void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
-        String sha1Hash = "11111";
-        String md5Hash = "22222";
-        String sha256Hash = "33333";
-        DdiArtifactHash DdiArtifact = new DdiArtifactHash(sha1Hash, md5Hash, sha256Hash);
+        final String sha1Hash = "11111";
+        final String md5Hash = "22222";
+        final String sha256Hash = "33333";
+        final DdiArtifactHash DdiArtifact = new DdiArtifactHash(sha1Hash, md5Hash, sha256Hash);
 
         // Test
-        String serializedDdiArtifact = mapper.writeValueAsString(DdiArtifact);
-        DdiArtifactHash deserializedDdiArtifact = mapper.readValue(serializedDdiArtifact,
-                DdiArtifactHash.class);
-
+        final String serializedDdiArtifact = OBJECT_MAPPER.writeValueAsString(DdiArtifact);
+        final DdiArtifactHash deserializedDdiArtifact = OBJECT_MAPPER.readValue(serializedDdiArtifact, DdiArtifactHash.class);
         assertThat(serializedDdiArtifact).contains(sha1Hash, md5Hash, sha256Hash);
         assertThat(deserializedDdiArtifact.getSha1()).isEqualTo(sha1Hash);
         assertThat(deserializedDdiArtifact.getMd5()).isEqualTo(md5Hash);
@@ -55,11 +53,10 @@ public class DdiArtifactHashTest {
     @Description("Verify the correct deserialization of a model with a additional unknown property")
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
-        String serializedDdiArtifact = "{\"sha1\": \"123\", \"md5\": \"456\",  \"sha256\": \"789\", \"unknownProperty\": \"test\"}";
+        final String serializedDdiArtifact = "{\"sha1\": \"123\", \"md5\": \"456\",  \"sha256\": \"789\", \"unknownProperty\": \"test\"}";
 
         // Test
-        DdiArtifactHash ddiArtifact = mapper.readValue(serializedDdiArtifact, DdiArtifactHash.class);
-
+        final DdiArtifactHash ddiArtifact = OBJECT_MAPPER.readValue(serializedDdiArtifact, DdiArtifactHash.class);
         assertThat(ddiArtifact.getSha1()).isEqualTo("123");
         assertThat(ddiArtifact.getMd5()).isEqualTo("456");
         assertThat(ddiArtifact.getSha256()).isEqualTo("789");
@@ -69,11 +66,10 @@ public class DdiArtifactHashTest {
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
-        String serializedDdiArtifact = "{\"sha1\": [123], \"md5\": 456, \"sha256\": \"789\"";
+        final String serializedDdiArtifact = "{\"sha1\": [123], \"md5\": 456, \"sha256\": \"789\"";
 
         // Test
-        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
-                () -> mapper.readValue(serializedDdiArtifact, DdiArtifactHash.class));
+        assertThatExceptionOfType(MismatchedInputException.class)
+                .isThrownBy(() -> OBJECT_MAPPER.readValue(serializedDdiArtifact, DdiArtifactHash.class));
     }
-
 }

@@ -43,9 +43,7 @@ public class DdiActionHistoryTest {
 
         // Test
         final String serializedDdiActionHistory = OBJECT_MAPPER.writeValueAsString(ddiActionHistory);
-        final DdiActionHistory deserializedDdiActionHistory = OBJECT_MAPPER.readValue(serializedDdiActionHistory,
-                DdiActionHistory.class);
-
+        final DdiActionHistory deserializedDdiActionHistory = OBJECT_MAPPER.readValue(serializedDdiActionHistory, DdiActionHistory.class);
         assertThat(serializedDdiActionHistory).contains(actionStatus, messages.get(0), messages.get(1));
         assertThat(deserializedDdiActionHistory.toString()).contains(actionStatus, messages.get(0), messages.get(1));
     }
@@ -63,7 +61,6 @@ public class DdiActionHistoryTest {
 
         // Test
         final DdiActionHistory ddiActionHistory = OBJECT_MAPPER.readValue(serializedDdiActionHistory, DdiActionHistory.class);
-
         assertThat(ddiActionHistory.toString()).contains("SomeAction", "Some message");
     }
 
