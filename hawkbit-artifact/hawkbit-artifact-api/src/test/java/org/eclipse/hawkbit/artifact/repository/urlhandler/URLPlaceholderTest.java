@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.URLPlaceholder;
 import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Artifact URL Handler")
@@ -31,10 +30,8 @@ class URLPlaceholderTest {
 
     @Test
     @Description("Same object should be equal")
-    // Exception squid:S5785 - JUnit assertTrue/assertFalse should be simplified to
-    // the corresponding dedicated assertion
-    // Need to test the equals method and need to bypass magic logic in utility
-    // classes
+    // Exception squid:S5785 - JUnit assertTrue/assertFalse should be simplified to the corresponding dedicated assertion
+    // Need to test the equals method and need to bypass magic logic in utility classes
     @SuppressWarnings({ "squid:S5838" })
     void sameObjectShouldBeEqual() {
         assertThat(softwareData.equals(softwareData)).isTrue();

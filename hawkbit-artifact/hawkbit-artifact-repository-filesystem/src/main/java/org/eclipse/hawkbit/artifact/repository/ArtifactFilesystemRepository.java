@@ -23,13 +23,13 @@ import org.springframework.validation.annotation.Validated;
 /**
  * Implementation of the {@link ArtifactRepository} to store artifacts on the
  * file-system. The files are stored by their SHA1 hash of the artifact binary.
- * Duplicate files with the same SHA1 hash will only stored once.
+ * Duplicate files with the same SHA1 hash will only be stored once.
  *
  * All files are stored flat in one base directory configured in the
  * {@link ArtifactFilesystemProperties#getPath()}.
  *
- * Due the limit of many file-systems of files within one directory, the files
- * are stored in different sub-directories based on the last four digits of the
+ * Due to the limit of many file-systems of files within one directory, the files
+ * are stored in different subdirectories based on the last four digits of the
  * SHA1-hash {@code (/basepath/[two digit sha1]/[two digit sha1])}.
  */
 @Validated
@@ -40,8 +40,7 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
     /**
      * Constructor.
      *
-     * @param artifactResourceProperties the properties which holds the necessary configuration for the
-     *         file-system repository
+     * @param artifactResourceProperties the properties which holds the necessary configuration for the file-system repository
      */
     public ArtifactFilesystemRepository(final ArtifactFilesystemProperties artifactResourceProperties) {
         this.artifactResourceProperties = artifactResourceProperties;
