@@ -16,32 +16,34 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
 /**
  * <p>
- * After the HawkBit Target has executed an action, received by a GET(URL)
- * request it reports the completion of it to the HawkBit Server with a action
- * status message, i.e. with a PUT message to the feedback channel, i.e. PUT
- * URL/feedback. This message could be used not only at the end of execution but
- * also as status updates during a longer lasting execution period. The format
- * of each action answer message is defined below at each action. But it is
- * expected, that the contents of the message answers have all a similar
- * structure: The content starts with a generic header and additional elements.
- * *
+ * After the HawkBit Target has executed an action, received by a GET(URL) request it reports the
+ * completion of it to the HawkBit Server with an action status message, i.e. with a PUT message to the
+ * feedback channel, i.e. PUT URL/feedback.
+ * This message could be used not only at the end of execution but also as status updates during a longer lasting execution period.
+ * The format of each action answer message is defined below at each action. But it is expected, that the contents of the message answers
+ * have all a similar structure:
+ * The content starts with a generic header and additional elements.
  * </p>
  *
  * <p>
- * The answer header would look like: { "time": "20140511T121314", "status": {
- * "execution": "closed", "result": { "final": "success", "progress": {} }
- * "details": [], } }
+ * The answer header would look like: {
+ *   "time": "20140511T121314",
+ *   "status": {
+ *      "execution": "closed",
+ *      "result": {
+ *         "final": "success",
+ *         "progress": {}
+ *      }
+ *      "details": []
+ *   }
+ * }
  * </p>
  */
-@Getter
-@EqualsAndHashCode
-@ToString
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiActionFeedback {
 

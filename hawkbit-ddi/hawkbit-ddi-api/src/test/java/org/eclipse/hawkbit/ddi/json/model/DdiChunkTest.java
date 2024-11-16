@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 @Story("Serializability of DDI api Models")
 public class DdiChunkTest {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
@@ -44,9 +44,8 @@ public class DdiChunkTest {
         final DdiChunk ddiChunk = new DdiChunk(part, version, name, null, dummyArtifacts, null);
 
         // Test
-        final String serializedDdiChunk = mapper.writeValueAsString(ddiChunk);
-        final DdiChunk deserializedDdiChunk = mapper.readValue(serializedDdiChunk, DdiChunk.class);
-
+        final String serializedDdiChunk = OBJECT_MAPPER.writeValueAsString(ddiChunk);
+        final DdiChunk deserializedDdiChunk = OBJECT_MAPPER.readValue(serializedDdiChunk, DdiChunk.class);
         assertThat(serializedDdiChunk).contains(part, version, name);
         assertThat(deserializedDdiChunk.getPart()).isEqualTo(part);
         assertThat(deserializedDdiChunk.getVersion()).isEqualTo(version);
@@ -61,8 +60,7 @@ public class DdiChunkTest {
         final String serializedDdiChunk = "{\"part\":\"1234\",\"version\":\"1.0\",\"name\":\"Dummy-Artifact\",\"artifacts\":[],\"unknownProperty\":\"test\"}";
 
         // Test
-        final DdiChunk ddiChunk = mapper.readValue(serializedDdiChunk, DdiChunk.class);
-
+        final DdiChunk ddiChunk = OBJECT_MAPPER.readValue(serializedDdiChunk, DdiChunk.class);
         assertThat(ddiChunk.getPart()).isEqualTo("1234");
         assertThat(ddiChunk.getVersion()).isEqualTo("1.0");
         assertThat(ddiChunk.getName()).isEqualTo("Dummy-Artifact");
@@ -77,6 +75,6 @@ public class DdiChunkTest {
 
         // Test
         assertThatExceptionOfType(MismatchedInputException.class)
-                .isThrownBy(() -> mapper.readValue(serializedDdiChunk, DdiChunk.class));
+                .isThrownBy(() -> OBJECT_MAPPER.readValue(serializedDdiChunk, DdiChunk.class));
     }
 }

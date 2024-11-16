@@ -14,10 +14,19 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * Polling interval for the SP target.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC)// needed for json create
+@Getter
+@EqualsAndHashCode
+@ToString
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = "Suggested sleep time between polls")
@@ -34,16 +43,5 @@ public class DdiPolling {
      */
     public DdiPolling(final String sleep) {
         this.sleep = sleep;
-    }
-
-    /**
-     * Constructor.
-     */
-    public DdiPolling() {
-        // needed for json create
-    }
-
-    public String getSleep() {
-        return sleep;
     }
 }

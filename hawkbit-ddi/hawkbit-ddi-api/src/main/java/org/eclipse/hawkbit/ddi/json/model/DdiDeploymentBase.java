@@ -222,8 +222,7 @@ public class DdiDeploymentBase extends RepresentationModel<DdiDeploymentBase> {
      *
      * @param id of the update action
      * @param deployment details
-     * @param actionHistory containing current action status and a list of feedback
-     *         messages received earlier from the controller.
+     * @param actionHistory containing current action status and a list of feedback messages received earlier from the controller.
      */
     public DdiDeploymentBase(final String id, final DdiDeployment deployment, final DdiActionHistory actionHistory) {
         this.id = id;

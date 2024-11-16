@@ -29,19 +29,19 @@ import org.junit.jupiter.api.Test;
 @Story("Serializability of DDI api Models")
 public class DdiCancelActionToStopTest {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
     public void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
-        String stopId = "1234";
-        DdiCancelActionToStop ddiCancelActionToStop = new DdiCancelActionToStop(stopId);
-        // Test
-        String serializedDdiCancelActionToStop = mapper.writeValueAsString(ddiCancelActionToStop);
-        DdiCancelActionToStop deserializedDdiCancelActionToStop = mapper.readValue(serializedDdiCancelActionToStop,
-                DdiCancelActionToStop.class);
+        final String stopId = "1234";
+        final DdiCancelActionToStop ddiCancelActionToStop = new DdiCancelActionToStop(stopId);
 
+        // Test
+        final String serializedDdiCancelActionToStop = OBJECT_MAPPER.writeValueAsString(ddiCancelActionToStop);
+        final DdiCancelActionToStop deserializedDdiCancelActionToStop = OBJECT_MAPPER.readValue(
+                serializedDdiCancelActionToStop, DdiCancelActionToStop.class);
         assertThat(serializedDdiCancelActionToStop).contains(stopId);
         assertThat(deserializedDdiCancelActionToStop.getStopId()).isEqualTo(stopId);
     }
@@ -50,12 +50,11 @@ public class DdiCancelActionToStopTest {
     @Description("Verify the correct deserialization of a model with a additional unknown property")
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
-        String serializedDdiCancelActionToStop = "{\"stopId\":\"12345\",\"unknownProperty\":\"test\"}";
+        final String serializedDdiCancelActionToStop = "{\"stopId\":\"12345\",\"unknownProperty\":\"test\"}";
 
         // Test
-        DdiCancelActionToStop ddiCancelActionToStop = mapper.readValue(serializedDdiCancelActionToStop,
-                DdiCancelActionToStop.class);
-
+        final DdiCancelActionToStop ddiCancelActionToStop = OBJECT_MAPPER.readValue(
+                serializedDdiCancelActionToStop, DdiCancelActionToStop.class);
         assertThat(ddiCancelActionToStop.getStopId()).contains("12345");
     }
 
@@ -63,10 +62,10 @@ public class DdiCancelActionToStopTest {
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
-        String serializedDdiCancelActionToStop = "{\"stopId\": [\"12345\"]}";
+        final String serializedDdiCancelActionToStop = "{\"stopId\": [\"12345\"]}";
 
         // Test
-        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
-                () -> mapper.readValue(serializedDdiCancelActionToStop, DdiCancelActionToStop.class));
+        assertThatExceptionOfType(MismatchedInputException.class)
+                .isThrownBy(() -> OBJECT_MAPPER.readValue(serializedDdiCancelActionToStop, DdiCancelActionToStop.class));
     }
 }

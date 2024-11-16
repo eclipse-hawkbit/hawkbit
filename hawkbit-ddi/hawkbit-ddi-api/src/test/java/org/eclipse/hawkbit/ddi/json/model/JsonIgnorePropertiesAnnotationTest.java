@@ -48,8 +48,7 @@ public class JsonIgnorePropertiesAnnotationTest {
                 }
                 final JsonIgnoreProperties annotation = modelClass.getAnnotation(JsonIgnoreProperties.class);
                 assertThat(annotation)
-                        .describedAs(
-                                "Annotation 'JsonIgnoreProperties' is missing for class: " + modelClass.getSimpleName())
+                        .describedAs("Annotation 'JsonIgnoreProperties' is missing for class: " + modelClass.getSimpleName())
                         .isNotNull();
                 assertThat(annotation.ignoreUnknown()).isTrue();
             });

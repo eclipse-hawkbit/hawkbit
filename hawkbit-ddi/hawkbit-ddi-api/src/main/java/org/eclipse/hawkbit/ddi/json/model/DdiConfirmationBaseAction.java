@@ -228,11 +228,9 @@ public class DdiConfirmationBaseAction extends RepresentationModel<DdiConfirmati
      *
      * @param id of the update action
      * @param confirmation chunk details
-     * @param actionHistory containing current action status and a list of feedback messages
-     *         received earlier from the controller.
+     * @param actionHistory containing current action status and a list of feedback messages received earlier from the controller.
      */
-    public DdiConfirmationBaseAction(final String id, final DdiDeployment confirmation,
-            final DdiActionHistory actionHistory) {
+    public DdiConfirmationBaseAction(final String id, final DdiDeployment confirmation, final DdiActionHistory actionHistory) {
         this.id = id;
         this.confirmation = confirmation;
         this.actionHistory = actionHistory;

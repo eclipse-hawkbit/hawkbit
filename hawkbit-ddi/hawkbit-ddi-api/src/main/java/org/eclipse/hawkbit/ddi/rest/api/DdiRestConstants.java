@@ -9,9 +9,13 @@
  */
 package org.eclipse.hawkbit.ddi.rest.api;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * Constants for the direct device integration rest resources.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DdiRestConstants {
 
     /**
@@ -77,8 +81,4 @@ public final class DdiRestConstants {
      * can reuse - even the Jackson data converter simply hardcodes this.
      */
     public static final String MEDIA_TYPE_CBOR = "application/cbor";
-
-    private DdiRestConstants() {
-        // constant class, private constructor.
-    }
 }

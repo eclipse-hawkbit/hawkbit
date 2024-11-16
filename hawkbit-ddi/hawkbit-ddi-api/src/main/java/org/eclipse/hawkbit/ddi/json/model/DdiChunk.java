@@ -73,7 +73,8 @@ public class DdiChunk {
      * @param artifacts download information
      * @param metadata optional as additional information for the target/device
      */
-    public DdiChunk(final String part, final String version, final String name, final Boolean encrypted,
+    public DdiChunk(
+            final String part, final String version, final String name, final Boolean encrypted,
             final List<DdiArtifact> artifacts, final List<DdiMetadata> metadata) {
         this.part = part;
         this.version = version;

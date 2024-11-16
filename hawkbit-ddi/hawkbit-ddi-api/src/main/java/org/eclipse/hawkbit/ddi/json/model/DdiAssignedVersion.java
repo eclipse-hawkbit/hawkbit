@@ -13,10 +13,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
 /**
  * Allow a target to declare running distribution set version
  */
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiAssignedVersion {
 
@@ -33,18 +35,11 @@ public class DdiAssignedVersion {
      * @param version Distribution set version
      */
     @JsonCreator
-    public DdiAssignedVersion(@JsonProperty(value = "name", required = true) String name,
-            @JsonProperty(value = "version", required = true) String version) {
+    public DdiAssignedVersion(
+            @JsonProperty(value = "name", required = true) final String name,
+            @JsonProperty(value = "version", required = true) final String version) {
         this.name = name;
         this.version = version;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getVersion() {
-        return version;
     }
 
     @Override

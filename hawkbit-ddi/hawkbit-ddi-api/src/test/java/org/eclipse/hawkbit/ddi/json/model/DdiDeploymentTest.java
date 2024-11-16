@@ -33,36 +33,33 @@ import org.junit.jupiter.api.Test;
 @Story("Serializability of DDI api Models")
 public class DdiDeploymentTest {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
     public void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
-        DdiDeployment ddiDeployment = new DdiDeployment(FORCED, ATTEMPT, Collections.emptyList(), AVAILABLE);
+        final DdiDeployment ddiDeployment = new DdiDeployment(FORCED, ATTEMPT, Collections.emptyList(), AVAILABLE);
 
         // Test
-        String serializedDdiDeployment = mapper.writeValueAsString(ddiDeployment);
-        DdiDeployment deserializedDdiDeployment = mapper.readValue(serializedDdiDeployment, DdiDeployment.class);
+        final String serializedDdiDeployment = OBJECT_MAPPER.writeValueAsString(ddiDeployment);
+        final DdiDeployment deserializedDdiDeployment = OBJECT_MAPPER.readValue(serializedDdiDeployment, DdiDeployment.class);
 
-        assertThat(serializedDdiDeployment).contains(ddiDeployment.getDownload().getName(),
-                ddiDeployment.getMaintenanceWindow().getStatus());
+        assertThat(serializedDdiDeployment).contains(ddiDeployment.getDownload().getName(), ddiDeployment.getMaintenanceWindow().getStatus());
         assertThat(deserializedDdiDeployment.getDownload().getName()).isEqualTo(ddiDeployment.getDownload().getName());
         assertThat(deserializedDdiDeployment.getUpdate().getName()).isEqualTo(ddiDeployment.getUpdate().getName());
-        assertThat(deserializedDdiDeployment.getMaintenanceWindow().getStatus()).isEqualTo(
-                ddiDeployment.getMaintenanceWindow().getStatus());
+        assertThat(deserializedDdiDeployment.getMaintenanceWindow().getStatus()).isEqualTo(ddiDeployment.getMaintenanceWindow().getStatus());
     }
 
     @Test
     @Description("Verify the correct deserialization of a model with a additional unknown property")
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
-        String serializedDdiDeployment = "{\"download\":\"forced\",\"update\":\"attempt\", "
-                + "\"maintenanceWindow\":\"available\",\"chunks\":[],\"unknownProperty\":\"test\"}";
+        final String serializedDdiDeployment = "{\"download\":\"forced\",\"update\":\"attempt\", " +
+                "\"maintenanceWindow\":\"available\",\"chunks\":[],\"unknownProperty\":\"test\"}";
 
         // Test
-        DdiDeployment ddiDeployment = mapper.readValue(serializedDdiDeployment, DdiDeployment.class);
-
+        final DdiDeployment ddiDeployment = OBJECT_MAPPER.readValue(serializedDdiDeployment, DdiDeployment.class);
         assertThat(ddiDeployment.getDownload().getName()).isEqualTo(FORCED.getName());
         assertThat(ddiDeployment.getUpdate().getName()).isEqualTo(ATTEMPT.getName());
         assertThat(ddiDeployment.getMaintenanceWindow().getStatus()).isEqualTo(AVAILABLE.getStatus());
@@ -72,11 +69,11 @@ public class DdiDeploymentTest {
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
-        String serializedDdiDeployment = "{\"download\":[\"forced\"],\"update\":\"attempt\", "
-                + "\"maintenanceWindow\":\"available\",\"chunks\":[]}";
+        final String serializedDdiDeployment = "{\"download\":[\"forced\"],\"update\":\"attempt\", " +
+                "\"maintenanceWindow\":\"available\",\"chunks\":[]}";
 
         // Test
-        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
-                () -> mapper.readValue(serializedDdiDeployment, DdiDeployment.class));
+        assertThatExceptionOfType(MismatchedInputException.class)
+                .isThrownBy(() -> OBJECT_MAPPER.readValue(serializedDdiDeployment, DdiDeployment.class));
     }
 }

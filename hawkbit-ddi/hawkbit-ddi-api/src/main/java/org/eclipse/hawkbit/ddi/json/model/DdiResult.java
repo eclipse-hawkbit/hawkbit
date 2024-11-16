@@ -17,17 +17,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 
 /**
- * Result information of the action progress which can by an intermediate or
- * final update.
+ * Result information of the action progress which can by an intermediate or final update.
  */
-@Getter
-@EqualsAndHashCode
-@ToString
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiResult {
 
@@ -35,6 +30,7 @@ public class DdiResult {
     @Valid
     @Schema(description = "Result of the action execution")
     private final FinalResult finished;
+
     @Schema(description = "Progress assumption of the device (currently not supported)")
     private final DdiProgress progress;
 
@@ -45,7 +41,8 @@ public class DdiResult {
      * @param progress if not yet finished
      */
     @JsonCreator
-    public DdiResult(@JsonProperty("finished") final FinalResult finished,
+    public DdiResult(
+            @JsonProperty("finished") final FinalResult finished,
             @JsonProperty("progress") final DdiProgress progress) {
         this.finished = finished;
         this.progress = progress;

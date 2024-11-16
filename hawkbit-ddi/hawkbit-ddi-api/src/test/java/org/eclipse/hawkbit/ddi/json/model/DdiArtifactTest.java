@@ -29,25 +29,24 @@ import org.junit.jupiter.api.Test;
 @Story("Serializability of DDI api Models")
 public class DdiArtifactTest {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
     public void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
-        String filename = "testfile.txt";
-        DdiArtifactHash hashes = new DdiArtifactHash("123", "456", "789");
-        Long size = 12345L;
+        final String filename = "testfile.txt";
+        final DdiArtifactHash hashes = new DdiArtifactHash("123", "456", "789");
+        final Long size = 12345L;
 
-        DdiArtifact ddiArtifact = new DdiArtifact();
+        final DdiArtifact ddiArtifact = new DdiArtifact();
         ddiArtifact.setFilename(filename);
         ddiArtifact.setHashes(hashes);
         ddiArtifact.setSize(size);
 
         // Test
-        String serializedDdiArtifact = mapper.writeValueAsString(ddiArtifact);
-        DdiArtifact deserializedDdiArtifact = mapper.readValue(serializedDdiArtifact, DdiArtifact.class);
-
+        final String serializedDdiArtifact = OBJECT_MAPPER.writeValueAsString(ddiArtifact);
+        final DdiArtifact deserializedDdiArtifact = OBJECT_MAPPER.readValue(serializedDdiArtifact, DdiArtifact.class);
         assertThat(serializedDdiArtifact).contains(filename, "12345");
         assertThat(deserializedDdiArtifact.getFilename()).isEqualTo(filename);
         assertThat(deserializedDdiArtifact.getSize()).isEqualTo(size);
@@ -60,11 +59,10 @@ public class DdiArtifactTest {
     @Description("Verify the correct deserialization of a model with a additional unknown property")
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
-        String serializedDdiArtifact = "{\"filename\":\"test.file\",\"hashes\":{\"sha1\":\"123\",\"md5\":\"456\",\"sha256\":\"789\"},\"size\":111,\"links\":[],\"unknownProperty\": \"test\"}";
+        final String serializedDdiArtifact = "{\"filename\":\"test.file\",\"hashes\":{\"sha1\":\"123\",\"md5\":\"456\",\"sha256\":\"789\"},\"size\":111,\"links\":[],\"unknownProperty\": \"test\"}";
 
         // Test
-        DdiArtifact ddiArtifact = mapper.readValue(serializedDdiArtifact, DdiArtifact.class);
-
+        final DdiArtifact ddiArtifact = OBJECT_MAPPER.readValue(serializedDdiArtifact, DdiArtifact.class);
         assertThat(ddiArtifact.getFilename()).isEqualTo("test.file");
         assertThat(ddiArtifact.getSize()).isEqualTo(111);
         assertThat(ddiArtifact.getHashes().getSha1()).isEqualTo("123");
@@ -76,10 +74,10 @@ public class DdiArtifactTest {
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
-        String serializedDdiArtifact = "{\"filename\": [\"test.file\"],\"hashes\":{\"sha1\":\"123\",\"md5\":\"456\",\"sha256\":\"789\"},\"size\":111,\"links\":[]}";
+        final String serializedDdiArtifact = "{\"filename\": [\"test.file\"],\"hashes\":{\"sha1\":\"123\",\"md5\":\"456\",\"sha256\":\"789\"},\"size\":111,\"links\":[]}";
 
         // Test
-        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
-                () -> mapper.readValue(serializedDdiArtifact, DdiArtifact.class));
+        assertThatExceptionOfType(MismatchedInputException.class)
+                .isThrownBy(() -> OBJECT_MAPPER.readValue(serializedDdiArtifact, DdiArtifact.class));
     }
 }

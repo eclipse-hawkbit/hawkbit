@@ -17,8 +17,8 @@ import static org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType.ATTE
 import static org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType.FORCED;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -43,10 +43,8 @@ class DdiConfirmationBaseTest {
         final String id = "1234";
         final DdiDeployment ddiDeployment = new DdiDeployment(FORCED, ATTEMPT, Collections.emptyList(), AVAILABLE);
         final String actionStatus = "TestAction";
-        final DdiActionHistory ddiActionHistory = new DdiActionHistory(actionStatus,
-                Arrays.asList("Action status message 1", "Action status message 2"));
-        final DdiConfirmationBaseAction ddiConfirmationBaseAction = new DdiConfirmationBaseAction(id, ddiDeployment,
-                ddiActionHistory);
+        final DdiActionHistory ddiActionHistory = new DdiActionHistory(actionStatus, List.of("Action status message 1", "Action status message 2"));
+        final DdiConfirmationBaseAction ddiConfirmationBaseAction = new DdiConfirmationBaseAction(id, ddiDeployment, ddiActionHistory);
 
         // Test
         String serializedDdiConfirmationBase = OBJECT_MAPPER.writeValueAsString(ddiConfirmationBaseAction);

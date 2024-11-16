@@ -31,34 +31,31 @@ import org.junit.jupiter.api.Test;
 @Story("Serializability of DDI api Models")
 public class DdiConfigDataTest {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
     public void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
-        Map<String, String> data = new HashMap<>();
+        final Map<String, String> data = new HashMap<>();
         data.put("test", "data");
-        DdiConfigData ddiConfigData = new DdiConfigData(data, DdiUpdateMode.REPLACE);
+        final DdiConfigData ddiConfigData = new DdiConfigData(data, DdiUpdateMode.REPLACE);
 
         // Test
-        String serializedDdiConfigData = mapper.writeValueAsString(ddiConfigData);
-        DdiConfigData deserializedDdiConfigData = mapper.readValue(serializedDdiConfigData, DdiConfigData.class);
-
+        final String serializedDdiConfigData = OBJECT_MAPPER.writeValueAsString(ddiConfigData);
+        final DdiConfigData deserializedDdiConfigData = OBJECT_MAPPER.readValue(serializedDdiConfigData, DdiConfigData.class);
         assertThat(serializedDdiConfigData).contains("test", "data");
         assertThat(deserializedDdiConfigData.getMode()).isEqualTo(DdiUpdateMode.REPLACE);
-
     }
 
     @Test
     @Description("Verify the correct deserialization of a model with an additional unknown property")
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
-        String serializedDdiConfigData = "{\"data\":{\"test\":\"data\"},\"mode\":\"replace\",\"unknownProperty\":\"test\"}";
+        final String serializedDdiConfigData = "{\"data\":{\"test\":\"data\"},\"mode\":\"replace\",\"unknownProperty\":\"test\"}";
 
         // Test
-        DdiConfigData ddiConfigData = mapper.readValue(serializedDdiConfigData, DdiConfigData.class);
-
+        final DdiConfigData ddiConfigData = OBJECT_MAPPER.readValue(serializedDdiConfigData, DdiConfigData.class);
         assertThat(ddiConfigData.getMode()).isEqualTo(DdiUpdateMode.REPLACE);
     }
 
@@ -66,11 +63,11 @@ public class DdiConfigDataTest {
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
-        String serializedDdiConfigData = "{\"data\":{\"test\":\"data\"},\"mode\":[\"replace\"],\"unknownProperty\":\"test\"}";
+        final String serializedDdiConfigData = "{\"data\":{\"test\":\"data\"},\"mode\":[\"replace\"],\"unknownProperty\":\"test\"}";
 
         // Test
-        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
-                () -> mapper.readValue(serializedDdiConfigData, DdiConfigData.class));
+        assertThatExceptionOfType(MismatchedInputException.class)
+                .isThrownBy(() -> OBJECT_MAPPER.readValue(serializedDdiConfigData, DdiConfigData.class));
     }
 
     @Test
@@ -88,7 +85,7 @@ public class DdiConfigDataTest {
                 + "\"details\":[]},\"data\":{\"test\":\"data\"},\"mode\":\"replace\"}";
 
         // Test
-        DdiConfigData ddiConfigData = mapper.readValue(serializedDdiConfigData, DdiConfigData.class);
+        DdiConfigData ddiConfigData = OBJECT_MAPPER.readValue(serializedDdiConfigData, DdiConfigData.class);
 
         assertThat(ddiConfigData.getMode()).isEqualTo(DdiUpdateMode.REPLACE);
     }
