@@ -2042,7 +2042,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifying that next group is started on manual trigger next group.")
     void checkRunningRolloutsManualTriggerNextGroup() {
-
         final int amountTargetsForRollout = 15;
         final int amountOtherTargets = 0;
         final int amountGroups = 3;
@@ -2080,6 +2079,30 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         runningActionsSlice.getContent().forEach(this::finishAction);
 
         verifyRolloutAndAllGroupsAreFinished(createdRollout);
+    }
+
+    @Test
+    @Description("Tests the rollout status mapping.")
+    void testRolloutStatusConvert() {
+        final long id = testdataFactory.createAndStartRollout(1, 0, 1, "100", "80").getId();
+        for (final RolloutStatus status : RolloutStatus.values()) {
+            final JpaRollout rollout = ((JpaRollout)rolloutManagement.get(id).orElseThrow());
+            rollout.setStatus(status);
+            rolloutRepository.save(rollout);
+            assertThat(rolloutManagement.get(id).orElseThrow().getStatus()).isEqualTo(status);
+        }
+    }
+
+    @Test
+    @Description("Tests the rollout action type mapping.")
+    void testActionTypeConvert() {
+        final long id = testdataFactory.createAndStartRollout(1, 0, 1, "100", "80").getId();
+        for (final ActionType actionType : ActionType.values()) {
+            final JpaRollout rollout = ((JpaRollout)rolloutManagement.get(id).orElseThrow());
+            rollout.setActionType(actionType);
+            rolloutRepository.save(rollout);
+            assertThat(rolloutManagement.get(id).orElseThrow().getActionType()).isEqualTo(actionType);
+        }
     }
 
     @Test
