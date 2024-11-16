@@ -15,7 +15,7 @@ package org.eclipse.hawkbit.artifact.repository;
 public class ArtifactFileNotFoundException extends RuntimeException {
 
     /**
-     * Creates the Exception from it's cause
+     * Creates the Exception from its cause
      *
      * @param cause the original exception
      */

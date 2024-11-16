@@ -14,18 +14,18 @@ import java.io.Serial;
 import lombok.Getter;
 
 /**
- * Thrown when provided hashes and hashes calculated during storing are not matching.
+ * {@link HashNotMatchException} is thrown when provided hashes and hashes calculated during storing are not matching.
  */
+@Getter
 public class HashNotMatchException extends RuntimeException {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public static final String SHA1 = "SHA-1";
     public static final String MD5 = "MD5";
     public static final String SHA256 = "SHA-256";
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    @Getter
     private final String hashFunction;
 
     /**

@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.artifact.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -35,12 +36,9 @@ class ArtifactFilesystemTest {
         final ArtifactFilesystem underTest = new ArtifactFilesystem(
                 file, "fileWhichTotalDoesNotExists",
                 new DbArtifactHash("1", "2", "3"), 0L, null);
-        try {
-            underTest.getFileInputStream();
-            Assertions.fail("Expected a FileNotFoundException because file does not exists");
-        } catch (final RuntimeException e) {
-            assertThat(e.getCause()).isInstanceOf(FileNotFoundException.class);
-        }
+        assertThatThrownBy(underTest::getFileInputStream)
+                .isInstanceOf(ArtifactFileNotFoundException.class)
+                .hasCauseInstanceOf(FileNotFoundException.class);
     }
 
     @Test

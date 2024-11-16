@@ -27,8 +27,7 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Abstract utility class for ArtifactRepository implementations with common
- * functionality, e.g. computation of hashes.
+ * Abstract utility class for ArtifactRepository implementations with common functionality, e.g. computation of hashes.
  */
 @Slf4j
 public abstract class AbstractArtifactRepository implements ArtifactRepository {
@@ -36,11 +35,11 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
     private static final String TEMP_FILE_PREFIX = "tmp";
     private static final String TEMP_FILE_SUFFIX = "artifactrepo";
 
-    @Override
     // suppress warning, of not strong enough hashing algorithm, SHA-1 and MD5 is not used security related
     @SuppressWarnings("squid:S2070")
-    public AbstractDbArtifact store(final String tenant,
-            final InputStream content, final String filename, final String contentType,
+    @Override
+    public AbstractDbArtifact store(
+            final String tenant, final InputStream content, final String filename, final String contentType,
             final DbArtifactHash providedHashes) {
         final MessageDigest mdSHA1;
         final MessageDigest mdMD5;

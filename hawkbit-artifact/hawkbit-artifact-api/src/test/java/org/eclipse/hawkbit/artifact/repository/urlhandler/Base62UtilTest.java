@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 class Base62UtilTest {
 
     @Test
-    @Description("Convert Base10 numbres to Base62 ASCII strings.")
+    @Description("Convert Base10 numbers to Base62 ASCII strings.")
     void fromBase10() {
         assertThat(Base62Util.fromBase10(0L)).isEqualTo("0");
         assertThat(Base62Util.fromBase10(11L)).isEqualTo("B");

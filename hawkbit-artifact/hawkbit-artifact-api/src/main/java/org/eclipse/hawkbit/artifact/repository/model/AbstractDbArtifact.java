@@ -9,8 +9,9 @@
  */
 package org.eclipse.hawkbit.artifact.repository.model;
 
+import java.util.Objects;
+
 import lombok.Data;
-import org.springframework.util.Assert;
 
 /**
  * Database representation of artifact.
@@ -24,12 +25,9 @@ public abstract class AbstractDbArtifact implements DbArtifact {
 
     private DbArtifactHash hashes;
 
-    protected AbstractDbArtifact(final String artifactId, final DbArtifactHash hashes, final long size,
-            final String contentType) {
-        Assert.notNull(artifactId, "Artifact ID cannot be null");
-        Assert.notNull(hashes, "Hashes cannot be null");
-        this.artifactId = artifactId;
-        this.hashes = hashes;
+    protected AbstractDbArtifact(final String artifactId, final DbArtifactHash hashes, final long size, final String contentType) {
+        this.artifactId = Objects.requireNonNull(artifactId, "Artifact ID cannot be null");
+        this.hashes = Objects.requireNonNull(hashes, "Hashes cannot be null");
         this.size = size;
         this.contentType = contentType;
     }
