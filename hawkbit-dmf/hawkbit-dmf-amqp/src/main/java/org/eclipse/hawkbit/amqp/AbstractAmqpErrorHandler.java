@@ -18,8 +18,7 @@ public abstract class AbstractAmqpErrorHandler<T> implements AmqpErrorHandler {
 
     @Override
     public void doHandle(Throwable throwable, AmqpErrorHandlerChain chain) {
-        // retrieving the cause of throwable as it contains the actual class of
-        // exception
+        // retrieving the cause of throwable as it contains the actual class of exception
         final Throwable cause = throwable.getCause();
         if (getExceptionClass().isAssignableFrom(cause.getClass())) {
             throw new AmqpRejectAndDontRequeueException(getErrorMessage(throwable));
@@ -43,5 +42,4 @@ public abstract class AbstractAmqpErrorHandler<T> implements AmqpErrorHandler {
     public String getErrorMessage(Throwable throwable) {
         return AmqpErrorMessageComposer.constructErrorMessage(throwable);
     }
-
 }

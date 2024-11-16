@@ -21,7 +21,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AmqpProperties {
 
     private static final int DEFAULT_QUEUE_DECLARATION_RETRIES = 50;
-
     private static final long DEFAULT_REQUEUE_DELAY = 0;
 
     /**

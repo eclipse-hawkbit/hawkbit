@@ -61,5 +61,4 @@ public class DefaultAmqpMessageSenderService extends BaseAmqpService implements 
     protected static boolean isCorrelationIdEmpty(final Message message) {
         return !StringUtils.hasLength(message.getMessageProperties().getCorrelationId());
     }
-
 }

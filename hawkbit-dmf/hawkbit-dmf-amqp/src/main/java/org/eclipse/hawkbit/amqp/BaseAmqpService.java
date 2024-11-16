@@ -50,8 +50,7 @@ public class BaseAmqpService {
     @SuppressWarnings("unchecked")
     public <T> T convertMessage(@NotNull final Message message, final Class<T> clazz) {
         checkMessageBody(message);
-        message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
-                clazz.getName());
+        message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME, clazz.getName());
         return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
 
@@ -104,5 +103,4 @@ public class BaseAmqpService {
     protected void cleanMessageHeaderProperties(final Message message) {
         message.getMessageProperties().getHeaders().remove(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME);
     }
-
 }
