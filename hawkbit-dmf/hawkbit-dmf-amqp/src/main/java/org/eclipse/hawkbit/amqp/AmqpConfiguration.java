@@ -127,8 +127,7 @@ public class AmqpConfiguration {
     }
 
     /**
-     * @return {@link RabbitTemplate} with automatic retry, published confirms and
-     *         {@link Jackson2JsonMessageConverter}.
+     * @return {@link RabbitTemplate} with automatic retry, published confirms and {@link Jackson2JsonMessageConverter}.
      */
     @Bean
     public RabbitTemplate rabbitTemplate() {
@@ -246,7 +245,8 @@ public class AmqpConfiguration {
             final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final ConfirmationManagement confirmationManagement) {
-        return new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherService, controllerManagement,
+        return new AmqpMessageHandlerService(
+                rabbitTemplate, amqpMessageDispatcherService, controllerManagement,
                 entityFactory, systemSecurityContext, tenantConfigurationManagement, confirmationManagement);
     }
 
@@ -279,7 +279,8 @@ public class AmqpConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(AmqpMessageDispatcherService.class)
-    AmqpMessageDispatcherService amqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
+    AmqpMessageDispatcherService amqpMessageDispatcherService(
+            final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
             final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement,

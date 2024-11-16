@@ -86,7 +86,8 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
     }
 
     private static boolean isMessageException(final Throwable cause) {
-        return cause instanceof InvalidTargetAddressException || cause instanceof MessageConversionException
-                || cause instanceof MessageHandlingException;
+        return cause instanceof InvalidTargetAddressException ||
+                cause instanceof MessageConversionException ||
+                cause instanceof MessageHandlingException;
     }
 }

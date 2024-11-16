@@ -19,7 +19,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(properties = { "hawkbit.server.security.allowedHostNames=localhost",
+@TestPropertySource(properties = {
+        "hawkbit.server.security.allowedHostNames=localhost",
         "hawkbit.server.security.httpFirewallIgnoredPaths=/index.html" })
 @Feature("Integration Test - Security")
 @Story("Allowed Host Names")
@@ -28,13 +29,15 @@ public class AllowedHostNamesTest extends AbstractSecurityTest {
     @Test
     @Description("Tests whether a RequestRejectedException is thrown when not allowed host is used")
     public void allowedHostNameWithNotAllowedHost() throws Exception {
-        mvc.perform(get("/").header(HttpHeaders.HOST, "www.google.com")).andExpect(status().isBadRequest());
+        mvc.perform(get("/").header(HttpHeaders.HOST, "www.google.com"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     @Description("Tests whether request is redirected when allowed host is used")
     public void allowedHostNameWithAllowedHost() throws Exception {
-        mvc.perform(get("/").header(HttpHeaders.HOST, "localhost")).andExpect(status().is3xxRedirection());
+        mvc.perform(get("/").header(HttpHeaders.HOST, "localhost"))
+                .andExpect(status().is3xxRedirection());
     }
 
     @Test

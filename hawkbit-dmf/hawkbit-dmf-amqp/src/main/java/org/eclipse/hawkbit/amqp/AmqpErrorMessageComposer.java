@@ -31,9 +31,7 @@ public final class AmqpErrorMessageComposer {
      * @return meaningful error message
      */
     public static String constructErrorMessage(final Throwable throwable) {
-        StringBuilder completeErrorMessage = new StringBuilder();
         final String mainErrorMsg = throwable.getCause().getMessage();
-
         if (throwable instanceof ListenerExecutionFailedException) {
             Collection<Message> failedMessages = ((ListenerExecutionFailedException) throwable).getFailedMessages();
             // since the intended message content is always on top of the collection, we only extract the first one
@@ -41,11 +39,10 @@ public final class AmqpErrorMessageComposer {
             final byte[] amqpFailedMsgBody = failedMessage.getBody();
             final Map<String, Object> amqpFailedMsgHeaders = failedMessage.getMessageProperties().getHeaders();
 
-            String amqpFailedMsgConcatenatedHeaders = amqpFailedMsgHeaders.keySet().stream()
-                    .map(key -> key + "=" + amqpFailedMsgHeaders.get(key)).collect(Collectors.joining(", ", "{", "}"));
-            completeErrorMessage.append(mainErrorMsg).append(new String(amqpFailedMsgBody))
-                    .append(amqpFailedMsgConcatenatedHeaders);
-            return completeErrorMessage.toString();
+            final String amqpFailedMsgConcatenatedHeaders = amqpFailedMsgHeaders.keySet().stream()
+                    .map(key -> key + "=" + amqpFailedMsgHeaders.get(key))
+                    .collect(Collectors.joining(", ", "{", "}"));
+            return mainErrorMsg + new String(amqpFailedMsgBody) + amqpFailedMsgConcatenatedHeaders;
         }
         return mainErrorMsg;
     }
