@@ -23,6 +23,7 @@ import java.io.StringWriter;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -57,8 +58,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-@ContextConfiguration(classes = { DdiApiConfiguration.class, RestConfiguration.class,
-        RepositoryApplicationConfiguration.class, TestConfiguration.class })
+@ContextConfiguration(
+        classes = { DdiApiConfiguration.class, RestConfiguration.class, RepositoryApplicationConfiguration.class, TestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
 @TestPropertySource(locations = "classpath:/ddi-test.properties")
 public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrationTest {
@@ -67,8 +68,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     protected static final String HTTP_LOCALHOST = String.format("http://localhost:%s/", HTTP_PORT);
     protected static final String CONTROLLER_BASE = "/{tenant}/controller/v1/{controllerId}";
 
-    protected static final String SOFTWARE_MODULE_ARTIFACTS = CONTROLLER_BASE
-            + "/softwaremodules/{softwareModuleId}/artifacts";
+    protected static final String SOFTWARE_MODULE_ARTIFACTS = CONTROLLER_BASE + "/softwaremodules/{softwareModuleId}/artifacts";
     protected static final String DEPLOYMENT_BASE = CONTROLLER_BASE + "/deploymentBase/{actionId}";
     protected static final String DEPLOYMENT_FEEDBACK = DEPLOYMENT_BASE + "/feedback";
     protected static final String CANCEL_ACTION = CONTROLLER_BASE + "/cancelAction/{actionId}";
@@ -83,7 +83,8 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     protected static final String CONFIRMATION_FEEDBACK = CONFIRMATION_BASE_ACTION + "/feedback";
 
     protected static final int ARTIFACT_SIZE = 5 * 1024;
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final Random RND = new Random();
 
     /**
      * Convert JSON to a CBOR equivalent.
@@ -126,62 +127,69 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     }
 
     protected static ObjectMapper getMapper() {
-        return objectMapper;
+        return OBJECT_MAPPER;
     }
 
     protected ResultActions postDeploymentFeedback(final String controllerId, final Long actionId, final String content,
             final ResultMatcher statusMatcher) throws Exception {
-        return postDeploymentFeedback(MediaType.APPLICATION_JSON_UTF8, controllerId, actionId, content.getBytes(),
-                statusMatcher);
+        return postDeploymentFeedback(MediaType.APPLICATION_JSON_UTF8, controllerId, actionId, content.getBytes(), statusMatcher);
     }
 
-    protected ResultActions putInstalledBase(final String controllerId, final String content,
-            final ResultMatcher statusMatcher) throws Exception {
+    protected ResultActions putInstalledBase(final String controllerId, final String content, final ResultMatcher statusMatcher)
+            throws Exception {
         return mvc.perform(put(INSTALLED_BASE_ROOT, tenantAware.getCurrentTenant(), controllerId)
                         .content(content.getBytes()).contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andDo(MockMvcResultPrinter.print()).andExpect(statusMatcher);
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(statusMatcher);
     }
 
-    protected ResultActions postDeploymentFeedback(final MediaType mediaType, final String controllerId,
+    protected ResultActions postDeploymentFeedback(
+            final MediaType mediaType, final String controllerId,
             final Long actionId, final byte[] content, final ResultMatcher statusMatcher) throws Exception {
         return mvc
                 .perform(post(DEPLOYMENT_FEEDBACK, tenantAware.getCurrentTenant(), controllerId, actionId)
                         .content(content).contentType(mediaType).accept(mediaType))
-                .andDo(MockMvcResultPrinter.print()).andExpect(statusMatcher);
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(statusMatcher);
     }
 
-    protected ResultActions postCancelFeedback(final String controllerId, final Long actionId, final String content,
+    protected ResultActions postCancelFeedback(
+            final String controllerId, final Long actionId, final String content,
             final ResultMatcher statusMatcher) throws Exception {
-        return postCancelFeedback(MediaType.APPLICATION_JSON_UTF8, controllerId, actionId, content.getBytes(),
-                statusMatcher);
+        return postCancelFeedback(MediaType.APPLICATION_JSON_UTF8, controllerId, actionId, content.getBytes(), statusMatcher);
     }
 
-    protected ResultActions postCancelFeedback(final MediaType mediaType, final String controllerId,
+    protected ResultActions postCancelFeedback(
+            final MediaType mediaType, final String controllerId,
             final Long actionId, final byte[] content, final ResultMatcher statusMatcher) throws Exception {
         return mvc
                 .perform(post(CANCEL_FEEDBACK, tenantAware.getCurrentTenant(), controllerId, actionId).content(content)
                         .contentType(mediaType).accept(mediaType))
-                .andDo(MockMvcResultPrinter.print()).andExpect(statusMatcher);
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(statusMatcher);
     }
 
-    protected ResultActions performGet(final String url, final MediaType mediaType, final ResultMatcher statusMatcher,
-            final String... values) throws Exception {
+    protected ResultActions performGet(final String url, final MediaType mediaType, final ResultMatcher statusMatcher, final String... values)
+            throws Exception {
         return mvc.perform(MockMvcRequestBuilders.get(url, values).accept(mediaType)
                         .with(new RequestOnHawkbitDefaultPortPostProcessor()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(statusMatcher)
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(statusMatcher)
                 .andExpect(content().contentTypeCompatibleWith(mediaType));
     }
 
-    protected ResultActions getAndVerifyDeploymentBasePayload(final String controllerId, final MediaType mediaType,
+    protected ResultActions getAndVerifyDeploymentBasePayload(
+            final String controllerId, final MediaType mediaType,
             final DistributionSet ds, final Artifact artifact, final Artifact artifactSignature, final Long actionId,
             final Long osModuleId, final String downloadType, final String updateType) throws Exception {
         final ResultActions resultActions = performGet(DEPLOYMENT_BASE, mediaType, status().isOk(),
                 tenantAware.getCurrentTenant(), controllerId, actionId.toString());
-        return verifyBasePayload("$.deployment", resultActions, controllerId, ds, artifact, artifactSignature, actionId, osModuleId,
-                downloadType, updateType);
+        return verifyBasePayload(
+                "$.deployment", resultActions, controllerId, ds, artifact, artifactSignature, actionId, osModuleId, downloadType, updateType);
     }
 
-    protected ResultActions getAndVerifyDeploymentBasePayload(final String controllerId, final MediaType mediaType,
+    protected ResultActions getAndVerifyDeploymentBasePayload(
+            final String controllerId, final MediaType mediaType,
             final DistributionSet ds, final Artifact artifact, final Artifact artifactSignature, final Long actionId,
             final Long osModuleId, final Action.ActionType actionType) throws Exception {
         return getAndVerifyDeploymentBasePayload(controllerId, mediaType, ds, artifact, artifactSignature, actionId,
@@ -198,125 +206,137 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     }
 
     protected String installedBaseLink(final String controllerId, final String actionId) {
-        return HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
-                + "/installedBase/" + actionId;
+        return HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" +
+                controllerId + "/installedBase/" + actionId;
     }
 
     protected String deploymentBaseLink(final String controllerId, final String actionId) {
-        return HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
-                + "/deploymentBase/" + actionId;
+        return HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" +
+                controllerId + "/deploymentBase/" + actionId;
     }
 
     protected String getJsonRejectedCancelActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(DdiStatus.ExecutionStatus.REJECTED, DdiResult.FinalResult.SUCCESS,
-                Collections.singletonList("rejected"));
+        return getJsonActionFeedback(
+                DdiStatus.ExecutionStatus.REJECTED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("rejected"));
     }
 
     protected String getJsonRejectedDeploymentActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(DdiStatus.ExecutionStatus.REJECTED, DdiResult.FinalResult.NONE,
-                Collections.singletonList("rejected"));
+        return getJsonActionFeedback(
+                DdiStatus.ExecutionStatus.REJECTED, DdiResult.FinalResult.NONE, Collections.singletonList("rejected"));
     }
 
     protected String getJsonDownloadDeploymentActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(DdiStatus.ExecutionStatus.DOWNLOAD, DdiResult.FinalResult.NONE,
-                Collections.singletonList("download"));
+        return getJsonActionFeedback(
+                DdiStatus.ExecutionStatus.DOWNLOAD, DdiResult.FinalResult.NONE, Collections.singletonList("download"));
     }
 
     protected String getJsonDownloadedDeploymentActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(DdiStatus.ExecutionStatus.DOWNLOADED, DdiResult.FinalResult.NONE,
-                Collections.singletonList("download"));
+        return getJsonActionFeedback(
+                DdiStatus.ExecutionStatus.DOWNLOADED, DdiResult.FinalResult.NONE, Collections.singletonList("download"));
     }
 
     protected String getJsonCanceledCancelActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(DdiStatus.ExecutionStatus.CANCELED, DdiResult.FinalResult.SUCCESS,
-                Collections.singletonList("canceled"));
+        return getJsonActionFeedback(
+                DdiStatus.ExecutionStatus.CANCELED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("canceled"));
     }
 
     protected String getJsonCanceledDeploymentActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(DdiStatus.ExecutionStatus.CANCELED, DdiResult.FinalResult.NONE,
-                Collections.singletonList("canceled"));
+        return getJsonActionFeedback(
+                DdiStatus.ExecutionStatus.CANCELED, DdiResult.FinalResult.NONE, Collections.singletonList("canceled"));
     }
 
     protected String getJsonScheduledCancelActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(DdiStatus.ExecutionStatus.SCHEDULED, DdiResult.FinalResult.SUCCESS,
-                Collections.singletonList("scheduled"));
+        return getJsonActionFeedback(
+                DdiStatus.ExecutionStatus.SCHEDULED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("scheduled"));
     }
 
     protected String getJsonScheduledDeploymentActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(DdiStatus.ExecutionStatus.SCHEDULED, DdiResult.FinalResult.NONE,
-                Collections.singletonList("scheduled"));
+        return getJsonActionFeedback(
+                DdiStatus.ExecutionStatus.SCHEDULED, DdiResult.FinalResult.NONE, Collections.singletonList("scheduled"));
     }
 
     protected String getJsonResumedCancelActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(DdiStatus.ExecutionStatus.RESUMED, DdiResult.FinalResult.SUCCESS,
-                Collections.singletonList("resumed"));
+        return getJsonActionFeedback(
+                DdiStatus.ExecutionStatus.RESUMED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("resumed"));
     }
 
     protected String getJsonResumedDeploymentActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(DdiStatus.ExecutionStatus.RESUMED, DdiResult.FinalResult.NONE,
-                Collections.singletonList("resumed"));
+        return getJsonActionFeedback(
+                DdiStatus.ExecutionStatus.RESUMED, DdiResult.FinalResult.NONE, Collections.singletonList("resumed"));
     }
 
     protected String getJsonProceedingCancelActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.SUCCESS,
-                Collections.singletonList("proceeding"));
+        return getJsonActionFeedback(
+                DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.SUCCESS, Collections.singletonList("proceeding"));
     }
 
     protected String getJsonProceedingDeploymentActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE,
-                Collections.singletonList("proceeding"));
+        return getJsonActionFeedback(
+                DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE, Collections.singletonList("proceeding"));
     }
 
     protected String getJsonClosedCancelActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
-                Collections.singletonList("closed"));
+        return getJsonActionFeedback(
+                DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("closed"));
     }
 
     protected String getJsonClosedDeploymentActionFeedback() throws JsonProcessingException {
-        return getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.NONE,
-                Collections.singletonList("closed"));
+        return getJsonActionFeedback(
+                DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.NONE, Collections.singletonList("closed"));
     }
 
-    protected String getJsonActionFeedback(final DdiStatus.ExecutionStatus executionStatus,
-            final DdiResult.FinalResult finalResult) throws JsonProcessingException {
-        return getJsonActionFeedback(executionStatus, finalResult,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+    protected String getJsonActionFeedback(
+            final DdiStatus.ExecutionStatus executionStatus, final DdiResult.FinalResult finalResult) throws JsonProcessingException {
+        return getJsonActionFeedback(
+                executionStatus, finalResult, Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
-    protected String getJsonActionFeedback(final DdiStatus.ExecutionStatus executionStatus, final DdiResult ddiResult,
+    protected String getJsonActionFeedback(
+            final DdiStatus.ExecutionStatus executionStatus, final DdiResult ddiResult,
             final List<String> messages) throws JsonProcessingException {
         final DdiStatus ddiStatus = new DdiStatus(executionStatus, ddiResult, null, messages);
-        return objectMapper.writeValueAsString(new DdiActionFeedback(Instant.now().toString(), ddiStatus));
+        return OBJECT_MAPPER.writeValueAsString(new DdiActionFeedback(Instant.now().toString(), ddiStatus));
     }
 
-    protected String getJsonActionFeedback(final DdiStatus.ExecutionStatus executionStatus,
+    protected String getJsonActionFeedback(
+            final DdiStatus.ExecutionStatus executionStatus,
             final DdiResult.FinalResult finalResult, final List<String> messages) throws JsonProcessingException {
         return getJsonActionFeedback(executionStatus, finalResult, null, messages);
     }
 
-    protected String getJsonActionFeedback(final DdiStatus.ExecutionStatus executionStatus,
+    protected String getJsonActionFeedback(
+            final DdiStatus.ExecutionStatus executionStatus,
             final DdiResult.FinalResult finalResult, final Integer code, final List<String> messages) throws JsonProcessingException {
-        final DdiStatus ddiStatus = new DdiStatus(executionStatus, new DdiResult(finalResult, new DdiProgress(2, 5)), code,
-                messages);
-        return objectMapper.writeValueAsString(new DdiActionFeedback(Instant.now().toString(), ddiStatus));
+        final DdiStatus ddiStatus = new DdiStatus(executionStatus, new DdiResult(finalResult, new DdiProgress(2, 5)), code, messages);
+        return OBJECT_MAPPER.writeValueAsString(new DdiActionFeedback(Instant.now().toString(), ddiStatus));
     }
 
-    protected String getJsonConfirmationFeedback(final DdiConfirmationFeedback.Confirmation confirmation,
+    protected String getJsonConfirmationFeedback(
+            final DdiConfirmationFeedback.Confirmation confirmation,
             final Integer code, final List<String> messages) throws JsonProcessingException {
-        return objectMapper.writeValueAsString(new DdiConfirmationFeedback(confirmation, code, messages));
+        return OBJECT_MAPPER.writeValueAsString(new DdiConfirmationFeedback(confirmation, code, messages));
     }
 
     protected String getJsonInstalledBase(String name, String version) throws JsonProcessingException {
-        return objectMapper.writeValueAsString(new DdiAssignedVersion(name, version));
+        return OBJECT_MAPPER.writeValueAsString(new DdiAssignedVersion(name, version));
     }
 
-    protected ResultActions getAndVerifyConfirmationBasePayload(final String controllerId, final MediaType mediaType,
+    protected ResultActions getAndVerifyConfirmationBasePayload(
+            final String controllerId, final MediaType mediaType,
             final DistributionSet ds, final Artifact artifact, final Artifact artifactSignature, final Long actionId,
             final Long osModuleId, final String downloadType, final String updateType) throws Exception {
-        final ResultActions resultActions = performGet(CONFIRMATION_BASE_ACTION, mediaType, status().isOk(),
+        final ResultActions resultActions = performGet(
+                CONFIRMATION_BASE_ACTION, mediaType, status().isOk(),
                 tenantAware.getCurrentTenant(), controllerId, actionId.toString());
-        return verifyBasePayload("$.confirmation", resultActions, controllerId, ds, artifact, artifactSignature, actionId, osModuleId,
+        return verifyBasePayload(
+                "$.confirmation", resultActions, controllerId, ds, artifact, artifactSignature, actionId, osModuleId,
                 downloadType, updateType);
+    }
+
+    static byte[] nextBytes(final int size) {
+        final byte[] bytes = new byte[size];
+        RND.nextBytes(bytes);
+        return bytes;
     }
 
     static void implicitLock(final DistributionSet set) {
@@ -330,7 +350,8 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
         return "attempt";
     }
 
-    private ResultActions verifyBasePayload(final String prefix, final ResultActions resultActions, final String controllerId,
+    private ResultActions verifyBasePayload(
+            final String prefix, final ResultActions resultActions, final String controllerId,
             final DistributionSet ds, final Artifact artifact, final Artifact artifactSignature, final Long actionId,
             final Long osModuleId, final String downloadType, final String updateType) throws Exception {
         return resultActions.andExpect(jsonPath("$.id", equalTo(String.valueOf(actionId))))
@@ -354,13 +375,11 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0].hashes.sha256",
                         contains(artifact.getSha256Hash())))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0]._links.download-http.href",
-                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
-                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifact.getFilename()
-                                + "/download")))
+                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId +
+                                "/softwaremodules/" + osModuleId + "/artifacts/" + artifact.getFilename() + "/download")))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0]._links.md5sum-http.href",
-                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
-                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifact.getFilename()
-                                + "/download.MD5SUM")))
+                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId +
+                                "/softwaremodules/" + osModuleId + "/artifacts/" + artifact.getFilename() + "/download.MD5SUM")))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].size", contains(ARTIFACT_SIZE)))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].filename",
                         contains(artifactSignature.getFilename())))
@@ -371,13 +390,11 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].hashes.sha256",
                         contains(artifactSignature.getSha256Hash())))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1]._links.download-http.href",
-                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
-                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifactSignature.getFilename()
-                                + "/download")))
+                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId +
+                                "/softwaremodules/" + osModuleId + "/artifacts/" + artifactSignature.getFilename() + "/download")))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1]._links.md5sum-http.href",
-                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
-                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifactSignature.getFilename()
-                                + "/download.MD5SUM")))
+                        contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId +
+                                "/softwaremodules/" + osModuleId + "/artifacts/" + artifactSignature.getFilename() + "/download.MD5SUM")))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='bApp')].version",
                         contains(ds.findFirstModuleByType(appType).get().getVersion())))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='bApp')].metadata").doesNotExist())

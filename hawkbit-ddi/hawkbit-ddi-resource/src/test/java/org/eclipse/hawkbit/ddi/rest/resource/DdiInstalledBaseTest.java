@@ -30,7 +30,6 @@ import java.util.stream.Stream;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
@@ -87,8 +86,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         testdataFactory.createArtifacts(softwareModuleId);
 
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds, target));
-        postDeploymentFeedback(target.getControllerId(), actionId, getJsonClosedDeploymentActionFeedback(),
-                status().isOk());
+        postDeploymentFeedback(target.getControllerId(), actionId, getJsonClosedDeploymentActionFeedback(), status().isOk());
 
         // get installed base
         performGet(INSTALLED_BASE, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR), status().isOk(),
@@ -107,11 +105,9 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         // update assigned version
-        putInstalledBase(target.getControllerId(), getJsonInstalledBase(ds.getName(), ds.getVersion()), status()
-                .isCreated());
+        putInstalledBase(target.getControllerId(), getJsonInstalledBase(ds.getName(), ds.getVersion()), status().isCreated());
 
-        assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get().getId())
-                .isEqualTo(ds.getId());
+        assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get().getId()).isEqualTo(ds.getId());
 
         // update assigned version while version already assigned
         putInstalledBase(target.getControllerId(), getJsonInstalledBase(ds.getName(), ds.getVersion()), status().isOk());
@@ -137,15 +133,15 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = createTargetAndAssertNoActiveActions();
 
         final DistributionSet ds1 = testdataFactory.createDistributionSet("1", true);
-        final Artifact artifact1 = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+        final Artifact artifact1 = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
                 getOsModule(ds1), "test1", ARTIFACT_SIZE);
-        final Artifact artifactSignature1 = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+        final Artifact artifactSignature1 = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
                 getOsModule(ds1), "test1.signature", ARTIFACT_SIZE);
 
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
-        final Artifact artifact2 = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+        final Artifact artifact2 = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
                 getOsModule(ds2), "test2", ARTIFACT_SIZE);
-        final Artifact artifactSignature2 = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+        final Artifact artifactSignature2 = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
                 getOsModule(ds2), "test2.signature", ARTIFACT_SIZE);
 
         // Run test with 1st action
@@ -161,8 +157,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 actionId1, ds1.findFirstModuleByType(osType).get().getId(), Action.ActionType.SOFT);
 
         postDeploymentFeedback(target.getControllerId(), actionId1,
-                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
-                        Collections.singletonList("Closed")),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("Closed")),
                 status().isOk());
 
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds1, artifact1, artifactSignature1,
@@ -182,8 +177,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 actionId2, ds2.findFirstModuleByType(osType).get().getId(), Action.ActionType.FORCED);
 
         postDeploymentFeedback(target.getControllerId(), actionId2,
-                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
-                        Collections.singletonList("Closed")),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("Closed")),
                 status().isOk());
 
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds2, artifact2, artifactSignature2,
@@ -195,8 +189,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                         startsWith(installedBaseLink(CONTROLLER_ID, actionId2.toString()))))
                 .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist());
 
-        // older installed action is still accessible, although not part of controller
-        // base
+        // older installed action is still accessible, although not part of controller base
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds1, artifact1, artifactSignature1,
                 actionId1, ds1.findFirstModuleByType(osType).get().getId(), Action.ActionType.SOFT);
     }
@@ -208,9 +201,9 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = createTargetAndAssertNoActiveActions();
 
         final DistributionSet ds1 = testdataFactory.createDistributionSet("1", true);
-        final Artifact artifact1 = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+        final Artifact artifact1 = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
                 getOsModule(ds1), "test1", ARTIFACT_SIZE);
-        final Artifact artifactSignature1 = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+        final Artifact artifactSignature1 = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
                 getOsModule(ds1), "test1.signature", ARTIFACT_SIZE);
 
         // assign ds1, action1 - and provide cancel feedback
@@ -218,8 +211,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
         deploymentManagement.cancelAction(actionId1);
         postCancelFeedback(target.getControllerId(), actionId1,
-                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
-                        Collections.singletonList("Canceled")),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("Canceled")),
                 status().isOk());
 
         // assign ds1, action2 - and provide cancel feedback
@@ -227,16 +219,14 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.FORCED));
         deploymentManagement.cancelAction(actionId2);
         postCancelFeedback(target.getControllerId(), actionId2,
-                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
-                        Collections.singletonList("Canceled")),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("Canceled")),
                 status().isOk());
 
         // assign ds1, action 3 - and provide success feedback
         final Long actionId3 = getFirstAssignedActionId(
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
         postDeploymentFeedback(target.getControllerId(), actionId3,
-                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
-                        Collections.singletonList("Canceled")),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("Canceled")),
                 status().isOk());
 
         // Test: latest succeeded action is returned in installedBase
@@ -251,9 +241,13 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         // cancelled action are not accessible
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), target.getControllerId(),
-                actionId1.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+                        actionId1.toString()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), target.getControllerId(),
-                actionId2.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+                        actionId2.toString()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -263,9 +257,9 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = createTargetAndAssertNoActiveActions();
 
         final DistributionSet ds1 = testdataFactory.createDistributionSet("1", true);
-        final Artifact artifact1 = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+        final Artifact artifact1 = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
                 getOsModule(ds1), "test1", ARTIFACT_SIZE);
-        final Artifact artifactSignature1 = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+        final Artifact artifactSignature1 = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
                 getOsModule(ds1), "test1.signature", ARTIFACT_SIZE);
 
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
@@ -274,8 +268,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Long actionId1 = getFirstAssignedActionId(
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
         postDeploymentFeedback(target.getControllerId(), actionId1,
-                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
-                        Collections.singletonList("Success")),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("Success")),
                 status().isOk());
 
         // assign ds2, action2 - assign ds1, action 3 - and cancel both
@@ -285,13 +278,11 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
         deploymentManagement.cancelAction(actionId2);
         postCancelFeedback(target.getControllerId(), actionId2,
-                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
-                        Collections.singletonList("Canceled")),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("Canceled")),
                 status().isOk());
         deploymentManagement.cancelAction(actionId3);
         postCancelFeedback(target.getControllerId(), actionId3,
-                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
-                        Collections.singletonList("Canceled")),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("Canceled")),
                 status().isOk());
 
         // Test: the succeeded action is returned in installedBase instead of the latest
@@ -307,9 +298,13 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         // cancelled action are not accessible
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), target.getControllerId(),
-                actionId2.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+                        actionId2.toString()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), target.getControllerId(),
-                actionId3.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+                        actionId3.toString()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -319,9 +314,9 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = createTargetAndAssertNoActiveActions();
 
         final DistributionSet ds1 = testdataFactory.createDistributionSet("1", true);
-        final Artifact artifact1 = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+        final Artifact artifact1 = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
                 getOsModule(ds1), "test1", ARTIFACT_SIZE);
-        final Artifact artifactSignature1 = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+        final Artifact artifactSignature1 = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
                 getOsModule(ds1), "test1.signature", ARTIFACT_SIZE);
 
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
@@ -330,8 +325,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Long actionId1 = getFirstAssignedActionId(
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
         postDeploymentFeedback(target.getControllerId(), actionId1,
-                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
-                        Collections.singletonList("Success")),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("Success")),
                 status().isOk());
 
         // assign ds2, action2 - assign ds1, action 3 - and cancel action 2
@@ -341,12 +335,10 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
         deploymentManagement.cancelAction(actionId2);
         postCancelFeedback(target.getControllerId(), actionId2,
-                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
-                        Collections.singletonList("Canceled")),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("Canceled")),
                 status().isOk());
 
-        // Test: the succeeded action is returned in installedBase instead of the latest
-        // cancelled action
+        // Test: the succeeded action is returned in installedBase instead of the latest cancelled action
         performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenantAware.getCurrentTenant(), CONTROLLER_ID)
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                 .andExpect(jsonPath("$._links.installedBase.href",
@@ -359,9 +351,13 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         // cancelled action are not accessible
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), target.getControllerId(),
-                actionId2.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+                        actionId2.toString()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), target.getControllerId(),
-                actionId3.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+                        actionId3.toString()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -382,7 +378,9 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 target.getControllerId(), actionId.toString());
 
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), target.getControllerId(),
-                actionId.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+                        actionId.toString()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -396,8 +394,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds, target));
 
-        postDeploymentFeedback(target.getControllerId(), actionId, getJsonClosedDeploymentActionFeedback(),
-                status().isOk());
+        postDeploymentFeedback(target.getControllerId(), actionId, getJsonClosedDeploymentActionFeedback(), status().isOk());
 
         performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isOk(),
                 tenantAware.getCurrentTenant(), target.getControllerId(), softwareModuleId.toString())
@@ -410,13 +407,15 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     @ParameterizedTest
     @MethodSource("org.eclipse.hawkbit.ddi.rest.resource.DdiInstalledBaseTest#actionTypeForDeployment")
     @Description("Test forced deployment to a controller. Checks that action is represented as installedBase after installation.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 5), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
@@ -424,26 +423,26 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         // Prepare test data
         final Target target = createTargetAndAssertNoActiveActions();
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
-        final Artifact artifact = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE), getOsModule(ds),
+        final Artifact artifact = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE), getOsModule(ds),
                 "test1", ARTIFACT_SIZE);
-        final Artifact artifactSignature = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+        final Artifact artifactSignature = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
                 getOsModule(ds), "test1.signature", ARTIFACT_SIZE);
         final Long actionId = getFirstAssignedActionId(
                 assignDistributionSet(ds.getId(), target.getControllerId(), actionType));
 
         postDeploymentFeedback(target.getControllerId(), actionId,
-                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
-                        Collections.singletonList("Closed")),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, Collections.singletonList("Closed")),
                 status().isOk());
 
         // Run test
         final ResultActions resultActions = performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(),
                 tenantAware.getCurrentTenant(), target.getControllerId());
-        resultActions.andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+        resultActions.andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist())
-                .andExpect(jsonPath("$._links.installedBase.href",
-                        containsString(String.format("/%s/controller/v1/%s/installedBase/%d",
-                                tenantAware.getCurrentTenant(), target.getControllerId(), actionId))));
+                .andExpect(jsonPath("$._links.installedBase.href", containsString(String.format(
+                        "/%s/controller/v1/%s/installedBase/%d",
+                        tenantAware.getCurrentTenant(), target.getControllerId(), actionId))));
 
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact, artifactSignature,
                 actionId, ds.findFirstModuleByType(osType).get().getId(), actionType);
@@ -461,13 +460,15 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test download-only deployment to a controller. Checks that download-only is not represented as installedBase.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
@@ -479,18 +480,20 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 assignDistributionSet(ds.getId(), target.getControllerId(), Action.ActionType.DOWNLOAD_ONLY));
 
         performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), tenantAware.getCurrentTenant(),
-                target.getControllerId()).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                target.getControllerId())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$._links.deploymentBase.href").exists())
                 .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
 
-        postDeploymentFeedback(target.getControllerId(), actionId, getJsonDownloadDeploymentActionFeedback(),
-                status().isOk());
-        postDeploymentFeedback(target.getControllerId(), actionId, getJsonDownloadedDeploymentActionFeedback(),
-                status().isOk());
+        postDeploymentFeedback(target.getControllerId(), actionId, getJsonDownloadDeploymentActionFeedback(), status().isOk());
+        postDeploymentFeedback(target.getControllerId(), actionId, getJsonDownloadedDeploymentActionFeedback(), status().isOk());
 
         // Test
         performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), tenantAware.getCurrentTenant(),
-                target.getControllerId()).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                target.getControllerId())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist())
                 .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
     }
@@ -506,7 +509,9 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 assignDistributionSet(ds.getId(), target.getControllerId(), actionType));
 
         performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), tenantAware.getCurrentTenant(),
-                target.getControllerId()).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                target.getControllerId())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$._links.deploymentBase.href").exists())
                 .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
 
@@ -520,7 +525,9 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Test
         performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), tenantAware.getCurrentTenant(),
-                target.getControllerId()).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                target.getControllerId())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist())
                 .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
     }
@@ -531,8 +538,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
-                .getContent().get(0);
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
 
         postDeploymentFeedback(savedTarget.getControllerId(), savedAction.getId(),
                 getJsonActionFeedback(DdiStatus.ExecutionStatus.SCHEDULED, DdiResult.FinalResult.NONE,
@@ -553,14 +559,15 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         // for zero input no action history is returned
         mvc.perform(get(INSTALLED_BASE + "?actionHistory", tenantAware.getCurrentTenant(), 911, savedAction.getId())
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.actionHistory.messages").doesNotExist());
 
-        // depending on given query parameter value, only the latest messages are
-        // returned
+        // depending on given query parameter value, only the latest messages are returned
         mvc.perform(get(INSTALLED_BASE + "?actionHistory=2", tenantAware.getCurrentTenant(), 911, savedAction.getId())
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.actionHistory.messages", hasItem(containsString("Installation completed"))))
                 .andExpect(jsonPath("$.actionHistory.messages", hasItem(containsString("Installation proceeding"))))
                 .andExpect(
@@ -569,7 +576,8 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         // for negative input the entire action history is returned
         mvc.perform(get(INSTALLED_BASE + "?actionHistory=-3", tenantAware.getCurrentTenant(), 911, savedAction.getId())
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.actionHistory.messages", hasItem(containsString("Installation completed"))))
                 .andExpect(jsonPath("$.actionHistory.messages", hasItem(containsString("Installation proceeding"))))
                 .andExpect(jsonPath("$.actionHistory.messages", hasItem(containsString("Installation scheduled"))));
@@ -582,21 +590,26 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         // not allowed methods
         mvc.perform(post(INSTALLED_BASE, tenantAware.getCurrentTenant(), CONTROLLER_ID, "1"))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(put(INSTALLED_BASE, tenantAware.getCurrentTenant(), CONTROLLER_ID, "1"))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isMethodNotAllowed());
 
         mvc.perform(delete(INSTALLED_BASE, tenantAware.getCurrentTenant(), CONTROLLER_ID, "1"))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isMethodNotAllowed());
 
         // non existing target
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), "not-existing", "1"))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
 
         // no deployment
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), CONTROLLER_ID, "1"))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
 
         // wrong media type
         final List<Target> toAssign = Collections.singletonList(target);
@@ -605,9 +618,11 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(savedSet, toAssign));
         postDeploymentFeedback(CONTROLLER_ID, actionId, getJsonClosedCancelActionFeedback(), status().isOk());
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), CONTROLLER_ID, actionId))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), CONTROLLER_ID, actionId)
-                        .accept(MediaType.APPLICATION_ATOM_XML)).andDo(MockMvcResultPrinter.print())
+                        .accept(MediaType.APPLICATION_ATOM_XML))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotAcceptable());
     }
 

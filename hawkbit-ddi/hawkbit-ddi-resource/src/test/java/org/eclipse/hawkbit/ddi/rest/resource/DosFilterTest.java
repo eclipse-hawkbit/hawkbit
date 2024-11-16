@@ -46,28 +46,26 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     @Override
     protected DefaultMockMvcBuilder createMvcWebAppContext(final WebApplicationContext context) {
         return super.createMvcWebAppContext(context).addFilter(
-                new DosFilter(null, 10, 10,
-                        "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
-                        "X-Forwarded-For"));
+                new DosFilter(null, 10, 10, "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)", "X-Forwarded-For"));
     }
 
     @Test
     @Description("Ensures that clients that are on the blacklist are forbidden")
     void blackListedClientIsForbidden() throws Exception {
         mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
-                .header(X_FORWARDED_FOR, "192.168.0.4 , 10.0.0.1 ")).andExpect(status().isForbidden());
+                        .header(X_FORWARDED_FOR, "192.168.0.4 , 10.0.0.1 "))
+                .andExpect(status().isForbidden());
     }
 
     @Test
     @Description("Ensures that a READ DoS attempt is blocked ")
     void getFloodingAttackThatIsPrevented() throws Exception {
-
-        MvcResult result = null;
-
         int requests = 0;
+        MvcResult result;
         do {
             result = mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
-                    .header(X_FORWARDED_FOR, "10.0.0.1")).andReturn();
+                            .header(X_FORWARDED_FOR, "10.0.0.1"))
+                    .andReturn();
             requests++;
 
             // we give up after 1.000 requests
@@ -83,7 +81,8 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     void unacceptableGetLoadButOnWhitelistIPv4() throws Exception {
         for (int i = 0; i < 100; i++) {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
-                    .header(X_FORWARDED_FOR, "127.0.0.1")).andExpect(status().isOk());
+                            .header(X_FORWARDED_FOR, "127.0.0.1"))
+                    .andExpect(status().isOk());
         }
     }
 
@@ -92,22 +91,23 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     void unacceptableGetLoadButOnWhitelistIPv6() throws Exception {
         for (int i = 0; i < 100; i++) {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
-                    .header(X_FORWARDED_FOR, "0:0:0:0:0:0:0:1")).andExpect(status().isOk());
+                            .header(X_FORWARDED_FOR, "0:0:0:0:0:0:0:1"))
+                    .andExpect(status().isOk());
         }
     }
 
     @Test
     @Description("Ensures that a relatively high number of READ requests is allowed if it is below the DoS detection threshold")
+    // No idea how to get rid of the Thread.sleep here
     @SuppressWarnings("squid:S2925")
-        // No idea how to get rid of the Thread.sleep here
     void acceptableGetLoad() throws Exception {
-
         for (int x = 0; x < 3; x++) {
             // sleep for one second
             Thread.sleep(1100);
             for (int i = 0; i < 9; i++) {
                 mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
-                        .header(X_FORWARDED_FOR, "10.0.0.1")).andExpect(status().isOk());
+                                .header(X_FORWARDED_FOR, "10.0.0.1"))
+                        .andExpect(status().isOk());
             }
         }
     }
@@ -118,8 +118,8 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
         final Long actionId = prepareDeploymentBase();
         final String feedback = getJsonProceedingDeploymentActionFeedback();
 
-        MvcResult result = null;
         int requests = 0;
+        MvcResult result;
         do {
             result = mvc.perform(post("/{tenant}/controller/v1/4711/deploymentBase/" + actionId + "/feedback",
                             tenantAware.getCurrentTenant()).header(X_FORWARDED_FOR, "10.0.0.1").content(feedback)
@@ -133,13 +133,12 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
         // the filter shuts down after 10 POST requests
         assertThat(requests).isGreaterThanOrEqualTo(10);
-
     }
 
     @Test
     @Description("Ensures that a relatively high number of WRITE requests is allowed if it is below the DoS detection threshold")
+    // No idea how to get rid of the Thread.sleep here
     @SuppressWarnings("squid:S2925")
-        // No idea how to get rid of the Thread.sleep here
     void acceptablePutPostLoad() throws Exception {
         final Long actionId = prepareDeploymentBase();
         final String feedback = getJsonProceedingDeploymentActionFeedback();
@@ -166,8 +165,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
         assignDistributionSet(ds, toAssign);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())).hasSize(1);
 
-        final Action uaction = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
-                .getContent().get(0);
+        final Action uaction = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId()).getContent().get(0);
 
         return uaction.getId();
     }
