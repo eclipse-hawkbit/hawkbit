@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -56,8 +57,8 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that management queries react as specfied on calls for non existing entities "
-            + " by means of throwing EntityNotFoundException.")
+    @Description("Verifies that management queries react as specified on calls for non existing entities " +
+            " by means of throwing EntityNotFoundException.")
     @ExpectEvents({ @Expect(type = RolloutDeletedEvent.class, count = 0),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 5),
@@ -215,6 +216,20 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
                 .hasSize((int) rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroupRunning.getId()));
         assertTargetNotNullAndActionStatusAndActionStatusCode(targetsWithActionStatusForRunningRG,
                 Status.RUNNING, 100);
+    }
+
+    @Test
+    @Description("Tests the rollout status mapping.")
+    void testRolloutGroupStatusConvert() {
+        final long id = rolloutGroupRepository.findByRolloutId(
+                        testdataFactory.createAndStartRollout(1, 0, 1, "100", "80").getId(), PAGE).getContent()
+                .get(0).getId();
+        for (final RolloutGroup.RolloutGroupStatus status : RolloutGroup.RolloutGroupStatus.values()) {
+            final JpaRolloutGroup rolloutGroup = ((JpaRolloutGroup) rolloutGroupManagement.get(id).orElseThrow());
+            rolloutGroup.setStatus(status);
+            rolloutGroupRepository.save(rolloutGroup);
+            assertThat( rolloutGroupManagement.get(id).orElseThrow().getStatus()).isEqualTo(status);
+        }
     }
 
     private void assertSortedListOfActionStatus(final List<TargetWithActionStatus> targetsWithActionStatus,
