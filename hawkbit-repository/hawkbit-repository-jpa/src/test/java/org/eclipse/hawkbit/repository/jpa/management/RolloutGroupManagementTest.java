@@ -47,13 +47,12 @@ import org.springframework.util.CollectionUtils;
 class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
-    @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
-            + "of Optional not present.")
+    @Description("Verifies that management get access reacts as specified on calls for non existing entities by means "  +
+            "of Optional not present.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(rolloutGroupManagement.get(NOT_EXIST_IDL)).isNotPresent();
         assertThat(rolloutGroupManagement.getWithDetailedStatus(NOT_EXIST_IDL)).isNotPresent();
-
     }
 
     @Test
@@ -219,7 +218,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Tests the rollout status mapping.")
+    @Description("Tests the rollout group status mapping.")
     void testRolloutGroupStatusConvert() {
         final long id = rolloutGroupRepository.findByRolloutId(
                         testdataFactory.createAndStartRollout(1, 0, 1, "100", "80").getId(), PAGE).getContent()
@@ -282,5 +281,4 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
     private Target reloadTarget(final Target targetCancelled) {
         return targetManagement.get(targetCancelled.getId()).orElseThrow();
     }
-
 }

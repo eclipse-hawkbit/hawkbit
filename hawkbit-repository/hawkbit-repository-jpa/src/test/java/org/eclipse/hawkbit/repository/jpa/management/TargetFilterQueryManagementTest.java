@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -27,6 +28,7 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
 import org.assertj.core.api.Assertions;
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
@@ -41,6 +43,7 @@ import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeExcep
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -236,7 +239,6 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     @Test
     @Description("Updates an existing filter query with a query string that addresses too many targets.")
     public void updateTargetFilterQueryWithQueryThatExceedsQuota() {
-
         // create targets
         final int maxTargets = quotaManagement.getMaxTargetsPerAutoAssignment();
         testdataFactory.createTargets(maxTargets + 1, "target%s");
@@ -389,7 +391,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final Long filterId = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("a")
-                .query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(23)).getId();
+                        .query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(23)).getId();
         assertThat(
                 targetFilterQueryManagement
                         .updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(null).weight(null)))
@@ -479,6 +481,34 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
                 .isThrownBy(() -> targetFilterQueryManagement
                         .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
                                 .ds(incompleteDistributionSet.getId())));
+    }
+
+    @Test
+    @Description("Tests the auto assign action type mapping.")
+    void testAutoAssignActionTypeConvert() {
+        for (final ActionType actionType : ActionType.values()) {
+            final Supplier<Long> create = () ->
+                    targetFilterQueryManagement.create(
+                                    entityFactory.targetFilterQuery()
+                                            .create()
+                                            .name("testAutoAssignActionTypeConvert_" + actionType)
+                                            .query("name==*")
+                                            .autoAssignActionType(actionType))
+                            .getId();
+            if (actionType == ActionType.TIMEFORCED) {
+                assertThatExceptionOfType(AbstractServerRtException.class).isThrownBy(create::get);
+            } else {
+                assertThat(targetFilterQueryManagement.get(create.get()).orElseThrow().getAutoAssignActionType()).isEqualTo(actionType);
+            }
+        }
+
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
+                ((JpaTargetFilterQuery) targetFilterQueryManagement.create(
+                        entityFactory.targetFilterQuery()
+                                .create()
+                                .name("testAutoAssignActionTypeConvert")
+                                .query("name==*")))
+                        .setAutoAssignActionType(ActionType.TIMEFORCED));
     }
 
     @Step

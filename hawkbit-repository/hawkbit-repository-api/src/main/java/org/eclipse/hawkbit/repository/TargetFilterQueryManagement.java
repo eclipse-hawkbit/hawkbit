@@ -169,8 +169,7 @@ public interface TargetFilterQueryManagement {
     Page<TargetFilterQuery> findByAutoAssignDSAndRsql(@NotNull Pageable pageable, long setId, String rsqlParam);
 
     /**
-     * Retrieves all {@link TargetFilterQuery}s with an auto-assign distribution
-     * set.
+     * Retrieves all {@link TargetFilterQuery}s with an auto-assign distribution set.
      *
      * @param pageable pagination information
      * @return the page with the found {@link TargetFilterQuery}s
