@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.artifact.repository.urlhandler.ApiType;
 import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.urlhandler.URLPlaceholder;
@@ -44,14 +46,11 @@ import org.springframework.util.CollectionUtils;
 /**
  * Utility class for the DDI API.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DataConversionHelper {
 
-    // utility class, private constructor.
-    private DataConversionHelper() {
-
-    }
-
-    public static DdiConfirmationBase createConfirmationBase(final Target target, final Action activeAction,
+    public static DdiConfirmationBase createConfirmationBase(
+            final Target target, final Action activeAction,
             final DdiAutoConfirmationState autoConfirmationState, final TenantAware tenantAware) {
         final String controllerId = target.getControllerId();
         final DdiConfirmationBase confirmationBase = new DdiConfirmationBase(autoConfirmationState);
@@ -77,7 +76,8 @@ public final class DataConversionHelper {
         return confirmationBase;
     }
 
-    public static DdiControllerBase fromTarget(final Target target, final Action installedAction,
+    public static DdiControllerBase fromTarget(
+            final Target target, final Action installedAction,
             final Action activeAction, final String defaultControllerPollTime, final TenantAware tenantAware) {
         final DdiControllerBase result = new DdiControllerBase(
                 new DdiConfig(new DdiPolling(defaultControllerPollTime)));
@@ -97,14 +97,13 @@ public final class DataConversionHelper {
                                         activeAction.getId()))
                         .withRel(DdiRestConstants.CANCEL_ACTION).expand());
             } else {
-                // we need to add the hashcode here of the actionWithStatus
-                // because the action might
-                // have changed from 'soft' to 'forced' type and we need to
-                // change the payload of the
+                // we need to add the hashcode here of the actionWithStatus because the action might
+                // have changed from 'soft' to 'forced' type, and we need to change the payload of the
                 // response because of eTags.
                 result.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder
                                 .methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                                .getControllerDeploymentBaseAction(tenantAware.getCurrentTenant(), target.getControllerId(),
+                                .getControllerDeploymentBaseAction(
+                                        tenantAware.getCurrentTenant(), target.getControllerId(),
                                         activeAction.getId(), calculateEtag(activeAction), null))
                         .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION).expand());
             }
@@ -121,7 +120,8 @@ public final class DataConversionHelper {
 
         if (target.isRequestControllerAttributes()) {
             result.add(WebMvcLinkBuilder
-                    .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+                    .linkTo(WebMvcLinkBuilder
+                            .methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                             .putConfigData(null, tenantAware.getCurrentTenant(), target.getControllerId()))
                     .withRel(DdiRestConstants.CONFIG_DATA_ACTION).expand());
         }
@@ -129,10 +129,10 @@ public final class DataConversionHelper {
         return result;
     }
 
-    static List<DdiChunk> createChunks(final Target target, final Action uAction,
+    static List<DdiChunk> createChunks(
+            final Target target, final Action uAction,
             final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
             final HttpRequest request, final ControllerManagement controllerManagement) {
-
         final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement
                 .findTargetVisibleMetaDataBySoftwareModuleId(uAction.getDistributionSet().getModules().stream()
                         .map(SoftwareModule::getId).collect(Collectors.toList()));
@@ -156,7 +156,8 @@ public final class DataConversionHelper {
     }
 
     private static List<DdiMetadata> mapMetadata(final List<SoftwareModuleMetadata> metadata) {
-        return CollectionUtils.isEmpty(metadata) ? null
+        return CollectionUtils.isEmpty(metadata)
+                ? null
                 : metadata.stream().map(md -> new DdiMetadata(md.getKey(), md.getValue())).collect(Collectors.toList());
     }
 
@@ -167,11 +168,11 @@ public final class DataConversionHelper {
         if ("runtime".equals(key)) {
             return "jvm";
         }
-
         return key;
     }
 
-    private static DdiArtifact createArtifact(final Target target, final ArtifactUrlHandler artifactUrlHandler,
+    private static DdiArtifact createArtifact(
+            final Target target, final ArtifactUrlHandler artifactUrlHandler,
             final Artifact artifact, final SystemManagement systemManagement, final HttpRequest request) {
         final DdiArtifact file = new DdiArtifact();
         file.setHashes(new DdiArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash(), artifact.getSha256Hash()));
@@ -187,13 +188,11 @@ public final class DataConversionHelper {
                 .forEach(entry -> file.add(Link.of(entry.getRef()).withRel(entry.getRel()).expand()));
 
         return file;
-
     }
 
     /**
-     * Calculates an etag for the given {@link Action} based on the entities
-     * hashcode and the {@link Action#isHitAutoForceTime(long)} to reflect a
-     * force switch.
+     * Calculates an etag for the given {@link Action} based on the entities hashcode and the {@link Action#isHitAutoForceTime(long)}
+     * to reflect a force switch.
      *
      * @param action to calculate the etag for
      * @return the etag
@@ -207,5 +206,4 @@ public final class DataConversionHelper {
         result = prime * result + offsetPrime;
         return result;
     }
-
 }
