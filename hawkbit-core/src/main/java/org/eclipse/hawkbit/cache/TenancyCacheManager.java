@@ -18,9 +18,8 @@ import org.springframework.cache.CacheManager;
 public interface TenancyCacheManager extends CacheManager {
 
     /**
-     * A direct-access for retrieving the cache without including the current
-     * tenant key. This is necessary e.g. for retrieving caches not for the
-     * current tenant.
+     * A direct-access for retrieving the cache without including the current tenant key. This is necessary e.g. for retrieving caches not for
+     * the current tenant.
      *
      * @param name the name of the cache to retrieve directly
      * @return the cache associated with the name without tenancy separation
@@ -28,8 +27,7 @@ public interface TenancyCacheManager extends CacheManager {
     Cache getDirectCache(String name);
 
     /**
-     * Evicts all caches for a given tenant. All caches under a certain tenant
-     * gets evicted.
+     * Evicts all caches for a given tenant. All caches under a certain tenant gets evicted.
      *
      * @param tenant the tenant to evict caches
      */

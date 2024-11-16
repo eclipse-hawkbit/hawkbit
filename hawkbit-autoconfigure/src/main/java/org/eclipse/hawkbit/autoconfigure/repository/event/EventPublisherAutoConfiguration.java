@@ -38,7 +38,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.messaging.converter.MessageConverter;
 
 /**
- * Auto configuration for the event bus.
+ * Autoconfiguration for the event bus.
  */
 @Configuration
 @RemoteApplicationEventScan(basePackages = "org.eclipse.hawkbit.repository.event.remote")
@@ -47,14 +47,12 @@ import org.springframework.messaging.converter.MessageConverter;
 public class EventPublisherAutoConfiguration {
 
     /**
-     * Server internal event publisher that allows parallel event processing if
-     * the event listener is marked as so.
+     * Server internal event publisher that allows parallel event processing if the event listener is marked as so.
      *
      * @return publisher bean
      */
     @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
-    ApplicationEventMulticaster applicationEventMulticaster(@Qualifier("asyncExecutor") final Executor executor,
-            final TenantAware tenantAware) {
+    ApplicationEventMulticaster applicationEventMulticaster(@Qualifier("asyncExecutor") final Executor executor, final TenantAware tenantAware) {
         final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster = new TenantAwareApplicationEventPublisher(
                 tenantAware, applicationEventFilter());
         simpleApplicationEventMulticaster.setTaskExecutor(executor);
@@ -85,26 +83,18 @@ public class EventPublisherAutoConfiguration {
     private static class TenantAwareApplicationEventPublisher extends SimpleApplicationEventMulticaster {
 
         private final TenantAware tenantAware;
-
         private final ApplicationEventFilter applicationEventFilter;
 
         @Autowired(required = false)
         private ServiceMatcher serviceMatcher;
 
-        /**
-         * Constructor.
-         *
-         * @param tenantAware the tenant ware
-         */
-        protected TenantAwareApplicationEventPublisher(final TenantAware tenantAware,
-                final ApplicationEventFilter applicationEventFilter) {
+        protected TenantAwareApplicationEventPublisher(final TenantAware tenantAware, final ApplicationEventFilter applicationEventFilter) {
             this.tenantAware = tenantAware;
             this.applicationEventFilter = applicationEventFilter;
         }
 
         /**
-         * Was overridden that not every event has to run within a own
-         * tenantAware.
+         * Was overridden that not every event has to run within an own tenantAware.
          */
         @Override
         public void multicastEvent(final ApplicationEvent event, final ResolvableType eventType) {
@@ -112,11 +102,10 @@ public class EventPublisherAutoConfiguration {
                 return;
             }
 
-            if (serviceMatcher == null || !(event instanceof RemoteTenantAwareEvent)) {
+            if (serviceMatcher == null || !(event instanceof final RemoteTenantAwareEvent remoteEvent)) {
                 super.multicastEvent(event, eventType);
                 return;
             }
-            final RemoteTenantAwareEvent remoteEvent = (RemoteTenantAwareEvent) event;
 
             if (serviceMatcher.isFromSelf(remoteEvent)) {
                 super.multicastEvent(event, eventType);
@@ -128,7 +117,6 @@ public class EventPublisherAutoConfiguration {
                 return null;
             });
         }
-
     }
 
     @ConditionalOnBusEnabled
@@ -142,7 +130,5 @@ public class EventPublisherAutoConfiguration {
         public MessageConverter busProtoBufConverter() {
             return new BusProtoStuffMessageConverter();
         }
-
     }
-
 }

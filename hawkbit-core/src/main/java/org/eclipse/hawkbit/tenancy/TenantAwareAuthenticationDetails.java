@@ -17,10 +17,8 @@ import lombok.ToString;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 
 /**
- * An authentication details object
- * {@link AbstractAuthenticationToken#getDetails()} which is stored in the
- * spring security authentication token details to transport the principal and
- * tenant in the security context session.
+ * An authentication details object {@link AbstractAuthenticationToken#getDetails()} which is stored in the
+ * spring security authentication token details to transport the principal and tenant in the security context session.
  */
 @Getter
 @ToString
