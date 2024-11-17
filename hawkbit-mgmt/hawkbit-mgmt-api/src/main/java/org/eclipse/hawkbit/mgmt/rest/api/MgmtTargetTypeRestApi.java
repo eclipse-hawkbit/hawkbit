@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -200,7 +201,7 @@ public interface MgmtTargetTypeRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetType> updateTargetType(
             @PathVariable("targetTypeId") Long targetTypeId,
-            MgmtTargetTypeRequestBodyPut restTargetType);
+            @RequestBody MgmtTargetTypeRequestBodyPut restTargetType);
 
     /**
      * Handles the POST request of creating new Target Types. The request body must always be a list of types.
@@ -240,7 +241,7 @@ public interface MgmtTargetTypeRestApi {
     @PostMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtTargetType>> createTargetTypes(List<MgmtTargetTypeRequestBodyPost> targetTypes);
+    ResponseEntity<List<MgmtTargetType>> createTargetTypes(@RequestBody List<MgmtTargetTypeRequestBodyPost> targetTypes);
 
     /**
      * Handles the GET request of retrieving the list of compatible distribution set types in that target type.
@@ -273,7 +274,8 @@ public interface MgmtTargetTypeRestApi {
     })
     @GetMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/" + MgmtRestConstants.TARGETTYPE_V1_DS_TYPES,
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtDistributionSetType>> getCompatibleDistributionSets(@PathVariable("targetTypeId") Long targetTypeId);
+    ResponseEntity<List<MgmtDistributionSetType>> getCompatibleDistributionSets(
+            @PathVariable("targetTypeId") Long targetTypeId);
 
     /**
      * Handles DELETE request for removing the compatibility of a distribution set type from the target type.
@@ -349,6 +351,7 @@ public interface MgmtTargetTypeRestApi {
     })
     @PostMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/" + MgmtRestConstants.TARGETTYPE_V1_DS_TYPES,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> addCompatibleDistributionSets(@PathVariable("targetTypeId") final Long targetTypeId,
-            final List<MgmtDistributionSetTypeAssignment> distributionSetTypeIds);
+    ResponseEntity<Void> addCompatibleDistributionSets(
+            @PathVariable("targetTypeId") Long targetTypeId,
+            @RequestBody List<MgmtDistributionSetTypeAssignment> distributionSetTypeIds);
 }

@@ -33,9 +33,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -55,10 +52,10 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtTargetType>> getTargetTypes(
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+            final int pagingOffsetParam,
+            final int pagingLimitParam,
+            final String sortParam,
+            final String rsqlParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetTypeSortParam(sortParam);
@@ -79,7 +76,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTargetType> getTargetType(@PathVariable("targetTypeId") final Long targetTypeId) {
+    public ResponseEntity<MgmtTargetType> getTargetType(final Long targetTypeId) {
         final TargetType foundType = findTargetTypeWithExceptionIfNotFound(targetTypeId);
         final MgmtTargetType response = MgmtTargetTypeMapper.toResponse(foundType);
         MgmtTargetTypeMapper.addLinks(response);
@@ -87,7 +84,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteTargetType(@PathVariable("targetTypeId") final Long targetTypeId) {
+    public ResponseEntity<Void> deleteTargetType(final Long targetTypeId) {
         log.debug("Delete {} target type", targetTypeId);
         targetTypeManagement.delete(targetTypeId);
         return ResponseEntity.ok().build();
@@ -95,8 +92,8 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
 
     @Override
     public ResponseEntity<MgmtTargetType> updateTargetType(
-            @PathVariable("targetTypeId") final Long targetTypeId,
-            @RequestBody final MgmtTargetTypeRequestBodyPut restTargetType) {
+            final Long targetTypeId,
+            final MgmtTargetTypeRequestBodyPut restTargetType) {
         final TargetType updated = targetTypeManagement
                 .update(entityFactory.targetType().update(targetTypeId).name(restTargetType.getName())
                         .description(restTargetType.getDescription()).colour(restTargetType.getColour()));
@@ -106,7 +103,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     }
 
     @Override
-    public ResponseEntity<List<MgmtTargetType>> createTargetTypes(@RequestBody final List<MgmtTargetTypeRequestBodyPost> targetTypes) {
+    public ResponseEntity<List<MgmtTargetType>> createTargetTypes(final List<MgmtTargetTypeRequestBodyPost> targetTypes) {
 
         final List<TargetType> createdTargetTypes = targetTypeManagement
                 .create(MgmtTargetTypeMapper.targetFromRequest(entityFactory, targetTypes));
@@ -115,23 +112,23 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
 
     @Override
     public ResponseEntity<List<MgmtDistributionSetType>> getCompatibleDistributionSets(
-            @PathVariable("targetTypeId") final Long targetTypeId) {
+            final Long targetTypeId) {
         final TargetType foundType = findTargetTypeWithExceptionIfNotFound(targetTypeId);
         return ResponseEntity.ok(MgmtDistributionSetTypeMapper.toListResponse(foundType.getCompatibleDistributionSetTypes()));
     }
 
     @Override
     public ResponseEntity<Void> removeCompatibleDistributionSet(
-            @PathVariable("targetTypeId") final Long targetTypeId,
-            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
+            final Long targetTypeId,
+            final Long distributionSetTypeId) {
         targetTypeManagement.unassignDistributionSetType(targetTypeId, distributionSetTypeId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> addCompatibleDistributionSets(
-            @PathVariable("targetTypeId") final Long targetTypeId,
-            @RequestBody final List<MgmtDistributionSetTypeAssignment> distributionSetTypeIds) {
+            final Long targetTypeId,
+            final List<MgmtDistributionSetTypeAssignment> distributionSetTypeIds) {
         targetTypeManagement.assignCompatibleDistributionSetTypes(
                 targetTypeId, distributionSetTypeIds.stream().map(MgmtDistributionSetTypeAssignment::getId).collect(Collectors.toList()));
         return ResponseEntity.ok().build();
