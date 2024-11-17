@@ -52,9 +52,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -87,10 +84,10 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam,
+            final int pagingOffsetParam,
+            final int pagingLimitParam,
+            final String sortParam,
+            final String rsqlParam,
             final String representationModeParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
@@ -120,7 +117,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtRolloutResponseBody> getRollout(@PathVariable("rolloutId") final Long rolloutId) {
+    public ResponseEntity<MgmtRolloutResponseBody> getRollout(final Long rolloutId) {
         final Rollout findRolloutById = rolloutManagement.getWithDetailedStatus(rolloutId)
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
 
@@ -129,9 +126,8 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     @Override
     public ResponseEntity<MgmtRolloutResponseBody> create(
-            @RequestBody final MgmtRolloutRestRequestBodyPost rolloutRequestBody) {
-        // first check the given RSQL query if it's well-formed, otherwise and
-        // exception is thrown
+            final MgmtRolloutRestRequestBodyPost rolloutRequestBody) {
+        // first check the given RSQL query if it's well-formed, otherwise and exception is thrown
         final String targetFilterQuery = rolloutRequestBody.getTargetFilterQuery();
         if (targetFilterQuery == null) {
             // Use RSQLParameterSyntaxException due to backwards compatibility
@@ -175,56 +171,55 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     @Override
     public ResponseEntity<MgmtRolloutResponseBody> update(
-            @PathVariable("rolloutId") final Long rolloutId,
-            @RequestBody final MgmtRolloutRestRequestBodyPut rolloutUpdateBody) {
-        final Rollout updated =
-                rolloutManagement.update(MgmtRolloutMapper.fromRequest(entityFactory, rolloutUpdateBody, rolloutId));
+            final Long rolloutId,
+            final MgmtRolloutRestRequestBodyPut rolloutUpdateBody) {
+        final Rollout updated = rolloutManagement.update(MgmtRolloutMapper.fromRequest(entityFactory, rolloutUpdateBody, rolloutId));
         return ResponseEntity.ok(MgmtRolloutMapper.toResponseRollout(updated, true));
     }
 
     @Override
-    public ResponseEntity<Void> approve(@PathVariable("rolloutId") final Long rolloutId, final String remark) {
+    public ResponseEntity<Void> approve(final Long rolloutId, final String remark) {
         rolloutManagement.approveOrDeny(rolloutId, Rollout.ApprovalDecision.APPROVED, remark);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> deny(@PathVariable("rolloutId") final Long rolloutId, final String remark) {
+    public ResponseEntity<Void> deny(final Long rolloutId, final String remark) {
         rolloutManagement.approveOrDeny(rolloutId, Rollout.ApprovalDecision.DENIED, remark);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> start(@PathVariable("rolloutId") final Long rolloutId) {
+    public ResponseEntity<Void> start(final Long rolloutId) {
         this.rolloutManagement.start(rolloutId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> pause(@PathVariable("rolloutId") final Long rolloutId) {
+    public ResponseEntity<Void> pause(final Long rolloutId) {
         this.rolloutManagement.pauseRollout(rolloutId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> delete(@PathVariable("rolloutId") final Long rolloutId) {
+    public ResponseEntity<Void> delete(final Long rolloutId) {
         this.rolloutManagement.delete(rolloutId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> resume(@PathVariable("rolloutId") final Long rolloutId) {
+    public ResponseEntity<Void> resume(final Long rolloutId) {
         this.rolloutManagement.resumeRollout(rolloutId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<PagedList<MgmtRolloutGroupResponseBody>> getRolloutGroups(
-            @PathVariable("rolloutId") final Long rolloutId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam,
+            final Long rolloutId,
+            final int pagingOffsetParam,
+            final int pagingLimitParam,
+            final String sortParam,
+            final String rsqlParam,
             final String representationModeParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -256,8 +251,9 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(@PathVariable("rolloutId") final Long rolloutId,
-            @PathVariable("groupId") final Long groupId) {
+    public ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(
+            final Long rolloutId,
+            final Long groupId) {
         findRolloutOrThrowException(rolloutId);
 
         final RolloutGroup rolloutGroup = rolloutGroupManagement.getWithDetailedStatus(groupId)
@@ -272,12 +268,13 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtTarget>> getRolloutGroupTargets(@PathVariable("rolloutId") final Long rolloutId,
-            @PathVariable("groupId") final Long groupId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+    public ResponseEntity<PagedList<MgmtTarget>> getRolloutGroupTargets(
+            final Long rolloutId,
+            final Long groupId,
+            final int pagingOffsetParam,
+            final int pagingLimitParam,
+            final String sortParam,
+            final String rsqlParam) {
         findRolloutOrThrowException(rolloutId);
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -298,7 +295,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> triggerNextGroup(@PathVariable("rolloutId") final Long rolloutId) {
+    public ResponseEntity<Void> triggerNextGroup(final Long rolloutId) {
         this.rolloutManagement.triggerNextGroup(rolloutId);
         return ResponseEntity.ok().build();
     }

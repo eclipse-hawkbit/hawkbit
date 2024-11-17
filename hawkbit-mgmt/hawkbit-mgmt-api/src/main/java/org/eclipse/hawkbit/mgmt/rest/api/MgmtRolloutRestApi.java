@@ -169,7 +169,8 @@ public interface MgmtRolloutRestApi {
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtRolloutResponseBody> create(MgmtRolloutRestRequestBodyPost rolloutCreateBody);
+    ResponseEntity<MgmtRolloutResponseBody> create(
+            @RequestBody MgmtRolloutRestRequestBodyPost rolloutRequestBody);
 
     /**
      * Handles the POST request for creating rollout.
@@ -440,7 +441,8 @@ public interface MgmtRolloutRestApi {
     })
     @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtRolloutGroupResponseBody>> getRolloutGroups(@PathVariable("rolloutId") Long rolloutId,
+    ResponseEntity<PagedList<MgmtRolloutGroupResponseBody>> getRolloutGroups(
+            @PathVariable("rolloutId") Long rolloutId,
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
@@ -625,5 +627,5 @@ public interface MgmtRolloutRestApi {
     })
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/retry",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtRolloutResponseBody> retryRollout(@PathVariable("rolloutId") final Long rolloutId);
+    ResponseEntity<MgmtRolloutResponseBody> retryRollout(@PathVariable("rolloutId") Long rolloutId);
 }
