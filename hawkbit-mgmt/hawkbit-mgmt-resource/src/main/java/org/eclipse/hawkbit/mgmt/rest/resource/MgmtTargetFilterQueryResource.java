@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtDistributionSetAutoA
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -37,9 +36,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -53,7 +49,8 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     private final EntityFactory entityFactory;
     private final TenantConfigHelper tenantConfigHelper;
 
-    MgmtTargetFilterQueryResource(final TargetFilterQueryManagement filterManagement, final EntityFactory entityFactory,
+    MgmtTargetFilterQueryResource(
+            final TargetFilterQueryManagement filterManagement, final EntityFactory entityFactory,
             final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         this.filterManagement = filterManagement;
@@ -62,7 +59,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
-    public ResponseEntity<MgmtTargetFilterQuery> getFilter(@PathVariable("filterId") final Long filterId) {
+    public ResponseEntity<MgmtTargetFilterQuery> getFilter(final Long filterId) {
         final TargetFilterQuery findTarget = findFilterWithExceptionIfNotFound(filterId);
         // to single response include poll status
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(findTarget,
@@ -74,11 +71,11 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     public ResponseEntity<PagedList<MgmtTargetFilterQuery>> getFilters(
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT) String representationModeParam) {
+            final int pagingOffsetParam,
+            final int pagingLimitParam,
+            final String sortParam,
+            final String rsqlParam,
+            final String representationModeParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetFilterQuerySortParam(sortParam);
@@ -104,7 +101,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     public ResponseEntity<MgmtTargetFilterQuery> createFilter(
-            @RequestBody final MgmtTargetFilterQueryRequestBody filter) {
+            final MgmtTargetFilterQueryRequestBody filter) {
         final TargetFilterQuery createdTarget = filterManagement
                 .create(MgmtTargetFilterQueryMapper.fromRequest(entityFactory, filter));
 
@@ -116,8 +113,9 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
-    public ResponseEntity<MgmtTargetFilterQuery> updateFilter(@PathVariable("filterId") final Long filterId,
-            @RequestBody final MgmtTargetFilterQueryRequestBody targetFilterRest) {
+    public ResponseEntity<MgmtTargetFilterQuery> updateFilter(
+            final Long filterId,
+            final MgmtTargetFilterQueryRequestBody targetFilterRest) {
         log.debug("updating target filter query {}", filterId);
 
         final TargetFilterQuery updateFilter = filterManagement
@@ -132,14 +130,14 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
-    public ResponseEntity<Void> deleteFilter(@PathVariable("filterId") final Long filterId) {
+    public ResponseEntity<Void> deleteFilter(final Long filterId) {
         filterManagement.delete(filterId);
         log.debug("{} target filter query deleted, return status {}", filterId, HttpStatus.OK);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(@PathVariable("filterId") final Long filterId) {
+    public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(final Long filterId) {
         final TargetFilterQuery filter = findFilterWithExceptionIfNotFound(filterId);
         final DistributionSet autoAssignDistributionSet = filter.getAutoAssignDistributionSet();
 
@@ -155,8 +153,8 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
-            @PathVariable("filterId") final Long filterId,
-            @RequestBody final MgmtDistributionSetAutoAssignment autoAssignRequest) {
+            final Long filterId,
+            final MgmtDistributionSetAutoAssignment autoAssignRequest) {
 
         final boolean confirmationRequired = autoAssignRequest.getConfirmationRequired() == null
                 ? tenantConfigHelper.isConfirmationFlowEnabled()
@@ -175,7 +173,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
-    public ResponseEntity<Void> deleteAssignedDistributionSet(@PathVariable("filterId") final Long filterId) {
+    public ResponseEntity<Void> deleteAssignedDistributionSet(final Long filterId) {
         filterManagement.updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(null));
 
         return ResponseEntity.noContent().build();
