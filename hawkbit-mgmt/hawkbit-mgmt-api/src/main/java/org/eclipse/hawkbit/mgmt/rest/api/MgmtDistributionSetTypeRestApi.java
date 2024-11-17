@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -202,7 +203,7 @@ public interface MgmtDistributionSetTypeRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetType> updateDistributionSetType(
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId,
-            MgmtDistributionSetTypeRequestBodyPut restDistributionSetType);
+            @RequestBody MgmtDistributionSetTypeRequestBodyPut restDistributionSetType);
 
     /**
      * Handles the POST request of creating new DistributionSetTypes. The request body must always be a list of types.
@@ -242,7 +243,7 @@ public interface MgmtDistributionSetTypeRestApi {
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSetType>> createDistributionSetTypes(
-            List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes);
+            @RequestBody List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes);
 
     /**
      * Handles the GET request of retrieving the list of mandatory software module types in that distribution set type.
@@ -421,7 +422,8 @@ public interface MgmtDistributionSetTypeRestApi {
     })
     @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/" +
             MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES + "/{softwareModuleTypeId}")
-    ResponseEntity<Void> removeMandatoryModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId,
+    ResponseEntity<Void> removeMandatoryModule(
+            @PathVariable("distributionSetTypeId") Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
     /**
@@ -457,7 +459,8 @@ public interface MgmtDistributionSetTypeRestApi {
     })
     @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/" +
             MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES + "/{softwareModuleTypeId}")
-    ResponseEntity<Void> removeOptionalModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId,
+    ResponseEntity<Void> removeOptionalModule(
+            @PathVariable("distributionSetTypeId") Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
     /**
@@ -500,7 +503,9 @@ public interface MgmtDistributionSetTypeRestApi {
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/" +
             MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> addMandatoryModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId, MgmtId smtId);
+    ResponseEntity<Void> addMandatoryModule(
+            @PathVariable("distributionSetTypeId") Long distributionSetTypeId,
+            @RequestBody MgmtId smtId);
 
     /**
      * Handles the POST request for adding an optional software module type to a distribution set type.
@@ -542,5 +547,7 @@ public interface MgmtDistributionSetTypeRestApi {
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/" +
             MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> addOptionalModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId, MgmtId smtId);
+    ResponseEntity<Void> addOptionalModule(
+            @PathVariable("distributionSetTypeId") Long distributionSetTypeId,
+            @RequestBody MgmtId smtId);
 }
