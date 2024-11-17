@@ -18,7 +18,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +36,6 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssi
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
@@ -68,9 +66,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -115,11 +110,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-
+            final int pagingOffsetParam,
+            final int pagingLimitParam,
+            final String sortParam,
+            final String rsqlParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeDistributionSetSortParam(sortParam);
@@ -141,7 +135,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<MgmtDistributionSet> getDistributionSet(
-            @PathVariable("distributionSetId") final Long distributionSetId) {
+            final Long distributionSetId) {
         final DistributionSet foundDs = distributionSetManagement.getOrElseThrowException(distributionSetId);
 
         final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(foundDs);
@@ -152,8 +146,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<List<MgmtDistributionSet>> createDistributionSets(
-            @RequestBody final List<MgmtDistributionSetRequestBodyPost> sets) {
-
+            final List<MgmtDistributionSetRequestBodyPost> sets) {
         log.debug("creating {} distribution sets", sets.size());
         // set default Ds type if ds type is null
         final String defaultDsKey = systemSecurityContext
@@ -180,15 +173,15 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteDistributionSet(@PathVariable("distributionSetId") final Long distributionSetId) {
+    public ResponseEntity<Void> deleteDistributionSet(final Long distributionSetId) {
         distributionSetManagement.delete(distributionSetId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<MgmtDistributionSet> updateDistributionSet(
-            @PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestBody final MgmtDistributionSetRequestBodyPut toUpdate) {
+            final Long distributionSetId,
+            final MgmtDistributionSetRequestBodyPut toUpdate) {
         final DistributionSet updated = distributionSetManagement.update(entityFactory.distributionSet()
                 .update(distributionSetId).name(toUpdate.getName()).description(toUpdate.getDescription())
                 .version(toUpdate.getVersion()).locked(toUpdate.getLocked())
@@ -202,12 +195,11 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
-            @PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-
+            final Long distributionSetId,
+            final int pagingOffsetParam,
+            final int pagingLimitParam,
+            final String sortParam,
+            final String rsqlParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
@@ -228,11 +220,11 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtTarget>> getInstalledTargets(
-            @PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+            final Long distributionSetId,
+            final int pagingOffsetParam,
+            final int pagingLimitParam,
+            final String sortParam,
+            final String rsqlParam) {
         // check if distribution set exists otherwise throw exception
         // immediately
         distributionSetManagement.getOrElseThrowException(distributionSetId);
@@ -256,11 +248,11 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
-            @PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+            final Long distributionSetId,
+            final int pagingOffsetParam,
+            final int pagingLimitParam,
+            final String sortParam,
+            final String rsqlParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetFilterQuerySortParam(sortParam);
@@ -276,9 +268,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<MgmtTargetAssignmentResponseBody> createAssignedTarget(
-            @PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestBody final List<MgmtTargetAssignmentRequestBody> assignments,
-            @RequestParam(value = "offline", required = false) final Boolean offline) {
+            final Long distributionSetId,
+            final List<MgmtTargetAssignmentRequestBody> assignments,
+            final Boolean offline) {
         if (offline != null && offline) {
             final List<Entry<String, Long>> offlineAssignments = assignments.stream()
                     .map(assignment -> new SimpleEntry<>(assignment.getId(), distributionSetId))
@@ -302,12 +294,11 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtMetadata>> getMetadata(
-            @PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-
+            final Long distributionSetId,
+            final int pagingOffsetParam,
+            final int pagingLimitParam,
+            final String sortParam,
+            final String rsqlParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeDistributionSetMetadataSortParam(sortParam);
@@ -329,8 +320,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<MgmtMetadata> getMetadataValue(
-            @PathVariable("distributionSetId") final Long distributionSetId,
-            @PathVariable("metadataKey") final String metadataKey) {
+            final Long distributionSetId,
+            final String metadataKey) {
         // check if distribution set exists otherwise throw exception immediately
         final DistributionSetMetadata findOne = distributionSetManagement
                 .getMetaDataByDistributionSetId(distributionSetId, metadataKey)
@@ -340,8 +331,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<MgmtMetadata> updateMetadata(
-            @PathVariable("distributionSetId") final Long distributionSetId,
-            @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadataBodyPut metadata) {
+            final Long distributionSetId,
+            final String metadataKey,
+            final MgmtMetadataBodyPut metadata) {
         // check if distribution set exists otherwise throw exception immediately
         final DistributionSetMetadata updated = distributionSetManagement.updateMetaData(distributionSetId,
                 entityFactory.generateDsMetadata(metadataKey, metadata.getValue()));
@@ -350,8 +342,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<Void> deleteMetadata(
-            @PathVariable("distributionSetId") final Long distributionSetId,
-            @PathVariable("metadataKey") final String metadataKey) {
+            final Long distributionSetId,
+            final String metadataKey) {
         // check if distribution set exists otherwise throw exception immediately
         distributionSetManagement.deleteMetaData(distributionSetId, metadataKey);
         return ResponseEntity.ok().build();
@@ -359,8 +351,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<List<MgmtMetadata>> createMetadata(
-            @PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestBody final List<MgmtMetadata> metadataRest) {
+            final Long distributionSetId,
+            final List<MgmtMetadata> metadataRest) {
         // check if distribution set exists otherwise throw exception immediately
         final List<DistributionSetMetadata> created = distributionSetManagement.createMetaData(distributionSetId,
                 MgmtDistributionSetMapper.fromRequestDsMetadata(metadataRest, entityFactory));
@@ -370,8 +362,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<Void> assignSoftwareModules(
-            @PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestBody final List<MgmtSoftwareModuleAssignment> softwareModuleIDs) {
+            final Long distributionSetId,
+            final List<MgmtSoftwareModuleAssignment> softwareModuleIDs) {
         distributionSetManagement.assignSoftwareModules(distributionSetId,
                 softwareModuleIDs.stream().map(MgmtSoftwareModuleAssignment::getId).collect(Collectors.toList()));
         return ResponseEntity.ok().build();
@@ -379,19 +371,18 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<Void> deleteAssignSoftwareModules(
-            @PathVariable("distributionSetId") final Long distributionSetId,
-            @PathVariable("softwareModuleId") final Long softwareModuleId) {
+            final Long distributionSetId,
+            final Long softwareModuleId) {
         distributionSetManagement.unassignSoftwareModule(distributionSetId, softwareModuleId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<PagedList<MgmtSoftwareModule>> getAssignedSoftwareModules(
-            @PathVariable("distributionSetId") final Long distributionSetId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam) {
-
+            final Long distributionSetId,
+            final int pagingOffsetParam,
+            final int pagingLimitParam,
+            final String sortParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeSoftwareModuleSortParam(sortParam);
@@ -403,7 +394,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSetStatistics> getRolloutsCountByStatusForDistributionSet(Long distributionSetId) {
+    public ResponseEntity<MgmtDistributionSetStatistics> getRolloutsCountByStatusForDistributionSet(final Long distributionSetId) {
         MgmtDistributionSetStatistics.Builder statistics = new MgmtDistributionSetStatistics.Builder(false);
         distributionSetManagement.countRolloutsByStatusForDistributionSet(distributionSetId).forEach(statistic ->
                 statistics.addTotalRolloutPerStatus(String.valueOf(statistic.getName()), Long.parseLong(statistic.getData().toString())));
@@ -411,7 +402,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSetStatistics> getActionsCountByStatusForDistributionSet(Long distributionSetId) {
+    public ResponseEntity<MgmtDistributionSetStatistics> getActionsCountByStatusForDistributionSet(final Long distributionSetId) {
         MgmtDistributionSetStatistics.Builder statistics = new MgmtDistributionSetStatistics.Builder(false);
         distributionSetManagement.countActionsByStatusForDistributionSet(distributionSetId).forEach(statistic ->
                 statistics.addTotalActionPerStatus(String.valueOf(statistic.getName()), Long.parseLong(statistic.getData().toString())));
@@ -419,14 +410,14 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSetStatistics> getAutoAssignmentsCountForDistributionSet(Long distributionSetId) {
+    public ResponseEntity<MgmtDistributionSetStatistics> getAutoAssignmentsCountForDistributionSet(final Long distributionSetId) {
         MgmtDistributionSetStatistics.Builder statistics = new MgmtDistributionSetStatistics.Builder(false);
         statistics.addTotalAutoAssignments(distributionSetManagement.countAutoAssignmentsForDistributionSet(distributionSetId));
         return ResponseEntity.ok(statistics.build());
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSetStatistics> getStatisticsForDistributionSet(Long distributionSetId) {
+    public ResponseEntity<MgmtDistributionSetStatistics> getStatisticsForDistributionSet(final Long distributionSetId) {
         MgmtDistributionSetStatistics.Builder statistics = new MgmtDistributionSetStatistics.Builder(true);
         distributionSetManagement.countRolloutsByStatusForDistributionSet(distributionSetId).forEach(statistic ->
                 statistics.addTotalRolloutPerStatus(String.valueOf(statistic.getName()), Long.parseLong(statistic.getData().toString())));
@@ -438,8 +429,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<Void> invalidateDistributionSet(
-            @PathVariable("distributionSetId") final Long distributionSetId,
-            @Valid @RequestBody final MgmtInvalidateDistributionSetRequestBody invalidateRequestBody) {
+            final Long distributionSetId,
+            final MgmtInvalidateDistributionSetRequestBody invalidateRequestBody) {
         distributionSetInvalidationManagement
                 .invalidateDistributionSet(new DistributionSetInvalidation(Arrays.asList(distributionSetId),
                         MgmtRestModelMapper.convertCancelationType(invalidateRequestBody.getActionCancelationType()),
