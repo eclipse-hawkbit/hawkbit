@@ -34,7 +34,6 @@ public final class MgmtDeploymentRequestMapper {
      */
     public static DeploymentRequestBuilder createAssignmentRequestBuilder(
             final MgmtDistributionSetAssignment dsAssignment, final String targetId) {
-
         return createAssignmentRequestBuilder(targetId, dsAssignment.getId(), dsAssignment.getType(),
                 dsAssignment.getForcetime(), dsAssignment.getWeight(), dsAssignment.getMaintenanceWindow());
     }

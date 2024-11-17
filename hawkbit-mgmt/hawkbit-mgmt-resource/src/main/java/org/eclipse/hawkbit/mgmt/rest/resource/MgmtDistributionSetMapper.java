@@ -49,8 +49,8 @@ public final class MgmtDistributionSetMapper {
      * @param sets to convert
      * @return converted list of {@link DistributionSet}s
      */
-    static List<DistributionSetCreate> dsFromRequest(final Collection<MgmtDistributionSetRequestBodyPost> sets,
-            final EntityFactory entityFactory) {
+    static List<DistributionSetCreate> dsFromRequest(
+            final Collection<MgmtDistributionSetRequestBodyPost> sets, final EntityFactory entityFactory) {
         return sets.stream().map(dsRest -> fromRequest(dsRest, entityFactory)).collect(Collectors.toList());
     }
 

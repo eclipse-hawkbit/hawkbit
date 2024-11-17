@@ -65,10 +65,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtTag>> getTargetTags(
-            final int pagingOffsetParam,
-            final int pagingLimitParam,
-            final String sortParam,
-            final String rsqlParam) {
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTagSortParam(sortParam);
@@ -103,9 +100,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTag> updateTargetTag(
-            final Long targetTagId,
-            final MgmtTagRequestBodyPut restTargetTagRest) {
+    public ResponseEntity<MgmtTag> updateTargetTag(final Long targetTagId, final MgmtTagRequestBodyPut restTargetTagRest) {
         log.debug("update {} target tag", restTargetTagRest);
 
         final TargetTag updateTargetTag = tagManagement
@@ -133,10 +128,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     @Override
     public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
             final Long targetTagId,
-            final int pagingOffsetParam,
-            final int pagingLimitParam,
-            final String sortParam,
-            final String rsqlParam) {
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
@@ -188,8 +180,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
     @Override
     public ResponseEntity<Void> unassignTargets(
-            final Long targetTagId, final OnNotFoundPolicy onNotFoundPolicy,
-            final List<String> controllerIds) {
+            final Long targetTagId, final OnNotFoundPolicy onNotFoundPolicy, final List<String> controllerIds) {
         log.debug("Unassign {} targets for target tag {}", controllerIds.size(), targetTagId);
         if (onNotFoundPolicy == OnNotFoundPolicy.FAIL) {
             this.targetManagement.unassignTag(controllerIds, targetTagId);
@@ -208,8 +199,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
     @Override
     public ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(
-            final Long targetTagId,
-            final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
+            final Long targetTagId, final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
         log.debug("Toggle Target assignment {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
 
         final TargetTag targetTag = findTargetTagById(targetTagId);
@@ -226,8 +216,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
     @Override
     public ResponseEntity<List<MgmtTarget>> assignTargetsByRequestBody(
-            final Long targetTagId,
-            final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
+            final Long targetTagId, final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
         log.debug("Assign targets {} for target tag {}", assignedTargetRequestBodies, targetTagId);
         final List<Target> assignedTarget = this.targetManagement
                 .assignTag(findTargetControllerIds(assignedTargetRequestBodies), targetTagId);

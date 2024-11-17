@@ -29,7 +29,7 @@ public class MgmtBasicAuthResource implements MgmtBasicAuthRestApi {
 
     @Override
     public ResponseEntity<MgmtUserInfo> validateBasicAuth() {
-        MgmtUserInfo userInfo = new MgmtUserInfo();
+        final MgmtUserInfo userInfo = new MgmtUserInfo();
         userInfo.setUsername(tenantAware.getCurrentUsername());
         userInfo.setTenant(tenantAware.getCurrentTenant());
         return ResponseEntity.ok(userInfo);

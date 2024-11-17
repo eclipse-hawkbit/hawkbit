@@ -41,7 +41,6 @@ public class MgmtActionResource implements MgmtActionRestApi {
     public ResponseEntity<PagedList<MgmtAction>> getActions(
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam,
             final String representationModeParam) {
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeActionSortParam(sortParam);
@@ -58,15 +57,11 @@ public class MgmtActionResource implements MgmtActionRestApi {
         }
 
         final MgmtRepresentationMode repMode = getRepresentationModeFromString(representationModeParam);
-
-        return ResponseEntity
-                .ok(new PagedList<>(MgmtActionMapper.toResponse(actions.getContent(), repMode), totalActionCount));
-
+        return ResponseEntity.ok(new PagedList<>(MgmtActionMapper.toResponse(actions.getContent(), repMode), totalActionCount));
     }
 
     @Override
     public ResponseEntity<MgmtAction> getAction(final Long actionId) {
-
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
@@ -81,5 +76,4 @@ public class MgmtActionResource implements MgmtActionRestApi {
                     return MgmtRepresentationMode.COMPACT;
                 });
     }
-
 }
