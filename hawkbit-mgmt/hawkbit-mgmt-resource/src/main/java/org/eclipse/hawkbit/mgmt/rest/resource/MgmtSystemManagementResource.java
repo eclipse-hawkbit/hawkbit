@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -51,7 +50,7 @@ public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi
      * @return HttpStatus.OK
      */
     @Override
-    public ResponseEntity<Void> deleteTenant(@PathVariable("tenant") final String tenant) {
+    public ResponseEntity<Void> deleteTenant(final String tenant) {
         systemManagement.deleteTenant(tenant);
         return ResponseEntity.ok().build();
     }
