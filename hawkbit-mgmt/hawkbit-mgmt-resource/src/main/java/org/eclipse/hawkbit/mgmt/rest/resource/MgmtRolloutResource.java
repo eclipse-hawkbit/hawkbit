@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -84,12 +83,8 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
-            final int pagingOffsetParam,
-            final int pagingLimitParam,
-            final String sortParam,
-            final String rsqlParam,
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam,
             final String representationModeParam) {
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeRolloutSortParam(sortParam);
@@ -125,8 +120,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtRolloutResponseBody> create(
-            final MgmtRolloutRestRequestBodyPost rolloutRequestBody) {
+    public ResponseEntity<MgmtRolloutResponseBody> create(final MgmtRolloutRestRequestBodyPost rolloutRequestBody) {
         // first check the given RSQL query if it's well-formed, otherwise and exception is thrown
         final String targetFilterQuery = rolloutRequestBody.getTargetFilterQuery();
         if (targetFilterQuery == null) {
@@ -170,9 +164,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtRolloutResponseBody> update(
-            final Long rolloutId,
-            final MgmtRolloutRestRequestBodyPut rolloutUpdateBody) {
+    public ResponseEntity<MgmtRolloutResponseBody> update(final Long rolloutId, final MgmtRolloutRestRequestBodyPut rolloutUpdateBody) {
         final Rollout updated = rolloutManagement.update(MgmtRolloutMapper.fromRequest(entityFactory, rolloutUpdateBody, rolloutId));
         return ResponseEntity.ok(MgmtRolloutMapper.toResponseRollout(updated, true));
     }
@@ -216,10 +208,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     @Override
     public ResponseEntity<PagedList<MgmtRolloutGroupResponseBody>> getRolloutGroups(
             final Long rolloutId,
-            final int pagingOffsetParam,
-            final int pagingLimitParam,
-            final String sortParam,
-            final String rsqlParam,
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam,
             final String representationModeParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -251,9 +240,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(
-            final Long rolloutId,
-            final Long groupId) {
+    public ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(final Long rolloutId, final Long groupId) {
         findRolloutOrThrowException(rolloutId);
 
         final RolloutGroup rolloutGroup = rolloutGroupManagement.getWithDetailedStatus(groupId)
@@ -263,18 +250,14 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             throw new EntityNotFoundException(RolloutGroup.class, groupId);
         }
 
-        return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(rolloutGroup, true,
-                tenantConfigHelper.isConfirmationFlowEnabled()));
+        return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(
+                rolloutGroup, true, tenantConfigHelper.isConfirmationFlowEnabled()));
     }
 
     @Override
     public ResponseEntity<PagedList<MgmtTarget>> getRolloutGroupTargets(
-            final Long rolloutId,
-            final Long groupId,
-            final int pagingOffsetParam,
-            final int pagingLimitParam,
-            final String sortParam,
-            final String rsqlParam) {
+            final Long rolloutId, final Long groupId,
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
         findRolloutOrThrowException(rolloutId);
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -329,8 +312,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         });
     }
 
-    private Optional<Boolean> isConfirmationRequiredForGroup(final MgmtRolloutGroup group,
-            final MgmtRolloutRestRequestBodyPost request) {
+    private Optional<Boolean> isConfirmationRequiredForGroup(final MgmtRolloutGroup group, final MgmtRolloutRestRequestBodyPost request) {
         if (group.getConfirmationRequired() != null) {
             return Optional.of(group.getConfirmationRequired());
         } else if (request.getConfirmationRequired() != null) {
@@ -344,5 +326,4 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             throw new EntityNotFoundException(Rollout.class, rolloutId);
         }
     }
-
 }

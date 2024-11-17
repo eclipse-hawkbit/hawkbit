@@ -52,10 +52,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtTargetType>> getTargetTypes(
-            final int pagingOffsetParam,
-            final int pagingLimitParam,
-            final String sortParam,
-            final String rsqlParam) {
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetTypeSortParam(sortParam);
@@ -91,9 +88,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTargetType> updateTargetType(
-            final Long targetTypeId,
-            final MgmtTargetTypeRequestBodyPut restTargetType) {
+    public ResponseEntity<MgmtTargetType> updateTargetType(final Long targetTypeId, final MgmtTargetTypeRequestBodyPut restTargetType) {
         final TargetType updated = targetTypeManagement
                 .update(entityFactory.targetType().update(targetTypeId).name(restTargetType.getName())
                         .description(restTargetType.getDescription()).colour(restTargetType.getColour()));
@@ -104,31 +99,26 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
 
     @Override
     public ResponseEntity<List<MgmtTargetType>> createTargetTypes(final List<MgmtTargetTypeRequestBodyPost> targetTypes) {
-
         final List<TargetType> createdTargetTypes = targetTypeManagement
                 .create(MgmtTargetTypeMapper.targetFromRequest(entityFactory, targetTypes));
         return ResponseEntity.status(HttpStatus.CREATED).body(MgmtTargetTypeMapper.toListResponse(createdTargetTypes));
     }
 
     @Override
-    public ResponseEntity<List<MgmtDistributionSetType>> getCompatibleDistributionSets(
-            final Long targetTypeId) {
+    public ResponseEntity<List<MgmtDistributionSetType>> getCompatibleDistributionSets(final Long targetTypeId) {
         final TargetType foundType = findTargetTypeWithExceptionIfNotFound(targetTypeId);
         return ResponseEntity.ok(MgmtDistributionSetTypeMapper.toListResponse(foundType.getCompatibleDistributionSetTypes()));
     }
 
     @Override
-    public ResponseEntity<Void> removeCompatibleDistributionSet(
-            final Long targetTypeId,
-            final Long distributionSetTypeId) {
+    public ResponseEntity<Void> removeCompatibleDistributionSet(final Long targetTypeId, final Long distributionSetTypeId) {
         targetTypeManagement.unassignDistributionSetType(targetTypeId, distributionSetTypeId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> addCompatibleDistributionSets(
-            final Long targetTypeId,
-            final List<MgmtDistributionSetTypeAssignment> distributionSetTypeIds) {
+            final Long targetTypeId, final List<MgmtDistributionSetTypeAssignment> distributionSetTypeIds) {
         targetTypeManagement.assignCompatibleDistributionSetTypes(
                 targetTypeId, distributionSetTypeIds.stream().map(MgmtDistributionSetTypeAssignment::getId).collect(Collectors.toList()));
         return ResponseEntity.ok().build();

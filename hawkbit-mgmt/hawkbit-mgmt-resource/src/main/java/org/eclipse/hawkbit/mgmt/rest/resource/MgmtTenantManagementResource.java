@@ -91,8 +91,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
 
     @Override
     public ResponseEntity<MgmtSystemTenantConfigurationValue> updateTenantConfigurationValue(
-            final String keyName,
-            final MgmtSystemTenantConfigurationValueRequest configurationValueRest) {
+            final String keyName, final MgmtSystemTenantConfigurationValueRequest configurationValueRest) {
         Serializable configurationValue = configurationValueRest.getValue();
         final MgmtSystemTenantConfigurationValue responseUpdatedValue;
         if (isDefaultDistributionSetTypeKey(keyName)) {

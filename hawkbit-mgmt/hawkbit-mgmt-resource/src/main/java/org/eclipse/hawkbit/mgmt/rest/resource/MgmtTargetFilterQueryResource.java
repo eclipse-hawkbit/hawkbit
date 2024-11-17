@@ -71,10 +71,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     public ResponseEntity<PagedList<MgmtTargetFilterQuery>> getFilters(
-            final int pagingOffsetParam,
-            final int pagingLimitParam,
-            final String sortParam,
-            final String rsqlParam,
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam,
             final String representationModeParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -153,8 +150,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
-            final Long filterId,
-            final MgmtDistributionSetAutoAssignment autoAssignRequest) {
+            final Long filterId, final MgmtDistributionSetAutoAssignment autoAssignRequest) {
 
         final boolean confirmationRequired = autoAssignRequest.getConfirmationRequired() == null
                 ? tenantConfigHelper.isConfirmationFlowEnabled()
@@ -175,7 +171,6 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     @Override
     public ResponseEntity<Void> deleteAssignedDistributionSet(final Long filterId) {
         filterManagement.updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(null));
-
         return ResponseEntity.noContent().build();
     }
 

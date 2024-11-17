@@ -58,10 +58,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
 
     @Override
     public ResponseEntity<PagedList<MgmtTag>> getDistributionSetTags(
-            final int pagingOffsetParam,
-            final int pagingLimitParam,
-            final String sortParam,
-            final String rsqlParam) {
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTagSortParam(sortParam);
@@ -132,10 +129,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSet>> getAssignedDistributionSets(
             final Long distributionsetTagId,
-            final int pagingOffsetParam,
-            final int pagingLimitParam,
-            final String sortParam,
-            final String rsqlParam) {
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTagSortParam(sortParam);

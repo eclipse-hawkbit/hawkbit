@@ -47,10 +47,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
 
     @Override
     public ResponseEntity<PagedList<MgmtSoftwareModuleType>> getTypes(
-            final int pagingOffsetParam,
-            final int pagingLimitParam,
-            final String sortParam,
-            final String rsqlParam) {
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeSoftwareModuleTypeSortParam(sortParam);
@@ -72,24 +69,20 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     }
 
     @Override
-    public ResponseEntity<MgmtSoftwareModuleType> getSoftwareModuleType(
-            final Long softwareModuleTypeId) {
+    public ResponseEntity<MgmtSoftwareModuleType> getSoftwareModuleType(final Long softwareModuleTypeId) {
         final SoftwareModuleType foundType = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
-
         return ResponseEntity.ok(MgmtSoftwareModuleTypeMapper.toResponse(foundType));
     }
 
     @Override
-    public ResponseEntity<Void> deleteSoftwareModuleType(
-            final Long softwareModuleTypeId) {
+    public ResponseEntity<Void> deleteSoftwareModuleType(final Long softwareModuleTypeId) {
         softwareModuleTypeManagement.delete(softwareModuleTypeId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<MgmtSoftwareModuleType> updateSoftwareModuleType(
-            final Long softwareModuleTypeId,
-            final MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType) {
+            final Long softwareModuleTypeId, final MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType) {
         final SoftwareModuleType updatedSoftwareModuleType = softwareModuleTypeManagement.update(entityFactory
                 .softwareModuleType().update(softwareModuleTypeId).description(restSoftwareModuleType.getDescription())
                 .colour(restSoftwareModuleType.getColour()));
