@@ -177,7 +177,7 @@ public interface MgmtTargetRestApi {
     @PostMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtTarget>> createTargets(List<MgmtTargetRequestBody> targets);
+    ResponseEntity<List<MgmtTarget>> createTargets(@RequestBody List<MgmtTargetRequestBody> targets);
 
     /**
      * Handles the PUT request of updating a target. The ID is within the URL path of the request. A given ID in the request body is ignored.
@@ -217,7 +217,9 @@ public interface MgmtTargetRestApi {
     @PutMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}",
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTarget> updateTarget(@PathVariable("targetId") String targetId, MgmtTargetRequestBody targetRest);
+    ResponseEntity<MgmtTarget> updateTarget(
+            @PathVariable("targetId") String targetId,
+            @RequestBody MgmtTargetRequestBody targetRest);
 
     /**
      * Handles the DELETE request of deleting a target.
@@ -302,7 +304,7 @@ public interface MgmtTargetRestApi {
     })
     @PostMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> assignTargetType(@PathVariable("targetId") String targetId, MgmtId targetTypeId);
+    ResponseEntity<Void> assignTargetType(@PathVariable("targetId") String targetId, @RequestBody MgmtId targetTypeId);
 
     /**
      * Handles the GET request of retrieving the attributes of a specific target.
@@ -422,7 +424,9 @@ public interface MgmtTargetRestApi {
     })
     @GetMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/actions/{actionId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtAction> getAction(@PathVariable("targetId") String targetId, @PathVariable("actionId") Long actionId);
+    ResponseEntity<MgmtAction> getAction(
+            @PathVariable("targetId") String targetId,
+            @PathVariable("actionId") Long actionId);
 
     /**
      * Handles the DELETE request of canceling an specific Actions of a specific Target.
@@ -497,7 +501,8 @@ public interface MgmtTargetRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAction> updateAction(
             @PathVariable("targetId") String targetId,
-            @PathVariable("actionId") Long actionId, MgmtActionRequestBodyPut actionUpdate);
+            @PathVariable("actionId") Long actionId,
+            @RequestBody MgmtActionRequestBodyPut actionUpdate);
 
     /**
      * Handles the GET request of retrieving the ActionStatus of a specific target and action.
@@ -610,7 +615,7 @@ public interface MgmtTargetRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
             @PathVariable("targetId") String targetId,
-            @Valid MgmtDistributionSetAssignments dsAssignments,
+            @RequestBody @Valid MgmtDistributionSetAssignments dsAssignments,
             @RequestParam(value = "offline", required = false)
             @Schema(description = """
                     Offline update (set param to true) that is only reported but not managed by the service, e.g.
@@ -709,7 +714,8 @@ public interface MgmtTargetRestApi {
     })
     @GetMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("targetId") String targetId,
+    ResponseEntity<PagedList<MgmtMetadata>> getMetadata(
+            @PathVariable("targetId") String targetId,
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
@@ -804,7 +810,8 @@ public interface MgmtTargetRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtMetadata> updateMetadata(
             @PathVariable("targetId") String targetId,
-            @PathVariable("metadataKey") String metadataKey, MgmtMetadataBodyPut metadata);
+            @PathVariable("metadataKey") String metadataKey,
+            @RequestBody MgmtMetadataBodyPut metadata);
 
     /**
      * Deletes a single metadata entry from the target.
@@ -874,7 +881,9 @@ public interface MgmtTargetRestApi {
     @PostMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata",
             consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("targetId") String targetId, List<MgmtMetadata> metadataRest);
+    ResponseEntity<List<MgmtMetadata>> createMetadata(
+            @PathVariable("targetId") String targetId,
+            @RequestBody List<MgmtMetadata> metadataRest);
 
     /**
      * Get the current auto-confirm state for a specific target.
@@ -977,5 +986,6 @@ public interface MgmtTargetRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/autoConfirm/deactivate")
-    ResponseEntity<Void> deactivateAutoConfirm(@PathVariable("targetId") String targetId);
+    ResponseEntity<Void> deactivateAutoConfirm(
+            @PathVariable("targetId") String targetId);
 }
