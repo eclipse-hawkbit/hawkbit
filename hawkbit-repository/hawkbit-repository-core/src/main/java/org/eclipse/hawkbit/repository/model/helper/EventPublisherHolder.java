@@ -30,10 +30,8 @@ public final class EventPublisherHolder {
     @Getter
     @Autowired
     private ApplicationEventPublisher eventPublisher;
-
     @Autowired(required = false)
     private ServiceMatcher serviceMatcher;
-
     @Autowired
     private BusProperties bus;
 

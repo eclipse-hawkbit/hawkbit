@@ -36,14 +36,12 @@ import org.springframework.util.MimeType;
 public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
 
     public static final MimeType APPLICATION_BINARY_PROTOSTUFF = new MimeType("application", "binary+protostuff");
+
     /**
      * The length of the class type length of the payload.
      */
     private static final byte EVENT_TYPE_LENGTH = 2;
 
-    /**
-     * Constructor.
-     */
     public BusProtoStuffMessageConverter() {
         super(APPLICATION_BINARY_PROTOSTUFF);
     }

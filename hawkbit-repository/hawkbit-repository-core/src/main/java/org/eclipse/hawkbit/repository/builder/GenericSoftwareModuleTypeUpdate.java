@@ -18,5 +18,4 @@ public class GenericSoftwareModuleTypeUpdate extends AbstractSoftwareModuleTypeU
     public GenericSoftwareModuleTypeUpdate(final Long id) {
         super.id = id;
     }
-
 }

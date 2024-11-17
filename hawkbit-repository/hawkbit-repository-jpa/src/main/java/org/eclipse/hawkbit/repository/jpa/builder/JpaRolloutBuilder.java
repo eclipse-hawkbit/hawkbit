@@ -36,5 +36,4 @@ public class JpaRolloutBuilder implements RolloutBuilder {
     public RolloutCreate create() {
         return new JpaRolloutCreate(distributionSetManagement);
     }
-
 }

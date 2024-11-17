@@ -72,75 +72,40 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @JoinColumn(name = "distribution_set", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolltout_ds"))
     @NotNull
     private JpaDistributionSet distributionSet;
-
-    @Converter
-    public static class RolloutStatusConverter extends MapAttributeConverter<RolloutStatus, Integer> {
-
-        public RolloutStatusConverter() {
-            super(new HashMap<>() {{
-                put(RolloutStatus.CREATING, 0);
-                put(RolloutStatus.READY, 1);
-                put(RolloutStatus.PAUSED, 2);
-                put(RolloutStatus.STARTING, 3);
-                put(RolloutStatus.STOPPED, 4);
-                put(RolloutStatus.RUNNING, 5);
-                put(RolloutStatus.FINISHED, 6);
-                put(RolloutStatus.ERROR_CREATING, 7);
-                put(RolloutStatus.ERROR_STARTING, 8);
-                put(RolloutStatus.DELETING, 9);
-                put(RolloutStatus.DELETED, 10);
-                put(RolloutStatus.WAITING_FOR_APPROVAL, 11);
-                put(RolloutStatus.APPROVAL_DENIED, 12);
-                put(RolloutStatus.STOPPING, 13);
-            }}, null);
-        }
-    }
     @Column(name = "status", nullable = false)
     @Convert(converter = RolloutStatusConverter.class)
     @NotNull
     private RolloutStatus status = RolloutStatus.CREATING;
     @Column(name = "last_check")
     private long lastCheck;
-
     @Column(name = "action_type", nullable = false)
     @Convert(converter = JpaAction.ActionTypeConverter.class)
     @NotNull
     private ActionType actionType = ActionType.FORCED;
-
     @Column(name = "forced_time")
     private long forcedTime;
-
     @Column(name = "total_targets")
     private long totalTargets;
-
     @Column(name = "rollout_groups_created")
     private int rolloutGroupsCreated;
-
     @Column(name = "deleted")
     private boolean deleted;
-
     @Column(name = "start_at")
     private Long startAt;
-
     @Column(name = "approval_decided_by")
     @Size(min = 1, max = Rollout.APPROVED_BY_MAX_SIZE)
     private String approvalDecidedBy;
-
     @Column(name = "approval_remark")
     @Size(max = Rollout.APPROVAL_REMARK_MAX_SIZE)
     private String approvalRemark;
-
     @Column(name = "weight")
     @Min(Action.WEIGHT_MIN)
     @Max(Action.WEIGHT_MAX)
     private Integer weight;
-
     @Column(name = "is_dynamic") // dynamic is reserved keyword in some databases
     private Boolean dynamic;
-
     @Column(name = "access_control_context", nullable = true)
     private String accessControlContext;
-
     @Transient
     private transient TotalTargetCountStatus totalTargetCountStatus;
 
@@ -330,5 +295,28 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
+    }
+
+    @Converter
+    public static class RolloutStatusConverter extends MapAttributeConverter<RolloutStatus, Integer> {
+
+        public RolloutStatusConverter() {
+            super(new HashMap<>() {{
+                put(RolloutStatus.CREATING, 0);
+                put(RolloutStatus.READY, 1);
+                put(RolloutStatus.PAUSED, 2);
+                put(RolloutStatus.STARTING, 3);
+                put(RolloutStatus.STOPPED, 4);
+                put(RolloutStatus.RUNNING, 5);
+                put(RolloutStatus.FINISHED, 6);
+                put(RolloutStatus.ERROR_CREATING, 7);
+                put(RolloutStatus.ERROR_STARTING, 8);
+                put(RolloutStatus.DELETING, 9);
+                put(RolloutStatus.DELETED, 10);
+                put(RolloutStatus.WAITING_FOR_APPROVAL, 11);
+                put(RolloutStatus.APPROVAL_DENIED, 12);
+                put(RolloutStatus.STOPPING, 13);
+            }}, null);
+        }
     }
 }

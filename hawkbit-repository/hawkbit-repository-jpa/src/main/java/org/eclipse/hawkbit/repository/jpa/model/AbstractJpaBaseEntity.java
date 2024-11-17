@@ -24,8 +24,8 @@ import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -96,19 +96,22 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         return optLockRevision;
     }
 
-    @CreatedBy
-    public void setCreatedBy(final String createdBy) {
+    @LastModifiedDate
+    public void setLastModifiedAt(final long lastModifiedAt) {
         if (isController()) {
-            this.createdBy = "CONTROLLER_PLUG_AND_PLAY";
-
-            // In general modification audit entry is not changed by the
-            // controller. However, we want to stay consistent with
-            // EnableJpaAuditing#modifyOnCreate=true.
-            this.lastModifiedBy = this.createdBy;
             return;
         }
 
-        this.createdBy = createdBy;
+        this.lastModifiedAt = lastModifiedAt;
+    }
+
+    @LastModifiedBy
+    public void setLastModifiedBy(final String lastModifiedBy) {
+        if (isController()) {
+            return;
+        }
+
+        this.lastModifiedBy = lastModifiedBy;
     }
 
     @CreatedDate
@@ -123,22 +126,19 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         }
     }
 
-    @LastModifiedBy
-    public void setLastModifiedBy(final String lastModifiedBy) {
+    @CreatedBy
+    public void setCreatedBy(final String createdBy) {
         if (isController()) {
+            this.createdBy = "CONTROLLER_PLUG_AND_PLAY";
+
+            // In general modification audit entry is not changed by the
+            // controller. However, we want to stay consistent with
+            // EnableJpaAuditing#modifyOnCreate=true.
+            this.lastModifiedBy = this.createdBy;
             return;
         }
 
-        this.lastModifiedBy = lastModifiedBy;
-    }
-
-    @LastModifiedDate
-    public void setLastModifiedAt(final long lastModifiedAt) {
-        if (isController()) {
-            return;
-        }
-
-        this.lastModifiedAt = lastModifiedAt;
+        this.createdBy = createdBy;
     }
 
     @Override
@@ -201,7 +201,8 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     private boolean isController() {
         return SecurityContextHolder.getContext().getAuthentication() != null
-                && SecurityContextHolder.getContext().getAuthentication().getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails
+                && SecurityContextHolder.getContext().getAuthentication()
+                .getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails
                 && tenantAwareDetails.isController();
     }
 }

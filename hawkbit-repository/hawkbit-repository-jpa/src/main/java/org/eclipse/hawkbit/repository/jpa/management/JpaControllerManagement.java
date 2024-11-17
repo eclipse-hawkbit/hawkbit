@@ -127,46 +127,32 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Autowired
     private EntityManager entityManager;
-
     @Autowired
     private TargetRepository targetRepository;
-
     @Autowired
     private SoftwareModuleRepository softwareModuleRepository;
-
     @Autowired
     private TenantConfigurationManagement tenantConfigurationManagement;
-
     @Autowired
     private SystemSecurityContext systemSecurityContext;
-
     @Autowired
     private EntityFactory entityFactory;
-
     @Autowired
     private EventPublisherHolder eventPublisherHolder;
-
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
-
     @Autowired
     private SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
-
     @Autowired
     private PlatformTransactionManager txManager;
-
     @Autowired
     private TenantAware tenantAware;
-
     @Autowired
     private ConfirmationManagement confirmationManagement;
-
     @Autowired
     private TargetTypeManagement targetTypeManagement;
-
     @Autowired
     private DeploymentManagement deploymentManagement;
-
     @Autowired
     private DistributionSetManagement distributionSetManagement;
 
@@ -179,7 +165,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             executorService.scheduleWithFixedDelay(this::flushUpdateQueue,
                     repositoryProperties.getPollPersistenceFlushTime(),
                     repositoryProperties.getPollPersistenceFlushTime(), TimeUnit.MILLISECONDS);
-
             queue = new LinkedBlockingDeque<>(repositoryProperties.getPollPersistenceQueueSize());
         } else {
             queue = null;
@@ -194,26 +179,30 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Override
     protected void onActionStatusUpdate(final Action.Status updatedActionStatus, final JpaAction action) {
         switch (updatedActionStatus) {
-            case ERROR:
+            case ERROR: {
                 final JpaTarget target = (JpaTarget) action.getTarget();
                 target.setUpdateStatus(TargetUpdateStatus.ERROR);
                 handleErrorOnAction(action, target);
                 break;
-            case FINISHED:
+            }
+            case FINISHED: {
                 handleFinishedAndStoreInTargetStatus(action).ifPresent(this::requestControllerAttributes);
                 break;
-            case DOWNLOADED:
+            }
+            case DOWNLOADED: {
                 handleDownloadedActionStatus(action).ifPresent(this::requestControllerAttributes);
                 break;
-            default:
+            }
+            default: {
                 break;
+            }
         }
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action addCancelActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
 
@@ -227,19 +216,22 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         switch (actionStatus.getStatus()) {
             case CANCELED:
-            case FINISHED:
+            case FINISHED: {
                 handleFinishedCancelation(actionStatus, action);
                 break;
+            }
             case ERROR:
-            case CANCEL_REJECTED:
+            case CANCEL_REJECTED: {
                 // Cancellation rejected. Back to running.
                 action.setStatus(Status.RUNNING);
                 break;
-            default:
+            }
+            default: {
                 // information status entry - check for a potential DOS attack
                 assertActionStatusQuota(actionStatus, action);
                 assertActionStatusMessageQuota(actionStatus);
                 break;
+            }
         }
 
         actionStatus.setAction(actionRepository.save(action));
@@ -250,24 +242,22 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public Optional<SoftwareModule> getSoftwareModule(final long id) {
-        return softwareModuleRepository.findById(id).map(s -> (SoftwareModule) s);
+        return softwareModuleRepository.findById(id).map(SoftwareModule.class::cast);
     }
 
     @Override
-    public Map<Long, List<SoftwareModuleMetadata>> findTargetVisibleMetaDataBySoftwareModuleId(
-            final Collection<Long> moduleId) {
-
+    public Map<Long, List<SoftwareModuleMetadata>> findTargetVisibleMetaDataBySoftwareModuleId(final Collection<Long> moduleId) {
         return softwareModuleMetadataRepository
-                .findBySoftwareModuleIdInAndTargetVisible(PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT),
-                        moduleId, true)
-                .getContent().stream().collect(Collectors.groupingBy(o -> (Long) o[0],
-                        Collectors.mapping(o -> (SoftwareModuleMetadata) o[1], Collectors.toList())));
+                .findBySoftwareModuleIdInAndTargetVisible(
+                        PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT), moduleId, true)
+                .getContent().stream()
+                .collect(Collectors.groupingBy(o -> (Long) o[0], Collectors.mapping(o -> (SoftwareModuleMetadata) o[1], Collectors.toList())));
     }
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public ActionStatus addInformationalActionStatus(final ActionStatusCreate c) {
         final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
         final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
@@ -282,8 +272,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action addUpdateActionStatus(final ActionStatusCreate statusCreate) {
         return addActionStatus((JpaActionStatusCreate) statusCreate);
     }
@@ -314,14 +304,14 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address) {
         return findOrRegisterTargetIfItDoesNotExist(controllerId, address, null, null);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address,
             final String name, final String type) {
         final Specification<JpaTarget> spec =
@@ -332,8 +322,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public Optional<Action> getActionForDownloadByTargetAndSoftwareModule(final String controllerId,
-            final long moduleId) {
+    public Optional<Action> getActionForDownloadByTargetAndSoftwareModule(final String controllerId, final long moduleId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
         throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
 
@@ -409,16 +398,16 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action registerRetrieved(final long actionId, final String message) {
         return handleRegisterRetrieved(actionId, message);
     }
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target updateControllerAttributes(final String controllerId, final Map<String, String> data,
             final UpdateMode mode) {
 

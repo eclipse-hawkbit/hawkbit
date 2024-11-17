@@ -108,7 +108,8 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     private Set<DistributionSetTag> tags;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "distributionSet", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaDistributionSetMetadata.class)
+    @OneToMany(mappedBy = "distributionSet", fetch = FetchType.LAZY, cascade = {
+            CascadeType.REMOVE }, targetEntity = JpaDistributionSetMetadata.class)
     private List<DistributionSetMetadata> metadata;
 
     @Column(name = "complete")

@@ -18,7 +18,6 @@ public abstract class AbstractNamedEntityBuilder<T> extends AbstractBaseEntityBu
 
     @ValidString
     protected String name;
-
     @ValidString
     protected String description;
 

@@ -40,5 +40,4 @@ public class JpaDistributionSetBuilder implements DistributionSetBuilder {
     public DistributionSetCreate create() {
         return new JpaDistributionSetCreate(distributionSetTypeManagement, softwareModuleManagement);
     }
-
 }

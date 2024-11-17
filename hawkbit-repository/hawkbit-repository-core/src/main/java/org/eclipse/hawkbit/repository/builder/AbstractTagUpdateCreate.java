@@ -32,5 +32,4 @@ public class AbstractTagUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
     public Optional<String> getColour() {
         return Optional.ofNullable(colour);
     }
-
 }

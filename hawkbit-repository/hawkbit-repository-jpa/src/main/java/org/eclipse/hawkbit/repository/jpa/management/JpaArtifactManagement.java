@@ -70,19 +70,15 @@ import org.springframework.validation.annotation.Validated;
 public class JpaArtifactManagement implements ArtifactManagement {
 
     private final EntityManager entityManager;
-
     private final LocalArtifactRepository localArtifactRepository;
-
     private final SoftwareModuleRepository softwareModuleRepository;
-
     @Nullable
     private final ArtifactRepository artifactRepository;
-
     private final TenantAware tenantAware;
-
     private final QuotaManagement quotaManagement;
 
-    public JpaArtifactManagement(final EntityManager entityManager,
+    public JpaArtifactManagement(
+            final EntityManager entityManager,
             final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, @Nullable final ArtifactRepository artifactRepository,
             final QuotaManagement quotaManagement, final TenantAware tenantAware) {
@@ -101,8 +97,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Artifact create(final ArtifactUpload artifactUpload) {
         assertArtifactRepositoryAvailable();
 
@@ -138,8 +134,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long id) {
         final JpaArtifact toDelete = (JpaArtifact) get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));

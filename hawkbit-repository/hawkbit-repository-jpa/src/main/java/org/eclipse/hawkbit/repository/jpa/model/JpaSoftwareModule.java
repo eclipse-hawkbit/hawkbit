@@ -77,7 +77,8 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @NotNull
     private JpaSoftwareModuleType type;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule", cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, targetEntity = JpaArtifact.class, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule", cascade = { CascadeType.PERSIST,
+            CascadeType.REMOVE }, targetEntity = JpaArtifact.class, orphanRemoval = true)
     private List<JpaArtifact> artifacts;
 
     @Setter
@@ -90,7 +91,8 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     private boolean encrypted;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "softwareModule", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaSoftwareModuleMetadata.class)
+    @OneToMany(mappedBy = "softwareModule", fetch = FetchType.LAZY, cascade = {
+            CascadeType.REMOVE }, targetEntity = JpaSoftwareModuleMetadata.class)
     private List<JpaSoftwareModuleMetadata> metadata;
 
     @Column(name = "locked")

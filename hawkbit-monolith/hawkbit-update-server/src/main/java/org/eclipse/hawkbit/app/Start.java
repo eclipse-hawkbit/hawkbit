@@ -42,8 +42,7 @@ public class Start {
     public static class RedirectController {
 
         @GetMapping("/")
-        public RedirectView redirectToSwagger(
-                RedirectAttributes attributes) {
+        public RedirectView redirectToSwagger(final RedirectAttributes attributes) {
             attributes.addFlashAttribute("flashAttribute", "redirectWithRedirectView");
             attributes.addAttribute("attribute", "redirectWithRedirectView");
             return new RedirectView("swagger-ui/index.html");
@@ -52,7 +51,5 @@ public class Start {
 
     @Configuration
     @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, proxyTargetClass = true)
-    public static class MethodSecurityConfig {
-
-    }
+    public static class MethodSecurityConfig {}
 }

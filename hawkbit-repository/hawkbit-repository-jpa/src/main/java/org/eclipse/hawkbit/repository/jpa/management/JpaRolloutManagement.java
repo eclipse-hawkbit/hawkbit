@@ -106,10 +106,10 @@ public class JpaRolloutManagement implements RolloutManagement {
     private static final List<RolloutStatus> ACTIVE_ROLLOUTS = Arrays.asList(RolloutStatus.CREATING,
             RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING,
             RolloutStatus.STOPPING);
-
     private static final List<RolloutStatus> ROLLOUT_STATUS_STOPPABLE = Arrays.asList(RolloutStatus.RUNNING,
             RolloutStatus.CREATING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.STARTING,
             RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.APPROVAL_DENIED);
+
     private final TargetManagement targetManagement;
     private final DistributionSetManagement distributionSetManagement;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
@@ -181,8 +181,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout create(final RolloutCreate rollout, final int amountGroup, final boolean confirmationRequired,
             final RolloutGroupConditions conditions, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
         if (amountGroup < 0) {
@@ -207,8 +207,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout create(@NotNull @Valid RolloutCreate create, int amountGroup, boolean confirmationRequired,
             @NotNull RolloutGroupConditions conditions) {
         return create(create, amountGroup, confirmationRequired, conditions, null);
@@ -216,8 +216,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout create(final RolloutCreate rollout, final List<RolloutGroupCreate> groups,
             final RolloutGroupConditions conditions) {
         if (groups.isEmpty()) {
@@ -324,8 +324,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void pauseRollout(final long rolloutId) {
         final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
         if (RolloutStatus.RUNNING != rollout.getStatus()) {
@@ -343,8 +343,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void resumeRollout(final long rolloutId) {
         final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
         if (RolloutStatus.PAUSED != rollout.getStatus()) {
@@ -357,29 +357,32 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision) {
         return this.approveOrDeny(rolloutId, decision, null);
     }
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision, final String remark) {
         log.debug("approveOrDeny rollout called for rollout {} with decision {}", rolloutId, decision);
         final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.WAITING_FOR_APPROVAL);
         switch (decision) {
-            case APPROVED:
+            case APPROVED: {
                 rollout.setStatus(RolloutStatus.READY);
                 break;
-            case DENIED:
+            }
+            case DENIED: {
                 rollout.setStatus(RolloutStatus.APPROVAL_DENIED);
                 break;
-            default:
+            }
+            default: {
                 throw new IllegalArgumentException("Unknown approval decision: " + decision);
+            }
         }
         rollout.setApprovalDecidedBy(rolloutApprovalStrategy.getApprovalUser(rollout));
         if (remark != null) {
@@ -390,8 +393,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout start(final long rolloutId) {
         log.debug("startRollout called for rollout {}", rolloutId);
 
@@ -404,8 +407,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout update(final RolloutUpdate u) {
         final GenericRolloutUpdate update = (GenericRolloutUpdate) u;
         final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(update.getId());
@@ -419,8 +422,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long rolloutId) {
         final JpaRollout jpaRollout = rolloutRepository.findById(rolloutId)
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
@@ -451,8 +454,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void triggerNextGroup(final long rolloutId) {
         final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
         if (RolloutStatus.RUNNING != rollout.getStatus()) {
@@ -479,8 +482,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     public void setRolloutStatusDetails(final Slice<Rollout> rollouts) {
         final List<Long> rolloutIds = rollouts.getContent().stream().map(Rollout::getId).collect(Collectors.toList());
-        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(
-                rolloutIds);
+        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(rolloutIds);
 
         if (allStatesForRollout != null) {
             rollouts.forEach(rollout -> {
@@ -492,14 +494,13 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     /**
-     * In case the given group is missing conditions or actions, they will be set
-     * from the supplied default conditions.
+     * In case the given group is missing conditions or actions, they will be set from the supplied default conditions.
      *
      * @param create group to check
      * @param conditions default conditions and actions
      */
-    private static JpaRolloutGroup prepareRolloutGroupWithDefaultConditions(final RolloutGroupCreate create,
-            final RolloutGroupConditions conditions) {
+    private static JpaRolloutGroup prepareRolloutGroupWithDefaultConditions(
+            final RolloutGroupCreate create, final RolloutGroupConditions conditions) {
         final JpaRolloutGroup group = ((JpaRolloutGroupCreate) create).build();
 
         if (group.getSuccessCondition() == null) {

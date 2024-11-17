@@ -23,7 +23,6 @@ public abstract class AbstractMetadataUpdateCreate<T> {
 
     @ValidString
     protected String key;
-
     @ValidString
     protected String value;
 
@@ -44,5 +43,4 @@ public abstract class AbstractMetadataUpdateCreate<T> {
     public Optional<String> getValue() {
         return Optional.ofNullable(value);
     }
-
 }

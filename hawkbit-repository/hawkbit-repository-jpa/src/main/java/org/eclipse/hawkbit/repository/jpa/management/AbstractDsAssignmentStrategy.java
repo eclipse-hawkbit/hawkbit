@@ -67,7 +67,8 @@ public abstract class AbstractDsAssignmentStrategy {
     private final BooleanSupplier confirmationFlowConfig;
     private final RepositoryProperties repositoryProperties;
 
-    AbstractDsAssignmentStrategy(final TargetRepository targetRepository,
+    AbstractDsAssignmentStrategy(
+            final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
@@ -83,7 +84,8 @@ public abstract class AbstractDsAssignmentStrategy {
         this.repositoryProperties = repositoryProperties;
     }
 
-    public JpaAction createTargetAction(final String initiatedBy, final TargetWithActionType targetWithActionType,
+    public JpaAction createTargetAction(
+            final String initiatedBy, final TargetWithActionType targetWithActionType,
             final List<JpaTarget> targets, final JpaDistributionSet set) {
         final Optional<JpaTarget> optTarget = targets.stream()
                 .filter(t -> t.getControllerId().equals(targetWithActionType.getControllerId())).findFirst();
@@ -95,8 +97,9 @@ public abstract class AbstractDsAssignmentStrategy {
             actionForTarget.setActionType(targetWithActionType.getActionType());
             actionForTarget.setForcedTime(targetWithActionType.getForceTime());
             actionForTarget.setWeight(
-                    targetWithActionType.getWeight() == null ?
-                            repositoryProperties.getActionWeightIfAbsent() : targetWithActionType.getWeight());
+                    targetWithActionType.getWeight() == null
+                            ? repositoryProperties.getActionWeightIfAbsent()
+                            : targetWithActionType.getWeight());
             actionForTarget.setActive(true);
             actionForTarget.setTarget(target);
             actionForTarget.setDistributionSet(set);
@@ -294,7 +297,6 @@ public abstract class AbstractDsAssignmentStrategy {
 
     private void assertActionsPerTargetQuota(final Target target, final int requested) {
         final int quota = quotaManagement.getMaxActionsPerTarget();
-        QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,
-                actionRepository::countByTargetId);
+        QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, actionRepository::countByTargetId);
     }
 }

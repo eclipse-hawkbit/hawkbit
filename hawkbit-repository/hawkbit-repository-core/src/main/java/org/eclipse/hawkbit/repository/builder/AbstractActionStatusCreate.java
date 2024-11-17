@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import org.eclipse.hawkbit.repository.ValidString;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.springframework.util.StringUtils;
 
 /**
  * Create and update builder DTO.
@@ -28,31 +27,24 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractActionStatusCreate<T> {
 
     protected Status status;
-
     protected Long occurredAt;
-
     protected Integer code;
-
     protected List<@ValidString String> messages;
-
     @Getter
     protected Long actionId;
 
     public T status(final Status status) {
         this.status = status;
-
         return (T) this;
     }
 
     public T occurredAt(final long occurredAt) {
         this.occurredAt = occurredAt;
-
         return (T) this;
     }
 
     public T code(final int code) {
         this.code = code;
-
         return (T) this;
     }
 
@@ -63,7 +55,6 @@ public abstract class AbstractActionStatusCreate<T> {
         } else {
             this.messages.addAll(messages.stream().map(String::strip).toList());
         }
-
         return (T) this;
     }
 
@@ -72,7 +63,6 @@ public abstract class AbstractActionStatusCreate<T> {
             this.messages = new ArrayList<>();
         }
         this.messages.add(message.strip());
-
         return (T) this;
     }
 

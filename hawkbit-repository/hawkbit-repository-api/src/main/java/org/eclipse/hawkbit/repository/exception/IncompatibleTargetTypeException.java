@@ -27,7 +27,7 @@ public class IncompatibleTargetTypeException extends AbstractServerRtException {
 
     @Serial
     private static final long serialVersionUID = 1L;
-    
+
     private final Collection<String> targetTypeNames;
     private final Collection<String> distributionSetTypeNames;
 

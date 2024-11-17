@@ -118,45 +118,25 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
 
     @Column(name = "install_date")
     private Long installationDate;
-
-    @Converter
-    public static class TargetUpdateStatusConverter extends MapAttributeConverter<TargetUpdateStatus, Integer> {
-
-        public TargetUpdateStatusConverter() {
-            super(Map.of(
-                    TargetUpdateStatus.UNKNOWN, 0,
-                    TargetUpdateStatus.IN_SYNC, 1,
-                    TargetUpdateStatus.PENDING, 2,
-                    TargetUpdateStatus.ERROR, 3,
-                    TargetUpdateStatus.REGISTERED, 4
-            ), null);
-        }
-    }
     @Column(name = "update_status", nullable = false)
     @Convert(converter = TargetUpdateStatusConverter.class)
     @NotNull
     private TargetUpdateStatus updateStatus = TargetUpdateStatus.UNKNOWN;
-
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "installed_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_inst_ds"))
     private JpaDistributionSet installedDistributionSet;
-
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_assign_ds"))
     private JpaDistributionSet assignedDistributionSet;
-
     // set default request controller attributes to true, because we want to request them the first time
     @Column(name = "request_controller_attributes", nullable = false)
     private boolean requestControllerAttributes = true;
-
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "target", orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private JpaAutoConfirmationStatus autoConfirmationStatus;
-
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = JpaTargetType.class)
     @JoinColumn(name = "target_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_relation_target_type"))
     private TargetType targetType;
-
     @ManyToMany(targetEntity = JpaTargetTag.class)
     @JoinTable(
             name = "sp_target_target_tag",
@@ -170,7 +150,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_tag"))
             })
     private Set<TargetTag> tags;
-
     /**
      * Supplied / committed by the controller. Read-only via management API.
      */
@@ -183,7 +162,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             joinColumns = { @JoinColumn(name = "target_id", nullable = false, insertable = false, updatable = false) },
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
     private Map<String, String> controllerAttributes;
-
     @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaTargetMetadata.class)
     private List<TargetMetadata> metadata;
 
@@ -495,5 +473,19 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @Override
     public List<String> getUpdateIgnoreFields() {
         return TARGET_UPDATE_EVENT_IGNORE_FIELDS;
+    }
+
+    @Converter
+    public static class TargetUpdateStatusConverter extends MapAttributeConverter<TargetUpdateStatus, Integer> {
+
+        public TargetUpdateStatusConverter() {
+            super(Map.of(
+                    TargetUpdateStatus.UNKNOWN, 0,
+                    TargetUpdateStatus.IN_SYNC, 1,
+                    TargetUpdateStatus.PENDING, 2,
+                    TargetUpdateStatus.ERROR, 3,
+                    TargetUpdateStatus.REGISTERED, 4
+            ), null);
+        }
     }
 }

@@ -58,7 +58,8 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
 
     private static final int MESSAGE_ENTRY_LENGTH = 512;
 
-    @Setter @Getter
+    @Setter
+    @Getter
     @Column(name = "target_occurred_at", nullable = false, updatable = false)
     private long occurredAt;
 
@@ -69,7 +70,8 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     @NotNull
     private JpaAction action;
 
-    @Setter @Getter
+    @Setter
+    @Getter
     @Column(name = "status", nullable = false, updatable = false)
     @Convert(converter = JpaAction.StatusConverter.class)
     @NotNull

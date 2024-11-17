@@ -47,11 +47,8 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     private static final int PAGE_SIZE = 1000;
 
     private final TargetFilterQueryManagement targetFilterQueryManagement;
-
     private final DeploymentManagement deploymentManagement;
-
     private final PlatformTransactionManager transactionManager;
-
     private final ContextAware contextAware;
 
     /**

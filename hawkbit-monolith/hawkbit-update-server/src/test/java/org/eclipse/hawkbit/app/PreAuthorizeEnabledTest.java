@@ -32,26 +32,29 @@ public class PreAuthorizeEnabledTest extends AbstractSecurityTest {
     @Description("Tests whether request fail if a role is forbidden for the user")
     @WithUser(authorities = { SpPermission.READ_TARGET })
     public void failIfNoRole() throws Exception {
-        mvc.perform(get("/rest/v1/distributionsets")).andExpect(result ->
-                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value()));
+        mvc.perform(get("/rest/v1/distributionsets"))
+                .andExpect(result ->
+                        assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value()));
     }
 
     @Test
     @Description("Tests whether request succeed if a role is granted for the user")
     @WithUser(authorities = { SpPermission.READ_REPOSITORY })
     public void successIfHasRole() throws Exception {
-        mvc.perform(get("/rest/v1/distributionsets")).andExpect(result -> {
-            assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
-        });
+        mvc.perform(get("/rest/v1/distributionsets"))
+                .andExpect(result -> {
+                    assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
+                });
     }
 
     @Test
     @Description("Tests whether request succeed if a role is granted for the user")
     @WithUser(authorities = { SpRole.TENANT_ADMIN })
     public void successIfHasTenantAdminRole() throws Exception {
-        mvc.perform(get("/rest/v1/distributionsets")).andExpect(result -> {
-            assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
-        });
+        mvc.perform(get("/rest/v1/distributionsets"))
+                .andExpect(result -> {
+                    assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
+                });
     }
 
     @Test
@@ -59,14 +62,15 @@ public class PreAuthorizeEnabledTest extends AbstractSecurityTest {
             "granted for the user")
     @WithUser(authorities = { SpPermission.READ_TARGET })
     public void onlyDSIfNoTenantConfig() throws Exception {
-        mvc.perform(get("/rest/v1/system/configs")).andExpect(result -> {
-            // returns default DS type because of READ_TARGET
-            assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
-            assertThat(
-                    new ObjectMapper().reader().readValue(result.getResponse().getContentAsString(), HashMap.class)
-                            .size())
-                    .isEqualTo(1);
-        });
+        mvc.perform(get("/rest/v1/system/configs"))
+                .andExpect(result -> {
+                    // returns default DS type because of READ_TARGET
+                    assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
+                    assertThat(
+                            new ObjectMapper().reader().readValue(result.getResponse().getContentAsString(), HashMap.class)
+                                    .size())
+                            .isEqualTo(1);
+                });
     }
 
     @Test
@@ -74,7 +78,8 @@ public class PreAuthorizeEnabledTest extends AbstractSecurityTest {
             "granted for the user")
     @WithUser(authorities = { SpPermission.TENANT_CONFIGURATION })
     public void successIfHasTenantConfig() throws Exception {
-        mvc.perform(get("/rest/v1/system/configs")).andExpect(result ->
-                assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value()));
+        mvc.perform(get("/rest/v1/system/configs"))
+                .andExpect(result ->
+                        assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value()));
     }
 }

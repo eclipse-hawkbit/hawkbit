@@ -47,7 +47,7 @@ import org.springframework.util.CollectionUtils;
 class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
-    @Description("Verifies that management get access reacts as specified on calls for non existing entities by means "  +
+    @Description("Verifies that management get access reacts as specified on calls for non existing entities by means " +
             "of Optional not present.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
@@ -227,7 +227,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
             final JpaRolloutGroup rolloutGroup = ((JpaRolloutGroup) rolloutGroupManagement.get(id).orElseThrow());
             rolloutGroup.setStatus(status);
             rolloutGroupRepository.save(rolloutGroup);
-            assertThat( rolloutGroupManagement.get(id).orElseThrow().getStatus()).isEqualTo(status);
+            assertThat(rolloutGroupManagement.get(id).orElseThrow().getStatus()).isEqualTo(status);
         }
     }
 

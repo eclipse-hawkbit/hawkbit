@@ -21,11 +21,9 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 /**
  * Create/build implementation.
  */
-public class JpaSoftwareModuleCreate extends AbstractSoftwareModuleUpdateCreate<SoftwareModuleCreate>
-        implements SoftwareModuleCreate {
+public class JpaSoftwareModuleCreate extends AbstractSoftwareModuleUpdateCreate<SoftwareModuleCreate> implements SoftwareModuleCreate {
 
     private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
-
     private boolean encrypted;
 
     JpaSoftwareModuleCreate(final SoftwareModuleTypeManagement softwareModuleTypeManagement) {

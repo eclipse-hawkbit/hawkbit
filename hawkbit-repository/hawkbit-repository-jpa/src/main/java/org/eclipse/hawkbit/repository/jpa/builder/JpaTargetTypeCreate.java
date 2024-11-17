@@ -25,8 +25,7 @@ import org.springframework.util.CollectionUtils;
 /**
  * Create/build implementation.
  */
-public class JpaTargetTypeCreate extends AbstractTargetTypeUpdateCreate<TargetTypeCreate>
-        implements TargetTypeCreate {
+public class JpaTargetTypeCreate extends AbstractTargetTypeUpdateCreate<TargetTypeCreate> implements TargetTypeCreate {
 
     private final DistributionSetTypeManagement distributionSetTypeManagement;
 

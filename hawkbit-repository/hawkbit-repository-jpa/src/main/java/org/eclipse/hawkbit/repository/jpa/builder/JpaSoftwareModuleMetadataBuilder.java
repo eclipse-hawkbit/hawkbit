@@ -36,5 +36,4 @@ public class JpaSoftwareModuleMetadataBuilder implements SoftwareModuleMetadataB
     public SoftwareModuleMetadataCreate create(final long softwareModuleId) {
         return new JpaSoftwareModuleMetadataCreate(softwareModuleId, softwareModuleManagement);
     }
-
 }

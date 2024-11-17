@@ -36,5 +36,4 @@ public class JpaSoftwareModuleBuilder implements SoftwareModuleBuilder {
     public SoftwareModuleCreate create() {
         return new JpaSoftwareModuleCreate(softwareModuleTypeManagement);
     }
-
 }

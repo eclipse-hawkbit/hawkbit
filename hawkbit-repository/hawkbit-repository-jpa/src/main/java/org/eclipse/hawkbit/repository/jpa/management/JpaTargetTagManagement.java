@@ -67,8 +67,8 @@ public class JpaTargetTagManagement implements TargetTagManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetTag create(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
 
@@ -77,8 +77,8 @@ public class JpaTargetTagManagement implements TargetTagManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<TargetTag> create(final Collection<TagCreate> tt) {
         final List<JpaTargetTag> targetTagList = tt.stream().map(JpaTagCreate.class::cast)
                 .map(JpaTagCreate::buildTargetTag).toList();
@@ -88,8 +88,8 @@ public class JpaTargetTagManagement implements TargetTagManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final String targetTagName) {
         targetTagRepository.delete(
                 targetTagRepository
@@ -125,8 +125,8 @@ public class JpaTargetTagManagement implements TargetTagManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetTag update(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
 

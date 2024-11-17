@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.repository.model.Target;
  */
 public class JpaTargetBuilder implements TargetBuilder {
 
-    final private TargetTypeManagement targetTypeManagement;
+    private final TargetTypeManagement targetTypeManagement;
 
     /**
      * @param targetTypeManagement Target type management
@@ -38,5 +38,4 @@ public class JpaTargetBuilder implements TargetBuilder {
     public TargetCreate create() {
         return new JpaTargetCreate(targetTypeManagement);
     }
-
 }

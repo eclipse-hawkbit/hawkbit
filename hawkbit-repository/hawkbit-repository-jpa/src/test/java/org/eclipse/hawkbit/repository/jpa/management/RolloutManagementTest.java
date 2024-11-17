@@ -2086,7 +2086,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     void testRolloutStatusConvert() {
         final long id = testdataFactory.createAndStartRollout(1, 0, 1, "100", "80").getId();
         for (final RolloutStatus status : RolloutStatus.values()) {
-            final JpaRollout rollout = ((JpaRollout)rolloutManagement.get(id).orElseThrow());
+            final JpaRollout rollout = ((JpaRollout) rolloutManagement.get(id).orElseThrow());
             rollout.setStatus(status);
             rolloutRepository.save(rollout);
             assertThat(rolloutManagement.get(id).orElseThrow().getStatus()).isEqualTo(status);
@@ -2098,7 +2098,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     void testActionTypeConvert() {
         final long id = testdataFactory.createAndStartRollout(1, 0, 1, "100", "80").getId();
         for (final ActionType actionType : ActionType.values()) {
-            final JpaRollout rollout = ((JpaRollout)rolloutManagement.get(id).orElseThrow());
+            final JpaRollout rollout = ((JpaRollout) rolloutManagement.get(id).orElseThrow());
             rollout.setActionType(actionType);
             rolloutRepository.save(rollout);
             assertThat(rolloutManagement.get(id).orElseThrow().getActionType()).isEqualTo(actionType);

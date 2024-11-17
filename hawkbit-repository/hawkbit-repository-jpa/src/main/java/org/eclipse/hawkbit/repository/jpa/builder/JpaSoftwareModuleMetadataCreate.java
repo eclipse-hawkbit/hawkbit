@@ -25,8 +25,7 @@ public class JpaSoftwareModuleMetadataCreate
 
     private final SoftwareModuleManagement softwareModuleManagement;
 
-    JpaSoftwareModuleMetadataCreate(final long softwareModuleId,
-            final SoftwareModuleManagement softwareModuleManagement) {
+    JpaSoftwareModuleMetadataCreate(final long softwareModuleId, final SoftwareModuleManagement softwareModuleManagement) {
         this.softwareModuleManagement = softwareModuleManagement;
         this.softwareModuleId = softwareModuleId;
     }
@@ -42,5 +41,4 @@ public class JpaSoftwareModuleMetadataCreate
 
         return new JpaSoftwareModuleMetadata(key, module, value, isTargetVisible().orElse(false));
     }
-
 }

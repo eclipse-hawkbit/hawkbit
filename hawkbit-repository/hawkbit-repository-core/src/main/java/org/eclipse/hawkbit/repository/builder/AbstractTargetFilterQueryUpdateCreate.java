@@ -29,18 +29,13 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
 
     @ValidString
     protected String name;
-
     @ValidString
     protected String query;
-
     protected Long distributionSetId;
-
     protected ActionType actionType;
-
     @Min(Action.WEIGHT_MIN)
     @Max(Action.WEIGHT_MAX)
     protected Integer weight;
-
     protected Boolean confirmationRequired;
 
     /**

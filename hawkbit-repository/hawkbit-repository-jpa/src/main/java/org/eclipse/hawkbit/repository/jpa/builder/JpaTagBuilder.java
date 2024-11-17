@@ -29,5 +29,4 @@ public class JpaTagBuilder implements TagBuilder {
     public TagCreate create() {
         return new JpaTagCreate();
     }
-
 }

@@ -27,18 +27,13 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
 
     @ValidString
     protected String controllerId;
-
     protected String address;
-
     @ToString.Exclude
     @ValidString
     protected String securityToken;
-
     protected Long lastTargetQuery;
     protected TargetUpdateStatus status;
-
     protected Boolean requestAttributes;
-
     protected Long targetTypeId;
 
     protected AbstractTargetUpdateCreate(final String controllerId) {

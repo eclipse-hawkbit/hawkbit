@@ -38,5 +38,4 @@ public abstract class AbstractSoftwareModuleMetadataUpdateCreate<T> extends Abst
         this.targetVisible = targetVisible;
         return (T) this;
     }
-
 }

@@ -22,5 +22,4 @@ public class JpaActionStatusBuilder implements ActionStatusBuilder {
     public ActionStatusCreate create(final long actionId) {
         return new JpaActionStatusCreate(actionId);
     }
-
 }
