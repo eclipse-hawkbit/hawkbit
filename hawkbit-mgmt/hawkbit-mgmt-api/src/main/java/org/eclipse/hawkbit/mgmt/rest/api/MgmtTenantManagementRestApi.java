@@ -131,7 +131,8 @@ public interface MgmtTenantManagementRestApi {
     })
     @GetMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtSystemTenantConfigurationValue> getTenantConfigurationValue(@PathVariable("keyName") String keyName);
+    ResponseEntity<MgmtSystemTenantConfigurationValue> getTenantConfigurationValue(
+            @PathVariable("keyName") String keyName);
 
     /**
      * Handles the PUT request for updating a tenant specific configuration value.
@@ -174,7 +175,8 @@ public interface MgmtTenantManagementRestApi {
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSystemTenantConfigurationValue> updateTenantConfigurationValue(
-            @PathVariable("keyName") String keyName, MgmtSystemTenantConfigurationValueRequest configurationValueRest);
+            @PathVariable("keyName") String keyName,
+            @RequestBody MgmtSystemTenantConfigurationValueRequest configurationValueRest);
 
     /**
      * Handles the PUT request for updating a batch of tenant specific configurations

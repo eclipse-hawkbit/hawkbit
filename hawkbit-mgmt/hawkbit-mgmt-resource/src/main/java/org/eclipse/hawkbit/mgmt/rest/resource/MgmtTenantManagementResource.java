@@ -27,8 +27,6 @@ import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -74,7 +72,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
     }
 
     @Override
-    public ResponseEntity<Void> deleteTenantConfigurationValue(@PathVariable("keyName") final String keyName) {
+    public ResponseEntity<Void> deleteTenantConfigurationValue(final String keyName) {
         //Default DistributionSet Type cannot be deleted as is part of TenantMetadata
         if (isDefaultDistributionSetTypeKey(keyName)) {
             return ResponseEntity.badRequest().build();
@@ -87,15 +85,14 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
     }
 
     @Override
-    public ResponseEntity<MgmtSystemTenantConfigurationValue> getTenantConfigurationValue(
-            @PathVariable("keyName") final String keyName) {
+    public ResponseEntity<MgmtSystemTenantConfigurationValue> getTenantConfigurationValue(final String keyName) {
         return ResponseEntity.ok(loadTenantConfigurationValueBy(keyName));
     }
 
     @Override
     public ResponseEntity<MgmtSystemTenantConfigurationValue> updateTenantConfigurationValue(
-            @PathVariable("keyName") final String keyName,
-            @RequestBody final MgmtSystemTenantConfigurationValueRequest configurationValueRest) {
+            final String keyName,
+            final MgmtSystemTenantConfigurationValueRequest configurationValueRest) {
         Serializable configurationValue = configurationValueRest.getValue();
         final MgmtSystemTenantConfigurationValue responseUpdatedValue;
         if (isDefaultDistributionSetTypeKey(keyName)) {
