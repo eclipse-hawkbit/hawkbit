@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -84,12 +85,12 @@ public interface MgmtSoftwareModuleRestApi {
     @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtArtifact> uploadArtifact(
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @RequestPart("file") final MultipartFile file,
-            @RequestParam(value = "filename", required = false) final String optionalFileName,
-            @RequestParam(value = "md5sum", required = false) final String md5Sum,
-            @RequestParam(value = "sha1sum", required = false) final String sha1Sum,
-            @RequestParam(value = "sha256sum", required = false) final String sha256sum);
+            @PathVariable("softwareModuleId") Long softwareModuleId,
+            @RequestPart("file") MultipartFile file,
+            @RequestParam(value = "filename", required = false) String optionalFileName,
+            @RequestParam(value = "md5sum", required = false) String md5Sum,
+            @RequestParam(value = "sha1sum", required = false) String sha1Sum,
+            @RequestParam(value = "sha256sum", required = false) String sha256Sum);
 
     /**
      * Handles the GET request of retrieving all metadata of artifacts assigned to a software module.
@@ -124,9 +125,9 @@ public interface MgmtSoftwareModuleRestApi {
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtArtifact>> getArtifacts(
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
+            @PathVariable("softwareModuleId") Long softwareModuleId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT) String representationModeParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_USE_ARTIFACT_URL_HANDLER, required = false) final Boolean useArtifactUrlHandler);
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_USE_ARTIFACT_URL_HANDLER, required = false) Boolean useArtifactUrlHandler);
 
     /**
      * Handles the GET request of retrieving a single Artifact metadata request.
@@ -159,9 +160,9 @@ public interface MgmtSoftwareModuleRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     @ResponseBody
     ResponseEntity<MgmtArtifact> getArtifact(
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("artifactId") final Long artifactId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_USE_ARTIFACT_URL_HANDLER, required = false) final Boolean useArtifactUrlHandler);
+            @PathVariable("softwareModuleId") Long softwareModuleId,
+            @PathVariable("artifactId") Long artifactId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_USE_ARTIFACT_URL_HANDLER, required = false) Boolean useArtifactUrlHandler);
 
     /**
      * Handles the DELETE request for a single SoftwareModule.
@@ -193,8 +194,8 @@ public interface MgmtSoftwareModuleRestApi {
     @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}")
     @ResponseBody
     ResponseEntity<Void> deleteArtifact(
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("artifactId") final Long artifactId);
+            @PathVariable("softwareModuleId") Long softwareModuleId,
+            @PathVariable("artifactId") Long artifactId);
 
     /**
      * Handles the GET request of retrieving all software modules.
@@ -281,7 +282,7 @@ public interface MgmtSoftwareModuleRestApi {
     })
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtSoftwareModule> getSoftwareModule(@PathVariable("softwareModuleId") final Long softwareModuleId);
+    ResponseEntity<MgmtSoftwareModule> getSoftwareModule(@PathVariable("softwareModuleId") Long softwareModuleId);
 
     /**
      * Handles the POST request of creating new software modules. The request body must always be a list of modules.
@@ -315,7 +316,7 @@ public interface MgmtSoftwareModuleRestApi {
     @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtSoftwareModule>> createSoftwareModules(final List<MgmtSoftwareModuleRequestBodyPost> softwareModules);
+    ResponseEntity<List<MgmtSoftwareModule>> createSoftwareModules(@RequestBody List<MgmtSoftwareModuleRequestBodyPost> softwareModules);
 
     /**
      * Handles the PUT request of updating a software module.
@@ -354,8 +355,8 @@ public interface MgmtSoftwareModuleRestApi {
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModule> updateSoftwareModule(
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            final MgmtSoftwareModuleRequestBodyPut restSoftwareModule);
+            @PathVariable("softwareModuleId") Long softwareModuleId,
+            @RequestBody MgmtSoftwareModuleRequestBodyPut restSoftwareModule);
 
     /**
      * Handles the DELETE request for a single software module.
@@ -384,7 +385,7 @@ public interface MgmtSoftwareModuleRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}")
-    ResponseEntity<Void> deleteSoftwareModule(@PathVariable("softwareModuleId") final Long softwareModuleId);
+    ResponseEntity<Void> deleteSoftwareModule(@PathVariable("softwareModuleId") Long softwareModuleId);
 
     /**
      * Gets a paged list of metadata for a software module.
@@ -421,7 +422,7 @@ public interface MgmtSoftwareModuleRestApi {
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModuleMetadata>> getMetadata(
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
+            @PathVariable("softwareModuleId") Long softwareModuleId,
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
@@ -476,8 +477,8 @@ public interface MgmtSoftwareModuleRestApi {
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata/{metadataKey}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleMetadata> getMetadataValue(
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("metadataKey") final String metadataKey);
+            @PathVariable("softwareModuleId") Long softwareModuleId,
+            @PathVariable("metadataKey") String metadataKey);
 
     /**
      * Updates a single metadata value of a software module.
@@ -510,8 +511,9 @@ public interface MgmtSoftwareModuleRestApi {
     @PutMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata/{metadataKey}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleMetadata> updateMetadata(
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("metadataKey") final String metadataKey, final MgmtSoftwareModuleMetadataBodyPut metadata);
+            @PathVariable("softwareModuleId") Long softwareModuleId,
+            @PathVariable("metadataKey") String metadataKey,
+            @RequestBody MgmtSoftwareModuleMetadataBodyPut metadata);
 
     /**
      * Deletes a single metadata entry from the software module.
@@ -542,8 +544,8 @@ public interface MgmtSoftwareModuleRestApi {
     })
     @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata/{metadataKey}")
     ResponseEntity<Void> deleteMetadata(
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("metadataKey") final String metadataKey);
+            @PathVariable("softwareModuleId") Long softwareModuleId,
+            @PathVariable("metadataKey") String metadataKey);
 
     /**
      * Creates a list of metadata for a specific software module.
@@ -582,6 +584,6 @@ public interface MgmtSoftwareModuleRestApi {
             consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleMetadata>> createMetadata(
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            final List<MgmtSoftwareModuleMetadata> metadataRest);
+            @PathVariable("softwareModuleId") Long softwareModuleId,
+            @RequestBody List<MgmtSoftwareModuleMetadata> metadataRest);
 }
