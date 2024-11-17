@@ -31,6 +31,7 @@ public class MgmtRolloutErrorAction {
 
     @Schema(description = "The error action to execute")
     private ErrorAction action = ErrorAction.PAUSE;
+
     @Schema(description = "The expression for the error action", example = "80")
     private String expression;
 

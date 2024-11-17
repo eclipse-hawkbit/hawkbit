@@ -17,7 +17,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssigment;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssignment;
 
 /**
  * Request Body for DistributionSetType POST.
@@ -38,10 +38,11 @@ public class MgmtDistributionSetTypeRequestBodyPost extends MgmtDistributionSetT
 
     @JsonProperty
     @Schema(description = "Mandatory module type IDs")
-    private List<MgmtSoftwareModuleTypeAssigment> mandatorymodules;
+    private List<MgmtSoftwareModuleTypeAssignment> mandatorymodules;
+
     @JsonProperty
     @Schema(description = "Optional module type IDs")
-    private List<MgmtSoftwareModuleTypeAssigment> optionalmodules;
+    private List<MgmtSoftwareModuleTypeAssignment> optionalmodules;
 
     @Override
     public MgmtDistributionSetTypeRequestBodyPost setDescription(final String description) {

@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.rabbitmq.test;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

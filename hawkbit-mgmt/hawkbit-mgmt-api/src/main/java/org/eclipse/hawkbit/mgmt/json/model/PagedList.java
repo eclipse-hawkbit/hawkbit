@@ -41,8 +41,10 @@ public class PagedList<T> extends RepresentationModel<PagedList<T>> {
 
     @JsonProperty
     private final List<T> content;
+
     @JsonProperty
     private final long total;
+
     private final int size;
 
     /**

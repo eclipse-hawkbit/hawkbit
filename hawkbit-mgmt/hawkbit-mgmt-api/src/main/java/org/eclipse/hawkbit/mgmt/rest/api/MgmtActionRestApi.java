@@ -35,18 +35,13 @@ public interface MgmtActionRestApi {
     /**
      * Handles the GET request of retrieving all actions.
      *
-     * @param pagingOffsetParam the offset of list of actions for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=distributionSet.id==1}
-     * @param representationModeParam the representation mode parameter specifying whether a compact
-     *         or a full representation shall be returned
-     * @return a list of all actions for a defined or default page request with
-     *         status OK. The response is always paged. In any failure the
+     * @param pagingOffsetParam the offset of list of actions for pagination, might not be present in the rest request then default value will
+     *         be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=distributionSet.id==1}
+     * @param representationModeParam the representation mode parameter specifying whether a compact or a full representation shall be returned
+     * @return a list of all actions for a defined or default page request with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all actions", description = "Handles the GET request of retrieving all actions.")
@@ -67,8 +62,7 @@ public interface MgmtActionRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtAction>> getActions(
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -101,8 +95,7 @@ public interface MgmtActionRestApi {
             String representationModeParam);
 
     /**
-     * Handles the GET request of retrieving a specific {@link MgmtAction} by
-     * its <code>actionId</code>.
+     * Handles the GET request of retrieving a specific {@link MgmtAction} by its <code>actionId</code>.
      *
      * @param actionId The ID of the requested action
      * @return the {@link MgmtAction}
@@ -123,7 +116,7 @@ public interface MgmtActionRestApi {
                     " and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/{actionId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/{actionId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAction> getAction(@PathVariable("actionId") Long actionId);
 }

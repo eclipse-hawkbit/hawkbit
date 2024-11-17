@@ -28,6 +28,7 @@ public abstract class MgmtNamedEntity extends MgmtBaseEntity {
     @JsonProperty(required = true)
     @Schema(example = "Name of entity")
     private String name;
+
     @JsonProperty
     @Schema(example = "Description of entity")
     private String description;

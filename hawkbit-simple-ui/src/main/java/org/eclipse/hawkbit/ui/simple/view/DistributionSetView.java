@@ -45,7 +45,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
-import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssigment;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
 import org.eclipse.hawkbit.ui.simple.MainLayout;
@@ -317,7 +317,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             finishBtn.addClickListener(e -> {
                 hawkbitClient.getDistributionSetRestApi().assignSoftwareModules(
                         distributionSetId, softwareModules.stream().map(softwareModule -> {
-                            final MgmtSoftwareModuleAssigment assignment = new MgmtSoftwareModuleAssigment();
+                            final MgmtSoftwareModuleAssignment assignment = new MgmtSoftwareModuleAssignment();
                             assignment.setId(softwareModule.getModuleId());
                             return assignment;
                         }).toList());

@@ -30,7 +30,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtInvalidateDistrib
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
-import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssigment;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
@@ -54,16 +54,12 @@ public interface MgmtDistributionSetRestApi {
     /**
      * Handles the GET request of retrieving all DistributionSets .
      *
-     * @param pagingOffsetParam the offset of list of sets for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=name==abc}
-     * @return a list of all set for a defined or default page request with
-     *         status OK. The response is always paged. In any failure the
+     * @param pagingOffsetParam the offset of list of sets for pagination, might not be present in the rest request then default value will
+     *         be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
+     * @return a list of all set for a defined or default page request with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all Distribution Sets", description = "Handles the GET request of retrieving all " +
@@ -85,8 +81,8 @@ public interface MgmtDistributionSetRestApi {
                     "attempts and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING,
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -138,19 +134,16 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> getDistributionSet(@PathVariable("distributionSetId") Long distributionSetId);
 
     /**
-     * Handles the POST request of creating new distribution sets . The request
-     * body must always be a list of sets.
+     * Handles the POST request of creating new distribution sets . The request body must always be a list of sets.
      *
      * @param sets the DistributionSets to be created.
-     * @return In case all sets could successful created the ResponseEntity with
-     *         status code 201 - Created but without ResponseBody. In any
-     *         failure the JsonResponseExceptionHandler is handling the
-     *         response.
+     * @return In case all sets could successful created the ResponseEntity with status code 201 - Created but without ResponseBody. In any
+     *         failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Creates new Distribution Sets", description = "Handles the POST request of creating new " +
             "distribution sets within Hawkbit. The request body must always be a list of sets. " +
@@ -178,9 +171,9 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING, consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSet>> createDistributionSets(List<MgmtDistributionSetRequestBodyPost> sets);
 
     /**
@@ -247,28 +240,22 @@ public interface MgmtDistributionSetRestApi {
                     "attempts and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}", consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
-            MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
+    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}",
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> updateDistributionSet(@PathVariable("distributionSetId") Long distributionSetId,
             MgmtDistributionSetRequestBodyPut toUpdate);
 
     /**
-     * Handles the GET request of retrieving assigned targets to a specific
-     * distribution set.
+     * Handles the GET request of retrieving assigned targets to a specific distribution set.
      *
-     * @param distributionSetId the ID of the distribution set to retrieve the assigned
-     *         targets
-     * @param pagingOffsetParam the offset of list of targets for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=name==abc}
-     * @return status OK if get request is successful with the paged list of
-     *         targets
+     * @param distributionSetId the ID of the distribution set to retrieve the assigned targets
+     * @param pagingOffsetParam the offset of list of targets for pagination, might not be present in the rest request then default value will
+     *         be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
+     * @return status OK if get request is successful with the paged list of targets
      */
     @Operation(summary = "Return assigned targets to a specific distribution set", description = "Handles the GET " +
             "request for retrieving assigned targets of a single distribution set. " +
@@ -292,9 +279,8 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
-            + "/{distributionSetId}/assignedTargets", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/assignedTargets",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(@PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -320,14 +306,12 @@ public interface MgmtDistributionSetRestApi {
             String rsqlParam);
 
     /**
-     * Handles the GET request of retrieving installed targets to a specific
-     * distribution set.
+     * Handles the GET request of retrieving installed targets to a specific distribution set.
      *
      * @param distributionSetId the ID of the distribution set to retrieve the assigned targets
-     * @param pagingOffsetParam the offset of list of targets for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
+     * @param pagingOffsetParam the offset of list of targets for pagination, might not be present in the rest request then default value will
+     *         be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
      * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
      * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @return status OK if get request is successful with the paged list of targets
@@ -354,9 +338,8 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
-            + "/{distributionSetId}/installedTargets", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/installedTargets",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getInstalledTargets(@PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -382,21 +365,15 @@ public interface MgmtDistributionSetRestApi {
             String rsqlParam);
 
     /**
-     * Handles the GET request to retrieve target filter queries that have the
-     * given distribution set as auto assign DS.
+     * Handles the GET request to retrieve target filter queries that have the given distribution set as auto assign DS.
      *
-     * @param distributionSetId the ID of the distribution set to retrieve the assigned
-     *         targets
-     * @param pagingOffsetParam the offset of list of targets for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search name parameter in the request URL, syntax
-     *         {@code q=myFilter}
-     * @return status OK if get request is successful with the paged list of
-     *         targets
+     * @param distributionSetId the ID of the distribution set to retrieve the assigned targets
+     * @param pagingOffsetParam the offset of list of targets for pagination, might not be present in the rest request then default value will
+     *         be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search name parameter in the request URL, syntax {@code q=myFilter}
+     * @return status OK if get request is successful with the paged list of targets
      */
     @Operation(summary = "Return target filter queries that have the given distribution set as auto assign DS",
             description = "Handles the GET request for retrieving assigned target filter queries of a single " +
@@ -420,9 +397,8 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
-            + "/{distributionSetId}/autoAssignTargetFilters", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/autoAssignTargetFilters",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
             @PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(
@@ -449,16 +425,12 @@ public interface MgmtDistributionSetRestApi {
             String rsqlParam);
 
     /**
-     * Handles the POST request of assigning multiple targets to a single
-     * distribution set.
+     * Handles the POST request of assigning multiple targets to a single distribution set.
      *
      * @param distributionSetId the ID of the distribution set within the URL path parameter
-     * @param targetIds the IDs of the target which should get assigned to the
-     *         distribution set given in the response body
-     * @param offline to <code>true</code> if update was executed offline, i.e. not
-     *         managed by hawkBit.
-     * @return status OK if the assignment of the targets was successful and a
-     *         complex return body which contains information about the assigned
+     * @param targetIds the IDs of the target which should get assigned to the distribution set given in the response body
+     * @param offline to <code>true</code> if update was executed offline, i.e. not managed by hawkBit.
+     * @return status OK if the assignment of the targets was successful and a complex return body which contains information about the assigned
      *         targets and the already assigned targets counters
      */
     @Operation(summary = "Assigning multiple targets to a single distribution set", description = "Handles the POST " +
@@ -501,10 +473,9 @@ public interface MgmtDistributionSetRestApi {
      * Gets a paged list of meta-data for a distribution set.
      *
      * @param distributionSetId the ID of the distribution set for the meta-data
-     * @param pagingOffsetParam the offset of list of targets for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
+     * @param pagingOffsetParam the offset of list of targets for pagination, might not be present in the rest request then default value will
+     *         be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
      * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
      * @param rsqlParam the search parameter in the request URL, syntax {@code q=key==abc}
      * @return status OK if get request is successful with the paged list of meta data
@@ -530,9 +501,8 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
-            + "/{distributionSetId}/metadata", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -562,8 +532,7 @@ public interface MgmtDistributionSetRestApi {
      *
      * @param distributionSetId the ID of the distribution set to get the meta data from
      * @param metadataKey the key of the meta data entry to retrieve the value from
-     * @return status OK if get request is successful with the value of the meta
-     *         data
+     * @return status OK if get request is successful with the value of the meta data
      */
     @Operation(summary = "Return single meta data value for a specific key of a Distribution Set",
             description = "Get a single meta data value for a meta data key. Required permission: READ_REPOSITORY")
@@ -586,8 +555,8 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
-            + "/{distributionSetId}/metadata/{metadataKey}", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata/{metadataKey}",
+            produces = { MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("metadataKey") String metadataKey);
 
@@ -597,8 +566,7 @@ public interface MgmtDistributionSetRestApi {
      * @param distributionSetId the ID of the distribution set to update the meta data entry
      * @param metadataKey the key of the meta data to update the value
      * @param metadata update body
-     * @return status OK if the update request is successful and the updated
-     *         meta data result
+     * @return status OK if the update request is successful and the updated meta data result
      */
     @Operation(summary = "Update single meta data value of a distribution set", description = "Update a single meta " +
             "data value for speficic key. Required permission: UPDATE_REPOSITORY")
@@ -627,9 +595,8 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
-            + "/{distributionSetId}/metadata/{metadataKey}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata/{metadataKey}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("metadataKey") String metadataKey, MgmtMetadataBodyPut metadata);
 
@@ -661,9 +628,9 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
-            + "/{distributionSetId}/metadata/{metadataKey}")
-    ResponseEntity<Void> deleteMetadata(@PathVariable("distributionSetId") Long distributionSetId,
+    @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata/{metadataKey}")
+    ResponseEntity<Void> deleteMetadata(
+            @PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("metadataKey") String metadataKey);
 
     /**
@@ -671,8 +638,7 @@ public interface MgmtDistributionSetRestApi {
      *
      * @param distributionSetId the ID of the distribution set to create meta data for
      * @param metadataRest the list of meta data entries to create
-     * @return status created if post request is successful with the value of
-     *         the created meta data
+     * @return status created if post request is successful with the value of the created meta data
      */
     @Operation(summary = "Create a list of meta data for a specific distribution set", description = "Create a list " +
             "of meta data entries Required permissions: READ_REPOSITORY and UPDATE_TARGET")
@@ -701,11 +667,11 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
-            + "/{distributionSetId}/metadata", consumes = { MediaType.APPLICATION_JSON_VALUE,
-            MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("distributionSetId") Long distributionSetId,
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
+            consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<List<MgmtMetadata>> createMetadata(
+            @PathVariable("distributionSetId") Long distributionSetId,
             List<MgmtMetadata> metadataRest);
 
     /**
@@ -744,20 +710,18 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
-            + "/{distributionSetId}/assignedSM", consumes = { MediaType.APPLICATION_JSON_VALUE,
-            MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> assignSoftwareModules(@PathVariable("distributionSetId") Long distributionSetId,
-            List<MgmtSoftwareModuleAssigment> softwareModuleIDs);
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/assignedSM",
+            consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<Void> assignSoftwareModules(
+            @PathVariable("distributionSetId") Long distributionSetId,
+            List<MgmtSoftwareModuleAssignment> softwareModuleIDs);
 
     /**
      * Deletes the assignment of the software module form the distribution set.
      *
-     * @param distributionSetId the ID of the distribution set to reject the software module
-     *         for
-     * @param softwareModuleId the software module id to get rejected form the distribution
-     *         set
+     * @param distributionSetId the ID of the distribution set to reject the software module for
+     * @param softwareModuleId the software module id to get rejected form the distribution set
      * @return status OK if rejection was successful.
      */
     @Operation(summary = "Delete the assignment of the software module from the distribution set",
@@ -781,9 +745,9 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
-            + "/{distributionSetId}/assignedSM/{softwareModuleId}")
-    ResponseEntity<Void> deleteAssignSoftwareModules(@PathVariable("distributionSetId") Long distributionSetId,
+    @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/assignedSM/{softwareModuleId}")
+    ResponseEntity<Void> deleteAssignSoftwareModules(
+            @PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("softwareModuleId") Long softwareModuleId);
 
     /**
@@ -791,14 +755,11 @@ public interface MgmtDistributionSetRestApi {
      * specific distribution set.
      *
      * @param distributionSetId the ID of the distribution to retrieve
-     * @param pagingOffsetParam the offset of list of sets for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @return a list of the assigned software modules of a distribution set
-     *         with status OK, if none is assigned than {@code null}
+     * @param pagingOffsetParam the offset of list of sets for pagination, might not be present in the rest request then default value will
+     *         be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @return a list of the assigned software modules of a distribution set with status OK, if none is assigned than {@code null}
      */
     @Operation(summary = "Return the assigned software modules of a specific distribution set",
             description = "Handles the GET request of retrieving a single distribution set. " +
@@ -822,9 +783,8 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
-            + "/{distributionSetId}/assignedSM", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/assignedSM",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModule>> getAssignedSoftwareModules(
             @PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(
@@ -846,8 +806,7 @@ public interface MgmtDistributionSetRestApi {
             String sortParam);
 
     /**
-     * Handles the GET request of retrieving Rollouts count by Status
-     * for Distribution Set.
+     * Handles the GET request of retrieving Rollouts count by Status for Distribution Set.
      *
      * @param distributionSetId the ID of the set to retrieve
      * @return a DistributionSetStatistics with status OK.
@@ -873,8 +832,8 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/statistics/rollouts", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/statistics/rollouts",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetStatistics> getRolloutsCountByStatusForDistributionSet(
             @PathVariable("distributionSetId") Long distributionSetId);
 
@@ -912,8 +871,7 @@ public interface MgmtDistributionSetRestApi {
             @PathVariable("distributionSetId") Long distributionSetId);
 
     /**
-     * Handles the GET request of retrieving Auto Assignments count
-     * for Distribution Set.
+     * Handles the GET request of retrieving Auto Assignments count for Distribution Set.
      *
      * @param distributionSetId the ID of the set to retrieve
      * @return a DistributionSetStatistics with status OK.
@@ -945,8 +903,7 @@ public interface MgmtDistributionSetRestApi {
             @PathVariable("distributionSetId") Long distributionSetId);
 
     /**
-     * Handles the GET request of retrieving Rollouts, Actions and
-     * Auto Assignments counts by Status for Distribution Set.
+     * Handles the GET request of retrieving Rollouts, Actions and Auto Assignments counts by Status for Distribution Set.
      *
      * @param distributionSetId the ID of the set to retrieve
      * @return a DistributionSetStatistics with status OK.
@@ -973,8 +930,8 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/statistics", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/statistics",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetStatistics> getStatisticsForDistributionSet(@PathVariable("distributionSetId") Long distributionSetId);
 
     /**
@@ -1015,10 +972,10 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
-            + "/{distributionSetId}/invalidate", consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> invalidateDistributionSet(@PathVariable("distributionSetId") Long distributionSetId,
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/invalidate",
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<Void> invalidateDistributionSet(
+            @PathVariable("distributionSetId") Long distributionSetId,
             @Valid MgmtInvalidateDistributionSetRequestBody invalidateRequestBody);
 }

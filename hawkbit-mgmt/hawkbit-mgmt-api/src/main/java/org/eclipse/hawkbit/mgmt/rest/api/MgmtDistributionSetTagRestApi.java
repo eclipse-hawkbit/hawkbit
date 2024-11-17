@@ -45,17 +45,12 @@ public interface MgmtDistributionSetTagRestApi {
     /**
      * Handles the GET request of retrieving all DistributionSet tags.
      *
-     * @param pagingOffsetParam the offset of list of DistributionSet tags for pagination,
-     *         might not be present in the rest request then default value
-     *         will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=name==abc}
-     * @return a list of all target tags for a defined or default page request
-     *         with status OK. The response is always paged. In any failure the
+     * @param pagingOffsetParam the offset of list of DistributionSet tags for pagination, might not be present in the rest request then default
+     *         value will be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
+     * @return a list of all target tags for a defined or default page request with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all Distribution Set Tags", description = "Handles the GET request of retrieving " +
@@ -78,8 +73,8 @@ public interface MgmtDistributionSetTagRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING, produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING,
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTag>> getDistributionSetTags(
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -132,17 +127,15 @@ public interface MgmtDistributionSetTagRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
-            + "/{distributionsetTagId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/{distributionsetTagId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> getDistributionSetTag(@PathVariable("distributionsetTagId") Long distributionsetTagId);
 
     /**
-     * Handles the POST request of creating new distribution set tag. The
-     * request body must always be a list of tags.
+     * Handles the POST request of creating new distribution set tag. The request body must always be a list of tags.
      *
      * @param tags the distribution set tags to be created.
-     * @return In case all modules could successful created the ResponseEntity
-     *         with status code 201 - Created. The Response Body contains the
+     * @return In case all modules could successful created the ResponseEntity with status code 201 - Created. The Response Body contains the
      *         created distribution set tags but without details.
      */
     @Operation(summary = "Creates new Distribution Set Tags", description = "Handles the POST request of creating " +
@@ -171,9 +164,9 @@ public interface MgmtDistributionSetTagRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING, consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTag>> createDistributionSetTags(List<MgmtTagRequestBodyPut> tags);
 
     /**
@@ -181,8 +174,7 @@ public interface MgmtDistributionSetTagRestApi {
      *
      * @param distributionsetTagId the ID of the distribution set tag
      * @param restDSTagRest the request body to be updated
-     * @return status OK if update is successful and the updated distribution
-     *         set tag.
+     * @return status OK if update is successful and the updated distribution set tag.
      */
     @Operation(summary = "Update Distribution Set Tag",
             description = "Handles the PUT request of updating a distribution set tag.")
@@ -212,11 +204,11 @@ public interface MgmtDistributionSetTagRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
-            + "/{distributionsetTagId}", consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTag> updateDistributionSetTag(@PathVariable("distributionsetTagId") Long distributionsetTagId,
+    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/{distributionsetTagId}",
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtTag> updateDistributionSetTag(
+            @PathVariable("distributionsetTagId") Long distributionsetTagId,
             MgmtTagRequestBodyPut restDSTagRest);
 
     /**
@@ -257,18 +249,14 @@ public interface MgmtDistributionSetTagRestApi {
     ResponseEntity<Void> deleteDistributionSetTag(@PathVariable("distributionsetTagId") Long distributionsetTagId);
 
     /**
-     * Handles the GET request of retrieving all assigned distribution sets by
-     * the given tag id.
+     * Handles the GET request of retrieving all assigned distribution sets by the given tag id.
      *
      * @param distributionsetTagId the ID of the distribution set tag
-     * @param pagingOffsetParam the offset of list of target tags for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=name==abc}
+     * @param pagingOffsetParam the offset of list of target tags for pagination, might not be present in the rest request then default value
+     *         will be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @return the list of assigned distribution sets.
      */
     @Operation(summary = "Return all assigned distribution sets by given tag Id",
@@ -293,9 +281,8 @@ public interface MgmtDistributionSetTagRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
-            + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING, produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING,
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtDistributionSet>> getAssignedDistributionSets(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
             @RequestParam(
@@ -329,8 +316,7 @@ public interface MgmtDistributionSetTagRestApi {
      * @return the list of assigned distribution set.
      */
     @Operation(summary = "Assign distribution set to the given tag id",
-            description = "Handles the POST request of distribution assignment. Already assigned distribution will " +
-                    "be ignored.")
+            description = "Handles the POST request of distribution assignment. Already assigned distribution will be ignored.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -355,8 +341,7 @@ public interface MgmtDistributionSetTagRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING +
-            MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING + "/{distributionsetId}")
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING + "/{distributionsetId}")
     ResponseEntity<Void> assignDistributionSet(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
             @PathVariable("distributionsetId") Long distributionsetId);
@@ -369,8 +354,7 @@ public interface MgmtDistributionSetTagRestApi {
      * @return the list of assigned distribution set.
      */
     @Operation(summary = "Assign distribution sets to the given tag id",
-            description = "Handles the POST request of distribution assignment. Already assigned distribution will " +
-                    "be ignored.")
+            description = "Handles the POST request of distribution assignment. Already assigned distribution will be ignored.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -397,10 +381,9 @@ public interface MgmtDistributionSetTagRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
-            + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING, consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> assignDistributionSets(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
             @RequestBody List<Long> distributionsetIds);
@@ -481,9 +464,8 @@ public interface MgmtDistributionSetTagRestApi {
      *
      * @param distributionsetTagId the ID of the distribution set tag to retrieve
      * @param assignedDSRequestBodies list of distribution set ids to be toggled
-     * @return the list of assigned distribution sets and unassigned
-     *         distribution sets.
-     * @deprecated since 0.6.0 with toggle assigment deprecation
+     * @return the list of assigned distribution sets and unassigned distribution sets.
+     * @deprecated since 0.6.0 with toggle assignment deprecation
      */
     @Operation(summary = "[DEPRECATED] Toggle the assignment of distribution sets by the given tag id",
             description = "Handles the POST request of toggle distribution assignment. The request body must " +
@@ -512,8 +494,8 @@ public interface MgmtDistributionSetTagRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
-            + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING + "/toggleTagAssignment")
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING +
+            MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING + "/toggleTagAssignment")
     @Deprecated(forRemoval = true, since = "0.6.0")
     ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignment(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
@@ -554,10 +536,9 @@ public interface MgmtDistributionSetTagRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
-            + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING, consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     @Deprecated(forRemoval = true, since = "0.6.0")
     ResponseEntity<List<MgmtDistributionSet>> assignDistributionSetsByRequestBody(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,

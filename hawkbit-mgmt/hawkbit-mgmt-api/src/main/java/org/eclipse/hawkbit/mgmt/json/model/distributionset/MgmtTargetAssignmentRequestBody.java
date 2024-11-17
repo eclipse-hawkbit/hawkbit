@@ -27,14 +27,19 @@ public class MgmtTargetAssignmentRequestBody {
 
     @Schema(description = "The technical identifier of the entity", example = "target4")
     private String id;
+
     @Schema(description = "Forcetime in milliseconds", example = "1682408575278")
     private long forcetime;
+
     @Schema(description = "The type of the assignment")
     private MgmtActionType type;
+
     @Schema(description = "Separation of download and install by defining a maintenance window for the installation")
     private MgmtMaintenanceWindowRequestBody maintenanceWindow;
+
     @Schema(description = "Importance of the assignment", example = "100")
     private Integer weight;
+
     @Schema(description = "(Available with user consent flow active) Defines, if the confirmation is required for " +
             "an action. Confirmation is required per default")
     private Boolean confirmationRequired;

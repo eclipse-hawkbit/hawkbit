@@ -142,11 +142,13 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         final String bodyDeactivate = new JSONObject().put("value", false).toString();
 
         mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", KEY_MULTI_ASSIGNMENTS)
-                        .content(bodyActivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content(bodyActivate).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", KEY_MULTI_ASSIGNMENTS)
-                        .content(bodyDeactivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content(bodyDeactivate).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
     }
 
@@ -212,7 +214,8 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         String body = configuration.toString();
 
         mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs")
-                        .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content(body).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         //assert all changes were applied after Rest Success
@@ -236,17 +239,20 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
 
         // enable Multi-Assignments
         mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", KEY_MULTI_ASSIGNMENTS)
-                        .content(bodyActivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content(bodyActivate).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // try to enable Auto-Close
         mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", KEY_AUTO_CLOSE)
-                        .content(bodyActivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content(bodyActivate).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
 
         // try to disable Auto-Close
         mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", KEY_AUTO_CLOSE)
-                        .content(bodyDeactivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content(bodyDeactivate).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
     }
 
@@ -337,7 +343,8 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         String body = configuration.toString();
 
         mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs")
-                        .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .content(body).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(resultMatchers);
         //Check if TenantMetadata and TenantConfiguration is not changed as Batch config failed
         assertEquals(oldDefaultDsType, getActualDefaultDsType(),

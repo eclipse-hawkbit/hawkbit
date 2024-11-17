@@ -26,6 +26,7 @@ public class MgmtSoftwareModuleTypeRequestBodyPut {
     @JsonProperty
     @Schema(example = "Example description")
     private String description;
+
     @JsonProperty
     @Schema(example = "rgb(0,0,255")
     private String colour;

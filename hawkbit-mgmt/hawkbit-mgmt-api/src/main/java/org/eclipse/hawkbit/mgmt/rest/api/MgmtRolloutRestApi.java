@@ -43,18 +43,13 @@ public interface MgmtRolloutRestApi {
     /**
      * Handles the GET request of retrieving all rollouts.
      *
-     * @param pagingOffsetParam the offset of list of rollouts for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=name==abc}
-     * @param representationModeParam the representation mode parameter specifying whether a compact
-     *         or a full representation shall be returned
-     * @return a list of all rollouts for a defined or default page request with
-     *         status OK. The response is always paged. In any failure the
+     * @param pagingOffsetParam the offset of list of rollouts for pagination, might not be present in the rest request then default value will
+     *         be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
+     * @param representationModeParam the representation mode parameter specifying whether a compact or a full representation shall be returned
+     * @return a list of all rollouts for a defined or default page request with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all Rollouts", description = "Handles the GET request of retrieving all rollouts. " +
@@ -77,8 +72,8 @@ public interface MgmtRolloutRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING,
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -134,18 +129,16 @@ public interface MgmtRolloutRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtRolloutResponseBody> getRollout(@PathVariable("rolloutId") Long rolloutId);
 
     /**
      * Handles the POST request for creating rollout.
      *
      * @param rolloutCreateBody the rollout body to be created.
-     * @return In case rollout could successful created the ResponseEntity with
-     *         status code 201 with the successfully created rollout. In any
-     *         failure the JsonResponseExceptionHandler is handling the
-     *         response.
+     * @return In case rollout could successful created the ResponseEntity with status code 201 with the successfully created rollout. In any
+     *         failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Create a new Rollout",
             description = "Handles the POST request of creating new rollout. Required Permission: CREATE_ROLLOUT")
@@ -173,19 +166,17 @@ public interface MgmtRolloutRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING, consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtRolloutResponseBody> create(MgmtRolloutRestRequestBodyPost rolloutCreateBody);
 
     /**
      * Handles the POST request for creating rollout.
      *
      * @param rolloutUpdateBody the rollout body with details for update.
-     * @return In case rollout could successful updated the ResponseEntity with
-     *         status code 200 with the successfully created rollout. In any
-     *         failure the JsonResponseExceptionHandler is handling the
-     *         response.
+     * @return In case rollout could successful updated the ResponseEntity with status code 200 with the successfully created rollout. In any
+     *         failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Update Rollout", description = "Handles the UPDATE request for a single " +
             "Rollout. Required permission: UPDATE_ROLLOUT")
@@ -214,10 +205,11 @@ public interface MgmtRolloutRestApi {
                     "attempts and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}", consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
-            MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
-    ResponseEntity<MgmtRolloutResponseBody> update(@PathVariable("rolloutId") Long rolloutId,
+    @PutMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}",
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
+    ResponseEntity<MgmtRolloutResponseBody> update(
+            @PathVariable("rolloutId") Long rolloutId,
             @RequestBody MgmtRolloutRestRequestBodyPut rolloutUpdateBody);
 
     /**
@@ -225,8 +217,7 @@ public interface MgmtRolloutRestApi {
      *
      * @param rolloutId the ID of the rollout to be approved.
      * @param remark an optional remark on the approval decision
-     * @return OK response (200) if rollout is approved now. In case of any
-     *         exception the corresponding errors occur.
+     * @return OK response (200) if rollout is approved now. In case of any exception the corresponding errors occur.
      */
     @Operation(summary = "Approve a Rollout",
             description = "Handles the POST request of approving a created rollout. Only possible if approval " +
@@ -250,9 +241,10 @@ public interface MgmtRolloutRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/approve", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> approve(@PathVariable("rolloutId") Long rolloutId,
+    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/approve",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<Void> approve(
+            @PathVariable("rolloutId") Long rolloutId,
             @RequestParam(value = "remark", required = false) String remark);
 
     /**
@@ -260,8 +252,7 @@ public interface MgmtRolloutRestApi {
      *
      * @param rolloutId the ID of the rollout to be denied.
      * @param remark an optional remark on the denial decision
-     * @return OK response (200) if rollout is denied now. In case of any
-     *         exception the corresponding errors occur.
+     * @return OK response (200) if rollout is denied now. In case of any exception the corresponding errors occur.
      */
     @Operation(summary = "Deny a Rollout", description = "Handles the POST request of denying a created rollout. " +
             "Only possible if approval workflow is enabled in system configuration and rollout is in state " +
@@ -284,17 +275,17 @@ public interface MgmtRolloutRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deny", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> deny(@PathVariable("rolloutId") Long rolloutId,
+    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deny",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<Void> deny(
+            @PathVariable("rolloutId") Long rolloutId,
             @RequestParam(value = "remark", required = false) String remark);
 
     /**
      * Handles the POST request for starting a rollout.
      *
      * @param rolloutId the ID of the rollout to be started.
-     * @return OK response (200) if rollout could be started. In case of any
-     *         exception the corresponding errors occur.
+     * @return OK response (200) if rollout could be started. In case of any exception the corresponding errors occur.
      */
     @Operation(summary = "Start a Rollout", description = "Handles the POST request of starting a created rollout. " +
             "Required Permission: HANDLE_ROLLOUT")
@@ -316,16 +307,15 @@ public interface MgmtRolloutRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/start", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/start",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> start(@PathVariable("rolloutId") Long rolloutId);
 
     /**
      * Handles the POST request for pausing a rollout.
      *
      * @param rolloutId the ID of the rollout to be paused.
-     * @return OK response (200) if rollout could be paused. In case of any
-     *         exception the corresponding errors occur.
+     * @return OK response (200) if rollout could be paused. In case of any exception the corresponding errors occur.
      */
     @Operation(summary = "Pause a Rollout", description = "Handles the POST request of pausing a running rollout. " +
             "Required Permission: HANDLE_ROLLOUT")
@@ -347,8 +337,8 @@ public interface MgmtRolloutRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/pause", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/pause",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> pause(@PathVariable("rolloutId") Long rolloutId);
 
     /**
@@ -380,16 +370,15 @@ public interface MgmtRolloutRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @DeleteMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @DeleteMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> delete(@PathVariable("rolloutId") Long rolloutId);
 
     /**
      * Handles the POST request for resuming a rollout.
      *
      * @param rolloutId the ID of the rollout to be resumed.
-     * @return OK response (200) if rollout could be resumed. In case of any
-     *         exception the corresponding errors occur.
+     * @return OK response (200) if rollout could be resumed. In case of any exception the corresponding errors occur.
      */
     @Operation(summary = "Resume a Rollout", description = "Handles the POST request of resuming a paused rollout. " +
             "Required Permission: HANDLE_ROLLOUT")
@@ -411,29 +400,21 @@ public interface MgmtRolloutRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/resume", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/resume",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> resume(@PathVariable("rolloutId") Long rolloutId);
 
     /**
-     * Handles the GET request of retrieving all rollout groups referred to a
-     * rollout.
+     * Handles the GET request of retrieving all rollout groups referred to a rollout.
      *
-     * @param pagingOffsetParam the offset of list of rollout groups for pagination, might not
-     *         be present in the rest request then default value will be
-     *         applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=name==abc}
-     * @param representationModeParam the representation mode parameter specifying whether a compact
-     *         or a full representation shall be returned
-     * @return a list of all rollout groups referred to a rollout for a defined
-     *         or default page request with status OK. The response is always
-     *         paged. In any failure the JsonResponseExceptionHandler is
-     *         handling the response.
+     * @param pagingOffsetParam the offset of list of rollout groups for pagination, might not be present in the rest request then default value
+     *         will be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
+     * @param representationModeParam the representation mode parameter specifying whether a compact or a full representation shall be returned
+     * @return a list of all rollout groups referred to a rollout for a defined or default page request with status OK. The response is always
+     *         paged. In any failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all rollout groups referred to a Rollout", description = "Handles the GET request of " +
             "retrieving all deploy groups of a specific rollout. Required Permission: READ_ROLLOUT")
@@ -457,8 +438,8 @@ public interface MgmtRolloutRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtRolloutGroupResponseBody>> getRolloutGroups(@PathVariable("rolloutId") Long rolloutId,
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -515,10 +496,10 @@ public interface MgmtRolloutRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING
-            + "/{rolloutId}/deploygroups/{groupId}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(@PathVariable("rolloutId") Long rolloutId,
+    @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups/{groupId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtRolloutGroupResponseBody> getRolloutGroup(
+            @PathVariable("rolloutId") Long rolloutId,
             @PathVariable("groupId") Long groupId);
 
     /**
@@ -526,17 +507,12 @@ public interface MgmtRolloutRestApi {
      *
      * @param rolloutId the ID of the rollout
      * @param groupId the ID of the rollout group
-     * @param pagingOffsetParam the offset of list of rollout groups for pagination, might not
-     *         be present in the rest request then default value will be
-     *         applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=name==abc}
-     * @return a paged list of targets related to a specific rollout and rollout
-     *         group.
+     * @param pagingOffsetParam the offset of list of rollout groups for pagination, might not be present in the rest request then default value
+     *         will be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
+     * @return a paged list of targets related to a specific rollout and rollout group.
      */
     @Operation(summary = "Return all targets related to a specific rollout group",
             description = "Handles the GET request of retrieving all targets of a single deploy group of a specific " +
@@ -561,10 +537,10 @@ public interface MgmtRolloutRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING
-            + "/{rolloutId}/deploygroups/{groupId}/targets", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtTarget>> getRolloutGroupTargets(@PathVariable("rolloutId") Long rolloutId,
+    @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups/{groupId}/targets",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<PagedList<MgmtTarget>> getRolloutGroupTargets(
+            @PathVariable("rolloutId") Long rolloutId,
             @PathVariable("groupId") Long groupId,
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -590,12 +566,10 @@ public interface MgmtRolloutRestApi {
             String rsqlParam);
 
     /**
-     * Handles the POST request to force trigger processing next group of a
-     * rollout even success threshold isn't yet met
+     * Handles the POST request to force trigger processing next group of a rollout even success threshold isn't yet met
      *
      * @param rolloutId the ID of the rollout to trigger next group.
-     * @return OK response (200). In case of any exception the corresponding
-     *         errors occur.
+     * @return OK response (200). In case of any exception the corresponding errors occur.
      */
     @Operation(summary = "Force trigger processing next group of a Rollout", description = "Handles the POST request " +
             "of triggering the next group of a rollout. Required Permission: UPDATE_ROLLOUT")
@@ -617,16 +591,15 @@ public interface MgmtRolloutRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/triggerNextGroup", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/triggerNextGroup",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> triggerNextGroup(@PathVariable("rolloutId") Long rolloutId);
 
     /**
      * Handles the POST request to retry a rollout
      *
      * @param rolloutId the ID of the rollout to be retried.
-     * @return OK response (200). In case of any exception the corresponding
-     *         errors occur.
+     * @return OK response (200). In case of any exception the corresponding errors occur.
      */
     @Operation(summary = "Retry a rollout", description = "Handles the POST request of retrying a rollout. " +
             "Required Permission: CREATE_ROLLOUT")
@@ -650,8 +623,7 @@ public interface MgmtRolloutRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/retry", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/retry",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtRolloutResponseBody> retryRollout(@PathVariable("rolloutId") final Long rolloutId);
-
 }

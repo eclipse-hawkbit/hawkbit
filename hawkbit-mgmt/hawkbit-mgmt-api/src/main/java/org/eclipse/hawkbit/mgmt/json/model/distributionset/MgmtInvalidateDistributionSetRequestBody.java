@@ -27,6 +27,7 @@ public class MgmtInvalidateDistributionSetRequestBody {
     @JsonProperty
     @Schema(description = "Type of cancelation for actions referring to the given distribution set")
     private MgmtCancelationType actionCancelationType;
+
     @JsonProperty
     @Schema(description = "Defines if rollouts referring to this distribution set should be canceled", example = "true")
     private boolean cancelRollouts;

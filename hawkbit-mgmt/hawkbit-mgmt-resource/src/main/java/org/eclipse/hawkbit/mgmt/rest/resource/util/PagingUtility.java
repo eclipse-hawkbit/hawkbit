@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource.util;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
@@ -30,13 +32,8 @@ import org.springframework.data.domain.Sort.Direction;
 /**
  * Utility class for for paged body generation.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PagingUtility {
-
-    /*
-     * utility constructor private.
-     */
-    private PagingUtility() {
-    }
 
     public static int sanitizeOffsetParam(final int offset) {
         if (offset < 0) {

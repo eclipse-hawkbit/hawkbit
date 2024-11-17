@@ -43,7 +43,6 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
 
     @Autowired
     private SoftwareModuleManagement softwareModuleManagement;
-
     @Autowired
     private ArtifactManagement artifactManagement;
 
@@ -55,9 +54,9 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
      * @return responseEntity with status ok if successful
      */
     @Override
-    public ResponseEntity<InputStream> downloadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    public ResponseEntity<InputStream> downloadArtifact(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("artifactId") final Long artifactId) {
-
         final SoftwareModule module = softwareModuleManagement.get(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
         if (module.isDeleted()) {

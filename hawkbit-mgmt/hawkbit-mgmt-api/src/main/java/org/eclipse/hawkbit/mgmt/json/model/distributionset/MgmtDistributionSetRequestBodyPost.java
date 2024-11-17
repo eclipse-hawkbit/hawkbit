@@ -20,7 +20,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssigment;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssignment;
 
 /**
  * A json annotated rest model for DistributionSet for POST.
@@ -33,20 +33,23 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssi
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtDistributionSetRequestBodyPost extends MgmtDistributionSetRequestBodyPut {
 
-    // deprecated format from the time where os, application and runtime where
-    // statically defined
+    // deprecated format from the time where os, application and runtime where statically defined
     @JsonProperty
     @Schema(hidden = true)
-    private MgmtSoftwareModuleAssigment os;
+    private MgmtSoftwareModuleAssignment os;
+
     @JsonProperty
     @Schema(hidden = true)
-    private MgmtSoftwareModuleAssigment runtime;
+    private MgmtSoftwareModuleAssignment runtime;
+
     @JsonProperty
     @Schema(hidden = true)
-    private MgmtSoftwareModuleAssigment application;
+    private MgmtSoftwareModuleAssignment application;
+
     // deprecated format - END
     @JsonProperty
-    private List<MgmtSoftwareModuleAssigment> modules;
+    private List<MgmtSoftwareModuleAssignment> modules;
+
     @JsonProperty
     @Schema(description = "The type of the distribution set", example = "test_default_ds_type")
     private String type;

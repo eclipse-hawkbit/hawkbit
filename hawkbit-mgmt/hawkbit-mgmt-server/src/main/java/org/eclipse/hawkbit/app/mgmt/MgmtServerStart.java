@@ -48,7 +48,5 @@ public class MgmtServerStart {
 
     @Configuration
     @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, proxyTargetClass = true)
-    public static class MethodSecurityConfig {
-
-    }
+    public static class MethodSecurityConfig {}
 }

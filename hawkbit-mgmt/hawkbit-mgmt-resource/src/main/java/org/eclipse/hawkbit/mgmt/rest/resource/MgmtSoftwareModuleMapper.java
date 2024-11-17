@@ -42,8 +42,7 @@ import org.eclipse.hawkbit.rest.json.model.ResponseList;
 import org.springframework.hateoas.Link;
 
 /**
- * A mapper which maps repository model to RESTful model representation and
- * back.
+ * A mapper which maps repository model to RESTful model representation and back.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtSoftwareModuleMapper {

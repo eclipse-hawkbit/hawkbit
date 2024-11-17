@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
@@ -47,12 +47,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeRestApi {
 
     private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
-
     private final DistributionSetTypeManagement distributionSetTypeManagement;
-
     private final EntityFactory entityFactory;
 
-    MgmtDistributionSetTypeResource(final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+    MgmtDistributionSetTypeResource(
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final EntityFactory entityFactory) {
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
         this.distributionSetTypeManagement = distributionSetTypeManagement;
@@ -81,8 +80,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
             countModulesAll = distributionSetTypeManagement.count();
         }
 
-        final List<MgmtDistributionSetType> rest = MgmtDistributionSetTypeMapper
-                .toListResponse(findModuleTypessAll.getContent());
+        final List<MgmtDistributionSetType> rest = MgmtDistributionSetTypeMapper.toListResponse(findModuleTypessAll.getContent());
         return ResponseEntity.ok(new PagedList<>(rest, countModulesAll));
     }
 
@@ -92,15 +90,14 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
 
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
 
-        final MgmtDistributionSetType reponse = MgmtDistributionSetTypeMapper.toResponse(foundType);
-        MgmtDistributionSetTypeMapper.addLinks(reponse);
+        final MgmtDistributionSetType response = MgmtDistributionSetTypeMapper.toResponse(foundType);
+        MgmtDistributionSetTypeMapper.addLinks(response);
 
-        return ResponseEntity.ok(reponse);
+        return ResponseEntity.ok(response);
     }
 
     @Override
-    public ResponseEntity<Void> deleteDistributionSetType(
-            @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
+    public ResponseEntity<Void> deleteDistributionSetType(@PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
         distributionSetTypeManagement.delete(distributionSetTypeId);
 
         return ResponseEntity.ok().build();
@@ -110,21 +107,19 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     public ResponseEntity<MgmtDistributionSetType> updateDistributionSetType(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @RequestBody final MgmtDistributionSetTypeRequestBodyPut restDistributionSetType) {
-
         final DistributionSetType updated = distributionSetTypeManagement.update(entityFactory.distributionSetType()
                 .update(distributionSetTypeId).description(restDistributionSetType.getDescription())
                 .colour(restDistributionSetType.getColour()));
 
-        final MgmtDistributionSetType reponse = MgmtDistributionSetTypeMapper.toResponse(updated);
-        MgmtDistributionSetTypeMapper.addLinks(reponse);
+        final MgmtDistributionSetType response = MgmtDistributionSetTypeMapper.toResponse(updated);
+        MgmtDistributionSetTypeMapper.addLinks(response);
 
-        return ResponseEntity.ok(reponse);
+        return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<List<MgmtDistributionSetType>> createDistributionSetTypes(
             @RequestBody final List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes) {
-
         final List<DistributionSetType> createdSoftwareModules = distributionSetTypeManagement
                 .create(MgmtDistributionSetTypeMapper.smFromRequest(entityFactory, distributionSetTypes));
 
@@ -135,7 +130,6 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     @Override
     public ResponseEntity<List<MgmtSoftwareModuleType>> getMandatoryModules(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
-
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
         return ResponseEntity.ok(MgmtSoftwareModuleTypeMapper.toTypesResponse(foundType.getMandatoryModuleTypes()));
     }
@@ -144,7 +138,6 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     public ResponseEntity<MgmtSoftwareModuleType> getMandatoryModule(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
-
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
         final SoftwareModuleType foundSmType = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
 
@@ -159,7 +152,6 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     public ResponseEntity<MgmtSoftwareModuleType> getOptionalModule(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
-
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
         final SoftwareModuleType foundSmType = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
 
@@ -173,7 +165,6 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     @Override
     public ResponseEntity<List<MgmtSoftwareModuleType>> getOptionalModules(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
-
         final DistributionSetType foundType = findDistributionSetTypeWithExceptionIfNotFound(distributionSetTypeId);
         return ResponseEntity.ok(MgmtSoftwareModuleTypeMapper.toTypesResponse(foundType.getOptionalModuleTypes()));
     }
@@ -191,26 +182,20 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     public ResponseEntity<Void> removeOptionalModule(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
-
         return removeMandatoryModule(distributionSetTypeId, softwareModuleTypeId);
     }
 
     @Override
     public ResponseEntity<Void> addMandatoryModule(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId, @RequestBody final MgmtId smtId) {
-
-        distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(distributionSetTypeId,
-                Arrays.asList(smtId.getId()));
-
+        distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(distributionSetTypeId, Collections.singletonList(smtId.getId()));
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> addOptionalModule(
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId, @RequestBody final MgmtId smtId) {
-
-        distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(distributionSetTypeId,
-                Arrays.asList(smtId.getId()));
+        distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(distributionSetTypeId, Collections.singletonList(smtId.getId()));
 
         return ResponseEntity.ok().build();
     }
@@ -221,7 +206,6 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     private SoftwareModuleType findSoftwareModuleTypeWithExceptionIfNotFound(final Long softwareModuleTypeId) {
-
         return softwareModuleTypeManagement.get(softwareModuleTypeId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, softwareModuleTypeId));
     }

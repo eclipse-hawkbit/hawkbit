@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentRequestBody;
@@ -20,11 +22,8 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 /**
  * A mapper for assignment requests
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtDeploymentRequestMapper {
-
-    private MgmtDeploymentRequestMapper() {
-        // Utility class
-    }
 
     /**
      * Convert assignment information to an {@link DeploymentRequestBuilder}

@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.mgmt.json.model.auth;
 
 import lombok.Data;
-import lombok.ToString;
 import lombok.experimental.Accessors;
 
 /**
@@ -18,7 +17,6 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@ToString
 public class MgmtUserInfo {
 
     private String tenant;

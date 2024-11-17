@@ -23,12 +23,7 @@ public class MgmtBasicAuthResource implements MgmtBasicAuthRestApi {
 
     private final TenantAware tenantAware;
 
-    /**
-     * Default constructor
-     *
-     * @param tenantAware tenantAware
-     */
-    public MgmtBasicAuthResource(TenantAware tenantAware) {
+    public MgmtBasicAuthResource(final TenantAware tenantAware) {
         this.tenantAware = tenantAware;
     }
 

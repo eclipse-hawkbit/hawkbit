@@ -50,9 +50,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestApi {
 
     private final TargetFilterQueryManagement filterManagement;
-
     private final EntityFactory entityFactory;
-
     private final TenantConfigHelper tenantConfigHelper;
 
     MgmtTargetFilterQueryResource(final TargetFilterQueryManagement filterManagement, final EntityFactory entityFactory,
@@ -81,14 +79,13 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT) String representationModeParam) {
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetFilterQuerySortParam(sortParam);
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Slice<TargetFilterQuery> findTargetFiltersAll;
-        final Long countTargetsAll;
+        final long countTargetsAll;
         if (rsqlParam != null) {
             final Page<TargetFilterQuery> findFilterPage = filterManagement.findByRsql(pageable, rsqlParam);
             countTargetsAll = findFilterPage.getTotalElements();
@@ -142,8 +139,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(
-            @PathVariable("filterId") final Long filterId) {
+    public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(@PathVariable("filterId") final Long filterId) {
         final TargetFilterQuery filter = findFilterWithExceptionIfNotFound(filterId);
         final DistributionSet autoAssignDistributionSet = filter.getAutoAssignDistributionSet();
 
@@ -197,5 +193,4 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         return filterManagement.get(filterId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, filterId));
     }
-
 }

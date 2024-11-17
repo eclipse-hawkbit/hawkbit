@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.jayway.jsonpath.JsonPath;
@@ -56,7 +57,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         final SoftwareModuleType testType = createTestType();
 
         mvc.perform(get("/rest/v1/softwaremoduletypes").accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.content.[?(@.key=='" + osType.getKey() + "')].name", contains(osType.getName())))
                 .andExpect(jsonPath("$.content.[?(@.key=='" + osType.getKey() + "')].description",
@@ -115,7 +117,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         // descending
         mvc.perform(get("/rest/v1/softwaremoduletypes").accept(MediaType.APPLICATION_JSON)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "MAXASSIGNMENTS:DESC"))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.content.[1].id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.content.[1].name", equalTo("TestName123")))
@@ -132,7 +135,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         // ascending
         mvc.perform(get("/rest/v1/softwaremoduletypes").accept(MediaType.APPLICATION_JSON)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "MAXASSIGNMENTS:ASC"))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.content.[2].id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.content.[2].name", equalTo("TestName123")))
@@ -157,14 +161,16 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
 
         mvc.perform(post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypes(types))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
 
         types.clear();
         types.add(entityFactory.softwareModuleType().create().key("test0").name("TestName0").maxAssignments(0).build());
 
         mvc.perform(post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypes(types))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -183,21 +189,26 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         final MvcResult mvcResult = mvc
                 .perform(post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypes(types))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("[0].name", equalTo("TestName1"))).andExpect(jsonPath("[0].key", equalTo("test1")))
+                .andExpect(jsonPath("[0].name", equalTo("TestName1")))
+                .andExpect(jsonPath("[0].key", equalTo("test1")))
                 .andExpect(jsonPath("[0].description", equalTo("Desc1")))
                 .andExpect(jsonPath("[0].createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("[0].maxAssignments", equalTo(1)))
-                .andExpect(jsonPath("[1].name", equalTo("TestName2"))).andExpect(jsonPath("[1].key", equalTo("test2")))
+                .andExpect(jsonPath("[1].name", equalTo("TestName2")))
+                .andExpect(jsonPath("[1].key", equalTo("test2")))
                 .andExpect(jsonPath("[1].description", equalTo("Desc2")))
                 .andExpect(jsonPath("[1].createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("[1].maxAssignments", equalTo(2)))
-                .andExpect(jsonPath("[2].name", equalTo("TestName3"))).andExpect(jsonPath("[2].key", equalTo("test3")))
+                .andExpect(jsonPath("[2].name", equalTo("TestName3")))
+                .andExpect(jsonPath("[2].key", equalTo("test3")))
                 .andExpect(jsonPath("[2].description", equalTo("Desc3")))
                 .andExpect(jsonPath("[2].createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("[2].createdAt", not(equalTo(0))))
-                .andExpect(jsonPath("[2].maxAssignments", equalTo(3))).andReturn();
+                .andExpect(jsonPath("[2].maxAssignments", equalTo(3)))
+                .andReturn();
 
         final SoftwareModuleType created1 = softwareModuleTypeManagement.getByKey("test1").get();
         final SoftwareModuleType created2 = softwareModuleTypeManagement.getByKey("test2").get();
@@ -223,7 +234,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         final SoftwareModuleType testType = createTestType();
 
         mvc.perform(get("/rest/v1/softwaremoduletypes/{smtId}", testType.getId()).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.name", equalTo("TestName123")))
                 .andExpect(jsonPath("$.description", equalTo("Desc1234")))
@@ -244,7 +256,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
 
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(4);
 
-        mvc.perform(delete("/rest/v1/softwaremoduletypes/{smId}", testType.getId())).andDo(MockMvcResultPrinter.print())
+        mvc.perform(delete("/rest/v1/softwaremoduletypes/{smId}", testType.getId()))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(3);
@@ -253,7 +266,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     @Test
     @Description("Ensures that module type deletion request to API on an entity that does not exist results in NOT_FOUND.")
     public void deleteSoftwareModuleTypeThatDoesNotExistLeadsToNotFound() throws Exception {
-        mvc.perform(delete("/rest/v1/softwaremoduletypes/1234")).andDo(MockMvcResultPrinter.print())
+        mvc.perform(delete("/rest/v1/softwaremoduletypes/1234"))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
     }
 
@@ -267,14 +281,19 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
 
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(4);
 
-        mvc.perform(get("/rest/v1/softwaremoduletypes/{smtId}", testType.getId())).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(false)));
+        mvc.perform(get("/rest/v1/softwaremoduletypes/{smtId}", testType.getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deleted", equalTo(false)));
 
         mvc.perform(delete("/rest/v1/softwaremoduletypes/{smtId}", testType.getId()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
 
-        mvc.perform(get("/rest/v1/softwaremoduletypes/{smtId}", testType.getId())).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(true)));
+        mvc.perform(get("/rest/v1/softwaremoduletypes/{smtId}", testType.getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deleted", equalTo(true)));
 
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(3);
     }
@@ -288,11 +307,14 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .put("colour", "updatedColour").put("name", "nameShouldNotBeChanged").toString();
 
         mvc.perform(put("/rest/v1/softwaremoduletypes/{smId}", testType.getId()).content(body)
-                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.description", equalTo("foobardesc")))
                 .andExpect(jsonPath("$.colour", equalTo("updatedColour")))
-                .andExpect(jsonPath("$.name", equalTo("TestName123"))).andReturn();
+                .andExpect(jsonPath("$.name", equalTo("TestName123")))
+                .andReturn();
 
     }
 
@@ -304,7 +326,9 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         final String body = new JSONObject().put("id", testType.getId()).put("deleted", true).toString();
 
         mvc.perform(put("/rest/v1/softwaremoduletypes/{smtId}", testType.getId()).content(body)
-                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(testType.getLastModifiedAt())))
                 .andExpect(jsonPath("$.deleted", equalTo(false)));
@@ -318,7 +342,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes GET requests with paging.")
     public void getSoftwareModuleTypesWithoutAddtionalRequestParameters() throws Exception {
         final int types = 3;
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print())
+        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(types)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(types)))
@@ -332,7 +357,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         final int limitSize = 1;
         mvc.perform(get(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(types)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(limitSize)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(limitSize)));
@@ -347,7 +373,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         mvc.perform(get(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(types)))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(types)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(expectedSize)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(expectedSize)));
@@ -358,46 +385,55 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     public void invalidRequestsOnSoftwaremoduleTypesResource() throws Exception {
         final SoftwareModuleType testType = createTestType();
 
-        final List<SoftwareModuleType> types = Arrays.asList(testType);
+        final List<SoftwareModuleType> types = Collections.singletonList(testType);
 
         // SM does not exist
-        mvc.perform(get("/rest/v1/softwaremoduletypes/12345678")).andDo(MockMvcResultPrinter.print())
+        mvc.perform(get("/rest/v1/softwaremoduletypes/12345678"))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
-        mvc.perform(delete("/rest/v1/softwaremoduletypes/12345678")).andDo(MockMvcResultPrinter.print())
+        mvc.perform(delete("/rest/v1/softwaremoduletypes/12345678"))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
         // bad request - no content
         mvc.perform(post("/rest/v1/softwaremoduletypes").contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
 
         // bad request - bad content
         mvc.perform(post("/rest/v1/softwaremoduletypes").content("sdfjsdlkjfskdjf".getBytes())
-                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         mvc.perform(post("/rest/v1/softwaremoduletypes").content(
                                 "[{\"description\":\"Desc123\",\"id\":9223372036854775807,\"key\":\"test123\",\"maxAssignments\":5}]")
-                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         final SoftwareModuleType toLongName = entityFactory.softwareModuleType().create().key("test123")
                 .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1)).build();
         mvc.perform(
-                        post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypes(Arrays.asList(toLongName)))
+                        post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypes(Collections.singletonList(toLongName)))
                                 .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
 
         // unsupported media type
         mvc.perform(post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypes(types))
-                        .contentType(MediaType.APPLICATION_OCTET_STREAM)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnsupportedMediaType());
 
         // not allowed methods
-        mvc.perform(put("/rest/v1/softwaremoduletypes")).andDo(MockMvcResultPrinter.print())
+        mvc.perform(put("/rest/v1/softwaremoduletypes"))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
-        mvc.perform(delete("/rest/v1/softwaremoduletypes")).andDo(MockMvcResultPrinter.print())
+        mvc.perform(delete("/rest/v1/softwaremoduletypes"))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
 
     }
@@ -412,9 +448,12 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
 
         final String rsqlFindLikeDs1OrDs2 = "name==TestName123,name==TestName1234";
 
-        mvc.perform(get("/rest/v1/softwaremoduletypes?q=" + rsqlFindLikeDs1OrDs2)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(jsonPath("size", equalTo(2)))
-                .andExpect(jsonPath("total", equalTo(2))).andExpect(jsonPath("content[0].name", equalTo("TestName123")))
+        mvc.perform(get("/rest/v1/softwaremoduletypes?q=" + rsqlFindLikeDs1OrDs2))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("size", equalTo(2)))
+                .andExpect(jsonPath("total", equalTo(2)))
+                .andExpect(jsonPath("content[0].name", equalTo("TestName123")))
                 .andExpect(jsonPath("content[1].name", equalTo("TestName1234")));
 
     }

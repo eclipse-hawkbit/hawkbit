@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.AbstractMgmtRolloutConditionsEntity;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutCondition;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutCondition.Condition;
@@ -50,16 +52,12 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 
 /**
- * A mapper which maps repository model to RESTful model representation and
- * back.
+ * A mapper which maps repository model to RESTful model representation and back.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class MgmtRolloutMapper {
 
     private static final String NOT_SUPPORTED = " is not supported";
-
-    private MgmtRolloutMapper() {
-        // Utility class
-    }
 
     static List<MgmtRolloutResponseBody> toResponseRollout(final List<Rollout> rollouts) {
         return toResponseRollout(rollouts, false);

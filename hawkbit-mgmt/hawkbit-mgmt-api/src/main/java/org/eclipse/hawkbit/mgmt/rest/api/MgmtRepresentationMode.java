@@ -23,7 +23,7 @@ public enum MgmtRepresentationMode {
 
     private final String mode;
 
-    private MgmtRepresentationMode(final String mode) {
+    MgmtRepresentationMode(final String mode) {
         this.mode = mode;
     }
 
@@ -35,5 +35,4 @@ public enum MgmtRepresentationMode {
     public String toString() {
         return mode;
     }
-
 }

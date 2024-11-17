@@ -86,7 +86,8 @@ public class MgmtBasicAuthResourceTest {
     @Description("Test of userinfo api with basic auth validation")
     @WithUser(principal = TEST_USER)
     public void validateBasicAuthWithUserDetails() throws Exception {
-        withSecurityMock().perform(get(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print())
+        withSecurityMock().perform(get(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING))
+                .andDo(MockMvcResultPrinter.print())
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON_VALUE))

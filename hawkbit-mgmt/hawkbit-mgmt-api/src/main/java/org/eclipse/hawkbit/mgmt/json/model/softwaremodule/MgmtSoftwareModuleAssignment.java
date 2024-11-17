@@ -16,6 +16,4 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
  * Request Body of SoftwareModule for assignment operations (ID only).
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MgmtSoftwareModuleAssigment extends MgmtId {
-
-}
+public class MgmtSoftwareModuleAssignment extends MgmtId {}

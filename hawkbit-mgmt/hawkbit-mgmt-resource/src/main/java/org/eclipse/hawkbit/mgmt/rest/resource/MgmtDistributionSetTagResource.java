@@ -49,12 +49,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRestApi {
 
     private final DistributionSetTagManagement distributionSetTagManagement;
-
     private final DistributionSetManagement distributionSetManagement;
-
     private final EntityFactory entityFactory;
 
-    MgmtDistributionSetTagResource(final DistributionSetTagManagement distributionSetTagManagement,
+    MgmtDistributionSetTagResource(
+            final DistributionSetTagManagement distributionSetTagManagement,
             final DistributionSetManagement distributionSetManagement, final EntityFactory entityFactory) {
         this.distributionSetTagManagement = distributionSetTagManagement;
         this.distributionSetManagement = distributionSetManagement;
@@ -67,7 +66,6 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTagSortParam(sortParam);
@@ -78,12 +76,10 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         if (rsqlParam == null) {
             distributionSetTags = distributionSetTagManagement.findAll(pageable);
             count = distributionSetTagManagement.count();
-
         } else {
             final Page<DistributionSetTag> page = distributionSetTagManagement.findByRsql(pageable, rsqlParam);
             distributionSetTags = page;
             count = page.getTotalElements();
-
         }
 
         final List<MgmtTag> rest = MgmtTagMapper.toResponseDistributionSetTag(distributionSetTags.getContent());
@@ -106,8 +102,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
             @RequestBody final List<MgmtTagRequestBodyPut> tags) {
         log.debug("creating {} ds tags", tags.size());
 
-        final List<DistributionSetTag> createdTags = distributionSetTagManagement
-                .create(MgmtTagMapper.mapTagFromRequest(entityFactory, tags));
+        final List<DistributionSetTag> createdTags = distributionSetTagManagement.create(MgmtTagMapper.mapTagFromRequest(entityFactory, tags));
 
         return new ResponseEntity<>(MgmtTagMapper.toResponseDistributionSetTag(createdTags), HttpStatus.CREATED);
     }
@@ -153,13 +148,11 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         Page<DistributionSet> findDistrAll;
         if (rsqlParam == null) {
             findDistrAll = distributionSetManagement.findByTag(pageable, distributionsetTagId);
-
         } else {
             findDistrAll = distributionSetManagement.findByRsqlAndTag(pageable, rsqlParam, distributionsetTagId);
         }
 
-        final List<MgmtDistributionSet> rest = MgmtDistributionSetMapper
-                .toResponseFromDsList(findDistrAll.getContent());
+        final List<MgmtDistributionSet> rest = MgmtDistributionSetMapper.toResponseFromDsList(findDistrAll.getContent());
         return ResponseEntity.ok(new PagedList<>(rest, findDistrAll.getTotalElements()));
     }
 
@@ -173,12 +166,9 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
-    public ResponseEntity<Void> assignDistributionSets(
-            final Long distributionsetTagId,
-            final List<Long> distributionsetIds) {
+    public ResponseEntity<Void> assignDistributionSets(final Long distributionsetTagId, final List<Long> distributionsetIds) {
         log.debug("Assign DistributionSet {} for ds tag {}", distributionsetIds.size(), distributionsetTagId);
-        final List<DistributionSet> assignedDs = this.distributionSetManagement
-                .assignTag(distributionsetIds, distributionsetTagId);
+        final List<DistributionSet> assignedDs = this.distributionSetManagement.assignTag(distributionsetIds, distributionsetTagId);
         log.debug("Assigned DistributionSet {}", assignedDs.size());
         return ResponseEntity.ok().build();
     }
@@ -197,8 +187,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             @RequestBody final List<Long> distributionsetIds) {
         log.debug("Unassign DistributionSet {} for ds tag {}", distributionsetIds.size(), distributionsetTagId);
-        final List<DistributionSet> assignedDs = this.distributionSetManagement
-                .unassignTag(distributionsetIds, distributionsetTagId);
+        final List<DistributionSet> assignedDs = this.distributionSetManagement.unassignTag(distributionsetIds, distributionsetTagId);
         log.debug("Unassigned DistributionSet {}", assignedDs.size());
         return ResponseEntity.ok().build();
     }
@@ -207,8 +196,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     public ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignment(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             @RequestBody final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
-        log.debug("Toggle distribution set assignment {} for ds tag {}", assignedDSRequestBodies.size(),
-                distributionsetTagId);
+        log.debug("Toggle distribution set assignment {} for ds tag {}", assignedDSRequestBodies.size(), distributionsetTagId);
 
         final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
 
@@ -221,8 +209,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         tagAssigmentResultRest.setUnassignedDistributionSets(
                 MgmtDistributionSetMapper.toResponseDistributionSets(assigmentResult.getUnassignedEntity()));
 
-        log.debug("Toggled assignedDS {} and unassignedDS{}", assigmentResult.getAssigned(),
-                assigmentResult.getUnassigned());
+        log.debug("Toggled assignedDS {} and unassignedDS{}", assigmentResult.getAssigned(), assigmentResult.getUnassigned());
 
         return ResponseEntity.ok(tagAssigmentResultRest);
     }

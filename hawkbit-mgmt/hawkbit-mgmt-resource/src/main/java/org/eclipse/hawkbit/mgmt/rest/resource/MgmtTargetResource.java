@@ -79,13 +79,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     private static final String ACTION_TARGET_MISSING_ASSIGN_WARN = "given action ({}) is not assigned to given target ({}).";
 
     private final TargetManagement targetManagement;
-
     private final ConfirmationManagement confirmationManagement;
-
     private final DeploymentManagement deploymentManagement;
-
     private final EntityFactory entityFactory;
-
     private final TenantConfigHelper tenantConfigHelper;
 
     MgmtTargetResource(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
@@ -115,7 +111,6 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
@@ -146,9 +141,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<MgmtTarget> updateTarget(
+            @PathVariable("targetId") final String targetId,
             @RequestBody final MgmtTargetRequestBody targetRest) {
-
         if (targetRest.getRequestAttributes() != null) {
             if (targetRest.getRequestAttributes()) {
                 targetManagement.requestControllerAttributes(targetId);
@@ -157,8 +152,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             }
         }
 
-        Target updateTarget;
-
+        final Target updateTarget;
         if (targetRest.getTargetType() != null && targetRest.getTargetType() == -1L) {
             // if targetType in request is -1 - unassign targetType from target
             this.targetManagement.unassignType(targetId);
@@ -216,7 +210,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtAction>> getActionHistory(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<PagedList<MgmtAction>> getActionHistory(
+            @PathVariable("targetId") final String targetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
@@ -230,7 +225,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
 
         final Slice<Action> activeActions;
-        final Long totalActionCount;
+        final long totalActionCount;
         if (rsqlParam != null) {
             activeActions = this.deploymentManagement.findActionsByTarget(rsqlParam, targetId, pageable);
             totalActionCount = this.deploymentManagement.countActionsByTarget(rsqlParam, targetId);
@@ -239,14 +234,13 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             totalActionCount = this.deploymentManagement.countActionsByTarget(targetId);
         }
 
-        return ResponseEntity.ok(
-                new PagedList<>(MgmtTargetMapper.toResponse(targetId, activeActions.getContent()), totalActionCount));
+        return ResponseEntity.ok(new PagedList<>(MgmtTargetMapper.toResponse(targetId, activeActions.getContent()), totalActionCount));
     }
 
     @Override
-    public ResponseEntity<MgmtAction> getAction(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<MgmtAction> getAction(
+            @PathVariable("targetId") final String targetId,
             @PathVariable("actionId") final Long actionId) {
-
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         if (!action.getTarget().getControllerId().equals(targetId)) {
@@ -258,7 +252,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> cancelAction(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<Void> cancelAction(
+            @PathVariable("targetId") final String targetId,
             @PathVariable("actionId") final Long actionId,
             @RequestParam(value = "force", required = false, defaultValue = "false") final boolean force) {
         final Action action = deploymentManagement.findAction(actionId)
@@ -281,7 +276,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtAction> updateAction(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<MgmtAction> updateAction(
+            @PathVariable("targetId") final String targetId,
             @PathVariable("actionId") final Long actionId, @RequestBody final MgmtActionRequestBodyPut actionUpdate) {
 
         Action action = deploymentManagement.findAction(actionId)
@@ -327,12 +323,10 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         return ResponseEntity.ok(new PagedList<>(
                 MgmtTargetMapper.toActionStatusRestResponse(statusList.getContent(), deploymentManagement),
                 statusList.getTotalElements()));
-
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(
-            @PathVariable("targetId") final String targetId) {
+    public ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(@PathVariable("targetId") final String targetId) {
         final MgmtDistributionSet distributionSetRest = deploymentManagement.getAssignedDistributionSet(targetId)
                 .map(ds -> {
                     final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(ds);
@@ -375,8 +369,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(
-            @PathVariable("targetId") final String targetId) {
+    public ResponseEntity<MgmtDistributionSet> getInstalledDistributionSet(@PathVariable("targetId") final String targetId) {
         final MgmtDistributionSet distributionSetRest = deploymentManagement.getInstalledDistributionSet(targetId)
                 .map(set -> {
                     final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(set);
@@ -395,17 +388,16 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<List<MgmtTag>> getTags(@PathVariable("targetId") String targetId) {
         final Set<TargetTag> tags = targetManagement.getTagsByControllerId(targetId);
-        return ResponseEntity.ok(
-                MgmtTagMapper.toResponse(tags == null ? Collections.emptyList() : tags.stream().toList()));
+        return ResponseEntity.ok(MgmtTagMapper.toResponse(tags == null ? Collections.emptyList() : tags.stream().toList()));
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<PagedList<MgmtMetadata>> getMetadata(
+            @PathVariable("targetId") final String targetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeDistributionSetMetadataSortParam(sortParam);
@@ -424,7 +416,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<MgmtMetadata> getMetadataValue(
+            @PathVariable("targetId") final String targetId,
             @PathVariable("metadataKey") final String metadataKey) {
         final TargetMetadata findOne = targetManagement.getMetaDataByControllerId(targetId, metadataKey)
                 .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, targetId, metadataKey));
@@ -432,7 +425,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<MgmtMetadata> updateMetadata(
+            @PathVariable("targetId") final String targetId,
             @PathVariable("metadataKey") final String metadataKey, @RequestBody final MgmtMetadataBodyPut metadata) {
         final TargetMetadata updated = targetManagement.updateMetadata(targetId,
                 entityFactory.generateTargetMetadata(metadataKey, metadata.getValue()));
@@ -440,14 +434,16 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteMetadata(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<Void> deleteMetadata(
+            @PathVariable("targetId") final String targetId,
             @PathVariable("metadataKey") final String metadataKey) {
         targetManagement.deleteMetaData(targetId, metadataKey);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<List<MgmtMetadata>> createMetadata(
+            @PathVariable("targetId") final String targetId,
             @RequestBody final List<MgmtMetadata> metadataRest) {
         final List<TargetMetadata> created = targetManagement.createMetaData(targetId,
                 MgmtTargetMapper.fromRequestTargetMetadata(metadataRest, entityFactory));
@@ -462,7 +458,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> activateAutoConfirm(@PathVariable("targetId") final String targetId,
+    public ResponseEntity<Void> activateAutoConfirm(
+            @PathVariable("targetId") final String targetId,
             @RequestBody(required = false) final MgmtTargetAutoConfirmUpdate update) {
         final String initiator = getNullIfEmpty(update, MgmtTargetAutoConfirmUpdate::getInitiator);
         final String remark = getNullIfEmpty(update, MgmtTargetAutoConfirmUpdate::getRemark);
@@ -484,5 +481,4 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     private <T, R> R getNullIfEmpty(final T object, final Function<T, R> extractMethod) {
         return object == null ? null : extractMethod.apply(object);
     }
-
 }

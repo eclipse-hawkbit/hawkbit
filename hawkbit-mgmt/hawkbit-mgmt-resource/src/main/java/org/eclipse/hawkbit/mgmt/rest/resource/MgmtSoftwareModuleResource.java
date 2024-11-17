@@ -73,7 +73,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     private final SystemManagement systemManagement;
     private final EntityFactory entityFactory;
 
-    MgmtSoftwareModuleResource(final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareModuleManagement,
+    MgmtSoftwareModuleResource(
+            final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
             final EntityFactory entityFactory) {
@@ -86,7 +87,8 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtArtifact> uploadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    public ResponseEntity<MgmtArtifact> uploadArtifact(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestPart("file") final MultipartFile file,
             @RequestParam(value = "filename", required = false) final String optionalFileName,
             @RequestParam(value = "md5sum", required = false) final String md5Sum,
@@ -137,13 +139,14 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         return ResponseEntity.ok(new ResponseList<>(response));
     }
 
-    @Override
-    @ResponseBody
     // Exception squid:S3655 - Optional access is checked in
     // findSoftwareModuleWithExceptionIfNotFound
     // subroutine
     @SuppressWarnings("squid:S3655")
-    public ResponseEntity<MgmtArtifact> getArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    @Override
+    @ResponseBody
+    public ResponseEntity<MgmtArtifact> getArtifact(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("artifactId") final Long artifactId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_USE_ARTIFACT_URL_HANDLER, required = false) final Boolean useArtifactUrlHandler) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
@@ -163,9 +166,9 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
     @Override
     @ResponseBody
-    public ResponseEntity<Void> deleteArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    public ResponseEntity<Void> deleteArtifact(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("artifactId") final Long artifactId) {
-
         findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
         artifactManagement.delete(artifactId);
 
@@ -178,7 +181,6 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeSoftwareModuleSortParam(sortParam);
@@ -200,9 +202,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtSoftwareModule> getSoftwareModule(
-            @PathVariable("softwareModuleId") final Long softwareModuleId) {
-
+    public ResponseEntity<MgmtSoftwareModule> getSoftwareModule(@PathVariable("softwareModuleId") final Long softwareModuleId) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
 
         final MgmtSoftwareModule response = MgmtSoftwareModuleMapper.toResponse(module);
@@ -214,7 +214,6 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     @Override
     public ResponseEntity<List<MgmtSoftwareModule>> createSoftwareModules(
             @RequestBody final List<MgmtSoftwareModuleRequestBodyPost> softwareModules) {
-
         log.debug("creating {} softwareModules", softwareModules.size());
 
         for (final MgmtSoftwareModuleRequestBodyPost sm : softwareModules) {
@@ -285,8 +284,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         }
 
         return ResponseEntity
-                .ok(new PagedList<>(MgmtSoftwareModuleMapper.toResponseSwMetadata(metaDataPage.getContent()),
-                        metaDataPage.getTotalElements()));
+                .ok(new PagedList<>(MgmtSoftwareModuleMapper.toResponseSwMetadata(metaDataPage.getContent()), metaDataPage.getTotalElements()));
     }
 
     @Override
@@ -346,7 +344,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         final SoftwareModule module = softwareModuleManagement.get(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
-        if (artifactId != null && !module.getArtifact(artifactId).isPresent()) {
+        if (artifactId != null && module.getArtifact(artifactId).isEmpty()) {
             throw new EntityNotFoundException(Artifact.class, artifactId);
         }
 

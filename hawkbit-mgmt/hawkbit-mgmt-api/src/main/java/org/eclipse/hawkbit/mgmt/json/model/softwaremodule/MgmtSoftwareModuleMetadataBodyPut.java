@@ -31,6 +31,7 @@ public class MgmtSoftwareModuleMetadataBodyPut {
     @JsonProperty
     @Schema(example = "newValue")
     private String value;
+
     @JsonProperty
     @Schema(example = "true")
     private Boolean targetVisible;

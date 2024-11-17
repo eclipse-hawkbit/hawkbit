@@ -41,8 +41,8 @@ public interface MgmtSystemManagementRestApi {
      *
      * @return system usage statistics
      */
-    @GetMapping(value = MgmtRestConstants.SYSTEM_ADMIN_MAPPING + "/usage", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SYSTEM_ADMIN_MAPPING + "/usage",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSystemStatisticsRest> getSystemUsageStats();
 
     /**
@@ -50,8 +50,8 @@ public interface MgmtSystemManagementRestApi {
      *
      * @return a list of caches for all tenants
      */
-    @GetMapping(value = MgmtRestConstants.SYSTEM_ADMIN_MAPPING + "/caches", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SYSTEM_ADMIN_MAPPING + "/caches",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Collection<MgmtSystemCache>> getCaches();
 
     /**
@@ -61,5 +61,4 @@ public interface MgmtSystemManagementRestApi {
      */
     @DeleteMapping(value = MgmtRestConstants.SYSTEM_ADMIN_MAPPING + "/caches")
     ResponseEntity<Collection<String>> invalidateCaches();
-
 }
