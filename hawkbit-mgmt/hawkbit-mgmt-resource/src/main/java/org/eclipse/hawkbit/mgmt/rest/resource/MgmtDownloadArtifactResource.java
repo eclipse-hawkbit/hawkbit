@@ -30,13 +30,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
-/**
- *
- */
 @RestController
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi {
@@ -55,8 +51,8 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
      */
     @Override
     public ResponseEntity<InputStream> downloadArtifact(
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("artifactId") final Long artifactId) {
+            final Long softwareModuleId,
+            final Long artifactId) {
         final SoftwareModule module = softwareModuleManagement.get(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
         if (module.isDeleted()) {

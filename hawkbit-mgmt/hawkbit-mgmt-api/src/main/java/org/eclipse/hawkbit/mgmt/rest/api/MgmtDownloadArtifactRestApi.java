@@ -34,6 +34,7 @@ public interface MgmtDownloadArtifactRestApi {
      */
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}/download")
     @ResponseBody
-    ResponseEntity<InputStream> downloadArtifact(@PathVariable("softwareModuleId") Long softwareModuleId,
+    ResponseEntity<InputStream> downloadArtifact(
+            @PathVariable("softwareModuleId") Long softwareModuleId,
             @PathVariable("artifactId") Long artifactId);
 }
