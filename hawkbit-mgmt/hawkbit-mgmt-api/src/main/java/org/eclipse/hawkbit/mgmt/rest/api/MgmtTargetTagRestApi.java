@@ -147,7 +147,7 @@ public interface MgmtTargetTagRestApi {
     @PostMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtTag>> createTargetTags(List<MgmtTagRequestBodyPut> tags);
+    ResponseEntity<List<MgmtTag>> createTargetTags(@RequestBody List<MgmtTagRequestBodyPut> tags);
 
     /**
      * Handles the PUT request of updating a single target tag.
@@ -178,7 +178,9 @@ public interface MgmtTargetTagRestApi {
     @PutMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/{targetTagId}",
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTag> updateTargetTag(@PathVariable("targetTagId") Long targetTagId, MgmtTagRequestBodyPut restTargetTagRest);
+    ResponseEntity<MgmtTag> updateTargetTag(
+            @PathVariable("targetTagId") Long targetTagId,
+            @RequestBody MgmtTagRequestBodyPut restTargetTagRest);
 
     /**
      * Handles the DELETE request for a single target tag.
@@ -416,8 +418,9 @@ public interface MgmtTargetTagRestApi {
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     @Deprecated(forRemoval = true, since = "0.6.0")
-    ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(@PathVariable("targetTagId") Long targetTagId,
-            List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
+    ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(
+            @PathVariable("targetTagId") Long targetTagId,
+            @RequestBody List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
 
     /**
      * Handles the POST request to assign targets to the given tag id.
@@ -449,8 +452,9 @@ public interface MgmtTargetTagRestApi {
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     @Deprecated(forRemoval = true, since = "0.6.0")
-    ResponseEntity<List<MgmtTarget>> assignTargetsByRequestBody(@PathVariable("targetTagId") Long targetTagId,
-            List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
+    ResponseEntity<List<MgmtTarget>> assignTargetsByRequestBody(
+            @PathVariable("targetTagId") Long targetTagId,
+            @RequestBody List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
 
     enum OnNotFoundPolicy {
         FAIL, // default
