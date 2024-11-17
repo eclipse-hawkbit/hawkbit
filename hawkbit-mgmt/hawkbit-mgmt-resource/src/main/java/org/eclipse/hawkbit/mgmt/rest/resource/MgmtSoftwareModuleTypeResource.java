@@ -29,9 +29,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -50,10 +47,10 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
 
     @Override
     public ResponseEntity<PagedList<MgmtSoftwareModuleType>> getTypes(
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+            final int pagingOffsetParam,
+            final int pagingLimitParam,
+            final String sortParam,
+            final String rsqlParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeSoftwareModuleTypeSortParam(sortParam);
@@ -76,7 +73,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
 
     @Override
     public ResponseEntity<MgmtSoftwareModuleType> getSoftwareModuleType(
-            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
+            final Long softwareModuleTypeId) {
         final SoftwareModuleType foundType = findSoftwareModuleTypeWithExceptionIfNotFound(softwareModuleTypeId);
 
         return ResponseEntity.ok(MgmtSoftwareModuleTypeMapper.toResponse(foundType));
@@ -84,15 +81,15 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
 
     @Override
     public ResponseEntity<Void> deleteSoftwareModuleType(
-            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId) {
+            final Long softwareModuleTypeId) {
         softwareModuleTypeManagement.delete(softwareModuleTypeId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<MgmtSoftwareModuleType> updateSoftwareModuleType(
-            @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId,
-            @RequestBody final MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType) {
+            final Long softwareModuleTypeId,
+            final MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType) {
         final SoftwareModuleType updatedSoftwareModuleType = softwareModuleTypeManagement.update(entityFactory
                 .softwareModuleType().update(softwareModuleTypeId).description(restSoftwareModuleType.getDescription())
                 .colour(restSoftwareModuleType.getColour()));
@@ -102,7 +99,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
 
     @Override
     public ResponseEntity<List<MgmtSoftwareModuleType>> createSoftwareModuleTypes(
-            @RequestBody final List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes) {
+            final List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes) {
         final List<SoftwareModuleType> createdSoftwareModules = softwareModuleTypeManagement
                 .create(MgmtSoftwareModuleTypeMapper.smFromRequest(entityFactory, softwareModuleTypes));
 

@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -159,7 +160,8 @@ public interface MgmtSoftwareModuleTypeRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING + "/{softwareModuleTypeId}")
-    ResponseEntity<Void> deleteSoftwareModuleType(@PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
+    ResponseEntity<Void> deleteSoftwareModuleType(
+            @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
     /**
      * Handles the PUT request of updating a software module type .
@@ -201,7 +203,7 @@ public interface MgmtSoftwareModuleTypeRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> updateSoftwareModuleType(
             @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId,
-            MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType);
+            @RequestBody MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType);
 
     /**
      * Handles the POST request of creating new SoftwareModuleTypes. The request body must always be a list of types.
@@ -242,5 +244,6 @@ public interface MgmtSoftwareModuleTypeRestApi {
     @PostMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtSoftwareModuleType>> createSoftwareModuleTypes(List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes);
+    ResponseEntity<List<MgmtSoftwareModuleType>> createSoftwareModuleTypes(
+            @RequestBody List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes);
 }
