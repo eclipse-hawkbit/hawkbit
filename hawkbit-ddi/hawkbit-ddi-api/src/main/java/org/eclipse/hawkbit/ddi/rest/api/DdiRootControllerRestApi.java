@@ -84,9 +84,9 @@ public interface DdiRootControllerRestApi {
     @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId,
-            @PathVariable("softwareModuleId") final Long softwareModuleId);
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") String controllerId,
+            @PathVariable("softwareModuleId") Long softwareModuleId);
 
     /**
      * Root resource for an individual {@link Target}.
@@ -123,8 +123,8 @@ public interface DdiRootControllerRestApi {
     @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<DdiControllerBase> getControllerBase(
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId);
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") String controllerId);
 
     /**
      * Handles GET {@link DdiArtifact} download request. This could be full or
@@ -160,10 +160,11 @@ public interface DdiRootControllerRestApi {
     })
     @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING +
             "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
-    ResponseEntity<InputStream> downloadArtifact(@PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId,
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("fileName") final String fileName);
+    ResponseEntity<InputStream> downloadArtifact(
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") String controllerId,
+            @PathVariable("softwareModuleId") Long softwareModuleId,
+            @PathVariable("fileName") String fileName);
 
     /**
      * Handles GET {@link DdiArtifact} MD5 checksum file download request.
@@ -198,10 +199,10 @@ public interface DdiRootControllerRestApi {
     @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}" +
             DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX, produces = MediaType.TEXT_PLAIN_VALUE)
     ResponseEntity<Void> downloadArtifactMd5(
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId,
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("fileName") final String fileName);
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") String controllerId,
+            @PathVariable("softwareModuleId") Long softwareModuleId,
+            @PathVariable("fileName") String fileName);
 
     /**
      * Resource for software module.
@@ -260,17 +261,16 @@ public interface DdiRootControllerRestApi {
     })
     @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
-    ResponseEntity<DdiDeploymentBase> getControllerDeploymentBaseAction(@PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") @NotEmpty final String controllerId,
-            @PathVariable("actionId") @NotNull final Long actionId,
-            @RequestParam(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "c", required = false, defaultValue = "-1") final int resource,
-            @RequestParam(
-                    value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "actionHistory",
-                    defaultValue = DdiRestConstants.NO_ACTION_HISTORY)
+    ResponseEntity<DdiDeploymentBase> getControllerDeploymentBaseAction(
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") @NotEmpty String controllerId,
+            @PathVariable("actionId") @NotNull Long actionId,
+            @RequestParam(value = "c", required = false, defaultValue = "-1") int resource,
+            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY)
             @Schema(description = """
                     (Optional) GET parameter to retrieve a given number of messages which are previously provided by the
                     device. Useful if the devices sent state information to the feedback channel and never stored them
-                    locally.""") final Integer actionHistoryMessageCount);
+                    locally.""") Integer actionHistoryMessageCount);
 
     /**
      * This is the feedback channel for the {@link DdiDeploymentBase} action.
@@ -316,9 +316,10 @@ public interface DdiRootControllerRestApi {
     @PostMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION +
             "/{actionId}/" + DdiRestConstants.FEEDBACK, consumes = { MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> postDeploymentBaseActionFeedback(
-            @Valid final DdiActionFeedback feedback,
-            @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
-            @PathVariable("actionId") @NotNull final Long actionId);
+            @Valid @RequestBody DdiActionFeedback feedback,
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") String controllerId,
+            @PathVariable("actionId") @NotNull Long actionId);
 
     /**
      * This is the feedback channel for the config data action.
@@ -358,9 +359,9 @@ public interface DdiRootControllerRestApi {
     @PutMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIG_DATA_ACTION,
             consumes = { MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> putConfigData(
-            @Valid final DdiConfigData configData,
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId);
+            @Valid @RequestBody DdiConfigData configData,
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") String controllerId);
 
     /**
      * RequestMethod.GET method for the {@link DdiCancel} action.
@@ -393,9 +394,9 @@ public interface DdiRootControllerRestApi {
     @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<DdiCancel> getControllerCancelAction(
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") @NotEmpty final String controllerId,
-            @PathVariable("actionId") @NotNull final Long actionId);
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") @NotEmpty String controllerId,
+            @PathVariable("actionId") @NotNull Long actionId);
 
     /**
      * RequestMethod.POST method receiving the {@link DdiActionFeedback} from the target.
@@ -436,10 +437,10 @@ public interface DdiRootControllerRestApi {
     @PostMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}/" +
             DdiRestConstants.FEEDBACK, consumes = { MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> postCancelActionFeedback(
-            @Valid final DdiActionFeedback feedback,
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") @NotEmpty final String controllerId,
-            @PathVariable("actionId") @NotNull final Long actionId);
+            @Valid @RequestBody DdiActionFeedback feedback,
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") @NotEmpty String controllerId,
+            @PathVariable("actionId") @NotNull Long actionId);
 
     /**
      * Resource for installed distribution set to retrieve the last successfully finished action.
@@ -490,12 +491,10 @@ public interface DdiRootControllerRestApi {
     @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.INSTALLED_BASE_ACTION + "/{actionId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<DdiDeploymentBase> getControllerInstalledAction(
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") @NotEmpty final String controllerId,
-            @PathVariable("actionId") @NotNull final Long actionId,
-            @RequestParam(
-                    value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "actionHistory",
-                    defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount);
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") @NotEmpty String controllerId,
+            @PathVariable("actionId") @NotNull Long actionId,
+            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) Integer actionHistoryMessageCount);
 
     /**
      * Returns the confirmation base with the current auto-confirmation state for a given controllerId and toggle links. In case there are
@@ -534,8 +533,8 @@ public interface DdiRootControllerRestApi {
     @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE,
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<DdiConfirmationBase> getConfirmationBase(
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") @NotEmpty final String controllerId);
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") @NotEmpty String controllerId);
 
     /**
      * Resource for confirmation of an action.
@@ -584,13 +583,12 @@ public interface DdiRootControllerRestApi {
     })
     @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/{actionId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
-    ResponseEntity<DdiConfirmationBaseAction> getConfirmationBaseAction(@PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") @NotEmpty final String controllerId,
-            @PathVariable("actionId") @NotNull final Long actionId,
-            @RequestParam(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "c", required = false, defaultValue = "-1") final int resource,
-            @RequestParam(
-                    value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "actionHistory",
-                    defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount);
+    ResponseEntity<DdiConfirmationBaseAction> getConfirmationBaseAction(
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") @NotEmpty String controllerId,
+            @PathVariable("actionId") @NotNull Long actionId,
+            @RequestParam(value = "c", required = false, defaultValue = "-1") int resource,
+            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) Integer actionHistoryMessageCount);
 
     /**
      * This is the feedback channel for the {@link DdiConfirmationBaseAction} action.
@@ -637,10 +635,10 @@ public interface DdiRootControllerRestApi {
             DdiRestConstants.FEEDBACK,
             consumes = { MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> postConfirmationActionFeedback(
-            @Valid final DdiConfirmationFeedback feedback,
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId,
-            @PathVariable("actionId") @NotNull final Long actionId);
+            @Valid @RequestBody DdiConfirmationFeedback feedback,
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") String controllerId,
+            @PathVariable("actionId") @NotNull Long actionId);
 
     /**
      * Activate auto confirmation for a given controllerId. Will use the provided initiator and remark field from the provided
@@ -685,9 +683,9 @@ public interface DdiRootControllerRestApi {
     @PostMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/" +
             DdiRestConstants.AUTO_CONFIRM_ACTIVATE, consumes = { MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> activateAutoConfirmation(
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") @NotEmpty final String controllerId,
-            @Valid @RequestBody(required = false) final DdiActivateAutoConfirmation body);
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") @NotEmpty String controllerId,
+            @Valid @RequestBody(required = false) DdiActivateAutoConfirmation body);
 
     /**
      * Deactivate auto confirmation for a given controller id.
@@ -728,8 +726,8 @@ public interface DdiRootControllerRestApi {
     @PostMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/" +
             DdiRestConstants.AUTO_CONFIRM_DEACTIVATE)
     ResponseEntity<Void> deactivateAutoConfirmation(
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") @NotEmpty final String controllerId);
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") @NotEmpty String controllerId);
 
     /**
      * Assign an already installed distribution for a target
@@ -773,7 +771,7 @@ public interface DdiRootControllerRestApi {
     @PutMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.INSTALLED_BASE_ACTION,
             consumes = { MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> setAssignedOfflineVersion(
-            @Valid DdiAssignedVersion ddiAssignedVersion,
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId);
+            @Valid @RequestBody DdiAssignedVersion ddiAssignedVersion,
+            @PathVariable("tenant") String tenant,
+            @PathVariable("controllerId") String controllerId);
 }

@@ -349,8 +349,7 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(status().isOk());
 
         // verify the initial parameters
-        final Map<String, String> updatedAttributes = targetManagement
-                .getControllerAttributes(DdiConfigDataTest.TARGET1_ID);
-        assertThat(updatedAttributes).containsExactlyEntriesOf(attributes);
+        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(DdiConfigDataTest.TARGET1_ID);
+        assertThat(updatedAttributes).containsExactlyInAnyOrderEntriesOf(attributes);
     }
 }
