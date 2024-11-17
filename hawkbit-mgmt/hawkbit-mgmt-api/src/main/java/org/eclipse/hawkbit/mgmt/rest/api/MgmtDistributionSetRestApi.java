@@ -42,6 +42,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -174,7 +175,7 @@ public interface MgmtDistributionSetRestApi {
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtDistributionSet>> createDistributionSets(List<MgmtDistributionSetRequestBodyPost> sets);
+    ResponseEntity<List<MgmtDistributionSet>> createDistributionSets(@RequestBody List<MgmtDistributionSetRequestBodyPost> sets);
 
     /**
      * Handles the DELETE request for a single DistributionSet .
@@ -243,8 +244,9 @@ public interface MgmtDistributionSetRestApi {
     @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}",
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
-    ResponseEntity<MgmtDistributionSet> updateDistributionSet(@PathVariable("distributionSetId") Long distributionSetId,
-            MgmtDistributionSetRequestBodyPut toUpdate);
+    ResponseEntity<MgmtDistributionSet> updateDistributionSet(
+            @PathVariable("distributionSetId") Long distributionSetId,
+            @RequestBody MgmtDistributionSetRequestBodyPut toUpdate);
 
     /**
      * Handles the GET request of retrieving assigned targets to a specific distribution set.
@@ -281,7 +283,8 @@ public interface MgmtDistributionSetRestApi {
     })
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/assignedTargets",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(@PathVariable("distributionSetId") Long distributionSetId,
+    ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
+            @PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
@@ -340,7 +343,8 @@ public interface MgmtDistributionSetRestApi {
     })
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/installedTargets",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtTarget>> getInstalledTargets(@PathVariable("distributionSetId") Long distributionSetId,
+    ResponseEntity<PagedList<MgmtTarget>> getInstalledTargets(
+            @PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
@@ -428,7 +432,7 @@ public interface MgmtDistributionSetRestApi {
      * Handles the POST request of assigning multiple targets to a single distribution set.
      *
      * @param distributionSetId the ID of the distribution set within the URL path parameter
-     * @param targetIds the IDs of the target which should get assigned to the distribution set given in the response body
+     * @param assignments the IDs of the target which should get assigned to the distribution set given in the response body
      * @param offline to <code>true</code> if update was executed offline, i.e. not managed by hawkBit.
      * @return status OK if the assignment of the targets was successful and a complex return body which contains information about the assigned
      *         targets and the already assigned targets counters
@@ -466,7 +470,7 @@ public interface MgmtDistributionSetRestApi {
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetAssignmentResponseBody> createAssignedTarget(
             @PathVariable("distributionSetId") Long distributionSetId,
-            final List<MgmtTargetAssignmentRequestBody> targetIds,
+            @RequestBody List<MgmtTargetAssignmentRequestBody> assignments,
             @RequestParam(value = "offline", required = false) Boolean offline);
 
     /**
@@ -503,7 +507,8 @@ public interface MgmtDistributionSetRestApi {
     })
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("distributionSetId") Long distributionSetId,
+    ResponseEntity<PagedList<MgmtMetadata>> getMetadata(
+            @PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
@@ -557,7 +562,8 @@ public interface MgmtDistributionSetRestApi {
     })
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata/{metadataKey}",
             produces = { MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("distributionSetId") Long distributionSetId,
+    ResponseEntity<MgmtMetadata> getMetadataValue(
+            @PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("metadataKey") String metadataKey);
 
     /**
@@ -597,8 +603,10 @@ public interface MgmtDistributionSetRestApi {
     })
     @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata/{metadataKey}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("distributionSetId") Long distributionSetId,
-            @PathVariable("metadataKey") String metadataKey, MgmtMetadataBodyPut metadata);
+    ResponseEntity<MgmtMetadata> updateMetadata(
+            @PathVariable("distributionSetId") Long distributionSetId,
+            @PathVariable("metadataKey") String metadataKey,
+            @RequestBody MgmtMetadataBodyPut metadata);
 
     /**
      * Deletes a single meta data entry from the distribution set.
@@ -672,7 +680,7 @@ public interface MgmtDistributionSetRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtMetadata>> createMetadata(
             @PathVariable("distributionSetId") Long distributionSetId,
-            List<MgmtMetadata> metadataRest);
+            @RequestBody List<MgmtMetadata> metadataRest);
 
     /**
      * Assigns a list of software modules to a distribution set.
@@ -715,7 +723,7 @@ public interface MgmtDistributionSetRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> assignSoftwareModules(
             @PathVariable("distributionSetId") Long distributionSetId,
-            List<MgmtSoftwareModuleAssignment> softwareModuleIDs);
+            @RequestBody List<MgmtSoftwareModuleAssignment> softwareModuleIDs);
 
     /**
      * Deletes the assignment of the software module form the distribution set.
@@ -977,5 +985,5 @@ public interface MgmtDistributionSetRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> invalidateDistributionSet(
             @PathVariable("distributionSetId") Long distributionSetId,
-            @Valid MgmtInvalidateDistributionSetRequestBody invalidateRequestBody);
+            @Valid @RequestBody MgmtInvalidateDistributionSetRequestBody invalidateRequestBody);
 }
