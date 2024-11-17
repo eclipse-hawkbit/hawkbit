@@ -107,42 +107,31 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Autowired
     private ConfirmationManagement confirmationManagement;
-
     @Autowired
     private ApplicationEventPublisher eventPublisher;
-
     @Autowired(required = false)
     private ServiceMatcher serviceMatcher;
-
     @Autowired
     private BusProperties bus;
-
     @Autowired
     private ControllerManagement controllerManagement;
-
     @Autowired
     private ArtifactManagement artifactManagement;
-
     @Autowired
     private HawkbitSecurityProperties securityProperties;
-
     @Autowired
     private TenantAware tenantAware;
-
     @Autowired
     private SystemManagement systemManagement;
-
     @Autowired
     private ArtifactUrlHandler artifactUrlHandler;
-
     @Autowired
     private EntityFactory entityFactory;
-
     @Override
     public ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId,
-            @PathVariable("softwareModuleId") final Long softwareModuleId) {
+            final String tenant,
+            final String controllerId,
+            final Long softwareModuleId) {
         log.debug("getSoftwareModulesArtifacts({})", controllerId);
 
         final Target target = findTarget(controllerId);
@@ -158,8 +147,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Override
     public ResponseEntity<DdiControllerBase> getControllerBase(
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId) {
+            final String tenant,
+            final String controllerId) {
         log.debug("getControllerBase({})", controllerId);
 
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, IpUtil
@@ -179,10 +168,11 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    public ResponseEntity<InputStream> downloadArtifact(@PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId,
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("fileName") final String fileName) {
+    public ResponseEntity<InputStream> downloadArtifact(
+            final String tenant,
+            final String controllerId,
+            final Long softwareModuleId,
+            final String fileName) {
         final ResponseEntity<InputStream> result;
 
         final Target target = findTarget(controllerId);
@@ -212,7 +202,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
                                 total) -> eventPublisher.publishEvent(new DownloadProgressEvent(
                                 tenantAware.getCurrentTenant(), statusId, shippedSinceLastEvent,
                                 serviceMatcher != null ? serviceMatcher.getBusId() : bus.getId())));
-
             }
         }
         return result;
@@ -253,11 +242,11 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Override
     public ResponseEntity<DdiDeploymentBase> getControllerDeploymentBaseAction(
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId,
-            @PathVariable("actionId") final Long actionId,
-            @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
-            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount) {
+            final String tenant,
+            final String controllerId,
+            final Long actionId,
+            final int resource,
+            final Integer actionHistoryMessageCount) {
         log.debug("getControllerDeploymentBaseAction({},{})", controllerId, resource);
 
         final Target target = findTarget(controllerId);
@@ -280,10 +269,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Override
     public ResponseEntity<Void> postDeploymentBaseActionFeedback(
-            @Valid @RequestBody final DdiActionFeedback feedback,
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId,
-            @PathVariable("actionId") @NotNull final Long actionId) {
+            final DdiActionFeedback feedback,
+            final String tenant,
+            final String controllerId,
+            final Long actionId) {
         log.debug("postDeploymentBaseActionFeedback for target [{},{}]: {}", controllerId, actionId, feedback);
 
         final Target target = findTarget(controllerId);
@@ -305,17 +294,18 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Override
     public ResponseEntity<Void> putConfigData(
-            @Valid @RequestBody final DdiConfigData configData,
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId) {
+            final DdiConfigData configData,
+            final String tenant,
+            final String controllerId) {
         controllerManagement.updateControllerAttributes(controllerId, configData.getData(), getUpdateMode(configData));
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<DdiCancel> getControllerCancelAction(@PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") @NotEmpty final String controllerId,
-            @PathVariable("actionId") @NotNull final Long actionId) {
+    public ResponseEntity<DdiCancel> getControllerCancelAction(
+            final String tenant,
+            final String controllerId,
+            final Long actionId) {
         log.debug("getControllerCancelAction({})", controllerId);
 
         final Target target = findTarget(controllerId);
@@ -336,10 +326,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Override
     public ResponseEntity<Void> postCancelActionFeedback(
-            @Valid @RequestBody final DdiActionFeedback feedback,
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") @NotEmpty final String controllerId,
-            @PathVariable("actionId") @NotNull final Long actionId) {
+            final DdiActionFeedback feedback,
+            final String tenant,
+            final String controllerId,
+            final Long actionId) {
         log.debug("provideCancelActionFeedback for target [{}]: {}", controllerId, feedback);
 
         final Target target = findTarget(controllerId);
@@ -352,9 +342,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Override
     public ResponseEntity<DdiDeploymentBase> getControllerInstalledAction(
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId, @PathVariable("actionId") final Long actionId,
-            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount) {
+            final String tenant,
+            final String controllerId,
+            final Long actionId,
+            final Integer actionHistoryMessageCount) {
         log.debug("getControllerInstalledAction({})", controllerId);
 
         final Target target = findTarget(controllerId);
@@ -387,11 +378,11 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Override
     public ResponseEntity<DdiConfirmationBaseAction> getConfirmationBaseAction(
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId,
-            @PathVariable("actionId") final Long actionId,
-            @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
-            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount) {
+            final String tenant,
+            final String controllerId,
+            final Long actionId,
+            final int resource,
+            final Integer actionHistoryMessageCount) {
         log.debug("getConfirmationBaseAction({},{})", controllerId, resource);
 
         final Target target = findTarget(controllerId);
@@ -411,10 +402,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Override
     public ResponseEntity<Void> postConfirmationActionFeedback(
-            @Valid @RequestBody final DdiConfirmationFeedback feedback,
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId,
-            @PathVariable("actionId") @NotNull final Long actionId) {
+            final DdiConfirmationFeedback feedback,
+            final String tenant,
+            final String controllerId,
+            final Long actionId) {
         log.debug("provideConfirmationActionFeedback with feedback [controllerId={}, actionId={}]: {}", controllerId, actionId, feedback);
 
         final Target target = findTarget(controllerId);
@@ -467,9 +458,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Override
     public ResponseEntity<Void> setAssignedOfflineVersion(
-            @Valid @RequestBody DdiAssignedVersion ddiAssignedVersion,
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId) {
+            final DdiAssignedVersion ddiAssignedVersion,
+            final String tenant,
+            final String controllerId) {
         boolean updated = controllerManagement.updateOfflineAssignedVersion(controllerId,
                 ddiAssignedVersion.getName(), ddiAssignedVersion.getVersion());
         if (updated) {
