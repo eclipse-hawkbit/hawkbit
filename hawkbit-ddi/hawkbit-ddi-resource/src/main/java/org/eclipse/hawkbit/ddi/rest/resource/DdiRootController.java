@@ -19,9 +19,6 @@ import java.util.Optional;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
@@ -84,9 +81,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -211,10 +205,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
     @SuppressWarnings("squid:S3655")
     @Override
     public ResponseEntity<Void> downloadArtifactMd5(
-            @PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") final String controllerId,
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("fileName") final String fileName) {
+            final String tenant,
+            final String controllerId,
+            final Long softwareModuleId,
+            final String fileName) {
         final Target target = findTarget(controllerId);
 
         final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId)
