@@ -26,13 +26,11 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 @Getter
 public class EntityNotFoundException extends AbstractServerRtException {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
-
     public static final String KEY = "key";
     public static final String ENTITY_ID = "entityId";
     public static final String TYPE = "type";
-
+    @Serial
+    private static final long serialVersionUID = 1L;
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_ENTITY_NOT_EXISTS;
     private static final int ENTITY_STRING_MAX_LENGTH = 100;
 

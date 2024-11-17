@@ -36,5 +36,4 @@ public class JpaDistributionSetTypeBuilder implements DistributionSetTypeBuilder
     public DistributionSetTypeCreate create() {
         return new JpaDistributionSetTypeCreate(softwareModuleTypeManagement);
     }
-
 }

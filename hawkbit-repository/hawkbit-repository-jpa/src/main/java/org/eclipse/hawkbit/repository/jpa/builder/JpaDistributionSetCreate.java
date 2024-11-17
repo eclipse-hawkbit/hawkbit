@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
+import lombok.Getter;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.ValidString;
@@ -28,11 +29,11 @@ import org.springframework.util.StringUtils;
 /**
  * Create/build implementation.
  */
-public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreate<DistributionSetCreate>
-        implements DistributionSetCreate {
+public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreate<DistributionSetCreate> implements DistributionSetCreate {
 
     private final DistributionSetTypeManagement distributionSetTypeManagement;
     private final SoftwareModuleManagement softwareModuleManagement;
+    @Getter
     @ValidString
     private String type;
 
@@ -56,10 +57,6 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
                 Optional.ofNullable(requiredMigrationStep).orElse(Boolean.FALSE));
     }
 
-    public String getType() {
-        return type;
-    }
-
     private DistributionSetType findDistributionSetTypeWithExceptionIfNotFound(final String distributionSetTypekey) {
         return distributionSetTypeManagement.getByKey(distributionSetTypekey)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distributionSetTypekey));
@@ -78,5 +75,4 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
 
         return module;
     }
-
 }

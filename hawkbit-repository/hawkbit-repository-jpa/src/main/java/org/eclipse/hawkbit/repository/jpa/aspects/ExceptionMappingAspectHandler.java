@@ -49,24 +49,20 @@ public class ExceptionMappingAspectHandler implements Ordered {
     private static final List<Class<?>> MAPPED_EXCEPTION_ORDER = new ArrayList<>(4);
 
     static {
-
         MAPPED_EXCEPTION_ORDER.add(DuplicateKeyException.class);
         MAPPED_EXCEPTION_ORDER.add(DataIntegrityViolationException.class);
         MAPPED_EXCEPTION_ORDER.add(OptimisticLockingFailureException.class);
         MAPPED_EXCEPTION_ORDER.add(AccessDeniedException.class);
 
         EXCEPTION_MAPPING.put(DuplicateKeyException.class.getName(), EntityAlreadyExistsException.class.getName());
-        EXCEPTION_MAPPING.put(DataIntegrityViolationException.class.getName(),
-                EntityAlreadyExistsException.class.getName());
+        EXCEPTION_MAPPING.put(DataIntegrityViolationException.class.getName(), EntityAlreadyExistsException.class.getName());
 
-        EXCEPTION_MAPPING.put(OptimisticLockingFailureException.class.getName(),
-                ConcurrentModificationException.class.getName());
+        EXCEPTION_MAPPING.put(OptimisticLockingFailureException.class.getName(), ConcurrentModificationException.class.getName());
         EXCEPTION_MAPPING.put(AccessDeniedException.class.getName(), InsufficientPermissionException.class.getName());
     }
 
     /**
-     * catch exceptions of the {@link TransactionManager} and wrap them to
-     * custom exceptions.
+     * catch exceptions of the {@link TransactionManager} and wrap them to custom exceptions.
      *
      * @param ex the thrown and catched exception
      * @throws Throwable

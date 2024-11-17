@@ -53,15 +53,13 @@ public class AutoActionCleanup implements CleanupTask {
      * @param deploymentMgmt The {@link DeploymentManagement} to operate on.
      * @param configMgmt The {@link TenantConfigurationManagement} service.
      */
-    public AutoActionCleanup(final DeploymentManagement deploymentMgmt,
-            final TenantConfigurationManagement configMgmt) {
+    public AutoActionCleanup(final DeploymentManagement deploymentMgmt, final TenantConfigurationManagement configMgmt) {
         this.deploymentMgmt = deploymentMgmt;
         this.config = configMgmt;
     }
 
     @Override
     public void run() {
-
         if (!isEnabled()) {
             log.debug("Action cleanup is disabled for this tenant...");
             return;
@@ -104,5 +102,4 @@ public class AutoActionCleanup implements CleanupTask {
             final Class<T> valueType) {
         return config.getConfigurationValue(key, valueType);
     }
-
 }

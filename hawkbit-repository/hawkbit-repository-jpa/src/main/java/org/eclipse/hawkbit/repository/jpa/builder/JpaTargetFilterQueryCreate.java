@@ -44,5 +44,4 @@ public class JpaTargetFilterQueryCreate extends AbstractTargetFilterQueryUpdateC
 
         return true;
     }
-
 }

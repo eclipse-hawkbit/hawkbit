@@ -34,15 +34,15 @@ public class AutoCleanupScheduler {
     private final List<CleanupTask> cleanupTasks;
 
     /**
-     * Constructs the cleanup schedulers and initializes it with a set of
-     * cleanup handlers.
+     * Constructs the cleanup schedulers and initializes it with a set of cleanup handlers.
      *
      * @param systemManagement Management APIs to invoke actions in a certain tenant context.
      * @param systemSecurityContext The system security context.
      * @param lockRegistry A registry for shared locks.
      * @param cleanupTasks A list of cleanup tasks.
      */
-    public AutoCleanupScheduler(final SystemManagement systemManagement,
+    public AutoCleanupScheduler(
+            final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext, final LockRegistry lockRegistry,
             final List<CleanupTask> cleanupTasks) {
         this.systemManagement = systemManagement;
@@ -88,5 +88,4 @@ public class AutoCleanupScheduler {
     private Lock obtainLock(final CleanupTask task, final String tenant) {
         return lockRegistry.obtain(AUTO_CLEANUP + SEP + task.getId() + SEP + tenant);
     }
-
 }

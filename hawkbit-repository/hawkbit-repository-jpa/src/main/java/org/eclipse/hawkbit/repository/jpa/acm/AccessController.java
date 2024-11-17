@@ -32,16 +32,14 @@ public interface AccessController<T> {
     /**
      * Introduce a new specification to limit the access to a specific entity.
      *
-     * @return a new specification limiting the access, if empty no access restrictions
-     *         are to be applied
+     * @return a new specification limiting the access, if empty no access restrictions are to be applied
      */
     Optional<Specification<T>> getAccessRules(Operation operation);
 
     /**
      * Append the resource limitation on an already existing specification.
      *
-     * @param specification is the root specification which needs to be appended by the
-     *         resource limitation
+     * @param specification is the root specification which needs to be appended by the resource limitation
      * @return a new appended specification
      */
     @Nullable
@@ -79,17 +77,14 @@ public interface AccessController<T> {
          * Entity creation
          */
         CREATE,
-
         /**
          * Read entities
          */
         READ,
-
         /**
          * Entity modification (e.g. name/description change, tag/type assignment, etc.)
          */
         UPDATE,
-
         /**
          * Entity deletion
          */

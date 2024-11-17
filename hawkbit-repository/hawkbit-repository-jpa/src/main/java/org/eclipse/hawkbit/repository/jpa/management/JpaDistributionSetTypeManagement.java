@@ -105,8 +105,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetType assignOptionalSoftwareModuleTypes(final long id,
             final Collection<Long> softwareModulesTypeIds) {
         return assignSoftwareModuleTypes(id, softwareModulesTypeIds, false);
@@ -114,8 +114,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetType assignMandatorySoftwareModuleTypes(final long id,
             final Collection<Long> softwareModuleTypeIds) {
         return assignSoftwareModuleTypes(id, softwareModuleTypeIds, true);
@@ -123,8 +123,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetType unassignSoftwareModuleType(final long id, final long softwareModuleTypeId) {
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(id);
 
@@ -137,8 +137,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSetType> create(final Collection<DistributionSetTypeCreate> types) {
         final List<JpaDistributionSetType> typesToCreate = types.stream().map(JpaDistributionSetTypeCreate.class::cast)
                 .map(JpaDistributionSetTypeCreate::build).toList();
@@ -149,8 +149,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetType create(final DistributionSetTypeCreate c) {
         final JpaDistributionSetType distributionSetType = ((JpaDistributionSetTypeCreate) c).build();
 
@@ -159,8 +159,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetType update(final DistributionSetTypeUpdate u) {
         final GenericDistributionSetTypeUpdate update = (GenericDistributionSetTypeUpdate) u;
 
@@ -202,8 +202,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long id) {
         final JpaDistributionSetType toDelete = distributionSetTypeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, id));
@@ -220,8 +220,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final Collection<Long> ids) {
         distributionSetTypeRepository.deleteAllById(ids);
     }

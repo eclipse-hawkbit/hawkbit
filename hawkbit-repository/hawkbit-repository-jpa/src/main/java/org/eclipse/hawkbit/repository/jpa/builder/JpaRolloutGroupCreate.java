@@ -15,8 +15,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 
-public class JpaRolloutGroupCreate extends AbstractRolloutGroupCreate<RolloutGroupCreate>
-        implements RolloutGroupCreate {
+public class JpaRolloutGroupCreate extends AbstractRolloutGroupCreate<RolloutGroupCreate> implements RolloutGroupCreate {
 
     /**
      * Set the Success And Error conditions for the rollout group
@@ -84,5 +83,4 @@ public class JpaRolloutGroupCreate extends AbstractRolloutGroupCreate<RolloutGro
 
         return group;
     }
-
 }

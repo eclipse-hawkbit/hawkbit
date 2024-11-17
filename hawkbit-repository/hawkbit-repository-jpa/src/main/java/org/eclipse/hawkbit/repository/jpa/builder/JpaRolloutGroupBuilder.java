@@ -22,5 +22,4 @@ public class JpaRolloutGroupBuilder implements RolloutGroupBuilder {
     public RolloutGroupCreate create() {
         return new JpaRolloutGroupCreate();
     }
-
 }

@@ -21,5 +21,4 @@ public class GenericTargetTypeUpdate extends AbstractTargetTypeUpdateCreate<Targ
     public GenericTargetTypeUpdate(final Long id) {
         super.id = id;
     }
-
 }

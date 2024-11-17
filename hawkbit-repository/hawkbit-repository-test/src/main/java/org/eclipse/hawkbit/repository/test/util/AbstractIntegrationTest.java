@@ -112,9 +112,7 @@ import org.springframework.test.context.TestPropertySource;
 public abstract class AbstractIntegrationTest {
 
     protected static final Pageable PAGE = PageRequest.of(0, 500, Sort.by(Direction.ASC, "id"));
-
     protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
-
     protected static final int DEFAULT_TEST_WEIGHT = 500;
 
     /**
@@ -125,80 +123,58 @@ public abstract class AbstractIntegrationTest {
      */
     protected static final int DEFAULT_DS_TYPES = RepositoryConstants.DEFAULT_DS_TYPES_IN_TENANT + 1;
 
+    private static final String ARTIFACT_DIRECTORY = createTempDir();
+
     @Autowired
     protected EntityFactory entityFactory;
-
     @Autowired
     protected SoftwareModuleManagement softwareModuleManagement;
-
     @Autowired
     protected SoftwareModuleTypeManagement softwareModuleTypeManagement;
-
     @Autowired
     protected DistributionSetManagement distributionSetManagement;
-
     @Autowired
     protected DistributionSetTypeManagement distributionSetTypeManagement;
-
     @Autowired
     protected ControllerManagement controllerManagement;
-
     @Autowired
     protected TargetManagement targetManagement;
-
     @Autowired
     protected TargetTypeManagement targetTypeManagement;
-
     @Autowired
     protected TargetFilterQueryManagement targetFilterQueryManagement;
-
     @Autowired
     protected TargetTagManagement targetTagManagement;
-
     @Autowired
     protected DistributionSetTagManagement distributionSetTagManagement;
-
     @Autowired
     protected DeploymentManagement deploymentManagement;
-
     @Autowired
     protected ConfirmationManagement confirmationManagement;
     @Autowired
     protected DistributionSetInvalidationManagement distributionSetInvalidationManagement;
-
     @Autowired
     protected ArtifactManagement artifactManagement;
-
     @Autowired
     protected AuditingHandler auditingHandler;
-
     @Autowired
     protected TenantAware tenantAware;
-
     @Autowired
     protected SystemManagement systemManagement;
-
     @Autowired
     protected TenantConfigurationManagement tenantConfigurationManagement;
-
     @Autowired
     protected RolloutManagement rolloutManagement;
-
     @Autowired
     protected RolloutHandler rolloutHandler;
-
     @Autowired
     protected RolloutGroupManagement rolloutGroupManagement;
-
     @Autowired
     protected SystemSecurityContext systemSecurityContext;
-
     @Autowired
     protected ArtifactRepository binaryArtifactRepository;
-
     @Autowired
     protected TenantAwareCacheManager cacheManager;
-
     @Autowired
     protected QuotaManagement quotaManagement;
 
@@ -210,13 +186,10 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected TestdataFactory testdataFactory;
-
     @Autowired
     protected ServiceMatcher serviceMatcher;
-
     @Autowired
     protected ApplicationEventPublisher eventPublisher;
-    private static final String ARTIFACT_DIRECTORY = createTempDir();
 
     @BeforeAll
     public static void beforeClass() {

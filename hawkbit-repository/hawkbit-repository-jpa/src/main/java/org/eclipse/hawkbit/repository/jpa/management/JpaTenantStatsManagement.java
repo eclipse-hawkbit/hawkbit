@@ -28,13 +28,10 @@ public class JpaTenantStatsManagement implements TenantStatsManagement {
 
     @Autowired
     private TargetRepository targetRepository;
-
     @Autowired
     private LocalArtifactRepository artifactRepository;
-
     @Autowired
     private ActionRepository actionRepository;
-
     @Autowired
     private TenantAware tenantAware;
 

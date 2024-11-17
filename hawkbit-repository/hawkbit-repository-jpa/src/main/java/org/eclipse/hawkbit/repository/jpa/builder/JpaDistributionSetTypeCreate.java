@@ -55,5 +55,4 @@ public class JpaDistributionSetTypeCreate extends AbstractDistributionSetTypeUpd
 
         return module;
     }
-
 }

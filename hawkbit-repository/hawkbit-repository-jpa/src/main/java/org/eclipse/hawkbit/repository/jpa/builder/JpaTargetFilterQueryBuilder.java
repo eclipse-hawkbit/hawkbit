@@ -42,5 +42,4 @@ public class JpaTargetFilterQueryBuilder implements TargetFilterQueryBuilder {
     public TargetFilterQueryCreate create() {
         return new JpaTargetFilterQueryCreate(distributionSetManagement);
     }
-
 }

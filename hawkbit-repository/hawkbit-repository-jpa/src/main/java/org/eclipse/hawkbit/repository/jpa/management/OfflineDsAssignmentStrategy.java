@@ -47,7 +47,8 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
  */
 public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
-    OfflineDsAssignmentStrategy(final TargetRepository targetRepository,
+    OfflineDsAssignmentStrategy(
+            final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,

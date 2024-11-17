@@ -54,14 +54,12 @@ import org.springframework.validation.annotation.Validated;
 public class JpaDistributionSetTagManagement implements DistributionSetTagManagement {
 
     private final DistributionSetTagRepository distributionSetTagRepository;
-
     private final DistributionSetRepository distributionSetRepository;
-
     private final VirtualPropertyReplacer virtualPropertyReplacer;
-
     private final Database database;
 
-    public JpaDistributionSetTagManagement(final DistributionSetTagRepository distributionSetTagRepository,
+    public JpaDistributionSetTagManagement(
+            final DistributionSetTagRepository distributionSetTagRepository,
             final DistributionSetRepository distributionSetRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
         this.distributionSetTagRepository = distributionSetTagRepository;
@@ -72,8 +70,8 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSetTag> create(final Collection<TagCreate> dst) {
         final List<JpaDistributionSetTag> toCreate = dst.stream().map(JpaTagCreate.class::cast)
                 .map(JpaTagCreate::buildDistributionSetTag).toList();
@@ -83,8 +81,8 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetTag create(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
         return distributionSetTagRepository.save(AccessController.Operation.CREATE, create.buildDistributionSetTag());
@@ -92,8 +90,8 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetTag update(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
 
@@ -114,16 +112,16 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long id) {
         distributionSetTagRepository.deleteById(id);
     }
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final Collection<Long> ids) {
         final List<JpaDistributionSetTag> setsFound = distributionSetTagRepository.findAllById(ids);
 
@@ -166,8 +164,8 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final String tagName) {
         final JpaDistributionSetTag dsTag = distributionSetTagRepository
                 .findOne(DistributionSetTagSpecifications.byName(tagName))

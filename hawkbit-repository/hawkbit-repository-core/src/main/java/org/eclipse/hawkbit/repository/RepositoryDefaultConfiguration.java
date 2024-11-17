@@ -19,9 +19,6 @@ import org.springframework.context.annotation.PropertySource;
  * Default configuration that is common to all repository implementations.
  */
 @Configuration
-@EnableConfigurationProperties({ RepositoryProperties.class, ControllerPollProperties.class,
-        TenantConfigurationProperties.class })
+@EnableConfigurationProperties({ RepositoryProperties.class, ControllerPollProperties.class, TenantConfigurationProperties.class })
 @PropertySource("classpath:/hawkbit-repository-defaults.properties")
-public class RepositoryDefaultConfiguration {
-
-}
+public class RepositoryDefaultConfiguration {}

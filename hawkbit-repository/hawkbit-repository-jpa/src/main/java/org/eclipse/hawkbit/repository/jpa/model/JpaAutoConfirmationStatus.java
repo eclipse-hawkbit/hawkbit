@@ -82,9 +82,9 @@ public class JpaAutoConfirmationStatus extends AbstractJpaTenantAwareBaseEntity 
         // nevertheless of the end of line of the file (\r\n, \n or \r) the result will contains \n
         return """
                 Assignment automatically confirmed by initiator '%s'.\040
-                            
+                
                 Auto confirmation activated by system user: '%s'\040
-                            
+                
                 Remark: %s""".formatted(formattedInitiator, createdByRolloutsUser, remarkMessage);
     }
 

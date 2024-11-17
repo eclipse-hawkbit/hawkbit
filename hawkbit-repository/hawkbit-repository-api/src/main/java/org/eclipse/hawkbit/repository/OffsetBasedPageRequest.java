@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.io.Serial;
+
 import lombok.Data;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -23,6 +25,7 @@ import org.springframework.data.domain.Sort;
 @Data
 public final class OffsetBasedPageRequest extends PageRequest {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final long offset;

@@ -93,87 +93,42 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Column(name = "active")
     private boolean active;
-
-    @Converter
-    public static class ActionTypeConverter extends MapAttributeConverter<ActionType, Integer> {
-
-        public ActionTypeConverter() {
-            super(Map.of(
-                    ActionType.FORCED, 0,
-                    ActionType.SOFT, 1,
-                    ActionType.TIMEFORCED, 2,
-                    ActionType.DOWNLOAD_ONLY, 3
-            ), null);
-        }
-    }
     @Column(name = "action_type", nullable = false)
     @Convert(converter = ActionTypeConverter.class)
     @NotNull
     private ActionType actionType;
-
     @Column(name = "forced_time")
     private long forcedTime;
-
     @Column(name = "weight")
     @Min(Action.WEIGHT_MIN)
     @Max(Action.WEIGHT_MAX)
     private Integer weight;
-
-    @Converter
-    public static class StatusConverter extends MapAttributeConverter<Status, Integer> {
-
-        public StatusConverter() {
-            super(new HashMap<>() {{
-                put(Status.FINISHED, 0);
-                put(Status.ERROR, 1);
-                put(Status.WARNING, 2);
-                put(Status.RUNNING, 3);
-                put(Status.CANCELED, 4);
-                put(Status.CANCELING, 5);
-                put(Status.RETRIEVED, 6);
-                put(Status.DOWNLOAD, 7);
-                put(Status.SCHEDULED, 8);
-                put(Status.CANCEL_REJECTED, 9);
-                put(Status.DOWNLOADED, 10);
-                put(Status.WAIT_FOR_CONFIRMATION, 11);
-            }}, null);
-        }
-    }
     @Column(name = "status", nullable = false)
     @Convert(converter = StatusConverter.class)
     @NotNull
     private Status status;
-
     @OneToMany(mappedBy = "action", targetEntity = JpaActionStatus.class, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE })
     private List<JpaActionStatus> actionStatus;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "rolloutgroup", updatable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rolloutgroup"))
     private JpaRolloutGroup rolloutGroup;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "rollout", updatable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout"))
     private JpaRollout rollout;
-
     @Column(name = "maintenance_cron_schedule", updatable = false, length = Action.MAINTENANCE_WINDOW_SCHEDULE_LENGTH)
     private String maintenanceWindowSchedule;
-
     @Column(name = "maintenance_duration", updatable = false, length = Action.MAINTENANCE_WINDOW_DURATION_LENGTH)
     private String maintenanceWindowDuration;
-
     @Column(name = "maintenance_time_zone", updatable = false, length = Action.MAINTENANCE_WINDOW_TIMEZONE_LENGTH)
     private String maintenanceWindowTimeZone;
-
     @Column(name = "external_ref", length = Action.EXTERNAL_REF_MAX_LENGTH)
     private String externalRef;
-
     @Column(name = "initiated_by", updatable = false, nullable = false, length = USERNAME_FIELD_LENGTH)
     private String initiatedBy;
-
     @Column(name = "last_action_status_code", nullable = true, updatable = true)
     private Integer lastActionStatusCode;
 
@@ -422,5 +377,39 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     private Optional<ZonedDateTime> getMaintenanceWindowEndTime() {
         return getMaintenanceWindowStartTime()
                 .map(start -> start.plus(MaintenanceScheduleHelper.convertToISODuration(maintenanceWindowDuration)));
+    }
+
+    @Converter
+    public static class ActionTypeConverter extends MapAttributeConverter<ActionType, Integer> {
+
+        public ActionTypeConverter() {
+            super(Map.of(
+                    ActionType.FORCED, 0,
+                    ActionType.SOFT, 1,
+                    ActionType.TIMEFORCED, 2,
+                    ActionType.DOWNLOAD_ONLY, 3
+            ), null);
+        }
+    }
+
+    @Converter
+    public static class StatusConverter extends MapAttributeConverter<Status, Integer> {
+
+        public StatusConverter() {
+            super(new HashMap<>() {{
+                put(Status.FINISHED, 0);
+                put(Status.ERROR, 1);
+                put(Status.WARNING, 2);
+                put(Status.RUNNING, 3);
+                put(Status.CANCELED, 4);
+                put(Status.CANCELING, 5);
+                put(Status.RETRIEVED, 6);
+                put(Status.DOWNLOAD, 7);
+                put(Status.SCHEDULED, 8);
+                put(Status.CANCEL_REJECTED, 9);
+                put(Status.DOWNLOADED, 10);
+                put(Status.WAIT_FOR_CONFIRMATION, 11);
+            }}, null);
+        }
     }
 }

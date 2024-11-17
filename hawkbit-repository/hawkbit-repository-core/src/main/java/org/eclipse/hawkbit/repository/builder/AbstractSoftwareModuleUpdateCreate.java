@@ -23,10 +23,8 @@ public abstract class AbstractSoftwareModuleUpdateCreate<T> extends AbstractName
 
     @ValidString
     protected String version;
-
     @ValidString
     protected String vendor;
-
     @ValidString
     protected String type;
 
@@ -56,5 +54,4 @@ public abstract class AbstractSoftwareModuleUpdateCreate<T> extends AbstractName
     public Optional<String> getVersion() {
         return Optional.ofNullable(version);
     }
-
 }

@@ -61,10 +61,8 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     private final EntityFactory entityFactory;
     private final TargetRepository targetRepository;
 
-    /**
-     * Constructor
-     */
-    public JpaConfirmationManagement(final TargetRepository targetRepository,
+    public JpaConfirmationManagement(
+            final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final RepositoryProperties repositoryProperties, final QuotaManagement quotaManagement,
             final EntityFactory entityFactory) {
@@ -80,14 +78,12 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
 
     @Override
     @Transactional
-    public AutoConfirmationStatus activateAutoConfirmation(final String controllerId, final String initiator,
-            final String remark) {
-        log.trace("'activateAutoConfirmation' was called with values: controllerId={}; initiator={}; remark={}",
-                controllerId, initiator, remark);
+    public AutoConfirmationStatus activateAutoConfirmation(final String controllerId, final String initiator, final String remark) {
+        log.trace(
+                "'activateAutoConfirmation' was called with values: controllerId={}; initiator={}; remark={}", controllerId, initiator, remark);
         final JpaTarget target = getTargetByControllerIdAndThrowIfNotFound(controllerId);
         if (target.getAutoConfirmationStatus() != null) {
-            log.debug("'activateAutoConfirmation' was called for an controller id {} with active auto confirmation.",
-                    controllerId);
+            log.debug("'activateAutoConfirmation' was called for an controller id {} with active auto confirmation.", controllerId);
             throw new AutoConfirmationAlreadyActiveException(controllerId);
         }
         final JpaAutoConfirmationStatus confirmationStatus = new JpaAutoConfirmationStatus(initiator, remark, target);
@@ -95,8 +91,9 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         final JpaTarget updatedTarget = targetRepository.save(target);
         final AutoConfirmationStatus autoConfStatus = updatedTarget.getAutoConfirmationStatus();
         if (autoConfStatus == null) {
-            final String message = String.format("Persisted auto confirmation status is null. "
-                            + "Cannot proceed with giving confirmations for active actions for device %s with initiator %s.",
+            final String message = String.format(
+                    "Persisted auto confirmation status is null. " +
+                            "Cannot proceed with giving confirmations for active actions for device %s with initiator %s.",
                     controllerId, initiator);
             log.error("message");
             throw new IllegalStateException(message);
@@ -123,8 +120,8 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action confirmAction(final long actionId, final Integer code, final Collection<String> deviceMessages) {
         log.trace("Action with id {} confirm request is triggered.", actionId);
         final Action action = getActionAndThrowExceptionIfNotFound(actionId);
@@ -142,8 +139,8 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action denyAction(final long actionId, final Integer code, final Collection<String> deviceMessages) {
         log.trace("Action with id {} deny request is triggered.", actionId);
         final Action action = getActionAndThrowExceptionIfNotFound(actionId);
@@ -152,8 +149,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         if (deviceMessages != null) {
             messages.addAll(deviceMessages);
         }
-        messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target rejected action."
-                + " Action will stay in confirmation pending state.");
+        messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target rejected action. Action will stay in confirmation pending state.");
         final ActionStatusCreate statusCreate = createConfirmationActionStatus(action.getId(), code, messages)
                 .status(Status.WAIT_FOR_CONFIRMATION);
         return addActionStatus((JpaActionStatusCreate) statusCreate);
@@ -191,8 +187,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         }
     }
 
-    private ActionStatusCreate createConfirmationActionStatus(final long actionId, final Integer code,
-            final Collection<String> messages) {
+    private ActionStatusCreate createConfirmationActionStatus(final long actionId, final Integer code, final Collection<String> messages) {
         final ActionStatusCreate statusCreate = entityFactory.actionStatus().create(actionId);
         if (!CollectionUtils.isEmpty(messages)) {
             statusCreate.messages(messages);
@@ -207,25 +202,27 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     private List<Action> giveConfirmationForActiveActions(final AutoConfirmationStatus autoConfirmationStatus) {
         final Target target = autoConfirmationStatus.getTarget();
         return findActiveActionsHavingStatus(target.getControllerId(), Status.WAIT_FOR_CONFIRMATION).stream()
-                .map(action -> autoConfirmAction(action, autoConfirmationStatus)).collect(Collectors.toList());
+                .map(action -> autoConfirmAction(action, autoConfirmationStatus))
+                .collect(Collectors.toList());
     }
 
     private Action autoConfirmAction(final JpaAction action, final AutoConfirmationStatus autoConfirmationStatus) {
         if (!action.isWaitingConfirmation()) {
-            log.debug("Auto-confirming action is not necessary, since action {} is in RUNNING state already.",
-                    action.getId());
+            log.debug("Auto-confirming action is not necessary, since action {} is in RUNNING state already.", action.getId());
             return action;
         }
-        final JpaActionStatus actionStatus = (JpaActionStatus) entityFactory.actionStatus().create(action.getId())
+        final JpaActionStatus actionStatus = (JpaActionStatus) entityFactory.actionStatus()
+                .create(action.getId())
                 .status(Status.RUNNING)
-                .messages(Collections.singletonList(autoConfirmationStatus.constructActionMessage())).build();
+                .messages(Collections.singletonList(autoConfirmationStatus.constructActionMessage()))
+                .build();
         log.debug(
                 "Automatically confirm actionId '{}' due to active auto-confirmation initiated by '{}' and rollouts system user '{}'",
                 action.getId(), autoConfirmationStatus.getInitiator(), autoConfirmationStatus.getCreatedBy());
 
         // do not make use of
         // org.eclipse.hawkbit.repository.jpa.management.JpaActionManagement.handleAddUpdateActionStatus
-        // to bypass the quota check. Otherwise the action will not be confirmed in case
+        // to bypass the quota check. Otherwise, the action will not be confirmed in case
         // of exceeded action status quota.
         action.setStatus(Status.RUNNING);
         actionStatus.setAction(action);

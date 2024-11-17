@@ -18,5 +18,4 @@ public class GenericDistributionSetTypeUpdate extends AbstractDistributionSetTyp
     public GenericDistributionSetTypeUpdate(final Long id) {
         super.id = id;
     }
-
 }

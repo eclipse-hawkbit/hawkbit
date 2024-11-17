@@ -83,6 +83,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpd
 public class EventType {
 
     private static final Map<Integer, Class<?>> TYPES = new HashMap<>();
+
     private int value;
 
     /**

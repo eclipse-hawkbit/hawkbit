@@ -45,5 +45,4 @@ public abstract class AbstractRolloutGroupCreate<T> extends AbstractNamedEntityB
         this.confirmationRequired = confirmationRequired;
         return (T) this;
     }
-
 }

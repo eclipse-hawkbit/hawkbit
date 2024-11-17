@@ -66,11 +66,9 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
 
     @Override
     public void checkSingleTarget(String controllerId) {
-        log.debug("Auto assign check call for tenant {} and device {} started", getContextAware().getCurrentTenant(),
-                controllerId);
+        log.debug("Auto assign check call for tenant {} and device {} started", getContextAware().getCurrentTenant(), controllerId);
         forEachFilterWithAutoAssignDS(filter -> checkForDevice(controllerId, filter));
-        log.debug("Auto assign check call for tenant {} and device {} finished", getContextAware().getCurrentTenant(),
-                controllerId);
+        log.debug("Auto assign check call for tenant {} and device {} finished", getContextAware().getCurrentTenant(), controllerId);
     }
 
     /**

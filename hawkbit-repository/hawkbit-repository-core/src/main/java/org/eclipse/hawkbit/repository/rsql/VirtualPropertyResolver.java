@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.rsql;
 
+import java.io.Serial;
 import java.time.Instant;
 
 import org.apache.commons.lang3.text.StrLookup;
@@ -43,6 +44,7 @@ import org.eclipse.hawkbit.repository.TimestampCalculator;
  */
 public class VirtualPropertyResolver extends StrLookup<String> implements VirtualPropertyReplacer {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private transient StrSubstitutor substitutor;
