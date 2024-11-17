@@ -43,21 +43,16 @@ public interface MgmtSoftwareModuleTypeRestApi {
     /**
      * Handles the GET request of retrieving all SoftwareModuleTypes .
      *
-     * @param pagingOffsetParam the offset of list of modules for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=name==abc}
-     * @return a list of all module type for a defined or default page request
-     *         with status OK. The response is always paged. In any failure the
+     * @param pagingOffsetParam the offset of list of modules for pagination, might not be present in the rest request then default value will
+     *         be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
+     * @return a list of all module type for a defined or default page request with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all Software Module Types",
-            description = "Handles the GET request of retrieving all software module types. " +
-                    "Required Permission: READ_REPOSITORY")
+            description = "Handles the GET request of retrieving all software module types. Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -76,8 +71,8 @@ public interface MgmtSoftwareModuleTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING,
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModuleType>> getTypes(
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -109,8 +104,7 @@ public interface MgmtSoftwareModuleTypeRestApi {
      * @return a single softwareModule with status OK.
      */
     @Operation(summary = "Return single Software Module Type",
-            description = "Handles the GET request of retrieving a single software module type. " +
-                    "Required Permission: READ_REPOSITORY")
+            description = "Handles the GET request of retrieving a single software module type. Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -131,8 +125,8 @@ public interface MgmtSoftwareModuleTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING
-            + "/{softwareModuleTypeId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING + "/{softwareModuleTypeId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> getSoftwareModuleType(
             @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
@@ -143,8 +137,7 @@ public interface MgmtSoftwareModuleTypeRestApi {
      * @return status OK if delete as successfully.
      */
     @Operation(summary = "Delete Software Module Type by Id",
-            description = "Handles the DELETE request for a single software module type. " +
-                    "Required Permission: DELETE_REPOSITORY")
+            description = "Handles the DELETE request for a single software module type. Required Permission: DELETE_REPOSITORY")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -176,8 +169,7 @@ public interface MgmtSoftwareModuleTypeRestApi {
      * @return status OK if update is successful
      */
     @Operation(summary = "Update Software Module Type",
-            description = "Handles the PUT request for a single software module type. " +
-                    "Required Permission: UPDATE_REPOSITORY")
+            description = "Handles the PUT request for a single software module type. Required Permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -204,23 +196,19 @@ public interface MgmtSoftwareModuleTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING
-            + "/{softwareModuleTypeId}", consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING + "/{softwareModuleTypeId}",
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> updateSoftwareModuleType(
             @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId,
             MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType);
 
     /**
-     * Handles the POST request of creating new SoftwareModuleTypes. The request
-     * body must always be a list of types.
+     * Handles the POST request of creating new SoftwareModuleTypes. The request body must always be a list of types.
      *
      * @param softwareModuleTypes the modules to be created.
-     * @return In case all modules could successful created the ResponseEntity
-     *         with status code 201 - Created but without ResponseBody. In any
-     *         failure the JsonResponseExceptionHandler is handling the
-     *         response.
+     * @return In case all modules could successful created the ResponseEntity with status code 201 - Created but without ResponseBody. In any
+     *         failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Creates new Software Module Types",
             description = "Handles the POST request of creating new software module types. The request body must " +
@@ -251,10 +239,8 @@ public interface MgmtSoftwareModuleTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING, consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtSoftwareModuleType>> createSoftwareModuleTypes(
-            List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes);
-
+    @PostMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<List<MgmtSoftwareModuleType>> createSoftwareModuleTypes(List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes);
 }

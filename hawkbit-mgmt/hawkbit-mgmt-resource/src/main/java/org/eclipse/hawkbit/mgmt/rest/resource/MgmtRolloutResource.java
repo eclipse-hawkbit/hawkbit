@@ -65,17 +65,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     private final RolloutManagement rolloutManagement;
-
     private final RolloutGroupManagement rolloutGroupManagement;
-
     private final DistributionSetManagement distributionSetManagement;
-
     private final TargetFilterQueryManagement targetFilterQueryManagement;
-
     private final EntityFactory entityFactory;
     private final TenantConfigHelper tenantConfigHelper;
 
-    MgmtRolloutResource(final RolloutManagement rolloutManagement, final RolloutGroupManagement rolloutGroupManagement,
+    MgmtRolloutResource(
+            final RolloutManagement rolloutManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final EntityFactory entityFactory,
             final SystemSecurityContext systemSecurityContext,

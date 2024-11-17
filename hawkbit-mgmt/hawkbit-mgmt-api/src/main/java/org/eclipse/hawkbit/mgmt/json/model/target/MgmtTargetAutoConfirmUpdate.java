@@ -39,8 +39,8 @@ public class MgmtTargetAutoConfirmUpdate {
      * @param remark can be null
      */
     @JsonCreator
-    public MgmtTargetAutoConfirmUpdate(@JsonProperty(value = "initiator") final String initiator,
-            @JsonProperty(value = "remark") final String remark) {
+    public MgmtTargetAutoConfirmUpdate(
+            @JsonProperty(value = "initiator") final String initiator, @JsonProperty(value = "remark") final String remark) {
         this.initiator = initiator;
         this.remark = remark;
     }

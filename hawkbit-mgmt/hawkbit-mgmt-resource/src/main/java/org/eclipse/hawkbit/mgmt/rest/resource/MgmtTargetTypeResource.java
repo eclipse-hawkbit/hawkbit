@@ -59,7 +59,6 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeTargetTypeSortParam(sortParam);
@@ -95,9 +94,9 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtTargetType> updateTargetType(@PathVariable("targetTypeId") final Long targetTypeId,
+    public ResponseEntity<MgmtTargetType> updateTargetType(
+            @PathVariable("targetTypeId") final Long targetTypeId,
             @RequestBody final MgmtTargetTypeRequestBodyPut restTargetType) {
-
         final TargetType updated = targetTypeManagement
                 .update(entityFactory.targetType().update(targetTypeId).name(restTargetType.getName())
                         .description(restTargetType.getDescription()).colour(restTargetType.getColour()));
@@ -107,8 +106,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     }
 
     @Override
-    public ResponseEntity<List<MgmtTargetType>> createTargetTypes(
-            @RequestBody final List<MgmtTargetTypeRequestBodyPost> targetTypes) {
+    public ResponseEntity<List<MgmtTargetType>> createTargetTypes(@RequestBody final List<MgmtTargetTypeRequestBodyPost> targetTypes) {
 
         final List<TargetType> createdTargetTypes = targetTypeManagement
                 .create(MgmtTargetTypeMapper.targetFromRequest(entityFactory, targetTypes));
@@ -118,26 +116,24 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     @Override
     public ResponseEntity<List<MgmtDistributionSetType>> getCompatibleDistributionSets(
             @PathVariable("targetTypeId") final Long targetTypeId) {
-
         final TargetType foundType = findTargetTypeWithExceptionIfNotFound(targetTypeId);
-        return ResponseEntity
-                .ok(MgmtDistributionSetTypeMapper.toListResponse(foundType.getCompatibleDistributionSetTypes()));
+        return ResponseEntity.ok(MgmtDistributionSetTypeMapper.toListResponse(foundType.getCompatibleDistributionSetTypes()));
     }
 
     @Override
-    public ResponseEntity<Void> removeCompatibleDistributionSet(@PathVariable("targetTypeId") final Long targetTypeId,
+    public ResponseEntity<Void> removeCompatibleDistributionSet(
+            @PathVariable("targetTypeId") final Long targetTypeId,
             @PathVariable("distributionSetTypeId") final Long distributionSetTypeId) {
-
         targetTypeManagement.unassignDistributionSetType(targetTypeId, distributionSetTypeId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<Void> addCompatibleDistributionSets(@PathVariable("targetTypeId") final Long targetTypeId,
+    public ResponseEntity<Void> addCompatibleDistributionSets(
+            @PathVariable("targetTypeId") final Long targetTypeId,
             @RequestBody final List<MgmtDistributionSetTypeAssignment> distributionSetTypeIds) {
-
-        targetTypeManagement.assignCompatibleDistributionSetTypes(targetTypeId, distributionSetTypeIds.stream()
-                .map(MgmtDistributionSetTypeAssignment::getId).collect(Collectors.toList()));
+        targetTypeManagement.assignCompatibleDistributionSetTypes(
+                targetTypeId, distributionSetTypeIds.stream().map(MgmtDistributionSetTypeAssignment::getId).collect(Collectors.toList()));
         return ResponseEntity.ok().build();
     }
 
@@ -145,5 +141,4 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
         return targetTypeManagement.get(targetTypeId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetType.class, targetTypeId));
     }
-
 }

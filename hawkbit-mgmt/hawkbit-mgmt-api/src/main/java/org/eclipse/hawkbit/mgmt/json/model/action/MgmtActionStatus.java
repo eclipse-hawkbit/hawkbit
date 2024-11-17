@@ -17,7 +17,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.ToString;
 import lombok.experimental.Accessors;
 
 /**
@@ -25,7 +24,6 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-@ToString
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtActionStatus {
@@ -33,14 +31,18 @@ public class MgmtActionStatus {
     @JsonProperty("id")
     @Schema(example = "21")
     private Long statusId;
+
     @JsonProperty
     @Schema(example = "running")
     private String type;
+
     @JsonProperty
     private List<String> messages;
+
     @JsonProperty
     @Schema(example = "1691065929524")
     private Long reportedAt;
+
     @JsonProperty
     @Schema(example = "200")
     private Integer code;

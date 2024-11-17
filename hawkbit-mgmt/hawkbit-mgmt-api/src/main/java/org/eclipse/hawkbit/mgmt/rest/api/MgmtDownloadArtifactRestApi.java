@@ -32,10 +32,8 @@ public interface MgmtDownloadArtifactRestApi {
      * @param artifactId of the related LocalArtifact
      * @return responseEntity with status ok if successful
      */
-    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
-            + "/{softwareModuleId}/artifacts/{artifactId}/download")
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}/download")
     @ResponseBody
     ResponseEntity<InputStream> downloadArtifact(@PathVariable("softwareModuleId") Long softwareModuleId,
             @PathVariable("artifactId") Long artifactId);
-
 }

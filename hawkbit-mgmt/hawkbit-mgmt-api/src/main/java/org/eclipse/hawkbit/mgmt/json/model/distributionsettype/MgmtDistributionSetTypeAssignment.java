@@ -18,5 +18,4 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
  */
 @Accessors(chain = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MgmtDistributionSetTypeAssignment extends MgmtId {
-}
+public class MgmtDistributionSetTypeAssignment extends MgmtId {}

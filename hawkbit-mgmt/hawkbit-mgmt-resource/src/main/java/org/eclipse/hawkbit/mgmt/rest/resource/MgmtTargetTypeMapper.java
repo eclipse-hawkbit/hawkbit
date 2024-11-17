@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetType;
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetTypeRequestBodyPost;
@@ -31,18 +33,16 @@ import org.eclipse.hawkbit.rest.json.model.ResponseList;
 /**
  * A mapper which maps repository model to RESTful model representation and back.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtTargetTypeMapper {
 
-    // private constructor, utility class
-    private MgmtTargetTypeMapper() {
-    }
-
-    static List<TargetTypeCreate> targetFromRequest(final EntityFactory entityFactory,
-            final Collection<MgmtTargetTypeRequestBodyPost> targetTypesRest) {
+    static List<TargetTypeCreate> targetFromRequest(
+            final EntityFactory entityFactory, final Collection<MgmtTargetTypeRequestBodyPost> targetTypesRest) {
         if (targetTypesRest == null) {
             return Collections.emptyList();
         }
-        return targetTypesRest.stream().map(targetRest -> fromRequest(entityFactory, targetRest))
+        return targetTypesRest.stream()
+                .map(targetRest -> fromRequest(entityFactory, targetRest))
                 .collect(Collectors.toList());
     }
 

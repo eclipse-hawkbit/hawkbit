@@ -26,6 +26,7 @@ public class MgmtDistributionSetTypeRequestBodyPut {
     @JsonProperty
     @Schema(description = "The description of the entity", example = "Example description")
     private String description;
+
     @JsonProperty
     @Schema(description = "The colour of the entity", example = "rgb(86,37,99)")
     private String colour;

@@ -22,12 +22,10 @@ public final class MgmtRestConstants {
      * API version definition. We are using only major versions.
      */
     public static final String API_VERSION = "v1";
-
     /**
      * The base URL mapping of the SP rest resources.
      */
     public static final String BASE_REST_MAPPING = "/rest";
-
     /**
      * The base URL mapping of the SP rest resources.
      */
@@ -165,23 +163,19 @@ public final class MgmtRestConstants {
      */
     public static final String DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING = "/{distributionsetTagId}/assigned";
     /**
-     * The default offset parameter in case the offset parameter is not present
-     * in the request.
+     * The default offset parameter in case the offset parameter is not present in the request.
      *
      * @see #REQUEST_PARAMETER_PAGING_OFFSET
      */
     public static final String REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET = "0";
     /**
-     * The default offset parameter in case the offset parameter is not present
-     * in the request.
+     * The default offset parameter in case the offset parameter is not present in the request.
      *
      * @see #REQUEST_PARAMETER_PAGING_OFFSET
      */
-    public static final int REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE = Integer
-            .parseInt(REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET);
+    public static final int REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE = Integer.parseInt(REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET);
     /**
-     * Limit http parameter for the limitation of returned values for a paged
-     * request.
+     * Limit http parameter for the limitation of returned values for a paged request.
      */
     public static final String REQUEST_PARAMETER_PAGING_LIMIT = "limit";
     /**
@@ -193,20 +187,16 @@ public final class MgmtRestConstants {
      */
     public static final String REQUEST_PARAMETER_PAGING_OFFSET = "offset";
     /**
-     * The request parameter for sorting. The value of the sort parameter must
-     * be in the following pattern. Example:
-     * http://www.bosch.com/iap/sp/rest/targets?sort=field_1:ASC,field_2:DESC,
-     * field_3:ASC
+     * The request parameter for sorting. The value of the sort parameter must be in the following pattern. Example:
+     * http://www.bosch.com/iap/sp/rest/targets?sort=field_1:ASC,field_2:DESC,field_3:ASC
      */
     public static final String REQUEST_PARAMETER_SORTING = "sort";
     /**
-     * The request parameter for searching. The value of the search parameter
-     * must be in the FIQL syntax.
+     * The request parameter for searching. The value of the search parameter must be in the FIQL syntax.
      */
     public static final String REQUEST_PARAMETER_SEARCH = "q";
     /**
-     * The request parameter for specifying the representation mode. The value
-     * of this parameter can either be "full" or "compact".
+     * The request parameter for specifying the representation mode. The value of this parameter can either be "full" or "compact".
      */
     public static final String REQUEST_PARAMETER_REPRESENTATION_MODE = "representation";
     /**

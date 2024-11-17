@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtDistributionSetAutoAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
@@ -31,14 +33,10 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.util.CollectionUtils;
 
 /**
- * A mapper which maps repository model to RESTful model representation and
- * back.
+ * A mapper which maps repository model to RESTful model representation and back.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtTargetFilterQueryMapper {
-
-    private MgmtTargetFilterQueryMapper() {
-        // Utility class
-    }
 
     static List<MgmtTargetFilterQuery> toResponse(final List<TargetFilterQuery> filters,
             final boolean confirmationFlowEnabled, final boolean isRepresentationFull) {
@@ -49,7 +47,7 @@ public final class MgmtTargetFilterQueryMapper {
     }
 
     static MgmtTargetFilterQuery toResponse(final TargetFilterQuery filter, final boolean confirmationFlowEnabled,
-            final boolean isReprentationFull) {
+            final boolean isRepresentationFull) {
         final MgmtTargetFilterQuery targetRest = new MgmtTargetFilterQuery();
         targetRest.setFilterId(filter.getId());
         targetRest.setName(filter.getName());
@@ -73,7 +71,7 @@ public final class MgmtTargetFilterQueryMapper {
 
         targetRest.add(
                 linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).getFilter(filter.getId())).withSelfRel().expand());
-        if (isReprentationFull && distributionSet != null) {
+        if (isRepresentationFull && distributionSet != null) {
             targetRest.add(
                     linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSets(
                             Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
@@ -89,9 +87,7 @@ public final class MgmtTargetFilterQueryMapper {
                 .postAssignedDistributionSet(targetRest.getFilterId(), null)).withRel("autoAssignDS").expand());
     }
 
-    static TargetFilterQueryCreate fromRequest(final EntityFactory entityFactory,
-            final MgmtTargetFilterQueryRequestBody filterRest) {
-
+    static TargetFilterQueryCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetFilterQueryRequestBody filterRest) {
         return entityFactory.targetFilterQuery().create().name(filterRest.getName()).query(filterRest.getQuery());
     }
 
@@ -102,5 +98,4 @@ public final class MgmtTargetFilterQueryMapper {
         return entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(assignRest.getId()).actionType(type)
                 .weight(assignRest.getWeight());
     }
-
 }

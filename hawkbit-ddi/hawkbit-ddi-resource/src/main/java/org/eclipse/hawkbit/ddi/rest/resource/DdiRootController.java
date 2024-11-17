@@ -466,7 +466,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> setAsssignedOfflineVersion(
+    public ResponseEntity<Void> setAssignedOfflineVersion(
             @Valid @RequestBody DdiAssignedVersion ddiAssignedVersion,
             @PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") final String controllerId) {

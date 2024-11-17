@@ -37,6 +37,7 @@ public class MgmtTargetAssignmentResponseBody extends RepresentationModel<MgmtTa
             Targets that had this distribution set already assigned (in "offline" case this includes
             targets that have arbitrary updates running)""")
     private int alreadyAssigned;
+
     @Schema(description = "The newly created actions as a result of this assignment")
     private List<MgmtActionId> assignedActions;
 

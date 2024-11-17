@@ -34,5 +34,4 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
           "name" : "exampleRollout",
           "description" : "Rollout for all named targets"
         }""")
-public class MgmtRolloutRestRequestBodyPut extends MgmtNamedEntity {
-}
+public class MgmtRolloutRestRequestBodyPut extends MgmtNamedEntity {}

@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
@@ -57,14 +59,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.util.ObjectUtils;
 
 /**
- * A mapper which maps repository model to RESTful model representation and
- * back.
+ * A mapper which maps repository model to RESTful model representation and back.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtTargetMapper {
-
-    private MgmtTargetMapper() {
-        // Utility class
-    }
 
     /**
      * Add links to a target response.
@@ -243,9 +241,7 @@ public final class MgmtTargetMapper {
 
         result.setDetailStatus(action.getStatus().toString().toLowerCase());
 
-        action.getLastActionStatusCode().ifPresent(statusCode -> {
-            result.setLastStatusCode(statusCode);
-        });
+        action.getLastActionStatusCode().ifPresent(result::setLastStatusCode);
 
         final Rollout rollout = action.getRollout();
         if (rollout != null) {
@@ -270,8 +266,7 @@ public final class MgmtTargetMapper {
 
         MgmtRestModelMapper.mapBaseToBase(result, action);
 
-        result.add(
-                linkTo(methodOn(MgmtTargetRestApi.class).getAction(targetId, action.getId())).withSelfRel().expand());
+        result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(targetId, action.getId())).withSelfRel().expand());
 
         return result;
     }

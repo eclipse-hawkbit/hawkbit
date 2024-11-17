@@ -26,6 +26,7 @@ public class MgmtTargetFilterQueryRequestBody {
     @JsonProperty(required = true)
     @Schema(example = "filterName")
     private String name;
+
     @JsonProperty(required = true)
     @Schema(example = "controllerId==example-target-*")
     private String query;

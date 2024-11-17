@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
-import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssigment;
+import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssignment;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -87,13 +87,13 @@ final class MgmtDistributionSetTypeMapper {
 
     private static Collection<Long> getMandatoryModules(final MgmtDistributionSetTypeRequestBodyPost smsRest) {
         return Optional.ofNullable(smsRest.getMandatorymodules()).map(
-                        modules -> modules.stream().map(MgmtSoftwareModuleTypeAssigment::getId).collect(Collectors.toList()))
+                        modules -> modules.stream().map(MgmtSoftwareModuleTypeAssignment::getId).collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
     }
 
     private static Collection<Long> getOptionalmodules(final MgmtDistributionSetTypeRequestBodyPost smsRest) {
         return Optional.ofNullable(smsRest.getOptionalmodules()).map(
-                        modules -> modules.stream().map(MgmtSoftwareModuleTypeAssigment::getId).collect(Collectors.toList()))
+                        modules -> modules.stream().map(MgmtSoftwareModuleTypeAssignment::getId).collect(Collectors.toList()))
                 .orElse(Collections.emptyList());
     }
 

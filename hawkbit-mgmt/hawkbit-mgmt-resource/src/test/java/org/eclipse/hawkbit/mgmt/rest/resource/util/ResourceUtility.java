@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.mgmt.rest.resource.util;
 
 import java.io.IOException;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
@@ -23,21 +21,17 @@ import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
  */
 public final class ResourceUtility {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    public static ExceptionInfo convertException(final String jsonExceptionResponse)
-            throws JsonParseException, JsonMappingException, IOException {
-        return mapper.readValue(jsonExceptionResponse, ExceptionInfo.class);
+    public static ExceptionInfo convertException(final String jsonExceptionResponse) throws IOException {
+        return OBJECT_MAPPER.readValue(jsonExceptionResponse, ExceptionInfo.class);
     }
 
-    public static MgmtArtifact convertArtifactResponse(final String jsonResponse)
-            throws JsonParseException, JsonMappingException, IOException {
-        return mapper.readValue(jsonResponse, MgmtArtifact.class);
-
+    public static MgmtArtifact convertArtifactResponse(final String jsonResponse) throws IOException {
+        return OBJECT_MAPPER.readValue(jsonResponse, MgmtArtifact.class);
     }
 
-    public static <T> PagedList<T> mapResponse(final Class<T> clazz, final String responseBody)
-            throws JsonParseException, JsonMappingException, IOException {
-        return mapper.readValue(responseBody, PagedList.class);
+    public static <T> PagedList<T> mapResponse(final Class<T> clazz, final String responseBody) throws IOException {
+        return OBJECT_MAPPER.readValue(responseBody, PagedList.class);
     }
 }

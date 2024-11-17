@@ -165,8 +165,7 @@ public class MgmtDistributionSet extends MgmtNamedEntity {
     private boolean deleted;
 
     @JsonProperty
-    @Schema(description = "True by default and false after the distribution set is invalidated by the user",
-            example = "true")
+    @Schema(description = "True by default and false after the distribution set is invalidated by the user", example = "true")
     private boolean valid;
 
     @JsonProperty

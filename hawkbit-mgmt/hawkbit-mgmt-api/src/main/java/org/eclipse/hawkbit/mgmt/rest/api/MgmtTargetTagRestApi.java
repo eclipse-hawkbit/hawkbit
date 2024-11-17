@@ -45,16 +45,12 @@ public interface MgmtTargetTagRestApi {
     /**
      * Handles the GET request of retrieving all target tags.
      *
-     * @param pagingOffsetParam the offset of list of target tags for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=name==abc}
-     * @return a list of all target tags for a defined or default page request
-     *         with status OK. The response is always paged. In any failure the
+     * @param pagingOffsetParam the offset of list of target tags for pagination, might not be present in the rest request then default value
+     *         will be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
+     * @return a list of all target tags for a defined or default page request with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all target tags",
@@ -71,8 +67,8 @@ public interface MgmtTargetTagRestApi {
             @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
                     "and the client has to wait another second.")
     })
-    @GetMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING,
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTag>> getTargetTags(
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -119,17 +115,15 @@ public interface MgmtTargetTagRestApi {
             @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
                     "and the client has to wait another second.")
     })
-    @GetMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/{targetTagId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/{targetTagId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> getTargetTag(@PathVariable("targetTagId") Long targetTagId);
 
     /**
-     * Handles the POST request of creating new target tag. The request body
-     * must always be a list of tags.
+     * Handles the POST request of creating new target tag. The request body must always be a list of tags.
      *
      * @param tags the target tags to be created.
-     * @return In case all modules could successful created the ResponseEntity
-     *         with status code 201 - Created. The Response Body are the created
+     * @return In case all modules could successful created the ResponseEntity with status code 201 - Created. The Response Body are the created
      *         target tags but without ResponseBody.
      */
     @Operation(summary = "Create target tag(s)", description = "Handles the POST request of creating new target tag. " +
@@ -150,13 +144,13 @@ public interface MgmtTargetTagRestApi {
             @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
                     "and the client has to wait another second.")
     })
-    @PostMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING, consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTag>> createTargetTags(List<MgmtTagRequestBodyPut> tags);
 
     /**
-     * Handles the PUT request of updating a single targetr tag.
+     * Handles the PUT request of updating a single target tag.
      *
      * @param targetTagId the ID of the target tag
      * @param restTargetTagRest the request body to be updated
@@ -181,11 +175,10 @@ public interface MgmtTargetTagRestApi {
             @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
                     "and the client has to wait another second.")
     })
-    @PutMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/{targetTagId}", consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTag> updateTargetTag(@PathVariable("targetTagId") Long targetTagId,
-            MgmtTagRequestBodyPut restTargetTagRest);
+    @PutMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/{targetTagId}",
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtTag> updateTargetTag(@PathVariable("targetTagId") Long targetTagId, MgmtTagRequestBodyPut restTargetTagRest);
 
     /**
      * Handles the DELETE request for a single target tag.
@@ -213,18 +206,14 @@ public interface MgmtTargetTagRestApi {
     ResponseEntity<Void> deleteTargetTag(@PathVariable("targetTagId") Long targetTagId);
 
     /**
-     * Handles the GET request of retrieving all assigned targets by the given
-     * tag id.
+     * Handles the GET request of retrieving all assigned targets by the given tag id.
      *
      * @param targetTagId the ID of the target tag to retrieve
-     * @param pagingOffsetParam the offset of list of target tags for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=name==abc}
+     * @param pagingOffsetParam the offset of list of target tags for pagination, might not be present in the rest request then default value
+     *         will be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @return the list of assigned targets.
      */
     @Operation(summary = "Return assigned targets for tag",
@@ -243,10 +232,10 @@ public interface MgmtTargetTagRestApi {
             @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
                     "and the client has to wait another second.")
     })
-    @GetMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING
-            + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") Long targetTagId,
+    @GetMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING,
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
+            @PathVariable("targetTagId") Long targetTagId,
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
@@ -398,8 +387,7 @@ public interface MgmtTargetTagRestApi {
             @RequestBody List<String> controllerId);
 
     /**
-     * Handles the POST request to toggle the assignment of targets by the given
-     * tag id.
+     * Handles the POST request to toggle the assignment of targets by the given tag id.
      *
      * @param targetTagId the ID of the target tag to retrieve
      * @param assignedTargetRequestBodies list of controller ids to be toggled
@@ -423,10 +411,10 @@ public interface MgmtTargetTagRestApi {
                     "supported by the server for this resource."),
             @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
     })
-    @PostMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING
-            + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING + "/toggleTagAssignment", consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING +
+            MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING + "/toggleTagAssignment",
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     @Deprecated(forRemoval = true, since = "0.6.0")
     ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(@PathVariable("targetTagId") Long targetTagId,
             List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);
@@ -457,10 +445,9 @@ public interface MgmtTargetTagRestApi {
             @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
                     "and the client has to wait another second.")
     })
-    @PostMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING
-            + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING, consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     @Deprecated(forRemoval = true, since = "0.6.0")
     ResponseEntity<List<MgmtTarget>> assignTargetsByRequestBody(@PathVariable("targetTagId") Long targetTagId,
             List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies);

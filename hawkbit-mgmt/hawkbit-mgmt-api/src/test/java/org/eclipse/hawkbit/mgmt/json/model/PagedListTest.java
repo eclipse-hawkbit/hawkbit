@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.mgmt.json.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,6 @@ import java.util.List;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Management API")
@@ -25,13 +25,10 @@ import org.junit.jupiter.api.Test;
 public class PagedListTest {
 
     @Test
-    @Description("Ensures that a null payload entitiy throws an exception.")
+    @Description("Ensures that a null payload entity throws an exception.")
     public void createListWithNullContentThrowsException() {
-        try {
-            new PagedList<>(null, 0);
-            Assertions.fail("as content is null");
-        } catch (final NullPointerException e) {
-        }
+        assertThatThrownBy(() -> new PagedList<>(null, 0))
+                .isInstanceOf(NullPointerException.class);
     }
 
     @Test

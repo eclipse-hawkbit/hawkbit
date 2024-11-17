@@ -24,8 +24,7 @@ import org.springframework.amqp.rabbit.junit.BrokerRunningSupport;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Creates and deletes a new virtual host if the rabbit mq management api is
- * available.
+ * Creates and deletes a new virtual host if the rabbit mq management api is available.
  */
 // exception squid:S2068 - Test instance passwd
 @SuppressWarnings("squid:S2068")
@@ -39,8 +38,7 @@ public class RabbitMqSetupService {
     private String virtualHost;
 
     public RabbitMqSetupService() {
-
-        BrokerRunningSupport brokerSupport = BrokerRunningSupport.isRunning();
+        final BrokerRunningSupport brokerSupport = BrokerRunningSupport.isRunning();
         connectionFactory = brokerSupport.getConnectionFactory();
         hostname = brokerSupport.getHostName();
         username = brokerSupport.getUser();

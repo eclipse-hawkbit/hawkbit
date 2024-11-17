@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi {
 
     private final SystemManagement systemManagement;
-
     private final CacheManager cacheManager;
 
     MgmtSystemManagementResource(final SystemManagement systemManagement, final CacheManager cacheManager) {

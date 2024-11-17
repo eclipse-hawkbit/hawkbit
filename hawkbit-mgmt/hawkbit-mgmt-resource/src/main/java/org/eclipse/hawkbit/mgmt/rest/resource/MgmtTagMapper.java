@@ -59,8 +59,7 @@ final class MgmtTagMapper {
 
         mapTag(response, targetTag);
 
-        response.add(
-                linkTo(methodOn(MgmtTargetTagRestApi.class).getTargetTag(targetTag.getId())).withSelfRel().expand());
+        response.add(linkTo(methodOn(MgmtTargetTagRestApi.class).getTargetTag(targetTag.getId())).withSelfRel().expand());
 
         return response;
     }
@@ -70,7 +69,6 @@ final class MgmtTagMapper {
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("assignedTargets")
                 .expand());
-
     }
 
     static List<MgmtTag> toResponseDistributionSetTag(final List<DistributionSetTag> distributionSetTags) {
@@ -109,8 +107,7 @@ final class MgmtTagMapper {
                 .withRel("assignedDistributionSets").expand());
     }
 
-    static List<TagCreate> mapTagFromRequest(final EntityFactory entityFactory,
-            final Collection<MgmtTagRequestBodyPut> tags) {
+    static List<TagCreate> mapTagFromRequest(final EntityFactory entityFactory, final Collection<MgmtTagRequestBodyPut> tags) {
         return tags.stream()
                 .map(tagRest -> entityFactory.tag().create().name(tagRest.getName())
                         .description(tagRest.getDescription()).colour(tagRest.getColour()))

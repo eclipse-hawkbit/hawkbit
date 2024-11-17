@@ -55,10 +55,8 @@ public interface MgmtSoftwareModuleRestApi {
      * @param md5Sum checksum for uploaded content check
      * @param sha1Sum checksum for uploaded content check
      * @param sha256sum checksum for uploaded content check
-     * @return In case all sets could successful be created the ResponseEntity
-     *         with status code 201 - Created but without ResponseBody. In any
-     *         failure the JsonResponseExceptionHandler is handling the
-     *         response.
+     * @return In case all sets could successful be created the ResponseEntity with status code 201 - Created but without ResponseBody. In any
+     *         failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Upload artifact", description = "Handles POST request for artifact upload. Required Permission: CREATE_REPOSITORY")
     @ApiResponses(value = {
@@ -83,10 +81,10 @@ public interface MgmtSoftwareModuleRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
-            + "/{softwareModuleId}/artifacts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtArtifact> uploadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtArtifact> uploadArtifact(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestPart("file") final MultipartFile file,
             @RequestParam(value = "filename", required = false) final String optionalFileName,
             @RequestParam(value = "md5sum", required = false) final String md5Sum,
@@ -94,16 +92,14 @@ public interface MgmtSoftwareModuleRestApi {
             @RequestParam(value = "sha256sum", required = false) final String sha256sum);
 
     /**
-     * Handles the GET request of retrieving all meta data of artifacts assigned
-     * to a software module.
+     * Handles the GET request of retrieving all metadata of artifacts assigned to a software module.
      *
      * @param softwareModuleId of the parent SoftwareModule
-     * @return a list of all artifacts for a defined or default page request
-     *         with status OK. The response is always paged. In any failure the
+     * @return a list of all artifacts for a defined or default page request with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @Operation(summary = "Return all meta data of artifacts assigned to a software module",
-            description = "Handles the GET request of retrieving all meta data of artifacts assigned to a " +
+    @Operation(summary = "Return all metadata of artifacts assigned to a software module",
+            description = "Handles the GET request of retrieving all metadata of artifacts assigned to a " +
                     "software module. Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
@@ -125,22 +121,21 @@ public interface MgmtSoftwareModuleRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
-            + "/{softwareModuleId}/artifacts", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtArtifact>> getArtifacts(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<List<MgmtArtifact>> getArtifacts(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT) String representationModeParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_USE_ARTIFACT_URL_HANDLER, required = false) final Boolean useArtifactUrlHandler);
 
     /**
-     * Handles the GET request of retrieving a single Artifact meta data
-     * request.
+     * Handles the GET request of retrieving a single Artifact metadata request.
      *
      * @param softwareModuleId of the parent SoftwareModule
      * @param artifactId of the related LocalArtifact
      * @return responseEntity with status ok if successful
      */
-    @Operation(summary = "Return single Artifact meta data", description = "Handles the GET request of retrieving a single Artifact meta data request. Required Permission: READ_REPOSITORY")
+    @Operation(summary = "Return single Artifact metadata", description = "Handles the GET request of retrieving a single Artifact metadata request. Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -160,9 +155,8 @@ public interface MgmtSoftwareModuleRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
-            + "/{softwareModuleId}/artifacts/{artifactId}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     @ResponseBody
     ResponseEntity<MgmtArtifact> getArtifact(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
@@ -196,25 +190,21 @@ public interface MgmtSoftwareModuleRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
-            + "/{softwareModuleId}/artifacts/{artifactId}")
+    @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}")
     @ResponseBody
-    ResponseEntity<Void> deleteArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    ResponseEntity<Void> deleteArtifact(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("artifactId") final Long artifactId);
 
     /**
-     * Handles the GET request of retrieving all softwaremodules.
+     * Handles the GET request of retrieving all software modules.
      *
-     * @param pagingOffsetParam the offset of list of modules for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=name==abc}
-     * @return a list of all modules for a defined or default page request with
-     *         status OK. The response is always paged. In any failure the
+     * @param pagingOffsetParam the offset of list of modules for pagination, might not be present in the rest request then default value will
+     *         be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
+     * @return a list of all modules for a defined or default page request with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all Software modules", description = "Handles the GET request of retrieving all softwaremodules. Required Permission: READ_REPOSITORY")
@@ -236,8 +226,8 @@ public interface MgmtSoftwareModuleRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING,
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModule>> getSoftwareModules(
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -289,19 +279,16 @@ public interface MgmtSoftwareModuleRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModule> getSoftwareModule(@PathVariable("softwareModuleId") final Long softwareModuleId);
 
     /**
-     * Handles the POST request of creating new softwaremodules. The request
-     * body must always be a list of modules.
+     * Handles the POST request of creating new software modules. The request body must always be a list of modules.
      *
      * @param softwareModules the modules to be created.
-     * @return In case all modules could successful created the ResponseEntity
-     *         with status code 201 - Created but without ResponseBody. In any
-     *         failure the JsonResponseExceptionHandler is handling the
-     *         response.
+     * @return In case all modules could successful created the ResponseEntity with status code 201 - Created but without ResponseBody. In any
+     *         failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Create Software Module(s)", description = "Handles the POST request of creating new software modules. The request body must always be a list of modules. Required Permission: CREATE_REPOSITORY")
     @ApiResponses(value = {
@@ -325,11 +312,10 @@ public interface MgmtSoftwareModuleRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING, consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtSoftwareModule>> createSoftwareModules(
-            final List<MgmtSoftwareModuleRequestBodyPost> softwareModules);
+    @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<List<MgmtSoftwareModule>> createSoftwareModules(final List<MgmtSoftwareModuleRequestBodyPost> softwareModules);
 
     /**
      * Handles the PUT request of updating a software module.
@@ -364,9 +350,9 @@ public interface MgmtSoftwareModuleRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}", consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}",
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModule> updateSoftwareModule(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             final MgmtSoftwareModuleRequestBodyPut restSoftwareModule);
@@ -401,21 +387,17 @@ public interface MgmtSoftwareModuleRestApi {
     ResponseEntity<Void> deleteSoftwareModule(@PathVariable("softwareModuleId") final Long softwareModuleId);
 
     /**
-     * Gets a paged list of meta data for a software module.
+     * Gets a paged list of metadata for a software module.
      *
-     * @param softwareModuleId the ID of the software module for the meta data
-     * @param pagingOffsetParam the offset of list of meta data for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=key==abc}
-     * @return status OK if get request is successful with the paged list of
-     *         meta data
+     * @param softwareModuleId the ID of the software module for the metadata
+     * @param pagingOffsetParam the offset of list of metadata for pagination, might not be present in the rest request then default value will
+     *         be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=key==abc}
+     * @return status OK if get request is successful with the paged list of metadata
      */
-    @Operation(summary = "Return meta data for a Software Module", description = "Get a paged list of meta data for a software module. Required Permission: READ_REPOSITORY")
+    @Operation(summary = "Return metadata for a Software Module", description = "Get a paged list of metadata for a software module. Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -436,9 +418,8 @@ public interface MgmtSoftwareModuleRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
-            + "/{softwareModuleId}/metadata", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModuleMetadata>> getMetadata(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestParam(
@@ -465,14 +446,13 @@ public interface MgmtSoftwareModuleRestApi {
             String rsqlParam);
 
     /**
-     * Gets a single meta data value for a specific key of a software module.
+     * Gets a single metadata value for a specific key of a software module.
      *
-     * @param softwareModuleId the ID of the software module to get the meta data from
-     * @param metadataKey the key of the meta data entry to retrieve the value from
-     * @return status OK if get request is successful with the value of the meta
-     *         data
+     * @param softwareModuleId the ID of the software module to get the metadata from
+     * @param metadataKey the key of the metadata entry to retrieve the value from
+     * @return status OK if get request is successful with the value of the metadata
      */
-    @Operation(summary = "Return single meta data value for a specific key of a Software Module", description = "Get a single meta data value for a meta data key. Required Permission: READ_REPOSITORY")
+    @Operation(summary = "Return single metadata value for a specific key of a Software Module", description = "Get a single metadata value for a metadata key. Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -493,23 +473,21 @@ public interface MgmtSoftwareModuleRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
-            + "/{softwareModuleId}/metadata/{metadataKey}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata/{metadataKey}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleMetadata> getMetadataValue(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey);
 
     /**
-     * Updates a single meta data value of a software module.
+     * Updates a single metadata value of a software module.
      *
-     * @param softwareModuleId the ID of the software module to update the meta data entry
-     * @param metadataKey the key of the meta data to update the value
+     * @param softwareModuleId the ID of the software module to update the metadata entry
+     * @param metadataKey the key of the metadata to update the value
      * @param metadata body to update
-     * @return status OK if the update request is successful and the updated
-     *         meta data result
+     * @return status OK if the update request is successful and the updated metadata result
      */
-    @Operation(summary = "Update a single meta data value of a Software Module", description = "Update a single meta data value for speficic key. Required Permission: UPDATE_REPOSITORY")
+    @Operation(summary = "Update a single metadata value of a Software Module", description = "Update a single metadata value for speficic key. Required Permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -529,21 +507,20 @@ public interface MgmtSoftwareModuleRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
-            + "/{softwareModuleId}/metadata/{metadataKey}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata/{metadataKey}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleMetadata> updateMetadata(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey, final MgmtSoftwareModuleMetadataBodyPut metadata);
 
     /**
-     * Deletes a single meta data entry from the software module.
+     * Deletes a single metadata entry from the software module.
      *
-     * @param softwareModuleId the ID of the software module to delete the meta data entry
-     * @param metadataKey the key of the meta data to delete
+     * @param softwareModuleId the ID of the software module to delete the metadata entry
+     * @param metadataKey the key of the metadata to delete
      * @return status OK if the delete request is successful
      */
-    @Operation(summary = "Delete single meta data entry from the software module", description = "Delete a single meta data. Required Permission: UPDATE_REPOSITORY")
+    @Operation(summary = "Delete single metadata entry from the software module", description = "Delete a single metadata. Required Permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -563,20 +540,19 @@ public interface MgmtSoftwareModuleRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
-            + "/{softwareModuleId}/metadata/{metadataKey}")
-    ResponseEntity<Void> deleteMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
+    @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata/{metadataKey}")
+    ResponseEntity<Void> deleteMetadata(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey);
 
     /**
-     * Creates a list of meta data for a specific software module.
+     * Creates a list of metadata for a specific software module.
      *
-     * @param softwareModuleId the ID of the distribution set to create meta data for
-     * @param metadataRest the list of meta data entries to create
-     * @return status created if post request is successful with the value of
-     *         the created meta data
+     * @param softwareModuleId the ID of the distribution set to create metadata for
+     * @param metadataRest the list of metadata entries to create
+     * @return status created if post request is successful with the value of the created metadata
      */
-    @Operation(summary = "Creates a list of meta data for a specific Software Module", description = "Create a list of meta data entries Required Permission: UPDATE_REPOSITORY")
+    @Operation(summary = "Creates a list of metadata for a specific Software Module", description = "Create a list of metadata entries Required Permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created"),
             @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -602,12 +578,10 @@ public interface MgmtSoftwareModuleRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
-            + "/{softwareModuleId}/metadata", consumes = { MediaType.APPLICATION_JSON_VALUE,
-            MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata",
+            consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleMetadata>> createMetadata(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             final List<MgmtSoftwareModuleMetadata> metadataRest);
-
 }

@@ -158,8 +158,8 @@ public interface DdiRootControllerRestApi {
                     " and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING
-            + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
+    @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING +
+            "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
     ResponseEntity<InputStream> downloadArtifact(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
@@ -315,7 +315,8 @@ public interface DdiRootControllerRestApi {
     })
     @PostMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION +
             "/{actionId}/" + DdiRestConstants.FEEDBACK, consumes = { MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
-    ResponseEntity<Void> postDeploymentBaseActionFeedback(@Valid final DdiActionFeedback feedback,
+    ResponseEntity<Void> postDeploymentBaseActionFeedback(
+            @Valid final DdiActionFeedback feedback,
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") @NotNull final Long actionId);
 
@@ -488,7 +489,8 @@ public interface DdiRootControllerRestApi {
     })
     @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.INSTALLED_BASE_ACTION + "/{actionId}",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
-    ResponseEntity<DdiDeploymentBase> getControllerInstalledAction(@PathVariable("tenant") final String tenant,
+    ResponseEntity<DdiDeploymentBase> getControllerInstalledAction(
+            @PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotNull final Long actionId,
             @RequestParam(
@@ -496,10 +498,8 @@ public interface DdiRootControllerRestApi {
                     defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount);
 
     /**
-     * Returns the confirmation base with the current auto-confirmation state
-     * for a given controllerId and toggle links. In case there are actions
-     * present where the confirmation is required, a reference to it will be
-     * returned as well.
+     * Returns the confirmation base with the current auto-confirmation state for a given controllerId and toggle links. In case there are
+     * actions present where the confirmation is required, a reference to it will be returned as well.
      *
      * @param tenant the controllerId is corresponding too
      * @param controllerId to check the state for
@@ -582,9 +582,8 @@ public interface DdiRootControllerRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
-            + DdiRestConstants.CONFIRMATION_BASE + "/{actionId}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
+    @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/{actionId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<DdiConfirmationBaseAction> getConfirmationBaseAction(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotNull final Long actionId,
@@ -635,7 +634,8 @@ public interface DdiRootControllerRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/{actionId}/" +
-            DdiRestConstants.FEEDBACK, consumes = { MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
+            DdiRestConstants.FEEDBACK,
+            consumes = { MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> postConfirmationActionFeedback(
             @Valid final DdiConfirmationFeedback feedback,
             @PathVariable("tenant") final String tenant,
@@ -772,7 +772,7 @@ public interface DdiRootControllerRestApi {
     })
     @PutMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.INSTALLED_BASE_ACTION,
             consumes = { MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
-    ResponseEntity<Void> setAsssignedOfflineVersion(
+    ResponseEntity<Void> setAssignedOfflineVersion(
             @Valid DdiAssignedVersion ddiAssignedVersion,
             @PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") final String controllerId);

@@ -44,18 +44,13 @@ public interface MgmtDistributionSetTypeRestApi {
     /**
      * Handles the GET request of retrieving all DistributionSetTypes.
      *
-     * @param pagingOffsetParam the offset of list of modules for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=name==abc}
-     * @return a list of all DistributionSetType for a defined or default page
-     *         request with status OK. The response is always paged. In any
-     *         failure the JsonResponseExceptionHandler is handling the
-     *         response.
+     * @param pagingOffsetParam the offset of list of modules for pagination, might not be present in the rest request then default value will
+     *         be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
+     * @return a list of all DistributionSetType for a defined or default page request with status OK. The response is always paged. In any
+     *         failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all Distribution Set Types", description = "Handles the GET request of " +
             "retrieving all distribution set types. Required Permission: READ_REPOSITORY")
@@ -77,8 +72,8 @@ public interface MgmtDistributionSetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING, produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING,
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtDistributionSetType>> getDistributionSetTypes(
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -104,8 +99,7 @@ public interface MgmtDistributionSetTypeRestApi {
             String rsqlParam);
 
     /**
-     * Handles the GET request of retrieving a single DistributionSetType
-     * within.
+     * Handles the GET request of retrieving a single DistributionSetType within.
      *
      * @param distributionSetTypeId the ID of the DS type to retrieve
      * @return a single DS type with status OK.
@@ -132,8 +126,8 @@ public interface MgmtDistributionSetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
-            + "/{distributionSetTypeId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetType> getDistributionSetType(
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId);
 
@@ -203,23 +197,19 @@ public interface MgmtDistributionSetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
-            + "/{distributionSetTypeId}", consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}",
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSetType> updateDistributionSetType(
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId,
             MgmtDistributionSetTypeRequestBodyPut restDistributionSetType);
 
     /**
-     * Handles the POST request of creating new DistributionSetTypes. The
-     * request body must always be a list of types.
+     * Handles the POST request of creating new DistributionSetTypes. The request body must always be a list of types.
      *
      * @param distributionSetTypes the modules to be created.
-     * @return In case all modules could successful created the ResponseEntity
-     *         with status code 201 - Created but without ResponseBody. In any
-     *         failure the JsonResponseExceptionHandler is handling the
-     *         response.
+     * @return In case all modules could successful created the ResponseEntity with status code 201 - Created but without ResponseBody. In any
+     *         failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Create new distribution set types", description = "Handles the POST request for creating " +
             "new distribution set types. The request body must always be a list of types. " +
@@ -248,15 +238,14 @@ public interface MgmtDistributionSetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING, consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSetType>> createDistributionSetTypes(
             List<MgmtDistributionSetTypeRequestBodyPost> distributionSetTypes);
 
     /**
-     * Handles the GET request of retrieving the list of mandatory software
-     * module types in that distribution set type.
+     * Handles the GET request of retrieving the list of mandatory software module types in that distribution set type.
      *
      * @param distributionSetTypeId of the DistributionSetType.
      * @return Unpaged list of module types and OK in case of success.
@@ -284,9 +273,9 @@ public interface MgmtDistributionSetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
-            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/" +
+            MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES,
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleType>> getMandatoryModules(
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId);
 
@@ -321,16 +310,15 @@ public interface MgmtDistributionSetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
-            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES
-            + "/{softwareModuleTypeId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/" +
+            MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES + "/{softwareModuleTypeId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> getMandatoryModule(
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
     /**
-     * Handles the GET request of retrieving the single optional software module
-     * type in that distribution set type.
+     * Handles the GET request of retrieving the single optional software module type in that distribution set type.
      *
      * @param distributionSetTypeId of the DistributionSetType.
      * @param softwareModuleTypeId of SoftwareModuleType.
@@ -359,16 +347,15 @@ public interface MgmtDistributionSetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
-            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES
-            + "/{softwareModuleTypeId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/" +
+            MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES + "/{softwareModuleTypeId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> getOptionalModule(
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
     /**
-     * Handles the GET request of retrieving the list of optional software
-     * module types in that distribution set type.
+     * Handles the GET request of retrieving the list of optional software module types in that distribution set type.
      *
      * @param distributionSetTypeId of the DistributionSetType.
      * @return Unpaged list of module types and OK in case of success.
@@ -396,15 +383,14 @@ public interface MgmtDistributionSetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
-            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/" +
+            MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES,
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleType>> getOptionalModules(
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId);
 
     /**
-     * Handles DELETE request for removing a mandatory module from the
-     * DistributionSetType.
+     * Handles DELETE request for removing a mandatory module from the DistributionSetType.
      *
      * @param distributionSetTypeId of the DistributionSetType.
      * @param softwareModuleTypeId of the SoftwareModuleType to remove
@@ -433,14 +419,13 @@ public interface MgmtDistributionSetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
-            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES + "/{softwareModuleTypeId}")
+    @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/" +
+            MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES + "/{softwareModuleTypeId}")
     ResponseEntity<Void> removeMandatoryModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
     /**
-     * Handles DELETE request for removing an optional module from the
-     * DistributionSetType.
+     * Handles DELETE request for removing an optional module from the DistributionSetType.
      *
      * @param distributionSetTypeId of the DistributionSetType.
      * @param softwareModuleTypeId of the SoftwareModuleType to remove
@@ -470,14 +455,13 @@ public interface MgmtDistributionSetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
-            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES + "/{softwareModuleTypeId}")
+    @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/" +
+            MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES + "/{softwareModuleTypeId}")
     ResponseEntity<Void> removeOptionalModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId,
             @PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
     /**
-     * Handles the POST request for adding a mandatory software module type to a
-     * distribution set type.
+     * Handles the POST request for adding a mandatory software module type to a distribution set type.
      *
      * @param distributionSetTypeId of the DistributionSetType.
      * @param smtId of the SoftwareModuleType to add
@@ -513,15 +497,13 @@ public interface MgmtDistributionSetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
-            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES, consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> addMandatoryModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId,
-            MgmtId smtId);
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/" +
+            MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<Void> addMandatoryModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId, MgmtId smtId);
 
     /**
-     * Handles the POST request for adding an optional software module type to a
-     * distribution set type.
+     * Handles the POST request for adding an optional software module type to a distribution set type.
      *
      * @param distributionSetTypeId of the DistributionSetType.
      * @param smtId of the SoftwareModuleType to add
@@ -557,9 +539,8 @@ public interface MgmtDistributionSetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/"
-            + MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES, consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> addOptionalModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId,
-            MgmtId smtId);
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}/" +
+            MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULE_TYPES,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<Void> addOptionalModule(@PathVariable("distributionSetTypeId") Long distributionSetTypeId, MgmtId smtId);
 }

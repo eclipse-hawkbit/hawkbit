@@ -44,17 +44,12 @@ public interface MgmtTargetTypeRestApi {
     /**
      * Handles the GET request of retrieving all TargetTypes.
      *
-     * @param pagingOffsetParam the offset of list of target types for pagination, might not
-     *         be present in the rest request then default value will be
-     *         applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=name==abc}
-     * @return a list of all TargetTypes for a defined or default page request
-     *         with status OK. The response is always paged. In any failure the
+     * @param pagingOffsetParam the offset of list of target types for pagination, might not be present in the rest request then default value
+     *         will be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
+     * @return a list of all TargetTypes for a defined or default page request with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all target types", description = "Handles the GET request of retrieving all target types.")
@@ -76,8 +71,8 @@ public interface MgmtTargetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING,
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTargetType>> getTargetTypes(
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -130,8 +125,8 @@ public interface MgmtTargetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetType> getTargetType(@PathVariable("targetTypeId") Long targetTypeId);
 
     /**
@@ -200,21 +195,19 @@ public interface MgmtTargetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}", consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTargetType> updateTargetType(@PathVariable("targetTypeId") Long targetTypeId,
+    @PutMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}",
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtTargetType> updateTargetType(
+            @PathVariable("targetTypeId") Long targetTypeId,
             MgmtTargetTypeRequestBodyPut restTargetType);
 
     /**
-     * Handles the POST request of creating new Target Types. The request body
-     * must always be a list of types.
+     * Handles the POST request of creating new Target Types. The request body must always be a list of types.
      *
      * @param targetTypes the target types to be created.
-     * @return In case all target types could be successfully created the
-     *         ResponseEntity with status code 201 - Created but without
-     *         ResponseBody. In any failure the JsonResponseExceptionHandler is
-     *         handling the response.
+     * @return In case all target types could be successfully created the ResponseEntity with status code 201 - Created but without
+     *         ResponseBody. In any failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Create target types", description = "Handles the POST request for creating new target " +
             "types. The request body must always be a list of types. Required Permission: CREATE_TARGET")
@@ -244,14 +237,13 @@ public interface MgmtTargetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING, consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTargetType>> createTargetTypes(List<MgmtTargetTypeRequestBodyPost> targetTypes);
 
     /**
-     * Handles the GET request of retrieving the list of compatible distribution
-     * set types in that target type.
+     * Handles the GET request of retrieving the list of compatible distribution set types in that target type.
      *
      * @param targetTypeId of the TargetType.
      * @return Unpaged list of distribution set types and OK in case of success.
@@ -279,15 +271,12 @@ public interface MgmtTargetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/"
-            + MgmtRestConstants.TARGETTYPE_V1_DS_TYPES, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtDistributionSetType>> getCompatibleDistributionSets(
-            @PathVariable("targetTypeId") Long targetTypeId);
+    @GetMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/" + MgmtRestConstants.TARGETTYPE_V1_DS_TYPES,
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<List<MgmtDistributionSetType>> getCompatibleDistributionSets(@PathVariable("targetTypeId") Long targetTypeId);
 
     /**
-     * Handles DELETE request for removing the compatibility of a distribution
-     * set type from the target type.
+     * Handles DELETE request for removing the compatibility of a distribution set type from the target type.
      *
      * @param targetTypeId of the TargetType.
      * @param distributionSetTypeId of the DistributionSetType.
@@ -316,14 +305,14 @@ public interface MgmtTargetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @DeleteMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/"
-            + MgmtRestConstants.TARGETTYPE_V1_DS_TYPES + "/{distributionSetTypeId}")
-    ResponseEntity<Void> removeCompatibleDistributionSet(@PathVariable("targetTypeId") Long targetTypeId,
+    @DeleteMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/" +
+            MgmtRestConstants.TARGETTYPE_V1_DS_TYPES + "/{distributionSetTypeId}")
+    ResponseEntity<Void> removeCompatibleDistributionSet(
+            @PathVariable("targetTypeId") Long targetTypeId,
             @PathVariable("distributionSetTypeId") Long distributionSetTypeId);
 
     /**
-     * Handles the POST request for adding the compatibility of a distribution
-     * set type to a target type.
+     * Handles the POST request for adding the compatibility of a distribution set type to a target type.
      *
      * @param targetTypeId of the TargetType.
      * @param distributionSetTypeIds of the DistributionSetTypes as a List.
@@ -358,9 +347,8 @@ public interface MgmtTargetTypeRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/"
-            + MgmtRestConstants.TARGETTYPE_V1_DS_TYPES, consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}/" + MgmtRestConstants.TARGETTYPE_V1_DS_TYPES,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> addCompatibleDistributionSets(@PathVariable("targetTypeId") final Long targetTypeId,
             final List<MgmtDistributionSetTypeAssignment> distributionSetTypeIds);
 }

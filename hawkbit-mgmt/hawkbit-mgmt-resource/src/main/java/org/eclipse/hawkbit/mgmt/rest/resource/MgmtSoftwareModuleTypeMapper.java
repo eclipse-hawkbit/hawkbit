@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
@@ -26,15 +28,10 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
 
 /**
- * A mapper which maps repository model to RESTful model representation and
- * back.
+ * A mapper which maps repository model to RESTful model representation and back.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 final class MgmtSoftwareModuleTypeMapper {
-
-    // private constructor, utility class
-    private MgmtSoftwareModuleTypeMapper() {
-
-    }
 
     static List<SoftwareModuleTypeCreate> smFromRequest(final EntityFactory entityFactory,
             final Collection<MgmtSoftwareModuleTypeRequestBodyPost> smTypesRest) {
@@ -50,8 +47,7 @@ final class MgmtSoftwareModuleTypeMapper {
             return Collections.emptyList();
         }
 
-        return new ResponseList<>(
-                types.stream().map(MgmtSoftwareModuleTypeMapper::toResponse).collect(Collectors.toList()));
+        return new ResponseList<>(types.stream().map(MgmtSoftwareModuleTypeMapper::toResponse).collect(Collectors.toList()));
     }
 
     static MgmtSoftwareModuleType toResponse(final SoftwareModuleType type) {
@@ -73,5 +69,4 @@ final class MgmtSoftwareModuleTypeMapper {
                 .description(smsRest.getDescription()).colour(smsRest.getColour())
                 .maxAssignments(smsRest.getMaxAssignments());
     }
-
 }

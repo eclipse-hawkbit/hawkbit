@@ -68,23 +68,19 @@ public interface MgmtTargetFilterQueryRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{filterId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{filterId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetFilterQuery> getFilter(@PathVariable("filterId") Long filterId);
 
     /**
      * Handles the GET request of retrieving all filters.
      *
-     * @param pagingOffsetParam the offset of list of targets for pagination, might not be
-     *         present in the rest request then default value will be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the
-     *         rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax
-     *         {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax
-     *         {@code q=name==abc}
-     * @return a list of all targets for a defined or default page request with
-     *         status OK. The response is always paged. In any failure the
+     * @param pagingOffsetParam the offset of list of targets for pagination, might not be present in the rest request then default value will
+     *         be applied
+     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
+     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
+     * @return a list of all targets for a defined or default page reque status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Return all target filter queries", description = "Handles the GET request of retrieving all target filter queries. Required permission: READ_TARGET")
@@ -106,8 +102,8 @@ public interface MgmtTargetFilterQueryRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING,
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTargetFilterQuery>> getFilters(
             @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
@@ -134,14 +130,11 @@ public interface MgmtTargetFilterQueryRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT) String representationModeParam);
 
     /**
-     * Handles the POST request of creating new target filters. The request body
-     * must always be a list of target filters.
+     * Handles the POST request of creating new target filters. The request body must always be a list of target filters.
      *
      * @param filter the filters to be created.
-     * @return In case all filters were successfully created the ResponseEntity
-     *         with status code 201 with a list of successfully created entities
-     *         is returned. In any failure the JsonResponseExceptionHandler is
-     *         handling the response.
+     * @return In case all filters were successfully created the ResponseEntity with status code 201 with a list of successfully created entities
+     *         is returned. In any failure the JsonResponseExceptionHandler is handling the response.
      */
     @Operation(summary = "Create target filter", description = "Handles the POST request to create a new target filter query. Required permission: CREATE_TARGET")
     @ApiResponses(value = {
@@ -168,22 +161,19 @@ public interface MgmtTargetFilterQueryRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING, consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetFilterQuery> createFilter(@RequestBody MgmtTargetFilterQueryRequestBody filter);
 
     /**
-     * Handles the PUT request of updating a target filter. The ID is within the
-     * URL path of the request. A given ID in the request body is ignored. It's
-     * not possible to set fields to {@code null} values.
+     * Handles the PUT request of updating a target filter. The ID is within the URL path of the request. A given ID in the request body is
+     * ignored. It's not possible to set fields to {@code null} values.
      *
      * @param filterId the path parameter which contains the ID of the target filter
-     * @param targetFilterRest the request body which contains the fields which should be
-     *         updated, fields which are not given are ignored for the
-     *         update.
-     * @return the updated target filter response which contains all fields
-     *         including fields which have not been updated
+     * @param targetFilterRest the request body which contains the fields which should be updated, fields which are not given are ignored for
+     *         the update.
+     * @return the updated target filter response which contains all fields including fields which have not been updated
      */
     @Operation(summary = "Updates target filter query by id", description = "Handles the PUT request of updating a target filter query. Required permission: UPDATE_TARGET")
     @ApiResponses(value = {
@@ -214,15 +204,15 @@ public interface MgmtTargetFilterQueryRestApi {
     @PutMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{filterId}", consumes = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTargetFilterQuery> updateFilter(@PathVariable("filterId") Long filterId,
+    ResponseEntity<MgmtTargetFilterQuery> updateFilter(
+            @PathVariable("filterId") Long filterId,
             @RequestBody MgmtTargetFilterQueryRequestBody targetFilterRest);
 
     /**
      * Handles the DELETE request of deleting a target filter.
      *
      * @param filterId the ID of the target filter to be deleted
-     * @return If the given controllerId could exists and could be deleted Http
-     *         OK. In any failure the JsonResponseExceptionHandler is handling
+     * @return If the given controllerId could exists and could be deleted Http OK. In any failure the JsonResponseExceptionHandler is handling
      *         the response.
      */
     @Operation(summary = "Delete target filter by id", description = "Handles the DELETE request of deleting a target filter query. Required permission: DELETE_TARGET")
@@ -245,17 +235,15 @@ public interface MgmtTargetFilterQueryRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @DeleteMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{filterId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @DeleteMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{filterId}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> deleteFilter(@PathVariable("filterId") Long filterId);
 
     /**
-     * Handles the GET request of retrieving the distribution set for auto
-     * assignment of an specific target filter.
+     * Handles the GET request of retrieving the distribution set for auto assignment of an specific target filter.
      *
      * @param filterId the ID of the target to retrieve the assigned distribution
-     * @return the assigned distribution set with status OK, if none is assigned
-     *         than {@code null} content (e.g. "{}")
+     * @return the assigned distribution set with status OK, if none is assigned than {@code null} content (e.g. "{}")
      */
     @Operation(summary = "Return distribution set for auto assignment of a specific target filter", description = "Handles the GET request of retrieving the auto assign distribution set. Required permission: READ_TARGET")
     @ApiResponses(value = {
@@ -276,17 +264,15 @@ public interface MgmtTargetFilterQueryRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{filterId}/autoAssignDS", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{filterId}/autoAssignDS",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(@PathVariable("filterId") Long filterId);
 
     /**
-     * Handles the POST request for changing distribution set for auto
-     * assignment of a target filter.
+     * Handles the POST request for changing distribution set for auto assignment of a target filter.
      *
      * @param filterId of the target to change
-     * @param dsIdWithActionType id of the distribution set and the action type for auto
-     *         assignment
+     * @param dsIdWithActionType id of the distribution set and the action type for auto assignment
      * @return http status
      */
     @Operation(summary = "Set auto assignment of distribution set for a target filter query",
@@ -318,15 +304,15 @@ public interface MgmtTargetFilterQueryRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PostMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{filterId}/autoAssignDS", consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(@PathVariable("filterId") Long filterId,
+    @PostMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{filterId}/autoAssignDS",
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
+            @PathVariable("filterId") Long filterId,
             @RequestBody MgmtDistributionSetAutoAssignment dsIdWithActionType);
 
     /**
-     * Handles the DELETE request for removing the distribution set for auto
-     * assignment of a target filter.
+     * Handles the DELETE request for removing the distribution set for auto assignment of a target filter.
      *
      * @param filterId of the target to change
      * @return http status

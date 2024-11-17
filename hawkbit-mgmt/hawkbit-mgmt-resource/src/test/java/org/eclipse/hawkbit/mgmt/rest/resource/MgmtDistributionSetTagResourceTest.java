@@ -48,7 +48,6 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
@@ -57,8 +56,7 @@ import org.springframework.test.web.servlet.ResultActions;
 @Story("Distribution Set Tag Resource")
 public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegrationTest {
 
-    private static final String DISTRIBUTIONSETTAGS_ROOT = "http://localhost"
-            + MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/";
+    private static final String DISTRIBUTIONSETTAGS_ROOT = "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/";
     private static final Random RND = new Random();
 
     @Test
@@ -70,7 +68,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         final DistributionSetTag unassigned = tags.get(1);
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(applyBaseEntityMatcherOnPagedResult(assigned))
                 .andExpect(applyBaseEntityMatcherOnPagedResult(unassigned))
@@ -108,7 +107,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING)
                         .queryParam(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "distributionset.id==" + distributionSet1.getId())
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(applyBaseEntityMatcherOnPagedResult(tag1))
                 .andExpect(applyBaseEntityMatcherOnPagedResult(tag2))
@@ -121,7 +121,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING)
                         .queryParam(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "distributionset.id==" + distributionSet2.getId())
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(applyBaseEntityMatcherOnPagedResult(tag1))
                 .andExpect(applySelfLinkMatcherOnPagedResult(tag1, DISTRIBUTIONSETTAGS_ROOT + tag1.getId()))
@@ -148,7 +149,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                         + "?" + MgmtRestConstants.REQUEST_PARAMETER_SEARCH +
                         "=distributionset.id==" + distributionSet1.getId() + ";description==" + tag1.getDescription())
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(applyBaseEntityMatcherOnPagedResult(tag1))
                 .andExpect(applySelfLinkMatcherOnPagedResult(tag1, DISTRIBUTIONSETTAGS_ROOT + tag1.getId()))
@@ -165,7 +167,9 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         final DistributionSetTag assigned = tags.get(0);
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + assigned.getId())
-                        .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(applyTagMatcherOnSingleResult(assigned))
                 .andExpect(applySelfLinkMatcherOnSingleResult(DISTRIBUTIONSETTAGS_ROOT + assigned.getId()))
@@ -176,7 +180,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     @Test
     @Description("Verifies that created DS tags are stored in the repository as send to the API.")
     @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
-    public void createDistributionSetTags() throws JSONException, Exception {
+    public void createDistributionSetTags() throws Exception {
         final Tag tagOne = entityFactory.tag().create().colour("testcol1").description("its a test1").name("thetest1")
                 .build();
         final Tag tagTwo = entityFactory.tag().create().colour("testcol2").description("its a test2").name("thetest2")
@@ -186,7 +190,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .perform(post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING)
                         .content(JsonBuilder.tags(Arrays.asList(tagOne, tagTwo)))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
 
         final Tag createdOne = distributionSetTagManagement.findByRsql(PAGE, "name==thetest1").getContent().get(0);
@@ -198,7 +203,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         assertThat(createdTwo.getDescription()).isEqualTo(tagTwo.getDescription());
         assertThat(createdTwo.getColour()).isEqualTo(tagTwo.getColour());
 
-        result.andExpect(applyTagMatcherOnArrayResult(createdOne)).andExpect(applyTagMatcherOnArrayResult(createdTwo));
+        result.andExpect(applyTagMatcherOnArrayResult(createdOne))
+                .andExpect(applyTagMatcherOnArrayResult(createdTwo));
     }
 
     @Test
@@ -216,7 +222,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .perform(put(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + original.getId())
                         .content(JsonBuilder.tag(update)).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
 
         final Tag updated = distributionSetTagManagement.findByRsql(PAGE, "name==updatedName").getContent().get(0);
@@ -224,7 +231,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         assertThat(updated.getDescription()).isEqualTo(update.getDescription());
         assertThat(updated.getColour()).isEqualTo(update.getColour());
 
-        result.andExpect(applyTagMatcherOnArrayResult(updated)).andExpect(applyTagMatcherOnArrayResult(updated));
+        result.andExpect(applyTagMatcherOnArrayResult(updated))
+                .andExpect(applyTagMatcherOnArrayResult(updated));
     }
 
     @Test
@@ -236,7 +244,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         final DistributionSetTag original = tags.get(0);
 
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + original.getId()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
 
         assertThat(distributionSetTagManagement.get(original.getId())).isNotPresent();
     }
@@ -253,7 +262,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned"))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(setsAssigned)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(setsAssigned)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(setsAssigned)));
@@ -273,7 +283,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(setsAssigned)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(limitSize)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(limitSize)));
@@ -296,7 +307,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(setsAssigned)))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(setsAssigned)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(expectedSize)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(expectedSize)));
@@ -346,7 +358,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
         mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
                         set.getId()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
@@ -367,7 +380,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                         put(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                                 .content(JsonBuilder.toArray(sets.stream().map(DistributionSet::getId).collect(Collectors.toList())))
                                 .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
@@ -390,7 +404,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
                         unassigned.getId()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
@@ -415,7 +430,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .content(JsonBuilder.toArray(List.of(unassigned0.getId(), unassigned1.getId())))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
@@ -478,7 +494,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                                 .content(JsonBuilder
                                         .ids(sets.stream().map(DistributionSet::getId).collect(Collectors.toList())))
                                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
@@ -498,7 +515,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                         + "/assigned/toggleTagAssignment").content(
                                 JsonBuilder.ids(sets.stream().map(DistributionSet::getId).collect(Collectors.toList())))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
     }
 }

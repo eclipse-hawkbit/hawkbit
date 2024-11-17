@@ -36,11 +36,9 @@ import org.springframework.test.context.ContextConfiguration;
 
 @Slf4j
 @RabbitAvailable
-@ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class,
-        TestConfiguration.class })
+@ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class, TestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
-// Dirty context is necessary to create a new vhost and recreate all necessary
-// beans after every test class.
+// Dirty context is necessary to create a new vhost and recreate all necessary beans after every test class.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTest {
 
@@ -48,7 +46,6 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
 
     @Autowired
     private ConnectionFactory connectionFactory;
-
     @Autowired
     private RabbitAdmin rabbitAdmin;
 
@@ -109,5 +106,4 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
         template.setExchange(getExchange());
         return template;
     }
-
 }

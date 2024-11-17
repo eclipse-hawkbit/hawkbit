@@ -39,8 +39,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface MgmtTenantManagementRestApi {
 
     /**
-     * Handles the GET request for receiving all tenant specific configuration
-     * values.
+     * Handles the GET request for receiving all tenant specific configuration values.
      *
      * @return a map of all configuration values.
      */
@@ -64,17 +63,15 @@ public interface MgmtTenantManagementRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Map<String, MgmtSystemTenantConfigurationValue>> getTenantConfiguration();
 
     /**
-     * Handles the DELETE request of deleting a tenant specific configuration
-     * value.
+     * Handles the DELETE request of deleting a tenant specific configuration value.
      *
      * @param keyName the Name of the configuration key
-     * @return if the given configuration value exists and could be deleted HTTP
-     *         OK. In any failure the JsonResponseExceptionHandler is handling
+     * @return if the given configuration value exists and could be deleted HTTP OK. In any failure the JsonResponseExceptionHandler is handling
      *         the response.
      */
     @Operation(summary = "Delete a tenant specific configuration value", description = "The DELETE request removes a " +
@@ -98,17 +95,15 @@ public interface MgmtTenantManagementRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @DeleteMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @DeleteMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> deleteTenantConfigurationValue(@PathVariable("keyName") String keyName);
 
     /**
-     * Handles the GET request of receiving a tenant specific configuration
-     * value.
+     * Handles the GET request of receiving a tenant specific configuration value.
      *
      * @param keyName the name of the configuration key
-     * @return if the given configuration value exists and could be get HTTP OK.
-     *         In any failure the JsonResponseExceptionHandler is handling the
+     * @return if the given configuration value exists and could be get HTTP OK. In any failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
     @Operation(summary = "Return a tenant specific configuration value", description = "The GET request returns the " +
@@ -134,19 +129,16 @@ public interface MgmtTenantManagementRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtSystemTenantConfigurationValue> getTenantConfigurationValue(
-            @PathVariable("keyName") String keyName);
+    @GetMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtSystemTenantConfigurationValue> getTenantConfigurationValue(@PathVariable("keyName") String keyName);
 
     /**
-     * Handles the PUT request for updating a tenant specific configuration
-     * value.
+     * Handles the PUT request for updating a tenant specific configuration value.
      *
      * @param keyName the name of the configuration key
      * @param configurationValueRest the new value for the configuration
-     * @return if the given configuration value exists and could be get HTTP OK.
-     *         In any failure the JsonResponseExceptionHandler is handling the
+     * @return if the given configuration value exists and could be get HTTP OK. In any failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
     @Operation(summary = "Update a tenant specific configuration value.", description = "The PUT request changes a " +
@@ -178,9 +170,9 @@ public interface MgmtTenantManagementRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}",
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSystemTenantConfigurationValue> updateTenantConfigurationValue(
             @PathVariable("keyName") String keyName, MgmtSystemTenantConfigurationValueRequest configurationValueRest);
 
@@ -188,9 +180,8 @@ public interface MgmtTenantManagementRestApi {
      * Handles the PUT request for updating a batch of tenant specific configurations
      *
      * @param configurationValueMap a Map of name - value pairs for the configurations
-     * @return if the given configurations values exists and could be get HTTP OK.
-     *         In any failure the JsonResponseExceptionHandler is handling the
-     *         response.
+     * @return if the given configurations values exists and could be get HTTP OK. In any failure the JsonResponseExceptionHandler is handling
+     *         the response.
      */
     @Operation(summary = "Batch update of tenant configuration.", description = "The PUT request updates the whole " +
             "configuration for the tenant. Required Permission: TENANT_CONFIGURATION")
@@ -218,9 +209,9 @@ public interface MgmtTenantManagementRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs", consumes = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs",
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSystemTenantConfigurationValue>> updateTenantConfiguration(
             @RequestBody Map<String, Serializable> configurationValueMap);
 }

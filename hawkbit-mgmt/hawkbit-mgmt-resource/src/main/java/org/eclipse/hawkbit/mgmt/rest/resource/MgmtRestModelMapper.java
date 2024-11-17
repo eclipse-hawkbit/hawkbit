@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtBaseEntity;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
@@ -21,19 +23,13 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.Type;
 
 /**
- * A mapper which maps repository model to RESTful model representation and
- * back.
+ * A mapper which maps repository model to RESTful model representation and back.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtRestModelMapper {
 
-    // private constructor, utility class
-    private MgmtRestModelMapper() {
-
-    }
-
     /**
-     * Convert the given {@link MgmtActionType} into a corresponding repository
-     * {@link ActionType}.
+     * Convert the given {@link MgmtActionType} into a corresponding repository {@link ActionType}.
      *
      * @param actionTypeRest the REST representation of the action type
      * @return <null> or the repository action type
@@ -43,23 +39,16 @@ public final class MgmtRestModelMapper {
             return null;
         }
 
-        switch (actionTypeRest) {
-            case SOFT:
-                return ActionType.SOFT;
-            case FORCED:
-                return ActionType.FORCED;
-            case TIMEFORCED:
-                return ActionType.TIMEFORCED;
-            case DOWNLOAD_ONLY:
-                return ActionType.DOWNLOAD_ONLY;
-            default:
-                throw new IllegalStateException("Action Type is not supported");
-        }
+        return switch (actionTypeRest) {
+            case SOFT -> ActionType.SOFT;
+            case FORCED -> ActionType.FORCED;
+            case TIMEFORCED -> ActionType.TIMEFORCED;
+            case DOWNLOAD_ONLY -> ActionType.DOWNLOAD_ONLY;
+        };
     }
 
     /**
-     * Converts the given repository {@link ActionType} into a corresponding
-     * {@link MgmtActionType}.
+     * Converts the given repository {@link ActionType} into a corresponding {@link MgmtActionType}.
      *
      * @param actionType the repository representation of the action type
      * @return <null> or the REST action type
@@ -69,23 +58,16 @@ public final class MgmtRestModelMapper {
             return null;
         }
 
-        switch (actionType) {
-            case SOFT:
-                return MgmtActionType.SOFT;
-            case FORCED:
-                return MgmtActionType.FORCED;
-            case TIMEFORCED:
-                return MgmtActionType.TIMEFORCED;
-            case DOWNLOAD_ONLY:
-                return MgmtActionType.DOWNLOAD_ONLY;
-            default:
-                throw new IllegalStateException("Action Type is not supported");
-        }
+        return switch (actionType) {
+            case SOFT -> MgmtActionType.SOFT;
+            case FORCED -> MgmtActionType.FORCED;
+            case TIMEFORCED -> MgmtActionType.TIMEFORCED;
+            case DOWNLOAD_ONLY -> MgmtActionType.DOWNLOAD_ONLY;
+        };
     }
 
     /**
-     * Converts the given repository {@link CancelationType} into a
-     * corresponding {@link MgmtCancelationType}.
+     * Converts the given repository {@link CancelationType} into a corresponding {@link MgmtCancelationType}.
      *
      * @param cancelationType the repository representation of the cancellation type
      * @return <null> or the REST cancellation type
@@ -95,16 +77,11 @@ public final class MgmtRestModelMapper {
             return null;
         }
 
-        switch (cancelationType) {
-            case SOFT:
-                return CancelationType.SOFT;
-            case FORCE:
-                return CancelationType.FORCE;
-            case NONE:
-                return CancelationType.NONE;
-            default:
-                throw new IllegalStateException("Action Cancelation Type is not supported");
-        }
+        return switch (cancelationType) {
+            case SOFT -> CancelationType.SOFT;
+            case FORCE -> CancelationType.FORCE;
+            case NONE -> CancelationType.NONE;
+        };
     }
 
     static void mapBaseToBase(final MgmtBaseEntity response, final TenantAwareBaseEntity base) {

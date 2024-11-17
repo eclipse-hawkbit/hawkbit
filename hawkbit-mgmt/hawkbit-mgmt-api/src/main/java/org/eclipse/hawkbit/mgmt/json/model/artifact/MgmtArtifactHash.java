@@ -28,9 +28,11 @@ public class MgmtArtifactHash {
     @JsonProperty
     @Schema(description = "SHA1 hash of the artifact", example = "2d86c2a659e364e9abba49ea6ffcd53dd5559f05")
     private String sha1;
+
     @JsonProperty
     @Schema(description = "MD5 hash of the artifact.", example = "0d1b08c34858921bc7c662b228acb7ba")
     private String md5;
+
     @JsonProperty
     @Schema(description = "SHA256 hash of the artifact", example = "a03b221c6c6eae7122ca51695d456d5222e524889136394944b2f9763b483615")
     private String sha256;

@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.RestConfiguration;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
@@ -33,14 +32,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.ResultMatcher;
 
-@ContextConfiguration(classes = { MgmtApiConfiguration.class, RestConfiguration.class,
-        RepositoryApplicationConfiguration.class, TestConfiguration.class })
+@ContextConfiguration(
+        classes = { MgmtApiConfiguration.class, RestConfiguration.class, RepositoryApplicationConfiguration.class, TestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
 @TestPropertySource(locations = "classpath:/mgmt-test.properties")
 public abstract class AbstractManagementApiIntegrationTest extends AbstractRestIntegrationTest {
 
-    protected static ResultMatcher applyBaseEntityMatcherOnArrayResult(final BaseEntity entity,
-            final String arrayElement) throws Exception {
+    protected static ResultMatcher applyBaseEntityMatcherOnArrayResult(final BaseEntity entity, final String arrayElement) {
         return mvcResult -> {
             jsonPath("$." + arrayElement + ".[?(@.id==" + entity.getId() + ")].createdBy",
                     contains(entity.getCreatedBy())).match(mvcResult);
@@ -53,8 +51,7 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         };
     }
 
-    protected static ResultMatcher applyTargetEntityMatcherOnArrayResult(final Target entity, final String arrayElement)
-            throws Exception {
+    protected static ResultMatcher applyTargetEntityMatcherOnArrayResult(final Target entity, final String arrayElement) {
         return mvcResult -> {
             jsonPath("$." + arrayElement + ".[?(@.controllerId=='" + entity.getControllerId() + "')].createdBy",
                     contains(entity.getCreatedBy())).match(mvcResult);
@@ -67,57 +64,46 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         };
     }
 
-    protected static ResultMatcher applyBaseEntityMatcherOnPagedResult(final BaseEntity entity) throws Exception {
+    protected static ResultMatcher applyBaseEntityMatcherOnPagedResult(final BaseEntity entity) {
         return applyBaseEntityMatcherOnArrayResult(entity, "content");
     }
 
-    protected static ResultMatcher applyNamedEntityMatcherOnPagedResult(final NamedEntity entity) throws Exception {
+    protected static ResultMatcher applyNamedEntityMatcherOnPagedResult(final NamedEntity entity) {
         return mvcResult -> {
             applyBaseEntityMatcherOnPagedResult(entity).match(mvcResult);
             jsonPath("$.content.[?(@.id==" + entity.getId() + ")].name", contains(entity.getName())).match(mvcResult);
-            jsonPath("$.content.[?(@.id==" + entity.getId() + ")].description", contains(entity.getDescription()))
-                    .match(mvcResult);
+            jsonPath("$.content.[?(@.id==" + entity.getId() + ")].description", contains(entity.getDescription())).match(mvcResult);
         };
-
     }
 
-    protected static ResultMatcher applyNamedVersionedEntityMatcherOnPagedResult(final NamedVersionedEntity entity)
-            throws Exception {
+    protected static ResultMatcher applyNamedVersionedEntityMatcherOnPagedResult(final NamedVersionedEntity entity) {
         return mvcResult -> {
             applyNamedEntityMatcherOnPagedResult(entity).match(mvcResult);
-            jsonPath("$.content.[?(@.id==" + entity.getId() + ")].version", contains(entity.getVersion()))
-                    .match(mvcResult);
+            jsonPath("$.content.[?(@.id==" + entity.getId() + ")].version", contains(entity.getVersion())).match(mvcResult);
         };
     }
 
-    protected static ResultMatcher applyTagMatcherOnPagedResult(final Tag entity) throws Exception {
+    protected static ResultMatcher applyTagMatcherOnPagedResult(final Tag entity) {
         return mvcResult -> {
             applyNamedEntityMatcherOnPagedResult(entity).match(mvcResult);
-            jsonPath("$.content.[?(@.id==" + entity.getId() + ")].colour", contains(entity.getColour()))
-                    .match(mvcResult);
+            jsonPath("$.content.[?(@.id==" + entity.getId() + ")].colour", contains(entity.getColour())).match(mvcResult);
         };
     }
 
-    protected static ResultMatcher applySelfLinkMatcherOnPagedResult(final BaseEntity entity, final String link)
-            throws Exception {
-
-        return mvcResult -> {
-            jsonPath("$.content.[?(@.id==" + entity.getId() + ")]._links.self.href", contains(link)).match(mvcResult);
-        };
+    protected static ResultMatcher applySelfLinkMatcherOnPagedResult(final BaseEntity entity, final String link) {
+        return mvcResult -> jsonPath("$.content.[?(@.id==" + entity.getId() + ")]._links.self.href", contains(link)).match(mvcResult);
     }
 
-    protected static ResultMatcher applyBaseEntityMatcherOnArrayResult(final BaseEntity entity) throws Exception {
+    protected static ResultMatcher applyBaseEntityMatcherOnArrayResult(final BaseEntity entity) {
         return mvcResult -> {
             jsonPath("$.[?(@.id==" + entity.getId() + ")].createdBy", contains(entity.getCreatedBy())).match(mvcResult);
             jsonPath("$.[?(@.id==" + entity.getId() + ")].createdAt", contains(entity.getCreatedAt())).match(mvcResult);
-            jsonPath("$.[?(@.id==" + entity.getId() + ")].lastModifiedBy", contains(entity.getLastModifiedBy()))
-                    .match(mvcResult);
-            jsonPath("$.[?(@.id==" + entity.getId() + ")].lastModifiedAt", contains(entity.getLastModifiedAt()))
-                    .match(mvcResult);
+            jsonPath("$.[?(@.id==" + entity.getId() + ")].lastModifiedBy", contains(entity.getLastModifiedBy())).match(mvcResult);
+            jsonPath("$.[?(@.id==" + entity.getId() + ")].lastModifiedAt", contains(entity.getLastModifiedAt())).match(mvcResult);
         };
     }
 
-    protected static ResultMatcher applyTargetEntityMatcherOnArrayResult(final Target entity) throws Exception {
+    protected static ResultMatcher applyTargetEntityMatcherOnArrayResult(final Target entity) {
         return mvcResult -> {
             jsonPath("$.[?(@.controllerId=='" + entity.getControllerId() + "')].createdBy",
                     contains(entity.getCreatedBy())).match(mvcResult);
@@ -130,18 +116,16 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         };
     }
 
-    protected static ResultMatcher applyNamedEntityMatcherOnArrayResult(final NamedEntity entity) throws Exception {
+    protected static ResultMatcher applyNamedEntityMatcherOnArrayResult(final NamedEntity entity) {
         return mvcResult -> {
             applyBaseEntityMatcherOnPagedResult(entity);
 
             jsonPath("$.[?(@.id=='" + entity.getId() + "')].name", contains(entity.getName())).match(mvcResult);
-            jsonPath("$.[?(@.id=='" + entity.getId() + "')].description", contains(entity.getDescription()))
-                    .match(mvcResult);
+            jsonPath("$.[?(@.id=='" + entity.getId() + "')].description", contains(entity.getDescription())).match(mvcResult);
         };
     }
 
-    protected static ResultMatcher applyNamedVersionedEntityMatcherOnArrayResult(final NamedVersionedEntity entity)
-            throws Exception {
+    protected static ResultMatcher applyNamedVersionedEntityMatcherOnArrayResult(final NamedVersionedEntity entity) {
         return mvcResult -> {
             applyNamedEntityMatcherOnPagedResult(entity);
 
@@ -149,7 +133,7 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         };
     }
 
-    protected static ResultMatcher applyTagMatcherOnArrayResult(final Tag entity) throws Exception {
+    protected static ResultMatcher applyTagMatcherOnArrayResult(final Tag entity) {
         return mvcResult -> {
             applyNamedEntityMatcherOnPagedResult(entity);
 
@@ -157,14 +141,11 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         };
     }
 
-    protected static ResultMatcher applySelfLinkMatcherOnArrayResult(final BaseEntity entity, final String link)
-            throws Exception {
-        return mvcResult -> {
-            jsonPath("$.[?(@.id=='" + entity.getId() + "')]._links.self.href", contains(link)).match(mvcResult);
-        };
+    protected static ResultMatcher applySelfLinkMatcherOnArrayResult(final BaseEntity entity, final String link) {
+        return mvcResult -> jsonPath("$.[?(@.id=='" + entity.getId() + "')]._links.self.href", contains(link)).match(mvcResult);
     }
 
-    protected static ResultMatcher applyBaseEntityMatcherOnSingleResult(final BaseEntity entity) throws Exception {
+    protected static ResultMatcher applyBaseEntityMatcherOnSingleResult(final BaseEntity entity) {
         return mvcResult -> {
             jsonPath("createdBy", equalTo(entity.getCreatedBy())).match(mvcResult);
             jsonPath("createdAt", equalTo(entity.getCreatedAt())).match(mvcResult);
@@ -173,7 +154,7 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         };
     }
 
-    protected static ResultMatcher applyNamedEntityMatcherOnSingleResult(final NamedEntity entity) throws Exception {
+    protected static ResultMatcher applyNamedEntityMatcherOnSingleResult(final NamedEntity entity) {
         return mvcResult -> {
             applyBaseEntityMatcherOnSingleResult(entity);
 
@@ -182,8 +163,7 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         };
     }
 
-    protected static ResultMatcher applyNamedVersionedEntityMatcherOnSingleResult(final NamedVersionedEntity entity)
-            throws Exception {
+    protected static ResultMatcher applyNamedVersionedEntityMatcherOnSingleResult(final NamedVersionedEntity entity) {
         return mvcResult -> {
             applyNamedEntityMatcherOnSingleResult(entity);
 
@@ -191,7 +171,7 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         };
     }
 
-    protected static ResultMatcher applyTagMatcherOnSingleResult(final Tag entity) throws Exception {
+    protected static ResultMatcher applyTagMatcherOnSingleResult(final Tag entity) {
         return mvcResult -> {
             applyNamedEntityMatcherOnSingleResult(entity);
 
@@ -199,34 +179,22 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         };
     }
 
-    protected static ResultMatcher applySelfLinkMatcherOnSingleResult(final String link) throws Exception {
-        return mvcResult -> {
-            jsonPath("_links.self.href", equalTo(link)).match(mvcResult);
-        };
+    protected static ResultMatcher applySelfLinkMatcherOnSingleResult(final String link) {
+        return mvcResult -> jsonPath("_links.self.href", equalTo(link)).match(mvcResult);
     }
 
     protected static JSONObject getAssignmentObject(final Object id, final MgmtActionType type) {
         final JSONObject obj = new JSONObject();
-        try {
-            obj.put("id", id);
-            obj.put("type", type.getName());
-        } catch (final JSONException e) {
-            e.printStackTrace();
-        }
+        obj.put("id", id);
+        obj.put("type", type.getName());
         return obj;
     }
 
     protected static JSONObject getAssignmentObject(final Object id, final MgmtActionType type, final int weight) {
-        try {
-            return getAssignmentObject(id, type).put("weight", weight);
-        } catch (final JSONException e) {
-            e.printStackTrace();
-        }
-        return new JSONObject();
+        return getAssignmentObject(id, type).put("weight", weight);
     }
 
-    // the set is a candidate for implicitly locking. So, lock it if not already locked
-    // set lock flag to true to avoid re-locking
+    // the set is a candidate for implicitly locking. So, lock it if not already locked set lock flag to true to avoid re-locking
     static void implicitLock(final DistributionSet set) {
         if (!set.isLocked()) {
             ((JpaDistributionSet) set).setOptLockRevision(set.getOptLockRevision() + 1);

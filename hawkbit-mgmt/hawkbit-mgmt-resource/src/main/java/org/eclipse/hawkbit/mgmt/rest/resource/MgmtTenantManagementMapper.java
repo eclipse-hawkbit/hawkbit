@@ -12,22 +12,21 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 
 /**
- * A mapper which maps repository model to RESTful model representation and
- * back.
+ * A mapper which maps repository model to RESTful model representation and back.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtTenantManagementMapper {
 
     public static String DEFAULT_DISTRIBUTION_SET_TYPE_KEY = "default.ds.type";
 
-    private MgmtTenantManagementMapper() {
-        // Utility class
-    }
-
-    public static MgmtSystemTenantConfigurationValue toResponseTenantConfigurationValue(String key, TenantConfigurationValue<?> repoConfValue) {
+    public static MgmtSystemTenantConfigurationValue toResponseTenantConfigurationValue(
+            final String key, final TenantConfigurationValue<?> repoConfValue) {
         final MgmtSystemTenantConfigurationValue restConfValue = new MgmtSystemTenantConfigurationValue();
         restConfValue.setValue(repoConfValue.getValue());
         restConfValue.setGlobal(repoConfValue.isGlobal());
@@ -35,12 +34,11 @@ public final class MgmtTenantManagementMapper {
         restConfValue.setCreatedBy(repoConfValue.getCreatedBy());
         restConfValue.setLastModifiedAt(repoConfValue.getLastModifiedAt());
         restConfValue.setLastModifiedBy(repoConfValue.getLastModifiedBy());
-        restConfValue.add(linkTo(methodOn(MgmtTenantManagementResource.class).getTenantConfigurationValue(key))
-                .withSelfRel().expand());
+        restConfValue.add(linkTo(methodOn(MgmtTenantManagementResource.class).getTenantConfigurationValue(key)).withSelfRel().expand());
         return restConfValue;
     }
 
-    public static MgmtSystemTenantConfigurationValue toResponseDefaultDsType(Long defaultDistributionSetType) {
+    public static MgmtSystemTenantConfigurationValue toResponseDefaultDsType(final Long defaultDistributionSetType) {
         final MgmtSystemTenantConfigurationValue restConfValue = new MgmtSystemTenantConfigurationValue();
         restConfValue.setValue(defaultDistributionSetType);
         restConfValue.setGlobal(Boolean.FALSE);

@@ -20,6 +20,4 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @ConditionalOnClass(MgmtApiConfiguration.class)
 @Import(MgmtApiConfiguration.class)
-public class MgmtApiAutoConfiguration {
-
-}
+public class MgmtApiAutoConfiguration {}

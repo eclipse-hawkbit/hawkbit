@@ -41,11 +41,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRestApi {
 
     private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
-
     private final EntityFactory entityFactory;
 
-    MgmtSoftwareModuleTypeResource(final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final EntityFactory entityFactory) {
+    MgmtSoftwareModuleTypeResource(final SoftwareModuleTypeManagement softwareModuleTypeManagement, final EntityFactory entityFactory) {
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
         this.entityFactory = entityFactory;
     }
@@ -56,7 +54,6 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
-
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeSoftwareModuleTypeSortParam(sortParam);
@@ -64,7 +61,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
 
         final Slice<SoftwareModuleType> findModuleTypessAll;
-        Long countModulesAll;
+        final long countModulesAll;
         if (rsqlParam != null) {
             findModuleTypessAll = softwareModuleTypeManagement.findByRsql(pageable, rsqlParam);
             countModulesAll = ((Page<SoftwareModuleType>) findModuleTypessAll).getTotalElements();
@@ -73,8 +70,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
             countModulesAll = softwareModuleTypeManagement.count();
         }
 
-        final List<MgmtSoftwareModuleType> rest = MgmtSoftwareModuleTypeMapper
-                .toTypesResponse(findModuleTypessAll.getContent());
+        final List<MgmtSoftwareModuleType> rest = MgmtSoftwareModuleTypeMapper.toTypesResponse(findModuleTypessAll.getContent());
         return ResponseEntity.ok(new PagedList<>(rest, countModulesAll));
     }
 
@@ -97,7 +93,6 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     public ResponseEntity<MgmtSoftwareModuleType> updateSoftwareModuleType(
             @PathVariable("softwareModuleTypeId") final Long softwareModuleTypeId,
             @RequestBody final MgmtSoftwareModuleTypeRequestBodyPut restSoftwareModuleType) {
-
         final SoftwareModuleType updatedSoftwareModuleType = softwareModuleTypeManagement.update(entityFactory
                 .softwareModuleType().update(softwareModuleTypeId).description(restSoftwareModuleType.getDescription())
                 .colour(restSoftwareModuleType.getColour()));
@@ -108,17 +103,14 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     @Override
     public ResponseEntity<List<MgmtSoftwareModuleType>> createSoftwareModuleTypes(
             @RequestBody final List<MgmtSoftwareModuleTypeRequestBodyPost> softwareModuleTypes) {
-
         final List<SoftwareModuleType> createdSoftwareModules = softwareModuleTypeManagement
                 .create(MgmtSoftwareModuleTypeMapper.smFromRequest(entityFactory, softwareModuleTypes));
 
-        return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toTypesResponse(createdSoftwareModules),
-                HttpStatus.CREATED);
+        return new ResponseEntity<>(MgmtSoftwareModuleTypeMapper.toTypesResponse(createdSoftwareModules), HttpStatus.CREATED);
     }
 
     private SoftwareModuleType findSoftwareModuleTypeWithExceptionIfNotFound(final Long softwareModuleTypeId) {
         return softwareModuleTypeManagement.get(softwareModuleTypeId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, softwareModuleTypeId));
     }
-
 }

@@ -34,8 +34,10 @@ public class MgmtDistributionSetStatistics {
 
     @JsonProperty("actions")
     private Map<String, Long> totalActionsPerStatus;
+
     @JsonProperty("rollouts")
     private Map<String, Long> totalRolloutsPerStatus;
+
     @JsonProperty
     private Long totalAutoAssignments;
 

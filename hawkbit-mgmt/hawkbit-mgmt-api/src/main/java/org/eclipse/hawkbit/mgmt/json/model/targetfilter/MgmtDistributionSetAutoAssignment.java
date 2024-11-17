@@ -29,8 +29,10 @@ public class MgmtDistributionSetAutoAssignment extends MgmtId {
 
     @JsonProperty
     private MgmtActionType type;
+
     @JsonProperty
     private Integer weight;
+
     @JsonProperty
     private Boolean confirmationRequired;
 }
