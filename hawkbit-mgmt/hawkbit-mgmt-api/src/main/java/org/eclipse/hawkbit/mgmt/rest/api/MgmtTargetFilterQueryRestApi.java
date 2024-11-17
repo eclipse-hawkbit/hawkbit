@@ -164,7 +164,8 @@ public interface MgmtTargetFilterQueryRestApi {
     @PostMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTargetFilterQuery> createFilter(@RequestBody MgmtTargetFilterQueryRequestBody filter);
+    ResponseEntity<MgmtTargetFilterQuery> createFilter(
+            @RequestBody MgmtTargetFilterQueryRequestBody filter);
 
     /**
      * Handles the PUT request of updating a target filter. The ID is within the URL path of the request. A given ID in the request body is
@@ -272,7 +273,7 @@ public interface MgmtTargetFilterQueryRestApi {
      * Handles the POST request for changing distribution set for auto assignment of a target filter.
      *
      * @param filterId of the target to change
-     * @param dsIdWithActionType id of the distribution set and the action type for auto assignment
+     * @param autoAssignRequest id of the distribution set and the action type for auto assignment
      * @return http status
      */
     @Operation(summary = "Set auto assignment of distribution set for a target filter query",
@@ -309,7 +310,7 @@ public interface MgmtTargetFilterQueryRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
             @PathVariable("filterId") Long filterId,
-            @RequestBody MgmtDistributionSetAutoAssignment dsIdWithActionType);
+            @RequestBody MgmtDistributionSetAutoAssignment autoAssignRequest);
 
     /**
      * Handles the DELETE request for removing the distribution set for auto assignment of a target filter.
