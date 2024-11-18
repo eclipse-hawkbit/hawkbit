@@ -35,14 +35,14 @@ import org.springframework.lang.Nullable;
  * @param <T> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
  */
-public class HawkBitBaseRepository<T, ID extends Serializable> extends SimpleJpaRepository<T, ID>
+public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpaRepository<T, ID>
         implements NoCountSliceRepository<T>, ACMRepository<T> {
 
-    public HawkBitBaseRepository(final Class<T> domainClass, final EntityManager em) {
+    public HawkbitBaseRepository(final Class<T> domainClass, final EntityManager em) {
         super(domainClass, em);
     }
 
-    public HawkBitBaseRepository(final JpaEntityInformation<T, ?> entityInformation, final EntityManager entityManager) {
+    public HawkbitBaseRepository(final JpaEntityInformation<T, ?> entityInformation, final EntityManager entityManager) {
         super(entityInformation, entityManager);
     }
 
@@ -121,13 +121,13 @@ public class HawkBitBaseRepository<T, ID extends Serializable> extends SimpleJpa
 
     /**
      * Simple implementation of {@link BaseRepositoryTypeProvider} leveraging our
-     * {@link HawkBitBaseRepository} for all current use cases
+     * {@link HawkbitBaseRepository} for all current use cases
      */
     public static class RepositoryTypeProvider implements BaseRepositoryTypeProvider {
 
         @Override
         public Class<?> getBaseRepositoryType(final Class<?> repositoryType) {
-            return HawkBitBaseRepository.class;
+            return HawkbitBaseRepository.class;
         }
     }
 }
