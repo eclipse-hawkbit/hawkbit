@@ -14,11 +14,13 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 /**
  * Default configuration that is common to all repository implementations.
  */
 @Configuration
+@EnableMethodSecurity(proxyTargetClass = true, securedEnabled = true)
 @EnableConfigurationProperties({ RepositoryProperties.class, ControllerPollProperties.class, TenantConfigurationProperties.class })
 @PropertySource("classpath:/hawkbit-repository-defaults.properties")
 public class RepositoryDefaultConfiguration {}

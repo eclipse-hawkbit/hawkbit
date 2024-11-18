@@ -14,11 +14,13 @@ import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 /**
  * Auto-Configuration for enabling the DDI REST-Resources.
  */
 @Configuration
+@EnableWebSecurity
 @ConditionalOnClass(DdiApiConfiguration.class)
 @Import({ DdiApiConfiguration.class, DdiSecurityProperties.class })
 public class DdiApiAutoConfiguration {}
