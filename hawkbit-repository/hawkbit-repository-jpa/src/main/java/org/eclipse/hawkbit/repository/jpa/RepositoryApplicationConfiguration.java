@@ -122,7 +122,7 @@ import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetMetadataRepo
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.HawkBitBaseRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.HawkbitBaseRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
@@ -1057,7 +1057,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     BaseRepositoryTypeProvider baseRepositoryTypeProvider() {
-        return new HawkBitBaseRepository.RepositoryTypeProvider();
+        return new HawkbitBaseRepository.RepositoryTypeProvider();
     }
 
     /**
