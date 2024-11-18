@@ -26,13 +26,13 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.UncategorizedDataAccessException;
 
 /**
- * Mapping tests for {@link HawkBitEclipseLinkJpaDialect}.
+ * Mapping tests for {@link HawkbitEclipseLinkJpaDialect}.
  */
 @Feature("Unit Tests - Repository")
 @Story("Exception handling")
 public class HawkBitEclipseLinkJpaDialectTest {
 
-    private final HawkBitEclipseLinkJpaDialect hawkBitEclipseLinkJpaDialectUnderTest = new HawkBitEclipseLinkJpaDialect();
+    private final HawkbitEclipseLinkJpaDialect hawkBitEclipseLinkJpaDialectUnderTest = new HawkbitEclipseLinkJpaDialect();
 
     @Test
     @Description("Use Case: PersistenceException that can be mapped by EclipseLinkJpaDialect into corresponding DataAccessException.")
