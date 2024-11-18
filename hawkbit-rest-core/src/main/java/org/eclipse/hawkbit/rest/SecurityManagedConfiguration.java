@@ -50,6 +50,18 @@ public class SecurityManagedConfiguration {
             ******************""";
     public static final int DOS_FILTER_ORDER = -200;
 
+    public static FilterRegistrationBean<DosFilter> dosFilter(final Collection<String> includeAntPaths,
+            final HawkbitSecurityProperties.Dos.Filter filterProperties,
+            final HawkbitSecurityProperties.Clients clientProperties) {
+        final FilterRegistrationBean<DosFilter> filterRegBean = new FilterRegistrationBean<>();
+
+        filterRegBean.setFilter(new DosFilter(includeAntPaths, filterProperties.getMaxRead(),
+                filterProperties.getMaxWrite(), filterProperties.getWhitelist(), clientProperties.getBlacklist(),
+                clientProperties.getRemoteIpHeader()));
+
+        return filterRegBean;
+    }
+
     /**
      * Filter to protect the hawkBit server system management interface against too many requests.
      *
@@ -86,18 +98,6 @@ public class SecurityManagedConfiguration {
             });
         }
         return firewall;
-    }
-
-    public static FilterRegistrationBean<DosFilter> dosFilter(final Collection<String> includeAntPaths,
-            final HawkbitSecurityProperties.Dos.Filter filterProperties,
-            final HawkbitSecurityProperties.Clients clientProperties) {
-        final FilterRegistrationBean<DosFilter> filterRegBean = new FilterRegistrationBean<>();
-
-        filterRegBean.setFilter(new DosFilter(includeAntPaths, filterProperties.getMaxRead(),
-                filterProperties.getMaxWrite(), filterProperties.getWhitelist(), clientProperties.getBlacklist(),
-                clientProperties.getRemoteIpHeader()));
-
-        return filterRegBean;
     }
 
     private static class IgnorePathsStrictHttpFirewall extends StrictHttpFirewall {

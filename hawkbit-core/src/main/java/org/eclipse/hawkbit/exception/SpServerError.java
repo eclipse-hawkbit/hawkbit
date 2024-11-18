@@ -152,8 +152,8 @@ public enum SpServerError {
     SP_REPO_OPERATION_NOT_SUPPORTED(
             "hawkbit.server.error.operation.notSupported",
             "Operation or method is (no longer) supported by service."),
-   SP_MAINTENANCE_SCHEDULE_INVALID(
-           "hawkbit.server.error.maintenanceScheduleInvalid",
+    SP_MAINTENANCE_SCHEDULE_INVALID(
+            "hawkbit.server.error.maintenanceScheduleInvalid",
             "Information for schedule, duration or timezone is missing; or there is no valid maintenance window available in future."),
     SP_AUTO_ASSIGN_ACTION_TYPE_INVALID(
             "hawkbit.server.error.repo.invalidAutoAssignActionType",

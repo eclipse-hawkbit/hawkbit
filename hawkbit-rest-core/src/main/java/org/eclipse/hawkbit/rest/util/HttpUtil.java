@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.rest.util;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 import lombok.AccessLevel;

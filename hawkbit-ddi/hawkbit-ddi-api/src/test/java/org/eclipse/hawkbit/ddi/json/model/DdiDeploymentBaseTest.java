@@ -17,7 +17,6 @@ import static org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType.ATTE
 import static org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType.FORCED;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,7 +43,8 @@ public class DdiDeploymentBaseTest {
         final String id = "1234";
         final DdiDeployment ddiDeployment = new DdiDeployment(FORCED, ATTEMPT, Collections.emptyList(), AVAILABLE);
         final String actionStatus = "TestAction";
-        final DdiActionHistory ddiActionHistory = new DdiActionHistory(actionStatus, List.of("Action status message 1", "Action status message 2"));
+        final DdiActionHistory ddiActionHistory = new DdiActionHistory(
+                actionStatus, List.of("Action status message 1", "Action status message 2"));
         final DdiDeploymentBase ddiDeploymentBase = new DdiDeploymentBase(id, ddiDeployment, ddiActionHistory);
 
         // Test

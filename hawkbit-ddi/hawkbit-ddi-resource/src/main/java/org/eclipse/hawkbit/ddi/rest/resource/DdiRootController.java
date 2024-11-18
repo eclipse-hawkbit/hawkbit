@@ -98,7 +98,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private static final String GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET = "given action ({}) is not assigned to given target ({}).";
     private static final String FALLBACK_REMARK = "Initiated using the Device Direct Integration API without providing a remark.";
-
+    /**
+     * File suffix for MDH hash download (see Linux md5sum).
+     */
+    private static final String ARTIFACT_MD5_DWNL_SUFFIX = ".MD5SUM";
     @Autowired
     private ConfirmationManagement confirmationManagement;
     @Autowired
@@ -121,6 +124,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private ArtifactUrlHandler artifactUrlHandler;
     @Autowired
     private EntityFactory entityFactory;
+
     @Override
     public ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(
             final String tenant,
@@ -572,6 +576,27 @@ public class DdiRootController implements DdiRootControllerRestApi {
         return null;
     }
 
+    /**
+     * Write a md5 file response.
+     *
+     * @param response the response
+     * @param md5Hash of the artifact
+     * @param filename as provided by the client
+     * @throws IOException cannot write output stream
+     */
+    private static void writeMD5FileResponse(final HttpServletResponse response, final String md5Hash, final String filename)
+            throws IOException {
+        if (md5Hash == null) {
+            throw new IllegalArgumentException("MD5 hash must not be null");
+        }
+
+        final byte[] content = (md5Hash + "  " + filename).getBytes(StandardCharsets.US_ASCII);
+        response.setContentType("text/plain");
+        response.setContentLength(content.length);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename + ARTIFACT_MD5_DWNL_SUFFIX);
+        response.getOutputStream().write(content);
+    }
+
     private ActionStatus checkAndLogDownload(final HttpServletRequest request, final Target target, final Long module) {
         final Action action = controllerManagement
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module)
@@ -713,7 +738,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
         return new DdiDeploymentBase(Long.toString(action.getId()), ddiDeployment, actionHistory);
     }
 
-    private DdiConfirmationBaseAction generateDdiConfirmationBase(final Target target, final Action action, final Integer actionHistoryMessageCount) {
+    private DdiConfirmationBaseAction generateDdiConfirmationBase(
+            final Target target, final Action action, final Integer actionHistoryMessageCount) {
         final DdiActionHistory actionHistory = generateDdiActionHistory(action, actionHistoryMessageCount).orElse(null);
         final DdiDeployment ddiDeployment = generateDdiDeployment(target, action);
         return new DdiConfirmationBaseAction(Long.toString(action.getId()), ddiDeployment, actionHistory);
@@ -752,30 +778,5 @@ public class DdiRootController implements DdiRootControllerRestApi {
             log.trace("Returning state auto-conf state disabled for device {}", controllerId);
             return DdiAutoConfirmationState.disabled();
         });
-    }
-
-    /**
-     * File suffix for MDH hash download (see Linux md5sum).
-     */
-    private static final String ARTIFACT_MD5_DWNL_SUFFIX = ".MD5SUM";
-
-    /**
-     * Write a md5 file response.
-     *
-     * @param response the response
-     * @param md5Hash of the artifact
-     * @param filename as provided by the client
-     * @throws IOException cannot write output stream
-     */
-    private static void writeMD5FileResponse(final HttpServletResponse response, final String md5Hash, final String filename) throws IOException {
-        if (md5Hash == null) {
-            throw new IllegalArgumentException("MD5 hash must not be null");
-        }
-
-        final byte[] content = (md5Hash + "  " + filename).getBytes(StandardCharsets.US_ASCII);
-        response.setContentType("text/plain");
-        response.setContentLength(content.length);
-        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename + ARTIFACT_MD5_DWNL_SUFFIX);
-        response.getOutputStream().write(content);
     }
 }

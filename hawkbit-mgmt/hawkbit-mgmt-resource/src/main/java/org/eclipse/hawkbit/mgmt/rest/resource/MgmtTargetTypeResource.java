@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionS
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetType;
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetTypeRequestBodyPut;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTypeRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.EntityFactory;

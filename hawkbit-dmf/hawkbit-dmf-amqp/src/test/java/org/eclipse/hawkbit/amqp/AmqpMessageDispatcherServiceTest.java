@@ -26,11 +26,11 @@ import java.util.UUID;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrl;
-import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystem;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrl;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -74,22 +74,16 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     private static final Long TENANT_ID = 4711L;
 
     private static final URI AMQP_URI = IpUtil.createAmqpUri("vHost", "mytest");
-
     private static final String TEST_TOKEN = "testToken";
-
     private static final String CONTROLLER_ID = "1";
 
     private AmqpMessageDispatcherService amqpMessageDispatcherService;
-
     private RabbitTemplate rabbitTemplate;
-
     private DefaultAmqpMessageSenderService senderService;
-
     private Target testTarget;
 
     @BeforeEach
     public void beforeEach() throws Exception {
-
         testTarget = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID)
                 .securityToken(TEST_TOKEN).address(AMQP_URI.toString()));
 
@@ -362,5 +356,4 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 clazz.getTypeName());
         return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
-
 }
