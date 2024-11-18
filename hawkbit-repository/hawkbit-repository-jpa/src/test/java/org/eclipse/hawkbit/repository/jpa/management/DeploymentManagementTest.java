@@ -558,8 +558,12 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(getResultingActionCount(assignmentResults)).isEqualTo(4);
         targetIds.forEach(controllerId -> {
             final List<Long> assignedDsIds = deploymentManagement.findActionsByTarget(controllerId, PAGE).stream()
-                    .peek(a -> assertThat(a.getInitiatedBy()).as("Actions should be initiated by current user")
-                            .isEqualTo(tenantAware.getCurrentUsername()))
+                    .map(a -> {
+                        // don't use peek since it is by documentation mainly for debugging and could be skipped in some cases
+                        assertThat(a.getInitiatedBy()).as("Actions should be initiated by current user")
+                                .isEqualTo(tenantAware.getCurrentUsername());
+                        return a;
+                    })
                     .map(action -> action.getDistributionSet().getId()).collect(Collectors.toList());
             assertThat(assignedDsIds).containsExactlyInAnyOrderElementsOf(dsIds);
         });
@@ -662,8 +666,12 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         targets.forEach(target -> {
             final List<Long> assignedDsIds = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE)
                     .stream()
-                    .peek(a -> assertThat(a.getInitiatedBy()).as("Initiated by current user")
-                            .isEqualTo(tenantAware.getCurrentUsername()))
+                    .map(a -> {
+                        // don't use peek since it is by documentation mainly for debugging and could be skipped in some cases
+                        assertThat(a.getInitiatedBy()).as("Initiated by current user")
+                                .isEqualTo(tenantAware.getCurrentUsername());
+                        return a;
+                    })
                     .map(action -> action.getDistributionSet().getId()).collect(Collectors.toList());
             assertThat(assignedDsIds).containsExactlyInAnyOrderElementsOf(dsIds);
         });

@@ -239,7 +239,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             distributionSetRepository.saveAll(
                     setsFound.stream()
                             .filter(set -> assigned.contains(set.getId()))
-                            .peek(toSoftDelete -> toSoftDelete.setDeleted(true))
+                            .map(toSoftDelete -> {
+                                // don't use peek since it is by documentation mainly for debugging and could be skipped in some cases
+                                toSoftDelete.setDeleted(true);
+                                return toSoftDelete;
+                            })
                             .toList());
             targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(assigned.toArray(new Long[0]));
         }

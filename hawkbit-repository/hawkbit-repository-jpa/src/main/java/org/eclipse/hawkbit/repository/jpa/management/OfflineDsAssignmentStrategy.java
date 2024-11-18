@@ -114,13 +114,14 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 //                    targetRepository
 //                            .findAll(AccessController.Operation.UPDATE, targetRepository.byIdsSpec(targetIdsChunk))
 //                            .stream()
-//                            .peek(target -> {
+//                            .map(target -> {
 //                                target.setAssignedDistributionSet(set);
 //                                target.setInstalledDistributionSet(set);
 //                                target.setInstallationDate(now);
 //                                target.setLastModifiedAt(now);
 //                                target.setLastModifiedBy(currentUser);
 //                                target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
+//                                return target;
 //                            })
 //                            .toList());
         });

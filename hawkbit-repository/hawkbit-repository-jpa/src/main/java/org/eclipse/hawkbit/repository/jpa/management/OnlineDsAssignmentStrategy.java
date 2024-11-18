@@ -139,11 +139,12 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 //                targetRepository
 //                        .findAll(AccessController.Operation.UPDATE, targetRepository.byIdsSpec(targetIdsChunk))
 //                        .stream()
-//                        .peek(target -> {
+//                        .map(target -> {
 //                            target.setAssignedDistributionSet(set);
 //                            target.setLastModifiedAt(now);
 //                            target.setLastModifiedBy(currentUser);
 //                            target.setUpdateStatus(TargetUpdateStatus.PENDING);
+//                            return target;
 //                        })
 //                        .toList());
         });
