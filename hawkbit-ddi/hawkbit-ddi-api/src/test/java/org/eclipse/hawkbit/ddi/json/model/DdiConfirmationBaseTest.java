@@ -43,7 +43,8 @@ class DdiConfirmationBaseTest {
         final String id = "1234";
         final DdiDeployment ddiDeployment = new DdiDeployment(FORCED, ATTEMPT, Collections.emptyList(), AVAILABLE);
         final String actionStatus = "TestAction";
-        final DdiActionHistory ddiActionHistory = new DdiActionHistory(actionStatus, List.of("Action status message 1", "Action status message 2"));
+        final DdiActionHistory ddiActionHistory = new DdiActionHistory(
+                actionStatus, List.of("Action status message 1", "Action status message 2"));
         final DdiConfirmationBaseAction ddiConfirmationBaseAction = new DdiConfirmationBaseAction(id, ddiDeployment, ddiActionHistory);
 
         // Test

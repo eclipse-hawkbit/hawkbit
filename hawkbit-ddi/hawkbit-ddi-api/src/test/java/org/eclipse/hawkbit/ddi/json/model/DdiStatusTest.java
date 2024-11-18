@@ -90,7 +90,7 @@ public class DdiStatusTest {
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
-        final String serializedDdiStatus = "{\"execution\":[\"proceeding\"],\"result\":{\"finished\":\"none\","  +
+        final String serializedDdiStatus = "{\"execution\":[\"proceeding\"],\"result\":{\"finished\":\"none\"," +
                 "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[]}";
 
         // Test

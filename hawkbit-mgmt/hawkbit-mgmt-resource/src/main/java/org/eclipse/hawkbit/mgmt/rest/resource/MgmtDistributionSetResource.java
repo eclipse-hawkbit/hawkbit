@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.text.MessageFormat;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -336,7 +335,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> assignSoftwareModules(final Long distributionSetId, final List<MgmtSoftwareModuleAssignment> softwareModuleIDs) {
+    public ResponseEntity<Void> assignSoftwareModules(
+            final Long distributionSetId, final List<MgmtSoftwareModuleAssignment> softwareModuleIDs) {
         distributionSetManagement.assignSoftwareModules(
                 distributionSetId,
                 softwareModuleIDs.stream()
@@ -404,8 +404,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         distributionSetInvalidationManagement
                 .invalidateDistributionSet(
                         new DistributionSetInvalidation(Collections.singletonList(distributionSetId),
-                        MgmtRestModelMapper.convertCancelationType(invalidateRequestBody.getActionCancelationType()),
-                        invalidateRequestBody.isCancelRollouts()));
+                                MgmtRestModelMapper.convertCancelationType(invalidateRequestBody.getActionCancelationType()),
+                                invalidateRequestBody.isCancelRollouts()));
         return ResponseEntity.ok().build();
     }
 }

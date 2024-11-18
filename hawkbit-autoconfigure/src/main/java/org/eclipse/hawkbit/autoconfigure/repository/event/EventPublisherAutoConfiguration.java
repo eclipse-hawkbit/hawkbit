@@ -52,7 +52,8 @@ public class EventPublisherAutoConfiguration {
      * @return publisher bean
      */
     @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
-    ApplicationEventMulticaster applicationEventMulticaster(@Qualifier("asyncExecutor") final Executor executor, final TenantAware tenantAware) {
+    ApplicationEventMulticaster applicationEventMulticaster(
+            @Qualifier("asyncExecutor") final Executor executor, final TenantAware tenantAware) {
         final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster = new TenantAwareApplicationEventPublisher(
                 tenantAware, applicationEventFilter());
         simpleApplicationEventMulticaster.setTaskExecutor(executor);

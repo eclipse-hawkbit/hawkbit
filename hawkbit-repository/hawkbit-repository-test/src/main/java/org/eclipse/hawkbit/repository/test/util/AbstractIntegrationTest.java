@@ -122,9 +122,6 @@ public abstract class AbstractIntegrationTest {
      * {@link SystemManagement#getTenantMetadata()};
      */
     protected static final int DEFAULT_DS_TYPES = RepositoryConstants.DEFAULT_DS_TYPES_IN_TENANT + 1;
-
-    private static final String ARTIFACT_DIRECTORY = createTempDir();
-
     @Autowired
     protected EntityFactory entityFactory;
     @Autowired
@@ -190,6 +187,7 @@ public abstract class AbstractIntegrationTest {
     protected ServiceMatcher serviceMatcher;
     @Autowired
     protected ApplicationEventPublisher eventPublisher;
+    private static final String ARTIFACT_DIRECTORY = createTempDir();
 
     @BeforeAll
     public static void beforeClass() {
