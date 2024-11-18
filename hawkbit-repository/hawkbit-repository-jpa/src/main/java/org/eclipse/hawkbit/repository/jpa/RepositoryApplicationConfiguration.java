@@ -258,7 +258,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     protected AbstractJpaVendorAdapter createJpaVendorAdapter() {
         return new EclipseLinkJpaVendorAdapter() {
 
-            private final HawkBitEclipseLinkJpaDialect jpaDialect = new HawkBitEclipseLinkJpaDialect();
+            private final HawkbitEclipseLinkJpaDialect jpaDialect = new HawkbitEclipseLinkJpaDialect();
 
             @Override
             public EclipseLinkJpaDialect getJpaDialect() {
