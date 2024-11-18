@@ -31,7 +31,7 @@ public class TargetPollEvent extends RemoteTenantAwareEvent {
     private static final long serialVersionUID = 1L;
 
     private String controllerId;
-    private String targetAdress; // TODO - check if could be renamed fixing spelling
+    private String targetAddress;
 
     public TargetPollEvent(final String controllerId, final String tenant, final String applicationId) {
         super(controllerId, tenant, applicationId);
@@ -41,6 +41,6 @@ public class TargetPollEvent extends RemoteTenantAwareEvent {
     public TargetPollEvent(final Target target, final String applicationId) {
         super(target.getControllerId(), target.getTenant(), applicationId);
         this.controllerId = target.getControllerId();
-        this.targetAdress = target.getAddress().toString();
+        this.targetAddress = target.getAddress().toString();
     }
 }
