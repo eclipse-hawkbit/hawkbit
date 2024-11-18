@@ -20,4 +20,4 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @PropertySource("classpath:/hawkbit-jpa-flyway-defaults.properties")
 @AutoConfigureBefore(FlywayAutoConfiguration.class) // ensure that property source is loaded before FlywayAutoConfiguration
-public class HawkBitFlywayAutoConfiguration {}
+public class HawkbitFlywayAutoConfiguration {}
