@@ -11,12 +11,16 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.List;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  * Result object for {@link TargetType} assignments.
  */
-@Data
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class TargetTypeAssignmentResult extends AbstractAssignmentResult<Target> {
 
     private final TargetType targetType;

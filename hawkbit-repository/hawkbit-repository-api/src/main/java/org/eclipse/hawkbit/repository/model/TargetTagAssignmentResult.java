@@ -11,7 +11,9 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.List;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  * Result object for {@link TargetTag} assignments.
@@ -19,7 +21,9 @@ import lombok.Data;
  * @deprecated since 0.6.0 with deprecation of toggle assignments
  */
 @Deprecated(forRemoval = true, since = "0.6.0")
-@Data
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class TargetTagAssignmentResult extends AbstractAssignmentResult<Target> {
 
     private final TargetTag targetTag;

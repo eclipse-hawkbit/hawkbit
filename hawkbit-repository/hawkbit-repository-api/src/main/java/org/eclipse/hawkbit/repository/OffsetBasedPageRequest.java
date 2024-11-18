@@ -11,7 +11,9 @@ package org.eclipse.hawkbit.repository;
 
 import java.io.Serial;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
@@ -22,7 +24,9 @@ import org.springframework.data.domain.Sort;
  * the REST-API is working with {@code offset} and {@code limit} parameter we
  * need an offset based page request.
  */
-@Data
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public final class OffsetBasedPageRequest extends PageRequest {
 
     @Serial

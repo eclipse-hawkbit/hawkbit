@@ -78,10 +78,7 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
     @Override
     List<T> findAllById(final Iterable<Long> ids);
 
-    // TODO When we switch to Spring 3.0 probably we could remove extending methods using
-    // queries and make here a default implementation using JPASpecificationExecutor delete method
     // TODO To be considered if this method is needed at all
-
     /**
      * Deletes all entities of a given tenant from this repository. For safety
      * reasons (this is a "delete everything" query after all) we add the tenant
