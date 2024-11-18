@@ -19,7 +19,7 @@ import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.Target;
 
 /**
- * Event is send in case a target polls either through DDI or DMF.
+ * Event is sent in case a target polls either through DDI or DMF.
  */
 @NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
 @Getter

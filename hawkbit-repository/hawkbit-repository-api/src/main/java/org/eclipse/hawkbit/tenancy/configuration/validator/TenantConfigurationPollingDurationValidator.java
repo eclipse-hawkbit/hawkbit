@@ -18,21 +18,20 @@ import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * This class is used to validate, that the property is a String and that it is
- * in the correct duration format.
+ * This class is used to validate, that the property is a String and that it is in the correct duration format.
  */
 public class TenantConfigurationPollingDurationValidator implements TenantConfigurationValidator {
 
     private final Duration minDuration;
-
     private final Duration maxDuration;
 
     /**
-     * Constructor.
+     * This constructor is called by {@link org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties} using
+     * ApplicationContext.getAutowireCapableBeanFactory().createBean(Class) to validate the polling duration configuration.
+     * This insures the wiring of the properties is done correctly.
      *
      * @param properties property accessor for poll configuration
      */
-    @Autowired
     public TenantConfigurationPollingDurationValidator(final ControllerPollProperties properties) {
         minDuration = DurationHelper.formattedStringToDuration(properties.getMinPollingTime());
         maxDuration = DurationHelper.formattedStringToDuration(properties.getMaxPollingTime());
