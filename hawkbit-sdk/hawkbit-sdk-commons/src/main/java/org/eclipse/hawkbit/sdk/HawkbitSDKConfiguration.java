@@ -40,7 +40,7 @@ import org.springframework.http.MediaType;
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @Import(FeignClientsConfiguration.class)
 @PropertySource("classpath:/hawkbit-sdk-defaults.properties")
-public class HawkbitSDKConfigurtion {
+public class HawkbitSDKConfiguration {
 
     /**
      * An feign request interceptor to set the defined {@code Accept} and {@code Content-Type} headers for each request
