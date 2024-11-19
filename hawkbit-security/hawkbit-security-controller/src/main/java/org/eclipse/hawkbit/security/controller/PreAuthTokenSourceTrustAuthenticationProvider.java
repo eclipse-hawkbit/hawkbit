@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.security.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -69,9 +70,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
      */
     public PreAuthTokenSourceTrustAuthenticationProvider(final String... authorizedSourceIps) {
         this.authorizedSourceIps = new ArrayList<>();
-        for (final String ip : authorizedSourceIps) {
-            this.authorizedSourceIps.add(ip);
-        }
+        this.authorizedSourceIps.addAll(Arrays.asList(authorizedSourceIps));
     }
 
     @Override

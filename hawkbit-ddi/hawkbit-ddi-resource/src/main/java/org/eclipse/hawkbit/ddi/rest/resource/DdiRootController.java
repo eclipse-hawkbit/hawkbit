@@ -178,7 +178,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         if (checkModule(fileName, module)) {
-            log.warn("Software module with id {} could not be found.", softwareModuleId);
+            log.warn("Software module with id {} could not be found (1).", softwareModuleId);
             result = ResponseEntity.notFound().build();
         } else {
             // Artifact presence is ensured in 'checkModule'
@@ -219,7 +219,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         if (checkModule(fileName, module)) {
-            log.warn("Software module with id {} could not be found.", softwareModuleId);
+            log.warn("Software module with id {} could not be found (2).", softwareModuleId);
             return ResponseEntity.notFound().build();
         }
 

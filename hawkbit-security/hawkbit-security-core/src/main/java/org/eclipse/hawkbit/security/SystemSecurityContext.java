@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -200,6 +201,7 @@ public class SystemSecurityContext {
      */
     public static final class SystemCodeAuthentication implements Authentication {
 
+        @Serial
         private static final long serialVersionUID = 1L;
         private static final List<SimpleGrantedAuthority> AUTHORITIES = Collections
                 .singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));

@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -19,6 +20,7 @@ import org.eclipse.hawkbit.repository.model.Target;
  */
 public class RolloutTargetGroupId implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private Long rolloutGroup;

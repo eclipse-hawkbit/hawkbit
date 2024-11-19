@@ -77,7 +77,7 @@ public class RolloutGroupEvaluationManager {
             final List<RolloutGroupActionEvaluator<T>> evaluators, final T action) {
         return evaluators.stream().filter(evaluator -> evaluator.getAction() == action).findFirst().orElseThrow(() -> {
             log.warn("Could not find suitable evaluator for the '{}' action.", action.name());
-            throw new EvaluatorNotConfiguredException(action.name());
+            return new EvaluatorNotConfiguredException(action.name());
         });
     }
 
@@ -86,7 +86,7 @@ public class RolloutGroupEvaluationManager {
         return evaluators.stream().filter(evaluator -> evaluator.getCondition() == condition).findFirst()
                 .orElseThrow(() -> {
                     log.warn("Could not find suitable evaluator for the '{}' condition.", condition.name());
-                    throw new EvaluatorNotConfiguredException(condition.name());
+                    return new EvaluatorNotConfiguredException(condition.name());
                 });
     }
 }

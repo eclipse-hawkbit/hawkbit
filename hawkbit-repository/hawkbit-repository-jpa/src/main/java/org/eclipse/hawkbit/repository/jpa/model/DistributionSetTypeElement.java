@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.persistence.Column;
@@ -34,6 +35,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 @Table(name = "sp_ds_type_element")
 public class DistributionSetTypeElement implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @EmbeddedId

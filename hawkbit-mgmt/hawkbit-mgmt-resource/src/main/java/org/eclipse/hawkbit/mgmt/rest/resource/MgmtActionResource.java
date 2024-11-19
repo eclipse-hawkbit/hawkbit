@@ -47,7 +47,7 @@ public class MgmtActionResource implements MgmtActionRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
 
         final Slice<Action> actions;
-        final Long totalActionCount;
+        final long totalActionCount;
         if (rsqlParam != null) {
             actions = this.deploymentManagement.findActions(rsqlParam, pageable);
             totalActionCount = this.deploymentManagement.countActions(rsqlParam);

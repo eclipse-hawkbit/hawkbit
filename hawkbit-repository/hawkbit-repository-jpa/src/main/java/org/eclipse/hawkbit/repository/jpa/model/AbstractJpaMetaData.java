@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
 import java.util.Objects;
 
 import jakarta.persistence.Basic;
@@ -26,6 +27,7 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 @MappedSuperclass
 public abstract class AbstractJpaMetaData implements MetaData {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id

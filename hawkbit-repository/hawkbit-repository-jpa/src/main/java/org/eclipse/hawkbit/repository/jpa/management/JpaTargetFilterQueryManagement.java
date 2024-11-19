@@ -145,7 +145,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             RSQLUtility.validateRsqlFor(query, TargetFields.class);
             return true;
         } catch (final RSQLParserException | RSQLParameterUnsupportedFieldException e) {
-            log.debug("The RSQL query '" + query + "' is invalid.", e);
+            log.debug("The RSQL query '{}}' is invalid.", query, e);
             return false;
         }
     }

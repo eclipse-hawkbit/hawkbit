@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import lombok.Data;
@@ -20,6 +21,7 @@ import org.eclipse.hawkbit.repository.Identifiable;
 @Data
 public class AssignedSoftwareModule implements Serializable, Identifiable<Long> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final SoftwareModule softwareModule;

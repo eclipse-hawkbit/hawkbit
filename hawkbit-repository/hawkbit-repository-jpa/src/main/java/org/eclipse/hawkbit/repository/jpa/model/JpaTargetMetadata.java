@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -30,6 +32,7 @@ import org.eclipse.hawkbit.repository.model.TargetMetadata;
 @Table(name = "sp_target_metadata")
 public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMetadata {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id

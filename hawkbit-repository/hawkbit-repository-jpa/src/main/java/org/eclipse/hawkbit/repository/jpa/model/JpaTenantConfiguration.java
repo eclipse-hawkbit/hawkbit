@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,12 +31,11 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 @Entity
 @Table(name = "sp_tenant_configuration", uniqueConstraints = @UniqueConstraint(columnNames = { "conf_key",
         "tenant" }, name = "uk_tenant_key"))
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity
-        implements TenantConfiguration, EventAwareEntity {
+public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity implements TenantConfiguration, EventAwareEntity {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Column(name = "conf_key", length = TenantConfiguration.KEY_MAX_SIZE, nullable = false, updatable = false)

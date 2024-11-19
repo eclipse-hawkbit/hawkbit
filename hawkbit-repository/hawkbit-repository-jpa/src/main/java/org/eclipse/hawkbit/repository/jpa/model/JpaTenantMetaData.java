@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -38,11 +40,11 @@ import org.eclipse.hawkbit.repository.model.TenantMetaData;
         @Index(name = "sp_idx_tenant_prim", columnList = "tenant,id") }, uniqueConstraints = {
         @UniqueConstraint(columnNames = { "tenant" }, name = "uk_tenantmd_tenant") })
 @Entity
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMetaData {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Column(name = "tenant", nullable = false, updatable = false, length = 40)

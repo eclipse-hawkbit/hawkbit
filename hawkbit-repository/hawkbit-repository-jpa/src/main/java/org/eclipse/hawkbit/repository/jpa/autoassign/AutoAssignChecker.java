@@ -120,7 +120,7 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
         } catch (final PersistenceException | AbstractServerRtException e) {
             log.error("Error during auto assign check of target filter query id {}", targetFilterQuery.getId(), e);
         }
-        log.debug("Auto assign check call for tenant {} and target filter query id {} finished",
-                getContextAware().getCurrentTenant(), targetFilterQuery.getId());
+        log.debug("Auto assign check call for tenant {} and target filter query id {} for device {} finished",
+                getContextAware().getCurrentTenant(), targetFilterQuery.getId(), controllerId);
     }
 }

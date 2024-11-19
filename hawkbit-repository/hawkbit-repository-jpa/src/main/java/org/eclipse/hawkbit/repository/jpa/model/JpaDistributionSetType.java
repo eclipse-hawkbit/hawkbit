@@ -48,8 +48,7 @@ import org.springframework.util.CollectionUtils;
         @Index(name = "sp_idx_distribution_set_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
         @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_dst_name"),
         @UniqueConstraint(columnNames = { "type_key", "tenant" }, name = "uk_dst_key") })
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaDistributionSetType extends AbstractJpaTypeEntity implements DistributionSetType, EventAwareEntity {
 
@@ -136,11 +135,11 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
     @Override
     public boolean checkComplete(final DistributionSet distributionSet) {
         final List<SoftwareModuleType> smTypes = distributionSet.getModules().stream().map(SoftwareModule::getType)
-                .distinct().collect(Collectors.toList());
+                .distinct().toList();
         if (smTypes.isEmpty()) {
             return false;
         }
-        return smTypes.containsAll(getMandatoryModuleTypes());
+        return new HashSet<>(smTypes).containsAll(getMandatoryModuleTypes());
     }
 
     public JpaDistributionSetType addOptionalModuleType(final SoftwareModuleType smType) {

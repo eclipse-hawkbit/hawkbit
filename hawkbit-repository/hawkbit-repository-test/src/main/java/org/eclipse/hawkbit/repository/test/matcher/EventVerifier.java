@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.Serial;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -175,11 +176,11 @@ public class EventVerifier extends AbstractTestExecutionListener {
 
     private static final class ResetCounterMarkerEvent extends RemoteApplicationEvent {
 
+        @Serial
         private static final long serialVersionUID = 1L;
 
         private ResetCounterMarkerEvent() {
             super(new Object(), "resetcounter");
         }
     }
-
 }

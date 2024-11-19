@@ -578,7 +578,7 @@ public final class TargetSpecifications {
             hasTagsPredicates.add(exp.isNull());
         }
         if (isAtLeastOneTagActive(tagNames)) {
-            hasTagsPredicates.add(exp.in(tagNames));
+            hasTagsPredicates.add(exp.in((Object[]) tagNames));
         }
 
         return hasTagsPredicates.stream().reduce(cb::or)

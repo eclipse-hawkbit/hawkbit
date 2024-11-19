@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -34,11 +36,11 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
         @Index(name = "sp_idx_artifact_02", columnList = "tenant,sha1_hash"),
         @Index(name = "sp_idx_artifact_prim", columnList = "tenant,id") })
 @Entity
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Artifact {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Column(name = "sha1_hash", length = 40, nullable = false, updatable = false)

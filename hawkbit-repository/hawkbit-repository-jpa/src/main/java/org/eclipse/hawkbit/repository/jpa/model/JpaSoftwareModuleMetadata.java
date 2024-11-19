@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -31,6 +33,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 @Table(name = "sp_sw_metadata")
 public class JpaSoftwareModuleMetadata extends AbstractJpaMetaData implements SoftwareModuleMetadata {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id

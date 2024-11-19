@@ -82,7 +82,7 @@ public class DmfController {
     public void unregisterThing() {
         log.debug(LOG_PREFIX + "Removing Controller...", getTenantId(), getControllerId());
         dmfSender.removeThing(getTenantId(), getControllerId());
-        log.debug(LOG_PREFIX + "Done. Create thing sent.", getTenantId(), getControllerId());
+        log.debug(LOG_PREFIX + "Done. Remove thing sent.", getTenantId(), getControllerId());
     }
 
     public void stop() {
