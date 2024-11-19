@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
@@ -21,11 +23,11 @@ import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
  * Extension for {@link NamedEntity} that are versioned.
  */
 @MappedSuperclass
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public abstract class AbstractJpaNamedVersionedEntity extends AbstractJpaNamedEntity implements NamedVersionedEntity {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Column(name = "version", nullable = false, length = NamedVersionedEntity.VERSION_MAX_SIZE)

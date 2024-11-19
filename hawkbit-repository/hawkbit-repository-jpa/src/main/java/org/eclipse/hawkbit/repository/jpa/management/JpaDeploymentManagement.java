@@ -556,7 +556,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                         try {
                             assertTargetUpdateAllowed(action);
                             forceQuitAction(action.getId());
-                            log.debug("Action {} force canceled", action.getId());
+                            log.debug("Action {} force canceled (force)", action.getId());
                         } catch (final InsufficientPermissionException e) {
                             log.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
                         } catch (final EntityNotFoundException e) {

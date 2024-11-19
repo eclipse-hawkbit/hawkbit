@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -30,12 +31,14 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
  * and use them also for filtering the DistributionSet list.
  */
 @Entity
-@Table(name = "sp_distributionset_tag", indexes = {
-        @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id"),
-        @Index(name = "sp_idx_distribution_set_tag_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-        "name", "tenant" }, name = "uk_ds_tag"))
+@Table(name = "sp_distributionset_tag",
+        indexes = {
+                @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id"),
+                @Index(name = "sp_idx_distribution_set_tag_01", columnList = "tenant,name") },
+        uniqueConstraints = @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_ds_tag"))
 public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag, EventAwareEntity {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @ManyToMany(mappedBy = "tags", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY)

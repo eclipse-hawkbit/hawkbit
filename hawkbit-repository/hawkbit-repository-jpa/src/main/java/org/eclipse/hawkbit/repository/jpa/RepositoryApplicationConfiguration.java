@@ -235,8 +235,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         // ValidatorFactory shall NOT be closed because after closing the generated Validator
         // methods shall not be called - we need the validator in future
         processor.setValidator(Validation.byDefaultProvider().configure()
-                .addProperty(BaseHibernateValidatorConfiguration.ALLOW_PARALLEL_METHODS_DEFINE_PARAMETER_CONSTRAINTS,
-                        "true")
+                .addProperty(BaseHibernateValidatorConfiguration.ALLOW_PARALLEL_METHODS_DEFINE_PARAMETER_CONSTRAINTS,"true")
                 .buildValidatorFactory().getValidator());
         return processor;
     }

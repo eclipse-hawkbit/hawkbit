@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.rest.json.model;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -74,7 +75,7 @@ public class ResponseList<T> extends RepresentationModel<ResponseList<T>> implem
 
     @Override
     public boolean containsAll(final Collection<?> c) {
-        return content.containsAll(c);
+        return new HashSet<>(content).containsAll(c);
     }
 
     @Override

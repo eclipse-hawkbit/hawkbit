@@ -9,30 +9,27 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 
+import lombok.NoArgsConstructor;
+
 /**
- * The Software Module meta data composite key which contains the meta data key
+ * The Software Module meta-data composite key which contains the meta-data key
  * and the ID of the software module itself.
  */
+@NoArgsConstructor // Default constructor for JPA
 public final class SwMetadataCompositeKey implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private String key;
-
     private Long softwareModule;
 
     /**
-     * Default constructor for JPA.
-     */
-    public SwMetadataCompositeKey() {
-        // Default constructor for JPA.
-    }
-
-    /**
-     * @param moduleId the software module for this meta data
-     * @param key the key of the meta data
+     * @param moduleId the software module for this meta-data
+     * @param key the key of the meta-data
      */
     public SwMetadataCompositeKey(final Long moduleId, final String key) {
         this.softwareModule = moduleId;

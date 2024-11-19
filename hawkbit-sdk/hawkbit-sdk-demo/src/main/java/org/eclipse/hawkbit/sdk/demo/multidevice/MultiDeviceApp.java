@@ -108,7 +108,7 @@ public class MultiDeviceApp {
         public void stopOne(@ShellOption("--id") final String controllerId) {
             ddiTenant.getController(controllerId).ifPresentOrElse(
                     DdiController::stop,
-                    () -> log.error("Controller with id " + controllerId + " not found!"));
+                    () -> log.error("Controller with id {} not found!", controllerId));
 
         }
 

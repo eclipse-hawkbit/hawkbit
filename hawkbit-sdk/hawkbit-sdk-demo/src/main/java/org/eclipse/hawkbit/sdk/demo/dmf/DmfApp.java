@@ -74,7 +74,7 @@ public class DmfApp {
         public void stopOne(@ShellOption("--id") final String controllerId) {
             dmfTenant.getController(controllerId).ifPresentOrElse(
                     DmfController::stop,
-                    () -> log.error("Controller with id " + controllerId + " not found!"));
+                    () -> log.error("Controller with id {} not found!", controllerId));
         }
 
         @ShellMethod(key = "start")

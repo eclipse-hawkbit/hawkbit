@@ -36,7 +36,7 @@ public class AfterTransactionCommitDefaultServiceExecutor extends TransactionSyn
             try {
                 afterCommitRunnable.run();
             } catch (final RuntimeException e) {
-                log.error("Failed to execute runnable " + afterCommitRunnable, e);
+                log.error("Failed to execute runnable {}", afterCommitRunnable, e);
             }
         }
     }

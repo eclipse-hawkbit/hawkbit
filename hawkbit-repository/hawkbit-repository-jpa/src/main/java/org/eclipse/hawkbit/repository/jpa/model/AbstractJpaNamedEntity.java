@@ -24,8 +24,7 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
  * addition to their technical ID.
  */
 @MappedSuperclass
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public abstract class AbstractJpaNamedEntity extends AbstractJpaTenantAwareBaseEntity implements NamedEntity {
 

@@ -39,7 +39,7 @@ public class ThresholdRolloutGroupErrorCondition
         final Long error = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
                 rolloutGroup.getId(), Action.Status.ERROR);
         try {
-            final Integer threshold = Integer.valueOf(expression);
+            final int threshold = Integer.parseInt(expression);
 
             if (totalGroup == 0) {
                 // in case e.g. targets has been deleted we don't have any
@@ -50,7 +50,7 @@ public class ThresholdRolloutGroupErrorCondition
             // calculate threshold
             return ((float) error / (float) totalGroup) > ((float) threshold / 100F);
         } catch (final NumberFormatException e) {
-            log.error("Cannot evaluate condition expression " + expression, e);
+            log.error("Cannot evaluate condition expression {}", expression, e);
             return false;
         }
     }

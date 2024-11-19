@@ -208,8 +208,8 @@ public final class FileStreamingUtil {
                 if (ifRangeTime != -1 && ifRangeTime + 1000 < lastModified) {
                     ranges.add(full);
                 }
-            } catch (final IllegalArgumentException ignore) {
-                log.info("Invalid if-range header field", ignore);
+            } catch (final IllegalArgumentException ignored) {
+                log.info("Invalid if-range header field", ignored);
                 ranges.add(full);
             }
         }

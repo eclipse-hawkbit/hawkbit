@@ -9,28 +9,27 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
+import lombok.NoArgsConstructor;
+
 /**
- * The Target Metadata composite key which contains the meta data key and the ID
- * of the Target itself.
+ * The Target Metadata composite key which contains the meta-data key and the ID of the Target itself.
  */
+@NoArgsConstructor // Default constructor for JPA
 public final class TargetMetadataCompositeKey implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private String key;
-
     private Long target;
 
-    public TargetMetadataCompositeKey() {
-        // Default constructor for JPA.
-    }
-
     /**
-     * @param target the target Id for this meta data
-     * @param key the key of the meta data
+     * @param target the target Id for this meta-data
+     * @param key the key of the meta-data
      */
     public TargetMetadataCompositeKey(final Long target, final String key) {
         this.target = target;

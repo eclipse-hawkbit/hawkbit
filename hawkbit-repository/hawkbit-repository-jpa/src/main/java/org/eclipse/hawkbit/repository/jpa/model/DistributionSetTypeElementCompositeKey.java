@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import jakarta.persistence.Column;
@@ -20,6 +21,7 @@ import jakarta.persistence.Embeddable;
 @Embeddable
 public class DistributionSetTypeElementCompositeKey implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Column(name = "distribution_set_type", nullable = false, updatable = false)

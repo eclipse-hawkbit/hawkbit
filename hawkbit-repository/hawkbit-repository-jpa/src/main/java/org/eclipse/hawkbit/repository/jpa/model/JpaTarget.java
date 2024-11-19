@@ -76,8 +76,7 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
         @Index(name = "sp_idx_target_05", columnList = "tenant,last_modified_at"),
         @Index(name = "sp_idx_target_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
         "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 @Slf4j
 public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAwareEntity {

@@ -225,15 +225,15 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
             return builder;
         }
 
-        builder = message.substring(message.indexOf(':') + 1, message.length());
-        if (builder.indexOf("Was expecting") != -1) {
+        builder = message.substring(message.indexOf(':') + 1);
+        if (builder.contains("Was expecting")) {
             builder = builder.substring(0, builder.lastIndexOf("Was expecting"));
         }
 
         if (!CollectionUtils.isEmpty(expectedTokens)) {
             final StringBuilder tokens = new StringBuilder();
-            expectedTokens.stream().forEach(value -> tokens.append(value.getSuggestion() + ","));
-            builder = builder.concat("Was expecting :" + tokens.toString().substring(0, tokens.length() - 1));
+            expectedTokens.stream().forEach(value -> tokens.append(value.getSuggestion()).append(","));
+            builder = builder.concat("Was expecting :" + tokens.substring(0, tokens.length() - 1));
         }
         builder = builder.replace('\r', ' ');
         builder = builder.replace('\n', ' ');
@@ -290,7 +290,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
             final String finalTmpTokenName = tmpTokenName;
             return Arrays.stream(TargetFields.values())
                     .filter(field -> field.toString().equalsIgnoreCase(finalTmpTokenName))
-                    .map(TargetFields::getSubEntityAttributes).flatMap(List::stream).count() > 0;
+                    .map(TargetFields::getSubEntityAttributes).mapToLong(List::size).sum() > 0;
         }
 
         private static boolean isMap(final String tokenImageName) {
@@ -316,16 +316,14 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
 
         private static boolean containsValue(final String imageName) {
             if (!imageName.contains(".")) {
-                return FIELD_NAMES.stream().filter(value -> value.equalsIgnoreCase(imageName)).count() > 0;
+                return FIELD_NAMES.stream().anyMatch(value -> value.equalsIgnoreCase(imageName));
             }
             final String[] split = imageName.split("\\.");
             if (split.length > 1 && FIELD_NAMES.contains(split[0].toLowerCase())) {
                 return SUB_NAMES.get(split[0].toLowerCase()).stream()
-                        .filter(subname -> (split[0] + "." + subname).equalsIgnoreCase(imageName)).count() > 0;
+                        .anyMatch(subname -> (split[0] + "." + subname).equalsIgnoreCase(imageName));
             }
-            return FIELD_NAMES.stream().filter(value -> value.equalsIgnoreCase(imageName)).count() > 0;
+            return FIELD_NAMES.stream().anyMatch(value -> value.equalsIgnoreCase(imageName));
         }
-
     }
-
 }

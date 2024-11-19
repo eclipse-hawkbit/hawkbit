@@ -66,8 +66,7 @@ import org.springframework.context.ApplicationEvent;
         @Index(name = "sp_idx_distribution_set_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "DistributionSet.detail", attributeNodes = { @NamedAttributeNode("modules"),
         @NamedAttributeNode("tags"), @NamedAttributeNode("type") })
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implements DistributionSet, EventAwareEntity {
 
