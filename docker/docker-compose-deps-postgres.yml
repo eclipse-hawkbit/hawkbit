@@ -14,7 +14,7 @@ services:
   # Postgres service
   # ---------------------
   postgres:
-    image: "postgres:16.1"
+    image: "postgres:16.5"
     ports:
       - "5432:5432"
     deploy:
@@ -24,6 +24,10 @@ services:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "admin"
       POSTGRES_DB: "hawkbit"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}"]
+      interval: 20s
+      retries: 10
 
   # ---------------------
   # RabbitMQ service
