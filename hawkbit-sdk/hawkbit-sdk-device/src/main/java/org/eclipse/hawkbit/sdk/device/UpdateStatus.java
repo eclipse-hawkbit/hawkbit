@@ -51,7 +51,7 @@ public record UpdateStatus(Status status, List<String> messages) {
         /**
          * Update has been not successful and response the error update.
          */
-        FAILURE(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.FAILURE, null);
+        FAILURE(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.FAILURE, 404);
 
         private final DdiStatus.ExecutionStatus executionStatus;
         private final DdiResult.FinalResult finalResult;
