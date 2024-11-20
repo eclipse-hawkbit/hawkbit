@@ -10,7 +10,7 @@
 version: '3.7'
 
 include:
-  - docker-compose-deps-mysql.yml
+  - docker-compose-deps-postgres.yml
 
 services:
 
@@ -18,11 +18,12 @@ services:
   # HawkBit DDI
   # ---------------------
   hawkbit-ddi:
-    image: "hawkbit/hawkbit-ddi-server:latest-mysql"
+    image: "hawkbit/hawkbit-ddi-server:latest"
     environment:
-      - 'PROFILES=mysql'
-      - 'SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/hawkbit'
-      - 'SPRING_DATASOURCE_USERNAME=root'
+      - 'PROFILES=postgresql'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
+      - 'SPRING_DATASOURCE_USERNAME=postgres'
+      - 'SPRING_DATASOURCE_PASSWORD=admin'
       - 'SPRING_RABBITMQ_HOST=rabbitmq'
       - 'SPRING_RABBITMQ_USERNAME=guest'
       - 'SPRING_RABBITMQ_PASSWORD=guest'
@@ -30,7 +31,7 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     labels:
       NAME: "hawkbit-ddi"
@@ -39,17 +40,18 @@ services:
   # HawkBit DMF
   # ---------------------
   hawkbit-dmf:
-    image: "hawkbit/hawkbit-dmf-server:latest-mysql"
+    image: "hawkbit/hawkbit-dmf-server:latest"
     environment:
-      - 'PROFILES=mysql'
-      - 'SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/hawkbit'
-      - 'SPRING_DATASOURCE_USERNAME=root'
+      - 'PROFILES=postgresql'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
+      - 'SPRING_DATASOURCE_USERNAME=postgres'
+      - 'SPRING_DATASOURCE_PASSWORD=admin'
       - 'SPRING_RABBITMQ_HOST=rabbitmq'
       - 'SPRING_RABBITMQ_USERNAME=guest'
       - 'SPRING_RABBITMQ_PASSWORD=guest'
     restart: always
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     labels:
       NAME: "hawkbit-dmf"
@@ -58,11 +60,12 @@ services:
   # HawkBit MGMT
   # ---------------------
   hawkbit-mgmt:
-    image: "hawkbit/hawkbit-mgmt-server:latest-mysql"
+    image: "hawkbit/hawkbit-mgmt-server:latest"
     environment:
-      - 'PROFILES=mysql'
-      - 'SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/hawkbit'
-      - 'SPRING_DATASOURCE_USERNAME=root'
+      - 'PROFILES=postgresql'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
+      - 'SPRING_DATASOURCE_USERNAME=postgres'
+      - 'SPRING_DATASOURCE_PASSWORD=admin'
       - 'SPRING_RABBITMQ_HOST=rabbitmq'
       - 'SPRING_RABBITMQ_USERNAME=guest'
       - 'SPRING_RABBITMQ_PASSWORD=guest'
@@ -72,7 +75,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     labels:
       NAME: "hawkbit-mgmt"

@@ -10,7 +10,7 @@
 version: '3'
 
 include:
-  - docker-compose-deps-mysql.yml
+  - docker-compose-deps-postgres.yml
 
 services:
 
@@ -18,11 +18,12 @@ services:
   # HawkBit service
   # ---------------------
   hawkbit:
-    image: "hawkbit/hawkbit-update-server:latest-mysql"
+    image: "hawkbit/hawkbit-update-server:latest"
     environment:
-      - 'PROFILES=mysql'
-      - 'SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/hawkbit'
-      - 'SPRING_DATASOURCE_USERNAME=root'
+      - 'PROFILES=postgresql'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
+      - 'SPRING_DATASOURCE_USERNAME=postgres'
+      - 'SPRING_DATASOURCE_PASSWORD=admin'
       - 'SPRING_RABBITMQ_HOST=rabbitmq'
       - 'SPRING_RABBITMQ_USERNAME=guest'
       - 'SPRING_RABBITMQ_PASSWORD=guest'
@@ -32,7 +33,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     labels:
       NAME: "hawkbit"
