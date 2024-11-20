@@ -15,6 +15,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Controller;
  * Management API.
  */
 @Configuration
+@EnableMethodSecurity(proxyTargetClass = true, securedEnabled = true)
 @ComponentScan
 @Import({ RestConfiguration.class, OpenApiConfiguration.class })
 @PropertySource("classpath:/hawkbit-mgmt-api-defaults.properties")
