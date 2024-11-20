@@ -9,21 +9,18 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Thrown if a distribution set is assigned to a a target that is incomplete
  * (i.e. mandatory modules are missing).
- *
- *
- *
- *
  */
 public final class IncompleteDistributionSetException extends AbstractServerRtException {
-    /**
-    *
-    */
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -35,16 +32,14 @@ public final class IncompleteDistributionSetException extends AbstractServerRtEx
     }
 
     /**
-     * @param cause
-     *            for the exception
+     * @param cause for the exception
      */
     public IncompleteDistributionSetException(final Throwable cause) {
         super(SpServerError.SP_DS_INCOMPLETE, cause);
     }
 
     /**
-     * @param message
-     *            of the error
+     * @param message of the error
      */
     public IncompleteDistributionSetException(final String message) {
         super(message, SpServerError.SP_DS_INCOMPLETE);

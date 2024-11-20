@@ -10,10 +10,10 @@
 package org.eclipse.hawkbit.repository.model;
 
 /**
- * {@link Type} is an abstract definition for {@link DistributionSetType}s and
- * {@link SoftwareModuleType}s
+ * {@link Type} is an abstract definition for {@link DistributionSetType}s and {@link SoftwareModuleType}s
  */
 public interface Type extends NamedEntity {
+
     /**
      * Maximum length of key.
      */
@@ -30,8 +30,7 @@ public interface Type extends NamedEntity {
     String getKey();
 
     /**
-     * @return <code>true</code> if the type is deleted and only kept for
-     *         history purposes.
+     * @return <code>true</code> if the type is deleted and only kept for history purposes.
      */
     boolean isDeleted();
 
@@ -39,5 +38,4 @@ public interface Type extends NamedEntity {
      * @return get color code to be used in management UI views.
      */
     String getColour();
-
 }

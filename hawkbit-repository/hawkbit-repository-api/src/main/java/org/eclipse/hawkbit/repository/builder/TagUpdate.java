@@ -18,28 +18,24 @@ import org.eclipse.hawkbit.repository.model.Tag;
 /**
  * Builder to update an existing {@link Tag} entry. Defines all fields that can
  * be updated.
- *
  */
 public interface TagUpdate {
+
     /**
-     * @param name
-     *            for {@link Tag#getName()}
+     * @param name for {@link Tag#getName()}
      * @return updated builder instance
      */
     TagUpdate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
-     * @param description
-     *            for {@link Tag#getDescription()}
+     * @param description for {@link Tag#getDescription()}
      * @return updated builder instance
      */
     TagUpdate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
-     * @param colour
-     *            for {@link Tag#getColour()}
+     * @param colour for {@link Tag#getColour()}
      * @return updated builder instance
      */
     TagUpdate colour(@Size(max = Tag.COLOUR_MAX_SIZE) String colour);
-
 }

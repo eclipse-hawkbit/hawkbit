@@ -1,0 +1,4 @@
+org.eclipse.hawkbit.autoconfigure.ddi.DdiApiAutoConfiguration
+org.eclipse.hawkbit.rest.SecurityManagedConfiguration
+org.eclipse.hawkbit.autoconfigure.ddi.ControllerSecurityConfiguration
+org.eclipse.hawkbit.autoconfigure.ddi.ControllerDownloadSecurityConfiguration

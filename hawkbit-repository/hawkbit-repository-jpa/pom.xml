@@ -9,155 +9,138 @@
     SPDX-License-Identifier: EPL-2.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-   <modelVersion>4.0.0</modelVersion>
-   <parent>
-      <groupId>org.eclipse.hawkbit</groupId>
-      <version>${revision}</version>
-      <artifactId>hawkbit-repository</artifactId>
-   </parent>
-   <artifactId>hawkbit-repository-jpa</artifactId>
-   <name>hawkBit :: Repository :: JPA Implementation</name>
-   
-   <properties>
-      <apt.source.dir>${project.build.directory}/generated-sources/apt/</apt.source.dir>
-   </properties>
-   
-   <dependencies>
-      <!-- Hawkbit -->
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-repository-api</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-repository-core</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-artifact-repository-filesystem</artifactId>
-         <version>${project.version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework</groupId>
-         <artifactId>spring-core</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.boot</groupId>
-         <artifactId>spring-boot-starter-data-jpa</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.eclipse.persistence</groupId>
-         <artifactId>org.eclipse.persistence.jpa</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.security</groupId>
-         <artifactId>spring-security-core</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.flywaydb</groupId>
-         <artifactId>flyway-core</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.flywaydb</groupId>
-         <artifactId>flyway-mysql</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>cz.jirutka.rsql</groupId>
-         <artifactId>rsql-parser</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.jsoup</groupId>
-         <artifactId>jsoup</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>javax.xml.bind</groupId>
-         <artifactId>jaxb-api</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.hibernate.validator</groupId>
-         <artifactId>hibernate-validator</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.apache.commons</groupId>
-         <artifactId>commons-collections4</artifactId>
-      </dependency>
-      
-      <!-- Test -->
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-repository-test</artifactId>
-         <version>${project.version}</version>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>javax.el</groupId>
-         <artifactId>javax.el-api</artifactId>
-         <scope>test</scope>
-      </dependency>
-      <dependency>
-         <groupId>io.qameta.allure</groupId>
-         <artifactId>allure-junit5</artifactId>
-         <scope>test</scope>
-      </dependency>
-   </dependencies>
-   
-   <build>
-      <plugins>
-         <!-- Static weaver for EclipseLink -->
-         <plugin>
-            <groupId>com.ethlo.persistence.tools</groupId>
-            <artifactId>eclipselink-maven-plugin</artifactId>
-            <executions>
-               <execution>
-                  <id>modelgen</id>
-                  <phase>generate-sources</phase>
-                  <goals>
-                     <goal>modelgen</goal>
-                  </goals>
-               </execution>
-               <execution>
-                  <phase>process-classes</phase>
-                  <goals>
-                     <goal>weave</goal>
-                  </goals>
-               </execution>
-            </executions>
-            <configuration>
-               <basePackage>org.eclipse.hawkbit.repository.jpa.model</basePackage>
-            </configuration>
-            <dependencies>
-               <dependency>
-                  <groupId>org.eclipse.persistence</groupId>
-                  <artifactId>org.eclipse.persistence.jpa</artifactId>
-                  <version>${eclipselink.version}</version>
-               </dependency>
-            </dependencies>
-         </plugin>
-         <plugin>
-            <!-- Should be placed here below 'eclipselink-maven-plugin' as the plugin should be executed -->
-            <!-- after the code generation and the order of the plugins in the pom is relevant for maven -->
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-            <executions>
-               <execution>
-                  <id>add-source</id>
-                  <phase>generate-sources</phase>
-                  <goals>
-                     <goal>add-source</goal>
-                  </goals>
-                  <configuration>
-                     <sources>
-                        <source>${apt.source.dir}</source>
-                     </sources>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
-      </plugins>
-   </build>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.eclipse.hawkbit</groupId>
+        <version>${revision}</version>
+        <artifactId>hawkbit-repository</artifactId>
+    </parent>
+
+    <artifactId>hawkbit-repository-jpa</artifactId>
+    <name>hawkBit :: Repository :: JPA Implementation</name>
+
+    <properties>
+        <apt.source.dir>${project.build.directory}/generated-sources/apt/</apt.source.dir>
+    </properties>
+
+    <dependencies>
+        <!-- Hawkbit -->
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-repository-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-repository-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.persistence</groupId>
+            <artifactId>org.eclipse.persistence.jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cz.jirutka.rsql</groupId>
+            <artifactId>rsql-parser</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-repository-test</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Static weaver for EclipseLink -->
+            <plugin>
+                <groupId>com.ethlo.persistence.tools</groupId>
+                <artifactId>eclipselink-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>modelgen</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>modelgen</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>weave</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <basePackage>org.eclipse.hawkbit.repository.jpa.model</basePackage>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.eclipse.persistence</groupId>
+                        <artifactId>org.eclipse.persistence.jpa</artifactId>
+                        <version>${eclipselink.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <!-- Should be placed here below 'eclipselink-maven-plugin' as the plugin should be executed -->
+                <!-- after the code generation and the order of the plugins in the pom is relevant for maven -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${apt.source.dir}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

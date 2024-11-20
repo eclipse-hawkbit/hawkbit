@@ -9,10 +9,10 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import lombok.Getter;
-
 import java.util.Collections;
 import java.util.List;
+
+import lombok.Getter;
 
 /**
  * Describing the fields of the Rollout model which can be used in the REST API e.g. for sorting etc.

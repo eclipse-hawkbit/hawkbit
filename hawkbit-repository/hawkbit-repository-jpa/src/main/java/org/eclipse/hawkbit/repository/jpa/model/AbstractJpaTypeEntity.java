@@ -9,14 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.eclipse.hawkbit.repository.model.Type;
+import java.io.Serial;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.io.Serial;
+
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.eclipse.hawkbit.repository.model.Type;
 
 /**
  * {@link TenantAwareBaseEntity} extension for all entities that are named in
@@ -49,10 +50,8 @@ public abstract class AbstractJpaTypeEntity extends AbstractJpaNamedEntity imple
     /**
      * Parameterized constructor.
      *
-     * @param key
-     *            of the {@link Type}
-     * @param colour
-     *            of the {@link Type}
+     * @param key of the {@link Type}
+     * @param colour of the {@link Type}
      */
     AbstractJpaTypeEntity(final String name, final String description, final String key, final String colour) {
         super(name, description);
@@ -70,11 +69,11 @@ public abstract class AbstractJpaTypeEntity extends AbstractJpaNamedEntity imple
         return colour;
     }
 
-    public void setKey(final String key) {
-        this.key = key;
-    }
-
     public void setColour(final String colour) {
         this.colour = colour;
+    }
+
+    public void setKey(final String key) {
+        this.key = key;
     }
 }

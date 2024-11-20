@@ -3,6 +3,12 @@ title: Release notes
 weight: 100
 ---
 
+## 0.6.1
+
+**Release Date:** Wednesday, October 30, 2024 <br />
+Hawkbit: [Tag](https://github.com/eclipse-hawkbit/hawkbit/releases/tag/0.6.1) /
+[Release](https://github.com/eclipse-hawkbit/hawkbit/milestone/27) <br />
+
 ## 0.5.0
 
 **Release Date:** Friday, March 22, 2024 <br />
@@ -28,25 +34,24 @@ Extensions: [Tag](https://github.com/eclipse-hawkbit/hawkbit-extensions/releases
 
 **Release Date:** Thursday, August 24, 2023 <br />
 Hawkbit: [Tag](https://github.com/eclipse-hawkbit/hawkbit/releases/tag/0.3.0M9) /
-         [Release](https://github.com/eclipse-hawkbit/hawkbit/milestone/24)  <br />
+[Release](https://github.com/eclipse-hawkbit/hawkbit/milestone/24)  <br />
 Extensions: [Tag](https://github.com/eclipse-hawkbit/hawkbit-extensions/releases/tag/0.3.0M9)
 
 ## 0.3.0M8
 
 **Release Date:** Friday, April 21, 2023 <br />
 Hawkbit: [Tag](https://github.com/eclipse-hawkbit/hawkbit/releases/tag/0.3.0M8) /
-         [Release](https://github.com/eclipse-hawkbit/hawkbit/milestone/23)   <br />
+[Release](https://github.com/eclipse-hawkbit/hawkbit/milestone/23)   <br />
 Extensions: [Tag](https://github.com/eclipse-hawkbit/hawkbit-extensions/releases/tag/0.3.0M8) /
-         [Release](https://github.com/eclipse-hawkbit/hawkbit-extensions/milestone/2)
-
+[Release](https://github.com/eclipse-hawkbit/hawkbit-extensions/milestone/2)
 
 ## 0.3.0M7
 
 **Release Date:** Monday, February 15, 2021 <br />
 Hawkbit: [Tag](https://github.com/eclipse-hawkbit/hawkbit/releases/tag/0.3.0M7) /
-         [Release](https://github.com/eclipse-hawkbit/hawkbit/milestone/22?closed=1) <br />
+[Release](https://github.com/eclipse-hawkbit/hawkbit/milestone/22?closed=1) <br />
 Extensions: [Tag](https://github.com/eclipse-hawkbit/hawkbit-extensions/releases/tag/0.3.0M7) /
-            [Release](https://github.com/eclipse-hawkbit/hawkbit-extensions/milestone/1?closed=1)
+[Release](https://github.com/eclipse-hawkbit/hawkbit-extensions/milestone/1?closed=1)
 
 ## 0.3.0M6
 
@@ -114,20 +119,19 @@ Extensions: [Tag](https://github.com/eclipse-hawkbit/hawkbit-extensions/releases
 [Tag](https://github.com/eclipse-hawkbit/hawkbit/releases/tag/0.2.1) /
 [Release](https://github.com/eclipse-hawkbit/hawkbit/milestone/9?closed=1)
 
-
 ## 0.2.0
 
 First Eclipse hawkBit release including:
 
 * **Core features:**
-  * Device and Software Repository
-  * Artifact Content Delivery
-  * Rollout/Campaign Management
+    * Device and Software Repository
+    * Artifact Content Delivery
+    * Rollout/Campaign Management
 
 * **Interfaces:**
-  * Management API
-  * Direct Device Integration (DDI) API
-  * Device Management Federation (DMF) API
+    * Management API
+    * Direct Device Integration (DDI) API
+    * Device Management Federation (DMF) API
 
 **Release Date:** Friday, June 15, 2018 <br />
 [Tag](https://github.com/eclipse-hawkbit/hawkbit/releases/tag/0.2.0) /

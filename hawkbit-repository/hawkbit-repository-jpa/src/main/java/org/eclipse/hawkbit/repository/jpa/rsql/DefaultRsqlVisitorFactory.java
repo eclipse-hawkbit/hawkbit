@@ -9,10 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
+import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;
-
-import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 
 /**
  * Factory providing {@link RSQLVisitor} instances which validate the nodes

@@ -9,13 +9,13 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import lombok.Getter;
-
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
+
+import lombok.Getter;
 
 /**
  * Describing the fields of the SoftwareModule model which can be used in the REST API e.g. for sorting etc.
@@ -41,6 +41,7 @@ public enum SoftwareModuleFields implements RsqlQueryField {
     SoftwareModuleFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
         this(jpaEntityFieldName, List.of(subEntityAttributes), null);
     }
+
     SoftwareModuleFields(final String jpaEntityFieldName, final Entry<String, String> subEntityMapTuple) {
         this(jpaEntityFieldName, Collections.emptyList(), subEntityMapTuple);
     }

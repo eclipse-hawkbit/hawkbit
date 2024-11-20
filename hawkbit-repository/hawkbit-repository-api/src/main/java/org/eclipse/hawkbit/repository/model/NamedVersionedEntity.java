@@ -11,9 +11,9 @@ package org.eclipse.hawkbit.repository.model;
 
 /**
  * Entities that have a name and a description.
- *
  */
 public interface NamedVersionedEntity extends NamedEntity {
+
     /**
      * Maximum length of version.
      */

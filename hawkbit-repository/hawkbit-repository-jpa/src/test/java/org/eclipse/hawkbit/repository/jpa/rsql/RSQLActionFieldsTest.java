@@ -12,6 +12,9 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -27,10 +30,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.orm.jpa.vendor.Database;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter actions")
@@ -49,25 +48,6 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
         for (int i = 0; i < 10; i++) {
             newJpaAction(dsA, i % 2 == 0, i % 2 == 0 ? "extRef" : "extRef2");
         }
-    }
-
-    private @NotNull JpaAction newJpaAction(final DistributionSet dsA, final boolean active, final String extRef) {
-        final JpaAction newAction = new JpaAction();
-        newAction.setActionType(ActionType.SOFT);
-        newAction.setDistributionSet(dsA);
-        newAction.setActive(active);
-        newAction.setStatus(Status.RUNNING);
-        newAction.setTarget(target);
-        newAction.setWeight(45);
-        newAction.setInitiatedBy(tenantAware.getCurrentUsername());
-        if (extRef != null) {
-            newAction.setExternalRef(extRef);
-        }
-        actionRepository.save(newAction);
-
-        target.addAction(action);
-
-        return newAction;
     }
 
     @Test
@@ -104,12 +84,32 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
         }
 
     }
+
     @Test
     @Description("Test action by status")
     public void testFilterByParameterExtRef() {
         assertRSQLQuery(ActionFields.EXTERNALREF.name() + "==extRef", 5);
         assertRSQLQuery(ActionFields.EXTERNALREF.name() + "!=extRef", 6);
         assertRSQLQuery(ActionFields.EXTERNALREF.name() + "==extRef*", 10);
+    }
+
+    private @NotNull JpaAction newJpaAction(final DistributionSet dsA, final boolean active, final String extRef) {
+        final JpaAction newAction = new JpaAction();
+        newAction.setActionType(ActionType.SOFT);
+        newAction.setDistributionSet(dsA);
+        newAction.setActive(active);
+        newAction.setStatus(Status.RUNNING);
+        newAction.setTarget(target);
+        newAction.setWeight(45);
+        newAction.setInitiatedBy(tenantAware.getCurrentUsername());
+        if (extRef != null) {
+            newAction.setExternalRef(extRef);
+        }
+        actionRepository.save(newAction);
+
+        target.addAction(action);
+
+        return newAction;
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expectedEntities) {

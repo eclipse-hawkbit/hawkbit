@@ -18,6 +18,12 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
+import cz.jirutka.rsql.parser.RSQLParser;
+import cz.jirutka.rsql.parser.RSQLParserException;
+import cz.jirutka.rsql.parser.ast.ComparisonOperator;
+import cz.jirutka.rsql.parser.ast.Node;
+import cz.jirutka.rsql.parser.ast.RSQLOperators;
+import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,13 +37,6 @@ import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.util.CollectionUtils;
-
-import cz.jirutka.rsql.parser.RSQLParser;
-import cz.jirutka.rsql.parser.RSQLParserException;
-import cz.jirutka.rsql.parser.ast.ComparisonOperator;
-import cz.jirutka.rsql.parser.ast.Node;
-import cz.jirutka.rsql.parser.ast.RSQLOperators;
-import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 
 /**
  * A utility class which is able to parse RSQL strings into an spring data
@@ -85,7 +84,6 @@ public final class RSQLUtility {
      * @param fieldNameProvider the enum class type which implements the {@link RsqlQueryField}
      * @param virtualPropertyReplacer holds the logic how the known macros have to be resolved; may be <code>null</code>
      * @param database database in use
-     *
      * @return a specification which can be used with JPA
      * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
      *         given {@code fieldNameProvider}
@@ -99,10 +97,9 @@ public final class RSQLUtility {
 
     /**
      * Validates the RSQL string
-     * 
+     *
      * @param rsql RSQL string to validate
      * @param fieldNameProvider
-     * 
      * @throws RSQLParserException if RSQL syntax is invalid
      * @throws RSQLParameterUnsupportedFieldException if RSQL key is not allowed
      */
@@ -119,7 +116,9 @@ public final class RSQLUtility {
         try {
             final Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
             return new RSQLParser(operators).parse(
-                    RsqlConfigHolder.getInstance().isCaseInsensitiveDB() || RsqlConfigHolder.getInstance().isIgnoreCase() ? rsql.toLowerCase() : rsql);
+                    RsqlConfigHolder.getInstance().isCaseInsensitiveDB() || RsqlConfigHolder.getInstance().isIgnoreCase()
+                            ? rsql.toLowerCase()
+                            : rsql);
         } catch (final IllegalArgumentException e) {
             throw new RSQLParameterSyntaxException("RSQL filter must not be null", e);
         } catch (final RSQLParserException e) {
@@ -157,10 +156,11 @@ public final class RSQLUtility {
                                     virtualPropertyReplacer, database, query,
                                     !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase())
                             :
-                            new JpaQueryRsqlVisitorG2<>(
-                                    enumType, root, query, cb,
-                                    database, virtualPropertyReplacer,
-                                    !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase());
+                                    new JpaQueryRsqlVisitorG2<>(
+                                            enumType, root, query, cb,
+                                            database, virtualPropertyReplacer,
+                                            !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance()
+                                                    .isIgnoreCase());
             final List<Predicate> accept = rootNode.accept(jpqQueryRSQLVisitor);
 
             if (CollectionUtils.isEmpty(accept)) {

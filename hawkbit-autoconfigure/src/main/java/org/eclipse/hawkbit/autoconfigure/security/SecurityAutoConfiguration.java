@@ -16,11 +16,11 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.im.authentication.SpRole;
-import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties;
-import org.eclipse.hawkbit.im.authentication.TenantAwareUserProperties.User;
+import org.eclipse.hawkbit.tenancy.TenantAwareUserProperties;
+import org.eclipse.hawkbit.tenancy.TenantAwareUserProperties.User;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
-import org.eclipse.hawkbit.security.InMemoryUserAuthoritiesResolver;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+import org.eclipse.hawkbit.security.InMemoryUserAuthoritiesResolver;
 import org.eclipse.hawkbit.security.MdcHandler;
 import org.eclipse.hawkbit.security.SecurityContextSerializer;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
@@ -53,18 +53,15 @@ import org.springframework.util.CollectionUtils;
  * {@link EnableAutoConfiguration Auto-configuration} for security.
  */
 @Configuration
-@EnableConfigurationProperties({
-        SecurityProperties.class,
-        DdiSecurityProperties.class, HawkbitSecurityProperties.class, TenantAwareUserProperties.class })
+@EnableConfigurationProperties({ SecurityProperties.class, HawkbitSecurityProperties.class, TenantAwareUserProperties.class })
 public class SecurityAutoConfiguration {
 
     /**
-     * Creates a {@link ContextAware} (hence {@link TenantAware}) bean based on the given
-     * {@link UserAuthoritiesResolver} and {@link SecurityContextSerializer}.
+     * Creates a {@link ContextAware} (hence {@link TenantAware}) bean based on the given {@link UserAuthoritiesResolver} and
+     * {@link SecurityContextSerializer}.
      *
      * @param authoritiesResolver The user authorities/roles resolver
      * @param securityContextSerializer The security context serializer.
-     *
      * @return the {@link ContextAware} singleton bean.
      */
     @Bean
@@ -76,8 +73,7 @@ public class SecurityAutoConfiguration {
     }
 
     /**
-     * Creates a {@link UserAuthoritiesResolver} bean that is responsible for
-     * resolving user authorities/roles.
+     * Creates a {@link UserAuthoritiesResolver} bean that is responsible for resolving user authorities/roles.
      *
      * @param securityProperties The Spring {@link SecurityProperties} for the security user
      * @param tenantAwareUserProperties The {@link TenantAwareUserProperties} for the managed users
@@ -85,7 +81,8 @@ public class SecurityAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public UserAuthoritiesResolver inMemoryAuthoritiesResolver(final SecurityProperties securityProperties,
+    public UserAuthoritiesResolver inMemoryAuthoritiesResolver(
+            final SecurityProperties securityProperties,
             final TenantAwareUserProperties tenantAwareUserProperties) {
         final Map<String, User> tenantAwareUsers = tenantAwareUserProperties.getUser();
         final Map<String, List<String>> usersToPermissions;
@@ -111,14 +108,12 @@ public class SecurityAutoConfiguration {
     }
 
     /**
-     * @param tenantAware
-     *            singleton bean
+     * @param tenantAware singleton bean
      * @return tenantAware {@link SystemSecurityContext}
      */
     @Bean
     @ConditionalOnMissingBean
-    public SystemSecurityContext systemSecurityContext(
-            final TenantAware tenantAware, final RoleHierarchy roleHierarchy) {
+    public SystemSecurityContext systemSecurityContext(final TenantAware tenantAware, final RoleHierarchy roleHierarchy) {
         return new SystemSecurityContext(tenantAware, roleHierarchy);
     }
 

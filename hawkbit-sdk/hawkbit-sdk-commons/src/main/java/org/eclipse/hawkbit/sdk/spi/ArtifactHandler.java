@@ -25,11 +25,8 @@ public interface ArtifactHandler {
 
     interface DownloadHandler {
 
-        enum Status {
-            SUCCESS, ERROR
-        }
-
         DownloadHandler SKIP = new DownloadHandler() {
+
             @Override
             public void read(byte[] buff, int off, int len) {
                 // skip
@@ -69,5 +66,9 @@ public interface ArtifactHandler {
          * @return the path to the download
          */
         Optional<Path> download();
+
+        enum Status {
+            SUCCESS, ERROR
+        }
     }
 }

@@ -9,13 +9,18 @@
  */
 package org.eclipse.hawkbit.sdk.device;
 
+import java.util.List;
+
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 
-import java.util.List;
-
 public record UpdateStatus(Status status, List<String> messages) {
+
+    DdiActionFeedback feedback() {
+        return new DdiActionFeedback(null,
+                new DdiStatus(status.executionStatus, new DdiResult(status.finalResult, null), status.code, messages));
+    }
 
     /**
      * The status to response to the hawkBit update server if an simulated update process should be respond with
@@ -58,10 +63,5 @@ public record UpdateStatus(Status status, List<String> messages) {
             this.finalResult = finalResult;
             this.code = code;
         }
-    }
-
-    DdiActionFeedback feedback() {
-        return new DdiActionFeedback(null,
-                new DdiStatus(status.executionStatus, new DdiResult(status.finalResult, null), status.code, messages));
     }
 }

@@ -27,63 +27,56 @@ public interface EntityInterceptor {
 
     /**
      * Callback for the {@link PrePersist} lifecycle event.
-     * 
-     * @param entity
-     *            the model entity
+     *
+     * @param entity the model entity
      */
     default void prePersist(final Object entity) {
     }
 
     /**
      * Callback for the {@link PostPersist} lifecycle event.
-     * 
-     * @param entity
-     *            the model entity
+     *
+     * @param entity the model entity
      */
     default void postPersist(final Object entity) {
     }
 
     /**
      * Callback for the {@link PostRemove} lifecycle event.
-     * 
-     * @param entity
-     *            the model entity
+     *
+     * @param entity the model entity
      */
     default void postRemove(final Object entity) {
     }
 
     /**
      * Callback for the {@link PreRemove} lifecycle event.
-     * 
-     * @param entity
-     *            the model entity
+     *
+     * @param entity the model entity
      */
     default void preRemove(final Object entity) {
     }
 
     /**
      * Callback for the {@link PostLoad} lifecycle event.
-     * 
-     * @param entity
-     *            the model entity
+     *
+     * @param entity the model entity
      */
     default void postLoad(final Object entity) {
     }
 
     /**
      * Callback for the {@link PreUpdate} lifecycle event.
-     * 
-     * @param entity
-     *            the model entity
+     *
+     * @param entity the model entity
      */
     default void preUpdate(final Object entity) {
     }
 
     /**
      * Callback for the {@link PostUpdate} lifecycle event.
-     * 
-     * @param entity
-     *            the model entity
+     *
+     * @param entity the model entity
      */
     default void postUpdate(final Object entity) {
     }

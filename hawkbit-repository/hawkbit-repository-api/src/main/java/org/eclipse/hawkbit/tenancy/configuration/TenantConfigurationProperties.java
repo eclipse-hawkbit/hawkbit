@@ -13,20 +13,24 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import lombok.Data;
 import lombok.ToString;
-import org.eclipse.hawkbit.ControllerPollProperties;
-import org.eclipse.hawkbit.HawkbitServerProperties.Anonymous.Download;
 import org.eclipse.hawkbit.repository.exception.InvalidTenantConfigurationKeyException;
+import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
+import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationBooleanValidator;
+import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationIntegerValidator;
+import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationLongValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationStringValidator;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidator;
-import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 
 /**
  * Properties for tenant configuration default values.
+ * <p/>
+ * Configuration are read from the properties where their type and validators could be specified also. Default type and validator is String.
  */
 @Data
 @ToString
@@ -47,14 +51,14 @@ public class TenantConfigurationProperties {
      * @return the TenantConfigurationKey with the name keyName
      */
     public TenantConfigurationKey fromKeyName(final String keyName) {
-        return configuration.values().stream().filter(conf -> conf.getKeyName().equals(keyName)).findAny()
-                .orElseThrow(() -> new InvalidTenantConfigurationKeyException(
-                        "The given configuration key " + keyName + " does not exist."));
+        return configuration.values().stream()
+                .filter(conf -> conf.getKeyName().equals(keyName))
+                .findAny()
+                .orElseThrow(() -> new InvalidTenantConfigurationKeyException("The given configuration key " + keyName + " does not exist."));
     }
 
     /**
-     * Tenant specific configurations which can be configured for each tenant
-     * separately by means of override of the system defaults.
+     * Tenant specific configurations which can be configured for each tenant separately by means of override of the system defaults.
      */
     @Data
     @ToString
@@ -64,121 +68,112 @@ public class TenantConfigurationProperties {
          * Header based authentication enabled.
          */
         public static final String AUTHENTICATION_MODE_HEADER_ENABLED = "authentication.header.enabled";
-
         /**
          * Header based authentication authority name.
          */
         public static final String AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME = "authentication.header.authority";
-
         /**
          * Target token based authentication enabled.
          */
         public static final String AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED = "authentication.targettoken.enabled";
-
         /**
          * Gateway token based authentication enabled.
          */
         public static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED = "authentication.gatewaytoken.enabled";
-
         /**
          * Gateway token value.
          */
         public static final String AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY = "authentication.gatewaytoken.key";
-
         /**
          * See system default in
          * {@link ControllerPollProperties#getPollingTime()}.
          */
         public static final String POLLING_TIME_INTERVAL = "pollingTime";
-
         /**
          * See system default in
          * {@link ControllerPollProperties#getMinPollingTime()}.
          */
         public static final String MIN_POLLING_TIME_INTERVAL = "minPollingTime";
-
         /**
          * See system default in
          * {@link ControllerPollProperties#getMaintenanceWindowPollCount()}.
          */
         public static final String MAINTENANCE_WINDOW_POLL_COUNT = "maintenanceWindowPollCount";
-
         /**
          * See system default in
          * {@link ControllerPollProperties#getPollingOverdueTime()}.
          */
         public static final String POLLING_OVERDUE_TIME_INTERVAL = "pollingOverdueTime";
-
         /**
-         * See system default {@link Download#isEnabled()}.
+         * If anonymous downloads are enabled
          */
         public static final String ANONYMOUS_DOWNLOAD_MODE_ENABLED = "anonymous.download.enabled";
-
         /**
          * Represents setting if approval for a rollout is needed.
          */
         public static final String ROLLOUT_APPROVAL_ENABLED = "rollout.approval.enabled";
-
         /**
          * Repository on autoclose mode instead of canceling in case of new DS
          * assignment over active actions.
          */
         public static final String REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED = "repository.actions.autoclose.enabled";
-
         /**
          * Switch to enable/disable automatic action cleanup.
          */
         public static final String ACTION_CLEANUP_ENABLED = "action.cleanup.enabled";
-
         /**
          * Specifies the action expiry in milli-seconds.
          */
         public static final String ACTION_CLEANUP_ACTION_EXPIRY = "action.cleanup.actionExpiry";
-
         /**
          * Specifies the action status.
          */
         public static final String ACTION_CLEANUP_ACTION_STATUS = "action.cleanup.actionStatus";
-
         /**
          * Switch to enable/disable the multi-assignment feature.
          */
         public static final String MULTI_ASSIGNMENTS_ENABLED = "multi.assignments.enabled";
-
         /**
          * Switch to enable/disable the batch-assignment feature.
          */
         public static final String BATCH_ASSIGNMENTS_ENABLED = "batch.assignments.enabled";
-
         /**
          * Switch to enable/disable the user-confirmation flow
          */
         public static final String USER_CONFIRMATION_ENABLED = "user.confirmation.flow.enabled";
-
         /**
          * Switch to enable/disable the implicit locking
          */
         public static final String IMPLICIT_LOCK_ENABLED = "implicit.lock.enabled";
 
+        private static final Map<Class<? extends Serializable>, TenantConfigurationValidator> DEFAULT_TYPE_VALIDATORS = Map.of(
+                Boolean.class, new TenantConfigurationBooleanValidator(),
+                Integer.class, new TenantConfigurationIntegerValidator(),
+                Long.class, new TenantConfigurationLongValidator(),
+                String.class, new TenantConfigurationStringValidator());
+
         private String keyName;
         private String defaultValue = "";
         private Class<? extends Serializable> dataType = String.class;
-        private Class<? extends TenantConfigurationValidator> validator = TenantConfigurationStringValidator.class;
+        private Class<? extends TenantConfigurationValidator> validator;
 
         /**
-         * validates if a object matches the allowed data format of the corresponding key
-         * 
+         * Validates if an object matches the allowed data format of the corresponding key
+         *
          * @param context application context
          * @param value which will be validated
          * @throws TenantConfigurationValidatorException is thrown, when object is invalid
          */
         public void validate(final ApplicationContext context, final Object value) {
-            final TenantConfigurationValidator createdBean = context.getAutowireCapableBeanFactory()
-                    .createBean(validator);
-            try {
-                createdBean.validate(value);
-            } finally {
-                context.getAutowireCapableBeanFactory().destroyBean(createdBean);
+            if (validator == null) {
+                Objects.requireNonNull(DEFAULT_TYPE_VALIDATORS.get(dataType), "No validator defined for " + keyName).validate(value);
+            } else {
+                final TenantConfigurationValidator createdBean = context.getAutowireCapableBeanFactory().createBean(validator);
+                try {
+                    createdBean.validate(value);
+                } finally {
+                    context.getAutowireCapableBeanFactory().destroyBean(createdBean);
+                }
             }
         }
     }

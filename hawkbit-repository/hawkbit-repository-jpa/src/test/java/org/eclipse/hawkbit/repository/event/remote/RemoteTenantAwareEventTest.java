@@ -15,6 +15,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -22,10 +25,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.junit.jupiter.api.Test;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("RemoteTenantAwareEvent Tests")
@@ -51,16 +50,6 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         final MultiActionAssignEvent remoteAssignEventJackson = createJacksonEvent(assignEvent);
         assertThat(assignEvent).isEqualTo(remoteAssignEventJackson);
         assertThat(remoteAssignEventJackson.getControllerIds()).containsExactlyElementsOf(controllerIds);
-    }
-
-    private Action createAction(final String controllerId) {
-        long id = 1;
-        final JpaAction generateAction = new JpaAction();
-        generateAction.setId(id++);
-        generateAction.setActionType(ActionType.FORCED);
-        generateAction.setTarget(testdataFactory.createTarget(controllerId));
-        generateAction.setStatus(Status.RUNNING);
-        return generateAction;
     }
 
     @Test
@@ -146,6 +135,16 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
 
         final CancelTargetAssignmentEvent remoteEventJackson = createJacksonEvent(cancelEvent);
         assertCancelTargetAssignmentEvent(action, remoteEventJackson);
+    }
+
+    private Action createAction(final String controllerId) {
+        long id = 1;
+        final JpaAction generateAction = new JpaAction();
+        generateAction.setId(id++);
+        generateAction.setActionType(ActionType.FORCED);
+        generateAction.setTarget(testdataFactory.createTarget(controllerId));
+        generateAction.setStatus(Status.RUNNING);
+        return generateAction;
     }
 
     private void assertTargetAssignDistributionSetEvent(final Action action,

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.model;
 
 /**
  * {@link BaseEntity} that distinguishes between tenants.
- *
  */
 public interface TenantAwareBaseEntity extends BaseEntity {
 

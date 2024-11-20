@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.repository.model.Tag;
 
 /**
  * Builder implementation for {@link Tag}.
- *
  */
 public class JpaTagBuilder implements TagBuilder {
 
@@ -30,5 +29,4 @@ public class JpaTagBuilder implements TagBuilder {
     public TagCreate create() {
         return new JpaTagCreate();
     }
-
 }

@@ -37,17 +37,12 @@ public class JpaRolloutHandler implements RolloutHandler {
 
     /**
      * Constructor
-     * 
-     * @param tenantAware
-     *            the {@link TenantAware} bean holding the tenant information
-     * @param rolloutManagement
-     *            to fetch rollout related information from the datasource
-     * @param rolloutExecutor
-     *            to trigger executions for a specific rollout
-     * @param lockRegistry
-     *            to lock processes
-     * @param txManager
-     *            transaction manager interface
+     *
+     * @param tenantAware the {@link TenantAware} bean holding the tenant information
+     * @param rolloutManagement to fetch rollout related information from the datasource
+     * @param rolloutExecutor to trigger executions for a specific rollout
+     * @param lockRegistry to lock processes
+     * @param txManager transaction manager interface
      */
     public JpaRolloutHandler(final TenantAware tenantAware, final RolloutManagement rolloutManagement,
             final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
@@ -83,8 +78,9 @@ public class JpaRolloutHandler implements RolloutHandler {
                 try {
                     handleRolloutInNewTransaction(rolloutId, handlerId);
                 } catch (final Throwable throwable) {
-                    log.error("Failed to process rollout with id {}", rolloutId , throwable);
-                }});
+                    log.error("Failed to process rollout with id {}", rolloutId, throwable);
+                }
+            });
             log.debug("Finished handling of the rollouts.");
         } finally {
             if (log.isTraceEnabled()) {
@@ -107,17 +103,17 @@ public class JpaRolloutHandler implements RolloutHandler {
                         // auditor is retrieved and set on transaction commit
                         // if not overridden, the system user will be the auditor
                         rollout.getAccessControlContext().ifPresentOrElse(
-                            context -> // has stored context - executes it with it
-                                contextAware.runInContext(
-                                    context,
-                                    () -> rolloutExecutor.execute(rollout)),
-                            () -> // has no stored context - executes it in the tenant & user scope
-                                contextAware.runAsTenantAsUser(
-                                    contextAware.getCurrentTenant(),
-                                    rollout.getCreatedBy(), () -> {
-                                        rolloutExecutor.execute(rollout);
-                                        return null;
-                                    })
+                                context -> // has stored context - executes it with it
+                                        contextAware.runInContext(
+                                                context,
+                                                () -> rolloutExecutor.execute(rollout)),
+                                () -> // has no stored context - executes it in the tenant & user scope
+                                        contextAware.runAsTenantAsUser(
+                                                contextAware.getCurrentTenant(),
+                                                rollout.getCreatedBy(), () -> {
+                                                    rolloutExecutor.execute(rollout);
+                                                    return null;
+                                                })
                         );
                     },
                     () -> log.error("Could not retrieve rollout with id {}. Will not continue with execution.",

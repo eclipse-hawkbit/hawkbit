@@ -9,19 +9,18 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import static org.eclipse.hawkbit.repository.test.util.DatasourceContext.SPRING_DATASOURCE_URL_KEY;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-
-import static org.eclipse.hawkbit.repository.test.util.DatasourceContext.SPRING_DATASOURCE_URL_KEY;
 
 /**
  * Provides a convenient way to generate a test database that can be used, and disposed of after the test is executed.
  */
 @Slf4j
 public class DisposableSqlTestDatabaseExtension extends SharedSqlTestDatabaseExtension implements AfterAllCallback {
-    
+
     private DatasourceContext datasourceContext = null;
 
     @Override

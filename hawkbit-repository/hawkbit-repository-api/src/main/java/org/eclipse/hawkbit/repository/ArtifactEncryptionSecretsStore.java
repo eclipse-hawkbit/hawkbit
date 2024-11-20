@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * Interface definition for artifact encryption secrets store.
- *
  */
 public interface ArtifactEncryptionSecretsStore {
 
@@ -23,12 +22,9 @@ public interface ArtifactEncryptionSecretsStore {
      * Adds secret key/value pair associated with particular
      * {@link SoftwareModule} id to the store.
      *
-     * @param softwareModuleId
-     *            {@link SoftwareModule} id associated with the secret
-     * @param secretKey
-     *            key of the secret
-     * @param secretValue
-     *            value of the secret
+     * @param softwareModuleId {@link SoftwareModule} id associated with the secret
+     * @param secretKey key of the secret
+     * @param secretValue value of the secret
      */
     void addSecret(final long softwareModuleId, final String secretKey, final String secretValue);
 
@@ -36,10 +32,8 @@ public interface ArtifactEncryptionSecretsStore {
      * Checks if secret is present for particular {@link SoftwareModule} id and
      * key in the store.
      *
-     * @param softwareModuleId
-     *            {@link SoftwareModule} id associated with the secret
-     * @param secretKey
-     *            key of the secret
+     * @param softwareModuleId {@link SoftwareModule} id associated with the secret
+     * @param secretKey key of the secret
      */
     boolean secretExists(final long softwareModuleId, final String secretKey);
 
@@ -47,10 +41,8 @@ public interface ArtifactEncryptionSecretsStore {
      * Retrieves secret value associated with particular {@link SoftwareModule}
      * id and key from the store.
      *
-     * @param softwareModuleId
-     *            {@link SoftwareModule} id associated with the secret
-     * @param secretKey
-     *            key of the secret
+     * @param softwareModuleId {@link SoftwareModule} id associated with the secret
+     * @param secretKey key of the secret
      */
     Optional<String> getSecret(final long softwareModuleId, final String secretKey);
 
@@ -58,10 +50,8 @@ public interface ArtifactEncryptionSecretsStore {
      * Removes secret key/value pair associated with particular
      * {@link SoftwareModule} id from the store.
      *
-     * @param softwareModuleId
-     *            {@link SoftwareModule} id associated with the secret
-     * @param secretKey
-     *            key of the secret
+     * @param softwareModuleId {@link SoftwareModule} id associated with the secret
+     * @param secretKey key of the secret
      */
     void removeSecret(final long softwareModuleId, final String secretKey);
 }

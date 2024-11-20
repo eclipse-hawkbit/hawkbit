@@ -16,8 +16,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -51,11 +51,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.annotations.CascadeOnDelete;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
-import org.eclipse.persistence.queries.UpdateObjectQuery;
-import org.eclipse.persistence.sessions.changesets.DirectToFieldChangeRecord;
-import org.eclipse.persistence.sessions.changesets.ObjectChangeSet;
 import org.springframework.context.ApplicationEvent;
 
 /**
@@ -67,12 +62,11 @@ import org.springframework.context.ApplicationEvent;
 @Entity
 @Table(name = "sp_distribution_set", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "name", "version", "tenant" }, name = "uk_distrib_set") }, indexes = {
-                @Index(name = "sp_idx_distribution_set_01", columnList = "tenant,deleted,complete"),
-                @Index(name = "sp_idx_distribution_set_prim", columnList = "tenant,id") })
+        @Index(name = "sp_idx_distribution_set_01", columnList = "tenant,deleted,complete"),
+        @Index(name = "sp_idx_distribution_set_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "DistributionSet.detail", attributeNodes = { @NamedAttributeNode("modules"),
         @NamedAttributeNode("tags"), @NamedAttributeNode("type") })
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implements DistributionSet, EventAwareEntity {
 
@@ -86,23 +80,35 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @NotNull
     private DistributionSetType type;
 
-    @CascadeOnDelete
     @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
-    @JoinTable(name = "sp_ds_module", joinColumns = {
-            @JoinColumn(name = "ds_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) }, inverseJoinColumns = {
-                    @JoinColumn(name = "module_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
+    @JoinTable(
+            name = "sp_ds_module",
+            joinColumns = {
+                    @JoinColumn(
+                            name = "ds_id", nullable = false, insertable = false, updatable = false, foreignKey =
+                    @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) },
+            inverseJoinColumns = {
+                    @JoinColumn(
+                            name = "module_id", nullable = false, insertable = false, updatable = false,
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
     private Set<SoftwareModule> modules;
 
-    @CascadeOnDelete
     @ManyToMany(targetEntity = JpaDistributionSetTag.class)
-    @JoinTable(name = "sp_ds_dstag", joinColumns = {
-            @JoinColumn(name = "ds", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds")) }, inverseJoinColumns = {
-            @JoinColumn(name = "TAG", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag")) })
+    @JoinTable(
+            name = "sp_ds_dstag",
+            joinColumns = {
+                    @JoinColumn(
+                            name = "ds", nullable = false, insertable = false, updatable = false,
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds")) },
+            inverseJoinColumns = {
+                    @JoinColumn(
+                            name = "TAG", nullable = false, insertable = false, updatable = false,
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag")) })
     private Set<DistributionSetTag> tags;
 
     @ToString.Exclude
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "distributionSet", fetch = FetchType.LAZY, targetEntity = JpaDistributionSetMetadata.class)
+    @OneToMany(mappedBy = "distributionSet", fetch = FetchType.LAZY, cascade = {
+            CascadeType.REMOVE }, targetEntity = JpaDistributionSetMetadata.class)
     private List<DistributionSetMetadata> metadata;
 
     @Column(name = "complete")
@@ -262,26 +268,30 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     }
 
     @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent() {
         publishEventWithEventPublisher(
                 new DistributionSetCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent() {
         publishEventWithEventPublisher(
                 new DistributionSetUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId(), complete));
 
-        if (isSoftDeleted(descriptorEvent)) {
+        if (deleted) {
             publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(), getClass(),
                     EventPublisherHolder.getInstance().getApplicationId()));
         }
     }
 
     @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+    public void fireDeleteEvent() {
         publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(), getClass(),
                 EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    private static void publishEventWithEventPublisher(final ApplicationEvent event) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(event);
     }
 
     private void checkTypeCompatability(final SoftwareModule softwareModule) {
@@ -294,19 +304,5 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         if (!type.containsModuleType(softwareModule.getType())) {
             throw new UnsupportedSoftwareModuleForThisDistributionSetException();
         }
-    }
-
-    private static void publishEventWithEventPublisher(final ApplicationEvent event) {
-        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(event);
-    }
-
-    private static boolean isSoftDeleted(final DescriptorEvent event) {
-        final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
-        final List<DirectToFieldChangeRecord> changes = changeSet.getChanges().stream()
-                .filter(DirectToFieldChangeRecord.class::isInstance).map(DirectToFieldChangeRecord.class::cast)
-                .collect(Collectors.toList());
-
-        return changes.stream().anyMatch(changeRecord -> DELETED_PROPERTY.equals(changeRecord.getAttribute())
-                && Boolean.parseBoolean(changeRecord.getNewValue().toString()));
     }
 }

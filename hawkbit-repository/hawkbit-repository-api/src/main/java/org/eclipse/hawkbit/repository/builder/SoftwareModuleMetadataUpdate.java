@@ -18,21 +18,18 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 /**
  * Builder to update an existing {@link SoftwareModuleMetadata} entry. Defines
  * all fields that can be updated.
- *
  */
 public interface SoftwareModuleMetadataUpdate {
+
     /**
-     * @param value
-     *            for {@link MetaData#getValue()}
+     * @param value for {@link MetaData#getValue()}
      * @return updated builder instance
      */
     SoftwareModuleMetadataUpdate value(@Size(min = 1, max = MetaData.VALUE_MAX_SIZE) @NotNull String value);
 
     /**
-     * @param visible
-     *            for {@link SoftwareModuleMetadata#isTargetVisible()}
+     * @param visible for {@link SoftwareModuleMetadata#isTargetVisible()}
      * @return updated builder instance
      */
     SoftwareModuleMetadataUpdate targetVisible(Boolean visible);
-
 }

@@ -9,6 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
+import static org.eclipse.hawkbit.repository.model.Action.Status.ERROR;
+import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -27,15 +36,6 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
-import static org.eclipse.hawkbit.repository.model.Action.Status.ERROR;
-import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
-
 /**
  * Implements utility methods for managing {@link Action}s
  */
@@ -47,13 +47,62 @@ public class JpaActionManagement {
     protected final QuotaManagement quotaManagement;
     protected final RepositoryProperties repositoryProperties;
 
-    public JpaActionManagement(final ActionRepository actionRepository,
+    public JpaActionManagement(
+            final ActionRepository actionRepository,
             final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
             final RepositoryProperties repositoryProperties) {
         this.actionRepository = actionRepository;
         this.actionStatusRepository = actionStatusRepository;
         this.quotaManagement = quotaManagement;
         this.repositoryProperties = repositoryProperties;
+    }
+
+    public int getWeightConsideringDefault(final Action action) {
+        return action.getWeight().orElse(repositoryProperties.getActionWeightIfAbsent());
+    }
+
+    protected static boolean isDownloadOnly(final JpaAction action) {
+        return DOWNLOAD_ONLY == action.getActionType();
+    }
+
+    protected List<JpaAction> findActiveActionsHavingStatus(final String controllerId, final Action.Status status) {
+        return actionRepository.findAll(
+                ActionSpecifications.byTargetControllerIdAndIsActiveAndStatus(controllerId, status));
+    }
+
+    protected Action addActionStatus(final JpaActionStatusCreate statusCreate) {
+        final Long actionId = statusCreate.getActionId();
+        final JpaActionStatus actionStatus = statusCreate.build();
+        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
+
+        if (isUpdatingActionStatusAllowed(action, actionStatus)) {
+            return handleAddUpdateActionStatus(actionStatus, action);
+        }
+
+        log.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
+                actionStatus.getStatus(), action.getId());
+        return action;
+    }
+
+    protected JpaAction getActionAndThrowExceptionIfNotFound(final Long actionId) {
+        return actionRepository.findById(actionId)
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+    }
+
+    protected void onActionStatusUpdate(final Action.Status updatedActionStatus, final JpaAction action) {
+        // can be overwritten to intercept the persistence of the action status
+    }
+
+    protected void assertActionStatusQuota(final JpaActionStatus newActionStatus, final JpaAction action) {
+        if (isIntermediateStatus(newActionStatus)) {// check for quota only for intermediate statuses
+            QuotaHelper.assertAssignmentQuota(action.getId(), 1, quotaManagement.getMaxStatusEntriesPerAction(),
+                    ActionStatus.class, Action.class, actionStatusRepository::countByActionId);
+        }
+    }
+
+    protected void assertActionStatusMessageQuota(final JpaActionStatus actionStatus) {
+        QuotaHelper.assertAssignmentQuota(actionStatus.getId(), actionStatus.getMessages().size(),
+                quotaManagement.getMaxMessagesPerActionStatus(), "Message", ActionStatus.class.getSimpleName(), null);
     }
 
     List<Action> findActiveActionsWithHighestWeightConsideringDefault(final String controllerId,
@@ -84,23 +133,8 @@ public class JpaActionManagement {
         return actions.stream().sorted(actionImportance).limit(maxActionCount).collect(Collectors.toList());
     }
 
-    protected List<JpaAction> findActiveActionsHavingStatus(final String controllerId, final Action.Status status) {
-        return actionRepository.findAll(
-                ActionSpecifications.byTargetControllerIdAndIsActiveAndStatus(controllerId, status));
-    }
-
-    protected Action addActionStatus(final JpaActionStatusCreate statusCreate) {
-        final Long actionId = statusCreate.getActionId();
-        final JpaActionStatus actionStatus = statusCreate.build();
-        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
-
-        if (isUpdatingActionStatusAllowed(action, actionStatus)) {
-            return handleAddUpdateActionStatus(actionStatus, action);
-        }
-
-        log.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
-              actionStatus.getStatus(), action.getId());
-        return action;
+    private static boolean isIntermediateStatus(final JpaActionStatus actionStatus) {
+        return FINISHED != actionStatus.getStatus() && ERROR != actionStatus.getStatus();
     }
 
     /**
@@ -117,24 +151,11 @@ public class JpaActionManagement {
         final boolean isAllowedByRepositoryConfiguration = intermediateStatus && !repositoryProperties.isRejectActionStatusForClosedAction();
 
         //in case of download_only action Status#DOWNLOADED is treated as 'final' already, so we accept one final status from device in case it sends
-        final boolean isAllowedForDownloadOnlyActions = isDownloadOnly(action) && action.getStatus() == Action.Status.DOWNLOADED && !intermediateStatus;
+        final boolean isAllowedForDownloadOnlyActions = isDownloadOnly(
+                action) && action.getStatus() == Action.Status.DOWNLOADED && !intermediateStatus;
 
         return action.isActive() || isAllowedByRepositoryConfiguration || isAllowedForDownloadOnlyActions;
     }
-
-    public int getWeightConsideringDefault(final Action action) {
-        return action.getWeight().orElse(repositoryProperties.getActionWeightIfAbsent());
-    }
-
-    protected JpaAction getActionAndThrowExceptionIfNotFound(final Long actionId) {
-        return actionRepository.findById(actionId)
-                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
-    }
-
-    protected static boolean isDownloadOnly(final JpaAction action) {
-        return DOWNLOAD_ONLY == action.getActionType();
-    }
-
 
     /**
      * Sets {@link TargetUpdateStatus} based on given {@link ActionStatus}.
@@ -151,25 +172,5 @@ public class JpaActionManagement {
 
         action.setLastActionStatusCode(actionStatus.getCode().orElse(null));
         return actionRepository.save(action);
-    }
-    
-    protected void onActionStatusUpdate(final Action.Status updatedActionStatus, final JpaAction action){
-     // can be overwritten to intercept the persistence of the action status
-    }
-    
-    protected void assertActionStatusQuota(final JpaActionStatus newActionStatus, final JpaAction action) {
-        if (isIntermediateStatus(newActionStatus)) {// check for quota only for intermediate statuses
-            QuotaHelper.assertAssignmentQuota(action.getId(), 1, quotaManagement.getMaxStatusEntriesPerAction(),
-                    ActionStatus.class, Action.class, actionStatusRepository::countByActionId);
-        }
-    }
-
-    protected void assertActionStatusMessageQuota(final JpaActionStatus actionStatus) {
-        QuotaHelper.assertAssignmentQuota(actionStatus.getId(), actionStatus.getMessages().size(),
-                quotaManagement.getMaxMessagesPerActionStatus(), "Message", ActionStatus.class.getSimpleName(), null);
-    }
-
-    private static boolean isIntermediateStatus(final JpaActionStatus actionStatus) {
-        return FINISHED != actionStatus.getStatus() && ERROR != actionStatus.getStatus();
     }
 }

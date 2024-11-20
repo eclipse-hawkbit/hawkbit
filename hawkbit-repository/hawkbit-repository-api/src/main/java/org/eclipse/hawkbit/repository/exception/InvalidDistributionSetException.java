@@ -9,13 +9,14 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 public class InvalidDistributionSetException extends AbstractServerRtException {
-    /**
-    *
-    */
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -27,16 +28,14 @@ public class InvalidDistributionSetException extends AbstractServerRtException {
     }
 
     /**
-     * @param cause
-     *            for the exception
+     * @param cause for the exception
      */
     public InvalidDistributionSetException(final Throwable cause) {
         super(SpServerError.SP_DS_INVALID, cause);
     }
 
     /**
-     * @param message
-     *            of the error
+     * @param message of the error
      */
     public InvalidDistributionSetException(final String message) {
         super(message, SpServerError.SP_DS_INVALID);

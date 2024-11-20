@@ -14,6 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.EntityManager;
+
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
@@ -26,19 +28,30 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.EntityManager;
-
 /**
  * Command repository operations for all {@link TenantAwareBaseEntity}s.
  *
- * @param <T>
- *            type if the entity type
+ * @param <T> type if the entity type
  */
 @NoRepositoryBean
 @Transactional(readOnly = true)
 public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity>
         extends PagingAndSortingRepository<T, Long>, CrudRepository<T, Long>, JpaSpecificationExecutor<T>,
-                NoCountSliceRepository<T>, ACMRepository<T> {
+        NoCountSliceRepository<T>, ACMRepository<T> {
+
+    /**
+     * Overrides
+     * {@link org.springframework.data.repository.CrudRepository#saveAll(Iterable)}
+     * to return a list of created entities instead of an instance of
+     * {@link Iterable} to be able to work with it directly in further code
+     * processing instead of converting the {@link Iterable}.
+     *
+     * @param entities to persist in the database
+     * @return the created entities
+     */
+    @Override
+    @Transactional
+    <S extends T> List<S> saveAll(Iterable<S> entities);
 
     /**
      * Overrides
@@ -65,23 +78,6 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
     @Override
     List<T> findAllById(final Iterable<Long> ids);
 
-    /**
-     * Overrides
-     * {@link org.springframework.data.repository.CrudRepository#saveAll(Iterable)}
-     * to return a list of created entities instead of an instance of
-     * {@link Iterable} to be able to work with it directly in further code
-     * processing instead of converting the {@link Iterable}.
-     *
-     * @param entities to persist in the database
-     * @return the created entities
-     */
-    @Override
-    @Transactional
-    <S extends T> List<S> saveAll(Iterable<S> entities);
-
-
-    // TODO When we switch to Spring 3.0 probably we could remove extending methods using
-    // queries and make here a default implementation using JPASpecificationExecutor delete method
     // TODO To be considered if this method is needed at all
     /**
      * Deletes all entities of a given tenant from this repository. For safety

@@ -17,6 +17,8 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.criteria.JoinType;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -48,8 +50,6 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import jakarta.persistence.criteria.JoinType;
-
 /**
  * {@link DistributionSet} to {@link Target} assignment strategy as utility for
  * {@link JpaDeploymentManagement}.
@@ -67,11 +67,12 @@ public abstract class AbstractDsAssignmentStrategy {
     private final BooleanSupplier confirmationFlowConfig;
     private final RepositoryProperties repositoryProperties;
 
-    AbstractDsAssignmentStrategy(final TargetRepository targetRepository,
-                                 final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
-                                 final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-                                 final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
-                                 final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
+    AbstractDsAssignmentStrategy(
+            final TargetRepository targetRepository,
+            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
+            final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
         this.targetRepository = targetRepository;
         this.afterCommit = afterCommit;
         this.eventPublisherHolder = eventPublisherHolder;
@@ -83,63 +84,49 @@ public abstract class AbstractDsAssignmentStrategy {
         this.repositoryProperties = repositoryProperties;
     }
 
-    /**
-     * Find targets to be considered for assignment.
-     * 
-     * @param controllerIDs
-     *            as provided by repository caller
-     * @param distributionSetId
-     *            to assign
-     * @return list of targets up to {@link Constants#MAX_ENTRIES_IN_STATEMENT}
-     */
-    abstract List<JpaTarget> findTargetsForAssignment(final List<String> controllerIDs, final long distributionSetId);
+    public JpaAction createTargetAction(
+            final String initiatedBy, final TargetWithActionType targetWithActionType,
+            final List<JpaTarget> targets, final JpaDistributionSet set) {
+        final Optional<JpaTarget> optTarget = targets.stream()
+                .filter(t -> t.getControllerId().equals(targetWithActionType.getControllerId())).findFirst();
 
-    /**
-     *
-     * @param set
-     * @param targets
-     */
-    abstract void sendTargetUpdatedEvents(final DistributionSet set, final List<JpaTarget> targets);
+        // create the action
+        return optTarget.map(target -> {
+            assertActionsPerTargetQuota(target, 1);
+            final JpaAction actionForTarget = new JpaAction();
+            actionForTarget.setActionType(targetWithActionType.getActionType());
+            actionForTarget.setForcedTime(targetWithActionType.getForceTime());
+            actionForTarget.setWeight(
+                    targetWithActionType.getWeight() == null
+                            ? repositoryProperties.getActionWeightIfAbsent()
+                            : targetWithActionType.getWeight());
+            actionForTarget.setActive(true);
+            actionForTarget.setTarget(target);
+            actionForTarget.setDistributionSet(set);
+            actionForTarget.setMaintenanceWindowSchedule(targetWithActionType.getMaintenanceSchedule());
+            actionForTarget.setMaintenanceWindowDuration(targetWithActionType.getMaintenanceWindowDuration());
+            actionForTarget.setMaintenanceWindowTimeZone(targetWithActionType.getMaintenanceWindowTimeZone());
+            actionForTarget.setInitiatedBy(initiatedBy);
+            return actionForTarget;
+        }).orElseGet(() -> {
+            log.warn("Cannot find target for targetWithActionType '{}'.", targetWithActionType.getControllerId());
+            return null;
+        });
+    }
 
-    /**
-     * Update status and DS fields of given target.
-     * 
-     * @param distributionSet
-     *            to set
-     * @param targetIds
-     *            to change
-     * @param currentUser
-     *            for auditing
-     */
-    abstract void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet distributionSet,
-            final List<List<Long>> targetIds, final String currentUser);
+    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
+        final JpaActionStatus actionStatus = new JpaActionStatus();
+        actionStatus.setAction(action);
+        actionStatus.setOccurredAt(action.getCreatedAt());
 
-    /**
-     * Cancels actions that can be canceled (i.e.
-     * {@link DistributionSet#isRequiredMigrationStep() is <code>false</code>})
-     * as a result of the new assignment and returns all {@link Target}s where
-     * such actions existed.
-     * 
-     * @param targetIds
-     *            to cancel actions for
-     * @return {@link Set} of {@link Target#getId()}s
-     */
-    abstract Set<Long> cancelActiveActions(List<List<Long>> targetIds);
+        if (StringUtils.hasText(actionMessage)) {
+            actionStatus.addMessage(actionMessage);
+        } else {
+            actionStatus.addMessage(getActionMessage(action));
+        }
 
-    /**
-     * Cancels actions that can be canceled (i.e.
-     * {@link DistributionSet#isRequiredMigrationStep() is <code>false</code>})
-     * as a result of the new assignment and returns all {@link Target}s where
-     * such actions existed.
-     * 
-     * @param targetIds
-     *            to cancel actions for
-     */
-    abstract void closeActiveActions(List<List<Long>> targetIds);
-
-    abstract void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult);
-
-    abstract void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults);
+        return actionStatus;
+    }
 
     protected void sendTargetUpdatedEvent(final JpaTarget target) {
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
@@ -172,7 +159,7 @@ public abstract class AbstractDsAssignmentStrategy {
 
             // document that the status has been retrieved
             actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
-                  RepositoryConstants.SERVER_MESSAGE_PREFIX + "cancel obsolete action due to new update"));
+                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "cancel obsolete action due to new update"));
             actionRepository.save(action);
 
             return action.getTarget().getId();
@@ -223,65 +210,70 @@ public abstract class AbstractDsAssignmentStrategy {
      * Sends the {@link CancelTargetAssignmentEvent} for a specific action to
      * the eventPublisher.
      *
-     * @param action
-     *            the action of the assignment
+     * @param action the action of the assignment
      */
     protected void cancelAssignDistributionSetEvent(final Action action) {
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
-              new CancelTargetAssignmentEvent(action, eventPublisherHolder.getApplicationId())));
+                new CancelTargetAssignmentEvent(action, eventPublisherHolder.getApplicationId())));
     }
 
-    private void cancelAssignDistributionSetEvent(final List<Action> actions) {
-        if (CollectionUtils.isEmpty(actions)) {
-            return;
-        }
-        final String tenant = actions.get(0).getTenant();
-        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
-                .publishEvent(new CancelTargetAssignmentEvent(tenant,
-                      actions, eventPublisherHolder.getApplicationId())));
+    protected boolean isMultiAssignmentsEnabled() {
+        return multiAssignmentsConfig.getAsBoolean();
     }
 
-    public JpaAction createTargetAction(final String initiatedBy, final TargetWithActionType targetWithActionType,
-            final List<JpaTarget> targets, final JpaDistributionSet set) {
-        final Optional<JpaTarget> optTarget = targets.stream()
-                .filter(t -> t.getControllerId().equals(targetWithActionType.getControllerId())).findFirst();
-
-        // create the action
-        return optTarget.map(target -> {
-            assertActionsPerTargetQuota(target, 1);
-            final JpaAction actionForTarget = new JpaAction();
-            actionForTarget.setActionType(targetWithActionType.getActionType());
-            actionForTarget.setForcedTime(targetWithActionType.getForceTime());
-            actionForTarget.setWeight(
-                    targetWithActionType.getWeight() == null ?
-                            repositoryProperties.getActionWeightIfAbsent() :  targetWithActionType.getWeight());
-            actionForTarget.setActive(true);
-            actionForTarget.setTarget(target);
-            actionForTarget.setDistributionSet(set);
-            actionForTarget.setMaintenanceWindowSchedule(targetWithActionType.getMaintenanceSchedule());
-            actionForTarget.setMaintenanceWindowDuration(targetWithActionType.getMaintenanceWindowDuration());
-            actionForTarget.setMaintenanceWindowTimeZone(targetWithActionType.getMaintenanceWindowTimeZone());
-            actionForTarget.setInitiatedBy(initiatedBy);
-            return actionForTarget;
-        }).orElseGet(() -> {
-            log.warn("Cannot find target for targetWithActionType '{}'.", targetWithActionType.getControllerId());
-            return null;
-        });
+    protected boolean isConfirmationFlowEnabled() {
+        return confirmationFlowConfig.getAsBoolean();
     }
 
-    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
-        final JpaActionStatus actionStatus = new JpaActionStatus();
-        actionStatus.setAction(action);
-        actionStatus.setOccurredAt(action.getCreatedAt());
+    /**
+     * Find targets to be considered for assignment.
+     *
+     * @param controllerIDs as provided by repository caller
+     * @param distributionSetId to assign
+     * @return list of targets up to {@link Constants#MAX_ENTRIES_IN_STATEMENT}
+     */
+    abstract List<JpaTarget> findTargetsForAssignment(final List<String> controllerIDs, final long distributionSetId);
 
-        if (StringUtils.hasText(actionMessage)) {
-            actionStatus.addMessage(actionMessage);
-        } else {
-            actionStatus.addMessage(getActionMessage(action));
-        }
+    /**
+     * @param set
+     * @param targets
+     */
+    abstract void sendTargetUpdatedEvents(final DistributionSet set, final List<JpaTarget> targets);
 
-        return actionStatus;
-    }
+    /**
+     * Update status and DS fields of given target.
+     *
+     * @param distributionSet to set
+     * @param targetIds to change
+     * @param currentUser for auditing
+     */
+    abstract void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet distributionSet,
+            final List<List<Long>> targetIds, final String currentUser);
+
+    /**
+     * Cancels actions that can be canceled (i.e.
+     * {@link DistributionSet#isRequiredMigrationStep() is <code>false</code>})
+     * as a result of the new assignment and returns all {@link Target}s where
+     * such actions existed.
+     *
+     * @param targetIds to cancel actions for
+     * @return {@link Set} of {@link Target#getId()}s
+     */
+    abstract Set<Long> cancelActiveActions(List<List<Long>> targetIds);
+
+    /**
+     * Cancels actions that can be canceled (i.e.
+     * {@link DistributionSet#isRequiredMigrationStep() is <code>false</code>})
+     * as a result of the new assignment and returns all {@link Target}s where
+     * such actions existed.
+     *
+     * @param targetIds to cancel actions for
+     */
+    abstract void closeActiveActions(List<List<Long>> targetIds);
+
+    abstract void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult);
+
+    abstract void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults);
 
     private static String getActionMessage(final Action action) {
         final RolloutGroup rolloutGroup = action.getRolloutGroup();
@@ -292,18 +284,19 @@ public abstract class AbstractDsAssignmentStrategy {
         }
         return String.format("Assignment initiated by user '%s'", action.getInitiatedBy());
     }
-    
+
+    private void cancelAssignDistributionSetEvent(final List<Action> actions) {
+        if (CollectionUtils.isEmpty(actions)) {
+            return;
+        }
+        final String tenant = actions.get(0).getTenant();
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                .publishEvent(new CancelTargetAssignmentEvent(tenant,
+                        actions, eventPublisherHolder.getApplicationId())));
+    }
+
     private void assertActionsPerTargetQuota(final Target target, final int requested) {
         final int quota = quotaManagement.getMaxActionsPerTarget();
-        QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,
-                actionRepository::countByTargetId);
-    }
-
-    protected boolean isMultiAssignmentsEnabled() {
-        return multiAssignmentsConfig.getAsBoolean();
-    }
-
-    protected boolean isConfirmationFlowEnabled() {
-        return confirmationFlowConfig.getAsBoolean();
+        QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class, actionRepository::countByTargetId);
     }
 }

@@ -16,6 +16,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.Arrays;
 import java.util.Collections;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
@@ -31,10 +34,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.jpa.vendor.Database;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 @Feature("Component Tests - Repository")
 @Story("RSQL filter distribution set")
 public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
@@ -47,7 +46,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
         sm = testdataFactory.createSoftwareModuleApp("SM");
 
-        ds = testdataFactory.createDistributionSet(Collections.singletonList(sm),"DS");
+        ds = testdataFactory.createDistributionSet(Collections.singletonList(sm), "DS");
         ds = distributionSetManagement.update(entityFactory.distributionSet().update(ds.getId()).description("DS"));
         createDistributionSetMetadata(ds.getId(), entityFactory.generateDsMetadata("metaKey", "metaValue"));
 

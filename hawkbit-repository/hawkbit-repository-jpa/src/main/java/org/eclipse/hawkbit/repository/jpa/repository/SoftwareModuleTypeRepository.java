@@ -23,25 +23,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository for {@link SoftwareModuleType}.
- *
  */
 @Transactional(readOnly = true)
 public interface SoftwareModuleTypeRepository
         extends BaseEntityRepository<JpaSoftwareModuleType> {
 
     /**
-     *
-     * @param key
-     *            to search for
+     * @param key to search for
      * @return all {@link SoftwareModuleType}s in the repository with given
      *         {@link SoftwareModuleType#getKey()}
      */
     Optional<SoftwareModuleType> findByKey(String key);
 
     /**
-     *
-     * @param name
-     *            to search for
+     * @param name to search for
      * @return all {@link SoftwareModuleType}s in the repository with given
      *         {@link SoftwareModuleType#getName()}
      */
@@ -53,8 +48,7 @@ public interface SoftwareModuleTypeRepository
      * manually to query even if this will by done by {@link EntityManager}
      * anyhow. The DB should take care of optimizing this away.
      *
-     * @param tenant
-     *            to delete data from
+     * @param tenant to delete data from
      */
     @Modifying
     @Transactional

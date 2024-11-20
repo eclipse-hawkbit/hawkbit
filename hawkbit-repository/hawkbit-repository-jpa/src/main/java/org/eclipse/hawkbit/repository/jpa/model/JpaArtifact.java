@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -29,16 +31,16 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * JPA implementation of {@link Artifact}.
- *
  */
 @Table(name = "sp_artifact", indexes = { @Index(name = "sp_idx_artifact_01", columnList = "tenant,software_module"),
         @Index(name = "sp_idx_artifact_02", columnList = "tenant,sha1_hash"),
         @Index(name = "sp_idx_artifact_prim", columnList = "tenant,id") })
 @Entity
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Artifact {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Column(name = "sha1_hash", length = 40, nullable = false, updatable = false)
@@ -74,12 +76,9 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     /**
      * Constructs artifact.
      *
-     * @param sha1Hash
-     *            that is the link to the {@link AbstractDbArtifact} entity.
-     * @param filename
-     *            that is used by {@link AbstractDbArtifact} store.
-     * @param softwareModule
-     *            of this artifact
+     * @param sha1Hash that is the link to the {@link AbstractDbArtifact} entity.
+     * @param filename that is used by {@link AbstractDbArtifact} store.
+     * @param softwareModule of this artifact
      */
     public JpaArtifact(@NotEmpty final String sha1Hash, @NotNull final String filename,
             final SoftwareModule softwareModule) {
@@ -87,6 +86,16 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
         this.filename = filename;
         this.softwareModule = (JpaSoftwareModule) softwareModule;
         this.softwareModule.addArtifact(this);
+    }
+
+    @Override
+    public String getFilename() {
+        return filename;
+    }
+
+    @Override
+    public SoftwareModule getSoftwareModule() {
+        return softwareModule;
     }
 
     @Override
@@ -104,18 +113,9 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
         return sha256Hash;
     }
 
-    public void setMd5Hash(final String md5Hash) {
-        this.md5Hash = md5Hash;
-    }
-
-    public void setSha1Hash(final String sha1Hash) {
-        this.sha1Hash = sha1Hash;
-    }
-
     public void setSha256Hash(final String sha256Hash) {
         this.sha256Hash = sha256Hash;
     }
-
 
     @Override
     public long getSize() {
@@ -126,13 +126,11 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
         this.size = size;
     }
 
-    @Override
-    public SoftwareModule getSoftwareModule() {
-        return softwareModule;
+    public void setSha1Hash(final String sha1Hash) {
+        this.sha1Hash = sha1Hash;
     }
 
-    @Override
-    public String getFilename() {
-        return filename;
+    public void setMd5Hash(final String md5Hash) {
+        this.md5Hash = md5Hash;
     }
 }

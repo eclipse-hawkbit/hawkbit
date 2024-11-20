@@ -11,9 +11,9 @@ package org.eclipse.hawkbit.repository.model;
 
 /**
  * {@link Tag} entry.
- *
  */
 public interface Tag extends NamedEntity {
+
     /**
      * Maximum length of colour in Management UI.
      */

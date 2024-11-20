@@ -15,24 +15,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.repository.rsql.SuggestToken;
-import org.eclipse.hawkbit.repository.rsql.ValidationOracleContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter suggestion")
 public class RSQLParserValidationOracleTest extends AbstractJpaIntegrationTest {
-
-    @Autowired
-    private RsqlValidationOracle rsqlValidationOracle;
 
     private static final String[] OP_SUGGESTIONS = new String[] { "==", "!=", "=ge=", "=le=", "=gt=", "=lt=", "=in=",
             "=out=" };
@@ -40,6 +35,8 @@ public class RSQLParserValidationOracleTest extends AbstractJpaIntegrationTest {
             .map(field -> field.name().toLowerCase()).toArray(String[]::new);
     private static final String[] AND_OR_SUGGESTIONS = new String[] { "and", "or" };
     private static final String[] NAME_VERSION_SUGGESTIONS = new String[] { "name", "version" };
+    @Autowired
+    private RsqlValidationOracle rsqlValidationOracle;
 
     @Test
     @Description("Verifies that suggestions contains all possible field names")

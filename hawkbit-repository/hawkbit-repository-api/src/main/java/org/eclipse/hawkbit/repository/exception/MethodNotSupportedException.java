@@ -9,17 +9,17 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Thrown if repository operation is no longer supported.
- *
  */
 public final class MethodNotSupportedException extends AbstractServerRtException {
-    /**
-    *
-    */
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -33,9 +33,8 @@ public final class MethodNotSupportedException extends AbstractServerRtException
     /**
      * Creates a new MethodNotSupportedException with
      * {@link SpServerError#SP_REPO_OPERATION_NOT_SUPPORTED} error.
-     * 
-     * @param cause
-     *            for the exception
+     *
+     * @param cause for the exception
      */
     public MethodNotSupportedException(final Throwable cause) {
         super(SpServerError.SP_REPO_OPERATION_NOT_SUPPORTED, cause);
@@ -44,9 +43,8 @@ public final class MethodNotSupportedException extends AbstractServerRtException
     /**
      * Creates a new MethodNotSupportedException with
      * {@link SpServerError#SP_REPO_OPERATION_NOT_SUPPORTED} error.
-     * 
-     * @param message
-     *            of the error
+     *
+     * @param message of the error
      */
     public MethodNotSupportedException(final String message) {
         super(message, SpServerError.SP_REPO_OPERATION_NOT_SUPPORTED);

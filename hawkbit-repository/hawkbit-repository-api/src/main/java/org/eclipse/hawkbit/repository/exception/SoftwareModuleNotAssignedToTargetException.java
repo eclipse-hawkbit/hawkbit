@@ -9,32 +9,29 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
 import java.lang.annotation.Target;
 
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
- * the {@link SoftwareModuleNotAssignedToTargetException} is thrown when a
- * {@link SoftwareModule} is requested as part of an {@link Action} that has
- * however never been assigned to the {@link Target}.
+ * the {@link SoftwareModuleNotAssignedToTargetException} is thrown when a {@link SoftwareModule} is requested as part of an {@link Action}
+ * that has however never been assigned to the {@link Target}.
  */
 public class SoftwareModuleNotAssignedToTargetException extends EntityNotFoundException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructor
-     * 
-     * @param moduleId
-     *            thats is not assigned to given {@link Target}
-     * @param controllerId
-     *            of the {@link Target} where given {@link SoftwareModule} is
-     *            not part of
+     *
+     * @param moduleId that is not assigned to given {@link Target}
+     * @param controllerId of the {@link Target} where given {@link SoftwareModule} is not part of
      */
     public SoftwareModuleNotAssignedToTargetException(final Long moduleId, final String controllerId) {
         super("No assignment found for " + SoftwareModule.class.getSimpleName() + " with id {" + moduleId + "} to "
                 + Target.class.getSimpleName() + " with id {" + controllerId + "}.");
     }
-
 }

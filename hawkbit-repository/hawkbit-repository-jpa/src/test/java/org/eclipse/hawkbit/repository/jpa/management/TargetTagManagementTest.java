@@ -23,6 +23,10 @@ import java.util.stream.Collectors;
 
 import jakarta.validation.ConstraintViolationException;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
@@ -32,21 +36,13 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.jupiter.api.Test;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -56,132 +52,11 @@ import org.springframework.data.domain.Pageable;
 @Story("Target Tag Management")
 class TargetTagManagementTest extends AbstractJpaIntegrationTest {
 
-    @Test
-    @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means " +
-            "of Optional not present.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
-    void nonExistingEntityAccessReturnsNotPresent() {
-        assertThat(targetTagManagement.getByName(NOT_EXIST_ID)).isNotPresent();
-        assertThat(targetTagManagement.get(NOT_EXIST_IDL)).isNotPresent();
-    }
-
-    @Test
-    @Description("Verifies that management queries react as specfied on calls for non existing entities " +
-            " by means of throwing EntityNotFoundException.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagUpdatedEvent.class), @Expect(type = TargetTagUpdatedEvent.class) })
-    void entityQueriesReferringToNotExistingEntitiesThrowsException() {
-        verifyThrownExceptionBy(() -> targetTagManagement.delete(NOT_EXIST_ID), "TargetTag");
-        verifyThrownExceptionBy(() -> targetTagManagement.update(entityFactory.tag().update(NOT_EXIST_IDL)), "TargetTag");
-        verifyThrownExceptionBy(() -> getTargetTags(NOT_EXIST_ID), "Target");
-    }
-
-    @Test
-    @Description("Verify that a tag with with invalid properties cannot be created or updated")
-    void createAndUpdateTagWithInvalidFields() {
-        final TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
-        createAndUpdateTagWithInvalidDescription(tag);
-        createAndUpdateTagWithInvalidColour(tag);
-        createAndUpdateTagWithInvalidName(tag);
-    }
-
-    @Step
-    private void createAndUpdateTagWithInvalidDescription(final Tag tag) {
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("tag with too long description should not be created")
-                .isThrownBy(() -> targetTagManagement.create(
-                        entityFactory.tag().create().name("a").description(RandomStringUtils.randomAlphanumeric(513))));
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("tag with invalid description should not be created").isThrownBy(() -> targetTagManagement
-                        .create(entityFactory.tag().create().name("a").description(INVALID_TEXT_HTML)));
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("tag with too long description should not be updated")
-                .isThrownBy(() -> targetTagManagement.update(
-                        entityFactory.tag().update(tag.getId())
-                                .description(RandomStringUtils.randomAlphanumeric(513))));
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("tag with invalid description should not be updated")
-                .isThrownBy(() -> targetTagManagement
-                        .update(entityFactory.tag().update(tag.getId()).description(INVALID_TEXT_HTML)));
-    }
-
-    @Step
-    private void createAndUpdateTagWithInvalidColour(final Tag tag) {
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("tag with too long colour should not be created")
-                .isThrownBy(() -> targetTagManagement.create(
-                        entityFactory.tag().create().name("a").colour(RandomStringUtils.randomAlphanumeric(17))));
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("tag with invalid colour should not be created").isThrownBy(() -> targetTagManagement
-                        .create(entityFactory.tag().create().name("a").colour(INVALID_TEXT_HTML)));
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("tag with too long colour should not be updated")
-                .isThrownBy(() -> targetTagManagement.update(
-                        entityFactory.tag().update(tag.getId()).colour(RandomStringUtils.randomAlphanumeric(17))));
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("tag with invalid colour should not be updated").isThrownBy(() -> targetTagManagement
-                        .update(entityFactory.tag().update(tag.getId()).colour(INVALID_TEXT_HTML)));
-    }
-
-    @Step
-    private void createAndUpdateTagWithInvalidName(final Tag tag) {
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("tag with too long name should not be created")
-                .isThrownBy(() -> targetTagManagement
-                        .create(entityFactory.tag().create().name(RandomStringUtils.randomAlphanumeric(
-                                NamedEntity.NAME_MAX_SIZE + 1))));
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("tag with invalidname should not be created")
-                .isThrownBy(() -> targetTagManagement.create(entityFactory.tag().create().name(INVALID_TEXT_HTML)));
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("tag with too long name should not be updated")
-                .isThrownBy(() -> targetTagManagement
-                        .update(entityFactory.tag().update(tag.getId()).name(RandomStringUtils.randomAlphanumeric(
-                                NamedEntity.NAME_MAX_SIZE + 1))));
-        assertThatExceptionOfType(ConstraintViolationException.class).as("tag with invalid name should not be updated")
-                .isThrownBy(() -> targetTagManagement
-                        .update(entityFactory.tag().update(tag.getId()).name(INVALID_TEXT_HTML)));
-        assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("tag with too short name should not be updated")
-                .isThrownBy(() -> targetTagManagement.update(entityFactory.tag().update(tag.getId()).name("")));
-    }
-
-    @Test
-    @Description("Verifies assign/unassign.")
-    void assignAndUnassignTargetTags() {
-        final List<Target> groupA = testdataFactory.createTargets(20);
-        final List<Target> groupB = testdataFactory.createTargets(20, "groupb", "groupb");
-
-        final TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
-
-        // toggle A only -> A is now assigned
-        List<Target> result = assignTag(groupA, tag);
-        assertThat(result).size().isEqualTo(20);
-        assertThat(result).containsAll(
-                targetManagement.getByControllerID(groupA.stream().map(Target::getControllerId).collect(Collectors.toList())));
-        assertThat(targetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent().stream().map(Target::getControllerId).sorted().toList())
-                .isEqualTo(groupA.stream().map(Target::getControllerId).sorted().toList());
-
-        // toggle A+B -> A is still assigned and B is assigned as well
-        final Collection<Target> groupAB = concat(groupA, groupB);
-        result = assignTag(groupAB, tag);
-        assertThat(result).size().isEqualTo(40);
-        assertThat(result).containsAll(
-                targetManagement.getByControllerID(groupAB.stream().map(Target::getControllerId).collect(Collectors.toList())));
-        assertThat(targetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent().stream().map(Target::getControllerId).sorted().toList())
-                .isEqualTo(groupAB.stream().map(Target::getControllerId).sorted().toList());
-
-        // toggle A+B -> both unassigned
-        result = unassignTag(groupAB, tag);
-        assertThat(result).size().isEqualTo(40);
-        assertThat(result).containsAll(
-                targetManagement.getByControllerID(groupAB.stream().map(Target::getControllerId).collect(Collectors.toList())));
-        assertThat(targetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent()).isEmpty();
-    }
-
     private static final Random RND = new Random();
+
     @Test
     @Description("Verifies that tagging of set containing missing DS throws meaningful and correct exception.")
-    public void failOnMissingDs() {
+    void failOnMissingDs() {
         final Collection<String> group = testdataFactory.createTargets(5).stream()
                 .map(Target::getControllerId)
                 .collect(Collectors.toList());
@@ -212,11 +87,67 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
                 });
     }
 
-    @SafeVarargs
-    private <T> Collection<T> concat(final Collection<T>... targets) {
-        final List<T> result = new ArrayList<>();
-        Arrays.asList(targets).forEach(result::addAll);
-        return result;
+    @Test
+    @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means " +
+            "of Optional not present.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
+    void nonExistingEntityAccessReturnsNotPresent() {
+        assertThat(targetTagManagement.getByName(NOT_EXIST_ID)).isNotPresent();
+        assertThat(targetTagManagement.get(NOT_EXIST_IDL)).isNotPresent();
+    }
+
+    @Test
+    @Description("Verifies that management queries react as specfied on calls for non existing entities " +
+            " by means of throwing EntityNotFoundException.")
+    @ExpectEvents({ @Expect(type = DistributionSetTagUpdatedEvent.class), @Expect(type = TargetTagUpdatedEvent.class) })
+    void entityQueriesReferringToNotExistingEntitiesThrowsException() {
+        verifyThrownExceptionBy(() -> targetTagManagement.delete(NOT_EXIST_ID), "TargetTag");
+        verifyThrownExceptionBy(() -> targetTagManagement.update(entityFactory.tag().update(NOT_EXIST_IDL)), "TargetTag");
+        verifyThrownExceptionBy(() -> getTargetTags(NOT_EXIST_ID), "Target");
+    }
+
+    @Test
+    @Description("Verify that a tag with with invalid properties cannot be created or updated")
+    void createAndUpdateTagWithInvalidFields() {
+        final TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
+        createAndUpdateTagWithInvalidDescription(tag);
+        createAndUpdateTagWithInvalidColour(tag);
+        createAndUpdateTagWithInvalidName(tag);
+    }
+
+    @Test
+    @Description("Verifies assign/unassign.")
+    void assignAndUnassignTargetTags() {
+        final List<Target> groupA = testdataFactory.createTargets(20);
+        final List<Target> groupB = testdataFactory.createTargets(20, "groupb", "groupb");
+
+        final TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
+
+        // toggle A only -> A is now assigned
+        List<Target> result = assignTag(groupA, tag);
+        assertThat(result).size().isEqualTo(20);
+        assertThat(result).containsAll(
+                targetManagement.getByControllerID(groupA.stream().map(Target::getControllerId).collect(Collectors.toList())));
+        assertThat(targetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent().stream().map(Target::getControllerId).sorted()
+                .toList())
+                .isEqualTo(groupA.stream().map(Target::getControllerId).sorted().toList());
+
+        // toggle A+B -> A is still assigned and B is assigned as well
+        final Collection<Target> groupAB = concat(groupA, groupB);
+        result = assignTag(groupAB, tag);
+        assertThat(result).size().isEqualTo(40);
+        assertThat(result).containsAll(
+                targetManagement.getByControllerID(groupAB.stream().map(Target::getControllerId).collect(Collectors.toList())));
+        assertThat(targetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent().stream().map(Target::getControllerId).sorted()
+                .toList())
+                .isEqualTo(groupAB.stream().map(Target::getControllerId).sorted().toList());
+
+        // toggle A+B -> both unassigned
+        result = unassignTag(groupAB, tag);
+        assertThat(result).size().isEqualTo(40);
+        assertThat(result).containsAll(
+                targetManagement.getByControllerID(groupAB.stream().map(Target::getControllerId).collect(Collectors.toList())));
+        assertThat(targetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent()).isEmpty();
     }
 
     @Test
@@ -300,6 +231,74 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
 
         assertThatExceptionOfType(EntityAlreadyExistsException.class)
                 .isThrownBy(() -> targetTagManagement.update(entityFactory.tag().update(tag.getId()).name("A")));
+    }
+
+    @Step
+    private void createAndUpdateTagWithInvalidDescription(final Tag tag) {
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("tag with too long description should not be created")
+                .isThrownBy(() -> targetTagManagement.create(
+                        entityFactory.tag().create().name("a").description(RandomStringUtils.randomAlphanumeric(513))));
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("tag with invalid description should not be created").isThrownBy(() -> targetTagManagement
+                        .create(entityFactory.tag().create().name("a").description(INVALID_TEXT_HTML)));
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("tag with too long description should not be updated")
+                .isThrownBy(() -> targetTagManagement.update(
+                        entityFactory.tag().update(tag.getId())
+                                .description(RandomStringUtils.randomAlphanumeric(513))));
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("tag with invalid description should not be updated")
+                .isThrownBy(() -> targetTagManagement
+                        .update(entityFactory.tag().update(tag.getId()).description(INVALID_TEXT_HTML)));
+    }
+
+    @Step
+    private void createAndUpdateTagWithInvalidColour(final Tag tag) {
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("tag with too long colour should not be created")
+                .isThrownBy(() -> targetTagManagement.create(
+                        entityFactory.tag().create().name("a").colour(RandomStringUtils.randomAlphanumeric(17))));
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("tag with invalid colour should not be created").isThrownBy(() -> targetTagManagement
+                        .create(entityFactory.tag().create().name("a").colour(INVALID_TEXT_HTML)));
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("tag with too long colour should not be updated")
+                .isThrownBy(() -> targetTagManagement.update(
+                        entityFactory.tag().update(tag.getId()).colour(RandomStringUtils.randomAlphanumeric(17))));
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("tag with invalid colour should not be updated").isThrownBy(() -> targetTagManagement
+                        .update(entityFactory.tag().update(tag.getId()).colour(INVALID_TEXT_HTML)));
+    }
+
+    @Step
+    private void createAndUpdateTagWithInvalidName(final Tag tag) {
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("tag with too long name should not be created")
+                .isThrownBy(() -> targetTagManagement
+                        .create(entityFactory.tag().create().name(RandomStringUtils.randomAlphanumeric(
+                                NamedEntity.NAME_MAX_SIZE + 1))));
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("tag with invalidname should not be created")
+                .isThrownBy(() -> targetTagManagement.create(entityFactory.tag().create().name(INVALID_TEXT_HTML)));
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("tag with too long name should not be updated")
+                .isThrownBy(() -> targetTagManagement
+                        .update(entityFactory.tag().update(tag.getId()).name(RandomStringUtils.randomAlphanumeric(
+                                NamedEntity.NAME_MAX_SIZE + 1))));
+        assertThatExceptionOfType(ConstraintViolationException.class).as("tag with invalid name should not be updated")
+                .isThrownBy(() -> targetTagManagement
+                        .update(entityFactory.tag().update(tag.getId()).name(INVALID_TEXT_HTML)));
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("tag with too short name should not be updated")
+                .isThrownBy(() -> targetTagManagement.update(entityFactory.tag().update(tag.getId()).name("")));
+    }
+
+    @SafeVarargs
+    private <T> Collection<T> concat(final Collection<T>... targets) {
+        final List<T> result = new ArrayList<>();
+        Arrays.asList(targets).forEach(result::addAll);
+        return result;
     }
 
     private List<JpaTargetTag> createTargetsWithTags() {

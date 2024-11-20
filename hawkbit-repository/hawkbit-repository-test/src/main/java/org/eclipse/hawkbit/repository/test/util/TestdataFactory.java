@@ -137,6 +137,8 @@ public class TestdataFactory {
 
     public static final String DEFAULT_COLOUR = "#000000";
 
+    private static final String SPACE_AND_DESCRIPTION = " description";
+
     @Autowired
     private ControllerManagement controllerManagament;
 
@@ -204,10 +206,8 @@ public class TestdataFactory {
      * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} and
      * {@link DistributionSet#isRequiredMigrationStep()} <code>false</code>.
      *
-     * @param prefix
-     *            for {@link SoftwareModule}s and {@link DistributionSet}s name,
-     *            vendor and description.
-     *
+     * @param prefix for {@link SoftwareModule}s and {@link DistributionSet}s name,
+     *         vendor and description.
      * @return {@link DistributionSet} entity.
      */
     public DistributionSet createDistributionSet(final String prefix) {
@@ -232,9 +232,7 @@ public class TestdataFactory {
      * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} and
      * {@link DistributionSet#isRequiredMigrationStep()} <code>false</code>.
      *
-     * @param modules
-     *            of {@link DistributionSet#getModules()}
-     *
+     * @param modules of {@link DistributionSet#getModules()}
      * @return {@link DistributionSet} entity.
      */
     public DistributionSet createDistributionSet(final Collection<SoftwareModule> modules) {
@@ -247,12 +245,9 @@ public class TestdataFactory {
      * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} and
      * {@link DistributionSet#isRequiredMigrationStep()} <code>false</code>.
      *
-     * @param modules
-     *            of {@link DistributionSet#getModules()}
-     * @param prefix
-     *            for {@link SoftwareModule}s and {@link DistributionSet}s name,
-     *            vendor and description.
-     *
+     * @param modules of {@link DistributionSet#getModules()}
+     * @param prefix for {@link SoftwareModule}s and {@link DistributionSet}s name,
+     *         vendor and description.
      * @return {@link DistributionSet} entity.
      */
     public DistributionSet createDistributionSet(final Collection<SoftwareModule> modules, final String prefix) {
@@ -264,12 +259,9 @@ public class TestdataFactory {
      * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
      * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION}.
      *
-     * @param prefix
-     *            for {@link SoftwareModule}s and {@link DistributionSet}s name,
-     *            vendor and description.
-     * @param isRequiredMigrationStep
-     *            for {@link DistributionSet#isRequiredMigrationStep()}
-     *
+     * @param prefix for {@link SoftwareModule}s and {@link DistributionSet}s name,
+     *         vendor and description.
+     * @param isRequiredMigrationStep for {@link DistributionSet#isRequiredMigrationStep()}
      * @return {@link DistributionSet} entity.
      */
     public DistributionSet createDistributionSet(final String prefix, final boolean isRequiredMigrationStep) {
@@ -282,12 +274,9 @@ public class TestdataFactory {
      * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} and
      * {@link DistributionSet#isRequiredMigrationStep()} <code>false</code>.
      *
-     * @param prefix
-     *            for {@link SoftwareModule}s and {@link DistributionSet}s name,
-     *            vendor and description.
-     * @param tags
-     *            DistributionSet tags
-     *
+     * @param prefix for {@link SoftwareModule}s and {@link DistributionSet}s name,
+     *         vendor and description.
+     * @param tags DistributionSet tags
      * @return {@link DistributionSet} entity.
      */
     public DistributionSet createDistributionSet(final String prefix, final Collection<DistributionSetTag> tags) {
@@ -299,15 +288,11 @@ public class TestdataFactory {
      * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
      * {@link #SM_TYPE_APP}.
      *
-     * @param prefix
-     *            for {@link SoftwareModule}s and {@link DistributionSet}s name,
-     *            vendor and description.
-     * @param version
-     *            {@link DistributionSet#getVersion()} and
-     *            {@link SoftwareModule#getVersion()} extended by a random number.
-     * @param isRequiredMigrationStep
-     *            for {@link DistributionSet#isRequiredMigrationStep()}
-     *
+     * @param prefix for {@link SoftwareModule}s and {@link DistributionSet}s name,
+     *         vendor and description.
+     * @param version {@link DistributionSet#getVersion()} and
+     *         {@link SoftwareModule#getVersion()} extended by a random number.
+     * @param isRequiredMigrationStep for {@link DistributionSet#isRequiredMigrationStep()}
      * @return {@link DistributionSet} entity.
      */
     public DistributionSet createDistributionSet(final String prefix, final String version,
@@ -342,35 +327,21 @@ public class TestdataFactory {
      * {@link #INVISIBLE_SM_MD_KEY}, {@link #INVISIBLE_SM_MD_VALUE} without
      * {@link SoftwareModuleMetadata#isTargetVisible()}
      *
-     * @param set
-     *            to add metadata to
+     * @param set to add metadata to
      */
     public void addSoftwareModuleMetadata(final DistributionSet set) {
         set.getModules().forEach(this::addTestModuleMetadata);
     }
 
-    private void addTestModuleMetadata(final SoftwareModule module) {
-        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
-                .key(VISIBLE_SM_MD_KEY).value(VISIBLE_SM_MD_VALUE).targetVisible(true));
-        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
-                .key(INVISIBLE_SM_MD_KEY).value(INVISIBLE_SM_MD_VALUE).targetVisible(false));
-
-    }
-
     /**
      * Creates {@link DistributionSet} in repository.
      *
-     * @param prefix
-     *            for {@link SoftwareModule}s and {@link DistributionSet}s name,
-     *            vendor and description.
-     * @param version
-     *            {@link DistributionSet#getVersion()} and
-     *            {@link SoftwareModule#getVersion()} extended by a random number.
-     * @param isRequiredMigrationStep
-     *            for {@link DistributionSet#isRequiredMigrationStep()}
-     * @param modules
-     *            for {@link DistributionSet#getModules()}
-     *
+     * @param prefix for {@link SoftwareModule}s and {@link DistributionSet}s name,
+     *         vendor and description.
+     * @param version {@link DistributionSet#getVersion()} and
+     *         {@link SoftwareModule#getVersion()} extended by a random number.
+     * @param isRequiredMigrationStep for {@link DistributionSet#isRequiredMigrationStep()}
+     * @param modules for {@link DistributionSet#getModules()}
      * @return {@link DistributionSet} entity.
      */
     public DistributionSet createDistributionSet(final String prefix, final String version,
@@ -388,16 +359,12 @@ public class TestdataFactory {
      * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
      * {@link #SM_TYPE_APP}.
      *
-     * @param prefix
-     *            for {@link SoftwareModule}s and {@link DistributionSet}s name,
-     *            vendor and description.
-     * @param version
-     *            {@link DistributionSet#getVersion()} and
-     *            {@link SoftwareModule#getVersion()} extended by a random
-     *            number.updat
-     * @param tags
-     *            DistributionSet tags
-     *
+     * @param prefix for {@link SoftwareModule}s and {@link DistributionSet}s name,
+     *         vendor and description.
+     * @param version {@link DistributionSet#getVersion()} and
+     *         {@link SoftwareModule#getVersion()} extended by a random
+     *         number.updat
+     * @param tags DistributionSet tags
      * @return {@link DistributionSet} entity.
      */
     public DistributionSet createDistributionSet(final String prefix, final String version, final Collection<DistributionSetTag> tags) {
@@ -413,9 +380,7 @@ public class TestdataFactory {
      * number and {@link DistributionSet#isRequiredMigrationStep()}
      * <code>false</code>.
      *
-     * @param number
-     *            of {@link DistributionSet}s to create
-     *
+     * @param number of {@link DistributionSet}s to create
      * @return {@link List} of {@link DistributionSet} entities
      */
     public List<DistributionSet> createDistributionSets(final int number) {
@@ -426,8 +391,7 @@ public class TestdataFactory {
     /**
      * Create a list of {@link DistributionSet}s without modules, i.e. incomplete.
      *
-     * @param number
-     *            of {@link DistributionSet}s to create
+     * @param number of {@link DistributionSet}s to create
      * @return {@link List} of {@link DistributionSet} entities
      */
     public List<DistributionSet> createDistributionSetsWithoutModules(final int number) {
@@ -449,12 +413,9 @@ public class TestdataFactory {
      * number and {@link DistributionSet#isRequiredMigrationStep()}
      * <code>false</code>.
      *
-     * @param prefix
-     *            for {@link SoftwareModule}s and {@link DistributionSet}s name,
-     *            vendor and description.
-     * @param number
-     *            of {@link DistributionSet}s to create
-     *
+     * @param prefix for {@link SoftwareModule}s and {@link DistributionSet}s name,
+     *         vendor and description.
+     * @param number of {@link DistributionSet}s to create
      * @return {@link List} of {@link DistributionSet} entities
      */
     public List<DistributionSet> createDistributionSets(final String prefix, final int number) {
@@ -472,11 +433,8 @@ public class TestdataFactory {
      * {@link #DEFAULT_DESCRIPTION} and
      * {@link DistributionSet#isRequiredMigrationStep()} <code>false</code>.
      *
-     * @param name
-     *            {@link DistributionSet#getName()}
-     * @param version
-     *            {@link DistributionSet#getVersion()}
-     *
+     * @param name {@link DistributionSet#getName()}
+     * @param version {@link DistributionSet#getVersion()}
      * @return {@link DistributionSet} entity
      */
     public DistributionSet createDistributionSetWithNoSoftwareModules(final String name, final String version) {
@@ -489,9 +447,7 @@ public class TestdataFactory {
      * Creates {@link Artifact}s for given {@link SoftwareModule} with a small text
      * payload.
      *
-     * @param moduleId
-     *            the {@link Artifact}s belong to.
-     *
+     * @param moduleId the {@link Artifact}s belong to.
      * @return {@link Artifact} entity.
      */
     public List<Artifact> createArtifacts(final Long moduleId) {
@@ -508,15 +464,9 @@ public class TestdataFactory {
      * Create an {@link Artifact} for given {@link SoftwareModule} with a small text
      * payload.
      *
-     * @param artifactData
-     *            the {@link Artifact} Inputstream
-     *
-     * @param moduleId
-     *            the {@link Artifact} belongs to
-     *
-     * @param filename
-     *            that was provided during upload.
-     *
+     * @param artifactData the {@link Artifact} Inputstream
+     * @param moduleId the {@link Artifact} belongs to
+     * @param filename that was provided during upload.
      * @return {@link Artifact} entity.
      */
     public Artifact createArtifact(final String artifactData, final Long moduleId, final String filename) {
@@ -529,18 +479,10 @@ public class TestdataFactory {
      * Create an {@link Artifact} for given {@link SoftwareModule} with a small text
      * payload.
      *
-     * @param artifactData
-     *            the {@link Artifact} Inputstream
-     *
-     * @param moduleId
-     *            the {@link Artifact} belongs to
-     *
-     * @param filename
-     *            that was provided during upload.
-     *
-     * @param fileSize
-     *            the file size
-     *
+     * @param artifactData the {@link Artifact} Inputstream
+     * @param moduleId the {@link Artifact} belongs to
+     * @param filename that was provided during upload.
+     * @param fileSize the file size
      * @return {@link Artifact} entity.
      */
     public Artifact createArtifact(final byte[] artifactData, final Long moduleId, final String filename,
@@ -554,9 +496,7 @@ public class TestdataFactory {
      * {@link #DEFAULT_VERSION} and random generated {@link Target#getDescription()}
      * in the repository.
      *
-     * @param typeKey
-     *            of the {@link SoftwareModuleType}
-     *
+     * @param typeKey of the {@link SoftwareModuleType}
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModule(final String typeKey) {
@@ -567,7 +507,6 @@ public class TestdataFactory {
      * Creates {@link SoftwareModule} of type {@value Constants#SMT_DEFAULT_APP_KEY}
      * with {@link #DEFAULT_VENDOR} and {@link #DEFAULT_VERSION} and random
      * generated {@link Target#getDescription()} in the repository.
-     *
      *
      * @return persisted {@link SoftwareModule}.
      */
@@ -580,10 +519,7 @@ public class TestdataFactory {
      * with {@link #DEFAULT_VENDOR} and {@link #DEFAULT_VERSION} and random
      * generated {@link Target#getDescription()} in the repository.
      *
-     * @param prefix
-     *            added to name and version
-     *
-     *
+     * @param prefix added to name and version
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModuleApp(final String prefix) {
@@ -594,7 +530,6 @@ public class TestdataFactory {
      * Creates {@link SoftwareModule} of type {@value Constants#SMT_DEFAULT_OS_KEY}
      * with {@link #DEFAULT_VENDOR} and {@link #DEFAULT_VERSION} and random
      * generated {@link Target#getDescription()} in the repository.
-     *
      *
      * @return persisted {@link SoftwareModule}.
      */
@@ -607,10 +542,7 @@ public class TestdataFactory {
      * with {@link #DEFAULT_VENDOR} and {@link #DEFAULT_VERSION} and random
      * generated {@link Target#getDescription()} in the repository.
      *
-     * @param prefix
-     *            added to name and version
-     *
-     *
+     * @param prefix added to name and version
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModuleOs(final String prefix) {
@@ -622,11 +554,8 @@ public class TestdataFactory {
      * {@link #DEFAULT_VERSION} and random generated {@link Target#getDescription()}
      * in the repository.
      *
-     * @param typeKey
-     *            of the {@link SoftwareModuleType}
-     * @param prefix
-     *            added to name and version
-     *
+     * @param typeKey of the {@link SoftwareModuleType}
+     * @param prefix added to name and version
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModule(final String typeKey, final String prefix, final boolean encrypted) {
@@ -643,8 +572,7 @@ public class TestdataFactory {
     }
 
     /**
-     * @param controllerId
-     *            of the target
+     * @param controllerId of the target
      * @return persisted {@link Target}
      */
     public Target createTarget(final String controllerId) {
@@ -652,10 +580,8 @@ public class TestdataFactory {
     }
 
     /**
-     * @param controllerId
-     *            of the target
-     * @param targetName
-     *            name of the target
+     * @param controllerId of the target
+     * @param targetName name of the target
      * @return persisted {@link Target}
      */
     public Target createTarget(final String controllerId, final String targetName) {
@@ -673,12 +599,9 @@ public class TestdataFactory {
     }
 
     /**
-     * @param controllerId
-     *            of the target
-     * @param targetName
-     *            name of the target
-     * @param targetTypeId
-     *            target type id
+     * @param controllerId of the target
+     * @param targetName name of the target
+     * @param targetTypeId target type id
      * @return persisted {@link Target}
      */
     public Target createTarget(final String controllerId, final String targetName, final Long targetTypeId) {
@@ -686,15 +609,6 @@ public class TestdataFactory {
                 entityFactory.target().create().controllerId(controllerId).name(targetName).targetType(targetTypeId));
         assertTargetProperlyCreated(target);
         return target;
-    }
-
-    private void assertTargetProperlyCreated(final Target target) {
-        assertThat(target.getCreatedBy()).isNotNull();
-        assertThat(target.getCreatedAt()).isNotNull();
-        assertThat(target.getLastModifiedBy()).isNotNull();
-        assertThat(target.getLastModifiedAt()).isNotNull();
-
-        assertThat(target.getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
     }
 
     /**
@@ -742,11 +656,8 @@ public class TestdataFactory {
     /**
      * Creates {@link DistributionSetType} in repository.
      *
-     * @param dsTypeKey
-     *            {@link DistributionSetType#getKey()}
-     * @param dsTypeName
-     *            {@link DistributionSetType#getName()}
-     *
+     * @param dsTypeKey {@link DistributionSetType#getKey()}
+     * @param dsTypeName {@link DistributionSetType#getName()}
      * @return persisted {@link DistributionSetType}
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName) {
@@ -759,15 +670,10 @@ public class TestdataFactory {
      * Finds {@link DistributionSetType} in repository with given
      * {@link DistributionSetType#getKey()} or creates if it does not exist yet.
      *
-     * @param dsTypeKey
-     *            {@link DistributionSetType#getKey()}
-     * @param dsTypeName
-     *            {@link DistributionSetType#getName()}
-     * @param mandatory
-     *            {@link DistributionSetType#getMandatoryModuleTypes()}
-     * @param optional
-     *            {@link DistributionSetType#getOptionalModuleTypes()}
-     *
+     * @param dsTypeKey {@link DistributionSetType#getKey()}
+     * @param dsTypeName {@link DistributionSetType#getName()}
+     * @param mandatory {@link DistributionSetType#getMandatoryModuleTypes()}
+     * @param optional {@link DistributionSetType#getOptionalModuleTypes()}
      * @return persisted {@link DistributionSetType}
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName,
@@ -784,9 +690,7 @@ public class TestdataFactory {
      * {@link SoftwareModuleType#getKey()} or creates if it does not exist yet with
      * {@link SoftwareModuleType#getMaxAssignments()} = 1.
      *
-     * @param key
-     *            {@link SoftwareModuleType#getKey()}
-     *
+     * @param key {@link SoftwareModuleType#getKey()}
      * @return persisted {@link SoftwareModuleType}
      */
     public SoftwareModuleType findOrCreateSoftwareModuleType(final String key) {
@@ -797,11 +701,8 @@ public class TestdataFactory {
      * Finds {@link SoftwareModuleType} in repository with given
      * {@link SoftwareModuleType#getKey()} or creates if it does not exist yet.
      *
-     * @param key
-     *            {@link SoftwareModuleType#getKey()}
-     * @param maxAssignments
-     *            {@link SoftwareModuleType#getMaxAssignments()}
-     *
+     * @param key {@link SoftwareModuleType#getKey()}
+     * @param maxAssignments {@link SoftwareModuleType#getMaxAssignments()}
      * @return persisted {@link SoftwareModuleType}
      */
     public SoftwareModuleType findOrCreateSoftwareModuleType(final String key, final int maxAssignments) {
@@ -814,15 +715,10 @@ public class TestdataFactory {
     /**
      * Creates a {@link DistributionSet}.
      *
-     * @param name
-     *            {@link DistributionSet#getName()}
-     * @param version
-     *            {@link DistributionSet#getVersion()}
-     * @param type
-     *            {@link DistributionSet#getType()}
-     * @param modules
-     *            {@link DistributionSet#getModules()}
-     *
+     * @param name {@link DistributionSet#getName()}
+     * @param version {@link DistributionSet#getVersion()}
+     * @param type {@link DistributionSet#getType()}
+     * @param modules {@link DistributionSet#getModules()}
      * @return the created {@link DistributionSet}
      */
     public DistributionSet createDistributionSet(final String name, final String version,
@@ -835,17 +731,11 @@ public class TestdataFactory {
     /**
      * Generates {@link DistributionSet} object without persisting it.
      *
-     * @param name
-     *            {@link DistributionSet#getName()}
-     * @param version
-     *            {@link DistributionSet#getVersion()}
-     * @param type
-     *            {@link DistributionSet#getType()}
-     * @param modules
-     *            {@link DistributionSet#getModules()}
-     * @param requiredMigrationStep
-     *            {@link DistributionSet#isRequiredMigrationStep()}
-     *
+     * @param name {@link DistributionSet#getName()}
+     * @param version {@link DistributionSet#getVersion()}
+     * @param type {@link DistributionSet#getType()}
+     * @param modules {@link DistributionSet#getModules()}
+     * @param requiredMigrationStep {@link DistributionSet#isRequiredMigrationStep()}
      * @return the created {@link DistributionSet}
      */
     public DistributionSet generateDistributionSet(final String name, final String version,
@@ -860,15 +750,10 @@ public class TestdataFactory {
     /**
      * Generates {@link DistributionSet} object without persisting it.
      *
-     * @param name
-     *            {@link DistributionSet#getName()}
-     * @param version
-     *            {@link DistributionSet#getVersion()}
-     * @param type
-     *            {@link DistributionSet#getType()}
-     * @param modules
-     *            {@link DistributionSet#getModules()}
-     *
+     * @param name {@link DistributionSet#getName()}
+     * @param version {@link DistributionSet#getVersion()}
+     * @param type {@link DistributionSet#getType()}
+     * @param modules {@link DistributionSet#getModules()}
      * @return the created {@link DistributionSet}
      */
     public DistributionSet generateDistributionSet(final String name, final String version,
@@ -879,9 +764,7 @@ public class TestdataFactory {
     /**
      * builder method for generating a {@link DistributionSet}.
      *
-     * @param name
-     *            {@link DistributionSet#getName()}
-     *
+     * @param name {@link DistributionSet#getName()}
      * @return the generated {@link DistributionSet}
      */
     public DistributionSet generateDistributionSet(final String name) {
@@ -893,9 +776,7 @@ public class TestdataFactory {
      * Creates {@link Target}s in repository and with {@link #DEFAULT_CONTROLLER_ID}
      * as prefix for {@link Target#getControllerId()}.
      *
-     * @param number
-     *            of {@link Target}s to create
-     *
+     * @param number of {@link Target}s to create
      * @return {@link List} of {@link Target} entities
      */
     public List<Target> createTargets(final int number) {
@@ -918,13 +799,9 @@ public class TestdataFactory {
     /**
      * Creates {@link Target}s in repository and with {@link TargetType}.
      *
-     * @param number
-     *            of {@link Target}s to create
-     * @param controllerIdPrefix
-     *            prefix for the controller id
-     * @param targetType
-     *            targetType of targets to create
-     *
+     * @param number of {@link Target}s to create
+     * @param controllerIdPrefix prefix for the controller id
+     * @param targetType targetType of targets to create
      * @return {@link List} of {@link Target} entities
      */
     public List<Target> createTargetsWithType(final int number, final String controllerIdPrefix,
@@ -942,9 +819,7 @@ public class TestdataFactory {
     /**
      * Creates {@link Target}s in repository and with given targetIds.
      *
-     * @param targetIds
-     *            specifies the IDs of the targets
-     *
+     * @param targetIds specifies the IDs of the targets
      * @return {@link List} of {@link Target} entities
      */
     public List<Target> createTargets(final String... targetIds) {
@@ -959,33 +834,10 @@ public class TestdataFactory {
 
     /**
      * Builds {@link Target} objects with given prefix for
-     * {@link Target#getControllerId()} followed by a number suffix.
-     *
-     * @param start
-     *            value for the controllerId suffix
-     * @param numberOfTargets
-     *            of {@link Target}s to generate
-     * @param controllerIdPrefix
-     *            for {@link Target#getControllerId()} generation.
-     * @return list of {@link Target} objects
-     */
-    private List<Target> generateTargets(final int start, final int numberOfTargets, final String controllerIdPrefix) {
-        final List<Target> targets = new ArrayList<>(numberOfTargets);
-        for (int i = start; i < start + numberOfTargets; i++) {
-            targets.add(entityFactory.target().create().controllerId(controllerIdPrefix + i).build());
-        }
-
-        return targets;
-    }
-
-    /**
-     * Builds {@link Target} objects with given prefix for
      * {@link Target#getControllerId()} followed by a number suffix starting with 0.
      *
-     * @param numberOfTargets
-     *            of {@link Target}s to generate
-     * @param controllerIdPrefix
-     *            for {@link Target#getControllerId()} generation.
+     * @param numberOfTargets of {@link Target}s to generate
+     * @param controllerIdPrefix for {@link Target#getControllerId()} generation.
      * @return list of {@link Target} objects
      */
     public List<Target> generateTargets(final int numberOfTargets, final String controllerIdPrefix) {
@@ -995,10 +847,8 @@ public class TestdataFactory {
     /**
      * builds a set of {@link Target} fixtures from the given parameters.
      *
-     * @param numberOfTargets
-     *            number of targets to create
-     * @param prefix
-     *            prefix used for the controller ID and description
+     * @param numberOfTargets number of targets to create
+     * @param prefix prefix used for the controller ID and description
      * @return set of {@link Target}
      */
     public List<Target> createTargets(final int numberOfTargets, final String prefix) {
@@ -1008,12 +858,9 @@ public class TestdataFactory {
     /**
      * builds a set of {@link Target} fixtures from the given parameters.
      *
-     * @param numberOfTargets
-     *            number of targets to create
-     * @param controllerIdPrefix
-     *            prefix used for the controller ID
-     * @param descriptionPrefix
-     *            prefix used for the description
+     * @param numberOfTargets number of targets to create
+     * @param controllerIdPrefix prefix used for the controller ID
+     * @param descriptionPrefix prefix used for the description
      * @return set of {@link Target}
      */
     public List<Target> createTargets(final int numberOfTargets, final String controllerIdPrefix,
@@ -1027,25 +874,13 @@ public class TestdataFactory {
         return createTargets(targets);
     }
 
-    private List<Target> createTargets(final Collection<TargetCreate> targetCreates) {
-        // init new instance of array list since the TargetManagement#create
-        // will
-        // provide a unmodifiable list
-        final List<Target> createdTargets = targetManagement.create(targetCreates);
-        return new ArrayList<>(createdTargets);
-    }
-
     /**
      * builds a set of {@link Target} fixtures from the given parameters.
      *
-     * @param numberOfTargets
-     *            number of targets to create
-     * @param controllerIdPrefix
-     *            prefix used for the controller ID
-     * @param descriptionPrefix
-     *            prefix used for the description
-     * @param lastTargetQuery
-     *            last time the target polled
+     * @param numberOfTargets number of targets to create
+     * @param controllerIdPrefix prefix used for the controller ID
+     * @param descriptionPrefix prefix used for the description
+     * @param lastTargetQuery last time the target polled
      * @return set of {@link Target}
      */
     public List<Target> createTargets(final int numberOfTargets, final String controllerIdPrefix,
@@ -1062,10 +897,8 @@ public class TestdataFactory {
     /**
      * Create a set of {@link TargetTag}s.
      *
-     * @param number
-     *            number of {@link TargetTag}. to be created
-     * @param tagPrefix
-     *            prefix for the {@link TargetTag#getName()}
+     * @param number number of {@link TargetTag}. to be created
+     * @param tagPrefix prefix for the {@link TargetTag#getName()}
      * @return the created set of {@link TargetTag}s
      */
     public List<TargetTag> createTargetTags(final int number, final String tagPrefix) {
@@ -1082,9 +915,7 @@ public class TestdataFactory {
     /**
      * Creates {@link DistributionSetTag}s in repository.
      *
-     * @param number
-     *            of {@link DistributionSetTag}s
-     *
+     * @param number of {@link DistributionSetTag}s
      * @return the persisted {@link DistributionSetTag}s
      */
     public List<DistributionSetTag> createDistributionSetTags(final int number) {
@@ -1098,23 +929,12 @@ public class TestdataFactory {
         return distributionSetTagManagement.create(result);
     }
 
-    private Action sendUpdateActionStatusToTarget(final Status status, final Action updActA,
-            final Collection<String> msgs) {
-
-        return controllerManagament.addUpdateActionStatus(
-                entityFactory.actionStatus().create(updActA.getId()).status(status).messages(msgs));
-    }
-
     /**
      * Append {@link ActionStatus} to all {@link Action}s of given {@link Target}s.
      *
-     * @param targets
-     *            to add {@link ActionStatus}
-     * @param status
-     *            to add
-     * @param message
-     *            to add
-     *
+     * @param targets to add {@link ActionStatus}
+     * @param status to add
+     * @param message to add
      * @return updated {@link Action}.
      */
     public List<Action> sendUpdateActionStatusToTargets(final Collection<Target> targets, final Status status,
@@ -1125,13 +945,9 @@ public class TestdataFactory {
     /**
      * Append {@link ActionStatus} to all {@link Action}s of given {@link Target}s.
      *
-     * @param targets
-     *            to add {@link ActionStatus}
-     * @param status
-     *            to add
-     * @param msgs
-     *            to add
-     *
+     * @param targets to add {@link ActionStatus}
+     * @param status to add
+     * @param msgs to add
      * @return updated {@link Action}.
      */
     public List<Action> sendUpdateActionStatusToTargets(final Collection<Target> targets, final Status status,
@@ -1159,20 +975,13 @@ public class TestdataFactory {
     /**
      * Creates rollout based on given parameters.
      *
-     * @param rolloutName
-     *            of the {@link Rollout}
-     * @param rolloutDescription
-     *            of the {@link Rollout}
-     * @param groupSize
-     *            of the {@link Rollout}
-     * @param filterQuery
-     *            to identify the {@link Target}s
-     * @param distributionSet
-     *            to assign
-     * @param successCondition
-     *            to switch to next group
-     * @param errorCondition
-     *            to switch to next group
+     * @param rolloutName of the {@link Rollout}
+     * @param rolloutDescription of the {@link Rollout}
+     * @param groupSize of the {@link Rollout}
+     * @param filterQuery to identify the {@link Target}s
+     * @param distributionSet to assign
+     * @param successCondition to switch to next group
+     * @param errorCondition to switch to next group
      * @return created {@link Rollout}
      */
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
@@ -1204,30 +1013,21 @@ public class TestdataFactory {
         return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
                 successCondition, errorCondition, actionType, weight, confirmationRequired, false);
     }
+
     /**
      * Creates rollout based on given parameters.
      *
-     * @param rolloutName
-     *            of the {@link Rollout}
-     * @param rolloutDescription
-     *            of the {@link Rollout}
-     * @param groupSize
-     *            of the {@link Rollout}
-     * @param filterQuery
-     *            to identify the {@link Target}s
-     * @param distributionSet
-     *            to assign
-     * @param successCondition
-     *            to switch to next group
-     * @param errorCondition
-     *            to switch to next group
-     * @param actionType
-     *            the type of the Rollout
-     * @param weight
-     *            weight of the Rollout
-     * @param confirmationRequired
-     *            if the confirmation is required (considered with confirmation flow
-     *            active)
+     * @param rolloutName of the {@link Rollout}
+     * @param rolloutDescription of the {@link Rollout}
+     * @param groupSize of the {@link Rollout}
+     * @param filterQuery to identify the {@link Target}s
+     * @param distributionSet to assign
+     * @param successCondition to switch to next group
+     * @param errorCondition to switch to next group
+     * @param actionType the type of the Rollout
+     * @param weight weight of the Rollout
+     * @param confirmationRequired if the confirmation is required (considered with confirmation flow
+     *         active)
      * @param dynamic is dynamic
      * @return created {@link Rollout}
      */
@@ -1238,6 +1038,7 @@ public class TestdataFactory {
         return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
                 successCondition, errorCondition, actionType, weight, confirmationRequired, dynamic, null);
     }
+
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition, final Action.ActionType actionType,
@@ -1264,15 +1065,14 @@ public class TestdataFactory {
      * Create {@link Rollout} with a new {@link DistributionSet} and
      * {@link Target}s.
      *
-     * @param prefix
-     *            for rollouts name, description, {@link Target#getControllerId()}
-     *            filter
+     * @param prefix for rollouts name, description, {@link Target#getControllerId()}
+     *         filter
      * @return created {@link Rollout}
      */
     public Rollout createRollout(final String prefix) {
         createTargets(quotaManagement.getMaxTargetsPerRolloutGroup() * quotaManagement.getMaxRolloutGroupsPerRollout(),
                 prefix);
-        return createRolloutByVariables(prefix, prefix + " description",
+        return createRolloutByVariables(prefix, prefix + SPACE_AND_DESCRIPTION,
                 quotaManagement.getMaxRolloutGroupsPerRollout(), "controllerId==" + prefix + "*",
                 createDistributionSet(prefix), "50", "5");
     }
@@ -1287,7 +1087,7 @@ public class TestdataFactory {
         final String prefix = RandomStringUtils.randomAlphanumeric(5);
         createTargets(quotaManagement.getMaxTargetsPerRolloutGroup() * quotaManagement.getMaxRolloutGroupsPerRollout(),
                 prefix);
-        return createRolloutByVariables(prefix, prefix + " description",
+        return createRolloutByVariables(prefix, prefix + SPACE_AND_DESCRIPTION,
                 quotaManagement.getMaxRolloutGroupsPerRollout(), "controllerId==" + prefix + "*",
                 createDistributionSet(prefix), "50", "5");
     }
@@ -1302,32 +1102,14 @@ public class TestdataFactory {
         return startAndReloadRollout(createRollout());
     }
 
-    private Rollout startAndReloadRollout(final Rollout rollout) {
-        rolloutManagement.start(rollout.getId());
-
-        // Run here, because scheduler is disabled during tests
-        rolloutHandler.handleAll();
-
-        return reloadRollout(rollout);
-    }
-
-    private Rollout reloadRollout(final Rollout rollout) {
-        return rolloutManagement.get(rollout.getId()).orElseThrow(NoSuchElementException::new);
-    }
-
     /**
      * Create the data for a simple rollout scenario
      *
-     * @param amountTargetsForRollout
-     *            the amount of targets used for the rollout
-     * @param amountOtherTargets
-     *            amount of other targets not included in the rollout
-     * @param amountGroups
-     *            the size of the rollout group
-     * @param successCondition
-     *            success condition
-     * @param errorCondition
-     *            error condition
+     * @param amountTargetsForRollout the amount of targets used for the rollout
+     * @param amountOtherTargets amount of other targets not included in the rollout
+     * @param amountGroups the size of the rollout group
+     * @param successCondition success condition
+     * @param errorCondition error condition
      * @return the created {@link Rollout}
      */
     public Rollout createAndStartRollout(final int amountTargetsForRollout, final int amountOtherTargets,
@@ -1341,16 +1123,11 @@ public class TestdataFactory {
     /**
      * Create the data for a simple rollout scenario
      *
-     * @param amountTargetsForRollout
-     *            the amount of targets used for the rollout
-     * @param amountOtherTargets
-     *            amount of other targets not included in the rollout
-     * @param amountOfGroups
-     *            the size of the rollout group
-     * @param successCondition
-     *            success condition
-     * @param errorCondition
-     *            error condition
+     * @param amountTargetsForRollout the amount of targets used for the rollout
+     * @param amountOtherTargets amount of other targets not included in the rollout
+     * @param amountOfGroups the size of the rollout group
+     * @param successCondition success condition
+     * @param errorCondition error condition
      * @return the created {@link Rollout}
      */
     public Rollout createSimpleTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
@@ -1363,20 +1140,13 @@ public class TestdataFactory {
     /**
      * Create the data for a simple rollout scenario
      *
-     * @param amountTargetsForRollout
-     *            the amount of targets used for the rollout
-     * @param amountOtherTargets
-     *            amount of other targets not included in the rollout
-     * @param amountOfGroups
-     *            the size of the rollout group
-     * @param successCondition
-     *            success condition
-     * @param errorCondition
-     *            error condition
-     * @param actionType
-     *            action Type
-     * @param weight
-     *            weight
+     * @param amountTargetsForRollout the amount of targets used for the rollout
+     * @param amountOtherTargets amount of other targets not included in the rollout
+     * @param amountOfGroups the size of the rollout group
+     * @param successCondition success condition
+     * @param errorCondition error condition
+     * @param actionType action Type
+     * @param weight weight
      * @return the created {@link Rollout}
      */
     public Rollout createSimpleTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
@@ -1395,9 +1165,8 @@ public class TestdataFactory {
      * Create the soft deleted {@link Rollout} with a new {@link DistributionSet}
      * and {@link Target}s.
      *
-     * @param prefix
-     *            for rollouts name, description, {@link Target#getControllerId()}
-     *            filter
+     * @param prefix for rollouts name, description, {@link Target#getControllerId()}
+     *         filter
      * @return created {@link Rollout}
      */
     public Rollout createSoftDeletedRollout(final String prefix) {
@@ -1414,15 +1183,13 @@ public class TestdataFactory {
      * {@link TargetType#getName()} or creates if it does not exist yet. No ds types
      * are assigned on creation.
      *
-     * @param targetTypeName
-     *            {@link TargetType#getName()}
-     *
+     * @param targetTypeName {@link TargetType#getName()}
      * @return persisted {@link TargetType}
      */
     public TargetType findOrCreateTargetType(final String targetTypeName) {
         return targetTypeManagement.getByName(targetTypeName)
                 .orElseGet(() -> targetTypeManagement.create(entityFactory.targetType().create()
-                        .name(targetTypeName).description(targetTypeName + " description")
+                        .name(targetTypeName).description(targetTypeName + SPACE_AND_DESCRIPTION)
                         .key(targetTypeName + " key").colour(DEFAULT_COLOUR)));
     }
 
@@ -1431,14 +1198,12 @@ public class TestdataFactory {
      * {@link TargetType#getName()}. Compatible distribution set types are assigned
      * on creation
      *
-     * @param targetTypeName
-     *            {@link TargetType#getName()}
-     *
+     * @param targetTypeName {@link TargetType#getName()}
      * @return persisted {@link TargetType}
      */
     public TargetType createTargetType(final String targetTypeName, final List<DistributionSetType> compatibleDsTypes) {
         return targetTypeManagement.create(entityFactory.targetType().create().name(targetTypeName)
-                .description(targetTypeName + " description").colour(DEFAULT_COLOUR)
+                .description(targetTypeName + SPACE_AND_DESCRIPTION).colour(DEFAULT_COLOUR)
                 .compatible(compatibleDsTypes.stream().map(DistributionSetType::getId).collect(Collectors.toList())));
     }
 
@@ -1446,16 +1211,14 @@ public class TestdataFactory {
      * Creates {@link TargetType} in repository with given
      * {@link TargetType#getName()}. No ds types are assigned on creation.
      *
-     * @param targetTypePrefix
-     *            {@link TargetType#getName()}
-     *
+     * @param targetTypePrefix {@link TargetType#getName()}
      * @return persisted {@link TargetType}
      */
     public List<TargetType> createTargetTypes(final String targetTypePrefix, final int count) {
         final List<TargetTypeCreate> result = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             result.add(entityFactory.targetType().create()
-                    .name(targetTypePrefix + i).description(targetTypePrefix + " description")
+                    .name(targetTypePrefix + i).description(targetTypePrefix + SPACE_AND_DESCRIPTION)
                     .key(targetTypePrefix + i + " key").colour(DEFAULT_COLOUR));
         }
         return targetTypeManagement.create(result);
@@ -1496,6 +1259,69 @@ public class TestdataFactory {
 
     private static String randomText(final int len) {
         return RandomStringUtils.randomAlphanumeric(len);
+    }
+
+    private void addTestModuleMetadata(final SoftwareModule module) {
+        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
+                .key(VISIBLE_SM_MD_KEY).value(VISIBLE_SM_MD_VALUE).targetVisible(true));
+        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
+                .key(INVISIBLE_SM_MD_KEY).value(INVISIBLE_SM_MD_VALUE).targetVisible(false));
+
+    }
+
+    private void assertTargetProperlyCreated(final Target target) {
+        assertThat(target.getCreatedBy()).isNotNull();
+        assertThat(target.getCreatedAt()).isNotNull();
+        assertThat(target.getLastModifiedBy()).isNotNull();
+        assertThat(target.getLastModifiedAt()).isNotNull();
+
+        assertThat(target.getUpdateStatus()).isEqualTo(TargetUpdateStatus.UNKNOWN);
+    }
+
+    /**
+     * Builds {@link Target} objects with given prefix for
+     * {@link Target#getControllerId()} followed by a number suffix.
+     *
+     * @param start value for the controllerId suffix
+     * @param numberOfTargets of {@link Target}s to generate
+     * @param controllerIdPrefix for {@link Target#getControllerId()} generation.
+     * @return list of {@link Target} objects
+     */
+    private List<Target> generateTargets(final int start, final int numberOfTargets, final String controllerIdPrefix) {
+        final List<Target> targets = new ArrayList<>(numberOfTargets);
+        for (int i = start; i < start + numberOfTargets; i++) {
+            targets.add(entityFactory.target().create().controllerId(controllerIdPrefix + i).build());
+        }
+
+        return targets;
+    }
+
+    private List<Target> createTargets(final Collection<TargetCreate> targetCreates) {
+        // init new instance of array list since the TargetManagement#create
+        // will
+        // provide a unmodifiable list
+        final List<Target> createdTargets = targetManagement.create(targetCreates);
+        return new ArrayList<>(createdTargets);
+    }
+
+    private Action sendUpdateActionStatusToTarget(final Status status, final Action updActA,
+            final Collection<String> msgs) {
+
+        return controllerManagament.addUpdateActionStatus(
+                entityFactory.actionStatus().create(updActA.getId()).status(status).messages(msgs));
+    }
+
+    private Rollout startAndReloadRollout(final Rollout rollout) {
+        rolloutManagement.start(rollout.getId());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutHandler.handleAll();
+
+        return reloadRollout(rollout);
+    }
+
+    private Rollout reloadRollout(final Rollout rollout) {
+        return rolloutManagement.get(rollout.getId()).orElseThrow(NoSuchElementException::new);
     }
 
 }

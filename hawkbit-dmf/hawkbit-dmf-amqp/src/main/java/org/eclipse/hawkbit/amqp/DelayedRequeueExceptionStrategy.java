@@ -14,11 +14,11 @@ import java.util.concurrent.TimeUnit;
 import jakarta.validation.ConstraintViolationException;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
 import org.springframework.amqp.rabbit.listener.FatalExceptionStrategy;
@@ -86,7 +86,8 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
     }
 
     private static boolean isMessageException(final Throwable cause) {
-        return cause instanceof InvalidTargetAddressException || cause instanceof MessageConversionException
-                || cause instanceof MessageHandlingException;
+        return cause instanceof InvalidTargetAddressException ||
+                cause instanceof MessageConversionException ||
+                cause instanceof MessageHandlingException;
     }
 }

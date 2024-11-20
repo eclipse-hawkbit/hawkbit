@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.model;
 
 /**
  * {@link MetaData} of a {@link Target}.
- *
  */
 public interface TargetMetadata extends MetaData {
 

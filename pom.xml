@@ -9,795 +9,812 @@
     SPDX-License-Identifier: EPL-2.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-   <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-   <parent>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-parent</artifactId>
-      <version>3.3.4</version>
-   </parent>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.5</version>
+    </parent>
 
-   <groupId>org.eclipse.hawkbit</groupId>
-   <artifactId>hawkbit-parent</artifactId>
-   <version>${revision}</version>
-   <packaging>pom</packaging>
-   <name>hawkBit :: Parent</name>
+    <groupId>org.eclipse.hawkbit</groupId>
+    <artifactId>hawkbit-parent</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+    <name>hawkBit :: Parent</name>
 
-   <licenses>
-      <license>
-         <name>EPL-2.0</name>
-         <url>https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt</url>
-         <comments>Eclipse Public License - Version 2.0</comments>
-      </license>
-   </licenses>
+    <licenses>
+        <license>
+            <name>EPL-2.0</name>
+            <url>https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt</url>
+            <comments>Eclipse Public License - Version 2.0</comments>
+        </license>
+    </licenses>
 
-   <properties>
-      <revision>0-SNAPSHOT</revision>
-      <java.version>17</java.version>
+    <properties>
+        <revision>0-SNAPSHOT</revision>
+        <java.version>17</java.version>
 
-      <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
+        <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
-      <spring.boot.version>3.3.4</spring.boot.version>
-      <spring.cloud.version>2023.0.2</spring.cloud.version>
-      <springdoc-openapi.version>2.6.0</springdoc-openapi.version>
-      <spring.plugin.core.version>3.0.0</spring.plugin.core.version>
-      <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
-      <!-- Newer versions needed than defined in Boot -->
-      <!-- Spring boot version overrides - END -->
+        <spring.boot.version>3.3.5</spring.boot.version>
+        <spring.cloud.version>2023.0.2</spring.cloud.version>
+        <springdoc-openapi.version>2.6.0</springdoc-openapi.version>
+        <spring.plugin.core.version>3.0.0</spring.plugin.core.version>
+        <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
+        <!-- Newer versions needed than defined in Boot -->
+        <!-- Spring boot version overrides - END -->
 
-      <!-- Eclipselink - START -->
-      <!-- 4.0.4 doesn't work because of https://github.com/eclipse-ee4j/eclipselink/issues/2219 -->
-      <eclipselink.version>4.0.3</eclipselink.version>
-      <!-- for some reason 3.0.2 doesn't work -->
-      <eclipselink.maven.plugin.version>3.0.1</eclipselink.maven.plugin.version>
-      <!-- Eclipselink - END -->
+        <!-- Eclipselink - START -->
+        <!-- 4.0.4 doesn't work because of https://github.com/eclipse-ee4j/eclipselink/issues/2219 -->
+        <eclipselink.version>4.0.3</eclipselink.version>
+        <!-- for some reason 3.0.2 doesn't work -->
+        <eclipselink.maven.plugin.version>3.0.1</eclipselink.maven.plugin.version>
+        <!-- Eclipselink - END -->
 
-      <!-- Misc libraries versions - START -->
-      <cron-utils.version>9.2.1</cron-utils.version>
-      <jsoup.version>1.18.1</jsoup.version>
-      <jaxb-api.version>2.3.1</jaxb-api.version>
-      <javax.el-api.version>3.0.0</javax.el-api.version>
-      <rsql-parser.version>2.1.0</rsql-parser.version>
-      <commons-io.version>2.16.1</commons-io.version>
-      <commons-collections4.version>4.4</commons-collections4.version>
-      <io-protostuff.version>1.8.0</io-protostuff.version>
-      <!-- test -->
-      <rabbitmq.http-client.version>5.2.0</rabbitmq.http-client.version>
-      <classgraph.version>4.8.174</classgraph.version>
-      <allure.version>2.28.1</allure.version>
-      <awaitility.version>4.2.1</awaitility.version>
-      <!-- Misc libraries versions - END -->
+        <!-- Misc libraries versions - START -->
+        <cron-utils.version>9.2.1</cron-utils.version>
+        <jsoup.version>1.18.1</jsoup.version>
+        <jaxb-api.version>2.3.1</jaxb-api.version>
+        <javax.el-api.version>3.0.0</javax.el-api.version>
+        <rsql-parser.version>2.1.0</rsql-parser.version>
+        <commons-io.version>2.16.1</commons-io.version>
+        <commons-collections4.version>4.4</commons-collections4.version>
+        <io-protostuff.version>1.8.0</io-protostuff.version>
+        <!-- test -->
+        <rabbitmq.http-client.version>5.2.0</rabbitmq.http-client.version>
+        <classgraph.version>4.8.174</classgraph.version>
+        <allure.version>2.28.1</allure.version>
+        <awaitility.version>4.2.1</awaitility.version>
+        <!-- Misc libraries versions - END -->
 
-      <!-- Maven Plugin versions - START -->
-      <maven.enforcer.plugin.version>3.5.0</maven.enforcer.plugin.version>
-      <flatten.maven.plugin.version>1.6.0</flatten.maven.plugin.version>
-      <maven.scm.plugin.version>2.1.0</maven.scm.plugin.version>
-      <maven.site.plugin.version>3.12.1</maven.site.plugin.version>
+        <!-- Maven Plugin versions - START -->
+        <maven.enforcer.plugin.version>3.5.0</maven.enforcer.plugin.version>
+        <flatten.maven.plugin.version>1.6.0</flatten.maven.plugin.version>
+        <maven.scm.plugin.version>2.1.0</maven.scm.plugin.version>
+        <maven.site.plugin.version>3.12.1</maven.site.plugin.version>
 
-      <license.tool.plugin.version>1.1.0</license.tool.plugin.version>
-      <license.maven.plugin.version>4.5</license.maven.plugin.version>
+        <license.tool.plugin.version>1.1.0</license.tool.plugin.version>
+        <license.maven.plugin.version>4.5</license.maven.plugin.version>
 
-      <maven.surefire.plugin.version>3.3.1</maven.surefire.plugin.version>
-      <maven.failsafe.plugin.version>3.3.1</maven.failsafe.plugin.version>
-      <jacoco.maven.plugin.version>0.8.12</jacoco.maven.plugin.version>
+        <maven.surefire.plugin.version>3.3.1</maven.surefire.plugin.version>
+        <maven.failsafe.plugin.version>3.3.1</maven.failsafe.plugin.version>
+        <jacoco.maven.plugin.version>0.8.12</jacoco.maven.plugin.version>
 
-      <nexus.staging.maven.plugin.version>1.7.0</nexus.staging.maven.plugin.version>
-      <maven.gpg.plugin.version>3.2.4</maven.gpg.plugin.version>
-      <!-- Maven Plugin versions - END -->
+        <nexus.staging.maven.plugin.version>1.7.0</nexus.staging.maven.plugin.version>
+        <maven.gpg.plugin.version>3.2.4</maven.gpg.plugin.version>
+        <!-- Maven Plugin versions - END -->
 
-      <!-- Release - START -->
-      <release.scm.connection>scm:git:git@github.com:eclipse/hawkbit.git</release.scm.connection>
-      <release.scm.developerConnection>scm:git:https://github.com/eclipse-hawkbit/hawkbit.git</release.scm.developerConnection>
-      <release.scm.url>https://github.com/eclipse-hawkbit/hawkbit.git</release.scm.url>
-      <!-- Release - END -->
+        <!-- Release - START -->
+        <release.scm.connection>scm:git:git@github.com:eclipse/hawkbit.git</release.scm.connection>
+        <release.scm.developerConnection>scm:git:https://github.com/eclipse-hawkbit/hawkbit.git
+        </release.scm.developerConnection>
+        <release.scm.url>https://github.com/eclipse-hawkbit/hawkbit.git</release.scm.url>
+        <!-- Release - END -->
 
-      <!-- Sonar - START -->
-      <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-      <sonar.branch.name>LOCAL_SCAN</sonar.branch.name>
-      <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
-      <sonar.qualitygate.timeout>600</sonar.qualitygate.timeout>
-      <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
-      <sonar.links.ci>https://github.com/eclipse-hawkbit/hawkbit/actions</sonar.links.ci>
-      <sonar.exclusions>
-         **/target/generated-sources/apt/**,**/src/test/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**
-      </sonar.exclusions>
-      <sonar.coverage.exclusions>
-         **/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**
-      </sonar.coverage.exclusions>
-      <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
-      <sonar.coverage.jacoco.xmlReportPaths>
-         ${project.basedir}/../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml,
-         ${project.basedir}/../../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml
-      </sonar.coverage.jacoco.xmlReportPaths>
-      <!-- Sonar - END -->
+        <!-- Sonar - START -->
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.branch.name>LOCAL_SCAN</sonar.branch.name>
+        <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+        <sonar.qualitygate.timeout>600</sonar.qualitygate.timeout>
+        <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
+        <sonar.links.ci>https://github.com/eclipse-hawkbit/hawkbit/actions</sonar.links.ci>
+        <sonar.exclusions>
+            **/target/generated-sources/apt/**,**/src/test/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**
+        </sonar.exclusions>
+        <sonar.coverage.exclusions>
+            **/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**
+        </sonar.coverage.exclusions>
+        <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.basedir}/../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml,
+            ${project.basedir}/../../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
+        <!-- Sonar - END -->
 
-      <!-- Dash tool integration - START -->
-      <dash.skip>true</dash.skip>
-      <dash.fail>true</dash.fail>
-      <dash.projectId>iot.hawkbit</dash.projectId>
-      <dash.summary>${project.build.directory}/dash/summary</dash.summary>
-      <!-- To automatically create IP Team review requests for identified content call with -Ddash.iplab.token=<token> (do not share your access token) -->
-      <dash.review.summary>${project.build.directory}/dash/review-summary</dash.review.summary>
-      <excludeGroupIds>org.eclipse,org.junit</excludeGroupIds>
-      <!-- Dash tool integration - END -->
+        <!-- Dash tool integration - START -->
+        <dash.skip>true</dash.skip>
+        <dash.fail>true</dash.fail>
+        <dash.projectId>iot.hawkbit</dash.projectId>
+        <dash.summary>${project.build.directory}/dash/summary</dash.summary>
+        <!-- To automatically create IP Team review requests for identified content call with -Ddash.iplab.token=<token> (do not share your access token) -->
+        <dash.review.summary>${project.build.directory}/dash/review-summary</dash.review.summary>
+        <excludeGroupIds>org.eclipse,org.junit</excludeGroupIds>
+        <!-- Dash tool integration - END -->
 
-      <!-- test -->
-      <surefire.forkcount>1</surefire.forkcount>
-      <test.jvm.args/>
-      <!-- Test - END -->
-   </properties>
+        <!-- test -->
+        <surefire.forkcount>1</surefire.forkcount>
+        <test.jvm.args/>
+        <!-- Test - END -->
+    </properties>
 
-   <modules>
-      <module>hawkbit-core</module>
-      <module>hawkbit-security-core</module>
-      <module>hawkbit-security-integration</module>
-      <module>hawkbit-http-security</module>
-      <module>hawkbit-repository</module>
-      <module>hawkbit-artifact-repository-filesystem</module>
-      <module>hawkbit-autoconfigure</module>
-      <module>hawkbit-rest</module>
-      <module>hawkbit-dmf</module>
-      <module>hawkbit-test-report</module>
-      <module>hawkbit-runtime</module>
-      <module>hawkbit-starters</module>
-      <module>hawkbit-sdk</module>
-   </modules>
+    <modules>
+        <module>hawkbit-core</module>
+        <module>hawkbit-rest-core</module>
+        <module>hawkbit-security</module>
+        <module>hawkbit-artifact</module>
+        <module>hawkbit-repository</module>
+        <module>hawkbit-autoconfigure</module>
 
-   <scm>
-      <connection>${release.scm.connection}</connection>
-      <developerConnection>${release.scm.developerConnection}</developerConnection>
-      <url>${release.scm.url}</url>
-   </scm>
+        <module>hawkbit-mgmt</module>
+        <module>hawkbit-ddi</module>
+        <module>hawkbit-dmf</module>
+        <module>hawkbit-monolith</module>
 
-   <ciManagement>
-      <system>Jenkins</system>
-      <url>https://hudson.eclipse.org/hawkbit/</url>
-   </ciManagement>
+        <module>hawkbit-simple-ui</module>
 
-   <developers>
-      <developer>
-         <id>kaizimmerm</id>
-         <email>kai.zimmermann@microsoft.com</email>
-         <organization>Microsoft</organization>
-         <organizationUrl>https://www.microsoft.com</organizationUrl>
-         <roles>
-            <role>Lead</role>
-            <role>Committer</role>
-         </roles>
-      </developer>
-      <developer>
-         <id>laverman</id>
-         <email>Jeroen.Laverman@bosch.io</email>
-         <organization>Bosch.IO GmbH</organization>
-         <organizationUrl>https://www.bosch.io</organizationUrl>
-         <roles>
-            <role>Lead</role>
-            <role>Committer</role>
-         </roles>
-      </developer>
-      <developer>
-         <id>michahirsch</id>
-         <roles>
-            <role>Committer</role>
-         </roles>
-      </developer>
-      <developer>
-         <id>schabdo</id>
-         <email>Dominic.Schabel@bosch.io</email>
-         <organization>Bosch.IO GmbH</organization>
-         <organizationUrl>https://www.bosch.io</organizationUrl>
-         <roles>
-            <role>Committer</role>
-         </roles>
-      </developer>
-      <developer>
-         <id>stefbehl</id>
-         <email>Stefan.Behl@bosch.io</email>
-         <organization>Bosch.IO GmbH</organization>
-         <organizationUrl>https://www.bosch.io</organizationUrl>
-         <roles>
-            <role>Committer</role>
-         </roles>
-      </developer>
-      <developer>
-         <id>avgustinmm</id>
-         <email>Avgustin.Marinov@bosch.com</email>
-         <organization>Bosch Digital</organization>
-         <organizationUrl>https://www.bosch-digital.com/</organizationUrl>
-         <roles>
-            <role>Committer</role>
-         </roles>
-      </developer>
-   </developers>
+        <module>hawkbit-sdk</module>
 
-   <distributionManagement>
-      <repository>
-         <id>ossrh</id>
-         <name>hawkBit Repository - Release</name>
-         <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-      </repository>
-      <snapshotRepository>
-         <id>ossrh</id>
-         <name>hawkBit Repository - Snapshots</name>
-         <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-      </snapshotRepository>
-   </distributionManagement>
+        <module>hawkbit-test-report</module>
+    </modules>
 
-   <pluginRepositories>
-      <pluginRepository>
-         <id>dash-licenses</id>
-         <url>https://repo.eclipse.org/content/repositories/dash-licenses</url>
-      </pluginRepository>
-   </pluginRepositories>
+    <scm>
+        <connection>${release.scm.connection}</connection>
+        <developerConnection>${release.scm.developerConnection}</developerConnection>
+        <url>${release.scm.url}</url>
+    </scm>
 
-   <build>
-      <plugins>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-enforcer-plugin</artifactId>
-         </plugin>
-         <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>flatten-maven-plugin</artifactId>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-scm-plugin</artifactId>
-         </plugin>
-         <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>versions-maven-plugin</artifactId>
-         </plugin>
+    <ciManagement>
+        <system>Jenkins</system>
+        <url>https://hudson.eclipse.org/hawkbit/</url>
+    </ciManagement>
 
-         <plugin>
-            <groupId>com.mycila</groupId>
-            <artifactId>license-maven-plugin</artifactId>
-         </plugin>
-         <plugin>
-            <groupId>org.eclipse.dash</groupId>
-            <artifactId>license-tool-plugin</artifactId>
-         </plugin>
+    <developers>
+        <developer>
+            <id>kaizimmerm</id>
+            <email>kai.zimmermann@microsoft.com</email>
+            <organization>Microsoft</organization>
+            <organizationUrl>https://www.microsoft.com</organizationUrl>
+            <roles>
+                <role>Lead</role>
+                <role>Committer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>laverman</id>
+            <email>Jeroen.Laverman@bosch.io</email>
+            <organization>Bosch.IO GmbH</organization>
+            <organizationUrl>https://www.bosch.io</organizationUrl>
+            <roles>
+                <role>Lead</role>
+                <role>Committer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>michahirsch</id>
+            <roles>
+                <role>Committer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>schabdo</id>
+            <email>Dominic.Schabel@bosch.io</email>
+            <organization>Bosch.IO GmbH</organization>
+            <organizationUrl>https://www.bosch.io</organizationUrl>
+            <roles>
+                <role>Committer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>stefbehl</id>
+            <email>Stefan.Behl@bosch.io</email>
+            <organization>Bosch.IO GmbH</organization>
+            <organizationUrl>https://www.bosch.io</organizationUrl>
+            <roles>
+                <role>Committer</role>
+            </roles>
+        </developer>
+        <developer>
+            <id>avgustinmm</id>
+            <email>Avgustin.Marinov@bosch.com</email>
+            <organization>Bosch Digital</organization>
+            <organizationUrl>https://www.bosch-digital.com/</organizationUrl>
+            <roles>
+                <role>Committer</role>
+            </roles>
+        </developer>
+    </developers>
 
-         <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-         </plugin>
-      </plugins>
+    <distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <name>hawkBit Repository - Release</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <name>hawkBit Repository - Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
-      <pluginManagement>
-         <plugins>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>dash-licenses</id>
+            <url>https://repo.eclipse.org/content/repositories/dash-licenses</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <build>
+        <plugins>
             <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-compiler-plugin</artifactId>
-               <configuration>
-                  <compilerArgument>-Xlint:all</compilerArgument>
-                  <showWarnings>true</showWarnings>
-                  <showDeprecation>true</showDeprecation>
-               </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
             <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-javadoc-plugin</artifactId>
-               <configuration>
-                  <doclint>syntax</doclint>
-               </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
             </plugin>
             <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-source-plugin</artifactId>
-               <executions>
-                  <execution>
-                     <id>attach-sources</id>
-                     <goals>
-                        <goal>jar</goal>
-                     </goals>
-                  </execution>
-               </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
             </plugin>
 
             <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-enforcer-plugin</artifactId>
-               <version>${maven.enforcer.plugin.version}</version>
-               <executions>
-                  <execution>
-                     <!-- Make sure that only non-snapshot versions are used
-                        for the dependencies. Only active when property 'snapshotDependencyAllowed'
-                        is false. -->
-                     <id>enforce-no-snapshots</id>
-                     <goals>
-                        <goal>enforce</goal>
-                     </goals>
-                     <configuration>
-                        <skip>${snapshotDependencyAllowed}</skip>
-                        <rules>
-                           <requireReleaseDeps>
-                              <message>No Snapshots Allowed!</message>
-                           </requireReleaseDeps>
-                           <requireReleaseVersion>
-                              <message>No Snapshots Allowed!</message>
-                           </requireReleaseVersion>
-                           <requireMavenVersion>
-                              <version>3.9</version>
-                           </requireMavenVersion>
-                        </rules>
-                     </configuration>
-                  </execution>
-               </executions>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
             </plugin>
             <plugin>
-               <groupId>org.codehaus.mojo</groupId>
-               <artifactId>flatten-maven-plugin</artifactId>
-               <version>${flatten.maven.plugin.version}</version>
-               <configuration>
-                  <flattenMode>resolveCiFriendliesOnly</flattenMode>
-                  <updatePomFile>true</updatePomFile>
-               </configuration>
-               <executions>
-                  <execution>
-                     <id>flatten</id>
-                     <phase>process-resources</phase>
-                     <goals>
-                        <goal>flatten</goal>
-                     </goals>
-                  </execution>
-                  <execution>
-                     <id>flatten.clean</id>
-                     <phase>clean</phase>
-                     <goals>
-                        <goal>clean</goal>
-                     </goals>
-                  </execution>
-               </executions>
-            </plugin>
-            <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-scm-plugin</artifactId>
-               <version>${maven.scm.plugin.version}</version>
-               <configuration>
-                  <tag>${project.version}</tag>
-               </configuration>
-            </plugin>
-            <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-site-plugin</artifactId>
-               <version>${maven.site.plugin.version}</version>
-               <configuration>
-                  <skip>true</skip>
-                  <skipDeploy>true</skipDeploy>
-               </configuration>
+                <groupId>org.eclipse.dash</groupId>
+                <artifactId>license-tool-plugin</artifactId>
             </plugin>
 
             <plugin>
-               <groupId>com.mycila</groupId>
-               <artifactId>license-maven-plugin</artifactId>
-               <version>${license.maven.plugin.version}</version>
-               <configuration>
-                  <licenseSets>
-                     <licenseSet>
-                        <header>licenses/LICENSE_HEADER_TEMPLATE.txt</header>
-                        <validHeaders>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_CONTRIBUTORS_23.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_15.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_19.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_20.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_21.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_22.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_23.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_20.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_19.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_20.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_KIWIGRID_19.txt</validHeader>
-                           <validHeader>licenses/LICENSE_HEADER_TEMPLATE_ENAPTER.txt</validHeader>
-                        </validHeaders>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <compilerArgument>-Xlint:all</compilerArgument>
+                        <showWarnings>true</showWarnings>
+                        <showDeprecation>true</showDeprecation>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <doclint>syntax</doclint>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${maven.enforcer.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <!-- Make sure that only non-snapshot versions are used
+                               for the dependencies. Only active when property 'snapshotDependencyAllowed'
+                               is false. -->
+                            <id>enforce-no-snapshots</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <skip>${snapshotDependencyAllowed}</skip>
+                                <rules>
+                                    <requireReleaseDeps>
+                                        <message>No Snapshots Allowed!</message>
+                                    </requireReleaseDeps>
+                                    <requireReleaseVersion>
+                                        <message>No Snapshots Allowed!</message>
+                                    </requireReleaseVersion>
+                                    <requireMavenVersion>
+                                        <version>3.9</version>
+                                    </requireMavenVersion>
+                                </rules>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>${flatten.maven.plugin.version}</version>
+                    <configuration>
+                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                        <updatePomFile>true</updatePomFile>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>flatten</id>
+                            <phase>process-resources</phase>
+                            <goals>
+                                <goal>flatten</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>flatten.clean</id>
+                            <phase>clean</phase>
+                            <goals>
+                                <goal>clean</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-scm-plugin</artifactId>
+                    <version>${maven.scm.plugin.version}</version>
+                    <configuration>
+                        <tag>${project.version}</tag>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>${maven.site.plugin.version}</version>
+                    <configuration>
+                        <skip>true</skip>
+                        <skipDeploy>true</skipDeploy>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>${license.maven.plugin.version}</version>
+                    <configuration>
+                        <licenseSets>
+                            <licenseSet>
+                                <header>licenses/LICENSE_HEADER_TEMPLATE.txt</header>
+                                <validHeaders>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_CONTRIBUTORS_23.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_15.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_19.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_20.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_21.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_22.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_23.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_20.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_19.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_20.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_KIWIGRID_19.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_ENAPTER.txt</validHeader>
+                                </validHeaders>
+                                <excludes>
+                                    <exclude>.3rd-party/**</exclude>
+                                    <exclude>.git*</exclude>
+                                    <exclude>.github/**</exclude>
+                                    <exclude>licenses/LICENSE*</exclude>
+                                    <exclude>eclipse_codeformatter.xml</exclude>
+                                    <exclude>intellij_codeformatter.xml</exclude>
+                                    <exclude>**/banner.txt</exclude>
+                                    <exclude>**/helm/**</exclude>
+                                    <exclude>**/README</exclude>
+                                    <exclude>**/.git*</exclude>
+                                    <exclude>**/*.sql</exclude>
+                                    <exclude>**/docker/**</exclude>
+                                    <exclude>**/frontend/**</exclude>
+                                    <exclude>site/content/**</exclude>
+                                    <exclude>site/layouts/**</exclude>
+                                    <exclude>site/static/**</exclude>
+                                    <exclude>site/*.toml</exclude>
+                                    <exclude>**/spring.factories</exclude>
+                                </excludes>
+                            </licenseSet>
+                        </licenseSets>
+                        <mapping>
+                            <java>JAVADOC_STYLE</java>
+                            <scss>JAVADOC_STYLE</scss>
+                        </mapping>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.eclipse.dash</groupId>
+                    <artifactId>license-tool-plugin</artifactId>
+                    <version>${license.tool.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>license-check</id>
+                            <goals>
+                                <goal>license-check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven.surefire.plugin.version}</version>
+                    <configuration>
+                        <systemPropertyVariables>
+                            <!-- Set output directory according to allure-framework recommendation -->
+                            <allure.results.directory>${project.build.directory}/allure-results
+                            </allure.results.directory>
+                            <!-- Bugfix for timeout. See https://github.com/allure-framework/allure-maven/issues/59 -->
+                            <allure.serve.timeout>650</allure.serve.timeout>
+                        </systemPropertyVariables>
+                        <!-- Bugfix for OpenJDK 8u181, see https://issues.apache.org/jira/browse/SUREFIRE-1588 -->
+                        <useSystemClassLoader>false</useSystemClassLoader>
+                        <reuseForks>true</reuseForks>
+                        <forkCount>${surefire.forkcount}</forkCount>
+                        <argLine>${jacoco.agent.ut.arg} ${test.jvm.args}</argLine>
+                        <properties>
+                            <property>
+                                <name>listener</name>
+                                <value>io.qameta.allure.junit5.AllureJunit5</value>
+                            </property>
+                        </properties>
+                        <includes>
+                            <include>**/*Tests.java</include>
+                            <include>**/*Test.java</include>
+                            <include>**/*IT.java</include>
+                        </includes>
                         <excludes>
-                           <exclude>.3rd-party/**</exclude>
-                           <exclude>.azure-pipelines/*</exclude>
-                           <exclude>.devcontainer/*</exclude>
-                           <exclude>.git*</exclude>
-                           <exclude>.github/**</exclude>
-                           <exclude>.sonar</exclude>
-                           <exclude>licenses/LICENSE*</exclude>
-                           <exclude>eclipse_codeformatter.xml</exclude>
-                           <exclude>intellij_codeformatter.xml</exclude>
-                           <exclude>**/banner.txt</exclude>
-                           <exclude>**/helm/**</exclude>
-                           <exclude>**/README</exclude>
-                           <exclude>**/.git*</exclude>
-                           <exclude>**/*.sql</exclude>
-                           <exclude>**/docker/**</exclude>
-                           <exclude>**/.sonar/**</exclude>
-                           <exclude>**/frontend/**</exclude>
-                           <exclude>site/content/**</exclude>
-                           <exclude>site/layouts/**</exclude>
-                           <exclude>site/static/**</exclude>
-                           <exclude>site/*.toml</exclude>
-                           <exclude>**/spring.factories</exclude>
+                            <exclude>**/Abstract*.java</exclude>
                         </excludes>
-                     </licenseSet>
-                  </licenseSets>
-                  <mapping>
-                     <java>JAVADOC_STYLE</java>
-                     <scss>JAVADOC_STYLE</scss>
-                  </mapping>
-               </configuration>
-            </plugin>
-            <plugin>
-               <groupId>org.eclipse.dash</groupId>
-               <artifactId>license-tool-plugin</artifactId>
-               <version>${license.tool.plugin.version}</version>
-               <executions>
-                  <execution>
-                     <id>license-check</id>
-                     <goals>
-                        <goal>license-check</goal>
-                     </goals>
-                  </execution>
-               </executions>
-            </plugin>
-
-            <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-surefire-plugin</artifactId>
-               <version>${maven.surefire.plugin.version}</version>
-               <configuration>
-                  <systemPropertyVariables>
-                     <!-- Set output directory according to allure-framework recommendation -->
-                     <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
-                     <!-- Bugfix for timeout. See https://github.com/allure-framework/allure-maven/issues/59 -->
-                     <allure.serve.timeout>650</allure.serve.timeout>
-                  </systemPropertyVariables>
-                  <!-- Bugfix for OpenJDK 8u181, see https://issues.apache.org/jira/browse/SUREFIRE-1588 -->
-                  <useSystemClassLoader>false</useSystemClassLoader>
-                  <reuseForks>true</reuseForks>
-                  <forkCount>${surefire.forkcount}</forkCount>
-                  <argLine>${jacoco.agent.ut.arg} ${test.jvm.args}</argLine>
-                  <properties>
-                     <property>
-                        <name>listener</name>
-                        <value>io.qameta.allure.junit5.AllureJunit5</value>
-                     </property>
-                  </properties>
-                  <includes>
-                     <include>**/*Tests.java</include>
-                     <include>**/*Test.java</include>
-                     <include>**/*IT.java</include>
-                  </includes>
-                  <excludes>
-                     <exclude>**/Abstract*.java</exclude>
-                  </excludes>
-               </configuration>
-            </plugin>
-            <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
-               <artifactId>maven-failsafe-plugin</artifactId>
-               <version>${maven.failsafe.plugin.version}</version>
-               <configuration>
-                  <reuseForks>false</reuseForks>
-                  <forkCount>${surefire.forkcount}</forkCount>
-                  <argLine>-Xmx1024m ${jacoco.agent.ut.arg}</argLine>
-                  <properties>
-                     <property>
-                        <name>listener</name>
-                        <value>io.qameta.allure.junit5.AllureJunit5</value>
-                     </property>
-                  </properties>
-               </configuration>
-               <executions>
-                  <execution>
-                     <id>integration-test</id>
-                     <phase>integration-test</phase>
-                     <goals>
-                        <goal>integration-test</goal>
-                     </goals>
-                  </execution>
-               </executions>
-            </plugin>
-            <plugin>
-               <groupId>org.jacoco</groupId>
-               <artifactId>jacoco-maven-plugin</artifactId>
-               <version>${jacoco.maven.plugin.version}</version>
-               <executions>
-                  <execution>
-                     <id>prepare-ut-agent</id>
-                     <phase>process-test-classes</phase>
-                     <goals>
-                        <goal>prepare-agent</goal>
-                     </goals>
-                     <configuration>
-                        <propertyName>jacoco.agent.ut.arg</propertyName>
-                     </configuration>
-                  </execution>
-                  <execution>
-                     <id>prepare-it-agent</id>
-                     <phase>pre-integration-test</phase>
-                     <goals>
-                        <goal>prepare-agent-integration</goal>
-                     </goals>
-                     <configuration>
-                        <propertyName>jacoco.agent.it.arg</propertyName>
-                     </configuration>
-                  </execution>
-               </executions>
-            </plugin>
-            <plugin>
-               <groupId>com.ethlo.persistence.tools</groupId>
-               <artifactId>eclipselink-maven-plugin</artifactId>
-               <version>${eclipselink.maven.plugin.version}</version>
-            </plugin>
-         </plugins>
-      </pluginManagement>
-   </build>
-
-   <profiles>
-      <profile>
-         <id>nexus_staging</id>
-         <activation>
-            <property>
-               <name>!skipNexusStaging</name>
-            </property>
-         </activation>
-         <build>
-            <plugins>
-               <plugin>
-                  <!-- Use the Nexus Staging plugin as a full replacement
-                     for the standard Maven Deploy plugin. See https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin
-                     why this makes sense :-) We can control whether we want to deploy to the
-                     Eclipse repo or Maven Central by a combination of the version being a SNAPSHOT
-                     or RELEASE version and property skipNexusStaging=true/false. In any case
-                     we can take advantage of the plugin's "deferred deploy" feature which makes
-                     sure that all artifacts of a multi-module project are deployed as a whole
-                     at the end of the build process instead of deploying each module's artifacts
-                     individually as part of building the module. -->
-                  <groupId>org.sonatype.plugins</groupId>
-                  <artifactId>nexus-staging-maven-plugin</artifactId>
-                  <version>${nexus.staging.maven.plugin.version}</version>
-                  <extensions>true</extensions>
-                  <configuration>
-                     <serverId>ossrh</serverId>
-                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                     <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                  </configuration>
-               </plugin>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven.failsafe.plugin.version}</version>
+                    <configuration>
+                        <reuseForks>false</reuseForks>
+                        <forkCount>${surefire.forkcount}</forkCount>
+                        <argLine>-Xmx1024m ${jacoco.agent.ut.arg}</argLine>
+                        <properties>
+                            <property>
+                                <name>listener</name>
+                                <value>io.qameta.allure.junit5.AllureJunit5</value>
+                            </property>
+                        </properties>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>integration-test</id>
+                            <phase>integration-test</phase>
+                            <goals>
+                                <goal>integration-test</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.maven.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>prepare-ut-agent</id>
+                            <phase>process-test-classes</phase>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                            <configuration>
+                                <propertyName>jacoco.agent.ut.arg</propertyName>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>prepare-it-agent</id>
+                            <phase>pre-integration-test</phase>
+                            <goals>
+                                <goal>prepare-agent-integration</goal>
+                            </goals>
+                            <configuration>
+                                <propertyName>jacoco.agent.it.arg</propertyName>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>com.ethlo.persistence.tools</groupId>
+                    <artifactId>eclipselink-maven-plugin</artifactId>
+                    <version>${eclipselink.maven.plugin.version}</version>
+                </plugin>
             </plugins>
-         </build>
-      </profile>
-      <profile>
-         <!-- this profile generates GPG signatures -->
-         <id>create_gpg_signature</id>
-         <activation>
-            <activeByDefault>false</activeByDefault>
-            <property>
-               <name>createGPGSignature</name>
-            </property>
-         </activation>
-         <build>
-            <plugins>
-               <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-gpg-plugin</artifactId>
-                  <version>${maven.gpg.plugin.version}</version>
-                  <executions>
-                     <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                           <goal>sign</goal>
-                        </goals>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>nexus_staging</id>
+            <activation>
+                <property>
+                    <name>!skipNexusStaging</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <!-- Use the Nexus Staging plugin as a full replacement
+                           for the standard Maven Deploy plugin. See https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin
+                           why this makes sense :-) We can control whether we want to deploy to the
+                           Eclipse repo or Maven Central by a combination of the version being a SNAPSHOT
+                           or RELEASE version and property skipNexusStaging=true/false. In any case
+                           we can take advantage of the plugin's "deferred deploy" feature which makes
+                           sure that all artifacts of a multi-module project are deployed as a whole
+                           at the end of the build process instead of deploying each module's artifacts
+                           individually as part of building the module. -->
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>${nexus.staging.maven.plugin.version}</version>
+                        <extensions>true</extensions>
                         <configuration>
-                           <gpgArguments>
-                              <arg>--pinentry-mode</arg>
-                              <arg>loopback</arg>
-                           </gpgArguments>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
                         </configuration>
-                     </execution>
-                  </executions>
-               </plugin>
-            </plugins>
-         </build>
-      </profile>
-   </profiles>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- this profile generates GPG signatures -->
+            <id>create_gpg_signature</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>createGPGSignature</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>${maven.gpg.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
-   <dependencyManagement>
-      <dependencies>
-         <!-- Misc -->
-         <dependency>
-            <groupId>com.rabbitmq</groupId>
-            <artifactId>http-client</artifactId>
-            <version>${rabbitmq.http-client.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>com.cronutils</groupId>
-            <artifactId>cron-utils</artifactId>
-            <version>${cron-utils.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-            <version>${jsoup.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>javax.el</groupId>
-            <artifactId>javax.el-api</artifactId>
-            <version>${javax.el-api.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>${jaxb-api.version}</version>
-         </dependency>
+    <dependencyManagement>
+        <dependencies>
+            <!-- Misc -->
+            <dependency>
+                <groupId>com.rabbitmq</groupId>
+                <artifactId>http-client</artifactId>
+                <version>${rabbitmq.http-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.cronutils</groupId>
+                <artifactId>cron-utils</artifactId>
+                <version>${cron-utils.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${jsoup.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.el</groupId>
+                <artifactId>javax.el-api</artifactId>
+                <version>${javax.el-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>${jaxb-api.version}</version>
+            </dependency>
 
-         <!-- Spring -->
-         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-dependencies</artifactId>
-            <version>${spring.cloud.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-         </dependency>
-         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring.boot.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>com.fasterxml.jackson.datatype</groupId>
-                  <artifactId>jackson-datatype-jdk8</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>com.fasterxml.jackson.datatype</groupId>
-                  <artifactId>jackson-datatype-jsr310</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>com.fasterxml.jackson.module</groupId>
-                  <artifactId>jackson-module-parameter-names</artifactId>
-               </exclusion>
-            </exclusions>
-         </dependency>
-         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
-            <version>${spring.boot.version}</version>
-            <scope>provided</scope>
-         </dependency>
-         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <version>${spring.boot.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>org.apache.logging.log4j</groupId>
-                  <artifactId>log4j-to-slf4j</artifactId>
-               </exclusion>
-            </exclusions>
-         </dependency>
-         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <version>${spring.boot.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>org.hibernate</groupId>
-                  <artifactId>hibernate-entitymanager</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>org.hibernate</groupId>
-                  <artifactId>hibernate-core</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>org.springframework.boot</groupId>
-                  <artifactId>spring-boot-starter-logging</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>javax.xml.bind</groupId>
-                  <artifactId>jaxb-api</artifactId>
-               </exclusion>
-            </exclusions>
-         </dependency>
-         <dependency>
+            <!-- Spring -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring.cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring.boot.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.datatype</groupId>
+                        <artifactId>jackson-datatype-jdk8</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.datatype</groupId>
+                        <artifactId>jackson-datatype-jsr310</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.module</groupId>
+                        <artifactId>jackson-module-parameter-names</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-tomcat</artifactId>
+                <version>${spring.boot.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter</artifactId>
+                <version>${spring.boot.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-to-slf4j</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-jpa</artifactId>
+                <version>${spring.boot.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.hibernate</groupId>
+                        <artifactId>hibernate-entitymanager</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.hibernate</groupId>
+                        <artifactId>hibernate-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-logging</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.xml.bind</groupId>
+                        <artifactId>jaxb-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.persistence</groupId>
+                <artifactId>org.eclipse.persistence.jpa</artifactId>
+                <version>${eclipselink.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.plugin</groupId>
+                <artifactId>spring-plugin-core</artifactId>
+                <version>${spring.plugin.core.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc-openapi.version}</version>
+            </dependency>
+
+            <!-- Protostuff Io -->
+            <dependency>
+                <groupId>io.protostuff</groupId>
+                <artifactId>protostuff-core</artifactId>
+                <version>${io-protostuff.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.protostuff</groupId>
+                <artifactId>protostuff-runtime</artifactId>
+                <version>${io-protostuff.version}</version>
+            </dependency>
+
+            <!-- RSQL / FIQL parser -->
+            <dependency>
+                <groupId>cz.jirutka.rsql</groupId>
+                <artifactId>rsql-parser</artifactId>
+                <version>${rsql-parser.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>${commons-collections4.version}</version>
+            </dependency>
+
+            <!-- Test -->
+            <dependency>
+                <groupId>io.github.classgraph</groupId>
+                <artifactId>classgraph</artifactId>
+                <version>${classgraph.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.amqp</groupId>
+                <artifactId>spring-rabbit-junit</artifactId>
+                <version>${spring-amqp.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.amqp</groupId>
+                <artifactId>spring-rabbit-test</artifactId>
+                <version>${spring-amqp.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-junit5</artifactId>
+                <version>${allure.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${awaitility.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <version>${spring.boot.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>org.eclipse.persistence.jpa</artifactId>
-            <version>${eclipselink.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.springframework.plugin</groupId>
-            <artifactId>spring-plugin-core</artifactId>
-            <version>${spring.plugin.core.version}</version>
-         </dependency>
-
-         <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>${springdoc-openapi.version}</version>
-         </dependency>
-
-         <!-- Protostuff Io -->
-         <dependency>
-            <groupId>io.protostuff</groupId>
-            <artifactId>protostuff-core</artifactId>
-            <version>${io-protostuff.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>io.protostuff</groupId>
-            <artifactId>protostuff-runtime</artifactId>
-            <version>${io-protostuff.version}</version>
-         </dependency>
-
-         <!-- RSQL / FIQL parser -->
-         <dependency>
-            <groupId>cz.jirutka.rsql</groupId>
-            <artifactId>rsql-parser</artifactId>
-            <version>${rsql-parser.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>${commons-io.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>${commons-collections4.version}</version>
-         </dependency>
-
-         <!-- Test -->
-         <dependency>
-            <groupId>io.github.classgraph</groupId>
-            <artifactId>classgraph</artifactId>
-            <version>${classgraph.version}</version>
             <scope>test</scope>
-         </dependency>
-         <dependency>
-            <groupId>org.springframework.amqp</groupId>
-            <artifactId>spring-rabbit-junit</artifactId>
-            <version>${spring-amqp.version}</version>
-            <scope>test</scope>
-         </dependency>
-         <dependency>
-            <groupId>org.springframework.amqp</groupId>
-            <artifactId>spring-rabbit-test</artifactId>
-            <version>${spring-amqp.version}</version>
-            <scope>test</scope>
-         </dependency>
-         <dependency>
+        </dependency>
+        <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-junit5</artifactId>
-            <version>${allure.version}</version>
             <scope>test</scope>
-         </dependency>
-         <dependency>
-            <groupId>org.awaitility</groupId>
-            <artifactId>awaitility</artifactId>
-            <version>${awaitility.version}</version>
-         </dependency>
-      </dependencies>
-   </dependencyManagement>
-
-   <dependencies>
-      <dependency>
-         <groupId>org.projectlombok</groupId>
-         <artifactId>lombok</artifactId>
-         <optional>true</optional>
-      </dependency>
-   </dependencies>
+        </dependency>
+    </dependencies>
 </project>

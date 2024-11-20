@@ -13,6 +13,7 @@ target
 .project
 .idea
 artifactrepo
+apt_generated
 
 # Windows image file caches
 Thumbs.db

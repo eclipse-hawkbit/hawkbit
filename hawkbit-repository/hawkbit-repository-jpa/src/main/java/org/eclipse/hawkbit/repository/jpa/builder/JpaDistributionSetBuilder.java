@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 /**
  * Builder implementation for {@link DistributionSet}.
- *
  */
 public class JpaDistributionSetBuilder implements DistributionSetBuilder {
 
@@ -41,5 +40,4 @@ public class JpaDistributionSetBuilder implements DistributionSetBuilder {
     public DistributionSetCreate create() {
         return new JpaDistributionSetCreate(distributionSetTypeManagement, softwareModuleManagement);
     }
-
 }

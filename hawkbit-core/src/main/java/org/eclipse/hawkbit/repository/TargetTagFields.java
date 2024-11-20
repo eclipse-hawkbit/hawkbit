@@ -18,14 +18,14 @@ import lombok.Getter;
 @Getter
 public enum TargetTagFields implements RsqlQueryField {
 
-  ID(TagFields.ID.getJpaEntityFieldName()),
-  NAME(TagFields.NAME.getJpaEntityFieldName()),
-  DESCRIPTION(TagFields.DESCRIPTION.getJpaEntityFieldName()),
-  COLOUR(TagFields.COLOUR.getJpaEntityFieldName());
+    ID(TagFields.ID.getJpaEntityFieldName()),
+    NAME(TagFields.NAME.getJpaEntityFieldName()),
+    DESCRIPTION(TagFields.DESCRIPTION.getJpaEntityFieldName()),
+    COLOUR(TagFields.COLOUR.getJpaEntityFieldName());
 
-  private final String jpaEntityFieldName;
+    private final String jpaEntityFieldName;
 
-  TargetTagFields(final String jpaEntityFieldName) {
-    this.jpaEntityFieldName = jpaEntityFieldName;
-  }
+    TargetTagFields(final String jpaEntityFieldName) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
+    }
 }

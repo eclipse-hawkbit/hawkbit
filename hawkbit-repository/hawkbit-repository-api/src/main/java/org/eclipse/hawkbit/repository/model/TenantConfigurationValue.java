@@ -9,15 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import lombok.Builder;
-import lombok.Data;
-
 import java.io.Serial;
 import java.io.Serializable;
 
+import lombok.Builder;
+import lombok.Data;
+
 /**
  * Represents a tenant configuration value including some meta data
- * 
+ *
  * @param <T> type of the configuration value
  */
 @Data

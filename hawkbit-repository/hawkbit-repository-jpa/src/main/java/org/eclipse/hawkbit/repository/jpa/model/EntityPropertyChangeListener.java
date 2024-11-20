@@ -17,34 +17,30 @@ import org.eclipse.persistence.queries.UpdateObjectQuery;
 /**
  * Listens to change in property values of an entity and calls the corresponding
  * {@link EventAwareEntity}.
- *
  */
 public class EntityPropertyChangeListener extends DescriptorEventAdapter {
-
-    @Override
-    public void postInsert(final DescriptorEvent event) {
-        final Object object = event.getObject();
-        if (isEventAwareEntity(object)) {
-            doNotifiy(() -> ((EventAwareEntity) object).fireCreateEvent(event));
-        }
-    }
-
-    @Override
-    public void postUpdate(final DescriptorEvent event) {
-
-        final Object object = event.getObject();
-        if (isEventAwareEntity(object)
-                && isFireUpdate((EventAwareEntity) object, (UpdateObjectQuery) event.getQuery())) {
-            doNotifiy(() -> ((EventAwareEntity) object).fireUpdateEvent(event));
-        }
-
-    }
 
     @Override
     public void postDelete(final DescriptorEvent event) {
         final Object object = event.getObject();
         if (isEventAwareEntity(object)) {
-            doNotifiy(() -> ((EventAwareEntity) object).fireDeleteEvent(event));
+            doNotify(() -> ((EventAwareEntity) object).fireDeleteEvent());
+        }
+    }
+
+    @Override
+    public void postInsert(final DescriptorEvent event) {
+        final Object object = event.getObject();
+        if (isEventAwareEntity(object)) {
+            doNotify(() -> ((EventAwareEntity) object).fireCreateEvent());
+        }
+    }
+
+    @Override
+    public void postUpdate(final DescriptorEvent event) {
+        final Object object = event.getObject();
+        if (isEventAwareEntity(object) && isFireUpdate((EventAwareEntity) object, (UpdateObjectQuery) event.getQuery())) {
+            doNotify(() -> ((EventAwareEntity) object).fireUpdateEvent());
         }
     }
 
@@ -52,7 +48,7 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
         return object instanceof EventAwareEntity;
     }
 
-    private static void doNotifiy(final Runnable runnable) {
+    private static void doNotify(final Runnable runnable) {
         AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(runnable);
     }
 
@@ -60,5 +56,4 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
         return entity.getUpdateIgnoreFields().isEmpty() || query.getObjectChangeSet().getChangedAttributeNames()
                 .stream().anyMatch(field -> !entity.getUpdateIgnoreFields().contains(field));
     }
-
 }

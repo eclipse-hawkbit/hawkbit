@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.dmf.json.model;
 /**
  * Enumerates the supported update modes. Each mode represents an attribute
  * update strategy.
- * 
+ *
  * @see DmfAttributeUpdate
  */
 public enum DmfUpdateMode {

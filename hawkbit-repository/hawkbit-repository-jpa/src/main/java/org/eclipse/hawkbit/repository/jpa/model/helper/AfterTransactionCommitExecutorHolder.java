@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  * A singleton bean which holds the {@link AfterTransactionCommitExecutor} to
  * have to the cache manager in beans not instantiated by spring e.g. JPA
  * entities or {@link EntityPropertyChangeListener} which cannot be autowired.
- *
  */
 public final class AfterTransactionCommitExecutorHolder {
 
@@ -45,8 +44,7 @@ public final class AfterTransactionCommitExecutorHolder {
     }
 
     /**
-     * @param afterCommit
-     *            the afterCommit to set
+     * @param afterCommit the afterCommit to set
      */
     public void setAfterCommit(final AfterTransactionCommitExecutor afterCommit) {
         this.afterCommit = afterCommit;

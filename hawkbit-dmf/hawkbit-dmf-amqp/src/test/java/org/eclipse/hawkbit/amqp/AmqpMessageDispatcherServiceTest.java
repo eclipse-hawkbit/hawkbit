@@ -23,17 +23,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.eclipse.hawkbit.api.ArtifactUrl;
-import org.eclipse.hawkbit.api.ArtifactUrlHandler;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.artifact.repository.ArtifactFilesystem;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrl;
+import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
-import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
@@ -62,10 +64,6 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 @ActiveProfiles({ "test" })
 @Feature("Component Tests - Device Management Federation API")
 @Story("AmqpMessage Dispatcher Service Test")
@@ -76,22 +74,16 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     private static final Long TENANT_ID = 4711L;
 
     private static final URI AMQP_URI = IpUtil.createAmqpUri("vHost", "mytest");
-
     private static final String TEST_TOKEN = "testToken";
-
     private static final String CONTROLLER_ID = "1";
 
     private AmqpMessageDispatcherService amqpMessageDispatcherService;
-
     private RabbitTemplate rabbitTemplate;
-
     private DefaultAmqpMessageSenderService senderService;
-
     private Target testTarget;
 
     @BeforeEach
     public void beforeEach() throws Exception {
-
         testTarget = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID)
                 .securityToken(TEST_TOKEN).address(AMQP_URI.toString()));
 
@@ -117,14 +109,10 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     }
 
-    private Message getCaptureAddressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
-        final Target target = targetManagement
-                .getByControllerID(targetAssignDistributionSetEvent.getActions().keySet().iterator().next()).get();
-        return createArgumentCapture(target.getAddress());
-    }
-
-    private Action createAction(final DistributionSet testDs) {
-        return getFirstAssignedAction(assignDistributionSet(testDs, testTarget));
+    protected Message createArgumentCapture(final URI uri) {
+        final ArgumentCaptor<Message> argumentCaptor = ArgumentCaptor.forClass(Message.class);
+        Mockito.verify(senderService).sendMessage(argumentCaptor.capture(), eq(uri));
+        return argumentCaptor.getValue();
     }
 
     @Test
@@ -295,6 +283,16 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         Mockito.verifyNoInteractions(senderService);
     }
 
+    private Message getCaptureAddressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
+        final Target target = targetManagement
+                .getByControllerID(targetAssignDistributionSetEvent.getActions().keySet().iterator().next()).get();
+        return createArgumentCapture(target.getAddress());
+    }
+
+    private Action createAction(final DistributionSet testDs) {
+        return getFirstAssignedAction(assignDistributionSet(testDs, testTarget));
+    }
+
     private void assertCancelMessage(final Message sendMessage) {
         assertEventMessage(sendMessage);
         final DmfActionRequest actionId = convertMessage(sendMessage, DmfActionRequest.class);
@@ -313,7 +311,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         assertThat(sendMessage.getMessageProperties().getHeaders())
                 .containsEntry(MessageHeaderKey.TENANT, TENANT);
         assertThat(sendMessage.getMessageProperties().getHeaders())
-                .containsEntry(MessageHeaderKey.TYPE,MessageType.THING_DELETED);
+                .containsEntry(MessageHeaderKey.TYPE, MessageType.THING_DELETED);
     }
 
     private DmfDownloadAndUpdateRequest assertDownloadAndInstallMessage(final Message sendMessage, final Long action) {
@@ -323,7 +321,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         assertThat(downloadAndUpdateRequest.getActionId()).isEqualTo(action);
         assertThat(sendMessage.getMessageProperties().getHeaders())
                 .as("The topic of the event should contain DOWNLOAD_AND_INSTALL")
-                .containsEntry(MessageHeaderKey.TOPIC,EventTopic.DOWNLOAD_AND_INSTALL);
+                .containsEntry(MessageHeaderKey.TOPIC, EventTopic.DOWNLOAD_AND_INSTALL);
         assertThat(downloadAndUpdateRequest.getTargetSecurityToken())
                 .as("Security token of target")
                 .isEqualTo(TEST_TOKEN);
@@ -346,16 +344,10 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 .containsEntry(MessageHeaderKey.THING_ID, CONTROLLER_ID);
         assertThat(sendMessage.getMessageProperties().getHeaders())
                 .as("The value of the message header TYPE should be EVENT")
-                .containsEntry(MessageHeaderKey.TYPE,MessageType.EVENT);
+                .containsEntry(MessageHeaderKey.TYPE, MessageType.EVENT);
         assertThat(sendMessage.getMessageProperties().getContentType())
                 .as("The content type message should be " + MessageProperties.CONTENT_TYPE_JSON)
                 .isEqualTo(MessageProperties.CONTENT_TYPE_JSON);
-    }
-
-    protected Message createArgumentCapture(final URI uri) {
-        final ArgumentCaptor<Message> argumentCaptor = ArgumentCaptor.forClass(Message.class);
-        Mockito.verify(senderService).sendMessage(argumentCaptor.capture(), eq(uri));
-        return argumentCaptor.getValue();
     }
 
     @SuppressWarnings("unchecked")
@@ -364,5 +356,4 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 clazz.getTypeName());
         return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
-
 }

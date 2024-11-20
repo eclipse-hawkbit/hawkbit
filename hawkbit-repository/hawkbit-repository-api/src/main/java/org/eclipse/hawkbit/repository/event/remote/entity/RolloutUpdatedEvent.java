@@ -9,32 +9,29 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.io.Serial;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 
 /**
  * Defines the remote event of updated a {@link Rollout}.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
 public class RolloutUpdatedEvent extends RemoteEntityEvent<Rollout> implements EntityUpdatedEvent {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * Default constructor.
-     */
-    public RolloutUpdatedEvent() {
-        // for serialization libs like jackson
-    }
-
-    /**
      * Constructor
-     * 
-     * @param rollout
-     *            the updated rollout
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param rollout the updated rollout
+     * @param applicationId the origin application id
      */
     public RolloutUpdatedEvent(final Rollout rollout, final String applicationId) {
         super(rollout, applicationId);
     }
-
 }

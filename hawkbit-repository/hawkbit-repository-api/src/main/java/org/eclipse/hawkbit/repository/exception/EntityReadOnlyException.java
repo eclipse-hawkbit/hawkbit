@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
@@ -18,7 +20,9 @@ import org.eclipse.hawkbit.exception.SpServerError;
  */
 public class EntityReadOnlyException extends AbstractServerRtException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_ENTITY_READ_ONLY;
 
     /**
@@ -30,9 +34,8 @@ public class EntityReadOnlyException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
-     * @param cause
-     *            of the exception
+     *
+     * @param cause of the exception
      */
     public EntityReadOnlyException(final Throwable cause) {
         super(THIS_ERROR, cause);
@@ -40,11 +43,9 @@ public class EntityReadOnlyException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
-     * @param cause
-     *            of the exception
+     *
+     * @param message of the exception
+     * @param cause of the exception
      */
     public EntityReadOnlyException(final String message, final Throwable cause) {
         super(message, THIS_ERROR, cause);
@@ -52,9 +53,8 @@ public class EntityReadOnlyException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
+     *
+     * @param message of the exception
      */
     public EntityReadOnlyException(final String message) {
         super(message, THIS_ERROR);

@@ -29,11 +29,10 @@ public class EntityNotFoundException extends AbstractServerRtException {
     public static final String KEY = "key";
     public static final String ENTITY_ID = "entityId";
     public static final String TYPE = "type";
-
     @Serial
     private static final long serialVersionUID = 1L;
-
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_ENTITY_NOT_EXISTS;
+    private static final int ENTITY_STRING_MAX_LENGTH = 100;
 
     /**
      * Default constructor.
@@ -44,7 +43,7 @@ public class EntityNotFoundException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
+     *
      * @param cause of the exception
      */
     public EntityNotFoundException(final Throwable cause) {
@@ -53,7 +52,7 @@ public class EntityNotFoundException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
+     *
      * @param message of the exception
      * @param cause of the exception
      */
@@ -63,7 +62,7 @@ public class EntityNotFoundException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
+     *
      * @param message of the exception
      */
     protected EntityNotFoundException(final String message) {
@@ -72,7 +71,7 @@ public class EntityNotFoundException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor for {@link BaseEntity} not found.
-     * 
+     *
      * @param type of the entity that was not found
      * @param entityId of the {@link BaseEntity}
      */
@@ -84,7 +83,7 @@ public class EntityNotFoundException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor for {@link MetaData} not found.
-     * 
+     *
      * @param type of the entity that was not found
      * @param entityId of the {@link BaseEntity} the {@link MetaData} was for
      * @param key for the {@link MetaData} entry
@@ -95,7 +94,7 @@ public class EntityNotFoundException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor for {@link MetaData} not found.
-     * 
+     *
      * @param type of the entity that was not found
      * @param entityId of the {@link BaseEntity} the {@link MetaData} was for
      * @param key for the {@link MetaData} entry
@@ -108,7 +107,7 @@ public class EntityNotFoundException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor for a list of {@link BaseEntity}s not found.
-     * 
+     *
      * @param type of the entity that was not found
      * @param expected collection of the {@link BaseEntity#getId()}s
      * @param found collection of the {@link BaseEntity#getId()}s
@@ -116,12 +115,11 @@ public class EntityNotFoundException extends AbstractServerRtException {
     public EntityNotFoundException(final Class<? extends BaseEntity> type, final Collection<?> expected,
             final Collection<?> found) {
         super(type.getSimpleName() + "s with given identifiers {" + toEntityString(expected.stream().filter(id -> !found.contains(id))
-                .map(String::valueOf).collect(Collectors.joining(","))) + "} do not exist.",
+                        .map(String::valueOf).collect(Collectors.joining(","))) + "} do not exist.",
                 THIS_ERROR,
                 Map.of(TYPE, type.getSimpleName(), ENTITY_ID, expected.stream().filter(id -> !found.contains(id)).map(String::valueOf)));
     }
 
-    private static final int ENTITY_STRING_MAX_LENGTH = 100;
     private static String toEntityString(final Object obj) {
         final String str = String.valueOf(obj);
         return str.length() > ENTITY_STRING_MAX_LENGTH ? str.substring(0, ENTITY_STRING_MAX_LENGTH - 3).concat("...") : str;

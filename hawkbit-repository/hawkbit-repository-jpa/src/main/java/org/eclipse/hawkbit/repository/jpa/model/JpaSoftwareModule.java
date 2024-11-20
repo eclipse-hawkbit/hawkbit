@@ -46,11 +46,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.annotations.CascadeOnDelete;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
-import org.eclipse.persistence.queries.UpdateObjectQuery;
-import org.eclipse.persistence.sessions.changesets.DirectToFieldChangeRecord;
-import org.eclipse.persistence.sessions.changesets.ObjectChangeSet;
 
 /**
  * Base Software Module that is supported by OS level provisioning mechanism on
@@ -62,12 +57,11 @@ import org.eclipse.persistence.sessions.changesets.ObjectChangeSet;
 @Entity
 @Table(name = "sp_base_software_module", uniqueConstraints = @UniqueConstraint(columnNames = { "module_type", "name",
         "version", "tenant" }, name = "uk_base_sw_mod"), indexes = {
-                @Index(name = "sp_idx_base_sw_module_01", columnList = "tenant,deleted,name,version"),
-                @Index(name = "sp_idx_base_sw_module_02", columnList = "tenant,deleted,module_type"),
-                @Index(name = "sp_idx_base_sw_module_prim", columnList = "tenant,id") })
+        @Index(name = "sp_idx_base_sw_module_01", columnList = "tenant,deleted,name,version"),
+        @Index(name = "sp_idx_base_sw_module_02", columnList = "tenant,deleted,module_type"),
+        @Index(name = "sp_idx_base_sw_module_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "SoftwareModule.artifacts", attributeNodes = { @NamedAttributeNode("artifacts") })
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implements SoftwareModule, EventAwareEntity {
 
@@ -82,8 +76,8 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @NotNull
     private JpaSoftwareModuleType type;
 
-    @CascadeOnDelete
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule", cascade = { CascadeType.PERSIST }, targetEntity = JpaArtifact.class, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule", cascade = { CascadeType.PERSIST,
+            CascadeType.REMOVE }, targetEntity = JpaArtifact.class, orphanRemoval = true)
     private List<JpaArtifact> artifacts;
 
     @Setter
@@ -96,8 +90,8 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     private boolean encrypted;
 
     @ToString.Exclude
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "softwareModule", fetch = FetchType.LAZY, targetEntity = JpaSoftwareModuleMetadata.class)
+    @OneToMany(mappedBy = "softwareModule", fetch = FetchType.LAZY, cascade = {
+            CascadeType.REMOVE }, targetEntity = JpaSoftwareModuleMetadata.class)
     private List<JpaSoftwareModuleMetadata> metadata;
 
     @Column(name = "locked")
@@ -108,7 +102,6 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     @ToString.Exclude
     @Getter(AccessLevel.NONE)
-    @CascadeOnDelete
     @ManyToMany(mappedBy = "modules", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY)
     private List<DistributionSet> assignedTo;
 
@@ -191,41 +184,31 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
                 }
                 sb.delete(sb.length() - 2, sb.length());
                 throw new LockedException(JpaSoftwareModule.class, getId(), "DELETE", sb.toString());
-            };
+            }
         }
         this.deleted = deleted;
     }
 
     @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new SoftwareModuleCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new SoftwareModuleUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
 
-        if (isSoftDeleted(descriptorEvent)) {
+        if (deleted) {
             EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleDeletedEvent(
                     getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
         }
     }
 
     @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+    public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleDeletedEvent(getTenant(),
                 getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
-    }
-
-    private static boolean isSoftDeleted(final DescriptorEvent event) {
-        final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
-        final List<DirectToFieldChangeRecord> changes = changeSet.getChanges().stream()
-                .filter(DirectToFieldChangeRecord.class::isInstance).map(DirectToFieldChangeRecord.class::cast)
-                .toList();
-
-        return changes.stream().anyMatch(changeRecord -> DELETED_PROPERTY.equals(changeRecord.getAttribute())
-                && Boolean.parseBoolean(changeRecord.getNewValue().toString()));
     }
 }

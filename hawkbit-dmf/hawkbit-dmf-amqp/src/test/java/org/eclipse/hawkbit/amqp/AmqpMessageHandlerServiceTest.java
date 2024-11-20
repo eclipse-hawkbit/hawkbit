@@ -26,6 +26,10 @@ import java.net.URI;
 import java.util.Map;
 import java.util.Optional;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -70,11 +74,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.amqp.support.converter.MessageConverter;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
 
 @ExtendWith(MockitoExtension.class)
 @Feature("Component Tests - Device Management Federation API")
@@ -168,49 +167,6 @@ public class AmqpMessageHandlerServiceTest {
         assertReplyToCapturedField("MyTest");
     }
 
-    @Step
-    private void processThingCreatedMessage(final String thingId, final DmfCreateThing payload) {
-        final MessageProperties messageProperties = getThingCreatedMessageProperties(thingId);
-        final Message message = createMessage(payload != null ? payload : new byte[0], messageProperties);
-
-        final Target targetMock = mock(Target.class);
-        if (payload == null) {
-            when(controllerManagementMock.findOrRegisterTargetIfItDoesNotExist(targetIdCaptor.capture(),
-                    uriCaptor.capture())).thenReturn(targetMock);
-        } else {
-            when(controllerManagementMock.findOrRegisterTargetIfItDoesNotExist(targetIdCaptor.capture(),
-                    uriCaptor.capture(), targetNameCaptor.capture(), targetTypeNameCaptor.capture()))
-                    .thenReturn(targetMock);
-            if (payload.getAttributeUpdate() != null) {
-                when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(),
-                        attributesCaptor.capture(), modeCaptor.capture())).thenReturn(null);
-            }
-        }
-        when(controllerManagementMock.findActiveActionWithHighestWeight(any())).thenReturn(Optional.empty());
-
-        amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, VIRTUAL_HOST);
-    }
-
-    @Step
-    private void assertThingIdCapturedField(final String thingId) {
-        assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(thingId);
-    }
-
-    @Step
-    private void assertReplyToCapturedField(final String replyTo) {
-        assertThat(uriCaptor.getValue()).as("Uri is not right").hasToString("amqp://" + VIRTUAL_HOST + "/" + replyTo);
-    }
-
-    @Step
-    private void assertInitiatorCapturedField(final String initiator) {
-        assertThat(initiatorCaptor.getValue()).as("Initiator is wrong").isEqualTo(initiator);
-    }
-
-    @Step
-    private void assertRemarkCapturedField(final String remark) {
-        assertThat(remarkCaptor.getValue()).as("Remark is wrong").isEqualTo(remark);
-    }
-
     @Test
     @Description("Tests the creation of a target/thing with specified name by calling the same method that incoming RabbitMQ messages would access.")
     public void createThingWithName() {
@@ -227,11 +183,6 @@ public class AmqpMessageHandlerServiceTest {
         assertThingNameCapturedField(knownThingName);
     }
 
-    @Step
-    private void assertThingNameCapturedField(final String thingName) {
-        assertThat(targetNameCaptor.getValue()).as("Thing name is wrong").isEqualTo(thingName);
-    }
-
     @Test
     @Description("Tests the creation of a target/thing with specified type name by calling the same method that incoming RabbitMQ messages would access.")
     public void createThingWithType() {
@@ -246,11 +197,6 @@ public class AmqpMessageHandlerServiceTest {
         assertThingIdCapturedField(knownThingId);
         assertReplyToCapturedField("MyTest");
         assertThingTypeCapturedField(knownThingTypeName);
-    }
-
-    @Step
-    private void assertThingTypeCapturedField(final String thingType) {
-        assertThat(targetTypeNameCaptor.getValue()).as("Thing type is wrong").isEqualTo(thingType);
     }
 
     @Test
@@ -284,11 +230,6 @@ public class AmqpMessageHandlerServiceTest {
         assertThingAttributesCapturedField(attributeUpdate.getAttributes());
     }
 
-    @Step
-    private void assertThingAttributesCapturedField(final Map<String, String> attributes) {
-        assertThat(attributesCaptor.getValue()).as("Attributes is not right").isEqualTo(attributes);
-    }
-
     @Test
     @Description("Tests the creation of a target/thing with specified name and attributes by calling the same method that incoming RabbitMQ messages would access.")
     public void createThingWithNameAndAttributes() {
@@ -310,11 +251,6 @@ public class AmqpMessageHandlerServiceTest {
         assertReplyToCapturedField("MyTest");
         assertThingAttributesCapturedField(attributeUpdate.getAttributes());
         assertThingAttributesModeCapturedField(UpdateMode.REPLACE);
-    }
-
-    @Step
-    private void assertThingAttributesModeCapturedField(final UpdateMode attributesUpdateMode) {
-        assertThat(modeCaptor.getValue()).as("Attributes update mode is not right").isEqualTo(attributesUpdateMode);
     }
 
     @Test
@@ -572,6 +508,35 @@ public class AmqpMessageHandlerServiceTest {
     }
 
     @Test
+    @Description("Tests the deletion of a target/thing, requested by the target itself.")
+    public void deleteThing() {
+        // prepare valid message
+        final String knownThingId = "1";
+        final MessageProperties messageProperties = createMessageProperties(MessageType.THING_REMOVED);
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
+        final Message message = createMessage(new byte[0], messageProperties);
+
+        // test
+        amqpMessageHandlerService.onMessage(message, MessageType.THING_REMOVED.name(), TENANT, VIRTUAL_HOST);
+
+        // verify
+        verify(controllerManagementMock).deleteExistingTarget(knownThingId);
+    }
+
+    @Test
+    @Description("Tests the deletion of a target/thing with missing thingId")
+    public void deleteThingWithoutThingId() {
+        // prepare invalid message
+        final MessageProperties messageProperties = createMessageProperties(MessageType.THING_REMOVED);
+        final Message message = createMessage(new byte[0], messageProperties);
+
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since no thingId was set")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.THING_REMOVED.name(), TENANT,
+                        VIRTUAL_HOST));
+    }
+
+    @Test
     @Description("Tests activating auto-confirmation on a target.")
     void setAutoConfirmationStateActive() {
         final String knownThingId = "1";
@@ -589,7 +554,7 @@ public class AmqpMessageHandlerServiceTest {
         final Message message = createMessage(autoConfirmation, messageProperties);
 
         when(controllerManagementMock.activateAutoConfirmation(targetIdCaptor.capture(), initiatorCaptor.capture(),
-              remarkCaptor.capture())).thenReturn(null);
+                remarkCaptor.capture())).thenReturn(null);
 
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
 
@@ -599,7 +564,6 @@ public class AmqpMessageHandlerServiceTest {
         assertInitiatorCapturedField(initiator);
         assertRemarkCapturedField(remark);
     }
-
 
     @Test
     @Description("Tests deactivating auto-confirmation on a target.")
@@ -619,6 +583,69 @@ public class AmqpMessageHandlerServiceTest {
         verify(controllerManagementMock, times(0)).activateAutoConfirmation(anyString(), anyString(), anyString());
 
         assertThingIdCapturedField(knownThingId);
+    }
+
+    @Step
+    private void processThingCreatedMessage(final String thingId, final DmfCreateThing payload) {
+        final MessageProperties messageProperties = getThingCreatedMessageProperties(thingId);
+        final Message message = createMessage(payload != null ? payload : new byte[0], messageProperties);
+
+        final Target targetMock = mock(Target.class);
+        if (payload == null) {
+            when(controllerManagementMock.findOrRegisterTargetIfItDoesNotExist(targetIdCaptor.capture(),
+                    uriCaptor.capture())).thenReturn(targetMock);
+        } else {
+            when(controllerManagementMock.findOrRegisterTargetIfItDoesNotExist(targetIdCaptor.capture(),
+                    uriCaptor.capture(), targetNameCaptor.capture(), targetTypeNameCaptor.capture()))
+                    .thenReturn(targetMock);
+            if (payload.getAttributeUpdate() != null) {
+                when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(),
+                        attributesCaptor.capture(), modeCaptor.capture())).thenReturn(null);
+            }
+        }
+        when(controllerManagementMock.findActiveActionWithHighestWeight(any())).thenReturn(Optional.empty());
+
+        amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT, VIRTUAL_HOST);
+    }
+
+    @Step
+    private void assertThingIdCapturedField(final String thingId) {
+        assertThat(targetIdCaptor.getValue()).as("Thing id is wrong").isEqualTo(thingId);
+    }
+
+    @Step
+    private void assertReplyToCapturedField(final String replyTo) {
+        assertThat(uriCaptor.getValue()).as("Uri is not right").hasToString("amqp://" + VIRTUAL_HOST + "/" + replyTo);
+    }
+
+    @Step
+    private void assertInitiatorCapturedField(final String initiator) {
+        assertThat(initiatorCaptor.getValue()).as("Initiator is wrong").isEqualTo(initiator);
+    }
+
+    @Step
+    private void assertRemarkCapturedField(final String remark) {
+        assertThat(remarkCaptor.getValue()).as("Remark is wrong").isEqualTo(remark);
+    }
+
+    @Step
+    private void assertThingNameCapturedField(final String thingName) {
+        assertThat(targetNameCaptor.getValue()).as("Thing name is wrong").isEqualTo(thingName);
+    }
+
+    @Step
+    private void assertThingTypeCapturedField(final String thingType) {
+        assertThat(targetTypeNameCaptor.getValue()).as("Thing type is wrong").isEqualTo(thingType);
+    }
+
+    @Step
+    private void assertThingAttributesCapturedField(final Map<String, String> attributes) {
+        assertThat(attributesCaptor.getValue()).as("Attributes is not right").isEqualTo(attributes);
+    }
+
+    @Step
+    private void assertThingAttributesModeCapturedField(final UpdateMode attributesUpdateMode) {
+        assertThat(modeCaptor.getValue()).as("Attributes update mode is not right").isEqualTo(attributesUpdateMode);
     }
 
     private DmfActionUpdateStatus createActionUpdateStatus(final DmfActionStatus status) {
@@ -673,35 +700,6 @@ public class AmqpMessageHandlerServiceTest {
                 field.set(instance, new SecurityTokenGenerator());
             }
         }
-    }
-
-    @Test
-    @Description("Tests the deletion of a target/thing, requested by the target itself.")
-    public void deleteThing() {
-        // prepare valid message
-        final String knownThingId = "1";
-        final MessageProperties messageProperties = createMessageProperties(MessageType.THING_REMOVED);
-        messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
-        final Message message = createMessage(new byte[0], messageProperties);
-
-        // test
-        amqpMessageHandlerService.onMessage(message, MessageType.THING_REMOVED.name(), TENANT, VIRTUAL_HOST);
-
-        // verify
-        verify(controllerManagementMock).deleteExistingTarget(knownThingId);
-    }
-
-    @Test
-    @Description("Tests the deletion of a target/thing with missing thingId")
-    public void deleteThingWithoutThingId() {
-        // prepare invalid message
-        final MessageProperties messageProperties = createMessageProperties(MessageType.THING_REMOVED);
-        final Message message = createMessage(new byte[0], messageProperties);
-
-        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
-                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since no thingId was set")
-                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.THING_REMOVED.name(), TENANT,
-                        VIRTUAL_HOST));
     }
 
     private MessageProperties getThingCreatedMessageProperties(final String thingId) {

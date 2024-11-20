@@ -10,8 +10,7 @@
 package org.eclipse.hawkbit.tenancy.configuration.validator;
 
 /**
- * specific tenant configuration validator, which validates that the given value
- * is a booleans.
+ * specific tenant configuration validator, which validates that the given value is a booleans.
  */
 public class TenantConfigurationBooleanValidator implements TenantConfigurationValidator {
 

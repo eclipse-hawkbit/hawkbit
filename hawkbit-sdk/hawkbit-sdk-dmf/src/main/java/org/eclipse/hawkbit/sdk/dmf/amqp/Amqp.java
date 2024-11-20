@@ -9,16 +9,16 @@
  */
 package org.eclipse.hawkbit.sdk.dmf.amqp;
 
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.ConcurrentHashMap;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.sdk.Tenant.DMF;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.util.ObjectUtils;
-
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Abstract class for connecting to AMQP host.
@@ -41,7 +41,7 @@ public class Amqp {
 
     public VHost getVhost(final DMF dmf, final boolean initVHost) {
         final String vHost = dmf == null || ObjectUtils.isEmpty(dmf.getVirtualHost()) ?
-                (rabbitProperties.getVirtualHost() == null ? "/" :rabbitProperties.getVirtualHost()) :
+                (rabbitProperties.getVirtualHost() == null ? "/" : rabbitProperties.getVirtualHost()) :
                 dmf.getVirtualHost();
         return vHosts.computeIfAbsent(vHost, vh -> new VHost(getConnectionFactory(dmf, vHost), amqpProperties, initVHost));
     }

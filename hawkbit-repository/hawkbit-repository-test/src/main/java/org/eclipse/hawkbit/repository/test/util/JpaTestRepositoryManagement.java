@@ -33,13 +33,10 @@ public class JpaTestRepositoryManagement {
 
     /**
      * Constructor.
-     * 
-     * @param cacheManager
-     *            the cachemanager
-     * @param systemSecurityContext
-     *            the systemSecurityContext
-     * @param systemManagement
-     *            the systemManagement
+     *
+     * @param cacheManager the cachemanager
+     * @param systemSecurityContext the systemSecurityContext
+     * @param systemManagement the systemManagement
      */
     public JpaTestRepositoryManagement(final TenantAwareCacheManager cacheManager,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement) {

@@ -9,12 +9,17 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -26,29 +31,23 @@ import org.eclipse.hawkbit.repository.model.Target;
  * an update).
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // for serialization libs like jackson
 public abstract class MultiActionEvent extends RemoteTenantAwareEvent implements Iterable<String> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final List<String> controllerIds = new ArrayList<>();
     private final List<Long> actionIds = new ArrayList<>();
 
     /**
-     * Default constructor.
-     */
-    protected MultiActionEvent() {
-        // for serialization libs like jackson
-    }
-
-    /**
      * Constructor.
      *
-     * @param tenant
-     *            tenant the event is scoped to
-     * @param applicationId
-     *            the application id
-     * @param actions
-     *            the actions involved
+     * @param tenant tenant the event is scoped to
+     * @param applicationId the application id
+     * @param actions the actions involved
      */
     protected MultiActionEvent(String tenant, String applicationId, List<Action> actions) {
         super(applicationId, tenant, applicationId);
@@ -69,5 +68,4 @@ public abstract class MultiActionEvent extends RemoteTenantAwareEvent implements
     private static List<Long> getIdsFromActions(final List<Action> actions) {
         return actions.stream().map(Identifiable::getId).collect(Collectors.toList());
     }
-
 }

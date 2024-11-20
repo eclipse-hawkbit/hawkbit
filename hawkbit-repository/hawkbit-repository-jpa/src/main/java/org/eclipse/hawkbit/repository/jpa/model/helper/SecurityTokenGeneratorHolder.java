@@ -15,10 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * A singleton bean which holds the {@link SecurityTokenGenerator} and make it
  * accessible to beans which are not managed by spring, e.g. JPA entities.
- * 
- *
- *
- *
  */
 public final class SecurityTokenGeneratorHolder {
 
@@ -43,7 +39,7 @@ public final class SecurityTokenGeneratorHolder {
 
     /**
      * delegates to {@link SecurityTokenGenerator#generateToken()}.
-     * 
+     *
      * @return the result {@link SecurityTokenGenerator#generateToken()}
      */
     public String generateToken() {

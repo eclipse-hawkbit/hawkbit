@@ -11,9 +11,9 @@ package org.eclipse.hawkbit.repository.model;
 
 /**
  * Entities that have a name and description.
- *
  */
 public interface NamedEntity extends TenantAwareBaseEntity {
+
     /**
      * Maximum length of name.
      */

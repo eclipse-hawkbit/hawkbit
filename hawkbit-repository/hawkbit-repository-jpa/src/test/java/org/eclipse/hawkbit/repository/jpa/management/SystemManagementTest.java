@@ -15,6 +15,9 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Random;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
@@ -26,10 +29,6 @@ import org.eclipse.hawkbit.repository.test.util.DisposableSqlTestDatabaseExtensi
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("System Management")
@@ -135,25 +134,25 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
             final String tenantname = "tenant" + i;
             SecurityContextSwitch.runAs(SecurityContextSwitch.withUserAndTenant("bumlux", tenantname, true, true, false,
                     SpringEvalExpressions.SYSTEM_ROLE), () -> {
-                        systemManagement.getTenantMetadata();
-                        if (artifactSize > 0) {
-                            createTestArtifact(random);
-                            createDeletedTestArtifact(random);
-                        }
-                        if (targets > 0) {
-                            final List<Target> createdTargets = createTestTargets(targets);
-                            if (updates > 0) {
-                                for (int x = 0; x < updates; x++) {
-                                    final DistributionSet ds = testdataFactory
-                                            .createDistributionSet("to be deployed" + x, true);
+                systemManagement.getTenantMetadata();
+                if (artifactSize > 0) {
+                    createTestArtifact(random);
+                    createDeletedTestArtifact(random);
+                }
+                if (targets > 0) {
+                    final List<Target> createdTargets = createTestTargets(targets);
+                    if (updates > 0) {
+                        for (int x = 0; x < updates; x++) {
+                            final DistributionSet ds = testdataFactory
+                                    .createDistributionSet("to be deployed" + x, true);
 
-                                    assignDistributionSet(ds, createdTargets);
-                                }
-                            }
+                            assignDistributionSet(ds, createdTargets);
                         }
+                    }
+                }
 
-                        return null;
-                    });
+                return null;
+            });
         }
 
         return random;

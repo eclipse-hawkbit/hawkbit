@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
@@ -19,6 +21,8 @@ import org.eclipse.hawkbit.exception.SpServerError;
  * should be at least one valid window after the current time.
  */
 public class InvalidMaintenanceScheduleException extends AbstractServerRtException {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final int durationErrorIndex;
@@ -26,8 +30,7 @@ public class InvalidMaintenanceScheduleException extends AbstractServerRtExcepti
     /**
      * Constructor for {@link InvalidMaintenanceScheduleException}.
      *
-     * @param message
-     *            the message for this exception.
+     * @param message the message for this exception.
      */
     public InvalidMaintenanceScheduleException(final String message) {
         this(message, -1);
@@ -36,10 +39,8 @@ public class InvalidMaintenanceScheduleException extends AbstractServerRtExcepti
     /**
      * Constructor for {@link InvalidMaintenanceScheduleException}.
      *
-     * @param message
-     *            the message for this exception.
-     * @param errorIndex
-     *            the error index of maintenance duration.
+     * @param message the message for this exception.
+     * @param errorIndex the error index of maintenance duration.
      */
     public InvalidMaintenanceScheduleException(final String message, final int errorIndex) {
         super(message, SpServerError.SP_MAINTENANCE_SCHEDULE_INVALID);
@@ -49,10 +50,8 @@ public class InvalidMaintenanceScheduleException extends AbstractServerRtExcepti
     /**
      * Constructor for {@link InvalidMaintenanceScheduleException}.
      *
-     * @param message
-     *            the message for this exception
-     * @param cause
-     *            the cause for this exception.
+     * @param message the message for this exception
+     * @param cause the cause for this exception.
      */
     public InvalidMaintenanceScheduleException(final String message, final Throwable cause) {
         this(message, cause, -1);
@@ -61,12 +60,9 @@ public class InvalidMaintenanceScheduleException extends AbstractServerRtExcepti
     /**
      * Constructor for {@link InvalidMaintenanceScheduleException}.
      *
-     * @param message
-     *            the message for this exception
-     * @param cause
-     *            the cause for this exception.
-     * @param errorIndex
-     *            the error index of maintenance duration.
+     * @param message the message for this exception
+     * @param cause the cause for this exception.
+     * @param errorIndex the error index of maintenance duration.
      */
     public InvalidMaintenanceScheduleException(final String message, final Throwable cause, final int errorIndex) {
         super(message, SpServerError.SP_MAINTENANCE_SCHEDULE_INVALID, cause);

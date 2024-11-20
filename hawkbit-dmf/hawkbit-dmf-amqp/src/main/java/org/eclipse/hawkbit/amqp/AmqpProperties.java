@@ -15,14 +15,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /**
  * Bean which holds the necessary properties for configuring the AMQP
  * connection.
- * 
  */
 @Data
 @ConfigurationProperties("hawkbit.dmf.rabbitmq")
 public class AmqpProperties {
 
     private static final int DEFAULT_QUEUE_DECLARATION_RETRIES = 50;
-
     private static final long DEFAULT_REQUEUE_DELAY = 0;
 
     /**

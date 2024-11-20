@@ -22,7 +22,6 @@ import org.springframework.integration.support.locks.LockRegistry;
 
 /**
  * Auto-Configuration for enabling JPA repository.
- *
  */
 @Configuration
 @ConditionalOnClass({ RepositoryApplicationConfiguration.class })
@@ -30,7 +29,6 @@ import org.springframework.integration.support.locks.LockRegistry;
 public class JpaRepositoryAutoConfiguration {
 
     /**
-     *
      * @return returns a VirtualPropertyReplacer
      */
     @Bean

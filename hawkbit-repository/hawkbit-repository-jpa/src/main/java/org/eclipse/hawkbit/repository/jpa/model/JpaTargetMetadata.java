@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -24,12 +26,13 @@ import org.eclipse.hawkbit.repository.model.TargetMetadata;
 
 /**
  * Meta data for {@link Target}.
- *
  */
 @IdClass(TargetMetadataCompositeKey.class)
 @Entity
 @Table(name = "sp_target_metadata")
 public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMetadata {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -43,11 +46,9 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
 
     /**
      * Creates a single metadata entry with the given key and value.
-     * 
-     * @param key
-     *            of the meta data entry
-     * @param value
-     *            of the meta data entry
+     *
+     * @param key of the meta data entry
+     * @param value of the meta data entry
      */
     public JpaTargetMetadata(final String key, final String value) {
         super(key, value);
@@ -56,13 +57,10 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
     /**
      * Creates a single metadata entry with the given key and value for the
      * given {@link Target}.
-     * 
-     * @param key
-     *            of the meta data entry
-     * @param value
-     *            of the meta data entry
-     * @param target
-     *            the meta data entry is associated with
+     *
+     * @param key of the meta data entry
+     * @param value of the meta data entry
+     * @param target the meta data entry is associated with
      */
     public JpaTargetMetadata(final String key, final String value, final Target target) {
         super(key, value);
@@ -73,13 +71,13 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
         return new TargetMetadataCompositeKey(target.getId(), getKey());
     }
 
-    public void setTarget(final Target target) {
-        this.target = (JpaTarget) target;
-    }
-
     @Override
     public Target getTarget() {
         return target;
+    }
+
+    public void setTarget(final Target target) {
+        this.target = (JpaTarget) target;
     }
 
     @Override

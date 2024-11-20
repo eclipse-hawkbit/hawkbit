@@ -17,7 +17,6 @@ import java.util.Set;
  * added (optional) to {@link DistributionSet} of that type or have to added
  * (mandatory) in order to be considered complete. Only complete DS can be
  * assigned to a {@link Target}.
- *
  */
 public interface DistributionSetType extends Type {
 
@@ -38,8 +37,7 @@ public interface DistributionSetType extends Type {
      * Checks if the given {@link SoftwareModuleType} is in this
      * {@link DistributionSetType}.
      *
-     * @param softwareModuleType
-     *            search for
+     * @param softwareModuleType search for
      * @return <code>true</code> if found
      */
     default boolean containsModuleType(final SoftwareModuleType softwareModuleType) {
@@ -50,8 +48,7 @@ public interface DistributionSetType extends Type {
      * Checks if the given {@link SoftwareModuleType} is in this
      * {@link DistributionSetType}.
      *
-     * @param softwareModuleTypeId
-     *            search for by {@link SoftwareModuleType#getId()}
+     * @param softwareModuleTypeId search for by {@link SoftwareModuleType#getId()}
      * @return <code>true</code> if found
      */
     default boolean containsModuleType(final Long softwareModuleTypeId) {
@@ -62,8 +59,7 @@ public interface DistributionSetType extends Type {
      * Checks if the given {@link SoftwareModuleType} is in
      * {@link #getMandatoryModuleTypes()}.
      *
-     * @param softwareModuleType
-     *            search for
+     * @param softwareModuleType search for
      * @return <code>true</code> if found
      */
     default boolean containsMandatoryModuleType(final SoftwareModuleType softwareModuleType) {
@@ -74,8 +70,7 @@ public interface DistributionSetType extends Type {
      * Checks if the given {@link SoftwareModuleType} is in
      * {@link #getMandatoryModuleTypes()}.
      *
-     * @param softwareModuleTypeId
-     *            search for by {@link SoftwareModuleType#getId()}
+     * @param softwareModuleTypeId search for by {@link SoftwareModuleType#getId()}
      * @return <code>true</code> if found
      */
     default boolean containsMandatoryModuleType(final Long softwareModuleTypeId) {
@@ -86,8 +81,7 @@ public interface DistributionSetType extends Type {
      * Checks if the given {@link SoftwareModuleType} is in
      * {@link #getOptionalModuleTypes()}.
      *
-     * @param softwareModuleType
-     *            search for
+     * @param softwareModuleType search for
      * @return <code>true</code> if found
      */
     default boolean containsOptionalModuleType(final SoftwareModuleType softwareModuleType) {
@@ -98,8 +92,7 @@ public interface DistributionSetType extends Type {
      * Checks if the given {@link SoftwareModuleType} is in
      * {@link #getOptionalModuleTypes()}.
      *
-     * @param softwareModuleTypeId
-     *            search by {@link SoftwareModuleType#getId()}
+     * @param softwareModuleTypeId search by {@link SoftwareModuleType#getId()}
      * @return <code>true</code> if found
      */
     default boolean containsOptionalModuleType(final Long softwareModuleTypeId) {
@@ -110,15 +103,13 @@ public interface DistributionSetType extends Type {
      * Compares the modules of this {@link DistributionSetType} and the given
      * one.
      *
-     * @param dsType
-     *            to compare with
+     * @param dsType to compare with
      * @return <code>true</code> if the lists are identical.
      */
     boolean areModuleEntriesIdentical(DistributionSetType dsType);
 
     /**
-     * @param distributionSet
-     *            to check for completeness
+     * @param distributionSet to check for completeness
      * @return <code>true</code> if the all mandatory software module types are
      *         in the system.
      */

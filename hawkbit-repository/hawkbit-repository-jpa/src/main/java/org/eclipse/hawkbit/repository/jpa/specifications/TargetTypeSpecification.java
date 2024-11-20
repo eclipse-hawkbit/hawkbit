@@ -9,6 +9,10 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
+import java.util.Collection;
+
+import jakarta.persistence.criteria.SetJoin;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -18,9 +22,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType_;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.springframework.data.jpa.domain.Specification;
-
-import jakarta.persistence.criteria.SetJoin;
-import java.util.Collection;
 
 /**
  * Specifications class for {@link TargetType}s. The class provides Spring Data JPQL Specifications.

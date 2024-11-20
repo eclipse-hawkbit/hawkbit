@@ -50,7 +50,6 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * JPA implementation of {@link TargetTypeManagement}.
- *
  */
 @Transactional(readOnly = true)
 @Validated
@@ -68,14 +67,10 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     /**
      * Constructor
      *
-     * @param targetTypeRepository
-     *            Target type repository
-     * @param targetRepository
-     *            Target repository
-     * @param virtualPropertyReplacer
-     *            replacer
-     * @param database
-     *            database
+     * @param targetTypeRepository Target type repository
+     * @param targetRepository Target repository
+     * @param virtualPropertyReplacer replacer
+     * @param database database
      */
     public JpaTargetTypeManagement(final TargetTypeRepository targetTypeRepository,
             final TargetRepository targetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
@@ -111,8 +106,8 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetType create(final TargetTypeCreate create) {
         final JpaTargetType typeCreate = ((JpaTargetTypeCreate) create).build();
         return targetTypeRepository.save(AccessController.Operation.CREATE, typeCreate);
@@ -120,8 +115,8 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<TargetType> create(final Collection<TargetTypeCreate> creates) {
         final List<JpaTargetType> typeCreate =
                 creates.stream().map(create -> ((JpaTargetTypeCreate) create).build()).toList();
@@ -130,8 +125,8 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final Long id) {
         getByIdAndThrowIfNotFound(id);
 
@@ -152,7 +147,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
         return JpaManagementHelper.findAllWithCountBySpec(targetTypeRepository, pageable,
                 List.of(
                         RSQLUtility.buildRsqlSpecification(
-                                rsqlParam, TargetTypeFields.class, virtualPropertyReplacer,database)));
+                                rsqlParam, TargetTypeFields.class, virtualPropertyReplacer, database)));
     }
 
     @Override
@@ -173,8 +168,8 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetType update(final TargetTypeUpdate update) {
         final GenericTargetTypeUpdate typeUpdate = (GenericTargetTypeUpdate) update;
 
@@ -189,8 +184,8 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetType assignCompatibleDistributionSetTypes(final long id,
             final Collection<Long> distributionSetTypeIds) {
         final Collection<JpaDistributionSetType> dsTypes = distributionSetTypeRepository
@@ -210,8 +205,8 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetType unassignDistributionSetType(final long id, final long distributionSetTypeId) {
         final JpaTargetType type = getByIdAndThrowIfNotFound(id);
         assertDistributionSetTypeExists(distributionSetTypeId);
@@ -236,13 +231,9 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
      * Enforces the quota specifying the maximum number of
      * {@link DistributionSetType}s per {@link TargetType}.
      *
-     * @param id
-     *            of the target type
-     * @param requested
-     *            number of distribution set types to check
-     *
-     * @throws AssignmentQuotaExceededException
-     *             if the software module type quota is exceeded
+     * @param id of the target type
+     * @param requested number of distribution set types to check
+     * @throws AssignmentQuotaExceededException if the software module type quota is exceeded
      */
     private void assertDistributionSetTypeQuota(final long id, final int requested) {
         QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxDistributionSetTypesPerTargetType(),

@@ -25,20 +25,20 @@ public class ValidationOracleContext {
         return syntaxError;
     }
 
-    public SuggestionContext getSuggestionContext() {
-        return suggestionContext;
-    }
-
-    public SyntaxErrorContext getSyntaxErrorContext() {
-        return syntaxErrorContext;
-    }
-
     public void setSyntaxError(final boolean syntaxError) {
         this.syntaxError = syntaxError;
     }
 
+    public SuggestionContext getSuggestionContext() {
+        return suggestionContext;
+    }
+
     public void setSuggestionContext(final SuggestionContext suggestionContext) {
         this.suggestionContext = suggestionContext;
+    }
+
+    public SyntaxErrorContext getSyntaxErrorContext() {
+        return syntaxErrorContext;
     }
 
     public void setSyntaxErrorContext(final SyntaxErrorContext syntaxErrorContext) {

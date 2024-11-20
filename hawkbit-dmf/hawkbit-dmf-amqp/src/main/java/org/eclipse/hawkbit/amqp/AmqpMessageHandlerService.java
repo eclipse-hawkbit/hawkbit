@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.dmf.json.model.DmfAutoConfirmation;
 import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
-import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -51,6 +50,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
@@ -63,6 +63,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -73,40 +74,29 @@ import org.springframework.util.StringUtils;
 @Slf4j
 public class AmqpMessageHandlerService extends BaseAmqpService {
 
-    private final AmqpMessageDispatcherService amqpMessageDispatcherService;
-
-    private ControllerManagement controllerManagement;
-    private final ConfirmationManagement confirmationManagement;
-
-    private final EntityFactory entityFactory;
-
-    private final TenantConfigurationManagement tenantConfigurationManagement;
-
-    private final SystemSecurityContext systemSecurityContext;
-
     private static final String THING_ID_NULL = "ThingId is null";
-
     private static final String EMPTY_MESSAGE_BODY = "\"\"";
+
+    private final AmqpMessageDispatcherService amqpMessageDispatcherService;
+    private final ConfirmationManagement confirmationManagement;
+    private final EntityFactory entityFactory;
+    private final TenantConfigurationManagement tenantConfigurationManagement;
+    private final SystemSecurityContext systemSecurityContext;
+    private ControllerManagement controllerManagement;
 
     /**
      * Constructor.
-     * 
-     * @param rabbitTemplate
-     *            for converting messages
-     * @param amqpMessageDispatcherService
-     *            to sending events to DMF client
-     * @param controllerManagement
-     *            for target repo access
-     * @param entityFactory
-     *            to create entities
-     * @param systemSecurityContext
-     *            the system Security Context
-     * @param tenantConfigurationManagement
-     *            the tenant configuration Management
-     * @param confirmationManagement
-     *            the confirmation management
+     *
+     * @param rabbitTemplate for converting messages
+     * @param amqpMessageDispatcherService to sending events to DMF client
+     * @param controllerManagement for target repo access
+     * @param entityFactory to create entities
+     * @param systemSecurityContext the system Security Context
+     * @param tenantConfigurationManagement the tenant configuration Management
+     * @param confirmationManagement the confirmation management
      */
-    public AmqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
+    public AmqpMessageHandlerService(
+            final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
             final ControllerManagement controllerManagement, final EntityFactory entityFactory,
             final SystemSecurityContext systemSecurityContext,
@@ -123,36 +113,30 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     /**
      * Method to handle all incoming DMF amqp messages.
      *
-     * @param message
-     *            incoming message
-     * @param type
-     *            the message type
-     * @param tenant
-     *            the contentType of the message
+     * @param message incoming message
+     * @param type the message type
+     * @param tenant the contentType of the message
      * @return a message if <null> no message is send back to sender
      */
     @RabbitListener(queues = "${hawkbit.dmf.rabbitmq.receiverQueue:dmf_receiver}", containerFactory = "listenerContainerFactory")
-    public Message onMessage(final Message message,
+    public Message onMessage(
+            final Message message,
             @Header(name = MessageHeaderKey.TYPE, required = false) final String type,
             @Header(name = MessageHeaderKey.TENANT, required = false) final String tenant) {
         return onMessage(message, type, tenant, getRabbitTemplate().getConnectionFactory().getVirtualHost());
     }
 
     /**
-     * * Executed if a amqp message arrives.
-     * 
-     * @param message
-     *            the message
-     * @param type
-     *            the type
-     * @param tenant
-     *            the tenant
-     * @param virtualHost
-     *            the virtual host
+     * Executed if a amqp message arrives.
+     *
+     * @param message the message
+     * @param type the type
+     * @param tenant the tenant
+     * @param virtualHost the virtual host
      * @return the rpc message back to supplier.
      */
     public Message onMessage(final Message message, final String type, final String tenant, final String virtualHost) {
-        if (StringUtils.isEmpty(type) || StringUtils.isEmpty(tenant)) {
+        if (ObjectUtils.isEmpty(type) || ObjectUtils.isEmpty(tenant)) {
             throw new AmqpRejectAndDontRequeueException("Invalid message! tenant and type header are mandatory!");
         }
 
@@ -160,28 +144,33 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         try {
             final MessageType messageType = MessageType.valueOf(type);
             switch (messageType) {
-            case THING_CREATED:
-                setTenantSecurityContext(tenant);
-                registerTarget(message, virtualHost);
-                break;
-            case THING_REMOVED:
-                setTenantSecurityContext(tenant);
-                deleteTarget(message);
-                break;
-            case EVENT:
-                checkContentTypeJson(message);
-                setTenantSecurityContext(tenant);
-                handleIncomingEvent(message);
-                break;
-            case PING:
-                if (isCorrelationIdNotEmpty(message)) {
-                    amqpMessageDispatcherService.sendPingReponseToDmfReceiver(message, tenant, virtualHost);
+                case THING_CREATED: {
+                    setTenantSecurityContext(tenant);
+                    registerTarget(message, virtualHost);
+                    break;
                 }
-                break;
-            default:
-                logAndThrowMessageError(message, "No handle method was found for the given message type.");
+                case THING_REMOVED: {
+                    setTenantSecurityContext(tenant);
+                    deleteTarget(message);
+                    break;
+                }
+                case EVENT: {
+                    checkContentTypeJson(message);
+                    setTenantSecurityContext(tenant);
+                    handleIncomingEvent(message);
+                    break;
+                }
+                case PING: {
+                    if (isCorrelationIdNotEmpty(message)) {
+                        amqpMessageDispatcherService.sendPingResponseToDmfReceiver(message, tenant, virtualHost);
+                    }
+                    break;
+                }
+                default: {
+                    logAndThrowMessageError(message, "No handle method was found for the given message type.");
+                }
             }
-        } catch(AssignmentQuotaExceededException ex) {
+        } catch (AssignmentQuotaExceededException ex) {
             throw new AmqpRejectAndDontRequeueException("Could not handle message due to quota violation!", ex);
         } catch (final IllegalArgumentException ex) {
             throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
@@ -189,6 +178,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             SecurityContextHolder.setContext(oldContext);
         }
         return null;
+    }
+
+    // for testing
+    public void setControllerManagement(final ControllerManagement controllerManagement) {
+        this.controllerManagement = controllerManagement;
     }
 
     private static void setSecurityContext(final Authentication authentication) {
@@ -205,21 +199,109 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         setSecurityContext(authenticationToken);
     }
 
+    private static boolean isOptionalMessageBodyEmpty(final Message message) {
+        // empty byte array message body is serialized to double-quoted string
+        // by message converter and should also be considered as empty
+        return isMessageBodyEmpty(message) || EMPTY_MESSAGE_BODY.equals(new String(message.getBody()));
+    }
+
+    private static boolean shouldTargetProceed(final Action action) {
+        return !action.isActive() || (action.hasMaintenanceSchedule() && action.isMaintenanceWindowAvailable());
+    }
+
+    private static boolean isCorrelationIdNotEmpty(final Message message) {
+        return StringUtils.hasLength(message.getMessageProperties().getCorrelationId());
+    }
+
+    // Exception squid:MethodCyclomaticComplexity - false positive, is a simple
+    // mapping
+    @SuppressWarnings("squid:MethodCyclomaticComplexity")
+    private static Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus,
+            final Action action) {
+        Status status = null;
+        switch (actionUpdateStatus.getActionStatus()) {
+            case DOWNLOAD: {
+                status = Status.DOWNLOAD;
+                break;
+            }
+            case RETRIEVED: {
+                status = Status.RETRIEVED;
+                break;
+            }
+            case RUNNING:
+            case CONFIRMED: {
+                status = Status.RUNNING;
+                break;
+            }
+            case CANCELED: {
+                status = Status.CANCELED;
+                break;
+            }
+            case FINISHED: {
+                status = Status.FINISHED;
+                break;
+            }
+            case ERROR: {
+                status = Status.ERROR;
+                break;
+            }
+            case WARNING: {
+                status = Status.WARNING;
+                break;
+            }
+            case DOWNLOADED: {
+                status = Status.DOWNLOADED;
+                break;
+            }
+            case CANCEL_REJECTED: {
+                status = handleCancelRejectedState(message, action);
+                break;
+            }
+            case DENIED: {
+                status = Status.WAIT_FOR_CONFIRMATION;
+                break;
+            }
+            default: {
+                logAndThrowMessageError(message, "Status for action does not exisit.");
+            }
+        }
+
+        return status;
+    }
+
+    private static Status handleCancelRejectedState(final Message message, final Action action) {
+        if (action.isCancelingOrCanceled()) {
+            return Status.CANCEL_REJECTED;
+        }
+        logAndThrowMessageError(
+                message,
+                "Cancel rejected message is not allowed, if action is on state: " + action.getStatus());
+        return null;
+    }
+
+    /**
+     * Retrieve the update mode from the given update message.
+     */
+    private static UpdateMode getUpdateMode(final DmfAttributeUpdate update) {
+        final DmfUpdateMode mode = update.getMode();
+        if (mode != null) {
+            return UpdateMode.valueOf(mode.name());
+        }
+        return null;
+    }
+
     /**
      * Method to create a new target or to find the target if it already exists
      * and update its poll time, status and optionally its name and attributes.
      *
-     * @param message
-     *            the message that contains replyTo property and optionally the
-     *            name and attributes in body
-     * @param virtualHost
-     *            the virtual host
+     * @param message the message that contains replyTo property and optionally the name and attributes in body
+     * @param virtualHost the virtual host
      */
     private void registerTarget(final Message message, final String virtualHost) {
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
         final String replyTo = message.getMessageProperties().getReplyTo();
 
-        if (StringUtils.isEmpty(replyTo)) {
+        if (ObjectUtils.isEmpty(replyTo)) {
             logAndThrowMessageError(message, "No ReplyTo was set for the createThing message.");
         }
 
@@ -234,29 +316,23 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 final DmfCreateThing thingCreateBody = convertMessage(message, DmfCreateThing.class);
                 final DmfAttributeUpdate thingAttributeUpdateBody = thingCreateBody.getAttributeUpdate();
 
-                log.debug("Received \"THING_CREATED\" AMQP message for thing \"{}\" with target name \"{}\" and type " +
-                                "\"{}\".", thingId, thingCreateBody.getName(), thingCreateBody.getType());
+                log.debug(
+                        "Received \"THING_CREATED\" AMQP message for thing \"{}\" with target name \"{}\" and type \"{}\".",
+                        thingId, thingCreateBody.getName(), thingCreateBody.getType());
 
-                target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri,
-                        thingCreateBody.getName(), thingCreateBody.getType());
+                target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(
+                        thingId, amqpUri, thingCreateBody.getName(), thingCreateBody.getType());
 
                 if (thingAttributeUpdateBody != null) {
-                    controllerManagement.updateControllerAttributes(thingId, thingAttributeUpdateBody.getAttributes(),
-                            getUpdateMode(thingAttributeUpdateBody));
+                    controllerManagement.updateControllerAttributes(
+                            thingId, thingAttributeUpdateBody.getAttributes(), getUpdateMode(thingAttributeUpdateBody));
                 }
             }
             log.debug("Target {} reported online state.", thingId);
             sendUpdateCommandToTarget(target);
         } catch (final EntityAlreadyExistsException e) {
-            throw new AmqpRejectAndDontRequeueException(
-                    "Tried to register previously registered target, message will be ignored!", e);
+            throw new AmqpRejectAndDontRequeueException("Tried to register previously registered target, message will be ignored!", e);
         }
-    }
-
-    private static boolean isOptionalMessageBodyEmpty(final Message message) {
-        // empty byte array message body is serialized to double-quoted string
-        // by message converter and should also be considered as empty
-        return isMessageBodyEmpty(message) || EMPTY_MESSAGE_BODY.equals(new String(message.getBody()));
     }
 
     private void sendUpdateCommandToTarget(final Target target) {
@@ -268,23 +344,21 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void sendCurrentActionsAsMultiActionToTarget(final Target target) {
-        final List<Action> actions = controllerManagement.findActiveActionsWithHighestWeight(target.getControllerId(),
-                MAX_ACTION_COUNT);
+        final List<Action> actions = controllerManagement.findActiveActionsWithHighestWeight(target.getControllerId(), MAX_ACTION_COUNT);
 
-        final Set<DistributionSet> distributionSets = actions.stream().map(Action::getDistributionSet)
-                .collect(Collectors.toSet());
+        final Set<DistributionSet> distributionSets = actions.stream().map(Action::getDistributionSet).collect(Collectors.toSet());
         final Map<Long, Map<SoftwareModule, List<SoftwareModuleMetadata>>> softwareModulesPerDistributionSet = distributionSets
                 .stream().collect(Collectors.toMap(DistributionSet::getId, this::getSoftwareModulesWithMetadata));
 
-        amqpMessageDispatcherService.sendMultiActionRequestToTarget(target.getTenant(), target, actions,
+        amqpMessageDispatcherService.sendMultiActionRequestToTarget(
+                target.getTenant(), target, actions,
                 action -> softwareModulesPerDistributionSet.get(action.getDistributionSet().getId()));
     }
 
     private void sendOldestActionToTarget(final Target target) {
-        final Optional<Action> actionOptional = controllerManagement
-                .findActiveActionWithHighestWeight(target.getControllerId());
+        final Optional<Action> actionOptional = controllerManagement.findActiveActionWithHighestWeight(target.getControllerId());
 
-        if (!actionOptional.isPresent()) {
+        if (actionOptional.isEmpty()) {
             return;
         }
 
@@ -298,8 +372,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    private Map<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModulesWithMetadata(
-            final DistributionSet distributionSet) {
+    private Map<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModulesWithMetadata(final DistributionSet distributionSet) {
         final List<Long> smIds = distributionSet.getModules().stream().map(SoftwareModule::getId)
                 .collect(Collectors.toList());
 
@@ -314,25 +387,27 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     /**
      * Method to handle the different topics to an event.
      *
-     * @param message
-     *            the incoming event message.
+     * @param message the incoming event message.
      */
     private void handleIncomingEvent(final Message message) {
         switch (EventTopic.valueOf(getStringHeaderKey(message, MessageHeaderKey.TOPIC, "EventTopic is null"))) {
-        case UPDATE_ACTION_STATUS:
-            updateActionStatus(message);
-            break;
-        case UPDATE_ATTRIBUTES:
-            updateAttributes(message);
-            break;
-        case UPDATE_AUTO_CONFIRM:
-            setAutoConfirmationState(message);
-            break;
-        default:
-            logAndThrowMessageError(message, "Got event without appropriate topic.");
-            break;
+            case UPDATE_ACTION_STATUS: {
+                updateActionStatus(message);
+                break;
+            }
+            case UPDATE_ATTRIBUTES: {
+                updateAttributes(message);
+                break;
+            }
+            case UPDATE_AUTO_CONFIRM: {
+                setAutoConfirmationState(message);
+                break;
+            }
+            default: {
+                logAndThrowMessageError(message, "Got event without appropriate topic.");
+                break;
+            }
         }
-
     }
 
     private void deleteTarget(final Message message) {
@@ -344,8 +419,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final DmfAttributeUpdate attributeUpdate = convertMessage(message, DmfAttributeUpdate.class);
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
 
-        controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes(),
-              getUpdateMode(attributeUpdate));
+        controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes(), getUpdateMode(attributeUpdate));
     }
 
     private void setAutoConfirmationState(final Message message) {
@@ -367,8 +441,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     /**
      * Method to update the action status of an action through the event.
      *
-     * @param message
-     *            the object form the ampq message
+     * @param message the object form the ampq message
      */
     private void updateActionStatus(final Message message) {
         final DmfActionUpdateStatus actionUpdateStatus = convertMessage(message, DmfActionUpdateStatus.class);
@@ -384,22 +457,19 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final Status status = mapStatus(message, actionUpdateStatus, action);
 
         final Action updatedAction;
-
         if (actionUpdateStatus.getActionStatus() == DmfActionStatus.CONFIRMED) {
             updatedAction = confirmationManagement.confirmAction(action.getId(),
                     actionUpdateStatus.getCode().orElse(null), messages);
         } else if (actionUpdateStatus.getActionStatus() == DmfActionStatus.DENIED) {
-            updatedAction = confirmationManagement.denyAction(action.getId(), actionUpdateStatus.getCode().orElse(null),
-                    messages);
+            updatedAction = confirmationManagement.denyAction(action.getId(), actionUpdateStatus.getCode().orElse(null), messages);
         } else {
-            final ActionStatusCreate actionStatus = entityFactory.actionStatus().create(action.getId()).status(status)
-                    .messages(messages);
+            final ActionStatusCreate actionStatus = entityFactory.actionStatus().create(action.getId()).status(status).messages(messages);
             actionUpdateStatus.getCode().ifPresent(code -> {
                 actionStatus.code(code);
                 actionStatus.message("Device reported status code: " + code);
             });
-            updatedAction = ((Status.CANCELED == status) || (Status.CANCEL_REJECTED == status)) ?
-                    controllerManagement.addCancelActionStatus(actionStatus)
+            updatedAction = ((Status.CANCELED == status) || (Status.CANCEL_REJECTED == status))
+                    ? controllerManagement.addCancelActionStatus(actionStatus)
                     : controllerManagement.addUpdateActionStatus(actionStatus);
         }
 
@@ -408,70 +478,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    private static boolean shouldTargetProceed(final Action action) {
-        return !action.isActive() || (action.hasMaintenanceSchedule() && action.isMaintenanceWindowAvailable());
-    }
-
-    private static boolean isCorrelationIdNotEmpty(final Message message) {
-        return StringUtils.hasLength(message.getMessageProperties().getCorrelationId());
-    }
-
-    // Exception squid:MethodCyclomaticComplexity - false positive, is a simple
-    // mapping
-    @SuppressWarnings("squid:MethodCyclomaticComplexity")
-    private static Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus,
-            final Action action) {
-        Status status = null;
-        switch (actionUpdateStatus.getActionStatus()) {
-        case DOWNLOAD:
-            status = Status.DOWNLOAD;
-            break;
-        case RETRIEVED:
-            status = Status.RETRIEVED;
-            break;
-        case RUNNING:
-        case CONFIRMED:
-            status = Status.RUNNING;
-            break;
-        case CANCELED:
-            status = Status.CANCELED;
-            break;
-        case FINISHED:
-            status = Status.FINISHED;
-            break;
-        case ERROR:
-            status = Status.ERROR;
-            break;
-        case WARNING:
-            status = Status.WARNING;
-            break;
-        case DOWNLOADED:
-            status = Status.DOWNLOADED;
-            break;
-        case CANCEL_REJECTED:
-            status = handleCancelRejectedState(message, action);
-            break;
-        case DENIED:
-            status = Status.WAIT_FOR_CONFIRMATION;
-            break;
-        default:
-            logAndThrowMessageError(message, "Status for action does not exisit.");
-        }
-
-        return status;
-    }
-
-    private static Status handleCancelRejectedState(final Message message, final Action action) {
-        if (action.isCancelingOrCanceled()) {
-            return Status.CANCEL_REJECTED;
-        }
-        logAndThrowMessageError(message,
-                "Cancel rejected message is not allowed, if action is on state: " + action.getStatus());
-        return null;
-    }
-
-    // Exception squid:S3655 - logAndThrowMessageError throws exception, i.e.
-    // get will not be called
+    // Exception squid:S3655 - logAndThrowMessageError throws exception, i.e. get will not be called
     @SuppressWarnings("squid:S3655")
     private Action checkActionExist(final Message message, final DmfActionUpdateStatus actionUpdateStatus) {
         final Long actionId = actionUpdateStatus.getActionId();
@@ -480,23 +487,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 actionUpdateStatus.getActionStatus());
 
         final Optional<Action> findActionWithDetails = controllerManagement.findActionWithDetails(actionId);
-        if (!findActionWithDetails.isPresent()) {
-            logAndThrowMessageError(message,
-                    "Got intermediate notification about action " + actionId + " but action does not exist");
+        if (findActionWithDetails.isEmpty()) {
+            logAndThrowMessageError(message, "Got intermediate notification about action " + actionId + " but action does not exist");
         }
 
         return findActionWithDetails.get();
-    }
-
-    /**
-     * Retrieve the update mode from the given update message.
-     */
-    private static UpdateMode getUpdateMode(final DmfAttributeUpdate update) {
-        final DmfUpdateMode mode = update.getMode();
-        if (mode != null) {
-            return UpdateMode.valueOf(mode.name());
-        }
-        return null;
     }
 
     private boolean isMultiAssignmentsEnabled() {
@@ -504,12 +499,6 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {
-        return systemSecurityContext
-                .runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
-    }
-
-    // for testing
-    public void setControllerManagement(final ControllerManagement controllerManagement) {
-        this.controllerManagement = controllerManagement;
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(key, valueType).getValue());
     }
 }

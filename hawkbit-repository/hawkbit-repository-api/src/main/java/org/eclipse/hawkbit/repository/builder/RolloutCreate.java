@@ -25,13 +25,12 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
  * Builder to create a new {@link Rollout} entry. Defines all fields that can be
  * set at creation time. Other fields are set by the repository automatically,
  * e.g. {@link BaseEntity#getCreatedAt()}.
- *
  */
 public interface RolloutCreate {
 
     /**
      * Set name
-     * 
+     *
      * @param name for {@link Rollout#getName()}
      * @return updated builder instance
      */
@@ -39,7 +38,7 @@ public interface RolloutCreate {
 
     /**
      * Set description
-     * 
+     *
      * @param description for {@link Rollout#getDescription()}
      * @return updated builder instance
      */
@@ -47,7 +46,7 @@ public interface RolloutCreate {
 
     /**
      * Set the {@link DistributionSet}
-     * 
+     *
      * @param set for {@link Rollout#getDistributionSet()}
      * @return updated builder instance
      */
@@ -57,7 +56,7 @@ public interface RolloutCreate {
 
     /**
      * Set the id of the {@link DistributionSet}
-     * 
+     *
      * @param distributionSetId for {@link Rollout#getDistributionSet()}
      * @return updated builder instance
      */
@@ -65,7 +64,7 @@ public interface RolloutCreate {
 
     /**
      * Set the {@link TargetFilterQuery}
-     * 
+     *
      * @param targetFilterQuery for {@link Rollout#getTargetFilterQuery()}
      * @return updated builder instance
      */
@@ -74,7 +73,7 @@ public interface RolloutCreate {
 
     /**
      * Set the {@link ActionType}
-     * 
+     *
      * @param actionType for {@link Rollout#getActionType()}
      * @return updated builder instance
      */
@@ -82,7 +81,7 @@ public interface RolloutCreate {
 
     /**
      * Set the forcedTime of the resulting {@link org.eclipse.hawkbit.repository.model.Action}s
-     * 
+     *
      * @param forcedTime for {@link Rollout#getForcedTime()}
      * @return updated builder instance
      */
@@ -90,7 +89,7 @@ public interface RolloutCreate {
 
     /**
      * Set the weight of the resulting {@link org.eclipse.hawkbit.repository.model.Action}s
-     * 
+     *
      * @param weight for {@link Rollout#getWeight()}
      * @return updated builder instance
      */
@@ -106,7 +105,7 @@ public interface RolloutCreate {
 
     /**
      * Set start at
-     * 
+     *
      * @param startAt for {@link Rollout#getStartAt()}
      * @return updated builder instance
      */

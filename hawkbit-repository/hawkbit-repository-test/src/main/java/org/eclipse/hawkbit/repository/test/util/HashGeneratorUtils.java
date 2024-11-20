@@ -9,13 +9,13 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Hash digest utility.
@@ -26,9 +26,8 @@ public final class HashGeneratorUtils {
 
     /**
      * Generates a MD5 cryptographic string.
-     * 
-     * @param message
-     *            the plain message
+     *
+     * @param message the plain message
      * @return the cryptographic string
      */
     public static String generateMD5(final byte[] message) {
@@ -37,9 +36,8 @@ public final class HashGeneratorUtils {
 
     /**
      * Generates a SHA-1 cryptographic string.
-     * 
-     * @param message
-     *            the plain message
+     *
+     * @param message the plain message
      * @return the cryptographic string
      */
     public static String generateSHA1(final byte[] message) {
@@ -48,9 +46,8 @@ public final class HashGeneratorUtils {
 
     /**
      * Generates a SHA-256 cryptographic string.
-     * 
-     * @param message
-     *            the plain message
+     *
+     * @param message the plain message
      * @return the cryptographic string
      */
     public static String generateSHA256(final byte[] message) {

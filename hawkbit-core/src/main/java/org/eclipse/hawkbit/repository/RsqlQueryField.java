@@ -16,7 +16,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import jakarta.validation.constraints.NotNull;
-import org.springframework.util.ObjectUtils;
 
 /**
  * An RSQL query field interface extended by all the fields that could be used in RSQL queries.

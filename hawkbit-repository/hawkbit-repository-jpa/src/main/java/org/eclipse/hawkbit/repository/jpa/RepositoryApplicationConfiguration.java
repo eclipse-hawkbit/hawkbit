@@ -12,10 +12,12 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 
-import jakarta.persistence.EntityManager;
 import javax.sql.DataSource;
+
+import jakarta.persistence.EntityManager;
 import jakarta.validation.Validation;
 
 import org.eclipse.hawkbit.ContextAware;
@@ -120,11 +122,11 @@ import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetMetadataRepo
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.HawkbitBaseRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutTargetGroupRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.HawkBitBaseRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleMetadataRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepository;
@@ -155,9 +157,9 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;
-import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
@@ -202,7 +204,6 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 
 /**
  * General configuration for hawkBit's Repository.
- *
  */
 @EnableJpaRepositories(value = "org.eclipse.hawkbit.repository.jpa.repository", repositoryFactoryBeanClass = CustomBaseRepositoryFactoryBean.class)
 @EnableTransactionManagement
@@ -223,10 +224,109 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         super(dataSource, properties, jtaTransactionManagerProvider);
     }
 
+    /**
+     * Defines the validation processor bean.
+     *
+     * @return the {@link MethodValidationPostProcessor}
+     */
+    @Bean
+    public MethodValidationPostProcessor methodValidationPostProcessor() {
+        final MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
+        // ValidatorFactory shall NOT be closed because after closing the generated Validator
+        // methods shall not be called - we need the validator in future
+        processor.setValidator(Validation.byDefaultProvider().configure()
+                .addProperty(BaseHibernateValidatorConfiguration.ALLOW_PARALLEL_METHODS_DEFINE_PARAMETER_CONSTRAINTS,"true")
+                .buildValidatorFactory().getValidator());
+        return processor;
+    }
+
+    /**
+     * {@link MultiTenantJpaTransactionManager} bean.
+     *
+     * @return a new {@link PlatformTransactionManager}
+     * @see org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration#transactionManager(ObjectProvider)
+     */
+    @Override
+    @Bean
+    public PlatformTransactionManager transactionManager(
+            final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
+        return new MultiTenantJpaTransactionManager();
+    }
+
+    @Override
+    protected AbstractJpaVendorAdapter createJpaVendorAdapter() {
+        return new EclipseLinkJpaVendorAdapter() {
+
+            private final HawkbitEclipseLinkJpaDialect jpaDialect = new HawkbitEclipseLinkJpaDialect();
+
+            @Override
+            public EclipseLinkJpaDialect getJpaDialect() {
+                return jpaDialect;
+            }
+        };
+    }
+
+    @Override
+    protected Map<String, Object> getVendorProperties() {
+        final Map<String, Object> properties = new HashMap<>(7);
+        // Turn off dynamic weaving to disable LTW lookup in static weaving mode
+        properties.put(PersistenceUnitProperties.WEAVING, "false");
+        // needed for reports
+        properties.put(PersistenceUnitProperties.ALLOW_NATIVE_SQL_QUERIES, "true");
+        // flyway
+        properties.put(PersistenceUnitProperties.DDL_GENERATION, "none");
+        // Embed into hawkBit logging
+        properties.put(PersistenceUnitProperties.LOGGING_LOGGER, "JavaLogger");
+        // Ensure that we flush only at the end of the transaction
+        properties.put(PersistenceUnitProperties.PERSISTENCE_CONTEXT_FLUSH_MODE, "COMMIT");
+        // Enable batch writing
+        properties.put(PersistenceUnitProperties.BATCH_WRITING, "JDBC");
+        // Batch size
+        properties.put(PersistenceUnitProperties.BATCH_WRITING_SIZE, "500");
+        return properties;
+    }
+
+    @Bean
+    public BeanPostProcessor entityManagerBeanPostProcessor(
+            @Autowired(required = false) final AccessController<JpaArtifact> artifactAccessController,
+            @Autowired(required = false) final AccessController<JpaSoftwareModuleType> softwareModuleTypeAccessController,
+            @Autowired(required = false) final AccessController<JpaSoftwareModule> softwareModuleAccessController,
+            @Autowired(required = false) final AccessController<JpaDistributionSetType> distributionSetTypeAccessController,
+            @Autowired(required = false) final AccessController<JpaDistributionSet> distributionSetAccessController,
+            @Autowired(required = false) final AccessController<JpaTargetType> targetTypeAccessControlManager,
+            @Autowired(required = false) final AccessController<JpaTarget> targetAccessControlManager,
+            @Autowired(required = false) final AccessController<JpaAction> actionAccessController) {
+        return new BeanPostProcessor() {
+
+            @Override
+            public Object postProcessAfterInitialization(@NonNull final Object bean, @NonNull final String beanName)
+                    throws BeansException {
+                if (bean instanceof LocalArtifactRepository repo) {
+                    return repo.withACM(artifactAccessController);
+                } else if (bean instanceof SoftwareModuleTypeRepository repo) {
+                    return repo.withACM(softwareModuleTypeAccessController);
+                } else if (bean instanceof SoftwareModuleRepository repo) {
+                    return repo.withACM(softwareModuleAccessController);
+                } else if (bean instanceof DistributionSetTypeRepository repo) {
+                    return repo.withACM(distributionSetTypeAccessController);
+                } else if (bean instanceof DistributionSetRepository repo) {
+                    return repo.withACM(distributionSetAccessController);
+                } else if (bean instanceof TargetTypeRepository repo) {
+                    return repo.withACM(targetTypeAccessControlManager);
+                } else if (bean instanceof TargetRepository repo) {
+                    return repo.withACM(targetAccessControlManager);
+                } else if (bean instanceof ActionRepository repo) {
+                    return repo.withACM(actionAccessController);
+                }
+                return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
+            }
+        };
+    }
+
     @Bean
     @ConditionalOnMissingBean
     PauseRolloutGroupAction pauseRolloutGroupAction(final RolloutManagement rolloutManagement,
-                                                    final RolloutGroupRepository rolloutGroupRepository, final SystemSecurityContext systemSecurityContext) {
+            final RolloutGroupRepository rolloutGroupRepository, final SystemSecurityContext systemSecurityContext) {
         return new PauseRolloutGroupAction(rolloutManagement, rolloutGroupRepository, systemSecurityContext);
     }
 
@@ -299,10 +399,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @param distributionSetTypeManagement
-     *            to loading the {@link DistributionSetType}
-     * @param softwareManagement
-     *            for loading {@link DistributionSet#getModules()}
+     * @param distributionSetTypeManagement to loading the {@link DistributionSetType}
+     * @param softwareManagement for loading {@link DistributionSet#getModules()}
      * @return DistributionSetBuilder bean
      */
     @Bean
@@ -317,8 +415,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @param dsTypeManagement
-     *            for loading {@link TargetType#getCompatibleDistributionSetTypes()}
+     * @param dsTypeManagement for loading {@link TargetType#getCompatibleDistributionSetTypes()}
      * @return TargetTypeBuilder bean
      */
     @Bean
@@ -333,9 +430,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @param softwareModuleTypeManagement
-     *            for loading {@link DistributionSetType#getMandatoryModuleTypes()}
-     *            and {@link DistributionSetType#getOptionalModuleTypes()}
+     * @param softwareModuleTypeManagement for loading {@link DistributionSetType#getMandatoryModuleTypes()}
+     *         and {@link DistributionSetType#getOptionalModuleTypes()}
      * @return DistributionSetTypeBuilder bean
      */
     @Bean
@@ -345,8 +441,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @param softwareModuleTypeManagement
-     *            for loading {@link SoftwareModule#getType()}
+     * @param softwareModuleTypeManagement for loading {@link SoftwareModule#getType()}
      * @return SoftwareModuleBuilder bean
      */
     @Bean
@@ -355,8 +450,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @param distributionSetManagement
-     *            for loading {@link Rollout#getDistributionSet()}
+     * @param distributionSetManagement for loading {@link Rollout#getDistributionSet()}
      * @return RolloutBuilder bean
      */
     @Bean
@@ -365,9 +459,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @param distributionSetManagement
-     *            for loading
-     *            {@link TargetFilterQuery#getAutoAssignDistributionSet()}
+     * @param distributionSetManagement for loading
+     *         {@link TargetFilterQuery#getAutoAssignDistributionSet()}
      * @return TargetFilterQueryBuilder bean
      */
     @Bean
@@ -434,7 +527,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     *
      * @return the singleton instance of the
      *         {@link AfterTransactionCommitExecutorHolder}
      */
@@ -444,73 +536,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * Defines the validation processor bean.
-     *
-     * @return the {@link MethodValidationPostProcessor}
-     */
-    @Bean
-    public MethodValidationPostProcessor methodValidationPostProcessor() {
-        final MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
-        // ValidatorFactory shall NOT be closed because after closing the generated Validator
-        // methods shall not be called - we need the validator in future
-        processor.setValidator(Validation.byDefaultProvider().configure()
-                .addProperty(BaseHibernateValidatorConfiguration.ALLOW_PARALLEL_METHODS_DEFINE_PARAMETER_CONSTRAINTS,
-                        "true")
-                .buildValidatorFactory().getValidator());
-        return processor;
-    }
-
-    /**
      * @return {@link ExceptionMappingAspectHandler} aspect bean
      */
     @Bean
     ExceptionMappingAspectHandler createRepositoryExceptionHandlerAdvice() {
         return new ExceptionMappingAspectHandler();
-    }
-
-    @Override
-    protected AbstractJpaVendorAdapter createJpaVendorAdapter() {
-        return new EclipseLinkJpaVendorAdapter() {
-            private final HawkBitEclipseLinkJpaDialect jpaDialect = new HawkBitEclipseLinkJpaDialect();
-
-            @Override
-            public EclipseLinkJpaDialect getJpaDialect() {
-                return jpaDialect;
-            }
-        };
-    }
-
-    @Override
-    protected Map<String, Object> getVendorProperties() {
-        final Map<String, Object> properties = new HashMap<>(7);
-        // Turn off dynamic weaving to disable LTW lookup in static weaving mode
-        properties.put(PersistenceUnitProperties.WEAVING, "false");
-        // needed for reports
-        properties.put(PersistenceUnitProperties.ALLOW_NATIVE_SQL_QUERIES, "true");
-        // flyway
-        properties.put(PersistenceUnitProperties.DDL_GENERATION, "none");
-        // Embed into hawkBit logging
-        properties.put(PersistenceUnitProperties.LOGGING_LOGGER, "JavaLogger");
-        // Ensure that we flush only at the end of the transaction
-        properties.put(PersistenceUnitProperties.PERSISTENCE_CONTEXT_FLUSH_MODE, "COMMIT");
-        // Enable batch writing
-        properties.put(PersistenceUnitProperties.BATCH_WRITING, "JDBC");
-        // Batch size
-        properties.put(PersistenceUnitProperties.BATCH_WRITING_SIZE, "500");
-        return properties;
-    }
-
-    /**
-     * {@link MultiTenantJpaTransactionManager} bean.
-     *
-     * @see org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration#transactionManager(ObjectProvider)
-     * @return a new {@link PlatformTransactionManager}
-     */
-    @Override
-    @Bean
-    public PlatformTransactionManager transactionManager(
-            final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
-        return new MultiTenantJpaTransactionManager();
     }
 
     /**
@@ -614,13 +644,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     TargetManagement targetManagement(final EntityManager entityManager, final QuotaManagement quotaManagement,
-                                      final TargetRepository targetRepository, final TargetMetadataRepository targetMetadataRepository,
-                                      final RolloutGroupRepository rolloutGroupRepository,
-                                      final TargetFilterQueryRepository targetFilterQueryRepository,
-                                      final TargetTypeRepository targetTypeRepository, final TargetTagRepository targetTagRepository,
-                                      final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
-                                      final VirtualPropertyReplacer virtualPropertyReplacer,
-                                      final JpaProperties properties, final DistributionSetManagement distributionSetManagement) {
+            final TargetRepository targetRepository, final TargetMetadataRepository targetMetadataRepository,
+            final RolloutGroupRepository rolloutGroupRepository,
+            final TargetFilterQueryRepository targetFilterQueryRepository,
+            final TargetTypeRepository targetTypeRepository, final TargetTagRepository targetTagRepository,
+            final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
+            final JpaProperties properties, final DistributionSetManagement distributionSetManagement) {
         return new JpaTargetManagement(entityManager, distributionSetManagement, quotaManagement, targetRepository,
                 targetTypeRepository, targetMetadataRepository, rolloutGroupRepository, targetFilterQueryRepository,
                 targetTagRepository, eventPublisherHolder, tenantAware, virtualPropertyReplacer,
@@ -630,19 +660,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     /**
      * {@link JpaTargetFilterQueryManagement} bean.
      *
-     * @param targetFilterQueryRepository
-     *            holding {@link TargetFilterQuery} entities
-     * @param targetManagement
-     *            managing {@link Target} entities
-     * @param virtualPropertyReplacer
-     *            for RSQL handling
-     * @param distributionSetManagement
-     *            for auto assign DS access
-     * @param quotaManagement
-     *            to access quotas
-     * @param properties
-     *            JPA properties
-     *
+     * @param targetFilterQueryRepository holding {@link TargetFilterQuery} entities
+     * @param targetManagement managing {@link Target} entities
+     * @param virtualPropertyReplacer for RSQL handling
+     * @param distributionSetManagement for auto assign DS access
+     * @param quotaManagement to access quotas
+     * @param properties JPA properties
      * @return a new {@link TargetFilterQueryManagement}
      */
     @Bean
@@ -658,7 +681,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
                 virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase(),
                 tenantConfigurationManagement, repositoryProperties, systemSecurityContext, contextAware, auditorAware);
     }
-
 
     /**
      * {@link JpaTargetTagManagement} bean.
@@ -792,10 +814,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     RolloutGroupManagement rolloutGroupManagement(final RolloutGroupRepository rolloutGroupRepository,
-                                                  final RolloutRepository rolloutRepository, final ActionRepository actionRepository,
-                                                  final TargetRepository targetRepository, final EntityManager entityManager,
-                                                  final VirtualPropertyReplacer virtualPropertyReplacer, final RolloutStatusCache rolloutStatusCache,
-                                                  final JpaProperties properties) {
+            final RolloutRepository rolloutRepository, final ActionRepository actionRepository,
+            final TargetRepository targetRepository, final EntityManager entityManager,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final RolloutStatusCache rolloutStatusCache,
+            final JpaProperties properties) {
         return new JpaRolloutGroupManagement(rolloutGroupRepository, rolloutRepository, actionRepository,
                 targetRepository, entityManager, virtualPropertyReplacer, rolloutStatusCache, properties.getDatabase());
     }
@@ -808,15 +830,16 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     DeploymentManagement deploymentManagement(final EntityManager entityManager,
-                                              final ActionRepository actionRepository,
-                                              final DistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
-                                              final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
-                                              final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
-                                              final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
-                                              final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
-                                              final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final AuditorAware<String> auditorAware,
-                                              final JpaProperties properties, final RepositoryProperties repositoryProperties) {
-        return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetManagement, targetRepository, actionStatusRepository, auditorProvider,
+            final ActionRepository actionRepository,
+            final DistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
+            final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
+            final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
+            final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final AuditorAware<String> auditorAware,
+            final JpaProperties properties, final RepositoryProperties repositoryProperties) {
+        return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetManagement, targetRepository, actionStatusRepository,
+                auditorProvider,
                 eventPublisherHolder, afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement,
                 quotaManagement, systemSecurityContext, tenantAware, auditorAware, properties.getDatabase(), repositoryProperties);
     }
@@ -849,9 +872,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     ArtifactManagement artifactManagement(
             final EntityManager entityManager, final LocalArtifactRepository localArtifactRepository,
-            final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
+            final SoftwareModuleRepository softwareModuleRepository, final Optional<ArtifactRepository> artifactRepository,
             final QuotaManagement quotaManagement, final TenantAware tenantAware) {
-        return new JpaArtifactManagement(entityManager, localArtifactRepository, softwareModuleRepository, artifactRepository,
+        return new JpaArtifactManagement(entityManager, localArtifactRepository, softwareModuleRepository, artifactRepository.orElse(null),
                 quotaManagement, tenantAware);
     }
 
@@ -880,10 +903,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     /**
      * {@link EventEntityManager} bean.
      *
-     * @param aware
-     *            the tenant aware
-     * @param entityManager
-     *            the entity manager
+     * @param aware the tenant aware
+     * @param entityManager the entity manager
      * @return a new {@link EventEntityManager}
      */
     @Bean
@@ -895,14 +916,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     /**
      * {@link AutoAssignChecker} bean.
      *
-     * @param targetFilterQueryManagement
-     *            to get all target filter queries
-     * @param targetManagement
-     *            to get targets
-     * @param deploymentManagement
-     *            to assign distribution sets to targets
-     * @param transactionManager
-     *            to run transactions
+     * @param targetFilterQueryManagement to get all target filter queries
+     * @param targetManagement to get targets
+     * @param deploymentManagement to assign distribution sets to targets
+     * @param transactionManager to run transactions
      * @return a new {@link AutoAssignChecker}
      */
     @Bean
@@ -920,14 +937,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      * Note: does not activate in test profile, otherwise it is hard to test the
      * auto assign functionality.
      *
-     * @param systemManagement
-     *            to find all tenants
-     * @param systemSecurityContext
-     *            to run as system
-     * @param autoAssignExecutor
-     *            to run a check as tenant
-     * @param lockRegistry
-     *            to lock the tenant for auto assignment
+     * @param systemManagement to find all tenants
+     * @param systemSecurityContext to run as system
+     * @param autoAssignExecutor to run a check as tenant
+     * @param lockRegistry to lock the tenant for auto assignment
      * @return a new {@link AutoAssignChecker}
      */
     @Bean
@@ -945,11 +958,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     /**
      * {@link AutoActionCleanup} bean.
      *
-     * @param deploymentManagement
-     *            Deployment management service
-     * @param configManagement
-     *            Tenant configuration service
-     *
+     * @param deploymentManagement Deployment management service
+     * @param configManagement Tenant configuration service
      * @return a new {@link AutoActionCleanup} bean
      */
     @Bean
@@ -961,15 +971,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     /**
      * {@link AutoCleanupScheduler} bean.
      *
-     * @param systemManagement
-     *            to find all tenants
-     * @param systemSecurityContext
-     *            to run as system
-     * @param lockRegistry
-     *            to lock the tenant for auto assignment
-     * @param cleanupTasks
-     *            a list of cleanup tasks
-     *
+     * @param systemManagement to find all tenants
+     * @param systemSecurityContext to run as system
+     * @param lockRegistry to lock the tenant for auto assignment
+     * @param cleanupTasks a list of cleanup tasks
      * @return a new {@link AutoCleanupScheduler} bean
      */
     @Bean
@@ -988,12 +993,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      * Note: does not activate in test profile, otherwise it is hard to test the
      * rollout handling functionality.
      *
-     * @param systemManagement
-     *            to find all tenants
-     * @param rolloutHandler
-     *            to run the rollout handler
-     * @param systemSecurityContext
-     *            to run as system
+     * @param systemManagement to find all tenants
+     * @param rolloutHandler to run the rollout handler
+     * @param systemSecurityContext to run as system
      * @return a new {@link RolloutScheduler} bean.
      */
     @Bean
@@ -1054,7 +1056,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     BaseRepositoryTypeProvider baseRepositoryTypeProvider() {
-        return new HawkBitBaseRepository.RepositoryTypeProvider();
+        return new HawkbitBaseRepository.RepositoryTypeProvider();
     }
 
     /**
@@ -1068,41 +1070,5 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     ArtifactEncryptionService artifactEncryptionService() {
         return ArtifactEncryptionService.getInstance();
-    }
-
-    @Bean
-    public BeanPostProcessor entityManagerBeanPostProcessor(
-            @Autowired(required = false) final AccessController<JpaArtifact> artifactAccessController,
-            @Autowired(required = false) final AccessController<JpaSoftwareModuleType> softwareModuleTypeAccessController,
-            @Autowired(required = false) final AccessController<JpaSoftwareModule> softwareModuleAccessController,
-            @Autowired(required = false) final AccessController<JpaDistributionSetType> distributionSetTypeAccessController,
-            @Autowired(required = false) final AccessController<JpaDistributionSet> distributionSetAccessController,
-            @Autowired(required = false) final AccessController<JpaTargetType> targetTypeAccessControlManager,
-            @Autowired(required = false) final AccessController<JpaTarget> targetAccessControlManager,
-            @Autowired(required = false) final AccessController<JpaAction> actionAccessController) {
-        return new BeanPostProcessor() {
-            @Override
-            public Object postProcessAfterInitialization(@NonNull final Object bean, @NonNull final String beanName)
-                    throws BeansException {
-                if (bean instanceof LocalArtifactRepository repo) {
-                    return repo.withACM(artifactAccessController);
-                } else if (bean instanceof SoftwareModuleTypeRepository repo) {
-                    return repo.withACM(softwareModuleTypeAccessController);
-                } else if (bean instanceof SoftwareModuleRepository repo) {
-                    return repo.withACM(softwareModuleAccessController);
-                } else if (bean instanceof DistributionSetTypeRepository repo) {
-                    return repo.withACM(distributionSetTypeAccessController);
-                } else if (bean instanceof DistributionSetRepository repo) {
-                    return repo.withACM(distributionSetAccessController);
-                } else if (bean instanceof TargetTypeRepository repo) {
-                    return repo.withACM(targetTypeAccessControlManager);
-                } else if (bean instanceof TargetRepository repo) {
-                    return repo.withACM(targetAccessControlManager);
-                } else if (bean instanceof ActionRepository repo) {
-                    return repo.withACM(actionAccessController);
-                }
-                return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
-            }
-        };
     }
 }

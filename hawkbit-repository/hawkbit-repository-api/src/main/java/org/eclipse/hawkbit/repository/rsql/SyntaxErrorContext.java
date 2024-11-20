@@ -27,12 +27,10 @@ public class SyntaxErrorContext {
 
     /**
      * Constructor.
-     * 
-     * @param characterPosition
-     *            the position of the character within the RSQL query string the
-     *            error occurs.
-     * @param errorMessage
-     *            the error message with further information
+     *
+     * @param characterPosition the position of the character within the RSQL query string the
+     *         error occurs.
+     * @param errorMessage the error message with further information
      */
     public SyntaxErrorContext(final int characterPosition, final String errorMessage) {
         this.characterPosition = characterPosition;

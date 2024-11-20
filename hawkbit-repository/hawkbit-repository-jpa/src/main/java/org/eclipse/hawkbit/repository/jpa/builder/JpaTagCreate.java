@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.builder.AbstractTagUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
@@ -18,12 +20,9 @@ import org.eclipse.hawkbit.repository.model.Tag;
 
 /**
  * Create/build implementation.
- *
  */
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 public class JpaTagCreate extends AbstractTagUpdateCreate<TagCreate> implements TagCreate {
-    JpaTagCreate() {
-
-    }
 
     public JpaDistributionSetTag buildDistributionSetTag() {
         return new JpaDistributionSetTag(name, description, colour);

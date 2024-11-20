@@ -29,16 +29,12 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.T
 public final class TimestampCalculator {
 
     /**
-     * Calculates the overdue timestamp (<em>overdue_ts</em>) based on the
-     * current timestamp and the intervals for polling and poll-overdue:
+     * Calculates the overdue timestamp (<em>overdue_ts</em>) based on the current timestamp and the intervals for polling and poll-overdue:
      * <p>
-     * <em>overdue_ts = now_ts - pollingInterval -
-     * pollingOverdueInterval</em>;<br>
-     * <em>pollingInterval</em> and <em>pollingOverdueInterval</em> are
-     * retrieved from tenant-specific system configuration.
+     * <em>overdue_ts = now_ts - pollingInterval - pollingOverdueInterval</em>;<br>
+     * <em>pollingInterval</em> and <em>pollingOverdueInterval</em> are retrieved from tenant-specific system configuration.
      *
-     * @return <em>overdue_ts</em> in milliseconds since Unix epoch as long
-     *         value
+     * @return <em>overdue_ts</em> in milliseconds since Unix epoch as long value
      */
     public static long calculateOverdueTimestamp() {
         return Instant.now().toEpochMilli() - getDurationForKey(TenantConfigurationKey.POLLING_TIME_INTERVAL).toMillis()

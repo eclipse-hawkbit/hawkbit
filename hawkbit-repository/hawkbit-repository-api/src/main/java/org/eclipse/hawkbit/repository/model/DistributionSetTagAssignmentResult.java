@@ -9,17 +9,21 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import lombok.Data;
-
 import java.util.List;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  * Result object for {@link DistributionSetTag} assignments.
  *
  * @deprecated since 0.6.0 with toggle deprecation
  */
-@Deprecated(forRemoval = true)
-@Data
+@Deprecated(forRemoval = true, since = "0.6.0")
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class DistributionSetTagAssignmentResult extends AbstractAssignmentResult<DistributionSet> {
 
     private final DistributionSetTag distributionSetTag;
@@ -27,14 +31,10 @@ public class DistributionSetTagAssignmentResult extends AbstractAssignmentResult
     /**
      * Constructor.
      *
-     * @param alreadyAssigned
-     *            number of already assigned/ignored elements
-     * @param assigned
-     *            newly assigned elements
-     * @param unassigned
-     *            unassigned elements
-     * @param distributionSetTag
-     *            the assigned or unassigned tag
+     * @param alreadyAssigned number of already assigned/ignored elements
+     * @param assigned newly assigned elements
+     * @param unassigned unassigned elements
+     * @param distributionSetTag the assigned or unassigned tag
      */
     public DistributionSetTagAssignmentResult(final int alreadyAssigned,
             final List<DistributionSet> assigned, final List<DistributionSet> unassigned,

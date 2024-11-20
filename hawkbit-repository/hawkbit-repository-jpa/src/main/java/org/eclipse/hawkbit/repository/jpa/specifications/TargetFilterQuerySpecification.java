@@ -18,9 +18,9 @@ import org.springframework.data.jpa.domain.Specification;
 /**
  * Specifications class for {@link TargetFilterQuery}s. The class provides
  * Spring Data JPQL Specifications.
- *
  */
 public final class TargetFilterQuerySpecification {
+
     private TargetFilterQuerySpecification() {
         // utility class
     }
@@ -29,8 +29,7 @@ public final class TargetFilterQuerySpecification {
      * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based
      * on is {@link JpaTargetFilterQuery#getQuery()}.
      *
-     * @param queryValue
-     *            the query of the filter
+     * @param queryValue the query of the filter
      * @return the {@link JpaTargetFilterQuery} {@link Specification}
      */
     public static Specification<JpaTargetFilterQuery> equalsQuery(final String queryValue) {
@@ -41,9 +40,8 @@ public final class TargetFilterQuerySpecification {
     /**
      * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based
      * on is {@link JpaTargetFilterQuery#getName()}.
-     * 
-     * @param searchText
-     *            of the filter
+     *
+     * @param searchText of the filter
      * @return the {@link JpaTargetFilterQuery} {@link Specification}
      */
     public static Specification<JpaTargetFilterQuery> likeName(final String searchText) {
@@ -57,8 +55,7 @@ public final class TargetFilterQuerySpecification {
      * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based
      * on is {@link JpaTargetFilterQuery#getName()}.
      *
-     * @param distributionSet
-     *            of the filter
+     * @param distributionSet of the filter
      * @return the {@link JpaTargetFilterQuery} {@link Specification}
      */
     public static Specification<JpaTargetFilterQuery> byAutoAssignDS(final DistributionSet distributionSet) {

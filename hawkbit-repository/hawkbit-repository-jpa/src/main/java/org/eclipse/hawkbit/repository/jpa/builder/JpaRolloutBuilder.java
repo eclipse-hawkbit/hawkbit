@@ -18,9 +18,9 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 
 /**
  * Builder implementation for {@link Rollout}.
- *
  */
 public class JpaRolloutBuilder implements RolloutBuilder {
+
     private final DistributionSetManagement distributionSetManagement;
 
     public JpaRolloutBuilder(final DistributionSetManagement distributionSetManagement) {
@@ -36,5 +36,4 @@ public class JpaRolloutBuilder implements RolloutBuilder {
     public RolloutCreate create() {
         return new JpaRolloutCreate(distributionSetManagement);
     }
-
 }

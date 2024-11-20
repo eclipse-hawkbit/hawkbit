@@ -17,10 +17,10 @@ import org.springframework.util.StringUtils;
 /**
  * Create and update builder DTO.
  *
- * @param <T>
- *            update or create builder interface
+ * @param <T> update or create builder interface
  */
 public class AbstractTagUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
+
     @ValidString
     protected String colour;
 
@@ -32,5 +32,4 @@ public class AbstractTagUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
     public Optional<String> getColour() {
         return Optional.ofNullable(colour);
     }
-
 }

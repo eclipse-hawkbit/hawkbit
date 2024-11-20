@@ -23,6 +23,8 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Converter;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -48,6 +50,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
+import org.eclipse.hawkbit.repository.jpa.utils.MapAttributeConverter;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -61,11 +64,6 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.persistence.annotations.CascadeOnDelete;
-import org.eclipse.persistence.annotations.ConversionValue;
-import org.eclipse.persistence.annotations.Convert;
-import org.eclipse.persistence.annotations.ObjectTypeConverter;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * JPA implementation of {@link Target}.
@@ -77,9 +75,8 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
         @Index(name = "sp_idx_target_04", columnList = "tenant,created_at"),
         @Index(name = "sp_idx_target_05", columnList = "tenant,last_modified_at"),
         @Index(name = "sp_idx_target_prim", columnList = "tenant,id") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-                "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+        "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 @Slf4j
 public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAwareEntity {
@@ -96,8 +93,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @Pattern(regexp = "[\\S]*", message = "has whitespaces which are not allowed")
     private String controllerId;
 
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, targetEntity = JpaAction.class)
+    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaAction.class)
     private List<JpaAction> actions;
 
     /**
@@ -109,8 +105,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @NotNull
     private String securityToken;
 
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
+    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private List<RolloutTargetGroup> rolloutTargetGroup;
 
     @Column(name = "address", length = Target.ADDRESS_MAX_SIZE)
@@ -122,64 +117,51 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
 
     @Column(name = "install_date")
     private Long installationDate;
-
     @Column(name = "update_status", nullable = false)
-    @ObjectTypeConverter(name = "updateStatus", objectType = TargetUpdateStatus.class, dataType = Integer.class, conversionValues = {
-            @ConversionValue(objectValue = "UNKNOWN", dataValue = "0"),
-            @ConversionValue(objectValue = "IN_SYNC", dataValue = "1"),
-            @ConversionValue(objectValue = "PENDING", dataValue = "2"),
-            @ConversionValue(objectValue = "ERROR", dataValue = "3"),
-            @ConversionValue(objectValue = "REGISTERED", dataValue = "4") })
-    @Convert("updateStatus")
+    @Convert(converter = TargetUpdateStatusConverter.class)
     @NotNull
     private TargetUpdateStatus updateStatus = TargetUpdateStatus.UNKNOWN;
-
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "installed_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_inst_ds"))
     private JpaDistributionSet installedDistributionSet;
-
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_assign_ds"))
     private JpaDistributionSet assignedDistributionSet;
-
     // set default request controller attributes to true, because we want to request them the first time
     @Column(name = "request_controller_attributes", nullable = false)
     private boolean requestControllerAttributes = true;
-
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "target", orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private JpaAutoConfirmationStatus autoConfirmationStatus;
-
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = JpaTargetType.class)
     @JoinColumn(name = "target_type", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_relation_target_type"))
     private TargetType targetType;
-
-    @CascadeOnDelete
     @ManyToMany(targetEntity = JpaTargetTag.class)
     @JoinTable(
             name = "sp_target_target_tag",
             joinColumns = {
-                    @JoinColumn(name = "target", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_target")) },
+                    @JoinColumn(
+                            name = "target", nullable = false, insertable = false, updatable = false,
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_target")) },
             inverseJoinColumns = {
-                    @JoinColumn(name = "tag", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_tag"))
+                    @JoinColumn(
+                            name = "tag", nullable = false, insertable = false, updatable = false,
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_tag"))
             })
     private Set<TargetTag> tags;
-
     /**
      * Supplied / committed by the controller. Read-only via management API.
      */
-    @CascadeOnDelete
+    // no cascade option on an ElementCollection, the target objects are always persisted, merged, removed with their parent.
     @ElementCollection
     @Column(name = "attribute_value", length = Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE)
     @MapKeyColumn(name = "attribute_key", nullable = false, length = Target.CONTROLLER_ATTRIBUTE_KEY_SIZE)
     @CollectionTable(
             name = "sp_target_attributes",
-            joinColumns = {
-                    @JoinColumn(name = "target_id", nullable = false, updatable = false) }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
+            joinColumns = { @JoinColumn(name = "target_id", nullable = false, insertable = false, updatable = false) },
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
     private Map<String, String> controllerAttributes;
-
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, targetEntity = JpaTargetMetadata.class)
+    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaTargetMetadata.class)
     private List<TargetMetadata> metadata;
 
     /**
@@ -218,89 +200,23 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         return assignedDistributionSet;
     }
 
+    /**
+     * @param assignedDistributionSet Distribution set
+     */
+    public void setAssignedDistributionSet(final DistributionSet assignedDistributionSet) {
+        this.assignedDistributionSet = (JpaDistributionSet) assignedDistributionSet;
+    }
+
     @Override
     public String getControllerId() {
         return controllerId;
     }
 
     /**
-     * @return tags
-     */
-    public Set<TargetTag> getTags() {
-        if (tags == null) {
-            return Collections.emptySet();
-        }
-
-        return Collections.unmodifiableSet(tags);
-    }
-
-    /**
-     * @return rollouts target group
-     */
-    public List<RolloutTargetGroup> getRolloutTargetGroup() {
-        if (rolloutTargetGroup == null) {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(rolloutTargetGroup);
-    }
-
-    /**
-     * @param tag
-     *            to be added
-     */
-    public void addTag(final TargetTag tag) {
-        if (tags == null) {
-            tags = new HashSet<>();
-        }
-        tags.add(tag);
-    }
-
-    /**
-     * @param tag
-     *            the tag to be removed from the target
-     */
-    public void removeTag(final TargetTag tag) {
-        if (tags != null) {
-            tags.remove(tag);
-        }
-    }
-
-    /**
-     * @param assignedDistributionSet
-     *          Distribution set
-     */
-    public void setAssignedDistributionSet(final DistributionSet assignedDistributionSet) {
-        this.assignedDistributionSet = (JpaDistributionSet) assignedDistributionSet;
-    }
-
-    /**
-     * @param controllerId
-     *          Controller ID
+     * @param controllerId Controller ID
      */
     public void setControllerId(final String controllerId) {
         this.controllerId = controllerId;
-    }
-
-    /**
-     * @return list of action
-     */
-    public List<Action> getActions() {
-        if (actions == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(actions);
-    }
-
-    /**
-     * @param action
-     *          Action
-     */
-    public void addAction(final Action action) {
-        if (actions == null) {
-            actions = new ArrayList<>();
-        }
-        actions.add((JpaAction) action);
     }
 
     /**
@@ -321,8 +237,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     }
 
     /**
-     * @param securityToken
-     *          token value
+     * @param securityToken token value
      */
     public void setSecurityToken(final String securityToken) {
         this.securityToken = securityToken;
@@ -342,6 +257,26 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             log.warn("Invalid address provided. Cloud not be configured to URI", e);
             return null;
         }
+    }
+
+    @Override
+    public Long getLastTargetQuery() {
+        return lastTargetQuery;
+    }
+
+    @Override
+    public Long getInstallationDate() {
+        return installationDate;
+    }
+
+    @Override
+    public TargetUpdateStatus getUpdateStatus() {
+        return updateStatus;
+    }
+
+    @Override
+    public TargetType getTargetType() {
+        return targetType;
     }
 
     /**
@@ -366,35 +301,115 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     }
 
     public void setAutoConfirmationStatus(final JpaAutoConfirmationStatus autoConfirmationStatus) {
-        this.autoConfirmationStatus =  autoConfirmationStatus;
+        this.autoConfirmationStatus = autoConfirmationStatus;
     }
 
     @Override
-    public Long getLastTargetQuery() {
-        return lastTargetQuery;
-    }
-
-    @Override
-    public Long getInstallationDate() {
-        return installationDate;
-    }
-
-    @Override
-    public TargetUpdateStatus getUpdateStatus() {
-        return updateStatus;
-    }
-
-    @Override
-    public TargetType getTargetType() {
-        return targetType;
+    public boolean isRequestControllerAttributes() {
+        return requestControllerAttributes;
     }
 
     /**
-     * @param type
-     *          Target type
+     * @param requestControllerAttributes Attributes
+     */
+    public void setRequestControllerAttributes(final boolean requestControllerAttributes) {
+        this.requestControllerAttributes = requestControllerAttributes;
+    }
+
+    /**
+     * @param type Target type
      */
     public void setTargetType(final TargetType type) {
         this.targetType = type;
+    }
+
+    /**
+     * @param updateStatus Status
+     */
+    public void setUpdateStatus(final TargetUpdateStatus updateStatus) {
+        this.updateStatus = updateStatus;
+    }
+
+    /**
+     * @param installationDate installation date
+     */
+    public void setInstallationDate(final Long installationDate) {
+        this.installationDate = installationDate;
+    }
+
+    /**
+     * @param lastTargetQuery last query ID
+     */
+    public void setLastTargetQuery(final Long lastTargetQuery) {
+        this.lastTargetQuery = lastTargetQuery;
+    }
+
+    /**
+     * @param address Address
+     */
+    public void setAddress(final String address) {
+        this.address = address;
+    }
+
+    /**
+     * @return tags
+     */
+    public Set<TargetTag> getTags() {
+        if (tags == null) {
+            return Collections.emptySet();
+        }
+
+        return Collections.unmodifiableSet(tags);
+    }
+
+    /**
+     * @return rollouts target group
+     */
+    public List<RolloutTargetGroup> getRolloutTargetGroup() {
+        if (rolloutTargetGroup == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(rolloutTargetGroup);
+    }
+
+    /**
+     * @param tag to be added
+     */
+    public void addTag(final TargetTag tag) {
+        if (tags == null) {
+            tags = new HashSet<>();
+        }
+        tags.add(tag);
+    }
+
+    /**
+     * @param tag the tag to be removed from the target
+     */
+    public void removeTag(final TargetTag tag) {
+        if (tags != null) {
+            tags.remove(tag);
+        }
+    }
+
+    /**
+     * @return list of action
+     */
+    public List<Action> getActions() {
+        if (actions == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(actions);
+    }
+
+    /**
+     * @param action Action
+     */
+    public void addAction(final Action action) {
+        if (actions == null) {
+            actions = new ArrayList<>();
+        }
+        actions.add((JpaAction) action);
     }
 
     /**
@@ -405,15 +420,17 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     }
 
     /**
+     * @param installedDistributionSet Distribution set
+     */
+    public void setInstalledDistributionSet(final JpaDistributionSet installedDistributionSet) {
+        this.installedDistributionSet = installedDistributionSet;
+    }
+
+    /**
      * @return controller attributes
      */
     public Map<String, String> getControllerAttributes() {
         return controllerAttributes;
-    }
-
-    @Override
-    public boolean isRequestControllerAttributes() {
-        return requestControllerAttributes;
     }
 
     /**
@@ -433,58 +450,23 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
                 + "]";
     }
 
-    /**
-     * @param address
-     *          Address
-     */
-    public void setAddress(final String address) {
-        this.address = address;
-    }
-
-    /**
-     * @param lastTargetQuery
-     *          last query ID
-     */
-    public void setLastTargetQuery(final Long lastTargetQuery) {
-        this.lastTargetQuery = lastTargetQuery;
-    }
-
-    /**
-     * @param installationDate
-     *          installation date
-     */
-    public void setInstallationDate(final Long installationDate) {
-        this.installationDate = installationDate;
-    }
-
-    /**
-     * @param installedDistributionSet
-     *          Distribution set
-     */
-    public void setInstalledDistributionSet(final JpaDistributionSet installedDistributionSet) {
-        this.installedDistributionSet = installedDistributionSet;
-    }
-
-    /**
-     * @param updateStatus
-     *          Status
-     */
-    public void setUpdateStatus(final TargetUpdateStatus updateStatus) {
-        this.updateStatus = updateStatus;
-    }
-
-    /**
-     * @param requestControllerAttributes
-     *          Attributes
-     */
-    public void setRequestControllerAttributes(final boolean requestControllerAttributes) {
-        this.requestControllerAttributes = requestControllerAttributes;
+    @Override
+    public void fireCreateEvent() {
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new TargetCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new TargetCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+                .publishEvent(new TargetUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireDeleteEvent() {
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new TargetDeletedEvent(getTenant(), getId(), getControllerId(), address,
+                        getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
@@ -492,16 +474,17 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         return TARGET_UPDATE_EVENT_IGNORE_FIELDS;
     }
 
-    @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new TargetUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
-    }
+    @Converter
+    public static class TargetUpdateStatusConverter extends MapAttributeConverter<TargetUpdateStatus, Integer> {
 
-    @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new TargetDeletedEvent(getTenant(), getId(), getControllerId(), address,
-                        getClass(), EventPublisherHolder.getInstance().getApplicationId()));
+        public TargetUpdateStatusConverter() {
+            super(Map.of(
+                    TargetUpdateStatus.UNKNOWN, 0,
+                    TargetUpdateStatus.IN_SYNC, 1,
+                    TargetUpdateStatus.PENDING, 2,
+                    TargetUpdateStatus.ERROR, 3,
+                    TargetUpdateStatus.REGISTERED, 4
+            ), null);
+        }
     }
 }

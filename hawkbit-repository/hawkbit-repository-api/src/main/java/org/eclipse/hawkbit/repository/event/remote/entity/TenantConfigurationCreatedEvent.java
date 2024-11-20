@@ -9,34 +9,29 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.io.Serial;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 
 /**
  * Defines the remote event of creating a new {@link TenantConfiguration}.
- *
  */
-public class TenantConfigurationCreatedEvent extends RemoteEntityEvent<TenantConfiguration>
-        implements EntityCreatedEvent {
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
+public class TenantConfigurationCreatedEvent extends RemoteEntityEvent<TenantConfiguration> implements EntityCreatedEvent {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * Default constructor.
-     */
-    public TenantConfigurationCreatedEvent() {
-        // for serialization libs like jackson
-    }
-
-    /**
      * Constructor.
-     * 
-     * @param baseEntity
-     *            the tenantConfiguration
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param baseEntity the tenantConfiguration
+     * @param applicationId the origin application id
      */
     public TenantConfigurationCreatedEvent(final TenantConfiguration baseEntity, final String applicationId) {
         super(baseEntity, applicationId);
     }
-
 }

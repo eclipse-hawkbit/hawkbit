@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.repository;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
 
@@ -29,11 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link DistributionSet} repository.
- *
  */
 @Transactional(readOnly = true)
-public interface DistributionSetRepository
-        extends BaseEntityRepository<JpaDistributionSet> {
+public interface DistributionSetRepository extends BaseEntityRepository<JpaDistributionSet> {
 
     /**
      * Count {@link Rollout}s by Status for Distribution set.
@@ -51,8 +48,7 @@ public interface DistributionSetRepository
      * <p/>
      * No access control applied.
      *
-     * @param dsId
-     *            to be found
+     * @param dsId to be found
      * @return map for {@link Action}s status counts
      */
     @Query(value = "SELECT a.status as name, COUNT(a.status) as data FROM JpaAction a WHERE a.distributionSet.id = :dsId GROUP BY a.status")
@@ -63,25 +59,11 @@ public interface DistributionSetRepository
      * <p/>
      * No access control applied.
      *
-     * @param dsId
-     *            to be found
+     * @param dsId to be found
      * @return number of Auto Assignments for Distribution set
      */
     @Query(value = "SELECT COUNT(f.autoAssignDistributionSet) FROM JpaTargetFilterQuery f WHERE f.autoAssignDistributionSet.id = :dsId GROUP BY f.autoAssignDistributionSet")
     Long countAutoAssignmentsForDistributionSet(@Param("dsId") Long dsId);
-
-    /**
-     * deletes the {@link DistributionSet}s with the given IDs.
-     * <p/>
-     * No access control applied.
-     * 
-     * @param ids
-     *            to be deleted
-     */
-    @Modifying
-    @Transactional
-    @Query("update JpaDistributionSet d set d.deleted = 1 where d.id in :ids")
-    void deleteDistributionSet(@Param("ids") Long... ids);
 
     /**
      * Finds {@link DistributionSet}s where given {@link SoftwareModule} is
@@ -89,8 +71,7 @@ public interface DistributionSetRepository
      * <p/>
      * No access control applied.
      *
-     * @param moduleId
-     *            to search for
+     * @param moduleId to search for
      * @return {@link List} of found {@link DistributionSet}s
      */
     Long countByModulesId(Long moduleId);
@@ -101,8 +82,7 @@ public interface DistributionSetRepository
      * <p/>
      * No access control applied.
      *
-     * @param ids
-     *            to search for
+     * @param ids to search for
      * @return list of {@link DistributionSet#getId()}
      */
     @Query("select ac.distributionSet.id from JpaAction ac where ac.distributionSet.id in :ids")
@@ -114,8 +94,7 @@ public interface DistributionSetRepository
      * <p/>
      * No access control applied.
      *
-     * @param ids
-     *            to search for
+     * @param ids to search for
      * @return list of {@link DistributionSet#getId()}
      */
     @Query("select ra.distributionSet.id from JpaRollout ra where ra.distributionSet.id in :ids")
@@ -126,8 +105,7 @@ public interface DistributionSetRepository
      * <p/>
      * No access control applied.
      *
-     * @param typeId
-     *            to search for
+     * @param typeId to search for
      * @return number of found {@link DistributionSet}s
      */
     long countByTypeId(Long typeId);
@@ -138,8 +116,7 @@ public interface DistributionSetRepository
      * manually to query even if this will by done by {@link EntityManager}
      * anyhow. The DB should take care of optimizing this away.
      *
-     * @param tenant
-     *            to delete data from
+     * @param tenant to delete data from
      */
     @Modifying
     @Transactional

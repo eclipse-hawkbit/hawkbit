@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -24,12 +26,13 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 
 /**
  * Meta data for {@link DistributionSet}.
- *
  */
 @IdClass(DsMetadataCompositeKey.class)
 @Entity
 @Table(name = "sp_ds_metadata")
 public class JpaDistributionSetMetadata extends AbstractJpaMetaData implements DistributionSetMetadata {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -54,13 +57,13 @@ public class JpaDistributionSetMetadata extends AbstractJpaMetaData implements D
         return new DsMetadataCompositeKey(distributionSet.getId(), getKey());
     }
 
-    public void setDistributionSet(final DistributionSet distributionSet) {
-        this.distributionSet = (JpaDistributionSet) distributionSet;
-    }
-
     @Override
     public DistributionSet getDistributionSet() {
         return distributionSet;
+    }
+
+    public void setDistributionSet(final DistributionSet distributionSet) {
+        this.distributionSet = (JpaDistributionSet) distributionSet;
     }
 
     @Override

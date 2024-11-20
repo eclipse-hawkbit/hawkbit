@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.test.util;
 
 import java.io.Serial;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
@@ -17,9 +18,9 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
-import org.eclipse.hawkbit.im.authentication.TenantAwareUser;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
+import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -30,10 +31,6 @@ public class SecurityContextSwitch {
     public static final String DEFAULT_TENANT = "default";
     private static final WithUser PRIVILEDGED_USER =
             createWithUser("bumlux", DEFAULT_TENANT, false, true, false, "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE");
-
-    private static  void setSecurityContext(final WithUser annotation) {
-        SecurityContextHolder.setContext(new WithUserSecurityContext(annotation));
-    }
 
     public static <T> T runAsPrivileged(final Callable<T> callable) throws Exception {
         createTenant(DEFAULT_TENANT);
@@ -48,16 +45,6 @@ public class SecurityContextSwitch {
         }
         try {
             return callable.call();
-        } finally {
-            SecurityContextHolder.setContext(oldContext);
-        }
-    }
-
-    private static void createTenant(final String tenantId) {
-        final SecurityContext oldContext = SecurityContextHolder.getContext();
-        setSecurityContext(PRIVILEDGED_USER);
-        try {
-            SystemManagementHolder.getInstance().getSystemManagement().createTenantMetadata(tenantId);
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }
@@ -81,73 +68,42 @@ public class SecurityContextSwitch {
         return createWithUser(principal, tenant, autoCreateTenant, allSpPermission, controller, authorities);
     }
 
-    private static WithUser createWithUser(final String principal, final String tenant, final boolean autoCreateTenant,
-            final boolean allSpPermission, final boolean controller, final String... authorities) {
-        return new WithUser() {
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return WithUser.class;
-            }
-
-            @Override
-            public String principal() {
-                return principal;
-            }
-
-            @Override
-            public String credentials() {
-                return null;
-            }
-
-            @Override
-            public String[] authorities() {
-                return authorities;
-            }
-
-            @Override
-            public boolean allSpPermissions() {
-                return allSpPermission;
-            }
-
-            @Override
-            public String[] removeFromAllPermission() {
-                return new String[0];
-            }
-
-            @Override
-            public String tenantId() {
-                return tenant;
-            }
-
-            @Override
-            public boolean autoCreateTenant() {
-                return autoCreateTenant;
-            }
-
-            @Override
-            public boolean controller() {
-                return controller;
-            }
-        };
+    private static void setSecurityContext(final WithUser annotation) {
+        SecurityContextHolder.setContext(new WithUserSecurityContext(annotation));
     }
 
+    private static void createTenant(final String tenantId) {
+        final SecurityContext oldContext = SecurityContextHolder.getContext();
+        setSecurityContext(PRIVILEDGED_USER);
+        try {
+            SystemManagementHolder.getInstance().getSystemManagement().createTenantMetadata(tenantId);
+        } finally {
+            SecurityContextHolder.setContext(oldContext);
+        }
+    }
+
+    private static WithUser createWithUser(
+            final String principal, final String tenant, final boolean autoCreateTenant,
+            final boolean allSpPermission, final boolean controller, final String... authorities) {
+        return new WithUserImpl(principal, tenant, autoCreateTenant, allSpPermission, controller, authorities);
+    }
+
+    // should be used only for test purposes and taking in account 'annotation' non-transient field in a Serializable
     static class WithUserSecurityContext implements SecurityContext {
 
         @Serial
         private static final long serialVersionUID = 1L;
+
+        // in some cases it could be serializable, e.g. if got via {@link java.lang.reflect.AnnotatedElement} (see javadoc) or WithUserImpl,
+        // and in some cases it used to be serialized, e.g. in {@link SecurityContextSerializer#JavaSerialization.serialize},
+        // must not be made transient!
         private final WithUser annotation;
 
-        public WithUserSecurityContext(final WithUser annotation) {
+        WithUserSecurityContext(final WithUser annotation) {
             this.annotation = annotation;
             if (annotation.autoCreateTenant()) {
                 createTenant(annotation.tenantId());
             }
-        }
-
-        @Override
-        public void setAuthentication(final Authentication authentication) {
-            // nothing to do
         }
 
         @Override
@@ -159,11 +115,30 @@ public class SecurityContextSwitch {
                 authorities = annotation.authorities();
             }
             final TestingAuthenticationToken testingAuthenticationToken = new TestingAuthenticationToken(
-                    new TenantAwareUser(annotation.principal(), annotation.tenantId()),
+                    new TenantAwareUser(annotation.principal(), "***", null, annotation.tenantId()),
                     annotation.credentials(), authorities);
             testingAuthenticationToken.setDetails(
                     new TenantAwareAuthenticationDetails(annotation.tenantId(), annotation.controller()));
             return testingAuthenticationToken;
+        }
+
+        @Override
+        public void setAuthentication(final Authentication authentication) {
+            // nothing to do
+        }
+
+        @Override
+        public int hashCode() {
+            return annotation.hashCode();
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (obj instanceof WithUserSecurityContext otherSecurityContextWithUser) {
+                return Objects.equals(annotation, otherSecurityContextWithUser.annotation);
+            } else {
+                return false;
+            }
         }
 
         private String[] getAllAuthorities(final String[] additionalAuthorities, final String[] notInclude) {
@@ -176,19 +151,71 @@ public class SecurityContextSwitch {
             }
             return permissions.toArray(new String[0]);
         }
+    }
 
-        @Override
-        public boolean equals(final Object obj) {
-            if (obj instanceof WithUserSecurityContext otherSecurityContextWithUser) {
-                return Objects.equals(annotation, otherSecurityContextWithUser.annotation);
-            } else {
-                return false;
-            }
+    private static class WithUserImpl implements WithUser, Serializable {
+
+        private final String principal;
+        private final String tenant;
+        private final boolean autoCreateTenant;
+        private final boolean allSpPermission;
+        private final boolean controller;
+        private final String[] authorities;
+
+        private WithUserImpl(
+                final String principal, final String tenant, final boolean autoCreateTenant,
+                final boolean allSpPermission, final boolean controller, final String... authorities) {
+            this.principal = principal;
+            this.tenant = tenant;
+            this.autoCreateTenant = autoCreateTenant;
+            this.allSpPermission = allSpPermission;
+            this.controller = controller;
+            this.authorities = authorities;
         }
 
         @Override
-        public int hashCode() {
-            return annotation.hashCode();
+        public Class<? extends Annotation> annotationType() {
+            return WithUser.class;
+        }
+
+        @Override
+        public String principal() {
+            return principal;
+        }
+
+        @Override
+        public String credentials() {
+            return null;
+        }
+
+        @Override
+        public String tenantId() {
+            return tenant;
+        }
+
+        @Override
+        public boolean autoCreateTenant() {
+            return autoCreateTenant;
+        }
+
+        @Override
+        public String[] authorities() {
+            return authorities;
+        }
+
+        @Override
+        public boolean allSpPermissions() {
+            return allSpPermission;
+        }
+
+        @Override
+        public String[] removeFromAllPermission() {
+            return new String[0];
+        }
+
+        @Override
+        public boolean controller() {
+            return controller;
         }
     }
 }

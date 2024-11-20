@@ -10,12 +10,11 @@
 package org.eclipse.hawkbit.repository.builder;
 
 import jakarta.annotation.Nullable;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-
-import java.util.Optional;
 
 /**
  * Update implementation.
@@ -24,8 +23,7 @@ import java.util.Optional;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @Accessors(fluent = true)
-public class GenericDistributionSetUpdate extends AbstractDistributionSetUpdateCreate<DistributionSetUpdate>
-        implements DistributionSetUpdate {
+public class GenericDistributionSetUpdate extends AbstractDistributionSetUpdateCreate<DistributionSetUpdate> implements DistributionSetUpdate {
 
     @Nullable
     protected Boolean locked;

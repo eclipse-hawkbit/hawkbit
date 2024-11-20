@@ -9,15 +9,17 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.io.Serial;
 import java.util.Objects;
 
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 /**
- * Event which is published in case a {@linkplain RolloutGroup} is created or
- * updated
+ * Event which is published in case a {@linkplain RolloutGroup} is created or updated
  */
 public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<RolloutGroup> {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final Long rolloutId;
@@ -41,6 +43,11 @@ public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<Rollou
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), rolloutId);
+    }
+
+    @Override
     public boolean equals(final Object o) {
         if (this == o)
             return true;
@@ -50,10 +57,5 @@ public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<Rollou
             return false;
         final AbstractRolloutGroupEvent that = (AbstractRolloutGroupEvent) o;
         return Objects.equals(rolloutId, that.rolloutId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), rolloutId);
     }
 }

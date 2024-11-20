@@ -9,16 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import java.util.Optional;
+
 import org.eclipse.hawkbit.repository.ValidString;
 import org.springframework.util.StringUtils;
-
-import java.util.Optional;
 
 /**
  * Create and update builder DTO.
  *
- * @param <T>
- *            update or create builder interface
+ * @param <T> update or create builder interface
  */
 public abstract class AbstractTypeUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
 

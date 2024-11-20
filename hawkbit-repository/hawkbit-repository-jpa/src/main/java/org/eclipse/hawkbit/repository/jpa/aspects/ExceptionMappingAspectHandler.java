@@ -49,27 +49,22 @@ public class ExceptionMappingAspectHandler implements Ordered {
     private static final List<Class<?>> MAPPED_EXCEPTION_ORDER = new ArrayList<>(4);
 
     static {
-
         MAPPED_EXCEPTION_ORDER.add(DuplicateKeyException.class);
         MAPPED_EXCEPTION_ORDER.add(DataIntegrityViolationException.class);
         MAPPED_EXCEPTION_ORDER.add(OptimisticLockingFailureException.class);
         MAPPED_EXCEPTION_ORDER.add(AccessDeniedException.class);
 
         EXCEPTION_MAPPING.put(DuplicateKeyException.class.getName(), EntityAlreadyExistsException.class.getName());
-        EXCEPTION_MAPPING.put(DataIntegrityViolationException.class.getName(),
-                EntityAlreadyExistsException.class.getName());
+        EXCEPTION_MAPPING.put(DataIntegrityViolationException.class.getName(), EntityAlreadyExistsException.class.getName());
 
-        EXCEPTION_MAPPING.put(OptimisticLockingFailureException.class.getName(),
-                ConcurrentModificationException.class.getName());
+        EXCEPTION_MAPPING.put(OptimisticLockingFailureException.class.getName(), ConcurrentModificationException.class.getName());
         EXCEPTION_MAPPING.put(AccessDeniedException.class.getName(), InsufficientPermissionException.class.getName());
     }
 
     /**
-     * catch exceptions of the {@link TransactionManager} and wrap them to
-     * custom exceptions.
+     * catch exceptions of the {@link TransactionManager} and wrap them to custom exceptions.
      *
-     * @param ex
-     *            the thrown and catched exception
+     * @param ex the thrown and catched exception
      * @throws Throwable
      */
     @AfterThrowing(pointcut = "execution( * org.eclipse.hawkbit.repository.jpa.management.*Management.*(..))", throwing = "ex")
@@ -103,6 +98,11 @@ public class ExceptionMappingAspectHandler implements Ordered {
         throw ex;
     }
 
+    @Override
+    public int getOrder() {
+        return 1;
+    }
+
     private static Exception replaceWithCauseIfConstraintViolationException(final TransactionSystemException rex) {
         Throwable exception = rex;
         do {
@@ -114,10 +114,5 @@ public class ExceptionMappingAspectHandler implements Ordered {
         } while (exception != null);
 
         return rex;
-    }
-
-    @Override
-    public int getOrder() {
-        return 1;
     }
 }

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.model;
 
 /**
  * {@link MetaData} of a {@link DistributionSet}.
- *
  */
 public interface DistributionSetMetadata extends MetaData {
 

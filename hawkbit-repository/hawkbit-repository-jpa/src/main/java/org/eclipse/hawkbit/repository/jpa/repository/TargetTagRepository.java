@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link TargetTag} repository.
- *
  */
 @Transactional(readOnly = true)
 public interface TargetTagRepository extends BaseEntityRepository<JpaTargetTag> {
@@ -31,8 +30,7 @@ public interface TargetTagRepository extends BaseEntityRepository<JpaTargetTag> 
     /**
      * find {@link TargetTag} by its name.
      *
-     * @param tagName
-     *            to filter on
+     * @param tagName to filter on
      * @return the {@link TargetTag} if found, otherwise null
      */
     Optional<TargetTag> findByNameEquals(String tagName);
@@ -43,8 +41,7 @@ public interface TargetTagRepository extends BaseEntityRepository<JpaTargetTag> 
      * manually to query even if this will by done by {@link EntityManager}
      * anyhow. The DB should take care of optimizing this away.
      *
-     * @param tenant
-     *            to delete data from
+     * @param tenant to delete data from
      */
     @Modifying
     @Transactional

@@ -13,7 +13,6 @@ import java.util.concurrent.Executor;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +20,6 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
- *
  * Auto config fot the exception handler.
  */
 @Configuration
@@ -29,9 +27,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @ConditionalOnMissingBean(AsyncConfigurer.class)
 public class AsyncConfigurerAutoConfiguration implements AsyncConfigurer {
 
-    @Autowired
-    @Qualifier("asyncExecutor")
-    private Executor executor;
+    private final Executor executor;
+
+    public AsyncConfigurerAutoConfiguration(@Qualifier("asyncExecutor") final Executor executor) {
+        this.executor = executor;
+    }
 
     @Override
     public Executor getAsyncExecutor() {
@@ -42,5 +42,4 @@ public class AsyncConfigurerAutoConfiguration implements AsyncConfigurer {
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return new SimpleAsyncUncaughtExceptionHandler();
     }
-
 }

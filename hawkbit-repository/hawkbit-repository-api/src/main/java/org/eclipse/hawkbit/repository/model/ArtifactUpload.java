@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.ValidString;
 
 /**
  * Use to create a new artifact.
- *
  */
 @Data
 public class ArtifactUpload {
@@ -47,18 +46,13 @@ public class ArtifactUpload {
 
     /**
      * Constructor
-     * 
-     * @param inputStream
-     *            to read from for artifact binary
-     * @param moduleId
-     *            to assign the new artifact to
-     * @param filename
-     *            of the artifact
-     * @param overrideExisting
-     *            to <code>true</code> if the artifact binary can be overridden
-     *            if it already exists
-     * @param filesize
-     *            the size of the file in bytes.
+     *
+     * @param inputStream to read from for artifact binary
+     * @param moduleId to assign the new artifact to
+     * @param filename of the artifact
+     * @param overrideExisting to <code>true</code> if the artifact binary can be overridden
+     *         if it already exists
+     * @param filesize the size of the file in bytes.
      */
     public ArtifactUpload(final InputStream inputStream, final long moduleId, final String filename,
             final boolean overrideExisting, final long filesize) {
@@ -67,24 +61,16 @@ public class ArtifactUpload {
 
     /**
      * Constructor
-     * 
-     * @param inputStream
-     *            to read from for artifact binary
-     * @param moduleId
-     *            to assign the new artifact to
-     * @param filename
-     *            of the artifact
-     * @param providedSha1Sum
-     *            optional sha1 checksum to check the new file against
-     * @param providedMd5Sum
-     *            optional md5 checksum to check the new file against
-     * @param overrideExisting
-     *            to <code>true</code> if the artifact binary can be overridden
-     *            if it already exists
-     * @param contentType
-     *            the contentType of the file
-     * @param filesize
-     *            the size of the file in bytes.
+     *
+     * @param inputStream to read from for artifact binary
+     * @param moduleId to assign the new artifact to
+     * @param filename of the artifact
+     * @param providedSha1Sum optional sha1 checksum to check the new file against
+     * @param providedMd5Sum optional md5 checksum to check the new file against
+     * @param overrideExisting to <code>true</code> if the artifact binary can be overridden
+     *         if it already exists
+     * @param contentType the contentType of the file
+     * @param filesize the size of the file in bytes.
      */
     public ArtifactUpload(final InputStream inputStream, final long moduleId, final String filename,
             final String providedMd5Sum, final String providedSha1Sum, final String providedSha256Sum,

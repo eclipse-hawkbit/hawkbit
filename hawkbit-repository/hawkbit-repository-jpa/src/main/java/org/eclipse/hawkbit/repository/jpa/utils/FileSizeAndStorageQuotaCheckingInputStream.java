@@ -31,12 +31,9 @@ public class FileSizeAndStorageQuotaCheckingInputStream extends FilterInputStrea
      * Creates a <code>QuotaInputStream</code> using the input stream in and a
      * limiting quota
      *
-     * @param in
-     *            Inner InputStream that read operations will be forwarded to
-     * @param sizeLimit
-     *            Quota file size limit in byte
-     * @param storageLeft
-     *            Storage left until quota is reached
+     * @param in Inner InputStream that read operations will be forwarded to
+     * @param sizeLimit Quota file size limit in byte
+     * @param storageLeft Storage left until quota is reached
      */
     public FileSizeAndStorageQuotaCheckingInputStream(final InputStream in, final long sizeLimit, final long storageLeft) {
         super(in);

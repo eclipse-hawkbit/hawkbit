@@ -22,7 +22,6 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Create/build implementation.
- *
  */
 public class JpaDistributionSetTypeCreate extends AbstractDistributionSetTypeUpdateCreate<DistributionSetTypeCreate>
         implements DistributionSetTypeCreate {
@@ -56,5 +55,4 @@ public class JpaDistributionSetTypeCreate extends AbstractDistributionSetTypeUpd
 
         return module;
     }
-
 }

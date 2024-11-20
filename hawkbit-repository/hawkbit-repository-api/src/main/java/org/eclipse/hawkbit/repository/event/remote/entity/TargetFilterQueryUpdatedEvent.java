@@ -9,34 +9,29 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.io.Serial;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
  * Defines the remote event for updating a {@link TargetFilterQuery}.
- *
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
 public class TargetFilterQueryUpdatedEvent extends RemoteEntityEvent<TargetFilterQuery> implements EntityUpdatedEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * Default constructor.
-     */
-    public TargetFilterQueryUpdatedEvent() {
-        // for serialization libs like jackson
-    }
-
-    /**
      * Constructor.
-     * 
-     * @param baseEntity
-     *            TargetFilterQuery entity
-     * @param applicationId
-     *            the origin application id
+     *
+     * @param baseEntity TargetFilterQuery entity
+     * @param applicationId the origin application id
      */
     public TargetFilterQueryUpdatedEvent(final TargetFilterQuery baseEntity, final String applicationId) {
         super(baseEntity, applicationId);
     }
-
 }

@@ -9,37 +9,44 @@ Please read this if you intend to contribute to the project.
 ### Code Style
 
 * Java files:
-  * we follow the standard eclipse IDE (built in) code formatter with the following changes:
-    * Tab policy: spaces only: 4
-  * We recommend using at least Eclipse [Mars](https://www.eclipse.org/mars/) IDE release. It seems that the Java code formatter line break handling has been changed between [Luna](https://www.eclipse.org/luna/) and Mars.
+    * we follow the standard eclipse IDE (built in) code formatter with the following changes:
+        * Tab policy: spaces only: 4
+    * We recommend using at least Eclipse [Mars](https://www.eclipse.org/mars/) IDE release. It seems that the Java code
+      formatter line break handling has been changed between [Luna](https://www.eclipse.org/luna/) and Mars.
 * XML files:
-  * we follow the standard eclipse IDE XML formatter with the following changes:
-    * Indent using spaces only: 3
+    * we follow the standard eclipse IDE XML formatter with the following changes:
+        * Indent using spaces only: 3
 * SCSS files:
-  * we follow the standard [scss-lint](https://github.com/brigade/scss-lint/) rules with the following exception:
-    * disabled rules: ImportantRule, PropertySortOrder
+    * we follow the standard [scss-lint](https://github.com/brigade/scss-lint/) rules with the following exception:
+        * disabled rules: ImportantRule, PropertySortOrder
 * Sonarqube:
-  * Our rule set can be found [here](https://sonarcloud.io/organizations/bosch-iot-rollouts/rules)
-  * Sonarqube reports can be found [here](https://sonarcloud.io/project/overview?id=org.eclipse.hawkbit%3Ahawkbit-parent)
+    * Our rule set can be found [here](https://sonarcloud.io/organizations/bosch-iot-rollouts/rules)
+    * Sonarqube reports can be
+      found [here](https://sonarcloud.io/project/overview?id=org.eclipse.hawkbit%3Ahawkbit-parent)
 
 ### Utility library usage
 
-hawkBit has currently [Apache commons lang](https://commons.apache.org/proper/commons-lang/) on the classpath in several of its modules. However, we see introducing too many utility libraries problematic as we force these as transitive dependencies on hawkBit users. We in fact are looking into reducing them in future not adding new ones.
+hawkBit has currently [Apache commons lang](https://commons.apache.org/proper/commons-lang/) on the classpath in several
+of its modules. However, we see introducing too many utility libraries problematic as we force these as transitive
+dependencies on hawkBit users. We in fact are looking into reducing them in future not adding new ones.
 
 So we kindly ask contributors:
 
 * not introduce extra utility library dependencies
-* keep them out of the core modules (e.g. hawkbit-core, hawkbit-rest-core, hawkbit-http-security) to avoid that all modules have them as transitive dependency
+* keep them out of the core modules (e.g. hawkbit-core, hawkbit-rest-core) to avoid that all
+  modules have them as transitive dependency
 * use utility functions in general based in the following priority:
-  * use utility functions from JDK if feasible
-  * use Spring utility classes if feasible
-  * use [Apache commons lang](https://commons.apache.org/proper/commons-lang/) if feasible
+    * use utility functions from JDK if feasible
+    * use Spring utility classes if feasible
+    * use [Apache commons lang](https://commons.apache.org/proper/commons-lang/) if feasible
 
 ### Test documentation
 
-Please document the test cases that you contribute by means of [Allure](https://docs.qameta.io/allure/) annotations and proper test method naming.
+Please document the test cases that you contribute by means of [Allure](https://docs.qameta.io/allure/) annotations and
+proper test method naming.
 
-All test classes are documented with [Allure's](https://docs.qameta.io/allure/#_behaviours_mapping) **@Feature** and **@Story** annotations in the following format:
+All test classes are documented with [Allure's](https://docs.qameta.io/allure/#_behaviours_mapping) **@Feature** and *
+*@Story** annotations in the following format:
 
 ```java
 @Feature("TEST_TYPE - HAWKBIT_COMPONENT")
@@ -49,7 +56,8 @@ All test classes are documented with [Allure's](https://docs.qameta.io/allure/#_
 Test types are:
 
 * Unit Tests - for single units tests with a mocked environment
-* Component Tests - for complete components including lower layers, e.g. Spring MVC test on rest API including repository and database.
+* Component Tests - for complete components including lower layers, e.g. Spring MVC test on rest API including
+  repository and database.
 * Integration Tests - including clients, e.g. Selenium UI tests with various browsers.
 * System Tests - on target environments, e.g. Cloud Foundry.
 
@@ -66,7 +74,8 @@ Examples for hawkBit components:
 @Story("Distribution Set Type Resource")
 ```
 
-In addition all test method's name describes in **camel case** what the test is all about and has in addition a long description in Allures **@Description** annotation.
+In addition all test method's name describes in **camel case** what the test is all about and has in addition a long
+description in Allures **@Description** annotation.
 
 ## Legal considerations for your contribution
 
@@ -129,8 +138,11 @@ Submit a pull request via the normal GitHub UI (desktop or web).
 
 ## Reporting a security vulnerability
 
-If you find a vulnerability, **DO NOT** disclose it in the public immediately! Instead, give us the possibility to fix it beforehand.
-So please don’t report your finding using GitHub issues and better head over to [https://eclipse.org/security](https://eclipse.org/security) and learn how to disclose a vulnerability in a safe and responsible manner
+If you find a vulnerability, **DO NOT** disclose it in the public immediately! Instead, give us the possibility to fix
+it beforehand.
+So please don’t report your finding using GitHub issues and better head over
+to [https://eclipse.org/security](https://eclipse.org/security) and learn how to disclose a vulnerability in a safe and
+responsible manner
 
 ## Further information
 

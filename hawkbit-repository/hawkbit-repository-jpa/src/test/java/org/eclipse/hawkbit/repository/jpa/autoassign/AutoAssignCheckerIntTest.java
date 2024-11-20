@@ -20,6 +20,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -42,22 +46,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Step;
-import io.qameta.allure.Story;
-
 /**
  * Test class for {@link AutoAssignChecker}.
- *
  */
 @Feature("Component Tests - Repository")
 @Story("Auto assign checker")
 class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
+    private static final String SPACE_AND_DESCRIPTION = " description";
+
     @Autowired
     private AutoAssignChecker autoAssignChecker;
-
     @Autowired
     private DeploymentManagement deploymentManagement;
 
@@ -122,7 +121,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
         final String targetDsAIdPref = "targ";
         final List<Target> targets = testdataFactory.createTargets(25, targetDsAIdPref,
-                targetDsAIdPref.concat(" description"));
+                targetDsAIdPref.concat(SPACE_AND_DESCRIPTION));
         final int targetsCount = targets.size();
 
         // assign set A to first 10 targets
@@ -201,7 +200,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
         final String targetDsAIdPref = "targ";
         final List<Target> targets = testdataFactory.createTargets(20, targetDsAIdPref,
-                targetDsAIdPref.concat(" description"));
+                targetDsAIdPref.concat(SPACE_AND_DESCRIPTION));
 
         // Run the check
         autoAssignChecker.checkAllTargets();
@@ -236,14 +235,6 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsNotHaveDistributionSetAssignment(toAssignDs, targets.subList(1, 25));
     }
 
-    private static Stream<Arguments> confirmationOptions() {
-        return Stream.of( //
-                Arguments.of(true, true, Status.WAIT_FOR_CONFIRMATION), //
-                Arguments.of(true, false, Status.RUNNING), //
-                Arguments.of(false, true, Status.RUNNING), //
-                Arguments.of(false, false, Status.RUNNING));
-    }
-
     @Test
     @Description("Test auto assignment of an incomplete DS to filtered targets, that causes failures")
     void checkAutoAssignWithFailures() {
@@ -261,7 +252,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         // fail
         assertThatExceptionOfType(IncompleteDistributionSetException.class).isThrownBy(() -> {
             final Long filterId = targetFilterQueryManagement.create(
-                    entityFactory.targetFilterQuery().create().name("filterA").query("id==" + targetDsFIdPref + "*"))
+                            entityFactory.targetFilterQuery().create().name("filterA").query("id==" + targetDsFIdPref + "*"))
                     .getId();
             targetFilterQueryManagement
                     .updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(setF.getId()));
@@ -272,10 +263,10 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         implicitLock(setA);
 
         final List<Target> targetsF = testdataFactory.createTargets(10, targetDsFIdPref,
-                targetDsFIdPref.concat(" description"));
+                targetDsFIdPref.concat(SPACE_AND_DESCRIPTION));
 
         final List<Target> targetsA = testdataFactory.createTargets(10, targetDsAIdPref,
-                targetDsAIdPref.concat(" description"));
+                targetDsAIdPref.concat(SPACE_AND_DESCRIPTION));
 
         final int targetsCount = targetsA.size() + targetsF.size();
 
@@ -293,71 +284,6 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         // all targets of A group should have received setA
         verifyThatTargetsHaveDistributionSetAssignment(setA, targetsA, targetsCount);
 
-    }
-
-    /**
-     * @param set
-     *            the expected distribution set
-     * @param targets
-     *            the targets that should have it
-     */
-    @Step
-    private void verifyThatTargetsHaveDistributionSetAssignment(final DistributionSet set, final List<Target> targets,
-            final int count) {
-        final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
-
-        final Slice<Target> targetsAll = targetManagement.findAll(PAGE);
-        assertThat(targetsAll).as("Count of targets").hasSize(count);
-
-        for (final Target target : targetsAll) {
-            if (targetIds.contains(target.getId())) {
-                assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get())
-                        .as("assigned DS").isEqualTo(set);
-            }
-        }
-    }
-
-    @Step
-    private void verifyThatTargetsHaveDistributionSetAssignedAndActionStatus(final DistributionSet set,
-            final List<Target> targets, final Action.Status status) {
-        final List<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toList());
-        final List<Target> targetsWithAssignedDS = targetManagement.findByAssignedDistributionSet(PAGE, set.getId())
-                .getContent();
-        assertThat(targetsWithAssignedDS).isNotEmpty();
-        assertThat(targetsWithAssignedDS).allMatch(target -> targetIds.contains(target.getControllerId()));
-
-        final List<Action> actionsByDs = findActionsByDistributionSet(PAGE, set.getId())
-                .getContent();
-
-        assertThat(actionsByDs).hasSize(targets.size());
-        assertThat(actionsByDs).allMatch(action -> action.getStatus() == status);
-    }
-
-    @Step
-    private void verifyThatTargetsNotHaveDistributionSetAssignment(final DistributionSet set,
-            final List<Target> targets) {
-        final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
-
-        final Slice<Target> targetsAll = targetManagement.findAll(PAGE);
-
-        for (final Target target : targetsAll) {
-            if (targetIds.contains(target.getId())) {
-                assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId())).isEmpty();
-            }
-        }
-
-    }
-
-    @Step
-    private void verifyThatCreatedActionsAreInitiatedByCurrentUser(final TargetFilterQuery targetFilterQuery,
-            final DistributionSet distributionSet, final List<Target> targets) {
-        final Set<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toSet());
-
-        findActionsByDistributionSet(Pageable.unpaged(), distributionSet.getId()).stream()
-                .filter(a -> targetIds.contains(a.getTarget().getControllerId()))
-                .forEach(a -> assertThat(a.getInitiatedBy())
-                        .as("Action should be initiated by the user who initiated the auto assignment")
-                        .isEqualTo(targetFilterQuery.getAutoAssignInitiatedBy()));
     }
 
     @Test
@@ -387,29 +313,6 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveAssignmentActionType(ActionType.FORCED, targetsA);
         verifyThatTargetsHaveAssignmentActionType(ActionType.SOFT, targetsB);
         verifyThatTargetsHaveAssignmentActionType(ActionType.DOWNLOAD_ONLY, targetsC);
-    }
-
-    @Step
-    private List<Target> createTargetsAndAutoAssignDistSet(final String prefix, final int targetCount,
-            final DistributionSet distributionSet, final ActionType actionType) {
-
-        final List<Target> targets = testdataFactory.createTargets(targetCount, "target" + prefix,
-                prefix.concat(" description"));
-        targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("filter" + prefix).query("id==target" + prefix + "*")
-                        .autoAssignDistributionSet(distributionSet).autoAssignActionType(actionType));
-
-        return targets;
-    }
-
-    @Step
-    private void verifyThatTargetsHaveAssignmentActionType(final ActionType actionType, final List<Target> targets) {
-        final List<Action> actions = targets.stream().map(Target::getControllerId).flatMap(
-                controllerId -> deploymentManagement.findActionsByTarget(controllerId, PAGE).getContent().stream())
-                .collect(Collectors.toList());
-
-        assertThat(actions).hasSize(targets.size());
-        assertThat(actions).allMatch(action -> action.getActionType().equals(actionType));
     }
 
     @Test
@@ -495,6 +398,100 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         assertThat(actions).hasSize(compatibleTargets.size());
         final List<Long> actionTargets = actions.stream().map(a -> a.getTarget().getId()).collect(Collectors.toList());
         assertThat(actionTargets).containsExactlyInAnyOrderElementsOf(compatibleTargets);
+    }
+
+    private static Stream<Arguments> confirmationOptions() {
+        return Stream.of( //
+                Arguments.of(true, true, Status.WAIT_FOR_CONFIRMATION), //
+                Arguments.of(true, false, Status.RUNNING), //
+                Arguments.of(false, true, Status.RUNNING), //
+                Arguments.of(false, false, Status.RUNNING));
+    }
+
+    /**
+     * @param set the expected distribution set
+     * @param targets the targets that should have it
+     */
+    @Step
+    private void verifyThatTargetsHaveDistributionSetAssignment(final DistributionSet set, final List<Target> targets,
+            final int count) {
+        final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
+
+        final Slice<Target> targetsAll = targetManagement.findAll(PAGE);
+        assertThat(targetsAll).as("Count of targets").hasSize(count);
+
+        for (final Target target : targetsAll) {
+            if (targetIds.contains(target.getId())) {
+                assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get())
+                        .as("assigned DS").isEqualTo(set);
+            }
+        }
+    }
+
+    @Step
+    private void verifyThatTargetsHaveDistributionSetAssignedAndActionStatus(final DistributionSet set,
+            final List<Target> targets, final Action.Status status) {
+        final List<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toList());
+        final List<Target> targetsWithAssignedDS = targetManagement.findByAssignedDistributionSet(PAGE, set.getId())
+                .getContent();
+        assertThat(targetsWithAssignedDS).isNotEmpty();
+        assertThat(targetsWithAssignedDS).allMatch(target -> targetIds.contains(target.getControllerId()));
+
+        final List<Action> actionsByDs = findActionsByDistributionSet(PAGE, set.getId())
+                .getContent();
+
+        assertThat(actionsByDs).hasSize(targets.size());
+        assertThat(actionsByDs).allMatch(action -> action.getStatus() == status);
+    }
+
+    @Step
+    private void verifyThatTargetsNotHaveDistributionSetAssignment(final DistributionSet set,
+            final List<Target> targets) {
+        final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
+
+        final Slice<Target> targetsAll = targetManagement.findAll(PAGE);
+
+        for (final Target target : targetsAll) {
+            if (targetIds.contains(target.getId())) {
+                assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId())).isEmpty();
+            }
+        }
+
+    }
+
+    @Step
+    private void verifyThatCreatedActionsAreInitiatedByCurrentUser(final TargetFilterQuery targetFilterQuery,
+            final DistributionSet distributionSet, final List<Target> targets) {
+        final Set<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toSet());
+
+        findActionsByDistributionSet(Pageable.unpaged(), distributionSet.getId()).stream()
+                .filter(a -> targetIds.contains(a.getTarget().getControllerId()))
+                .forEach(a -> assertThat(a.getInitiatedBy())
+                        .as("Action should be initiated by the user who initiated the auto assignment")
+                        .isEqualTo(targetFilterQuery.getAutoAssignInitiatedBy()));
+    }
+
+    @Step
+    private List<Target> createTargetsAndAutoAssignDistSet(final String prefix, final int targetCount,
+            final DistributionSet distributionSet, final ActionType actionType) {
+
+        final List<Target> targets = testdataFactory.createTargets(targetCount, "target" + prefix,
+                prefix.concat(SPACE_AND_DESCRIPTION));
+        targetFilterQueryManagement.create(
+                entityFactory.targetFilterQuery().create().name("filter" + prefix).query("id==target" + prefix + "*")
+                        .autoAssignDistributionSet(distributionSet).autoAssignActionType(actionType));
+
+        return targets;
+    }
+
+    @Step
+    private void verifyThatTargetsHaveAssignmentActionType(final ActionType actionType, final List<Target> targets) {
+        final List<Action> actions = targets.stream().map(Target::getControllerId).flatMap(
+                        controllerId -> deploymentManagement.findActionsByTarget(controllerId, PAGE).getContent().stream())
+                .collect(Collectors.toList());
+
+        assertThat(actions).hasSize(targets.size());
+        assertThat(actions).allMatch(action -> action.getActionType().equals(actionType));
     }
 
     private Slice<Action> findActionsByDistributionSet(final Pageable pageable, final long distributionSetId) {

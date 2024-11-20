@@ -23,28 +23,21 @@ import org.springframework.scheduling.annotation.Scheduled;
  */
 @Slf4j
 public class AutoAssignScheduler {
-    
+
     private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.autoassign.scheduler.fixedDelay:2000}";
 
     private final SystemManagement systemManagement;
-
     private final SystemSecurityContext systemSecurityContext;
-
     private final AutoAssignExecutor autoAssignExecutor;
-
     private final LockRegistry lockRegistry;
 
     /**
      * Instantiates a new AutoAssignScheduler
-     * 
-     * @param systemManagement
-     *            to find all tenants
-     * @param systemSecurityContext
-     *            to run as system
-     * @param autoAssignExecutor
-     *            to run a check as tenant
-     * @param lockRegistry
-     *            to acquire a lock per tenant
+     *
+     * @param systemManagement to find all tenants
+     * @param systemSecurityContext to run as system
+     * @param autoAssignExecutor to run a check as tenant
+     * @param lockRegistry to acquire a lock per tenant
      */
     public AutoAssignScheduler(final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext, final AutoAssignExecutor autoAssignExecutor,
@@ -56,10 +49,8 @@ public class AutoAssignScheduler {
     }
 
     /**
-     * Scheduler method called by the spring-async mechanism. Retrieves all
-     * tenants and runs for each
-     * tenant the auto assignments defined in the target filter queries
-     * {@link SystemSecurityContext}.
+     * Scheduler method called by the spring-async mechanism. Retrieves all tenants and runs for each
+     * tenant the auto assignments defined in the target filter queries {@link SystemSecurityContext}.
      */
     @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void autoAssignScheduler() {

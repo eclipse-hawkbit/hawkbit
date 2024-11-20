@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * A singleton bean which holds the {@link EntityInterceptor} to have all
  * interceptors in spring beans.
- * 
  */
 public final class EntityInterceptorHolder {
 

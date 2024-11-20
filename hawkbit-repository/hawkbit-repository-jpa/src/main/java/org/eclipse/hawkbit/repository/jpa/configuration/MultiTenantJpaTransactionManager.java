@@ -28,7 +28,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * {@link JpaTransactionManager} that sets the
  * {@link TenantAware#getCurrentTenant()} in the eclipselink session. This has
  * to be done in eclipselink after a {@link Transaction} has been started.
- *
  */
 public class MultiTenantJpaTransactionManager extends JpaTransactionManager {
 

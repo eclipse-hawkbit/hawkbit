@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 
 /**
  * Repository constants.
- *
  */
 public final class RepositoryConstants {
 
@@ -46,7 +45,7 @@ public final class RepositoryConstants {
 
     /**
      * Maximum number of metadata entries provided to controllers.
-     * 
+     *
      * @see SoftwareModuleMetadata#isTargetVisible()
      */
     public static final int MAX_META_DATA_COUNT = 50;

@@ -19,35 +19,8 @@ import java.time.temporal.TemporalAccessor;
  * This class is a helper for converting a duration into a string and for the
  * other way. The string is in the format expected in configuration and database
  * {@link #DURATION_FORMAT}.
- *
  */
 public final class DurationHelper {
-
-    /**
-     * Duration validation utility class. Checks if the requested duration is in
-     * the defined min/max range.
-     *
-     */
-    public static final class DurationRangeValidator {
-        private final Duration min;
-        private final Duration max;
-
-        private DurationRangeValidator(final Duration min, final Duration max) {
-            this.min = min;
-            this.max = max;
-        }
-
-        /**
-         * Checks if the requested duration is in the defined min/max range.
-         * 
-         * @param duration
-         *            to checked
-         * @return <code>true</code> if in time range
-         */
-        public boolean isWithinRange(final Duration duration) {
-            return duration.compareTo(min) >= 0 && duration.compareTo(max) <= 0;
-        }
-    }
 
     /**
      * Format of the String expected in configuration file and in the database.
@@ -60,11 +33,9 @@ public final class DurationHelper {
 
     /**
      * Creates a {@link DurationRangeValidator}.
-     * 
-     * @param min
-     *            imum of range.
-     * @param max
-     *            imum of range.
+     *
+     * @param min imum of range.
+     * @param max imum of range.
      * @return {@link DurationRangeValidator} range.
      */
     public static DurationRangeValidator durationRangeValidator(final Duration min, final Duration max) {
@@ -73,9 +44,8 @@ public final class DurationHelper {
 
     /**
      * Converts a Duration into a formatted String
-     * 
-     * @param duration
-     *            duration, which will be converted into a formatted String
+     *
+     * @param duration duration, which will be converted into a formatted String
      * @return String in the duration format, specified at
      *         {@link #DURATION_FORMAT}
      */
@@ -89,12 +59,10 @@ public final class DurationHelper {
 
     /**
      * Converts a formatted String into a Duration object.
-     * 
-     * @param formattedDuration
-     *            String in {@link #DURATION_FORMAT}
+     *
+     * @param formattedDuration String in {@link #DURATION_FORMAT}
      * @return duration
-     * @throws DateTimeParseException
-     *             when String is in wrong format
+     * @throws DateTimeParseException when String is in wrong format
      */
     public static Duration formattedStringToDuration(final String formattedDuration) {
         if (formattedDuration == null) {
@@ -107,17 +75,39 @@ public final class DurationHelper {
 
     /**
      * converts values of time constants to a Duration object..
-     * 
-     * @param hours
-     *            count of hours
-     * @param minutes
-     *            count of minutes
-     * @param seconds
-     *            count of seconds
+     *
+     * @param hours count of hours
+     * @param minutes count of minutes
+     * @param seconds count of seconds
      * @return duration
      */
     public static Duration getDurationByTimeValues(final long hours, final long minutes, final long seconds) {
         return Duration.ofHours(hours).plusMinutes(minutes).plusSeconds(seconds);
+    }
+
+    /**
+     * Duration validation utility class. Checks if the requested duration is in
+     * the defined min/max range.
+     */
+    public static final class DurationRangeValidator {
+
+        private final Duration min;
+        private final Duration max;
+
+        private DurationRangeValidator(final Duration min, final Duration max) {
+            this.min = min;
+            this.max = max;
+        }
+
+        /**
+         * Checks if the requested duration is in the defined min/max range.
+         *
+         * @param duration to checked
+         * @return <code>true</code> if in time range
+         */
+        public boolean isWithinRange(final Duration duration) {
+            return duration.compareTo(min) >= 0 && duration.compareTo(max) <= 0;
+        }
     }
 
 }

@@ -9,10 +9,10 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.util.Collection;
+
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.Collection;
 
 /**
  * Holds distribution set filter parameters.

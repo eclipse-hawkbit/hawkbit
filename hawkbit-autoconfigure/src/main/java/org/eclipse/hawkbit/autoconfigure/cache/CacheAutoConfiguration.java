@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.autoconfigure.cache;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -22,23 +23,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-
 /**
- * A configuration for configuring the spring {@link CacheManager} for specific
- * multi-tenancy caching. The caches between tenants must not interfere each
- * other.
+ * A configuration for configuring the spring {@link CacheManager} for specific multi-tenancy caching. The caches between
+ * tenants must not interfere each other.
  *
- * This is done by providing a special {@link TenantCacheResolver} which
- * generates a cache name included the current tenant.
+ * This is done by providing a special {@link TenancyCacheManager} which generates a cache name included the current tenant.
  */
 @Configuration
 @EnableCaching
 public class CacheAutoConfiguration {
 
     /**
-     * @return the default cache manager bean if none other cache manager is
-     *         existing.
+     * @return the default cache manager bean if none other cache manager is existing.
      */
     @Bean
     @ConditionalOnMissingBean

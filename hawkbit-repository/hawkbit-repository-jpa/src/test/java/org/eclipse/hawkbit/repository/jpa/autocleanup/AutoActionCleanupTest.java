@@ -17,6 +17,9 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -25,13 +28,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 /**
  * Test class for {@link AutoActionCleanup}.
- *
  */
 @Feature("Component Tests - Repository")
 @Story("Action cleanup handler")

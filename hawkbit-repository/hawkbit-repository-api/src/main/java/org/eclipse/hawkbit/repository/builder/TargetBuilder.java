@@ -15,13 +15,11 @@ import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * Builder for {@link Target}.
- *
  */
 public interface TargetBuilder {
 
     /**
-     * @param controllerId
-     *            of the updatable entity
+     * @param controllerId of the updatable entity
      * @return builder instance
      */
     TargetUpdate update(@NotEmpty String controllerId);

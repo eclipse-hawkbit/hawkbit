@@ -18,5 +18,4 @@ public class GenericTargetFilterQueryUpdate extends AbstractTargetFilterQueryUpd
     public GenericTargetFilterQueryUpdate(final Long id) {
         super.id = id;
     }
-
 }

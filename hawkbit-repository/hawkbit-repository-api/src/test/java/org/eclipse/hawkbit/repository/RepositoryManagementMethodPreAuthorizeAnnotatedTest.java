@@ -20,12 +20,11 @@ import java.util.Set;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
-import org.junit.jupiter.api.Test;
-import org.springframework.security.access.prepost.PreAuthorize;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @Feature("Unit Tests - Repository")
 @Story("Security Test")
@@ -62,9 +61,8 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
      * {@link PreAuthorize} annotation for security. Inherited methods are not
      * checked. The following methods are excluded due inherited from
      * {@link Object}, like equals() or toString().
-     * 
-     * @param clazz
-     *            the class to retrieve the public declared methods
+     *
+     * @param clazz the class to retrieve the public declared methods
      */
     private static void assertDeclaredMethodsContainsPreAuthorizeAnnotations(final Class<?> clazz) {
         final Method[] declaredMethods = clazz.getDeclaredMethods();

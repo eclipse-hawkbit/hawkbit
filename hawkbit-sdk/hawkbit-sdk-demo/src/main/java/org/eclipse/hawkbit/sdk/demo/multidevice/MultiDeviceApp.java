@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.sdk.demo.multidevice;
 
+import java.util.Optional;
+import java.util.concurrent.Executors;
+
 import feign.Client;
 import feign.Contract;
 import feign.codec.Decoder;
@@ -28,9 +31,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-
-import java.util.Optional;
-import java.util.concurrent.Executors;
 
 /**
  * Abstract class representing DDI device connecting directly to hawkVit.
@@ -52,7 +52,7 @@ public class MultiDeviceApp {
 
     @Bean
     DdiTenant ddiTenant(final Tenant defaultTenant,
-                        final HawkbitClient hawkbitClient) {
+            final HawkbitClient hawkbitClient) {
         return new DdiTenant(defaultTenant, hawkbitClient);
     }
 
@@ -86,7 +86,7 @@ public class MultiDeviceApp {
         public void startOne(@ShellOption("--id") final String controllerId) {
             final String securityTargetToken;
             if (setup) {
-                securityTargetToken = mgmtApi.setupTargetToken(controllerId,null);
+                securityTargetToken = mgmtApi.setupTargetToken(controllerId, null);
             } else {
                 securityTargetToken = null;
             }
@@ -96,19 +96,19 @@ public class MultiDeviceApp {
             ddiTenant.getController(controllerId).ifPresentOrElse(
                     ddiController -> ddiController.start(Executors.newSingleThreadScheduledExecutor()),
                     () -> ddiTenant.createController(Controller.builder()
-                                .controllerId(controllerId)
-                                .securityToken(securityTargetToken)
-                                .build(),updateHandler)
+                                    .controllerId(controllerId)
+                                    .securityToken(securityTargetToken)
+                                    .build(), updateHandler)
                             .setOverridePollMillis(10_000)
                             .start(Executors.newSingleThreadScheduledExecutor())
-                    );
+            );
         }
 
         @ShellMethod(key = "stop-one")
         public void stopOne(@ShellOption("--id") final String controllerId) {
             ddiTenant.getController(controllerId).ifPresentOrElse(
                     DdiController::stop,
-                    () -> log.error("Controller with id " + controllerId + " not found!"));
+                    () -> log.error("Controller with id {} not found!", controllerId));
 
         }
 

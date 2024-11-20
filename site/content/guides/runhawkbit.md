@@ -4,12 +4,14 @@ parent: Guides
 weight: 31
 ---
 
-In this guide we describe how to run a full featured hawkBit setup based on a production ready infrastructure. It is based on the hawkBit example modules and update server.
+In this guide we describe how to run a full featured hawkBit setup based on a production ready infrastructure. It is
+based on the hawkBit example modules and update server.
 
 <!--more-->
 
 {{% note %}}
-The update server can in fact be run stand alone. However, only with an embedded H2, no Device Management Federation API and no artifact storage.
+The update server can in fact be run stand alone. However, only with an embedded H2, no Device Management Federation API
+and no artifact storage.
 {{% /note %}}
 
 ## System Architecture
@@ -30,7 +32,8 @@ This guide describes a target architecture that is more like one that you will e
 
 ## Adapt hawkBit Update Server and Device Simulator to your environment.
 
-As mentioned you can create your own application with hawkBit inside or adapt the existing example app. The second option will be shown here.
+As mentioned you can create your own application with hawkBit inside or adapt the existing example app. The second
+option will be shown here.
 
 ### Set MariaDB dependency to compile in the [update server POM](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-runtime/hawkbit-update-server/pom.xml)
 
@@ -44,7 +47,8 @@ As mentioned you can create your own application with hawkBit inside or adapt th
 
 ### Configure MariaDB/MySQL connection settings.
 
-For this you can either edit the existing _application.properties_ or create a [new profile](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-external-config-profile-specific-properties).
+For this you can either edit the existing _application.properties_ or create
+a [new profile](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-external-config-profile-specific-properties).
 
 ```properties
 spring.jpa.database=MYSQL
@@ -54,12 +58,15 @@ spring.datasource.password=YOUR_PWD
 spring.datasource.driverClassName=org.mariadb.jdbc.Driver
 ```
 
-Note: On Ubuntu 18.04 with MariaDB 10.1 installed from the default repository via apt install _COLLATE option_ of database have to be changed manually to "latin1".
-For recent versions of MariaDB running on Ubuntu this is not required (cf. [system variables](https://mariadb.com/kb/en/differences-in-mariadb-in-debian-and-ubuntu), [issue](https://github.com/eclipse-hawkbit/hawkbit/issues/963))
+Note: On Ubuntu 18.04 with MariaDB 10.1 installed from the default repository via apt install _COLLATE option_ of
+database have to be changed manually to "latin1".
+For recent versions of MariaDB running on Ubuntu this is not required (
+cf. [system variables](https://mariadb.com/kb/en/differences-in-mariadb-in-debian-and-ubuntu), [issue](https://github.com/eclipse-hawkbit/hawkbit/issues/963))
 
 ### Configure RabbitMQ connection settings for update server and device simulator (optional).
 
-We provide already defaults that should work with a standard Rabbit installation. Otherwise configure the following in the `application.properties` of the two services:
+We provide already defaults that should work with a standard Rabbit installation. Otherwise configure the following in
+the `application.properties` of the two services:
 
 ```properties
 spring.rabbitmq.username=guest
@@ -93,9 +100,11 @@ see [update server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkb
 
 ### Compile & Run example scenario [creation script](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator) (optional)
 
-This has to be done before the device simulator is started. hawkBit creates the mandatory tenant metadata with first login into either Management API (which is done by this client).
+This has to be done before the device simulator is started. hawkBit creates the mandatory tenant metadata with first
+login into either Management API (which is done by this client).
 
-However, this is not done by _DMF_ which is in fact used by the device simulator, i.e. without calling _Management API_ first hawkBit would drop all _DMF_ messages as the tenant is unknown.
+However, this is not done by _DMF_ which is in fact used by the device simulator, i.e. without calling _Management API_
+first hawkBit would drop all _DMF_ messages as the tenant is unknown.
 
 ### Compile & Run device simulator (optional)
 

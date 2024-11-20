@@ -13,6 +13,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
@@ -24,6 +27,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -38,27 +42,22 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.CollectionUtils;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 @Feature("Component Tests - Repository")
 @Story("Rollout Management")
 class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
-    @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
-            + "of Optional not present.")
+    @Description("Verifies that management get access reacts as specified on calls for non existing entities by means " +
+            "of Optional not present.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(rolloutGroupManagement.get(NOT_EXIST_IDL)).isNotPresent();
         assertThat(rolloutGroupManagement.getWithDetailedStatus(NOT_EXIST_IDL)).isNotPresent();
-
     }
 
     @Test
-    @Description("Verifies that management queries react as specfied on calls for non existing entities "
-            + " by means of throwing EntityNotFoundException.")
+    @Description("Verifies that management queries react as specified on calls for non existing entities " +
+            " by means of throwing EntityNotFoundException.")
     @ExpectEvents({ @Expect(type = RolloutDeletedEvent.class, count = 0),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 5),
@@ -159,40 +158,9 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
                 .hasSize((int) rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroup.getId()));
 
         targetsWithActionStatus = rolloutGroupManagement.findAllTargetsOfRolloutGroupWithActionStatus(
-                PageRequest.of(0, 500, Sort.by(Direction.DESC, "lastActionStatusCode")), rolloutGroup.getId())
+                        PageRequest.of(0, 500, Sort.by(Direction.DESC, "lastActionStatusCode")), rolloutGroup.getId())
                 .getContent();
         assertSortedListOfActionStatus(targetsWithActionStatus, target24, 24, target0, 0);
-    }
-
-    private void assertSortedListOfActionStatus(final List<TargetWithActionStatus> targetsWithActionStatus,
-            final Target first, final Integer firstStatusCode, final Target last, final Integer lastStatusCode) {
-        assertTargetAndActionStatusCode(CollectionUtils.firstElement(targetsWithActionStatus), first, firstStatusCode);
-        assertTargetAndActionStatusCode(CollectionUtils.lastElement(targetsWithActionStatus), last, lastStatusCode);
-    }
-
-    private void assertTargetAndActionStatusCode(final TargetWithActionStatus targetWithActionStatus,
-            final Target target, final Integer actionStatusCode) {
-        assertThat(targetWithActionStatus.getTarget().getControllerId()).isEqualTo(target.getControllerId());
-        assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
-    }
-
-    private void assertTargetNotNullAndActionStatusNullAndActionStatusCode(
-            final List<TargetWithActionStatus> targetsWithActionStatus, final Integer actionStatusCode) {
-        targetsWithActionStatus.forEach(targetWithActionStatus -> {
-            assertThat(targetWithActionStatus.getTarget().getControllerId()).isNotNull();
-            assertThat(targetWithActionStatus.getStatus()).isNull();
-            assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
-        });
-    }
-
-    private void assertTargetNotNullAndActionStatusAndActionStatusCode(
-            final List<TargetWithActionStatus> targetsWithActionStatus, final Status actionStatus,
-            final Integer actionStatusCode) {
-        targetsWithActionStatus.forEach(targetWithActionStatus -> {
-            assertThat(targetWithActionStatus.getTarget().getControllerId()).isNotNull();
-            assertThat(targetWithActionStatus.getStatus()).isEqualTo(actionStatus);
-            assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
-        });
     }
 
     @Test
@@ -249,6 +217,51 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
                 Status.RUNNING, 100);
     }
 
+    @Test
+    @Description("Tests the rollout group status mapping.")
+    void testRolloutGroupStatusConvert() {
+        final long id = rolloutGroupRepository.findByRolloutId(
+                        testdataFactory.createAndStartRollout(1, 0, 1, "100", "80").getId(), PAGE).getContent()
+                .get(0).getId();
+        for (final RolloutGroup.RolloutGroupStatus status : RolloutGroup.RolloutGroupStatus.values()) {
+            final JpaRolloutGroup rolloutGroup = ((JpaRolloutGroup) rolloutGroupManagement.get(id).orElseThrow());
+            rolloutGroup.setStatus(status);
+            rolloutGroupRepository.save(rolloutGroup);
+            assertThat(rolloutGroupManagement.get(id).orElseThrow().getStatus()).isEqualTo(status);
+        }
+    }
+
+    private void assertSortedListOfActionStatus(final List<TargetWithActionStatus> targetsWithActionStatus,
+            final Target first, final Integer firstStatusCode, final Target last, final Integer lastStatusCode) {
+        assertTargetAndActionStatusCode(CollectionUtils.firstElement(targetsWithActionStatus), first, firstStatusCode);
+        assertTargetAndActionStatusCode(CollectionUtils.lastElement(targetsWithActionStatus), last, lastStatusCode);
+    }
+
+    private void assertTargetAndActionStatusCode(final TargetWithActionStatus targetWithActionStatus,
+            final Target target, final Integer actionStatusCode) {
+        assertThat(targetWithActionStatus.getTarget().getControllerId()).isEqualTo(target.getControllerId());
+        assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
+    }
+
+    private void assertTargetNotNullAndActionStatusNullAndActionStatusCode(
+            final List<TargetWithActionStatus> targetsWithActionStatus, final Integer actionStatusCode) {
+        targetsWithActionStatus.forEach(targetWithActionStatus -> {
+            assertThat(targetWithActionStatus.getTarget().getControllerId()).isNotNull();
+            assertThat(targetWithActionStatus.getStatus()).isNull();
+            assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
+        });
+    }
+
+    private void assertTargetNotNullAndActionStatusAndActionStatusCode(
+            final List<TargetWithActionStatus> targetsWithActionStatus, final Status actionStatus,
+            final Integer actionStatusCode) {
+        targetsWithActionStatus.forEach(targetWithActionStatus -> {
+            assertThat(targetWithActionStatus.getTarget().getControllerId()).isNotNull();
+            assertThat(targetWithActionStatus.getStatus()).isEqualTo(actionStatus);
+            assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
+        });
+    }
+
     private void assertThatListIsSortedByTargetName(final List<TargetWithActionStatus> targets,
             final Direction sortDirection) {
         String previousName = null;
@@ -268,5 +281,4 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
     private Target reloadTarget(final Target targetCancelled) {
         return targetManagement.get(targetCancelled.getId()).orElseThrow();
     }
-
 }

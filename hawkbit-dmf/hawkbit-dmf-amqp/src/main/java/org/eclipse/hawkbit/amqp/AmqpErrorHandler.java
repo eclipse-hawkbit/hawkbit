@@ -10,8 +10,7 @@
 package org.eclipse.hawkbit.amqp;
 
 /**
- * Interface declaration of {@link AmqpErrorHandler} that handles errors based on the
- * types of exception.
+ * Interface declaration of {@link AmqpErrorHandler} that handles errors based on the types of exception.
  */
 @FunctionalInterface
 public interface AmqpErrorHandler {
@@ -19,10 +18,8 @@ public interface AmqpErrorHandler {
     /**
      * Handles the error based on the type of exception
      *
-     * @param throwable
-     *            the throwable
-     * @param chain
-     *            an {@link AmqpErrorHandlerChain}
+     * @param throwable the throwable
+     * @param chain an {@link AmqpErrorHandlerChain}
      */
     void doHandle(final Throwable throwable, final AmqpErrorHandlerChain chain);
 }

@@ -13,9 +13,9 @@ import java.io.Serializable;
 
 /**
  * Meta data for entities, a (key/value) store.
- *
  */
 public interface MetaData extends Serializable {
+
     /**
      * Maximum length of metadata key.
      */

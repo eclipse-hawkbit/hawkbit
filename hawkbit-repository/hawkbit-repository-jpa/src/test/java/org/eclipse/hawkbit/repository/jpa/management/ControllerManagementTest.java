@@ -9,11 +9,37 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
+import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
+import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
+import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
+import static org.eclipse.hawkbit.repository.test.util.TestdataFactory.DEFAULT_CONTROLLER_ID;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.ByteArrayInputStream;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import jakarta.validation.ConstraintViolationException;
+
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
-import jakarta.validation.ConstraintViolationException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.assertj.core.api.Assertions;
@@ -66,37 +92,215 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 
-import java.io.ByteArrayInputStream;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE;
-import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS;
-import static org.eclipse.hawkbit.repository.jpa.configuration.Constants.TX_RT_MAX;
-import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
-import static org.eclipse.hawkbit.repository.test.util.TestdataFactory.DEFAULT_CONTROLLER_ID;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @Feature("Component Tests - Repository")
 @Story("Controller Management")
 class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private RepositoryProperties repositoryProperties;
+
+    @Test
+    @Description("Ensures that target attribute update fails if quota hits.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2) })
+    public void updateTargetAttributesFailsIfTooManyEntries() throws Exception {
+        final String controllerId = "test123";
+        final int allowedAttributes = quotaManagement.getMaxAttributeEntriesPerTarget();
+        testdataFactory.createTarget(controllerId);
+
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> SecurityContextSwitch
+                .runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+                    writeAttributes(controllerId, allowedAttributes + 1, "key", "value");
+                    return null;
+                })).withMessageContaining("" + allowedAttributes);
+
+        // verify that no attributes have been written
+        assertThat(targetManagement.getControllerAttributes(controllerId)).isEmpty();
+
+        // Write allowed number of attributes twice with same key should result
+        // in update but work
+        SecurityContextSwitch.runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+            writeAttributes(controllerId, allowedAttributes, "key", "value1");
+            writeAttributes(controllerId, allowedAttributes, "key", "value2");
+            return null;
+        });
+        assertThat(targetManagement.getControllerAttributes(controllerId)).hasSize(10);
+
+        // Now rite one more
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> SecurityContextSwitch
+                .runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+                    writeAttributes(controllerId, 1, "additional", "value1");
+                    return null;
+                })).withMessageContaining("" + allowedAttributes);
+        assertThat(targetManagement.getControllerAttributes(controllerId)).hasSize(10);
+
+    }
+
+    @Test
+    @Description("Checks if invalid values of attribute-key and attribute-value are handled correctly")
+    public void updateTargetAttributesFailsForInvalidAttributes() {
+        final String controllerId = "targetId123";
+        testdataFactory.createTarget(controllerId);
+
+        assertThatExceptionOfType(InvalidTargetAttributeException.class)
+                .as("Attribute with key too long should not be created")
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(TargetTestData.ATTRIBUTE_KEY_TOO_LONG, TargetTestData.ATTRIBUTE_VALUE_VALID), null));
+
+        assertThatExceptionOfType(InvalidTargetAttributeException.class)
+                .as("Attribute with key too long and value too long should not be created")
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(TargetTestData.ATTRIBUTE_KEY_TOO_LONG, TargetTestData.ATTRIBUTE_VALUE_TOO_LONG), null));
+
+        assertThatExceptionOfType(InvalidTargetAttributeException.class)
+                .as("Attribute with value too long should not be created")
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
+                        Collections.singletonMap(TargetTestData.ATTRIBUTE_KEY_VALID, TargetTestData.ATTRIBUTE_VALUE_TOO_LONG), null));
+
+        assertThatExceptionOfType(InvalidTargetAttributeException.class)
+                .as("Attribute with key NULL should not be created").isThrownBy(() -> controllerManagement
+                        .updateControllerAttributes(controllerId,
+                                Collections.singletonMap(null, TargetTestData.ATTRIBUTE_VALUE_VALID), null));
+    }
+
+    @Test
+    @Description("Controller providing status entries fails if providing more than permitted by quota.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
+    public void controllerProvidesIntermediateFeedbackFailsIfQuotaHit() {
+        final int allowStatusEntries = 10;
+        final Long actionId = createTargetAndAssignDs();
+
+        // Fails as one entry is already in there from the assignment
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> SecurityContextSwitch
+                .runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+                    writeStatus(actionId, allowStatusEntries);
+                    return null;
+                })).withMessageContaining("" + allowStatusEntries);
+
+    }
+
+    @Test
+    @Description("Test to verify the storage and retrieval of action history.")
+    public void findMessagesByActionStatusId() {
+        final DistributionSet testDs = testdataFactory.createDistributionSet("1");
+        final List<Target> testTarget = testdataFactory.createTargets(1);
+
+        final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
+
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
+                .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis())
+                .messages(List.of("proceeding message 1")));
+
+        final long createTime = System.currentTimeMillis();
+        waitNextMillis();
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
+                .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis())
+                .messages(List.of("proceeding message 2")));
+
+        final List<String> messages = controllerManagement.getActionHistoryMessages(actionId, 2);
+
+        assertThat(deploymentManagement.findActionStatusByAction(PAGE, actionId).getTotalElements())
+                .as("Two action-states in total").isEqualTo(3L);
+        assertThat(messages.get(0)).as("Message of action-status").isEqualTo("proceeding message 2");
+        assertThat(messages.get(1)).as("Message of action-status").isEqualTo("proceeding message 1");
+    }
+
+    @Test
+    @Description("Verifies that the quota specifying the maximum number of status entries per action is enforced.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6), // implicit lock
+            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2) })
+    public void addActionStatusUpdatesUntilQuotaIsExceeded() {
+
+        // any distribution set assignment causes 1 status entity to be created
+        final int maxStatusEntries = quotaManagement.getMaxStatusEntriesPerAction() - 1;
+
+        // test for informational status
+        final Long actionId1 = getFirstAssignedActionId(assignDistributionSet(
+                testdataFactory.createDistributionSet("ds1"), testdataFactory.createTargets(1, "t1")));
+        assertThat(actionId1).isNotNull();
+        for (int i = 0; i < maxStatusEntries; ++i) {
+            controllerManagement.addInformationalActionStatus(entityFactory.actionStatus().create(actionId1)
+                    .status(Status.WARNING).message("Msg " + i).occurredAt(System.currentTimeMillis()));
+        }
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> controllerManagement
+                .addInformationalActionStatus(entityFactory.actionStatus().create(actionId1).status(Status.WARNING)));
+
+        // test for update status (and mixed case)
+        final Long actionId2 = getFirstAssignedActionId(assignDistributionSet(
+                testdataFactory.createDistributionSet("ds2"), testdataFactory.createTargets(1, "t2")));
+        assertThat(actionId2).isNotEqualTo(actionId1);
+        for (int i = 0; i < maxStatusEntries; ++i) {
+            controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId2)
+                    .status(Status.WARNING).message("Msg " + i).occurredAt(System.currentTimeMillis()));
+        }
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> controllerManagement
+                .addInformationalActionStatus(entityFactory.actionStatus().create(actionId2).status(Status.WARNING)));
+
+    }
+
+    @Test
+    @Description("Verifies that the quota specifying the maximum number of messages per action status is enforced.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
+    public void createActionStatusWithTooManyMessages() {
+
+        final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
+
+        final Long actionId = getFirstAssignedActionId(
+                assignDistributionSet(testdataFactory.createDistributionSet("ds1"), testdataFactory.createTargets(1)));
+        assertThat(actionId).isNotNull();
+
+        final List<String> messages = new ArrayList<>();
+        IntStream.range(0, maxMessages).forEach(i -> messages.add(i, "msg"));
+
+        assertThat(controllerManagement.addInformationalActionStatus(
+                entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING))).isNotNull();
+
+        messages.add("msg");
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(
+                        entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING)));
+
+    }
+
+    @Test
+    @Description("Verifies that a DOWNLOAD_ONLY action is not marked complete when the controller reports DOWNLOAD")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
+    public void controllerReportsDownloadForDownloadOnlyAction() {
+        testdataFactory.createTarget();
+        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
+        assertThat(actionId).isNotNull();
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOAD));
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
+                Action.Status.DOWNLOAD, true);
+
+        assertThat(actionStatusRepository.count()).isEqualTo(2);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(2);
+        assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isEqualTo(true);
+    }
 
     @Test
     @Description("Verifies that management get access react as specified on calls for non existing entities by means "
@@ -138,7 +342,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.actionStatus().create(NOT_EXIST_IDL).status(Action.Status.FINISHED)), "Action");
 
         verifyThrownExceptionBy(() -> controllerManagement
-                .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), NOT_EXIST_IDL),
+                        .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), NOT_EXIST_IDL),
                 "SoftwareModule");
 
         verifyThrownExceptionBy(
@@ -378,117 +582,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(8);
     }
 
-    @Step
-    private Long createTargetAndAssignDs() {
-        final Long dsId = testdataFactory.createDistributionSet().getId();
-        testdataFactory.createTarget();
-        assignDistributionSet(dsId, DEFAULT_CONTROLLER_ID);
-        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.PENDING);
-
-        return deploymentManagement.findActiveActionsByTarget(PAGE, DEFAULT_CONTROLLER_ID).getContent().get(0).getId();
-    }
-
-    @Step
-    private Long createAndAssignDsAsDownloadOnly(final String dsName, final String defaultControllerId) {
-        final Long dsId = testdataFactory.createDistributionSet(dsName).getId();
-        assignDistributionSet(dsId, defaultControllerId, DOWNLOAD_ONLY);
-        assertThat(targetManagement.getByControllerID(defaultControllerId).get().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.PENDING);
-
-        final Long id = deploymentManagement.findActiveActionsByTarget(PAGE, defaultControllerId).getContent().get(0)
-                .getId();
-        assertThat(id).isNotNull();
-        return id;
-    }
-
-    @Step
-    private Long assignDs(final Long dsId, final String defaultControllerId, final Action.ActionType actionType) {
-        assignDistributionSet(dsId, defaultControllerId, actionType);
-        assertThat(targetManagement.getByControllerID(defaultControllerId).get().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.PENDING);
-
-        final Long id = deploymentManagement.findActiveActionsByTarget(PAGE, defaultControllerId).getContent().get(0)
-                .getId();
-        assertThat(id).isNotNull();
-        return id;
-    }
-
-    @Step
-    private void simulateIntermediateStatusOnCancellation(final Long actionId) {
-        controllerManagement
-                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RUNNING));
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
-                Action.Status.RUNNING, true);
-
-        controllerManagement
-                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOAD));
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
-                Action.Status.DOWNLOAD, true);
-
-        controllerManagement
-                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOADED));
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
-                Action.Status.DOWNLOADED, true);
-
-        controllerManagement
-                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RETRIEVED));
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
-                Action.Status.RETRIEVED, true);
-
-        controllerManagement
-                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.WARNING));
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
-                Action.Status.WARNING, true);
-    }
-
-    @Step
-    private void simulateIntermediateStatusOnUpdate(final Long actionId) {
-        addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING);
-
-        addUpdateActionStatusAndAssert(actionId, Action.Status.DOWNLOAD);
-
-        addUpdateActionStatusAndAssert(actionId, Action.Status.DOWNLOADED);
-
-        addUpdateActionStatusAndAssert(actionId, Action.Status.RETRIEVED);
-
-        addUpdateActionStatusAndAssert(actionId, Action.Status.WARNING);
-    }
-
-    private void addUpdateActionStatusAndAssert(final Long actionId, final Action.Status actionStatus) {
-        addUpdateActionStatusAndAssert(actionId, actionStatus, null);
-    }
-
-    private void addUpdateActionStatusAndAssert(final Long actionId, final Action.Status actionStatus,
-            final Integer code) {
-        final ActionStatusCreate status = entityFactory.actionStatus().create(actionId).status(actionStatus);
-        if (code != null) {
-            status.code(code.intValue());
-        }
-        controllerManagement
-                .addUpdateActionStatus(status);
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
-                actionStatus, true);
-    }
-
-    private void assertActionStatus(final Long actionId, final String controllerId,
-            final TargetUpdateStatus expectedTargetUpdateStatus, final Action.Status expectedActionActionStatus,
-            final Action.Status expectedActionStatus, final boolean actionActive) {
-        final TargetUpdateStatus targetStatus = targetManagement.getByControllerID(controllerId).get()
-                .getUpdateStatus();
-        assertThat(targetStatus).isEqualTo(expectedTargetUpdateStatus);
-        final Action action = deploymentManagement.findAction(actionId).get();
-        assertThat(action.getStatus()).isEqualTo(expectedActionActionStatus);
-        assertThat(action.isActive()).isEqualTo(actionActive);
-        final List<ActionStatus> actionStatusList = controllerManagement.findActionStatusByAction(PAGE, actionId)
-                .getContent();
-        assertThat(actionStatusList.get(actionStatusList.size() - 1).getStatus()).isEqualTo(expectedActionStatus);
-        if (actionActive) {
-            assertThat(controllerManagement.findActiveActionWithHighestWeight(controllerId).get().getId())
-                    .isEqualTo(actionId);
-        }
-    }
-
     @Test
     @Description("Verifies that assignment verification works based on SHA1 hash. By design it is not important which artifact "
             + "is actually used for the check as long as they have an identical binary, i.e. same SHA1 hash. ")
@@ -516,14 +609,14 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(
                 controllerManagement.hasTargetArtifactAssigned(savedTarget.getControllerId(), artifact.getSha1Hash()))
-                        .isFalse();
+                .isFalse();
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
         assertThat(
                 controllerManagement.hasTargetArtifactAssigned(savedTarget.getControllerId(), artifact.getSha1Hash()))
-                        .isTrue();
+                .isTrue();
         assertThat(
                 controllerManagement.hasTargetArtifactAssigned(savedTarget.getControllerId(), artifact2.getSha1Hash()))
-                        .isTrue();
+                .isTrue();
     }
 
     @Test
@@ -577,11 +670,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetRepository.count()).as("Only 1 target should be registred").isEqualTo(1L);
     }
 
-    private void createTargetType(String targetTypeName) {
-        systemSecurityContext.runAsSystem(() ->
-                targetTypeManagement.create(entityFactory.targetType().create().name(targetTypeName)));
-    }
-
     @Test
     @Description("Register a controller which does not exist with existing target type and update its target type to non existing one")
     @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
@@ -591,9 +679,9 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     void findOrRegisterTargetIfItDoesNotExistWithExistingTypeAndUpdateToNonExistingType() {
         createTargetType("knownTargetTypeName");
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST,
-                null,"knownTargetTypeName");
+                null, "knownTargetTypeName");
         final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST,
-                null,"unknownTargetTypeName");
+                null, "unknownTargetTypeName");
         assertThat(target.getId()).as("Target should be the same").isEqualTo(sameTarget.getId());
         assertThat(sameTarget.getTargetType().getName()).as("Target type should be unchanged")
                 .isEqualTo("knownTargetTypeName");
@@ -995,39 +1083,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetVerify.getLastModifiedAt()).isEqualTo(target.getLastModifiedAt());
     }
 
-    @Step
-    private void addAttributeAndVerify(final String controllerId) {
-        final Map<String, String> testData = new HashMap<>(1);
-        testData.put("test1", "testdata1");
-        controllerManagement.updateControllerAttributes(controllerId, testData, null);
-
-        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
-    }
-
-    @Step
-    private void addSecondAttributeAndVerify(final String controllerId) {
-        final Map<String, String> testData = new HashMap<>(2);
-        testData.put("test2", "testdata20");
-        controllerManagement.updateControllerAttributes(controllerId, testData, null);
-
-        testData.put("test1", "testdata1");
-        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
-    }
-
-    @Step
-    private void updateAttributeAndVerify(final String controllerId) {
-        final Map<String, String> testData = new HashMap<>(2);
-        testData.put("test1", "testdata12");
-
-        controllerManagement.updateControllerAttributes(controllerId, testData, null);
-
-        testData.put("test2", "testdata20");
-        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
-    }
-
     @Test
     @Description("Ensures that target attributes can be updated using different update modes.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -1049,300 +1104,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         // update mode REMOVE
         updateTargetAttributesWithUpdateModeRemove(controllerId);
 
-    }
-
-    @Step
-    private void updateTargetAttributesWithUpdateModeRemove(final String controllerId) {
-
-        final int previousSize = targetManagement.getControllerAttributes(controllerId).size();
-
-        // update the attributes using update mode REMOVE
-        final Map<String, String> removeAttributes = new HashMap<>();
-        removeAttributes.put("k1", "foo");
-        removeAttributes.put("k3", "bar");
-        controllerManagement.updateControllerAttributes(controllerId, removeAttributes, UpdateMode.REMOVE);
-
-        // verify attribute removal
-        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
-        assertThat(updatedAttributes.size()).isEqualTo(previousSize - 2);
-        assertThat(updatedAttributes).doesNotContainKeys("k1", "k3");
-
-    }
-
-    @Step
-    private void updateTargetAttributesWithUpdateModeMerge(final String controllerId) {
-        // get the current attributes
-        final HashMap<String, String> attributes = new HashMap<>(
-                targetManagement.getControllerAttributes(controllerId));
-
-        // update the attributes using update mode MERGE
-        final Map<String, String> mergeAttributes = new HashMap<>();
-        mergeAttributes.put("k1", "v1_modified_again");
-        mergeAttributes.put("k4", "v4");
-        controllerManagement.updateControllerAttributes(controllerId, mergeAttributes, UpdateMode.MERGE);
-
-        // verify attribute merge
-        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
-        assertThat(updatedAttributes.size()).isEqualTo(4);
-        assertThat(updatedAttributes).containsAllEntriesOf(mergeAttributes);
-        assertThat(updatedAttributes.get("k1")).isEqualTo("v1_modified_again");
-        attributes.keySet().forEach(assertThat(updatedAttributes)::containsKey);
-    }
-
-    @Step
-    private void updateTargetAttributesWithUpdateModeReplace(final String controllerId) {
-
-        // get the current attributes
-        final HashMap<String, String> attributes = new HashMap<>(
-                targetManagement.getControllerAttributes(controllerId));
-
-        // update the attributes using update mode REPLACE
-        final Map<String, String> replacementAttributes = new HashMap<>();
-        replacementAttributes.put("k1", "v1_modified");
-        replacementAttributes.put("k2", "v2");
-        replacementAttributes.put("k3", "v3");
-        controllerManagement.updateControllerAttributes(controllerId, replacementAttributes, UpdateMode.REPLACE);
-
-        // verify attribute replacement
-        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
-        assertThat(updatedAttributes.size()).isEqualTo(replacementAttributes.size());
-        assertThat(updatedAttributes).containsAllEntriesOf(replacementAttributes);
-        assertThat(updatedAttributes.get("k1")).isEqualTo("v1_modified");
-        attributes.entrySet().forEach(assertThat(updatedAttributes)::doesNotContain);
-    }
-
-    @Step
-    private void updateTargetAttributesWithoutUpdateMode(final String controllerId) {
-
-        // set the initial attributes
-        final Map<String, String> attributes = new HashMap<>();
-        attributes.put("k0", "v0");
-        attributes.put("k1", "v1");
-        controllerManagement.updateControllerAttributes(controllerId, attributes, null);
-
-        // verify initial attributes
-        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
-        assertThat(updatedAttributes.size()).isEqualTo(attributes.size());
-        assertThat(updatedAttributes).containsAllEntriesOf(attributes);
-    }
-
-    @Test
-    @Description("Ensures that target attribute update fails if quota hits.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 2) })
-    public void updateTargetAttributesFailsIfTooManyEntries() throws Exception {
-        final String controllerId = "test123";
-        final int allowedAttributes = quotaManagement.getMaxAttributeEntriesPerTarget();
-        testdataFactory.createTarget(controllerId);
-
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> SecurityContextSwitch
-                .runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
-                    writeAttributes(controllerId, allowedAttributes + 1, "key", "value");
-                    return null;
-                })).withMessageContaining("" + allowedAttributes);
-
-        // verify that no attributes have been written
-        assertThat(targetManagement.getControllerAttributes(controllerId)).isEmpty();
-
-        // Write allowed number of attributes twice with same key should result
-        // in update but work
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
-            writeAttributes(controllerId, allowedAttributes, "key", "value1");
-            writeAttributes(controllerId, allowedAttributes, "key", "value2");
-            return null;
-        });
-        assertThat(targetManagement.getControllerAttributes(controllerId)).hasSize(10);
-
-        // Now rite one more
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> SecurityContextSwitch
-                .runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
-                    writeAttributes(controllerId, 1, "additional", "value1");
-                    return null;
-                })).withMessageContaining("" + allowedAttributes);
-        assertThat(targetManagement.getControllerAttributes(controllerId)).hasSize(10);
-
-    }
-
-    private void writeAttributes(final String controllerId, final int allowedAttributes, final String keyPrefix,
-            final String valuePrefix) {
-        final Map<String, String> testData = new HashMap<>(allowedAttributes);
-        for (int i = 0; i < allowedAttributes; i++) {
-            testData.put(keyPrefix + i, valuePrefix);
-        }
-        controllerManagement.updateControllerAttributes(controllerId, testData, null);
-    }
-
-    @Test
-    @Description("Checks if invalid values of attribute-key and attribute-value are handled correctly")
-    public void updateTargetAttributesFailsForInvalidAttributes() {
-        final String controllerId = "targetId123";
-        testdataFactory.createTarget(controllerId);
-
-        assertThatExceptionOfType(InvalidTargetAttributeException.class)
-                .as("Attribute with key too long should not be created")
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(TargetTestData.ATTRIBUTE_KEY_TOO_LONG, TargetTestData.ATTRIBUTE_VALUE_VALID), null));
-
-        assertThatExceptionOfType(InvalidTargetAttributeException.class)
-                .as("Attribute with key too long and value too long should not be created")
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(TargetTestData.ATTRIBUTE_KEY_TOO_LONG, TargetTestData.ATTRIBUTE_VALUE_TOO_LONG), null));
-
-        assertThatExceptionOfType(InvalidTargetAttributeException.class)
-                .as("Attribute with value too long should not be created")
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(TargetTestData.ATTRIBUTE_KEY_VALID, TargetTestData.ATTRIBUTE_VALUE_TOO_LONG), null));
-
-        assertThatExceptionOfType(InvalidTargetAttributeException.class)
-                .as("Attribute with key NULL should not be created").isThrownBy(() -> controllerManagement
-                        .updateControllerAttributes(controllerId,
-                                Collections.singletonMap(null, TargetTestData.ATTRIBUTE_VALUE_VALID), null));
-    }
-
-    @Test
-    @Description("Controller providing status entries fails if providing more than permitted by quota.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
-    public void controllerProvidesIntermediateFeedbackFailsIfQuotaHit() {
-        final int allowStatusEntries = 10;
-        final Long actionId = createTargetAndAssignDs();
-
-        // Fails as one entry is already in there from the assignment
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> SecurityContextSwitch
-                .runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
-                    writeStatus(actionId, allowStatusEntries);
-                    return null;
-                })).withMessageContaining("" + allowStatusEntries);
-
-    }
-
-    private void writeStatus(final Long actionId, final int allowedStatusEntries) {
-        for (int i = 0; i < allowedStatusEntries; i++) {
-            controllerManagement.addInformationalActionStatus(
-                    entityFactory.actionStatus().create(actionId).status(Status.RUNNING).message("test" + i));
-        }
-    }
-
-    @Test
-    @Description("Test to verify the storage and retrieval of action history.")
-    public void findMessagesByActionStatusId() {
-        final DistributionSet testDs = testdataFactory.createDistributionSet("1");
-        final List<Target> testTarget = testdataFactory.createTargets(1);
-
-        final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
-
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
-                .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis())
-                .messages(List.of("proceeding message 1")));
-
-        final long createTime = System.currentTimeMillis();
-        waitNextMillis();
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
-                .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis())
-                .messages(List.of("proceeding message 2")));
-
-        final List<String> messages = controllerManagement.getActionHistoryMessages(actionId, 2);
-
-        assertThat(deploymentManagement.findActionStatusByAction(PAGE, actionId).getTotalElements())
-                .as("Two action-states in total").isEqualTo(3L);
-        assertThat(messages.get(0)).as("Message of action-status").isEqualTo("proceeding message 2");
-        assertThat(messages.get(1)).as("Message of action-status").isEqualTo("proceeding message 1");
-    }
-
-    @Test
-    @Description("Verifies that the quota specifying the maximum number of status entries per action is enforced.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6), // implicit lock
-            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 2),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2) })
-    public void addActionStatusUpdatesUntilQuotaIsExceeded() {
-
-        // any distribution set assignment causes 1 status entity to be created
-        final int maxStatusEntries = quotaManagement.getMaxStatusEntriesPerAction() - 1;
-
-        // test for informational status
-        final Long actionId1 = getFirstAssignedActionId(assignDistributionSet(
-                testdataFactory.createDistributionSet("ds1"), testdataFactory.createTargets(1, "t1")));
-        assertThat(actionId1).isNotNull();
-        for (int i = 0; i < maxStatusEntries; ++i) {
-            controllerManagement.addInformationalActionStatus(entityFactory.actionStatus().create(actionId1)
-                    .status(Status.WARNING).message("Msg " + i).occurredAt(System.currentTimeMillis()));
-        }
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> controllerManagement
-                .addInformationalActionStatus(entityFactory.actionStatus().create(actionId1).status(Status.WARNING)));
-
-        // test for update status (and mixed case)
-        final Long actionId2 = getFirstAssignedActionId(assignDistributionSet(
-                testdataFactory.createDistributionSet("ds2"), testdataFactory.createTargets(1, "t2")));
-        assertThat(actionId2).isNotEqualTo(actionId1);
-        for (int i = 0; i < maxStatusEntries; ++i) {
-            controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId2)
-                    .status(Status.WARNING).message("Msg " + i).occurredAt(System.currentTimeMillis()));
-        }
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> controllerManagement
-                .addInformationalActionStatus(entityFactory.actionStatus().create(actionId2).status(Status.WARNING)));
-
-    }
-
-    @Test
-    @Description("Verifies that the quota specifying the maximum number of messages per action status is enforced.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
-    public void createActionStatusWithTooManyMessages() {
-
-        final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
-
-        final Long actionId = getFirstAssignedActionId(
-                assignDistributionSet(testdataFactory.createDistributionSet("ds1"), testdataFactory.createTargets(1)));
-        assertThat(actionId).isNotNull();
-
-        final List<String> messages = new ArrayList<>();
-        IntStream.range(0, maxMessages).forEach(i -> messages.add(i, "msg"));
-
-        assertThat(controllerManagement.addInformationalActionStatus(
-                entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING))).isNotNull();
-
-        messages.add("msg");
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(
-                        entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING)));
-
-    }
-
-    @Test
-    @Description("Verifies that a DOWNLOAD_ONLY action is not marked complete when the controller reports DOWNLOAD")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
-    public void controllerReportsDownloadForDownloadOnlyAction() {
-        testdataFactory.createTarget();
-        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
-        assertThat(actionId).isNotNull();
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOAD));
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
-                Action.Status.DOWNLOAD, true);
-
-        assertThat(actionStatusRepository.count()).isEqualTo(2);
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(2);
-        assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isEqualTo(true);
     }
 
     @Test
@@ -1468,16 +1229,15 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                         () -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement.addUpdateActionStatus(
                                 entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
 
-
         //assert that Final result is accepted even if quota is reached
         assertThatNoException().isThrownBy(() -> {
-            Action updatedAction = controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED));
+            Action updatedAction = controllerManagement.addUpdateActionStatus(
+                    entityFactory.actionStatus().create(actionId).status(Status.FINISHED));
             // check if action really finished
             assertThat(updatedAction.isActive()).isFalse();
             // check if final status is updated accordingly
             assertThat(updatedAction.getStatus()).isEqualTo(Status.FINISHED);
         });
-
 
         //assert that additional final result is not accepted
         assertThatNoException().isThrownBy(() -> {
@@ -1513,7 +1273,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                         () -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement.addUpdateActionStatus(
                                 entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
 
-
         //assert that Final result is accepted even if quota is reached
         assertThatNoException().isThrownBy(() -> {
             Action updatedAction = controllerManagement
@@ -1523,7 +1282,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             // check if final status is updated accordingly
             assertThat(updatedAction.getStatus()).isEqualTo(Status.FINISHED);
         });
-
 
         //assert that additional final result is not accepted
         assertThatNoException().isThrownBy(() -> {
@@ -1558,9 +1316,9 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         }
 
         final List<Action> foundAction = actionRepository.findAll((root, query, cb) -> cb.and(
-                   root.get(JpaAction_.externalRef).in(allExternalRef),
-                   cb.equal(root.get(JpaAction_.active), true)
-           )).stream().map(Action.class::cast).toList();
+                root.get(JpaAction_.externalRef).in(allExternalRef),
+                cb.equal(root.get(JpaAction_.active), true)
+        )).stream().map(Action.class::cast).toList();
         assertThat(foundAction).isNotNull();
         for (int i = 0; i < numberOfActions; i++) {
             assertThat(foundAction.get(i).getId()).isEqualTo(allActionId.get(i));
@@ -1589,6 +1347,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(foundAction).isPresent();
         assertThat(foundAction.get().getId()).isEqualTo(actionId);
     }
+
     @Test
     @Description("Verify that assigning version form target works")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -1597,8 +1356,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = ActionCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3)}
-          )
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3) }
+    )
     void assignVersionToTarget() {
 
         final DistributionSet knownDistributionSet = testdataFactory.createDistributionSet();
@@ -1608,10 +1367,10 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // WHEN
         boolean updated1 = controllerManagement.updateOfflineAssignedVersion(DEFAULT_CONTROLLER_ID,
-                knownDistributionSet.getName(),knownDistributionSet.getVersion());
+                knownDistributionSet.getName(), knownDistributionSet.getVersion());
         // if target is already assigned to a distribution then it shouldn't reassign the distribution
         boolean updated2 = controllerManagement.updateOfflineAssignedVersion(DEFAULT_CONTROLLER_ID,
-                knownDistributionSet.getName(),knownDistributionSet.getVersion());
+                knownDistributionSet.getName(), knownDistributionSet.getVersion());
 
         // THEN
         assertAssignedDistributionSetId(DEFAULT_CONTROLLER_ID, knownDistributionSet.getId());
@@ -1671,16 +1430,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionStatusRepository.count()).isEqualTo(12L);
     }
 
-    @Step
-    private void finishDownloadOnlyUpdateAndSendUpdateActionStatus(final Long actionId, final Status status) {
-        // finishing action
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
-
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(status));
-        assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isEqualTo(false);
-    }
-
     @Test
     @Description("Verifies that a controller can report a FINISHED event for a DOWNLOAD_ONLY action after having"
             + " installed an intermediate update.")
@@ -1720,12 +1469,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertNoActiveActionsExistsForControllerId(DEFAULT_CONTROLLER_ID);
     }
 
-    @Step
-    private void addUpdateActionStatus(final Long actionId, final String controllerId, final Status actionStatus) {
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(actionStatus));
-        assertActionStatus(actionId, controllerId, TargetUpdateStatus.IN_SYNC, actionStatus, actionStatus, false);
-    }
-
     @Test
     @Description("Actions are exposed according to thier weight in multi assignment mode.")
     void actionsAreExposedAccordingToTheirWeight() {
@@ -1757,24 +1500,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         controllerManagement
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionWeight500new).status(Status.FINISHED));
         assertThat(controllerManagement.findActiveActionWithHighestWeight(targetId)).isEmpty();
-    }
-
-    private void assertAssignedDistributionSetId(final String controllerId, final Long dsId) {
-        final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
-        assertThat(target).isPresent();
-        final DistributionSet assignedDistributionSet = ((JpaTarget) target.get()).getAssignedDistributionSet();
-        assertThat(assignedDistributionSet.getId()).isEqualTo(dsId);
-    }
-
-    private void assertInstalledDistributionSetId(final String controllerId, final Long dsId) {
-        final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
-        assertThat(target).isPresent();
-        final DistributionSet installedDistributionSet = ((JpaTarget) target.get()).getInstalledDistributionSet();
-        if (dsId == null) {
-            assertThat(installedDistributionSet).isNull();
-        } else {
-            assertThat(installedDistributionSet.getId()).isEqualTo(dsId);
-        }
     }
 
     @Test
@@ -1832,6 +1557,280 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING, 20);
         assertLastActionStatusCodeInAction(actionId, 20);
 
+    }
+
+    @Step
+    private Long createTargetAndAssignDs() {
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+        testdataFactory.createTarget();
+        assignDistributionSet(dsId, DEFAULT_CONTROLLER_ID);
+        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.PENDING);
+
+        return deploymentManagement.findActiveActionsByTarget(PAGE, DEFAULT_CONTROLLER_ID).getContent().get(0).getId();
+    }
+
+    @Step
+    private Long createAndAssignDsAsDownloadOnly(final String dsName, final String defaultControllerId) {
+        final Long dsId = testdataFactory.createDistributionSet(dsName).getId();
+        assignDistributionSet(dsId, defaultControllerId, DOWNLOAD_ONLY);
+        assertThat(targetManagement.getByControllerID(defaultControllerId).get().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.PENDING);
+
+        final Long id = deploymentManagement.findActiveActionsByTarget(PAGE, defaultControllerId).getContent().get(0)
+                .getId();
+        assertThat(id).isNotNull();
+        return id;
+    }
+
+    @Step
+    private Long assignDs(final Long dsId, final String defaultControllerId, final Action.ActionType actionType) {
+        assignDistributionSet(dsId, defaultControllerId, actionType);
+        assertThat(targetManagement.getByControllerID(defaultControllerId).get().getUpdateStatus())
+                .isEqualTo(TargetUpdateStatus.PENDING);
+
+        final Long id = deploymentManagement.findActiveActionsByTarget(PAGE, defaultControllerId).getContent().get(0)
+                .getId();
+        assertThat(id).isNotNull();
+        return id;
+    }
+
+    @Step
+    private void simulateIntermediateStatusOnCancellation(final Long actionId) {
+        controllerManagement
+                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RUNNING));
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
+                Action.Status.RUNNING, true);
+
+        controllerManagement
+                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOAD));
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
+                Action.Status.DOWNLOAD, true);
+
+        controllerManagement
+                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOADED));
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
+                Action.Status.DOWNLOADED, true);
+
+        controllerManagement
+                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RETRIEVED));
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
+                Action.Status.RETRIEVED, true);
+
+        controllerManagement
+                .addCancelActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.WARNING));
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.CANCELING,
+                Action.Status.WARNING, true);
+    }
+
+    @Step
+    private void simulateIntermediateStatusOnUpdate(final Long actionId) {
+        addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING);
+
+        addUpdateActionStatusAndAssert(actionId, Action.Status.DOWNLOAD);
+
+        addUpdateActionStatusAndAssert(actionId, Action.Status.DOWNLOADED);
+
+        addUpdateActionStatusAndAssert(actionId, Action.Status.RETRIEVED);
+
+        addUpdateActionStatusAndAssert(actionId, Action.Status.WARNING);
+    }
+
+    private void addUpdateActionStatusAndAssert(final Long actionId, final Action.Status actionStatus) {
+        addUpdateActionStatusAndAssert(actionId, actionStatus, null);
+    }
+
+    private void addUpdateActionStatusAndAssert(final Long actionId, final Action.Status actionStatus,
+            final Integer code) {
+        final ActionStatusCreate status = entityFactory.actionStatus().create(actionId).status(actionStatus);
+        if (code != null) {
+            status.code(code.intValue());
+        }
+        controllerManagement
+                .addUpdateActionStatus(status);
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
+                actionStatus, true);
+    }
+
+    private void assertActionStatus(final Long actionId, final String controllerId,
+            final TargetUpdateStatus expectedTargetUpdateStatus, final Action.Status expectedActionActionStatus,
+            final Action.Status expectedActionStatus, final boolean actionActive) {
+        final TargetUpdateStatus targetStatus = targetManagement.getByControllerID(controllerId).get()
+                .getUpdateStatus();
+        assertThat(targetStatus).isEqualTo(expectedTargetUpdateStatus);
+        final Action action = deploymentManagement.findAction(actionId).get();
+        assertThat(action.getStatus()).isEqualTo(expectedActionActionStatus);
+        assertThat(action.isActive()).isEqualTo(actionActive);
+        final List<ActionStatus> actionStatusList = controllerManagement.findActionStatusByAction(PAGE, actionId)
+                .getContent();
+        assertThat(actionStatusList.get(actionStatusList.size() - 1).getStatus()).isEqualTo(expectedActionStatus);
+        if (actionActive) {
+            assertThat(controllerManagement.findActiveActionWithHighestWeight(controllerId).get().getId())
+                    .isEqualTo(actionId);
+        }
+    }
+
+    private void createTargetType(String targetTypeName) {
+        systemSecurityContext.runAsSystem(() ->
+                targetTypeManagement.create(entityFactory.targetType().create().name(targetTypeName)));
+    }
+
+    @Step
+    private void addAttributeAndVerify(final String controllerId) {
+        final Map<String, String> testData = new HashMap<>(1);
+        testData.put("test1", "testdata1");
+        controllerManagement.updateControllerAttributes(controllerId, testData, null);
+
+        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
+                .isEqualTo(testData);
+    }
+
+    @Step
+    private void addSecondAttributeAndVerify(final String controllerId) {
+        final Map<String, String> testData = new HashMap<>(2);
+        testData.put("test2", "testdata20");
+        controllerManagement.updateControllerAttributes(controllerId, testData, null);
+
+        testData.put("test1", "testdata1");
+        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
+                .isEqualTo(testData);
+    }
+
+    @Step
+    private void updateAttributeAndVerify(final String controllerId) {
+        final Map<String, String> testData = new HashMap<>(2);
+        testData.put("test1", "testdata12");
+
+        controllerManagement.updateControllerAttributes(controllerId, testData, null);
+
+        testData.put("test2", "testdata20");
+        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
+                .isEqualTo(testData);
+    }
+
+    @Step
+    private void updateTargetAttributesWithUpdateModeRemove(final String controllerId) {
+
+        final int previousSize = targetManagement.getControllerAttributes(controllerId).size();
+
+        // update the attributes using update mode REMOVE
+        final Map<String, String> removeAttributes = new HashMap<>();
+        removeAttributes.put("k1", "foo");
+        removeAttributes.put("k3", "bar");
+        controllerManagement.updateControllerAttributes(controllerId, removeAttributes, UpdateMode.REMOVE);
+
+        // verify attribute removal
+        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
+        assertThat(updatedAttributes.size()).isEqualTo(previousSize - 2);
+        assertThat(updatedAttributes).doesNotContainKeys("k1", "k3");
+
+    }
+
+    @Step
+    private void updateTargetAttributesWithUpdateModeMerge(final String controllerId) {
+        // get the current attributes
+        final HashMap<String, String> attributes = new HashMap<>(
+                targetManagement.getControllerAttributes(controllerId));
+
+        // update the attributes using update mode MERGE
+        final Map<String, String> mergeAttributes = new HashMap<>();
+        mergeAttributes.put("k1", "v1_modified_again");
+        mergeAttributes.put("k4", "v4");
+        controllerManagement.updateControllerAttributes(controllerId, mergeAttributes, UpdateMode.MERGE);
+
+        // verify attribute merge
+        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
+        assertThat(updatedAttributes.size()).isEqualTo(4);
+        assertThat(updatedAttributes).containsAllEntriesOf(mergeAttributes);
+        assertThat(updatedAttributes.get("k1")).isEqualTo("v1_modified_again");
+        attributes.keySet().forEach(assertThat(updatedAttributes)::containsKey);
+    }
+
+    @Step
+    private void updateTargetAttributesWithUpdateModeReplace(final String controllerId) {
+
+        // get the current attributes
+        final HashMap<String, String> attributes = new HashMap<>(
+                targetManagement.getControllerAttributes(controllerId));
+
+        // update the attributes using update mode REPLACE
+        final Map<String, String> replacementAttributes = new HashMap<>();
+        replacementAttributes.put("k1", "v1_modified");
+        replacementAttributes.put("k2", "v2");
+        replacementAttributes.put("k3", "v3");
+        controllerManagement.updateControllerAttributes(controllerId, replacementAttributes, UpdateMode.REPLACE);
+
+        // verify attribute replacement
+        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
+        assertThat(updatedAttributes.size()).isEqualTo(replacementAttributes.size());
+        assertThat(updatedAttributes).containsAllEntriesOf(replacementAttributes);
+        assertThat(updatedAttributes.get("k1")).isEqualTo("v1_modified");
+        attributes.entrySet().forEach(assertThat(updatedAttributes)::doesNotContain);
+    }
+
+    @Step
+    private void updateTargetAttributesWithoutUpdateMode(final String controllerId) {
+
+        // set the initial attributes
+        final Map<String, String> attributes = new HashMap<>();
+        attributes.put("k0", "v0");
+        attributes.put("k1", "v1");
+        controllerManagement.updateControllerAttributes(controllerId, attributes, null);
+
+        // verify initial attributes
+        final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
+        assertThat(updatedAttributes.size()).isEqualTo(attributes.size());
+        assertThat(updatedAttributes).containsAllEntriesOf(attributes);
+    }
+
+    private void writeAttributes(final String controllerId, final int allowedAttributes, final String keyPrefix,
+            final String valuePrefix) {
+        final Map<String, String> testData = new HashMap<>(allowedAttributes);
+        for (int i = 0; i < allowedAttributes; i++) {
+            testData.put(keyPrefix + i, valuePrefix);
+        }
+        controllerManagement.updateControllerAttributes(controllerId, testData, null);
+    }
+
+    private void writeStatus(final Long actionId, final int allowedStatusEntries) {
+        for (int i = 0; i < allowedStatusEntries; i++) {
+            controllerManagement.addInformationalActionStatus(
+                    entityFactory.actionStatus().create(actionId).status(Status.RUNNING).message("test" + i));
+        }
+    }
+
+    @Step
+    private void finishDownloadOnlyUpdateAndSendUpdateActionStatus(final Long actionId, final Status status) {
+        // finishing action
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
+
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(status));
+        assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isEqualTo(false);
+    }
+
+    @Step
+    private void addUpdateActionStatus(final Long actionId, final String controllerId, final Status actionStatus) {
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(actionStatus));
+        assertActionStatus(actionId, controllerId, TargetUpdateStatus.IN_SYNC, actionStatus, actionStatus, false);
+    }
+
+    private void assertAssignedDistributionSetId(final String controllerId, final Long dsId) {
+        final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
+        assertThat(target).isPresent();
+        final DistributionSet assignedDistributionSet = ((JpaTarget) target.get()).getAssignedDistributionSet();
+        assertThat(assignedDistributionSet.getId()).isEqualTo(dsId);
+    }
+
+    private void assertInstalledDistributionSetId(final String controllerId, final Long dsId) {
+        final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
+        assertThat(target).isPresent();
+        final DistributionSet installedDistributionSet = ((JpaTarget) target.get()).getInstalledDistributionSet();
+        if (dsId == null) {
+            assertThat(installedDistributionSet).isNull();
+        } else {
+            assertThat(installedDistributionSet.getId()).isEqualTo(dsId);
+        }
     }
 
     private void assertLastActionStatusCodeInAction(final Long actionId, final Integer expectedLastActionStatusCode) {

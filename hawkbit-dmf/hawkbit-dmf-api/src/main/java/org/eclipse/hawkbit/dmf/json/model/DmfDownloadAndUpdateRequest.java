@@ -48,8 +48,7 @@ public class DmfDownloadAndUpdateRequest extends DmfActionRequest {
     /**
      * Add a Software module.
      *
-     * @param createSoftwareModule
-     *            the module
+     * @param createSoftwareModule the module
      */
     public void addSoftwareModule(final DmfSoftwareModule createSoftwareModule) {
         if (softwareModules == null) {

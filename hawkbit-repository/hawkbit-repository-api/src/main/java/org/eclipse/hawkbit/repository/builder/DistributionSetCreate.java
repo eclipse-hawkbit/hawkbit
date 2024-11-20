@@ -20,46 +20,41 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.repository.model.Type;
 
 /**
  * Builder to create a new {@link DistributionSet} entry. Defines all fields
  * that can be set at creation time. Other fields are set by the repository
  * automatically, e.g. {@link BaseEntity#getCreatedAt()}.
- *
  */
 public interface DistributionSetCreate {
 
     /**
-     * @param name
-     *            for {@link DistributionSet#getName()}
+     * @param name for {@link DistributionSet#getName()}
      * @return updated builder instance
      */
     DistributionSetCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
-     * @param version
-     *            for {@link DistributionSet#getVersion()}
+     * @param version for {@link DistributionSet#getVersion()}
      * @return updated builder instance
      */
     DistributionSetCreate version(@Size(min = 1, max = NamedVersionedEntity.VERSION_MAX_SIZE) @NotNull String version);
 
     /**
-     * @param description
-     *            for {@link DistributionSet#getDescription()}
+     * @param description for {@link DistributionSet#getDescription()}
      * @return updated builder instance
      */
     DistributionSetCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
-     * @param typeKey
-     *            for {@link DistributionSet#getType()}
+     * @param typeKey for {@link DistributionSet#getType()}
      * @return updated builder instance
      */
-    DistributionSetCreate type(@Size(min = 1, max = DistributionSetType.KEY_MAX_SIZE) @NotNull String typeKey);
+    DistributionSetCreate type(@Size(min = 1, max = Type.KEY_MAX_SIZE) @NotNull String typeKey);
 
     /**
-     * @param type
-     *            for {@link DistributionSet#getType()}
+     * @param type for {@link DistributionSet#getType()}
      * @return updated builder instance
      */
     default DistributionSetCreate type(final DistributionSetType type) {
@@ -67,15 +62,13 @@ public interface DistributionSetCreate {
     }
 
     /**
-     * @param modules
-     *            for {@link DistributionSet#getModules()}
+     * @param modules for {@link DistributionSet#getModules()}
      * @return updated builder instance
      */
     DistributionSetCreate modules(Collection<Long> modules);
 
     /**
-     * @param requiredMigrationStep
-     *            for {@link DistributionSet#isRequiredMigrationStep()}
+     * @param requiredMigrationStep for {@link DistributionSet#isRequiredMigrationStep()}
      * @return updated builder instance
      */
     DistributionSetCreate requiredMigrationStep(Boolean requiredMigrationStep);

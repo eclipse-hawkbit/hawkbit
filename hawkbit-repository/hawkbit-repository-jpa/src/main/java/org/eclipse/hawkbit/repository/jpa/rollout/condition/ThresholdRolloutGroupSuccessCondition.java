@@ -54,7 +54,7 @@ public class ThresholdRolloutGroupSuccessCondition
             return ((float) finished / (float) totalGroup) >= ((float) threshold / 100F);
 
         } catch (final NumberFormatException e) {
-            log.error("Cannot evaluate condition expression " + expression, e);
+            log.error("Cannot evaluate condition expression {}", expression, e);
             return false;
         }
     }

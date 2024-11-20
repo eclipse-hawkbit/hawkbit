@@ -16,11 +16,10 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Create/build implementation.
- *
  */
 public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> implements TargetCreate {
 
@@ -29,8 +28,7 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
     /**
      * Constructor
      *
-     * @param targetTypeManagement
-     *          Target type management
+     * @param targetTypeManagement Target type management
      */
     JpaTargetCreate(final TargetTypeManagement targetTypeManagement) {
         super(null);
@@ -39,20 +37,19 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
 
     @Override
     public JpaTarget build() {
-        JpaTarget target;
-
-        if (StringUtils.isEmpty(securityToken)) {
+        final JpaTarget target;
+        if (ObjectUtils.isEmpty(securityToken)) {
             target = new JpaTarget(controllerId);
         } else {
             target = new JpaTarget(controllerId, securityToken);
         }
 
-        if (!StringUtils.isEmpty(name)) {
+        if (!ObjectUtils.isEmpty(name)) {
             target.setName(name);
         }
 
-        if (targetTypeId != null){
-            TargetType targetType = targetTypeManagement.get(targetTypeId)
+        if (targetTypeId != null) {
+            final TargetType targetType = targetTypeManagement.get(targetTypeId)
                     .orElseThrow(() -> new EntityNotFoundException(TargetType.class, targetTypeId));
             target.setTargetType(targetType);
         }
@@ -64,5 +61,4 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
 
         return target;
     }
-
 }

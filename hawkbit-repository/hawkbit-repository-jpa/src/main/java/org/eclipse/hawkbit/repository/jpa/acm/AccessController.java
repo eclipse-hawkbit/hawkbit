@@ -24,7 +24,7 @@ import org.springframework.lang.Nullable;
  * additional restrictions (e.g. entity based) could be applied.
  * <p/>
  * <b>Note</b>: Experimental, only
- * 
+ *
  * @param <T> the domain type the repository manages
  */
 public interface AccessController<T> {
@@ -32,17 +32,14 @@ public interface AccessController<T> {
     /**
      * Introduce a new specification to limit the access to a specific entity.
      *
-     * @return a new specification limiting the access, if empty no access restrictions
-     *   are to be applied
+     * @return a new specification limiting the access, if empty no access restrictions are to be applied
      */
     Optional<Specification<T>> getAccessRules(Operation operation);
 
     /**
      * Append the resource limitation on an already existing specification.
-     * 
-     * @param specification
-     *            is the root specification which needs to be appended by the
-     *            resource limitation
+     *
+     * @param specification is the root specification which needs to be appended by the resource limitation
      * @return a new appended specification
      */
     @Nullable
@@ -55,18 +52,17 @@ public interface AccessController<T> {
     /**
      * Verify if the given {@link Operation} is permitted for the provided entity.
      *
-     * @throws InsufficientPermissionException
-     *             if operation is not permitted for given entities
+     * @throws InsufficientPermissionException if operation is not permitted for given entities
      */
     void assertOperationAllowed(final Operation operation, final T entity) throws InsufficientPermissionException;
 
     /**
      * Verify if the given {@link Operation} is permitted for the provided entities.
      *
-     * @throws InsufficientPermissionException
-     *             if operation is not permitted for given entities
+     * @throws InsufficientPermissionException if operation is not permitted for given entities
      */
-    default void assertOperationAllowed(final Operation operation, final Iterable<? extends T> entities) throws InsufficientPermissionException {
+    default void assertOperationAllowed(final Operation operation, final Iterable<? extends T> entities)
+            throws InsufficientPermissionException {
         for (final T entity : entities) {
             assertOperationAllowed(operation, entity);
         }
@@ -81,17 +77,14 @@ public interface AccessController<T> {
          * Entity creation
          */
         CREATE,
-
         /**
          * Read entities
          */
         READ,
-
         /**
          * Entity modification (e.g. name/description change, tag/type assignment, etc.)
          */
         UPDATE,
-
         /**
          * Entity deletion
          */

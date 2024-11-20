@@ -9,12 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.junit.jupiter.api.Test;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test the remote entity events.

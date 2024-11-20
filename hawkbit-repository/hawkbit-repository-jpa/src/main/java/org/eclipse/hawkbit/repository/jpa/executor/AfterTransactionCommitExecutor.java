@@ -10,10 +10,8 @@
 package org.eclipse.hawkbit.repository.jpa.executor;
 
 /**
- * 
  * A interface to register a runnable, which will be executed after a successful
  * spring transaction.
- *
  */
 @FunctionalInterface
 public interface AfterTransactionCommitExecutor {
@@ -21,9 +19,8 @@ public interface AfterTransactionCommitExecutor {
     /**
      * Register a runnable which will be executed after a successful spring
      * transaction.
-     * 
-     * @param runnable
-     *            the after commit runnable
+     *
+     * @param runnable the after commit runnable
      */
     void afterCommit(Runnable runnable);
 }
