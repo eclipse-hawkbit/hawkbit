@@ -3,30 +3,11 @@ title: Getting Started
 weight: 20
 ---
 
-## On Sandbox
-
-We offer a sandbox installation that is free for everyone to try out hawkBit's [Management UI](/hawkbit/ui/),
-[Management API](/hawkbit/apis/management_api/), and [Direct Device Integration API](/hawkbit/apis/ddi_api/): &nbsp;
-**[<i class="fas fa-desktop">&nbsp;</i> https://hawkbit.eclipseprojects.io](https://hawkbit.eclipseprojects.io)**
-
-{{% warning %}}
-The sandbox is a shared installation that will be reset from time to time. Therefore, it is not allowed to upload
-any personal data.
-{{% /warning %}}
-
-In addition, the following vendors offer free trial accounts for their Eclipse hawkBit compatible products:
-
-* [Bosch IoT Rollouts](https://bosch-iot-suite.com/service/rollouts/) (
-  by [Bosch Digital](https://www.bosch-digital.com))
-* [Kynetics Update Factory](https://www.kynetics.com/update-factory) (by [Kynetics LLC](https://www.kynetics.com/))
-
 ## From Docker Image
 
 ### Overview
 
-HawkBit Update Server username/password -> admin/admin as default login credentials. They can be overridden by the
-environment variables spring.security.user.name and spring.security.user.password which are defined in the corresponding
-default [application.properties](hawkbit-runtime/hawkbit-update-server/src/main/resources/application.properties).
+HawkBit Update Server default user has _admin/admin_ as default credentials. See below how the user can be changed.
 
 It supports two configurations:
 
@@ -68,31 +49,27 @@ $ docker-compose -f docker-compose-micro-service-mysql.yml up -d
 ```sh
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit
-$ mvn clean install
+$ mvn clean install -DskipTests
 ```
 
 ### 2: Start hawkBit [update server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-runtime/hawkbit-update-server) (Monolith)
 
 ```sh
-$ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-#version#-SNAPSHOT.jar
+$ java -jar ./hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-0-SNAPSHOT.jar
 ```
 
-### 3: Build hawkBit examples
-
-```sh
-$ git clone https://github.com/eclipse-hawkbit/hawkbit-examples.git
-$ cd hawkbit-examples
-$ mvn clean install
+### 3: Change credentials
+As stated before the default user is _admin/admin_. It could be overridden by changing the [TenantAwareUserProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-core/src/main/java/org/eclipse/hawkbit/tenancy/TenantAwareUserProperties.java) configuration using Spring ways. For instance, using a properties file like:
+```properties 
+# should remove the admin/admin user
+hawkbit.security.user.admin.tenant=#{null}
+hawkbit.security.user.admin.password=#{null}
+hawkbit.security.user.admin.roles=#{null}
+# should add a hawkbit/isAwesome! user
+hawkbit.security.user.hawkbit.tenant=DEFAULT
+hawkbit.security.user.hawkbit.password={noop}isAwesome!
+hawkbit.security.user.hawkbit.roles=TENANT_ADMIN
 ```
+which should remove the default _admin/admin_ user and add a hawkbit user _hawkbit_ with password _isAwesome!_ and a role _TENANT_ADMIN_. 
 
-### 4: Start hawkBit [Device Simulator](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-device-simulator)
-
-```sh
-$ java -jar ./hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
-```
-
-### 5: Generate Getting Started data with [Example Management API Client](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator)
-
-```sh
-$ java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#.jar
-```
+You could create multiple users with specified roles.
