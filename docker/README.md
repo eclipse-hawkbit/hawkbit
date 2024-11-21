@@ -46,11 +46,8 @@ hawkbit:
         "spring.rabbitmq.host": "rabbitmq",
         "spring.rabbitmq.username": "guest",
         "spring.rabbitmq.password": "guest",
-        "spring.datasource.username": "root",
-        "hawkbit.server.im.users[0].username": "hawkbit",
-        "hawkbit.server.im.users[0].password": "{noop}isAwesome!",
-        "hawkbit.server.im.users[0].firstname": "Eclipse",
-        "hawkbit.server.im.users[0].lastname": "HawkBit",
-        "hawkbit.server.im.users[0].permissions": "ALL"
+        "hawkbit.security.user.hawkbit.tenant": "DEFAULT",
+        "hawkbit.security.user.hawkbit.password": "{noop}isAwesome!",
+        "hawkbit.security.user.hawkbit.roles": "TENANT_ADMIN" 
       }'
 ```
