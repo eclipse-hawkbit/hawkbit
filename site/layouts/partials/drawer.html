@@ -19,12 +19,7 @@
   <div class="scrollable">
     <div class="wrapper">
       {{ if (eq (trim .Site.Params.provider " " | lower) "github") | and (isset .Site.Params "repo_url") }}
-        <ul class="repo">
-          <li class="repo-download">
-            <a href="https://hawkbit.eclipseprojects.io" target="_blank" title="hawkBit Sandbox" data-action="sandbox">
-              <i class="fas fa-desktop"></i> &nbsp; Sandbox
-            </a>
-          </li>
+        <ul class="repo" style="text-align: left; ; padding-left: 2em;">
           <li class="repo-stars">
             <a href="{{ .Site.Params.repo_url }}/stargazers" target="_blank" title="Stargazers" data-action="star">
               <i class="icon icon-star"></i> Stars
