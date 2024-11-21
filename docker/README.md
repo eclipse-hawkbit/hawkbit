@@ -37,7 +37,7 @@ $ docker compose -f docker-compose-monolith-mysql.yml down
 # Configuration
 You can override application.properties by setting an environment variable SPRING_APPLICATION_JSON for hawkbit container.
 
-```
+```yaml
 hawkbit:
     image: "hawkbit/hawkbit-update-server:latest"
     environment:
@@ -46,6 +46,11 @@ hawkbit:
         "spring.rabbitmq.host": "rabbitmq",
         "spring.rabbitmq.username": "guest",
         "spring.rabbitmq.password": "guest",
+# should remove default admin/admin user
+        "hawkbit.security.user.admin.tenant": "#{null}",  
+        "hawkbit.security.user.admin.password": "#{null}",  
+        "hawkbit.security.user.admin.roles": "#{null}",
+# should add hawkbit/isAwesome! user        
         "hawkbit.security.user.hawkbit.tenant": "DEFAULT",
         "hawkbit.security.user.hawkbit.password": "{noop}isAwesome!",
         "hawkbit.security.user.hawkbit.roles": "TENANT_ADMIN" 

@@ -32,7 +32,7 @@ auto assignment checker and rollouts executor. To run multiple management server
 of hawkbit to ensure that they wont run schedulers simultaneously or you shall configure all instances but one to do not
 run schedulers!
 
-## Optional Protostuff for Sprign cloud bus
+## Optional Protostuff for Spring cloud bus
 
 The micro-service instances are configured to communicate via Spring Cloud Bus. Optionally, you could
 use [Protostuff](https://github.com/protostuff/protostuff) based message payload serialization for improved performance.
