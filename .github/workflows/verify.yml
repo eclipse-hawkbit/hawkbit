@@ -7,10 +7,12 @@ on:
     paths-ignore:
       - '.3rd-party/**'
       - 'site/**'
+      - '**.md'
   pull_request:
     paths-ignore:
       - '.3rd-party/**'
       - 'site/**'
+      - '**.md'
 
 jobs:
   verify:
