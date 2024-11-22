@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -53,9 +53,10 @@ public class EventPublisherAutoConfiguration {
      */
     @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
     ApplicationEventMulticaster applicationEventMulticaster(
-            @Qualifier("asyncExecutor") final Executor executor, final TenantAware tenantAware) {
+            @Qualifier("asyncExecutor") final Executor executor,
+            final SystemSecurityContext systemSecurityContext, final ApplicationEventFilter applicationEventFilter) {
         final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster = new TenantAwareApplicationEventPublisher(
-                tenantAware, applicationEventFilter());
+                systemSecurityContext, applicationEventFilter);
         simpleApplicationEventMulticaster.setTaskExecutor(executor);
         return simpleApplicationEventMulticaster;
     }
@@ -82,14 +83,15 @@ public class EventPublisherAutoConfiguration {
 
     private static class TenantAwareApplicationEventPublisher extends SimpleApplicationEventMulticaster {
 
-        private final TenantAware tenantAware;
+        private final SystemSecurityContext systemSecurityContext;
         private final ApplicationEventFilter applicationEventFilter;
 
         @Autowired(required = false)
         private ServiceMatcher serviceMatcher;
 
-        protected TenantAwareApplicationEventPublisher(final TenantAware tenantAware, final ApplicationEventFilter applicationEventFilter) {
-            this.tenantAware = tenantAware;
+        protected TenantAwareApplicationEventPublisher(
+                final SystemSecurityContext systemSecurityContext, final ApplicationEventFilter applicationEventFilter) {
+            this.systemSecurityContext = systemSecurityContext;
             this.applicationEventFilter = applicationEventFilter;
         }
 
@@ -112,10 +114,10 @@ public class EventPublisherAutoConfiguration {
                 return;
             }
 
-            tenantAware.runAsTenant(remoteEvent.getTenant(), () -> {
+            systemSecurityContext.runAsSystemAsTenant(() -> {
                 super.multicastEvent(event, eventType);
                 return null;
-            });
+            }, remoteEvent.getTenant());
         }
     }
 
