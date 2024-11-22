@@ -153,17 +153,13 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        systemSecurityContext.runAsSystemAsTenant(() -> {
-            final List<Target> filteredTargetList = getTargetsWithoutPendingCancellations(
-                    assignedEvent.getTenant(), assignedEvent.getActions().keySet());
+        final List<Target> filteredTargetList = getTargetsWithoutPendingCancellations(
+                assignedEvent.getTenant(), assignedEvent.getActions().keySet());
 
-            if (!filteredTargetList.isEmpty()) {
-                log.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
-                sendUpdateMessageToTargets(assignedEvent.getDistributionSetId(), assignedEvent.getActions(), filteredTargetList);
-            }
-
-            return null;
-        }, assignedEvent.getTenant());
+        if (!filteredTargetList.isEmpty()) {
+            log.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
+            sendUpdateMessageToTargets(assignedEvent.getDistributionSetId(), assignedEvent.getActions(), filteredTargetList);
+        }
     }
 
     /**
@@ -177,11 +173,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        systemSecurityContext.runAsSystemAsTenant(() -> {
-            log.debug("MultiActionEvent received for {}", multiActionEvent.getControllerIds());
-            sendMultiActionRequestMessages(multiActionEvent.getTenant(), multiActionEvent.getControllerIds());
-            return null;
-        }, multiActionEvent.getTenant());
+        log.debug("MultiActionEvent received for {}", multiActionEvent.getControllerIds());
+        sendMultiActionRequestMessages(multiActionEvent.getTenant(), multiActionEvent.getControllerIds());
     }
 
     protected void sendUpdateMessageToTarget(
@@ -238,20 +231,16 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        systemSecurityContext.runAsSystemAsTenant(() -> {
-            final List<Target> eventTargets = partitionedParallelExecution(
-                    cancelEvent.getActions().keySet(), targetManagement::getByControllerID);
+        final List<Target> eventTargets = partitionedParallelExecution(
+                cancelEvent.getActions().keySet(), targetManagement::getByControllerID);
 
-            eventTargets.forEach(target ->
-                    cancelEvent.getActionPropertiesForController(target.getControllerId())
-                            .map(ActionProperties::getId)
-                            .ifPresent(actionId ->
-                                    sendCancelMessageToTarget(cancelEvent.getTenant(), target.getControllerId(), actionId, target.getAddress())
-                            )
-            );
-
-            return null;
-        }, cancelEvent.getTenant());
+        eventTargets.forEach(target ->
+                cancelEvent.getActionPropertiesForController(target.getControllerId())
+                        .map(ActionProperties::getId)
+                        .ifPresent(actionId ->
+                                sendCancelMessageToTarget(cancelEvent.getTenant(), target.getControllerId(), actionId, target.getAddress())
+                        )
+        );
     }
 
     /**
