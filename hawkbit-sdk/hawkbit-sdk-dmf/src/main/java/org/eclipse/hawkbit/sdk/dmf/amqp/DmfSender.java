@@ -40,6 +40,7 @@ import org.springframework.util.ObjectUtils;
 public class DmfSender {
 
     protected final RabbitTemplate rabbitTemplate;
+
     private static final byte[] EMPTY_BODY = new byte[0];
     private final AmqpProperties amqpProperties;
     private final ConcurrentHashMap<String, BiConsumer<String, Message>> pingListeners = new ConcurrentHashMap<>();

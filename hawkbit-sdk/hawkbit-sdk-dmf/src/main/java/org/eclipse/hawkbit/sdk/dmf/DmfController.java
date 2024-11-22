@@ -116,4 +116,9 @@ public class DmfController {
     public void removeAttribute(final String key) {
         this.attributes.remove(key);
     }
+
+    public void thingCreated() {
+        log.debug(LOG_PREFIX + "Thing created.", getTenantId(), getControllerId());
+        dmfSender.createOrUpdateThing(getTenantId(), getControllerId());
+    }
 }

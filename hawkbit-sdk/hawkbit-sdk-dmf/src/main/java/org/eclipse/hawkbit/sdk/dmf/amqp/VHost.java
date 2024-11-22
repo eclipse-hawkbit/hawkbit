@@ -49,6 +49,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 public class VHost extends DmfSender implements MessageListener {
 
     private static final String REGEX_EXTRACT_ACTION_ID = "[^0-9]";
+
     private final SimpleMessageListenerContainer container;
     private final ConcurrentHashMap<String, DmfTenant> dmfTenants = new ConcurrentHashMap<>();
     private final Set<Long> openActions = Collections.synchronizedSet(new HashSet<>());
@@ -269,13 +270,11 @@ public class VHost extends DmfSender implements MessageListener {
     }
 
     /**
-     * Convert a message body to a given class and set the message header
-     * AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME for Jackson converter.
+     * Convert a message body to a given class and set the message header AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME for Jackson converter.
      */
     @SuppressWarnings("unchecked")
     private <T> T convertMessage(final Message message, final Class<T> clazz) {
-        message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME,
-                clazz.getTypeName());
+        message.getMessageProperties().getHeaders().put(AbstractJavaTypeMapper.DEFAULT_CLASSID_FIELD_NAME, clazz.getTypeName());
         return (T) rabbitTemplate.getMessageConverter().fromMessage(message);
     }
 }
