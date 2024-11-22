@@ -213,11 +213,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return StringUtils.hasLength(message.getMessageProperties().getCorrelationId());
     }
 
-    // Exception squid:MethodCyclomaticComplexity - false positive, is a simple
-    // mapping
+    // Exception squid:MethodCyclomaticComplexity - false positive, is a simple mapping
     @SuppressWarnings("squid:MethodCyclomaticComplexity")
-    private static Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus,
-            final Action action) {
+    private static Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus, final Action action) {
         Status status = null;
         switch (actionUpdateStatus.getActionStatus()) {
             case DOWNLOAD: {
