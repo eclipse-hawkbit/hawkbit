@@ -86,10 +86,8 @@ public class EventType {
 
     private int value;
 
-    /**
-     * The associated event-type-value must remain the same as initially
-     * declared. Otherwise, messages cannot correctly de-serialized.
-     */
+    // The associated event-type-value must remain the same as initially
+    // declared. Otherwise, messages cannot correctly de-serialized.
     static {
         // target
         TYPES.put(1, TargetCreatedEvent.class);
@@ -190,10 +188,12 @@ public class EventType {
      *         does not have a {@link EventType}.
      */
     public static EventType from(final Class<?> clazz) {
-        final Optional<Integer> foundEventType = TYPES.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(clazz)).map(Entry::getKey).findAny();
-
-        return foundEventType.map(EventType::new).orElse(null);
+        return TYPES.entrySet().stream()
+                .filter(entry -> entry.getValue().equals(clazz))
+                .map(Entry::getKey)
+                .findAny()
+                .map(EventType::new)
+                .orElse(null);
     }
 
     public Class<?> getTargetClass() {

@@ -57,8 +57,7 @@ public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteId
     private E reloadEntityFromRepository() {
         try {
             final Class<E> clazz = (Class<E>) Class.forName(getEntityClass());
-            return EventEntityManagerHolder.getInstance().getEventEntityManager().findEntity(
-                    getTenant(), getEntityId(), clazz);
+            return EventEntityManagerHolder.getInstance().getEventEntityManager().findEntity(getTenant(), getEntityId(), clazz);
         } catch (final ClassNotFoundException e) {
             log.error("Cannot reload entity because class is not found", e);
         }

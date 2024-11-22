@@ -31,6 +31,5 @@ public class CancelTargetAssignmentEvent extends AbstractAssignmentEvent {
 
     public CancelTargetAssignmentEvent(final String tenant, final List<Action> a, final String applicationId) {
         super(applicationId, tenant, a, applicationId);
-
     }
 }

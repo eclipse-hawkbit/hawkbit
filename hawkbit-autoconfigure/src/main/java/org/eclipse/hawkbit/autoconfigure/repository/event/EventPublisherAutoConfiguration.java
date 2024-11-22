@@ -72,8 +72,7 @@ public class EventPublisherAutoConfiguration {
     }
 
     /**
-     * @return default {@link ApplicationEventFilter} that does not filter any
-     *         events
+     * @return default {@link ApplicationEventFilter} that does not filter any events
      */
     @Bean
     @ConditionalOnMissingBean

@@ -65,14 +65,14 @@ public class SystemSecurityContext {
     /**
      * Runs a given {@link Callable} within a system security context, which is
      * permitted to call secured system code. Often the system needs to call
-     * secured methods by it's own without relying on the current security
+     * secured methods by its own without relying on the current security
      * context e.g. if the current security context does not contain the
      * necessary permission it's necessary to execute code as system code to
      * execute necessary methods and functionality.
-     *
+     * <br/>
      * The security context will be switched to the system code and back after
      * the callable is called.
-     *
+     * <br/>
      * The system code is executed for a current tenant by using the
      * {@link TenantAware#getCurrentTenant()}.
      *
@@ -88,7 +88,7 @@ public class SystemSecurityContext {
     /**
      * Runs a given {@link Callable} within a system security context, which is
      * permitted to call secured system code. Often the system needs to call
-     * secured methods by it's own without relying on the current security
+     * secured methods by its own without relying on the current security
      * context e.g. if the current security context does not contain the
      * necessary permission it's necessary to execute code as system code to
      * execute necessary methods and functionality.
@@ -120,12 +120,10 @@ public class SystemSecurityContext {
     }
 
     /**
-     * Runs a given {@link Callable} within a system security context, which has
-     * the provided {@link GrantedAuthority}s to successfully run the
-     * {@link Callable}.
-     *
-     * The security context will be switched to the a new
-     * {@link SecurityContext} and back after the callable is called.
+     * Runs a given {@link Callable} within a system security context, which has the provided {@link GrantedAuthority}s to successfully
+     * run the {@link Callable}.
+     * <br/>
+     * The security context will be switched to a new {@link SecurityContext} and back after the callable is called.
      *
      * @param tenant under which the {@link Callable#call()} must be executed.
      * @param callable to call within the security context
@@ -193,18 +191,17 @@ public class SystemSecurityContext {
     }
 
     /**
-     * An implementation of the Spring's {@link Authentication} object which is
-     * used within a system security code block and wraps the original
-     * authentication object. The wrapped object contains the necessary
-     * {@link SpringEvalExpressions#SYSTEM_ROLE} which is allowed to execute all
-     * secured methods.
+     * An implementation of the Spring's {@link Authentication} object which is used within a system security code block and
+     * wraps the original authentication object. The wrapped object contains the necessary {@link SpringEvalExpressions#SYSTEM_ROLE}
+     * which is allowed to execute all secured methods.
      */
     public static final class SystemCodeAuthentication implements Authentication {
 
         @Serial
         private static final long serialVersionUID = 1L;
-        private static final List<SimpleGrantedAuthority> AUTHORITIES = Collections
-                .singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
+
+        private static final List<SimpleGrantedAuthority> AUTHORITIES =
+                Collections.singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
         private final Authentication oldAuthentication;
 
         private SystemCodeAuthentication(final Authentication oldAuthentication) {

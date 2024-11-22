@@ -224,6 +224,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     void testSendCancelRequest() {
         final Action action = mock(Action.class);
         when(action.getId()).thenReturn(1L);
+        when(action.getTenant()).thenReturn(TENANT);
         when(action.getTarget()).thenReturn(testTarget);
         final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent = new CancelTargetAssignmentEvent(
                 action, serviceMatcher.getBusId());

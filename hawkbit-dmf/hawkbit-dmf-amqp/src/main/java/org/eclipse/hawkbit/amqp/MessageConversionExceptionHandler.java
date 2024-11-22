@@ -27,8 +27,7 @@ public class MessageConversionExceptionHandler extends AbstractAmqpErrorHandler<
     @Override
     public String getErrorMessage(Throwable throwable) {
         final String errorMessage = super.getErrorMessage(throwable);
-        //since the detailed error message lies in the first parent of current throwable we retrieve it
-        // and append it to the errorMessage
+        // since the detailed error message lies in the first parent of current throwable we retrieve it and append it to the errorMessage
         final Optional<String> detailedErrorMessage = getFirstAncestralErrorMessage(throwable.getCause());
         return detailedErrorMessage.isPresent() ? (detailedErrorMessage.get() + errorMessage) : errorMessage;
     }

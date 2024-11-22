@@ -22,24 +22,19 @@ import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.util.MimeType;
 
 /**
- * A customize message converter for the spring cloud events. The converter is
- * registered for the application/binary+protostuff type.
- *
- * The clazz-type-information is encoded into the message payload infront with a
- * length of {@link #EVENT_TYPE_LENGTH}. This is necessary due in case of
- * rabbitMQ batching the message headers will be merged together and custom
- * message header information will get lost. So in this implementation the
- * information about the event-type is encoded in the payload of the message
- * directly using the encoded values of {@link EventType}.
+ * A customize message converter for the spring cloud events. The converter is registered for the application/binary+protostuff type.
+ * <p/>
+ * The clazz-type-information is encoded into the message payload infront with a length of {@link #EVENT_TYPE_LENGTH}. This is necessary
+ * due in case of rabbitMQ batching the message headers will be merged together and custom message header information will get lost.
+ * So in this implementation the information about the event-type is encoded in the payload of the message directly using the encoded
+ * values of {@link EventType}.
  */
 @Slf4j
 public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
 
     public static final MimeType APPLICATION_BINARY_PROTOSTUFF = new MimeType("application", "binary+protostuff");
 
-    /**
-     * The length of the class type length of the payload.
-     */
+    /** The length of the class type length of the payload. */
     private static final byte EVENT_TYPE_LENGTH = 2;
 
     public BusProtoStuffMessageConverter() {
@@ -52,8 +47,7 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
     }
 
     @Override
-    public Object convertFromInternal(final Message<?> message, final Class<?> targetClass,
-            final Object conversionHint) {
+    public Object convertFromInternal(final Message<?> message, final Class<?> targetClass, final Object conversionHint) {
         final Object objectPayload = message.getPayload();
         if (objectPayload instanceof byte[] payload) {
             final byte[] clazzHeader = extractClazzHeader(payload);
@@ -66,13 +60,9 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
     }
 
     @Override
-    protected Object convertToInternal(final Object payload, final MessageHeaders headers,
-            final Object conversionHint) {
-
+    protected Object convertToInternal(final Object payload, final MessageHeaders headers, final Object conversionHint) {
         final byte[] clazzHeader = writeClassHeader(payload.getClass());
-
         final byte[] writeContent = writeContent(payload);
-
         return mergeClassHeaderAndContent(clazzHeader, writeContent);
     }
 
