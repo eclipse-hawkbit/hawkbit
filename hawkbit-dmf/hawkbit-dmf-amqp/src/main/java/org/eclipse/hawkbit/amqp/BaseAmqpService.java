@@ -66,7 +66,7 @@ public class BaseAmqpService {
         return ObjectUtils.isEmpty(message.getBody());
     }
 
-    protected static final void logAndThrowMessageError(final Message message, final String error) {
+    protected static void logAndThrowMessageError(final Message message, final String error) {
         log.debug("Warning! \"{}\" reported by message: {}", error, message);
         throw new AmqpRejectAndDontRequeueException(error);
     }

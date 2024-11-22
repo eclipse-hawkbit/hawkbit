@@ -165,9 +165,8 @@ public class SecurityContextTenantAware implements ContextAware {
     }
 
     /**
-     * An {@link Authentication} implementation to delegate to an existing
-     * {@link Authentication} object except setting the details specifically for
-     * a specific tenant and user.
+     * An {@link Authentication} implementation to delegate to an existing {@link Authentication} object except setting the details
+     * specifically for a specific tenant and user.
      */
     private static final class AuthenticationDelegate implements Authentication {
 
