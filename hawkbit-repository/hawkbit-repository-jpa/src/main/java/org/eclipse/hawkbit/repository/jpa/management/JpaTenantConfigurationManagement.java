@@ -107,7 +107,8 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     }
 
     @Override
-    @Cacheable(value = "tenantConfiguration", key = "#configurationKeyName")
+// TODO - check if cache works
+//    @Cacheable(value = "tenantConfiguration", key = "#configurationKeyName")
     public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(final String configurationKeyName) {
         checkAccess(configurationKeyName);
 
@@ -117,8 +118,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     }
 
     @Override
-// TODO - check if cache works
-//    @Cacheable(value = "tenantConfiguration", key = "#configurationKeyName")
+    @Cacheable(value = "tenantConfiguration", key = "#configurationKeyName")
     public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(
             final String configurationKeyName, final Class<T> propertyType) {
         checkAccess(configurationKeyName);
