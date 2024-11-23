@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Primary;
 /**
  * A configuration for configuring the spring {@link CacheManager} for specific multi-tenancy caching. The caches between
  * tenants must not interfere each other.
- *
+ * <p/>
  * This is done by providing a special {@link TenancyCacheManager} which generates a cache name included the current tenant.
  */
 @Configuration
@@ -39,14 +39,14 @@ public class CacheAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @Primary
-    TenancyCacheManager cacheManager(@Qualifier("directCacheManager") final CacheManager directCacheManager,
+    TenancyCacheManager cacheManager(
+            @Qualifier("directCacheManager") final CacheManager directCacheManager,
             final TenantAware tenantAware) {
         return new TenantAwareCacheManager(directCacheManager, tenantAware);
     }
 
     /**
-     * A separate configuration of the direct cache manager for the
-     * {@link TenantAwareCacheManager} that it can get overridden by another
+     * A separate configuration of the direct cache manager for the {@link TenantAwareCacheManager} that it can get overridden by another
      * configuration.
      */
     @Configuration
@@ -54,10 +54,8 @@ public class CacheAutoConfiguration {
     static class DirectCacheManagerConfiguration {
 
         /**
-         * @return the direct cache manager to access without tenant aware
-         *         check, cause in sometimes it's necessary to access the cache
-         *         directly without having the current tenant, e.g. initial
-         *         creation of tenant
+         * @return the direct cache manager to access without tenant aware check, cause in sometimes it's necessary to access the cache
+         *         directly without having the current tenant, e.g. initial creation of tenant
          */
         @Bean(name = "directCacheManager")
         @ConditionalOnMissingBean(name = "directCacheManager")
@@ -72,6 +70,5 @@ public class CacheAutoConfiguration {
 
             return cacheManager;
         }
-
     }
 }
