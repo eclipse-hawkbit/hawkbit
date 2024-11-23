@@ -17,12 +17,9 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
 /**
- * A {@link CacheManager} delegator which wraps the
- * {@link CacheManager#getCache(String)} and
- * {@link CacheManager#getCacheNames()} to include the
- * {@link TenantAware#getCurrentTenant()} when accessing a cache, so caches are
- * seperated.
- *
+ * A {@link CacheManager} delegator which wraps the {@link CacheManager#getCache(String)} and {@link CacheManager#getCacheNames()}
+ * to include the {@link TenantAware#getCurrentTenant()} when accessing a cache, so caches are seperated.
+ * <p/>
  * Additionally, it also provides functionality to retrieve all caches overall tenants at once, for monitoring and system access.
  */
 public class TenantAwareCacheManager implements TenancyCacheManager {

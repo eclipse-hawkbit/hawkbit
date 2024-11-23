@@ -58,7 +58,8 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class JpaTenantConfigurationManagement implements TenantConfigurationManagement {
 
-    private static final ConfigurableConversionService conversionService = new DefaultConversionService();
+    private static final ConfigurableConversionService CONVERSION_SERVICE = new DefaultConversionService();
+
     @Autowired
     private TenantConfigurationRepository tenantConfigurationRepository;
     @Autowired
@@ -87,7 +88,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     public <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration(Map<String, T> configurations) {
         // Register a callback to be invoked after the transaction is committed - for cache eviction
         afterCommitExecutor.afterCommit(() -> {
-            Cache cache = cacheManager.getCache("tenantConfiguration");
+            final Cache cache = cacheManager.getCache("tenantConfiguration");
             if (cache != null) {
                 configurations.keySet().forEach(cache::evict);
             }
@@ -116,7 +117,8 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     }
 
     @Override
-    @Cacheable(value = "tenantConfiguration", key = "#configurationKeyName")
+// TODO - check if cache works
+//    @Cacheable(value = "tenantConfiguration", key = "#configurationKeyName")
     public <T extends Serializable> TenantConfigurationValue<T> getConfigurationValue(
             final String configurationKeyName, final Class<T> propertyType) {
         checkAccess(configurationKeyName);
@@ -141,7 +143,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
                     "Cannot parse the database value of type %s into the type %s.", key.getDataType(), propertyType));
         }
 
-        return conversionService.convert(key.getDefaultValue(), propertyType);
+        return CONVERSION_SERVICE.convert(key.getDefaultValue(), propertyType);
     }
 
     /**
@@ -214,7 +216,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
                             .createdAt(updatedTenantConfiguration.getCreatedAt())
                             .lastModifiedAt(updatedTenantConfiguration.getLastModifiedAt())
                             .lastModifiedBy(updatedTenantConfiguration.getLastModifiedBy())
-                            .value(conversionService.convert(updatedTenantConfiguration.getValue(), clazzT))
+                            .value(CONVERSION_SERVICE.convert(updatedTenantConfiguration.getValue(), clazzT))
                             .build();
                 }));
     }
@@ -227,7 +229,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
                     .createdAt(tenantConfiguration.getCreatedAt())
                     .lastModifiedAt(tenantConfiguration.getLastModifiedAt())
                     .lastModifiedBy(tenantConfiguration.getLastModifiedBy())
-                    .value(conversionService.convert(tenantConfiguration.getValue(), propertyType)).build();
+                    .value(CONVERSION_SERVICE.convert(tenantConfiguration.getValue(), propertyType)).build();
 
         } else if (configurationKey.getDefaultValue() != null) {
 
