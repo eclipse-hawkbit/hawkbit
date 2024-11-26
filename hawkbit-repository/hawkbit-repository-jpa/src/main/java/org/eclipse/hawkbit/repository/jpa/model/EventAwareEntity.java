@@ -9,12 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.util.Collections;
-import java.util.List;
-
 /**
- * Interfaces which can be implemented by entities to be called when the entity
- * should fire an event because the entity has been created, updated or deleted.
+ * Interfaces which can be implemented by entities to be called when the entity should fire an event because the entity has been created,
+ * updated or deleted.
  */
 public interface EventAwareEntity {
 
@@ -32,11 +29,4 @@ public interface EventAwareEntity {
      * Fired for the Entity deletion.
      */
     void fireDeleteEvent();
-
-    /**
-     * @return list of entity fields that if the only changed fields prevents {@link #fireUpdateEvent()} call.
-     */
-    default List<String> getUpdateIgnoreFields() {
-        return Collections.emptyList();
-    }
 }

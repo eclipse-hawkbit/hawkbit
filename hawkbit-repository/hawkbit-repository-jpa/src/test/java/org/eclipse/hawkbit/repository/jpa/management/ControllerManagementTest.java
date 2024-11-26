@@ -622,22 +622,25 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Register a controller which does not exist")
     @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
     void findOrRegisterTargetIfItDoesNotExist() {
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
         assertThat(target).as("target should not be null").isNotNull();
 
         final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
-        assertThat(target.getId()).as("Target should be the equals").isEqualTo(sameTarget.getId());
+        assertThat(target.getId()).as("Target should ben equals").isEqualTo(sameTarget.getId());
         assertThat(targetRepository.count()).as("Only 1 target should be registered").isEqualTo(1L);
     }
 
     @Test
     @Description("Register a controller with name which does not exist and update its name")
     @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 1) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 1) })
     void findOrRegisterTargetIfItDoesNotExistWithName() {
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST, "TestName", null);
         final Target sameTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST,
@@ -1085,10 +1088,10 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Ensures that target attributes can be updated using different update modes.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 4) })
     void updateTargetAttributesWithDifferentUpdateModes() {
-
         final String controllerId = "testCtrl";
         testdataFactory.createTarget(controllerId);
 
@@ -1103,7 +1106,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // update mode REMOVE
         updateTargetAttributesWithUpdateModeRemove(controllerId);
-
     }
 
     @Test
@@ -1710,7 +1712,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Step
     private void updateTargetAttributesWithUpdateModeRemove(final String controllerId) {
-
         final int previousSize = targetManagement.getControllerAttributes(controllerId).size();
 
         // update the attributes using update mode REMOVE
@@ -1723,14 +1724,12 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
         assertThat(updatedAttributes.size()).isEqualTo(previousSize - 2);
         assertThat(updatedAttributes).doesNotContainKeys("k1", "k3");
-
     }
 
     @Step
     private void updateTargetAttributesWithUpdateModeMerge(final String controllerId) {
         // get the current attributes
-        final HashMap<String, String> attributes = new HashMap<>(
-                targetManagement.getControllerAttributes(controllerId));
+        final HashMap<String, String> attributes = new HashMap<>(targetManagement.getControllerAttributes(controllerId));
 
         // update the attributes using update mode MERGE
         final Map<String, String> mergeAttributes = new HashMap<>();
@@ -1748,10 +1747,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Step
     private void updateTargetAttributesWithUpdateModeReplace(final String controllerId) {
-
         // get the current attributes
-        final HashMap<String, String> attributes = new HashMap<>(
-                targetManagement.getControllerAttributes(controllerId));
+        final HashMap<String, String> attributes = new HashMap<>(targetManagement.getControllerAttributes(controllerId));
 
         // update the attributes using update mode REPLACE
         final Map<String, String> replacementAttributes = new HashMap<>();
@@ -1770,7 +1767,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Step
     private void updateTargetAttributesWithoutUpdateMode(final String controllerId) {
-
         // set the initial attributes
         final Map<String, String> attributes = new HashMap<>();
         attributes.put("k0", "v0");

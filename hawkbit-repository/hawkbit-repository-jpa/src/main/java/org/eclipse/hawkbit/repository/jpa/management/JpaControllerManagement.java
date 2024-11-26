@@ -408,13 +408,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target updateControllerAttributes(final String controllerId, final Map<String, String> data,
-            final UpdateMode mode) {
-
-        /*
-         * Constraints on attribute keys & values are not validated by
-         * EclipseLink. Hence, they are validated here.
-         */
+    public Target updateControllerAttributes(final String controllerId, final Map<String, String> data, final UpdateMode mode) {
+        // Constraints on attribute keys & values are not validated by EclipseLink. Hence, they are validated here.
         if (data.entrySet().stream().anyMatch(e -> !isAttributeEntryValid(e))) {
             throw new InvalidTargetAttributeException();
         }
@@ -889,7 +884,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         // because the currently assigned DS can be unequal to the currently
         // installed DS (the downloadOnly DS)
         if (isDownloadOnly(action)) {
-            target.setAssignedDistributionSet(action.getDistributionSet());
+            target.setAssignedDistributionSet((JpaDistributionSet) action.getDistributionSet());
         }
 
         // check if the assigned set is equal to the installed set (not

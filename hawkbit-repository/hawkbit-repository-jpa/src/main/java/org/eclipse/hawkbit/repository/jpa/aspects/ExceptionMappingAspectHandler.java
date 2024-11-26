@@ -73,9 +73,8 @@ public class ExceptionMappingAspectHandler implements Ordered {
     @SuppressWarnings({ "squid:S00112", "squid:S1162" })
     public void catchAndWrapJpaExceptionsService(final Exception ex) throws Throwable {
 
-        // Workarround for EclipseLink merge where it does not throw
-        // ConstraintViolationException directly in case of existing entity
-        // update
+        // Workaround for EclipseLink merge where it does not throw ConstraintViolationException directly in case of
+        // existing entity update
         if (ex instanceof TransactionSystemException) {
             throw replaceWithCauseIfConstraintViolationException((TransactionSystemException) ex);
         }

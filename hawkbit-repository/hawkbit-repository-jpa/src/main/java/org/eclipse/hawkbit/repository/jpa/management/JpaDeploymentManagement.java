@@ -1009,7 +1009,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private void setAssignmentOnTargets(final List<JpaAction> actions) {
         final List<JpaTarget> assignedDsTargets = actions.stream().map(savedAction -> {
             final JpaTarget mergedTarget = (JpaTarget) entityManager.merge(savedAction.getTarget());
-            mergedTarget.setAssignedDistributionSet(savedAction.getDistributionSet());
+            mergedTarget.setAssignedDistributionSet((JpaDistributionSet) savedAction.getDistributionSet());
             mergedTarget.setUpdateStatus(TargetUpdateStatus.PENDING);
             return mergedTarget;
         }).collect(Collectors.toList());
@@ -1022,8 +1022,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         actionStatus.setAction(action);
         actionStatus.setOccurredAt(action.getCreatedAt());
         actionStatus.setStatus(Status.RUNNING);
-        actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX
-                + "Distribution Set is already assigned. Skipping this action.");
+        actionStatus.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Distribution Set is already assigned. Skipping this action.");
         actionStatusRepository.save(actionStatus);
     }
 

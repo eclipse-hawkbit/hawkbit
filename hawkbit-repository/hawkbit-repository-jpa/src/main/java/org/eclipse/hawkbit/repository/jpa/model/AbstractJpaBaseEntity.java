@@ -19,11 +19,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostRemove;
+import jakarta.persistence.PostUpdate;
 import jakarta.persistence.Version;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.springframework.data.annotation.CreatedBy;
@@ -39,7 +43,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // Default constructor needed for JPA entities.
 @MappedSuperclass
 @Access(AccessType.FIELD)
-@EntityListeners({ AuditingEntityListener.class, EntityPropertyChangeListener.class, EntityInterceptorListener.class })
+@EntityListeners({ AuditingEntityListener.class, EntityInterceptorListener.class })
 public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     protected static final int USERNAME_FIELD_LENGTH = 64;
@@ -197,6 +201,32 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + " [id=" + id + "]";
+    }
+
+    @PostPersist
+    public void postInsert() {
+        if (this instanceof EventAwareEntity eventAwareEntity) {
+            doNotify(eventAwareEntity::fireCreateEvent);
+        }
+    }
+
+    @PostUpdate
+    public void postUpdate() {
+        if (this instanceof EventAwareEntity eventAwareEntity) {
+            doNotify(eventAwareEntity::fireUpdateEvent);
+        }
+    }
+
+    @PostRemove
+    public void postDelete() {
+        if (this instanceof EventAwareEntity eventAwareEntity) {
+            doNotify(eventAwareEntity::fireDeleteEvent);
+        }
+    }
+
+    protected static void doNotify(final Runnable runnable) {
+        // fire events onl AFTER transaction commit
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(runnable);
     }
 
     private boolean isController() {

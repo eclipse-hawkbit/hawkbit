@@ -58,21 +58,20 @@ public class EventVerifier extends AbstractTestExecutionListener {
      * executor in the ApplicationEventMultiCaster, so the order of the events
      * keep the same.
      *
-     * @param publisher the {@link ApplicationEventPublisher} to publish the marker
-     *         event to
+     * @param publisher the {@link ApplicationEventPublisher} to publish the marker event to
      */
     public static void publishResetMarkerEvent(final ApplicationEventPublisher publisher) {
         publisher.publishEvent(new ResetCounterMarkerEvent());
     }
 
     @Override
-    public void beforeTestMethod(final TestContext testContext) throws Exception {
+    public void beforeTestMethod(final TestContext testContext) {
         final Optional<Expect[]> expectedEvents = getExpectationsFrom(testContext.getTestMethod());
         expectedEvents.ifPresent(events -> beforeTest(testContext));
     }
 
     @Override
-    public void afterTestMethod(final TestContext testContext) throws Exception {
+    public void afterTestMethod(final TestContext testContext) {
         final Optional<Expect[]> expectedEvents = getExpectationsFrom(testContext.getTestMethod());
         try {
             expectedEvents.ifPresent(events -> afterTest(events));
