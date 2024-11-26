@@ -17,6 +17,10 @@ import jakarta.persistence.PrePersist;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
@@ -28,6 +32,7 @@ import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
 /**
  * Holder of the base attributes common to all tenant aware entities.
  */
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // Default constructor needed for JPA entities.
 @MappedSuperclass
 @TenantDiscriminatorColumn(name = "tenant", length = 40)
 @Multitenant(MultitenantType.SINGLE_TABLE)
@@ -36,34 +41,16 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @Setter
+    @Getter
     @Column(name = "tenant", nullable = false, insertable = false, updatable = false, length = 40)
     @Size(min = 1, max = 40)
     @NotNull
     private String tenant;
 
     /**
-     * Default constructor needed for JPA entities.
-     */
-    protected AbstractJpaTenantAwareBaseEntity() {
-        // Default constructor needed for JPA entities.
-    }
-
-    @Override
-    public String getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(final String tenant) {
-        this.tenant = tenant;
-    }
-
-    /**
-     * Tenant aware entities extend the equals/hashcode strategy with the tenant
-     * name. That would allow for instance in a multi-schema based data
-     * separation setup to have the same primary key for different entities of
-     * different tenants.
-     *
-     * @see org.eclipse.hawkbit.repository.model.BaseEntity#hashCode()
+     * Tenant aware entities extend the equals/hashcode strategy with the tenant name. That would allow for instance in a
+     * multi-schema based data separation setup to have the same primary key for different entities of different tenants.
      */
     @Override
     public int hashCode() {
@@ -74,12 +61,9 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
     }
 
     /**
-     * Tenant aware entities extend the equals/hashcode strategy with the tenant
-     * name. That would allow for instance in a multi-schema based data
-     * separation setup to have the same primary key for different entities of
+     * Tenant aware entities extend the equals/hashcode strategy with the tenant name. That would allow for instance in a
+     * multi-schema based data separation setup to have the same primary key for different entities of
      * different tenants.
-     *
-     * @see org.eclipse.hawkbit.repository.model.BaseEntity#equals(java.lang.Object)
      */
     @Override
     // exception squid:S2259 - obj is checked for null in super
@@ -105,21 +89,18 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
     }
 
     /**
-     * PrePersist listener method for all {@link TenantAwareBaseEntity}
-     * entities.
+     * PrePersist listener method for all {@link TenantAwareBaseEntity} entities.
      */
     @PrePersist
     void prePersist() {
-        // before persisting the entity check the current ID of the tenant by
-        // using the TenantAware
-        // service
+        // before persisting the entity check the current ID of the tenant by using the TenantAware service
         final String currentTenant = SystemManagementHolder.getInstance().currentTenant();
         if (currentTenant == null) {
-            throw new TenantNotExistException("Tenant "
-                    + TenantAwareHolder.getInstance().getTenantAware().getCurrentTenant()
-                    + " does not exists, cannot create entity " + this.getClass() + " with id " + super.getId());
+            throw new TenantNotExistException(
+                    String.format(
+                            "Tenant %s does not exists, cannot create entity %s with id %d",
+                            TenantAwareHolder.getInstance().getTenantAware().getCurrentTenant(), getClass(), getId()));
         }
         setTenant(currentTenant.toUpperCase());
     }
-
 }

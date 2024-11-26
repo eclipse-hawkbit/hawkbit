@@ -321,8 +321,7 @@ public interface ControllerManagement {
      * @throws InvalidTargetAttributeException if attributes violate constraints
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Target updateControllerAttributes(@NotEmpty String controllerId, @NotNull Map<String, String> attributes,
-            UpdateMode mode);
+    Target updateControllerAttributes(@NotEmpty String controllerId, @NotNull Map<String, String> attributes, UpdateMode mode);
 
     /**
      * Finds {@link Target} based on given controller ID returns found Target

@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
@@ -68,7 +69,7 @@ public final class DeploymentHelper {
             target.setAssignedDistributionSet(target.getInstalledDistributionSet());
             target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
         } else {
-            target.setAssignedDistributionSet(nextActiveActions.get(0).getDistributionSet());
+            target.setAssignedDistributionSet((JpaDistributionSet) nextActiveActions.get(0).getDistributionSet());
         }
 
         targetRepository.save(target);

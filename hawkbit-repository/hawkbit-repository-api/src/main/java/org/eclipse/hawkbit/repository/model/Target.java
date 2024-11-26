@@ -53,7 +53,9 @@ public interface Target extends NamedEntity {
     String getControllerId();
 
     /**
-     * @return the securityToken
+     * @return the securityToken if the current security context contains the necessary permission
+     *         {@link org.eclipse.hawkbit.im.authentication.SpPermission#READ_TARGET_SEC_TOKEN}
+     *         or the current context is executed as system code, otherwise {@code null}.
      */
     String getSecurityToken();
 
@@ -70,8 +72,7 @@ public interface Target extends NamedEntity {
     URI getAddress();
 
     /**
-     * @return time in {@link TimeUnit#MILLISECONDS} GMT when the {@link Target}
-     *         polled the server the last time or <code>null</code> if target
+     * @return time in {@link TimeUnit#MILLISECONDS} GMT when the {@link Target} polled the server the last time or <code>null</code> if target
      *         has never queried yet.
      */
     Long getLastTargetQuery();

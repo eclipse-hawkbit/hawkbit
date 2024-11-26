@@ -23,8 +23,7 @@ import org.eclipse.hawkbit.repository.jpa.EntityInterceptor;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 
 /**
- * Entity listener which calls the callback's of all registered entity
- * interceptors.
+ * Entity listener which calls the callback's of all registered entity interceptors.
  */
 public class EntityInterceptorListener {
 
