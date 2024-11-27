@@ -297,7 +297,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public DistributionSet assignSoftwareModules(final long id, final Collection<Long> softwareModuleId) {
         final JpaDistributionSet set = (JpaDistributionSet) getValid(id);
         assertDistributionSetIsNotAssignedToTargets(id);
-        assertSoftwareModuleQuota(id, softwareModuleId.size());
+        QuotaHelper.assertAssignmentQuota(id, softwareModuleId.size(), quotaManagement.getMaxSoftwareModulesPerDistributionSet(),
+                SoftwareModule.class, DistributionSet.class, v -> (long)set.getModules().size());
 
         final Collection<JpaSoftwareModule> modules = softwareModuleRepository.findAllById(softwareModuleId);
         if (modules.size() < softwareModuleId.size()) {
@@ -437,8 +438,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final DistributionSet distributionSet = getValid(id);
 
         if (!distributionSet.isComplete()) {
-            throw new IncompleteDistributionSetException("Distribution set of type "
-                    + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
+            throw new IncompleteDistributionSetException(String.format(
+                    "Distribution set of type %s is incomplete: %d", distributionSet.getType().getKey(), distributionSet.getId()));
         }
 
         if (distributionSet.isDeleted()) {
@@ -832,11 +833,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         QuotaHelper.assertAssignmentQuota(dsId, requested, quotaManagement.getMaxMetaDataEntriesPerDistributionSet(),
                 DistributionSetMetadata.class, DistributionSet.class,
                 distributionSetMetadataRepository::countByDistributionSetId);
-    }
-
-    private void assertSoftwareModuleQuota(final Long id, final int requested) {
-        QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxSoftwareModulesPerDistributionSet(),
-                SoftwareModule.class, DistributionSet.class, softwareModuleRepository::countByAssignedToId);
     }
 
     private Specification<JpaDistributionSetMetadata> byDsIdSpec(final long dsId) {

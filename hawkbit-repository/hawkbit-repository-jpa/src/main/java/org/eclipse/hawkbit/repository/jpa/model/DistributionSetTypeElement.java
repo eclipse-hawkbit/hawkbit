@@ -28,8 +28,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
- * Relation element between a {@link DistributionSetType} and its
- * {@link SoftwareModuleType} elements.
+ * Relation element between a {@link DistributionSetType} and its {@link SoftwareModuleType} elements.
  */
 @Entity
 @Table(name = "sp_ds_type_element")

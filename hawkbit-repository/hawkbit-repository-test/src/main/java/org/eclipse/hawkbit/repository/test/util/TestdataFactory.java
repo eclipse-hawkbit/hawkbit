@@ -81,6 +81,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Data generator utility for tests.
@@ -312,15 +313,17 @@ public class TestdataFactory {
                         .description(randomDescriptionLong()).vendor(prefix + " vendor Limited Inc, California"));
 
         return distributionSetManagement.create(
-                entityFactory.distributionSet().create().name(prefix != null && prefix.length() > 0 ? prefix : "DS")
-                        .version(version).description(randomDescriptionShort()).type(findOrCreateDefaultTestDsType())
+                entityFactory.distributionSet().create()
+                        .type(findOrCreateDefaultTestDsType())
+                        .name(ObjectUtils.isEmpty(prefix) ? "DS" : prefix)
+                        .version(version)
+                        .description(randomDescriptionShort())
                         .modules(Arrays.asList(osMod.getId(), runtimeMod.getId(), appMod.getId()))
                         .requiredMigrationStep(isRequiredMigrationStep));
     }
 
     /**
-     * Adds {@link SoftwareModuleMetadata} to every module of given
-     * {@link DistributionSet}.
+     * Adds {@link SoftwareModuleMetadata} to every module of given {@link DistributionSet}.
      *
      * {@link #VISIBLE_SM_MD_VALUE}, {@link #VISIBLE_SM_MD_KEY} with
      * {@link SoftwareModuleMetadata#isTargetVisible()} and

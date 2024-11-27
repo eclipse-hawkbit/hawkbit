@@ -132,7 +132,6 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Verifies that the quota for software module types per distribution set type is enforced as expected.")
     public void quotaMaxSoftwareModuleTypes() {
-
         final int quota = quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType();
         // create software module types
         final List<Long> moduleTypeIds = new ArrayList<>();
@@ -156,8 +155,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType2.getId(),
                 moduleTypeIds.subList(0, quota));
         assertThat(distributionSetTypeManagement.get(dsType2.getId())).isNotEmpty();
-        assertThat(distributionSetTypeManagement.get(dsType2.getId()).get().getMandatoryModuleTypes().size())
-                .isEqualTo(quota);
+        assertThat(distributionSetTypeManagement.get(dsType2.getId()).get().getMandatoryModuleTypes().size()).isEqualTo(quota);
         // assign one more to trigger the quota exceeded error
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType2.getId(),
@@ -166,8 +164,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         // assign as many optional modules as possible
         final DistributionSetType dsType3 = distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("dst3").name("dst3"));
-        distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3.getId(),
-                moduleTypeIds.subList(0, quota));
+        distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3.getId(), moduleTypeIds.subList(0, quota));
         assertThat(distributionSetTypeManagement.get(dsType3.getId())).isNotEmpty();
         assertThat(distributionSetTypeManagement.get(dsType3.getId()).get().getOptionalModuleTypes().size())
                 .isEqualTo(quota);

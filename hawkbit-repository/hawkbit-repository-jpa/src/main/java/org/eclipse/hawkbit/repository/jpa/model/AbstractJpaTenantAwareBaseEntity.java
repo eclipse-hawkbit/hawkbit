@@ -24,7 +24,6 @@ import lombok.Setter;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.persistence.annotations.Multitenant;
 import org.eclipse.persistence.annotations.MultitenantType;
 import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
@@ -33,7 +32,10 @@ import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
  * Holder of the base attributes common to all tenant aware entities.
  */
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // Default constructor needed for JPA entities.
+@Setter
+@Getter
 @MappedSuperclass
+// Eclipse link MultiTenant support
 @TenantDiscriminatorColumn(name = "tenant", length = 40)
 @Multitenant(MultitenantType.SINGLE_TABLE)
 public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEntity implements TenantAwareBaseEntity {
@@ -41,9 +43,7 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Setter
-    @Getter
-    @Column(name = "tenant", nullable = false, insertable = false, updatable = false, length = 40)
+    @Column(name = "tenant", nullable = false, insertable = false, updatable = false, length = 40) // eclipselink
     @Size(min = 1, max = 40)
     @NotNull
     private String tenant;
@@ -74,13 +74,10 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
         }
         final AbstractJpaTenantAwareBaseEntity other = (AbstractJpaTenantAwareBaseEntity) obj;
         if (tenant == null) {
-            if (other.tenant != null) {
-                return false;
-            }
-        } else if (!tenant.equals(other.tenant)) {
-            return false;
+            return other.tenant == null;
+        } else {
+            return tenant.equals(other.tenant);
         }
-        return true;
     }
 
     @Override
@@ -90,11 +87,14 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
 
     /**
      * PrePersist listener method for all {@link TenantAwareBaseEntity} entities.
+     *
+     * // TODO - check if the tenant support should set tenant from context
+     * // TODO - should we check if tenant exists in the system? Note: seems it's not good to work with db in the listener
      */
     @PrePersist
     void prePersist() {
         // before persisting the entity check the current ID of the tenant by using the TenantAware service
-        final String currentTenant = SystemManagementHolder.getInstance().currentTenant();
+        final String currentTenant = TenantAwareHolder.getInstance().getTenantAware().getCurrentTenant();
         if (currentTenant == null) {
             throw new TenantNotExistException(
                     String.format(

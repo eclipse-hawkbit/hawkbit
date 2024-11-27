@@ -148,7 +148,10 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
 
     @Setter
     @Getter
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "target", orphanRemoval = true)
+    @OneToOne(
+            fetch = FetchType.LAZY, mappedBy = "target",
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE},
+            orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private JpaAutoConfirmationStatus autoConfirmationStatus;
 
@@ -176,7 +179,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @Getter
     @ElementCollection
     @Column(name = "attribute_value", length = Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE)
-    @MapKeyColumn(name = "attribute_key", nullable = false, length = Target.CONTROLLER_ATTRIBUTE_KEY_SIZE)
+    @MapKeyColumn(name = "attribute_key", length = Target.CONTROLLER_ATTRIBUTE_KEY_SIZE)
     @CollectionTable(
             name = "sp_target_attributes",
             joinColumns = { @JoinColumn(name = "target_id", nullable = false, insertable = false, updatable = false) },

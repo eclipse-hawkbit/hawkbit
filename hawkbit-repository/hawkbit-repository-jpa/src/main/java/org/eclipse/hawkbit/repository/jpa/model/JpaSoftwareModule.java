@@ -73,12 +73,17 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     @Setter
     @ManyToOne
-    @JoinColumn(name = "module_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_module_type"))
+    @JoinColumn(
+            name = "module_type", nullable = false, updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_module_type"))
     @NotNull
     private JpaSoftwareModuleType type;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule", cascade = { CascadeType.PERSIST,
-            CascadeType.REMOVE }, targetEntity = JpaArtifact.class, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY,
+            mappedBy = "softwareModule",
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+            targetEntity = JpaArtifact.class,
+            orphanRemoval = true)
     private List<JpaArtifact> artifacts;
 
     @Setter

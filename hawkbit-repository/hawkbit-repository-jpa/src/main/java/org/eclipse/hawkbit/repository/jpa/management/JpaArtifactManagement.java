@@ -137,15 +137,14 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long id) {
-        final JpaArtifact toDelete = (JpaArtifact) get(id)
-                .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
+        final JpaArtifact toDelete = (JpaArtifact) get(id).orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
 
+        final JpaSoftwareModule softwareModule = (JpaSoftwareModule) toDelete.getSoftwareModule();
         // clearArtifactBinary checks (unconditionally) software module UPDATE access
         softwareModuleRepository.getAccessController().ifPresent(accessController ->
-                accessController.assertOperationAllowed(AccessController.Operation.UPDATE,
-                        (JpaSoftwareModule) toDelete.getSoftwareModule()));
-        ((JpaSoftwareModule) toDelete.getSoftwareModule()).removeArtifact(toDelete);
-        softwareModuleRepository.save((JpaSoftwareModule) toDelete.getSoftwareModule());
+                accessController.assertOperationAllowed(AccessController.Operation.UPDATE, softwareModule));
+        softwareModule.removeArtifact(toDelete);
+        softwareModuleRepository.save(softwareModule);
 
         localArtifactRepository.deleteById(id);
         clearArtifactBinary(toDelete.getSha1Hash());

@@ -27,6 +27,10 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTypeUpdatedEvent;
@@ -39,9 +43,9 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.springframework.util.CollectionUtils;
 
 /**
- * A distribution set type defines which software module types can or have to be
- * {@link DistributionSet}.
+ * A distribution set type defines which software module types can or have to be {@link DistributionSet}.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // default public constructor for JPA
 @Entity
 @Table(name = "sp_distribution_set_type", indexes = {
         @Index(name = "sp_idx_distribution_set_type_01", columnList = "tenant,deleted"),
@@ -55,50 +59,26 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @OneToMany(mappedBy = "dsType", targetEntity = DistributionSetTypeElement.class, fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST,
-            CascadeType.REMOVE }, orphanRemoval = true)
+    @OneToMany(mappedBy = "dsType",
+            targetEntity = DistributionSetTypeElement.class,
+            fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+            orphanRemoval = true)
     private Set<DistributionSetTypeElement> elements;
 
+    @Setter
+    @Getter
     @Column(name = "deleted")
     private boolean deleted;
 
     @ManyToMany(mappedBy = "distributionSetTypes", targetEntity = JpaTargetType.class, fetch = FetchType.LAZY)
     private List<TargetType> compatibleToTargetTypes;
 
-    public JpaDistributionSetType() {
-        // default public constructor for JPA
-    }
-
-    /**
-     * Standard constructor.
-     *
-     * @param key of the type (unique)
-     * @param name of the type (unique)
-     * @param description of the type
-     */
     public JpaDistributionSetType(final String key, final String name, final String description) {
         this(key, name, description, null);
     }
 
-    /**
-     * Constructor.
-     *
-     * @param key of the type
-     * @param name of the type
-     * @param description of the type
-     * @param colour of the type. It will be null by default
-     */
     public JpaDistributionSetType(final String key, final String name, final String description, final String colour) {
         super(name, description, key, colour);
-    }
-
-    @Override
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(final boolean deleted) {
-        this.deleted = deleted;
     }
 
     @Override
@@ -156,8 +136,7 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
         }
 
         // we search by id (standard equals compares also revison)
-        elements.stream().filter(element -> element.getSmType().getId().equals(smTypeId)).findAny()
-                .ifPresent(elements::remove);
+        elements.stream().filter(element -> element.getSmType().getId().equals(smTypeId)).findAny().ifPresent(elements::remove);
 
         return this;
     }
@@ -194,10 +173,8 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
     }
 
     private boolean isOneModuleListEmpty(final DistributionSetType dsType) {
-        return (!CollectionUtils.isEmpty(((JpaDistributionSetType) dsType).elements)
-                && CollectionUtils.isEmpty(elements))
-                || (CollectionUtils.isEmpty(((JpaDistributionSetType) dsType).elements)
-                && !CollectionUtils.isEmpty(elements));
+        return (!CollectionUtils.isEmpty(((JpaDistributionSetType) dsType).elements) && CollectionUtils.isEmpty(elements)) ||
+                (CollectionUtils.isEmpty(((JpaDistributionSetType) dsType).elements) && !CollectionUtils.isEmpty(elements));
     }
 
     private boolean areBothModuleListsEmpty(final DistributionSetType dsType) {

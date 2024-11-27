@@ -6,7 +6,7 @@ with at least hawkbit-mgmt-server.
 
 ### Run
 ```bash
-java -jar hawkbit-runtime/hawkbit-dmf-server/target/hawkbit-dmf-server-*-SNAPSHOT.jar
+java -jar hawkbit-dmf/hawkbit-dmf-server/target/hawkbit-dmf-server-0-SNAPSHOT.jar
 ```
 _(Note: you have to add the JDBC driver also to your class path if you intend to use another database than H2.)_
 

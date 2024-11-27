@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serial;
 
-import jakarta.persistence.Access;
-import jakarta.persistence.AccessType;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -25,11 +23,13 @@ import jakarta.persistence.PostUpdate;
 import jakarta.persistence.Version;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
+import org.springframework.data.annotation.AccessType;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -41,8 +41,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
  * Holder of the base attributes common to all entities.
  */
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // Default constructor needed for JPA entities.
+@Setter
+@Getter
 @MappedSuperclass
-@Access(AccessType.FIELD)
 @EntityListeners({ AuditingEntityListener.class, EntityInterceptorListener.class })
 public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
@@ -51,62 +52,48 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Setter
     @Id
+    @AccessType(AccessType.Type.PROPERTY)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "created_by", updatable = false, nullable = false, length = USERNAME_FIELD_LENGTH)
     private String createdBy;
+    @Column(name = "created_at", updatable = false, nullable = false)
     private long createdAt;
+    @Column(name = "last_modified_by", nullable = false, length = USERNAME_FIELD_LENGTH)
     private String lastModifiedBy;
+    @Column(name = "last_modified_at", nullable = false)
     private long lastModifiedAt;
 
-    @Setter
     @Version
     @Column(name = "optlock_revision")
     private int optLockRevision;
 
-    @Override
-    @Access(AccessType.PROPERTY)
-    @Column(name = "created_by", updatable = false, nullable = false, length = USERNAME_FIELD_LENGTH)
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    @Override
-    @Access(AccessType.PROPERTY)
-    @Column(name = "created_at", updatable = false, nullable = false)
-    public long getCreatedAt() {
-        return createdAt;
-    }
-
-    @Override
-    @Access(AccessType.PROPERTY)
-    @Column(name = "last_modified_by", nullable = false, length = USERNAME_FIELD_LENGTH)
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    @Override
-    @Access(AccessType.PROPERTY)
-    @Column(name = "last_modified_at", nullable = false)
-    public long getLastModifiedAt() {
-        return lastModifiedAt;
-    }
-
-    @Override
-    public int getOptLockRevision() {
-        return optLockRevision;
-    }
-
-    @LastModifiedDate
-    public void setLastModifiedAt(final long lastModifiedAt) {
+    @CreatedBy
+    public void setCreatedBy(final String createdBy) {
         if (isController()) {
+            this.createdBy = "CONTROLLER_PLUG_AND_PLAY";
+
+            // In general modification audit entry is not changed by the controller.
+            // However, we want to stay consistent with EnableJpaAuditing#modifyOnCreate=true.
+            this.lastModifiedBy = this.createdBy;
             return;
         }
 
-        this.lastModifiedAt = lastModifiedAt;
+        this.createdBy = createdBy;
+    }
+
+    @CreatedDate
+    public void setCreatedAt(final long createdAt) {
+        this.createdAt = createdAt;
+
+        // In general modification audit entry is not changed by the controller.
+        // However, we want to stay consistent with EnableJpaAuditing#modifyOnCreate=true.
+        if (isController()) {
+            this.lastModifiedAt = createdAt;
+        }
     }
 
     @LastModifiedBy
@@ -118,44 +105,18 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         this.lastModifiedBy = lastModifiedBy;
     }
 
-    @CreatedDate
-    public void setCreatedAt(final long createdAt) {
-        this.createdAt = createdAt;
-
-        // In general modification audit entry is not changed by the controller.
-        // However, we want to stay consistent with
-        // EnableJpaAuditing#modifyOnCreate=true.
+    @LastModifiedDate
+    public void setLastModifiedAt(final long lastModifiedAt) {
         if (isController()) {
-            this.lastModifiedAt = createdAt;
-        }
-    }
-
-    @CreatedBy
-    public void setCreatedBy(final String createdBy) {
-        if (isController()) {
-            this.createdBy = "CONTROLLER_PLUG_AND_PLAY";
-
-            // In general modification audit entry is not changed by the
-            // controller. However, we want to stay consistent with
-            // EnableJpaAuditing#modifyOnCreate=true.
-            this.lastModifiedBy = this.createdBy;
             return;
         }
 
-        this.createdBy = createdBy;
-    }
-
-    @Override
-    public Long getId() {
-        return id;
+        this.lastModifiedAt = lastModifiedAt;
     }
 
     /**
-     * Defined equals/hashcode strategy for the repository in general is that an
-     * entity is equal if it has the same {@link #getId()} and
+     * Defined equals/hashcode strategy for the repository in general is that an entity is equal if it has the same {@link #getId()} and
      * {@link #getOptLockRevision()} and class.
-     *
-     * @see java.lang.Object#hashCode()
      */
     @Override
     // Exception squid:S864 - generated code
@@ -170,11 +131,8 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     }
 
     /**
-     * Defined equals/hashcode strategy for the repository in general is that an
-     * entity is equal if it has the same {@link #getId()} and
+     * Defined equals/hashcode strategy for the repository in general is that an entity is equal if it has the same {@link #getId()} and
      * {@link #getOptLockRevision()} and class.
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
     public boolean equals(final Object obj) {

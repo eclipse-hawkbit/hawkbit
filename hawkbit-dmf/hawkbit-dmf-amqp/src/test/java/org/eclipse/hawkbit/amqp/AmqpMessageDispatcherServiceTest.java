@@ -70,7 +70,7 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(classes = { RepositoryApplicationConfiguration.class }, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
-    private static final String TENANT = "default";
+    private static final String TENANT = "DEFAULT";
     private static final Long TENANT_ID = 4711L;
 
     private static final URI AMQP_URI = IpUtil.createAmqpUri("vHost", "mytest");

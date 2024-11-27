@@ -80,7 +80,7 @@ public class MgmtBasicAuthResourceTest {
     @Autowired
     MockMvc defaultMock;
     private static final String TEST_USER = "testUser";
-    private static final String DEFAULT = "default";
+    private static final String DEFAULT_TENANT = "DEFAULT";
 
     @Test
     @Description("Test of userinfo api with basic auth validation")
@@ -92,7 +92,7 @@ public class MgmtBasicAuthResourceTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON_VALUE))
                 .andExpect(jsonPath("$.username", equalTo(TEST_USER)))
-                .andExpect(jsonPath("$.tenant", equalTo(DEFAULT)));
+                .andExpect(jsonPath("$.tenant", equalTo(DEFAULT_TENANT)));
     }
 
     @Test

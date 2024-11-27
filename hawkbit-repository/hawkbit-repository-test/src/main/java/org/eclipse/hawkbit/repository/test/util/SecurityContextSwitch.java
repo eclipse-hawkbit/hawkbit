@@ -28,7 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class SecurityContextSwitch {
 
-    public static final String DEFAULT_TENANT = "default";
+    public static final String DEFAULT_TENANT = "DEFAULT";
     private static final WithUser PRIVILEDGED_USER =
             createWithUser("bumlux", DEFAULT_TENANT, false, true, false, "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE");
 

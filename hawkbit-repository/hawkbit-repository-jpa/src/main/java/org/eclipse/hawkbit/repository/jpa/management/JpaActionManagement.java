@@ -66,8 +66,7 @@ public class JpaActionManagement {
     }
 
     protected List<JpaAction> findActiveActionsHavingStatus(final String controllerId, final Action.Status status) {
-        return actionRepository.findAll(
-                ActionSpecifications.byTargetControllerIdAndIsActiveAndStatus(controllerId, status));
+        return actionRepository.findAll(ActionSpecifications.byTargetControllerIdAndIsActiveAndStatus(controllerId, status));
     }
 
     protected Action addActionStatus(final JpaActionStatusCreate statusCreate) {

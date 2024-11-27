@@ -74,7 +74,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         final TenantUsage tenantUsage1 = new TenantUsage("tenant1");
         tenantUsage1.setArtifacts(1);
         tenantUsage1.setOverallArtifactVolumeInBytes(1234);
-        assertThat(tenants).containsOnly(new TenantUsage("default"),
+        assertThat(tenants).containsOnly(new TenantUsage("DEFAULT"),
                 tenantUsage0,
                 tenantUsage1);
     }
@@ -96,7 +96,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         tenantUsage0.setTargets(100);
         final TenantUsage tenantUsage1 = new TenantUsage("tenant1");
         tenantUsage1.setTargets(100);
-        assertThat(tenants).containsOnly(new TenantUsage("default"),
+        assertThat(tenants).containsOnly(new TenantUsage("DEFAULT"),
                 tenantUsage0,
                 tenantUsage1);
     }

@@ -15,6 +15,8 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -35,17 +37,6 @@ public interface SoftwareModuleRepository extends BaseEntityRepository<JpaSoftwa
      * @return number of {@link SoftwareModule}s
      */
     long countByType(JpaSoftwareModuleType type);
-
-    /**
-     * Count the software modules which are assigned to the distribution set
-     * with the given ID.
-     * <p/>
-     * No access control applied
-     *
-     * @param distributionSetId the distribution set ID
-     * @return the number of software modules matching the given distribution set ID.
-     */
-    long countByAssignedToId(Long distributionSetId);
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety

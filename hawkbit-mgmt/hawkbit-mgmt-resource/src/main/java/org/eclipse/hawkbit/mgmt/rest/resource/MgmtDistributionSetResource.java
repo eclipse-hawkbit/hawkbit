@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.validation.ValidationException;
@@ -355,13 +356,11 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<PagedList<MgmtSoftwareModule>> getAssignedSoftwareModules(
             final Long distributionSetId,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeSoftwareModuleSortParam(sortParam);
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Page<SoftwareModule> softwaremodules = softwareModuleManagement.findByAssignedTo(pageable, distributionSetId);
+        final Set<SoftwareModule> softwareModules = distributionSetManagement
+                .get(distributionSetId).orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, distributionSetId))
+                .getModules();
         return ResponseEntity.ok(new PagedList<>(MgmtSoftwareModuleMapper.toResponse(
-                softwaremodules.getContent()), softwaremodules.getTotalElements()));
+                softwareModules), softwareModules.size()));
     }
 
     @Override
