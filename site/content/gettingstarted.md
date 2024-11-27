@@ -93,7 +93,7 @@ $ cd hawkbit
 $ mvn clean install -DskipTests
 ```
 
-### 2: Start hawkBit [update server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-runtime/hawkbit-update-server) (Monolith)
+### 2: Start hawkBit [update server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-monolith/hawkbit-update-server) (Monolith)
 
 ```sh
 $ java -jar ./hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-0-SNAPSHOT.jar

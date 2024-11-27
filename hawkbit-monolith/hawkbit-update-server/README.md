@@ -7,7 +7,7 @@ The hawkBit Update Server (Monolith) is a standalone spring-boot application wit
 ### Run
 
 ```bash
-java -jar hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-*-SNAPSHOT.jar
+java -jar hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-*-SNAPSHOT.jar
 ```
 
 _(Note: you have to add the JDBC driver also to your class path if you intend to use another database than H2.)_
