@@ -6,7 +6,7 @@ weight: 33
 
 hawkBit is able to run in a cluster with some constraints. This guide provides insights in the basic concepts and how to
 setup your own cluster. You can find additional information in
-the [hawkBit runtimes's README](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-runtime/hawkbit-update-server/README.md).
+the [hawkBit runtimes's README](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-monolith/hawkbit-update-server/README.md).
 <!--more-->
 
 ## Big picture

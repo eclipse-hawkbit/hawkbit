@@ -107,7 +107,7 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 # Getting Started
 
 We are providing a [Spring Boot](https://projects.spring.io/spring-boot/) based
-reference [Update Server](hawkbit-runtime/hawkbit-update-server) including embedded H2 DB for test and evaluation
+reference [Update Server](hawkbit-monolith/hawkbit-update-server) including embedded H2 DB for test and evaluation
 purposes.
 Run with docker:
 
@@ -128,19 +128,19 @@ at [guide](https://www.eclipse.org/hawkbit/guides/runhawkbit/) -> _Configure Rab
 
 # hawkBit (Spring boot) starters
 
-Next to the [Update Server](hawkbit-runtime/hawkbit-update-server) we are also providing a set
+Next to the [Update Server](hawkbit-monolith/hawkbit-update-server) we are also providing a set
 of [Spring Boot Starters](hawkbit-starters) to quick start your
 own [Spring Boot](https://projects.spring.io/spring-boot/) based application.
 
 # Clone, build and run hawkBit
 
-## Build and start hawkBit [Update Server](hawkbit-runtime/hawkbit-update-server)
+## Build and start hawkBit [Update Server](hawkbit-monolith/hawkbit-update-server)
 
 ```bash
 git clone https://github.com/eclipse-hawkbit/hawkbit.git
 cd hawkbit
 mvn clean install
-java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-#version#.jar
+java -jar ./hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-0-SNAPSHOT.jar
 ```
 
 ## Start hawkBit [Device Simulator](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-device-simulator) (optional)

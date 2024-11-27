@@ -18,7 +18,7 @@ and no artifact storage.
 
 This guide describes a target architecture that is more like one that you will expect in a production system.
 
-- hawkBit [Update Server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-runtime/hawkbit-update-server).
+- hawkBit [Update Server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-monolith/hawkbit-update-server).
 - [MariaDB](https://mariadb.org) for the repository.
 - [RabbitMQ](https://www.rabbitmq.com) for DMF communication.
 - For testing and demonstration purposes we will also use:
@@ -35,7 +35,7 @@ This guide describes a target architecture that is more like one that you will e
 As mentioned you can create your own application with hawkBit inside or adapt the existing example app. The second
 option will be shown here.
 
-### Set MariaDB dependency to compile in the [update server POM](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-runtime/hawkbit-update-server/pom.xml)
+### Set MariaDB dependency to compile in the [update server POM](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-monolith/hawkbit-update-server/pom.xml)
 
 ```xml
 <dependency>
@@ -96,7 +96,7 @@ hawkbit-example-mgmt-simulator-##VERSION##.jar --hawkbit.url=YOUR_HOST:PORT
 
 ### Compile & Run your _"production ready"_ app
 
-see [update server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-runtime/hawkbit-update-server)
+see [update server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-monolith/hawkbit-update-server)
 
 ### Compile & Run example scenario [creation script](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator) (optional)
 
