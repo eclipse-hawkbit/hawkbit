@@ -37,6 +37,7 @@ import jakarta.validation.constraints.NotNull;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
@@ -60,12 +61,13 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 @ToString(callSuper = true)
 @Entity
-@Table(name = "sp_distribution_set", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "name", "version", "tenant" }, name = "uk_distrib_set") }, indexes = {
-        @Index(name = "sp_idx_distribution_set_01", columnList = "tenant,deleted,complete"),
-        @Index(name = "sp_idx_distribution_set_prim", columnList = "tenant,id") })
-@NamedEntityGraph(name = "DistributionSet.detail", attributeNodes = { @NamedAttributeNode("modules"),
-        @NamedAttributeNode("tags"), @NamedAttributeNode("type") })
+@Table(name = "sp_distribution_set",
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "name", "version", "tenant" }, name = "uk_distrib_set") },
+        indexes = {
+                @Index(name = "sp_idx_distribution_set_01", columnList = "tenant,deleted,complete"),
+                @Index(name = "sp_idx_distribution_set_prim", columnList = "tenant,id") })
+@NamedEntityGraph(name = "DistributionSet.detail",
+        attributeNodes = { @NamedAttributeNode("modules"), @NamedAttributeNode("tags"), @NamedAttributeNode("type") })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implements DistributionSet, EventAwareEntity {
@@ -75,6 +77,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     private static final String DELETED_PROPERTY = "deleted";
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = JpaDistributionSetType.class)
     @JoinColumn(name = "ds_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstype_ds"))
     @NotNull
@@ -117,12 +120,14 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Column(name = "locked")
     private boolean locked;
 
+    @Setter
     @Column(name = "deleted")
     private boolean deleted;
 
     @Column(name = "valid")
     private boolean valid;
 
+    @Setter
     @Column(name = "required_migration_step")
     private boolean requiredMigrationStep;
 
@@ -155,10 +160,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         this(name, version, description, type, moduleList, false);
     }
 
-    public void setType(final DistributionSetType type) {
-        this.type = type;
-    }
-
     @Override
     public Set<SoftwareModule> getModules() {
         if (modules == null) {
@@ -168,7 +169,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         return Collections.unmodifiableSet(modules);
     }
 
-    public boolean addModule(final SoftwareModule softwareModule) {
+    public void addModule(final SoftwareModule softwareModule) {
         if (isLocked()) {
             throw new LockedException(JpaDistributionSet.class, getId(), "ADD_SOFTWARE_MODULE");
         }
@@ -183,7 +184,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
                 .filter(module -> module.getId().equals(softwareModule.getId())).findAny();
 
         if (found.isPresent()) {
-            return false;
+            return;
         }
 
         final long already = modules.stream()
@@ -196,10 +197,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
         if (modules.add(softwareModule)) {
             complete = type.checkComplete(this);
-            return true;
         }
-
-        return false;
     }
 
     public void removeModule(final SoftwareModule softwareModule) {
@@ -255,16 +253,8 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         locked = false;
     }
 
-    public void setDeleted(final boolean deleted) {
-        this.deleted = deleted;
-    }
-
     public void invalidate() {
         this.valid = false;
-    }
-
-    public void setRequiredMigrationStep(final boolean isRequiredMigrationStep) {
-        requiredMigrationStep = isRequiredMigrationStep;
     }
 
     @Override

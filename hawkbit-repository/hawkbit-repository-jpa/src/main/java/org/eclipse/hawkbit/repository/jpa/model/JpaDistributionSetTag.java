@@ -19,6 +19,8 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
@@ -27,9 +29,9 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 
 /**
- * A {@link DistributionSetTag} is used to describe DistributionSet attributes
- * and use them also for filtering the DistributionSet list.
+ * A {@link DistributionSetTag} is used to describe DistributionSet attributes and use them also for filtering the DistributionSet list.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor needed for JPA entities.
 @Entity
 @Table(name = "sp_distributionset_tag",
         indexes = {
@@ -53,13 +55,6 @@ public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag,
      */
     public JpaDistributionSetTag(final String name, final String description, final String colour) {
         super(name, description, colour);
-    }
-
-    /**
-     * Default constructor for JPA.
-     */
-    public JpaDistributionSetTag() {
-        // Default constructor for JPA.
     }
 
     @Override

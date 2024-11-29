@@ -312,8 +312,11 @@ public class TestdataFactory {
                         .description(randomDescriptionLong()).vendor(prefix + " vendor Limited Inc, California"));
 
         return distributionSetManagement.create(
-                entityFactory.distributionSet().create().name(prefix != null && prefix.length() > 0 ? prefix : "DS")
-                        .version(version).description(randomDescriptionShort()).type(findOrCreateDefaultTestDsType())
+                entityFactory.distributionSet().create()
+                        .type(findOrCreateDefaultTestDsType())
+                        .name(prefix == null || prefix.isEmpty() ? "DS" : prefix)
+                        .version(version)
+                        .description(randomDescriptionShort())
                         .modules(Arrays.asList(osMod.getId(), runtimeMod.getId(), appMod.getId()))
                         .requiredMigrationStep(isRequiredMigrationStep));
     }

@@ -12,6 +12,4 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import org.eclipse.hawkbit.repository.model.Statistic;
 
-public interface JpaStatistic extends Statistic {
-
-}
+public interface JpaStatistic extends Statistic {}

@@ -31,7 +31,9 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
@@ -44,6 +46,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 /**
  * JPA entity definition of persisting a group of an rollout.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor needed for JPA entities.
 @Entity
 @Table(name = "sp_rolloutgroup", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "rollout", "tenant" }, name = "uk_rolloutgroup"))
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
@@ -57,80 +60,97 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "rollout", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolloutgroup_rollout"))
     private JpaRollout rollout;
+
     @Setter
     @Getter
     @Column(name = "status", nullable = false)
     @Convert(converter = RolloutGroupStatusConverter.class)
     private RolloutGroupStatus status = RolloutGroupStatus.CREATING;
+
     @OneToMany(mappedBy = "rolloutGroup", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST,
             CascadeType.REMOVE }, targetEntity = RolloutTargetGroup.class)
     private List<RolloutTargetGroup> rolloutTargetGroup;
+
     // No foreign key to avoid to many nested cascades on delete which some DBs cannot handle
     @Setter
     @Getter
     @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
     @JoinColumn(name = "parent_id")
     private JpaRolloutGroup parent;
+
     @Setter
     @Getter
     @Column(name = "is_dynamic") // dynamic is reserved keyword in some databases
     private boolean dynamic;
+
     @Setter
     @Getter
     @Column(name = "success_condition", nullable = false)
     @NotNull
     private RolloutGroupSuccessCondition successCondition = RolloutGroupSuccessCondition.THRESHOLD;
+
     @Setter
     @Getter
     @Column(name = "success_condition_exp", length = 512, nullable = false)
     @Size(max = 512)
     @NotNull
     private String successConditionExp;
+
     @Setter
     @Getter
     @Column(name = "success_action", nullable = false)
     @NotNull
     private RolloutGroupSuccessAction successAction = RolloutGroupSuccessAction.NEXTGROUP;
+
     @Setter
     @Getter
     @Column(name = "success_action_exp", length = 512)
     @Size(max = 512)
     private String successActionExp;
+
     @Setter
     @Getter
     @Column(name = "error_condition")
     private RolloutGroupErrorCondition errorCondition;
+
     @Setter
     @Getter
     @Column(name = "error_condition_exp", length = 512)
     @Size(max = 512)
     private String errorConditionExp;
+
     @Setter
     @Getter
     @Column(name = "error_action")
     private RolloutGroupErrorAction errorAction;
+
     @Setter
     @Getter
     @Column(name = "error_action_exp", length = 512)
     @Size(max = 512)
     private String errorActionExp;
+
     @Setter
     @Getter
     @Column(name = "total_targets")
     private int totalTargets;
+
     @Setter
     @Getter
     @Column(name = "target_filter", length = 1024)
     @Size(max = 1024)
     private String targetFilterQuery = "";
+
     @Setter
     @Getter
     @Column(name = "target_percentage")
     private float targetPercentage = 100;
+
     @Setter
     @Getter
     @Column(name = "confirmation_required")
     private boolean confirmationRequired;
+
     @Setter
     @Transient
     private transient TotalTargetCountStatus totalTargetCountStatus;
@@ -148,14 +168,6 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
             totalTargetCountStatus = new TotalTargetCountStatus((long) totalTargets, rollout.getActionType());
         }
         return totalTargetCountStatus;
-    }
-
-    public List<RolloutTargetGroup> getRolloutTargetGroup() {
-        if (rolloutTargetGroup == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(rolloutTargetGroup);
     }
 
     @Override
