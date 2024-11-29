@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serial;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,10 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
@@ -50,6 +55,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 /**
  * JPA implementation of a {@link Rollout}.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor needed for JPA entities.
 @Entity
 @Table(name = "sp_rollout", uniqueConstraints = @UniqueConstraint(columnNames = { "name",
         "tenant" }, name = "uk_rollout"))
@@ -61,80 +67,134 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     private static final long serialVersionUID = 1L;
 
     @OneToMany(targetEntity = JpaRolloutGroup.class, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, mappedBy = "rollout")
-    private List<JpaRolloutGroup> rolloutGroups;
+    private List<JpaRolloutGroup> rolloutGroups = new ArrayList<>();
 
+    @Setter
+    @Getter
     @Column(name = "target_filter", length = TargetFilterQuery.QUERY_MAX_SIZE, nullable = false)
     @Size(min = 1, max = TargetFilterQuery.QUERY_MAX_SIZE)
     @NotNull
     private String targetFilterQuery;
 
+    @Getter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "distribution_set", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolltout_ds"))
     @NotNull
     private JpaDistributionSet distributionSet;
+
+    @Setter
+    @Getter
     @Column(name = "status", nullable = false)
     @Convert(converter = RolloutStatusConverter.class)
     @NotNull
     private RolloutStatus status = RolloutStatus.CREATING;
+
+    @Setter
+    @Getter
     @Column(name = "last_check")
     private long lastCheck;
+
+    @Setter
+    @Getter
     @Column(name = "action_type", nullable = false)
     @Convert(converter = JpaAction.ActionTypeConverter.class)
     @NotNull
     private ActionType actionType = ActionType.FORCED;
+
+    @Setter
+    @Getter
     @Column(name = "forced_time")
     private long forcedTime;
+
+    @Setter
+    @Getter
     @Column(name = "total_targets")
     private long totalTargets;
+
+    @Setter
+    @Getter
     @Column(name = "rollout_groups_created")
     private int rolloutGroupsCreated;
+
+    @Setter
+    @Getter
     @Column(name = "deleted")
     private boolean deleted;
+
+    @Setter
+    @Getter
     @Column(name = "start_at")
     private Long startAt;
+
+    @Setter
+    @Getter
     @Column(name = "approval_decided_by")
     @Size(min = 1, max = Rollout.APPROVED_BY_MAX_SIZE)
     private String approvalDecidedBy;
+
+    @Setter
+    @Getter
     @Column(name = "approval_remark")
     @Size(max = Rollout.APPROVAL_REMARK_MAX_SIZE)
     private String approvalRemark;
+
+    @Setter
     @Column(name = "weight")
     @Min(Action.WEIGHT_MIN)
     @Max(Action.WEIGHT_MAX)
     private Integer weight;
+
+    @Setter
     @Column(name = "is_dynamic") // dynamic is reserved keyword in some databases
     private Boolean dynamic;
+
+    @Setter
     @Column(name = "access_control_context", nullable = true)
     private String accessControlContext;
+
+    @Setter
     @Transient
     private transient TotalTargetCountStatus totalTargetCountStatus;
 
     public List<RolloutGroup> getRolloutGroups() {
-        if (rolloutGroups == null) {
-            return Collections.emptyList();
-        }
-
         return Collections.unmodifiableList(rolloutGroups);
     }
 
-    public long getLastCheck() {
-        return lastCheck;
-    }
-
-    public void setLastCheck(final long lastCheck) {
-        this.lastCheck = lastCheck;
-    }
-
-    // dynamic is null only for old rollouts - could be used for distinguishing
-    // old once from the other
+    // dynamic is null only for old rollouts - could be used for distinguishing old once from the other
     public boolean isNewStyleTargetPercent() {
         return dynamic != null;
     }
 
+    public void setDistributionSet(final DistributionSet distributionSet) {
+        this.distributionSet = (JpaDistributionSet) distributionSet;
+    }
+
+    @Override
+    public TotalTargetCountStatus getTotalTargetCountStatus() {
+        if (totalTargetCountStatus == null) {
+            totalTargetCountStatus = new TotalTargetCountStatus(totalTargets, actionType);
+        }
+        return totalTargetCountStatus;
+    }
+
+    @Override
+    public Optional<Integer> getWeight() {
+        return Optional.ofNullable(weight);
+    }
+
+    @Override
+    public boolean isDynamic() {
+        return Boolean.TRUE.equals(dynamic);
+    }
+
+    public Optional<String> getAccessControlContext() {
+        return Optional.ofNullable(accessControlContext);
+    }
+
     @Override
     public String toString() {
-        return "Rollout [ targetFilterQuery=" + targetFilterQuery + ", distributionSet=" + distributionSet + ", status="
-                + status + ", lastCheck=" + lastCheck + ", getName()=" + getName() + ", getId()=" + getId() + "]";
+        return "Rollout [ targetFilterQuery=" + targetFilterQuery + ", distributionSet=" + distributionSet + ", status=" + status +
+                ", lastCheck=" + lastCheck + ", getName()=" + getName() + ", getId()=" + getId() + "]";
     }
 
     @Override
@@ -158,143 +218,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(),
                 getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
-    }
-
-    @Override
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    @Override
-    public DistributionSet getDistributionSet() {
-        return distributionSet;
-    }
-
-    public void setDistributionSet(final DistributionSet distributionSet) {
-        this.distributionSet = (JpaDistributionSet) distributionSet;
-    }
-
-    @Override
-    public String getTargetFilterQuery() {
-        return targetFilterQuery;
-    }
-
-    public void setTargetFilterQuery(final String targetFilterQuery) {
-        this.targetFilterQuery = targetFilterQuery;
-    }
-
-    @Override
-    public RolloutStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(final RolloutStatus status) {
-        this.status = status;
-    }
-
-    @Override
-    public ActionType getActionType() {
-        return actionType;
-    }
-
-    public void setActionType(final ActionType actionType) {
-        this.actionType = actionType;
-    }
-
-    @Override
-    public long getForcedTime() {
-        return forcedTime;
-    }
-
-    @Override
-    public Long getStartAt() {
-        return startAt;
-    }
-
-    public void setStartAt(final Long startAt) {
-        this.startAt = startAt;
-    }
-
-    @Override
-    public long getTotalTargets() {
-        return totalTargets;
-    }
-
-    public void setTotalTargets(final long totalTargets) {
-        this.totalTargets = totalTargets;
-    }
-
-    @Override
-    public int getRolloutGroupsCreated() {
-        return rolloutGroupsCreated;
-    }
-
-    public void setRolloutGroupsCreated(final int rolloutGroupsCreated) {
-        this.rolloutGroupsCreated = rolloutGroupsCreated;
-    }
-
-    @Override
-    public TotalTargetCountStatus getTotalTargetCountStatus() {
-        if (totalTargetCountStatus == null) {
-            totalTargetCountStatus = new TotalTargetCountStatus(totalTargets, actionType);
-        }
-        return totalTargetCountStatus;
-    }
-
-    public void setTotalTargetCountStatus(final TotalTargetCountStatus totalTargetCountStatus) {
-        this.totalTargetCountStatus = totalTargetCountStatus;
-    }
-
-    @Override
-    public String getApprovalDecidedBy() {
-        return approvalDecidedBy;
-    }
-
-    public void setApprovalDecidedBy(final String approvalDecidedBy) {
-        this.approvalDecidedBy = approvalDecidedBy;
-    }
-
-    @Override
-    public String getApprovalRemark() {
-        return approvalRemark;
-    }
-
-    @Override
-    public Optional<Integer> getWeight() {
-        return Optional.ofNullable(weight);
-    }
-
-    public void setWeight(final Integer weight) {
-        this.weight = weight;
-    }
-
-    @Override
-    public boolean isDynamic() {
-        return Boolean.TRUE.equals(dynamic);
-    }
-
-    public void setDynamic(final Boolean dynamic) {
-        this.dynamic = dynamic;
-    }
-
-    public Optional<String> getAccessControlContext() {
-        return Optional.ofNullable(accessControlContext);
-    }
-
-    public void setAccessControlContext(final String accessControlContext) {
-        this.accessControlContext = accessControlContext;
-    }
-
-    public void setApprovalRemark(final String approvalRemark) {
-        this.approvalRemark = approvalRemark;
-    }
-
-    public void setForcedTime(final long forcedTime) {
-        this.forcedTime = forcedTime;
-    }
-
-    public void setDeleted(final boolean deleted) {
-        this.deleted = deleted;
     }
 
     @Converter

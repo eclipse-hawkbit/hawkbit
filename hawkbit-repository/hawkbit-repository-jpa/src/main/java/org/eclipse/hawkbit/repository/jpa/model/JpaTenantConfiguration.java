@@ -19,6 +19,10 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.eclipse.hawkbit.repository.event.remote.TenantConfigurationDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpdatedEvent;
@@ -28,6 +32,9 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 /**
  * A JPA entity which stores the tenant specific configuration.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@Setter
+@Getter
 @Entity
 @Table(name = "sp_tenant_configuration", uniqueConstraints = @UniqueConstraint(columnNames = { "conf_key",
         "tenant" }, name = "uk_tenant_key"))
@@ -49,38 +56,8 @@ public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity imp
     @NotNull
     private String value;
 
-    /**
-     * JPA default constructor.
-     */
-    public JpaTenantConfiguration() {
-        // JPA default constructor.
-    }
-
-    /**
-     * @param key the key of this configuration
-     * @param value the value of this configuration
-     */
     public JpaTenantConfiguration(final String key, final String value) {
         this.key = key;
-        this.value = value;
-
-    }
-
-    @Override
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(final String key) {
-        this.key = key;
-    }
-
-    @Override
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(final String value) {
         this.value = value;
     }
 

@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 /**
  * Entity with JPA annotation to store the information which {@link Target} is in a specific {@link RolloutGroup}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // JPA constructor
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
 @IdClass(RolloutTargetGroupId.class)
 @Entity
 @Table(name = "sp_rollouttargetgroup")

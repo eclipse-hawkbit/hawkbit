@@ -25,6 +25,10 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.eclipse.hawkbit.repository.event.remote.TargetFilterQueryDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryUpdatedEvent;
@@ -37,6 +41,9 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 /**
  * Stored target filter.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@Setter
+@Getter
 @Entity
 @Table(
         name = "sp_target_filter_query",
@@ -78,20 +85,6 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
     @Column(name = "access_control_context", nullable = true)
     private String accessControlContext;
 
-    public JpaTargetFilterQuery() {
-        // Default constructor for JPA.
-    }
-
-    /**
-     * Construct a Target filter query with auto assign distribution set
-     *
-     * @param name of the {@link TargetFilterQuery}.
-     * @param query of the {@link TargetFilterQuery}.
-     * @param autoAssignDistributionSet of the {@link TargetFilterQuery}.
-     * @param autoAssignActionType of the {@link TargetFilterQuery}.
-     * @param autoAssignWeight of the {@link TargetFilterQuery}.
-     * @param confirmationRequired of the {@link TargetFilterQuery}.
-     */
     public JpaTargetFilterQuery(final String name, final String query, final DistributionSet autoAssignDistributionSet,
             final ActionType autoAssignActionType, final Integer autoAssignWeight, final boolean confirmationRequired) {
         this.name = name;
@@ -100,38 +93,6 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
         this.autoAssignActionType = autoAssignActionType;
         this.autoAssignWeight = autoAssignWeight == null ? 0 : autoAssignWeight;
         this.confirmationRequired = confirmationRequired;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getQuery() {
-        return query;
-    }
-
-    public void setQuery(final String query) {
-        this.query = query;
-    }
-
-    @Override
-    public DistributionSet getAutoAssignDistributionSet() {
-        return autoAssignDistributionSet;
-    }
-
-    public void setAutoAssignDistributionSet(final JpaDistributionSet distributionSet) {
-        this.autoAssignDistributionSet = distributionSet;
-    }
-
-    @Override
-    public ActionType getAutoAssignActionType() {
-        return autoAssignActionType;
     }
 
     public void setAutoAssignActionType(final ActionType actionType) {
@@ -146,33 +107,9 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
         return Optional.ofNullable(autoAssignWeight);
     }
 
-    public void setAutoAssignWeight(final Integer weight) {
-        this.autoAssignWeight = weight;
-    }
-
-    public String getAutoAssignInitiatedBy() {
-        return autoAssignInitiatedBy;
-    }
-
-    public void setAutoAssignInitiatedBy(final String autoAssignInitiatedBy) {
-        this.autoAssignInitiatedBy = autoAssignInitiatedBy;
-    }
-
     @Override
-    public boolean isConfirmationRequired() {
-        return confirmationRequired;
-    }
-
-    public void setConfirmationRequired(final boolean confirmationRequired) {
-        this.confirmationRequired = confirmationRequired;
-    }
-
     public Optional<String> getAccessControlContext() {
         return Optional.ofNullable(accessControlContext);
-    }
-
-    public void setAccessControlContext(final String accessControlContext) {
-        this.accessControlContext = accessControlContext;
     }
 
     @Override
@@ -192,5 +129,4 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetFilterQueryDeletedEvent(
                 getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }
-
 }

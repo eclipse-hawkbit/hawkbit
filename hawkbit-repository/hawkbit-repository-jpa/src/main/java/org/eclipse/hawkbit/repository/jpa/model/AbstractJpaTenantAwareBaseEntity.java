@@ -33,7 +33,10 @@ import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
  * Holder of the base attributes common to all tenant aware entities.
  */
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // Default constructor needed for JPA entities.
+@Setter
+@Getter
 @MappedSuperclass
+// Eclipse link MultiTenant support
 @TenantDiscriminatorColumn(name = "tenant", length = 40)
 @Multitenant(MultitenantType.SINGLE_TABLE)
 public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEntity implements TenantAwareBaseEntity {
@@ -41,8 +44,6 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Setter
-    @Getter
     @Column(name = "tenant", nullable = false, insertable = false, updatable = false, length = 40)
     @Size(min = 1, max = 40)
     @NotNull
@@ -74,13 +75,10 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
         }
         final AbstractJpaTenantAwareBaseEntity other = (AbstractJpaTenantAwareBaseEntity) obj;
         if (tenant == null) {
-            if (other.tenant != null) {
-                return false;
-            }
-        } else if (!tenant.equals(other.tenant)) {
-            return false;
+            return other.tenant == null;
+        } else {
+            return tenant.equals(other.tenant);
         }
-        return true;
     }
 
     @Override

@@ -24,6 +24,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.remote.TargetTypeDeletedEvent;
@@ -35,10 +36,9 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 
 /**
- * A target type defines which distribution set types can or have to be
- * {@link Target}.
+ * A target type defines which distribution set types can or have to be {@link Target}.
  */
-@NoArgsConstructor // default public constructor for JPA
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
 @ToString(callSuper = true)
 @Entity
 @Table(name = "sp_target_type", indexes = {
@@ -60,7 +60,7 @@ public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, 
                     @JoinColumn(
                             name = "distribution_set_type", nullable = false, insertable = false, updatable = false,
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_ds_type")) })
-    private Set<DistributionSetType> distributionSetTypes;
+    private Set<DistributionSetType> distributionSetTypes = new HashSet<>();
 
     public JpaTargetType(final String key, final String name, final String description, final String colour) {
         super(name, description, key, colour);
@@ -73,21 +73,12 @@ public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, 
      * @return Target type
      */
     public JpaTargetType addCompatibleDistributionSetType(final DistributionSetType dsSetType) {
-        if (distributionSetTypes == null) {
-            distributionSetTypes = new HashSet<>();
-        }
-
         distributionSetTypes.add(dsSetType);
-
         return this;
     }
 
     @Override
     public Set<DistributionSetType> getCompatibleDistributionSetTypes() {
-        if (distributionSetTypes == null) {
-            return Collections.emptySet();
-        }
-
         return Collections.unmodifiableSet(distributionSetTypes);
     }
 
@@ -98,15 +89,10 @@ public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, 
      * @return Target type
      */
     public JpaTargetType removeDistributionSetType(final Long dsTypeId) {
-        if (distributionSetTypes == null) {
-            return this;
-        }
-
         distributionSetTypes.stream()
                 .filter(element -> element.getId().equals(dsTypeId))
                 .findAny()
                 .ifPresent(distributionSetTypes::remove);
-
         return this;
     }
 

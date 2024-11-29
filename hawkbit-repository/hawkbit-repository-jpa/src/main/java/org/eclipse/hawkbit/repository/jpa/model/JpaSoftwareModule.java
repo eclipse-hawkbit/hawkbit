@@ -48,10 +48,10 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 
 /**
- * Base Software Module that is supported by OS level provisioning mechanism on
- * the edge controller, e.g. OS, JVM, AgentHub.
+ * Base Software Module that is supported by OS level provisioning mechanism on the edge controller, e.g. OS, JVM, AgentHub.
  */
-@NoArgsConstructor // Default constructor for JPA
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@Setter
 @Getter
 @ToString(callSuper = true)
 @Entity
@@ -73,12 +73,14 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     @Setter
     @ManyToOne
-    @JoinColumn(name = "module_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_module_type"))
+    @JoinColumn(name = "module_type", nullable = false, updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_module_type"))
     @NotNull
     private JpaSoftwareModuleType type;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule", cascade = { CascadeType.PERSIST,
-            CascadeType.REMOVE }, targetEntity = JpaArtifact.class, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "softwareModule",
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
+            targetEntity = JpaArtifact.class, orphanRemoval = true)
     private List<JpaArtifact> artifacts;
 
     @Setter
@@ -91,8 +93,9 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     private boolean encrypted;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "softwareModule", fetch = FetchType.LAZY, cascade = {
-            CascadeType.REMOVE }, targetEntity = JpaSoftwareModuleMetadata.class)
+    @OneToMany(mappedBy = "softwareModule", fetch = FetchType.LAZY,
+            cascade = { CascadeType.REMOVE },
+            targetEntity = JpaSoftwareModuleMetadata.class)
     private List<JpaSoftwareModuleMetadata> metadata;
 
     @Column(name = "locked")
@@ -146,9 +149,6 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
         }
     }
 
-    /**
-     * @param artifact is removed from the assigned {@link Artifact}s.
-     */
     public void removeArtifact(final Artifact artifact) {
         if (isLocked()) {
             throw new LockedException(JpaSoftwareModule.class, getId(), "REMOVE_ARTIFACT");

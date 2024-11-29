@@ -74,7 +74,7 @@ import org.eclipse.persistence.queries.UpdateObjectQuery;
 /**
  * JPA implementation of {@link Target}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // empty constructor for JPA.
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
 @Entity
 @Table(name = "sp_target",
         indexes = {

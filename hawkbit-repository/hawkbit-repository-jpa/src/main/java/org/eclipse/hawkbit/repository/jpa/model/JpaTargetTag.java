@@ -16,6 +16,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
@@ -27,7 +28,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 /**
  * A {@link TargetTag} is used to describe Target attributes and use them also for filtering the target list.
  */
-@NoArgsConstructor // Default constructor for JPA.
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
 @ToString(callSuper = true)
 @Entity
 @Table(name = "sp_target_tag", indexes = { @Index(name = "sp_idx_target_tag_prim", columnList = "tenant,id"),

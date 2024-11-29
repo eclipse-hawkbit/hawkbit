@@ -592,13 +592,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetMetadata updateMetaData(final long id, final MetaData md) {
         // check if exists otherwise throw entity not found exception
-        final JpaDistributionSetMetadata toUpdate = (JpaDistributionSetMetadata) getMetaDataByDistributionSetId(id,
-                md.getKey())
+        final JpaDistributionSetMetadata toUpdate = (JpaDistributionSetMetadata) getMetaDataByDistributionSetId(id, md.getKey())
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetMetadata.class, id, md.getKey()));
         toUpdate.setValue(md.getValue());
 
-        // touch it to update the lock revision because we are modifying the
-        // DS indirectly, it will, also check UPDATE access
+        // touch it to update the lock revision because we are modifying the DS indirectly, it will, also check UPDATE access
         JpaManagementHelper.touch(entityManager, distributionSetRepository, (JpaDistributionSet) getValid(id));
         return distributionSetMetadataRepository.save(toUpdate);
     }

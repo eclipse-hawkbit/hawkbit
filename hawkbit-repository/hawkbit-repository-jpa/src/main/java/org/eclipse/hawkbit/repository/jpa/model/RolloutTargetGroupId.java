@@ -12,12 +12,17 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import java.io.Serial;
 import java.io.Serializable;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * Combined unique key of the table {@link RolloutTargetGroup}.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@Getter
 public class RolloutTargetGroupId implements Serializable {
 
     @Serial
@@ -25,13 +30,6 @@ public class RolloutTargetGroupId implements Serializable {
 
     private Long rolloutGroup;
     private Long target;
-
-    /**
-     * default constructor necessary for JPA.
-     */
-    public RolloutTargetGroupId() {
-        // default constructor necessary for JPA, empty.
-    }
 
     /**
      * Constructor.
@@ -42,13 +40,5 @@ public class RolloutTargetGroupId implements Serializable {
     public RolloutTargetGroupId(final RolloutGroup rolloutGroup, final Target target) {
         this.rolloutGroup = rolloutGroup.getId();
         this.target = target.getId();
-    }
-
-    public Long getRolloutGroup() {
-        return rolloutGroup;
-    }
-
-    public Long getTarget() {
-        return target;
     }
 }

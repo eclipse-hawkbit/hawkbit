@@ -21,12 +21,19 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 
 /**
  * Meta data for {@link Target}.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@Setter
+@Getter
 @IdClass(TargetMetadataCompositeKey.class)
 @Entity
 @Table(name = "sp_target_metadata")
@@ -40,15 +47,11 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
     @JoinColumn(name = "target_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_target"))
     private JpaTarget target;
 
-    public JpaTargetMetadata() {
-        // default public constructor for JPA
-    }
-
     /**
      * Creates a single metadata entry with the given key and value.
      *
-     * @param key of the meta data entry
-     * @param value of the meta data entry
+     * @param key of the meta-data entry
+     * @param value of the meta-data entry
      */
     public JpaTargetMetadata(final String key, final String value) {
         super(key, value);
@@ -58,9 +61,9 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
      * Creates a single metadata entry with the given key and value for the
      * given {@link Target}.
      *
-     * @param key of the meta data entry
-     * @param value of the meta data entry
-     * @param target the meta data entry is associated with
+     * @param key of the meta-data entry
+     * @param value of the meta-data entry
+     * @param target the meta-data entry is associated with
      */
     public JpaTargetMetadata(final String key, final String value, final Target target) {
         super(key, value);
@@ -69,15 +72,6 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
 
     public TargetMetadataCompositeKey getId() {
         return new TargetMetadataCompositeKey(target.getId(), getKey());
-    }
-
-    @Override
-    public Target getTarget() {
-        return target;
-    }
-
-    public void setTarget(final Target target) {
-        this.target = (JpaTarget) target;
     }
 
     @Override
@@ -97,12 +91,9 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
         }
         final JpaTargetMetadata other = (JpaTargetMetadata) obj;
         if (target == null) {
-            if (other.target != null) {
-                return false;
-            }
-        } else if (!target.equals(other.target)) {
-            return false;
+            return other.target == null;
+        } else {
+            return target.equals(other.target);
         }
-        return true;
     }
 }
