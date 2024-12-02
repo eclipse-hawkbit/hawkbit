@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -237,6 +238,7 @@ public final class MgmtTargetMapper {
             result.setStatus(MgmtAction.ACTION_PENDING);
         } else {
             result.setStatus(MgmtAction.ACTION_FINISHED);
+            action.getTimestamp().ifPresent(result::setTimestamp);
         }
 
         result.setDetailStatus(action.getStatus().toString().toLowerCase());

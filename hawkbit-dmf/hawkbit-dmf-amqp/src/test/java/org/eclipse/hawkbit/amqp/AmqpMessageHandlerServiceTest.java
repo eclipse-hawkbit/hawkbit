@@ -384,7 +384,7 @@ public class AmqpMessageHandlerServiceTest {
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.empty());
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
-        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(1L, DmfActionStatus.DOWNLOAD);
+        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(1L, DmfActionStatus.DOWNLOAD, System.currentTimeMillis());
         final Message message = createMessage(actionUpdateStatus, messageProperties);
 
         assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
@@ -487,7 +487,7 @@ public class AmqpMessageHandlerServiceTest {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
 
-        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(23L, DmfActionStatus.RUNNING);
+        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(23L, DmfActionStatus.RUNNING, System.currentTimeMillis());
         actionUpdateStatus.setSoftwareModuleId(Long.valueOf(2));
         actionUpdateStatus.setCode(12);
 
@@ -653,7 +653,7 @@ public class AmqpMessageHandlerServiceTest {
     }
 
     private DmfActionUpdateStatus createActionUpdateStatus(final DmfActionStatus status, final Long id) {
-        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(id, status);
+        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(id, status, System.currentTimeMillis());
         actionUpdateStatus.setSoftwareModuleId(Long.valueOf(2));
         return actionUpdateStatus;
     }

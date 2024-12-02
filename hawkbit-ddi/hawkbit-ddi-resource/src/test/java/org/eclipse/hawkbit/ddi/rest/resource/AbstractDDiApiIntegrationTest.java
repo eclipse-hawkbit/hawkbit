@@ -295,7 +295,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
             final DdiStatus.ExecutionStatus executionStatus, final DdiResult ddiResult,
             final List<String> messages) throws JsonProcessingException {
         final DdiStatus ddiStatus = new DdiStatus(executionStatus, ddiResult, null, messages);
-        return OBJECT_MAPPER.writeValueAsString(new DdiActionFeedback(Instant.now().toString(), ddiStatus));
+        return OBJECT_MAPPER.writeValueAsString(new DdiActionFeedback(Instant.now().toString(), Instant.now().toEpochMilli(), ddiStatus));
     }
 
     protected String getJsonActionFeedback(
@@ -308,7 +308,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
             final DdiStatus.ExecutionStatus executionStatus,
             final DdiResult.FinalResult finalResult, final Integer code, final List<String> messages) throws JsonProcessingException {
         final DdiStatus ddiStatus = new DdiStatus(executionStatus, new DdiResult(finalResult, new DdiProgress(2, 5)), code, messages);
-        return OBJECT_MAPPER.writeValueAsString(new DdiActionFeedback(Instant.now().toString(), ddiStatus));
+        return OBJECT_MAPPER.writeValueAsString(new DdiActionFeedback(Instant.now().toString(), Instant.now().toEpochMilli(), ddiStatus));
     }
 
     protected String getJsonConfirmationFeedback(

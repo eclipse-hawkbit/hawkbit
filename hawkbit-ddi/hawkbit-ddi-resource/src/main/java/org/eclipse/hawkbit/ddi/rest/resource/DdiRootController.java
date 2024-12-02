@@ -503,7 +503,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private static ActionStatusCreate generateActionCancelStatus(
             final DdiActionFeedback feedback, final Target target, final Long actionId, final EntityFactory entityFactory) {
-        final ActionStatusCreate actionStatusCreate = entityFactory.actionStatus().create(actionId);
+        final ActionStatusCreate actionStatusCreate = entityFactory.actionStatus().create(actionId).occurredAt(feedback.getTimestamp());
         final List<String> messages = new ArrayList<>();
         final Status status;
         switch (feedback.getStatus().getExecution()) {
@@ -616,7 +616,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     private ActionStatusCreate generateUpdateStatus(final DdiActionFeedback feedback, final String controllerId, final Long actionId) {
-        final ActionStatusCreate actionStatusCreate = entityFactory.actionStatus().create(actionId);
+        final ActionStatusCreate actionStatusCreate = entityFactory.actionStatus().create(actionId).occurredAt(feedback.getTimestamp());
         final List<String> messages = new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(feedback.getStatus().getDetails())) {

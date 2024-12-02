@@ -134,8 +134,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     private String initiatedBy;
     @Column(name = "last_action_status_code", nullable = true, updatable = true)
     private Integer lastActionStatusCode;
-    @Column(name = "timestamp", updatable = false, nullable = false)
-    private long timestamp;
+    @Column(name = "timestamp")
+    private Long timestamp;
 
     @Override
     public DistributionSet getDistributionSet() {
@@ -289,13 +289,12 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     }
 
     @Override
-    public long getTimestamp() {
-        return timestamp;
+    public Optional<Long> getTimestamp() {
+        return Optional.ofNullable(timestamp);
     }
 
     @Override
-    @CreatedDate
-    public void setTimestamp(final long timestamp) {
+    public void setTimestamp(final Long timestamp) {
         this.timestamp = timestamp;
     }
 

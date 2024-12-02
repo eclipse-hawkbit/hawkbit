@@ -354,7 +354,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @Description("Tests invalid topic message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void updateActionStatusWithInvalidActionId() {
-        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(1L, DmfActionStatus.RUNNING);
+        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(1L, DmfActionStatus.RUNNING, System.currentTimeMillis());
         final Message eventMessage = createUpdateActionEventMessage(actionUpdateStatus);
         getDmfClient().send(eventMessage);
         verifyOneDeadLetterMessage();

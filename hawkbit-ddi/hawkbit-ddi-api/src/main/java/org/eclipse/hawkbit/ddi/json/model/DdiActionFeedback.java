@@ -50,6 +50,9 @@ public class DdiActionFeedback {
     @Schema(description = "Timestamp of the action", example = "2023-08-03T12:31:41.890992967Z")
     private final String time;
 
+    @Schema(description = "Timestamp of the action in milliseconds since epoch", example = "1627997501890")
+    private final Long timestamp;
+
     @NotNull
     @Valid
     private final DdiStatus status;
@@ -63,8 +66,10 @@ public class DdiActionFeedback {
     @JsonCreator
     public DdiActionFeedback(
             @JsonProperty(value = "time") final String time,
+            @JsonProperty(value = "timestamp") final Long timestamp,
             @JsonProperty(value = "status", required = true) final DdiStatus status) {
         this.time = time;
+        this.timestamp = timestamp != null ? timestamp : System.currentTimeMillis();
         this.status = status;
     }
 }

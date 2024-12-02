@@ -39,7 +39,7 @@ class DdiActionFeedbackTest {
     void shouldSerializeAndDeserializeObjectWithoutOptionalValues() throws IOException {
         // Setup
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null, null, Collections.emptyList());
-        final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(null, ddiStatus);
+        final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(null, null, ddiStatus);
 
         // Test
         final String serializedDdiActionFeedback = mapper.writeValueAsString(ddiActionFeedback);
@@ -54,9 +54,10 @@ class DdiActionFeedbackTest {
     void shouldSerializeAndDeserializeObjectWithOptionalValues() throws IOException {
         // Setup
         final String time = Instant.now().toString();
+        final Long timestamp = Instant.now().toEpochMilli();
         final DdiResult ddiResult = new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(10, 10));
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, ddiResult, 200, Collections.singletonList("myMessage"));
-        final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(time, ddiStatus);
+        final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(time, timestamp, ddiStatus);
 
         // Test
         final String serializedDdiActionFeedback = mapper.writeValueAsString(ddiActionFeedback);
@@ -64,6 +65,7 @@ class DdiActionFeedbackTest {
 
         assertThat(serializedDdiActionFeedback).contains(time);
         assertThat(deserializedDdiActionFeedback.getTime()).isEqualTo(time);
+        assertThat(deserializedDdiActionFeedback.getTimestamp()).isEqualTo(timestamp);
         assertThat(deserializedDdiActionFeedback.getStatus()).hasToString(ddiStatus.toString());
     }
 
@@ -93,6 +95,7 @@ class DdiActionFeedbackTest {
 
         assertThat(mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class)).satisfies(deserializedDdiActionFeedback -> {
             assertThat(deserializedDdiActionFeedback.getTime()).isNull();
+            assertThat(deserializedDdiActionFeedback.getTimestamp()).isNotNull();
             assertThat(deserializedDdiActionFeedback.getStatus()).isNotNull();
             assertThat(deserializedDdiActionFeedback.getStatus().getResult()).isNotNull();
             assertThat(deserializedDdiActionFeedback.getStatus().getResult().getFinished()).isEqualTo(DdiResult.FinalResult.NONE);

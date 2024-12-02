@@ -163,8 +163,8 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     }
 
     @Override
-    protected void onActionStatusUpdate(final Status updatedActionStatus, final JpaAction action) {
-        if (updatedActionStatus == Status.RUNNING && action.isActive()) {
+    protected void onActionStatusUpdate(final JpaActionStatus newActionStatus, final JpaAction action) {
+        if (newActionStatus.getStatus() == Status.RUNNING && action.isActive()) {
             action.setStatus(Status.RUNNING);
         }
     }

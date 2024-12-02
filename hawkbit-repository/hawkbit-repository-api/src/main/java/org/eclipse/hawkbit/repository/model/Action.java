@@ -144,12 +144,12 @@ public interface Action extends TenantAwareBaseEntity {
     /**
      * Timestamp of the action when it actually happened (e.g. could be on offline action)
      */
-    long getTimestamp();
+    Optional<Long> getTimestamp();
 
     /**
      * Timestamp of the action when it actually happened (e.g. could be an offline action)
      */
-    void setTimestamp(long timestamp);
+    void setTimestamp(Long timestamp);
 
     /**
      * checks if the {@link #getForcedTime()} is hit by the given

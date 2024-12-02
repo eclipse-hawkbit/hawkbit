@@ -177,19 +177,23 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    protected void onActionStatusUpdate(final Action.Status updatedActionStatus, final JpaAction action) {
+    protected void onActionStatusUpdate(final JpaActionStatus newActionStatus, final JpaAction action) {
+        Action.Status updatedActionStatus = newActionStatus.getStatus();
         switch (updatedActionStatus) {
             case ERROR: {
                 final JpaTarget target = (JpaTarget) action.getTarget();
                 target.setUpdateStatus(TargetUpdateStatus.ERROR);
+                action.setTimestamp(newActionStatus.getOccurredAt());
                 handleErrorOnAction(action, target);
                 break;
             }
             case FINISHED: {
+                action.setTimestamp(newActionStatus.getOccurredAt());
                 handleFinishedAndStoreInTargetStatus(action).ifPresent(this::requestControllerAttributes);
                 break;
             }
             case DOWNLOADED: {
+                action.setTimestamp(newActionStatus.getOccurredAt());
                 handleDownloadedActionStatus(action).ifPresent(this::requestControllerAttributes);
                 break;
             }
