@@ -73,8 +73,10 @@ import org.springframework.validation.annotation.Validated;
 public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement {
 
     private static final int MAX_TENANTS_QUERY = 1000;
+
     private final String countArtifactQuery;
     private final String countSoftwareModulesQuery;
+
     @Autowired
     private EntityManager entityManager;
     @Autowired
@@ -282,12 +284,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     public TenantMetaData getTenantMetadata(final long tenantId) {
         return tenantMetaDataRepository.findById(tenantId)
                 .orElseThrow(() -> new EntityNotFoundException(TenantMetaData.class, tenantId));
-    }
-
-    @Override
-    @Cacheable(value = "currentTenant", keyGenerator = "currentTenantKeyGenerator", cacheManager = "directCacheManager", unless = "#result == null")
-    public boolean tenantExists(final String tenant) {
-        return tenantMetaDataRepository.findByTenantIgnoreCase(tenant) != null;
     }
 
     private static boolean isPostgreSql(final JpaProperties properties) {

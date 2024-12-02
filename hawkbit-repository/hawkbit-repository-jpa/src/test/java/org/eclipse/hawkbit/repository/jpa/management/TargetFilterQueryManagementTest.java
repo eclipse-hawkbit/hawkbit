@@ -66,8 +66,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     @Test
     @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
             + "of Optional not present.")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(targetFilterQueryManagement.get(NOT_EXIST_IDL)).isNotPresent();
         assertThat(targetFilterQueryManagement.getByName(NOT_EXIST_ID)).isNotPresent();

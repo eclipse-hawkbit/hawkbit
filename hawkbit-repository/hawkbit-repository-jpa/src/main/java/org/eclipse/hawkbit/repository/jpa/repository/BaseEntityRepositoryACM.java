@@ -322,7 +322,11 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
                                     .filter(value -> repository.getDomainClass().isAssignableFrom(value.getClass()))
                                     .isPresent()) {
                                 return ((Optional<T>) result).filter(
-                                        t -> isOperationAllowed(AccessController.Operation.READ, t, accessController));
+                                        t -> {
+                                            // if not accessible - throws exception (as for iterables or single entities)
+                                            accessController.assertOperationAllowed(AccessController.Operation.READ, t);
+                                            return true;
+                                        });
                             } else if (repository.getDomainClass().isAssignableFrom(method.getReturnType())) {
                                 accessController.assertOperationAllowed(AccessController.Operation.READ, (T) result);
                             }

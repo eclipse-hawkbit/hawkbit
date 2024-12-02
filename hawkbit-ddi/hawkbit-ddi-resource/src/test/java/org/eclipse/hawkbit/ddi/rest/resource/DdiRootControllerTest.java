@@ -146,8 +146,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that server returns a not found response in case of empty controller ID.")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void rootRsWithoutId() throws Exception {
         mvc.perform(get("/controller/v1/"))
                 .andDo(MockMvcResultPrinter.print())

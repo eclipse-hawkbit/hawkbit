@@ -410,7 +410,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Optional<Target> getByControllerID(final String controllerId) {
-        return targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId)).map(Target.class::cast);
+        return targetRepository.findByControllerId(controllerId).map(Target.class::cast);
     }
 
     @Override
@@ -892,8 +892,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private JpaTarget getByControllerIdAndThrowIfNotFound(final String controllerId) {
-        return targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        return targetRepository.getByControllerId(controllerId);
     }
 
     private JpaTargetType getTargetTypeByIdAndThrowIfNotFound(final long id) {
@@ -960,7 +959,7 @@ public class JpaTargetManagement implements TargetManagement {
         final JpaTargetTag tag = targetTagRepository.findById(targetTagId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
         final List<JpaTarget> targets = controllerIds.size() == 1 ?
-                targetRepository.findOne(TargetSpecifications.hasControllerId(controllerIds.iterator().next()))
+                targetRepository.findByControllerId(controllerIds.iterator().next())
                         .map(List::of)
                         .orElseGet(Collections::emptyList) :
                 targetRepository

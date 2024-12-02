@@ -154,7 +154,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
@@ -486,16 +485,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
         return TenantConfigurationManagementHolder.getInstance();
-    }
-
-    /**
-     * @return the {@link SystemManagementHolder} singleton bean which holds the
-     *         current {@link SystemManagement} service and make it accessible in
-     *         beans which cannot access the service directly, e.g. JPA entities.
-     */
-    @Bean
-    SystemManagementHolder systemManagementHolder() {
-        return SystemManagementHolder.getInstance();
     }
 
     /**

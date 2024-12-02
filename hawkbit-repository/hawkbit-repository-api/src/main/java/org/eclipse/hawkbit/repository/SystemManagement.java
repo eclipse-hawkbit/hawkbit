@@ -109,7 +109,4 @@ public interface SystemManagement {
 
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     TenantMetaData getTenantMetadata(long tenantId);
-
-    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
-    boolean tenantExists(String tenant);
 }

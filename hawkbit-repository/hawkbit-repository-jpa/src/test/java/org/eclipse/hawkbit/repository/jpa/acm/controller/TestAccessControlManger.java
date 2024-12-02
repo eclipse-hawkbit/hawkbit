@@ -57,7 +57,6 @@ public class TestAccessControlManger {
                             "Access to " + ruleClass.getName() + "/" + entity + " not allowed by checker!");
                 }
             }
-            return;
         }
     }
 

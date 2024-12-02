@@ -21,7 +21,6 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.Identifiable;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
@@ -76,7 +75,9 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
 
         // verify targetManagement#getByControllerID
         assertThat(targetManagement.getByControllerID(permittedTarget.getControllerId())).isPresent();
-        assertThat(targetManagement.getByControllerID(hiddenTarget.getControllerId())).isEmpty();
+        assertThatThrownBy(() -> targetManagement.getByControllerID(hiddenTarget.getControllerId()))
+                .as("Missing read permissions for hidden target.")
+                .isInstanceOf(InsufficientPermissionException.class);
 
         // verify targetManagement#getByControllerID
         assertThat(targetManagement
@@ -95,7 +96,7 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
         assertThat(targetManagement.getControllerAttributes(permittedTarget.getControllerId())).isEmpty();
         assertThatThrownBy(() -> {
             assertThat(targetManagement.getControllerAttributes(hiddenTarget.getControllerId())).isEmpty();
-        }).as("Target should not be found.").isInstanceOf(EntityNotFoundException.class);
+        }).as("Target should not be found.").isInstanceOf(InsufficientPermissionException.class);
 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("test").query("id==*"));
@@ -176,7 +177,7 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
         assertThatThrownBy(() -> {
             targetManagement.assignTag(Collections.singletonList(readOnlyTarget.getControllerId()), myTag.getId());
         }).as("Missing update permissions for target to toggle tag assignment.")
-                .isInstanceOfAny(InsufficientPermissionException.class, EntityNotFoundException.class);
+                .isInstanceOfAny(InsufficientPermissionException.class);
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
         assertThatThrownBy(() -> {
@@ -190,19 +191,18 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
                     .assignTag(Collections.singletonList(hiddenTarget.getControllerId()), myTag.getId())
                     .size();
         }).as("Missing update permissions for target to toggle tag assignment.")
-                .isInstanceOf(EntityNotFoundException.class);
+                .isInstanceOf(InsufficientPermissionException.class);
 
         // assignment is denied for hiddenTarget since it's hidden
         assertThatThrownBy(() -> {
             targetManagement.assignTag(Collections.singletonList(hiddenTarget.getControllerId()), myTag.getId());
         }).as("Missing update permissions for target to toggle tag assignment.")
-                .isInstanceOf(EntityNotFoundException.class);
+                .isInstanceOf(InsufficientPermissionException.class);
 
         // assignment is denied for hiddenTarget since it's hidden
-        assertThatThrownBy(() -> {
-            targetManagement.unassignTag(hiddenTarget.getControllerId(), myTag.getId());
-        }).as("Missing update permissions for target to toggle tag assignment.")
-                .isInstanceOf(EntityNotFoundException.class);
+        assertThatThrownBy(() -> targetManagement.unassignTag(hiddenTarget.getControllerId(), myTag.getId()))
+                .as("Missing update permissions for target to toggle tag assignment.")
+                .isInstanceOf(InsufficientPermissionException.class);
     }
 
     @Test

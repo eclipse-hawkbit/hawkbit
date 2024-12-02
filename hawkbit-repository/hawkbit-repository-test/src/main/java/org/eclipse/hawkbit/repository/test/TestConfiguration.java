@@ -27,11 +27,13 @@ import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
 import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
+import org.eclipse.hawkbit.repository.test.util.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
@@ -129,6 +131,16 @@ public class TestConfiguration implements AsyncConfigurer {
     @Bean
     ArtifactRepository artifactRepository(final ArtifactFilesystemProperties artifactFilesystemProperties) {
         return new ArtifactFilesystemRepository(artifactFilesystemProperties);
+    }
+
+    /**
+     * @return the {@link org.eclipse.hawkbit.repository.test.util.SystemManagementHolder} singleton bean which holds the
+     *         current {@link SystemManagement} service and make it accessible in
+     *         beans which cannot access the service directly, e.g. JPA entities.
+     */
+    @Bean
+    SystemManagementHolder systemManagementHolder() {
+        return SystemManagementHolder.getInstance();
     }
 
     @Bean

@@ -63,8 +63,7 @@ public class BaseAmqpServiceTest {
 
     @Test
     @Description("Tests invalid null message content")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void convertMessageWithNullContent() {
         final Message message = createMessage("".getBytes());
         assertThatExceptionOfType(MessageConversionException.class)
@@ -74,8 +73,7 @@ public class BaseAmqpServiceTest {
 
     @Test
     @Description("Tests invalid empty message content")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void updateActionStatusWithEmptyContent() {
         final Message message = createMessage("".getBytes());
         assertThatExceptionOfType(MessageConversionException.class)
@@ -85,8 +83,7 @@ public class BaseAmqpServiceTest {
 
     @Test
     @Description("Tests invalid json message content")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void updateActionStatusWithInvalidJsonContent() {
         final Message message = createMessage("Invalid Json".getBytes());
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());

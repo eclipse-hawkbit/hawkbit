@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.AutoConfirmationAlreadyActiveException;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidConfirmationFeedbackException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -35,7 +34,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
-import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
@@ -81,7 +79,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     public AutoConfirmationStatus activateAutoConfirmation(final String controllerId, final String initiator, final String remark) {
         log.trace(
                 "'activateAutoConfirmation' was called with values: controllerId={}; initiator={}; remark={}", controllerId, initiator, remark);
-        final JpaTarget target = getTargetByControllerIdAndThrowIfNotFound(controllerId);
+        final JpaTarget target = targetRepository.getByControllerId(controllerId);
         if (target.getAutoConfirmationStatus() != null) {
             log.debug("'activateAutoConfirmation' was called for an controller id {} with active auto confirmation.", controllerId);
             throw new AutoConfirmationAlreadyActiveException(controllerId);
@@ -104,13 +102,13 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
 
     @Override
     public Optional<AutoConfirmationStatus> getStatus(final String controllerId) {
-        return Optional.of(getTargetByControllerIdAndThrowIfNotFound(controllerId)).map(JpaTarget::getAutoConfirmationStatus);
+        return Optional.of(targetRepository.getByControllerId(controllerId)).map(JpaTarget::getAutoConfirmationStatus);
     }
 
     @Override
     @Transactional
     public List<Action> autoConfirmActiveActions(final String controllerId) {
-        final JpaTarget target = getTargetByControllerIdAndThrowIfNotFound(controllerId);
+        final JpaTarget target = targetRepository.getByControllerId(controllerId);
         if (target.getAutoConfirmationStatus() == null) {
             // auto-confirmation is not active
             return Collections.emptyList();
@@ -159,7 +157,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     @Transactional
     public void deactivateAutoConfirmation(String controllerId) {
         log.debug("Deactivate auto confirmation for controllerId '{}'", controllerId);
-        final JpaTarget target = getTargetByControllerIdAndThrowIfNotFound(controllerId);
+        final JpaTarget target = targetRepository.getByControllerId(controllerId);
         target.setAutoConfirmationStatus(null);
         targetRepository.save(target);
     }
@@ -220,19 +218,12 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
                 "Automatically confirm actionId '{}' due to active auto-confirmation initiated by '{}' and rollouts system user '{}'",
                 action.getId(), autoConfirmationStatus.getInitiator(), autoConfirmationStatus.getCreatedBy());
 
-        // do not make use of
-        // org.eclipse.hawkbit.repository.jpa.management.JpaActionManagement.handleAddUpdateActionStatus
-        // to bypass the quota check. Otherwise, the action will not be confirmed in case
-        // of exceeded action status quota.
+        // do not make use of org.eclipse.hawkbit.repository.jpa.management.JpaActionManagement.handleAddUpdateActionStatus
+        // to bypass the quota check. Otherwise, the action will not be confirmed in case of exceeded action status quota.
         action.setStatus(Status.RUNNING);
         actionStatus.setAction(action);
 
         actionStatusRepository.save(actionStatus);
         return actionRepository.save(action);
-    }
-
-    private JpaTarget getTargetByControllerIdAndThrowIfNotFound(final String controllerId) {
-        return targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
     }
 }

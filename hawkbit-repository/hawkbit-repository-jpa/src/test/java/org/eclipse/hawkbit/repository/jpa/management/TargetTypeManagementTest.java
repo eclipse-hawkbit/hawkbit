@@ -43,8 +43,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management get access react as specified on calls for non existing entities by means "
             + "of Optional not present.")
-    @ExpectEvents({
-            @Expect(type = TargetTypeCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetTypeCreatedEvent.class) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(targetTypeManagement.get(NOT_EXIST_IDL)).isNotPresent();
         assertThat(targetTypeManagement.getByName(NOT_EXIST_ID)).isNotPresent();
@@ -53,8 +52,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management queries react as specified on calls for non existing entities "
             + " by means of throwing EntityNotFoundException.")
-    @ExpectEvents({
-            @Expect(type = TargetTypeUpdatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetTypeUpdatedEvent.class) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         verifyThrownExceptionBy(() -> targetTypeManagement.delete(NOT_EXIST_IDL), "TargetType");
         verifyThrownExceptionBy(() -> targetTypeManagement.update(entityFactory.targetType().update(NOT_EXIST_IDL)),

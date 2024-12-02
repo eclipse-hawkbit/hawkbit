@@ -486,16 +486,12 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Optional<DistributionSet> getAssignedDistributionSet(final String controllerId) {
-        return targetRepository
-                .findOne(TargetSpecifications.hasControllerId(controllerId))
-                .map(JpaTarget::getAssignedDistributionSet);
+        return targetRepository.findByControllerId(controllerId).map(JpaTarget::getAssignedDistributionSet);
     }
 
     @Override
     public Optional<DistributionSet> getInstalledDistributionSet(final String controllerId) {
-        return targetRepository
-                .findOne(TargetSpecifications.hasControllerId(controllerId))
-                .map(JpaTarget::getInstalledDistributionSet);
+        return targetRepository.findByControllerId(controllerId).map(JpaTarget::getInstalledDistributionSet);
     }
 
     @Override
@@ -710,8 +706,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private void checkCompatibilityForMultiDsAssignment(final String controllerId, final List<Long> distSetIds) {
-        final Target target = targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        final Target target = targetRepository.getByControllerId(controllerId);
 
         if (target.getTargetType() != null) {
             // we assume that list of assigned DS is less than

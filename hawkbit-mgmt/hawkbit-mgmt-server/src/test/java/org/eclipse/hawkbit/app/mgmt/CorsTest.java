@@ -46,7 +46,7 @@ public class CorsTest extends AbstractSecurityTest {
 
     @Test
     @Description("Ensures that Cors is working.")
-    @WithUser(authorities = SpRole.TENANT_ADMIN)
+    @WithUser(authorities = SpRole.TENANT_ADMIN, autoCreateTenant = false)
     public void validateCorsRequest() throws Exception {
         performOptionsRequestToRestWithOrigin(ALLOWED_ORIGIN_FIRST).andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGIN_FIRST));

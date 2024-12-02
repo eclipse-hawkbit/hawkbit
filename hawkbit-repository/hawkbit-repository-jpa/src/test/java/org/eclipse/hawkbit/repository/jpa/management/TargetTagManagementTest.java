@@ -90,8 +90,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means " +
             "of Optional not present.")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(targetTagManagement.getByName(NOT_EXIST_ID)).isNotPresent();
         assertThat(targetTagManagement.get(NOT_EXIST_IDL)).isNotPresent();
