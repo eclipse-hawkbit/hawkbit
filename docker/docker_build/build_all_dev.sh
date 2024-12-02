@@ -16,7 +16,6 @@ set -xe
 # -r <local maven repository> the local maven repository the already built application jars are located into
 
 VERSION=0-SNAPSHOT
-FLAVOUR="standard"
 MVN_REPO=~/.m2/repository
 
 while getopts v:f:r: option
@@ -24,33 +23,24 @@ do
     case "${option}"
         in
         v)VERSION=${OPTARG};;
-        f)FLAVOUR=${OPTARG};;
         r)MVN_REPO=${OPTARG};;
     esac
 done
 
 echo "hawkBit version      : ${VERSION}"
-echo "docker image flavour : ${FLAVOUR}"
 echo "maven repository     : ${MVN_REPO}"
 
-if [ ${FLAVOUR} == "mysql" ]
-then
-      DOCKER_FILE="Dockerfile_dev-mysql"
-      TAG_SUFFIX="-mysql"
-else
-      DOCKER_FILE="Dockerfile_dev"
-      TAG_SUFFIX=""
-fi
-
+DOCKER_FILE="Dockerfile_dev"
 echo "docker file          : ${DOCKER_FILE}"
 
 function build() {
-  docker build -t hawkbit/$1:${VERSION}${TAG_SUFFIX} -t hawkbit/$1:latest${TAG_SUFFIX} --build-arg HAWKBIT_APP=$1 --build-arg HAWKBIT_VERSION=${VERSION} -f ${DOCKER_FILE} "${MVN_REPO}"
+  docker build -t hawkbit/$1:${VERSION} -t hawkbit/$1:latest --build-arg HAWKBIT_APP=$1 --build-arg HAWKBIT_VERSION=${VERSION} -f ${DOCKER_FILE} "${MVN_REPO}"
 }
 
+# micro-services
 build "hawkbit-ddi-server"
 build "hawkbit-dmf-server"
 build "hawkbit-mgmt-server"
 build "hawkbit-simple-ui"
-
+# monolith
 build "hawkbit-update-server"

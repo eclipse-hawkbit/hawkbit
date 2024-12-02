@@ -18,7 +18,7 @@ services:
   # HawkBit DDI
   # ---------------------
   hawkbit-ddi:
-    image: "hawkbit/hawkbit-ddi-server:latest-mysql"
+    image: "hawkbit/hawkbit-ddi-server:latest"
     environment:
       - 'PROFILES=mysql'
       - 'SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/hawkbit'
@@ -39,7 +39,7 @@ services:
   # HawkBit DMF
   # ---------------------
   hawkbit-dmf:
-    image: "hawkbit/hawkbit-dmf-server:latest-mysql"
+    image: "hawkbit/hawkbit-dmf-server:latest"
     environment:
       - 'PROFILES=mysql'
       - 'SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/hawkbit'
@@ -58,7 +58,7 @@ services:
   # HawkBit MGMT
   # ---------------------
   hawkbit-mgmt:
-    image: "hawkbit/hawkbit-mgmt-server:latest-mysql"
+    image: "hawkbit/hawkbit-mgmt-server:latest"
     environment:
       - 'PROFILES=mysql'
       - 'SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/hawkbit'

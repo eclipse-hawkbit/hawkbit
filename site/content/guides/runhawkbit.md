@@ -35,16 +35,6 @@ This guide describes a target architecture that is more like one that you will e
 As mentioned you can create your own application with hawkBit inside or adapt the existing example app. The second
 option will be shown here.
 
-### Set MariaDB dependency to compile in the [update server POM](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-monolith/hawkbit-update-server/pom.xml)
-
-```xml
-<dependency>
-  <groupId>org.mariadb.jdbc</groupId>
-  <artifactId>mariadb-java-client</artifactId>
-  <scope>compile</scope>
-</dependency>
-```
-
 ### Configure MariaDB/MySQL connection settings.
 
 For this you can either edit the existing _application.properties_ or create

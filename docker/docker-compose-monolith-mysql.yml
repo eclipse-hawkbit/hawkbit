@@ -18,7 +18,7 @@ services:
   # HawkBit service
   # ---------------------
   hawkbit:
-    image: "hawkbit/hawkbit-update-server:latest-mysql"
+    image: "hawkbit/hawkbit-update-server:latest"
     environment:
       - 'PROFILES=mysql'
       - 'SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/hawkbit'
