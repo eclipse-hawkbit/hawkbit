@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.model.helper;
+package org.eclipse.hawkbit.repository.test.util;
 
 import lombok.AccessLevel;
 import lombok.Getter;

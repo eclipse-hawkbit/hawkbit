@@ -37,8 +37,7 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
             + "of Optional not present.")
-    @ExpectEvents({
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 0) })
     public void nonExistingEntityAccessReturnsNotPresent() {
 
         assertThat(softwareModuleTypeManagement.get(NOT_EXIST_IDL)).isNotPresent();
@@ -49,8 +48,7 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Verifies that management queries react as specfied on calls for non existing entities "
             + " by means of throwing EntityNotFoundException.")
-    @ExpectEvents({
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 0) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         verifyThrownExceptionBy(() -> softwareModuleTypeManagement.delete(NOT_EXIST_IDL), "SoftwareModuleType");
 

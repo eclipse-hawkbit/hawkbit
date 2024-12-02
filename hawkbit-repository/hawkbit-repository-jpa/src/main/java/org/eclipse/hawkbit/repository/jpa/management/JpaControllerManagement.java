@@ -414,8 +414,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             throw new InvalidTargetAttributeException();
         }
 
-        final JpaTarget target = targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        final JpaTarget target = targetRepository.getByControllerId(controllerId);
 
         // get the modifiable attribute map
         final Map<String, String> controllerAttributes = target.getControllerAttributes();
@@ -447,7 +446,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public Optional<Target> getByControllerId(final String controllerId) {
-        return targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId)).map(Target.class::cast);
+        return targetRepository.findByControllerId(controllerId).map(Target.class::cast);
     }
 
     @Override
@@ -541,20 +540,16 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public void deleteExistingTarget(@NotEmpty final String controllerId) {
-        final Target target = targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-        targetRepository.deleteById(target.getId());
+        targetRepository.deleteById(targetRepository.getByControllerId(controllerId).getId());
     }
 
     @Override
     public Optional<Action> getInstalledActionByTarget(final String controllerId) {
-        final JpaTarget jpaTarget = targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-
-        final JpaDistributionSet installedDistributionSet = jpaTarget.getInstalledDistributionSet();
-        if (null != installedDistributionSet) {
-            return actionRepository.findFirstByTargetIdAndDistributionSetIdAndStatusOrderByIdDesc(jpaTarget.getId(),
-                    installedDistributionSet.getId(), FINISHED);
+        final JpaDistributionSet installedDistributionSet = targetRepository.getByControllerId(controllerId).getInstalledDistributionSet();
+        if (installedDistributionSet != null) {
+            final JpaTarget jpaTarget = targetRepository.getByControllerId(controllerId);
+            return actionRepository.findFirstByTargetIdAndDistributionSetIdAndStatusOrderByIdDesc(
+                    jpaTarget.getId(), installedDistributionSet.getId(), FINISHED);
         } else {
             return Optional.empty();
         }

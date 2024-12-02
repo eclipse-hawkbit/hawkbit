@@ -18,7 +18,6 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
-import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.springframework.security.authentication.TestingAuthenticationToken;
@@ -29,6 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class SecurityContextSwitch {
 
     public static final String DEFAULT_TENANT = "DEFAULT";
+
     private static final WithUser PRIVILEDGED_USER =
             createWithUser("bumlux", DEFAULT_TENANT, false, true, false, "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE");
 

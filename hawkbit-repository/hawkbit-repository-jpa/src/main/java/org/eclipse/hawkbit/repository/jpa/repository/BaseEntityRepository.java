@@ -37,15 +37,13 @@ import org.springframework.transaction.annotation.Transactional;
 @NoRepositoryBean
 @Transactional(readOnly = true)
 public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity>
-        extends PagingAndSortingRepository<T, Long>, CrudRepository<T, Long>, JpaSpecificationExecutor<T>,
-        NoCountSliceRepository<T>, ACMRepository<T> {
+        extends PagingAndSortingRepository<T, Long>, CrudRepository<T, Long>, JpaSpecificationExecutor<T>, NoCountSliceRepository<T>,
+        ACMRepository<T> {
 
     /**
-     * Overrides
-     * {@link org.springframework.data.repository.CrudRepository#saveAll(Iterable)}
-     * to return a list of created entities instead of an instance of
-     * {@link Iterable} to be able to work with it directly in further code
-     * processing instead of converting the {@link Iterable}.
+     * Overrides {@link org.springframework.data.repository.CrudRepository#saveAll(Iterable)} to return a list of created entities instead
+     * of an instance of {@link Iterable} to be able to work with it directly in further code processing instead of converting the
+     * {@link Iterable}.
      *
      * @param entities to persist in the database
      * @return the created entities
@@ -55,11 +53,9 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
     <S extends T> List<S> saveAll(Iterable<S> entities);
 
     /**
-     * Overrides
-     * {@link org.springframework.data.repository.CrudRepository#findAll()}
-     * to return a list of found entities instead of an instance of
-     * {@link Iterable} to be able to work with it directly in further code
-     * processing instead of converting the {@link Iterable}.
+     * Overrides {@link org.springframework.data.repository.CrudRepository#findAll()} to return a list of found entities instead of
+     * an instance of {@link Iterable} to be able to work with it directly in further code processing instead of converting the
+     * {@link Iterable}.
      *
      * @return the found entities
      */
@@ -67,22 +63,9 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
     List<T> findAll();
 
     /**
-     * Gets by id requiring entity to exists
-     *
-     * @param id the entity id
-     * @return the existing entity.
-     * @throws EntityNotFoundException if the entity doesn't exist
-     */
-    default T getById(final Long id) {
-        return findById(id).orElseThrow(() -> new EntityNotFoundException(getDomainClass(), id));
-    }
-
-    /**
-     * Overrides
-     * {@link org.springframework.data.repository.CrudRepository#findAllById(Iterable)}
-     * to return a list of found entities instead of an instance of
-     * {@link Iterable} to be able to work with it directly in further code
-     * processing instead of converting the {@link Iterable}.
+     * Overrides {@link org.springframework.data.repository.CrudRepository#findAllById(Iterable)} to return a list of found entities instead
+     * of an instance of {@link Iterable} to be able to work with it directly in further code processing instead of converting the
+     * {@link Iterable}.
      *
      * @param ids to search in the database for
      * @return the found entities
@@ -92,10 +75,8 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
 
     // TODO To be considered if this method is needed at all
     /**
-     * Deletes all entities of a given tenant from this repository. For safety
-     * reasons (this is a "delete everything" query after all) we add the tenant
-     * manually to query even if this will be done by {@link EntityManager}
-     * anyhow. The DB should take care of optimizing this away.
+     * Deletes all entities of a given tenant from this repository. For safety reasons (this is a "delete everything" query after all) we add
+     * the tenant manually to query even if this will be done by {@link EntityManager} anyhow. The DB should take care of optimizing this away.
      * <p/>
      *
      * @param tenant to delete data from
@@ -103,11 +84,9 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
     void deleteByTenant(String tenant);
 
     /**
-     * Returns a wrapper (or the same instance if access controller is <code>null</code> of this repository that
-     * supports ACM.
+     * Returns a wrapper (or the same instance if access controller is <code>null</code> of this repository that supports ACM.
      * <p/>
-     * Note: To use ACM support the returned object shall be used! <code>this</code> object will not achieve ACM
-     * support!
+     * Note: To use ACM support the returned object shall be used! <code>this</code> object will not achieve ACM support!
      * <p/>
      * Notes on ACM support (if enabled, i.e. <code>accessController</code> is not <code>null</code>):
      * <ul>
@@ -123,7 +102,6 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
      * </ul>
      *
      * @param accessController access controller to be applied to the result
-     * @param entityType the entity type of the repository
      * @return a repository that supports ACM.
      */
     default BaseEntityRepository<T> withACM(@Nullable final AccessController<T> accessController) {

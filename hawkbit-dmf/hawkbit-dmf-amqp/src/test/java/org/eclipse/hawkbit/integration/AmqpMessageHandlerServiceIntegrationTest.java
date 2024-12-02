@@ -187,8 +187,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @ValueSource(strings = { "", "Invalid Invalid" })
     @NullSource
     @Description("Tests register invalid target with empty controller id.")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void shouldNotRegisterTargetsWithInvalidControllerIds(String controllerId) {
         createAndSendThingCreated(controllerId);
         assertAllTargetsCount(0);
@@ -197,8 +196,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     @Test
     @Description("Tests register invalid target with too long controller id")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void registerInvalidTargetWithTooLongControllerId() {
         createAndSendThingCreated(RandomStringUtils.randomAlphabetic(Target.CONTROLLER_ID_MAX_SIZE + 1));
         assertAllTargetsCount(0);
@@ -207,8 +205,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     @Test
     @Description("Tests null reply to property in message header. This message should forwarded to the deadletter queue")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void missingReplyToProperty() {
         final String controllerId = TARGET_PREFIX + "missingReplyToProperty";
         final Message createTargetMessage = createTargetMessage(controllerId, TENANT_EXIST);
@@ -221,8 +218,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     @Test
     @Description("Tests missing reply to property in message header. This message should forwarded to the deadletter queue")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void emptyReplyToProperty() {
         final String controllerId = TARGET_PREFIX + "emptyReplyToProperty";
         final Message createTargetMessage = createTargetMessage(controllerId, TENANT_EXIST);
@@ -235,8 +231,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     @Test
     @Description("Tests missing thing id property in message. This message should forwarded to the deadletter queue")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void missingThingIdProperty() {
         final Message createTargetMessage = createTargetMessage(null, TENANT_EXIST);
         createTargetMessage.getMessageProperties().getHeaders().remove(MessageHeaderKey.THING_ID);
@@ -248,8 +243,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     @Test
     @Description("Tests null thing id property in message. This message should forwarded to the deadletter queue")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void nullThingIdProperty() {
         final Message createTargetMessage = createTargetMessage(null, TENANT_EXIST);
         getDmfClient().send(createTargetMessage);
@@ -260,8 +254,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     @Test
     @Description("Tests missing tenant message header. This message should forwarded to the deadletter queue")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void missingTenantHeader() {
         final String controllerId = TARGET_PREFIX + "missingTenantHeader";
         final Message createTargetMessage = createTargetMessage(controllerId, TENANT_EXIST);
@@ -274,8 +267,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     @Test
     @Description("Tests null tenant message header. This message should forwarded to the deadletter queue")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void nullTenantHeader() {
         final String controllerId = TARGET_PREFIX + "nullTenantHeader";
         final Message createTargetMessage = createTargetMessage(controllerId, null);
@@ -287,8 +279,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     @Test
     @Description("Tests empty tenant message header. This message should forwarded to the deadletter queue")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void emptyTenantHeader() {
         final String controllerId = TARGET_PREFIX + "emptyTenantHeader";
         final Message createTargetMessage = createTargetMessage(controllerId, "");
@@ -300,8 +291,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     @Test
     @Description("Tests missing type message header. This message should forwarded to the deadletter queue")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void missingTypeHeader() {
         final Message createTargetMessage = createTargetMessage(null, TENANT_EXIST);
         createTargetMessage.getMessageProperties().getHeaders().remove(MessageHeaderKey.TYPE);
@@ -315,8 +305,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @ValueSource(strings = { "", "NotExist" })
     @NullSource
     @Description("Tests null type message header. This message should forwarded to the deadletter queue")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void shouldNotCreateTargetsWithInvalidTypeInHeader(String type) {
         final Message createTargetMessage = createTargetMessage(null, TENANT_EXIST);
         createTargetMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.TYPE, type);
@@ -330,8 +319,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @ValueSource(strings = { "", "NotExist" })
     @NullSource
     @Description("Tests null topic message header. This message should forwarded to the deadletter queue")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void shouldNotSendMessagesWithInvalidTopic(String topic) {
         final Message eventMessage = createUpdateActionEventMessage("");
         eventMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.TOPIC, topic);
@@ -342,8 +330,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     @Test
     @Description("Tests missing topic message header. This message should forwarded to the deadletter queue")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void missingTopicHeader() {
         final Message eventMessage = createUpdateActionEventMessage("");
         eventMessage.getMessageProperties().getHeaders().remove(MessageHeaderKey.TOPIC);
@@ -356,8 +343,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @ValueSource(strings = { "", "Invalid Content" })
     @NullSource
     @Description("Tests invalid null message content. This message should forwarded to the deadletter queue")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void shouldMoveUpdateActionStatusWithInvalidPayloadIntoDeadLetter(String payload) {
         final Message eventMessage = createUpdateActionEventMessage(payload);
         getDmfClient().send(eventMessage);
@@ -366,8 +352,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     @Test
     @Description("Tests invalid topic message header. This message should forwarded to the deadletter queue")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void updateActionStatusWithInvalidActionId() {
         final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(1L, DmfActionStatus.RUNNING);
         final Message eventMessage = createUpdateActionEventMessage(actionUpdateStatus);

@@ -146,8 +146,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management get access react as specified on calls for non existing entities by means " +
             "of Optional not present.")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(deploymentManagement.findAction(1234L)).isNotPresent();
         assertThat(deploymentManagement.findActionWithDetails(NOT_EXIST_IDL)).isNotPresent();
@@ -156,8 +155,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management queries react as specified on calls for non existing entities " +
             " by means of throwing EntityNotFoundException.")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 1) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         final Target target = testdataFactory.createTarget();
         final String dsName = "DistributionSet";

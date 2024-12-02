@@ -54,8 +54,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that management get access reacts as specified on calls for non existing entities by means of Optional not present.")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(distributionSetTagManagement.getByName(NOT_EXIST_ID)).isNotPresent();
         assertThat(distributionSetTagManagement.get(NOT_EXIST_IDL)).isNotPresent();

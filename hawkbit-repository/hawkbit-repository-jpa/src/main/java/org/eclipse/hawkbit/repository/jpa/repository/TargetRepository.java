@@ -10,11 +10,14 @@
 package org.eclipse.hawkbit.repository.jpa.repository;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
 
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
@@ -28,6 +31,15 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true)
 public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
+
+    default Optional<JpaTarget> findByControllerId(final String controllerId) {
+        return findOne(TargetSpecifications.hasControllerId(controllerId));
+    }
+
+    default JpaTarget getByControllerId(final String controllerId) {
+        return findOne(TargetSpecifications.hasControllerId(controllerId))
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+    }
 
     // TODO AC - remove it and use specification
 

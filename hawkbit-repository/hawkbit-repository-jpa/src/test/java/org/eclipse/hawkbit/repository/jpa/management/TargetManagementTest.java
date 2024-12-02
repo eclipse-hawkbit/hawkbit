@@ -96,8 +96,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management get access react as specified on calls for non existing entities by means "
             + "of Optional not present.")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 1) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     void nonExistingEntityAccessReturnsNotPresent() {
         final Target target = testdataFactory.createTarget();
         assertThat(targetManagement.getByControllerID(NOT_EXIST_ID)).isNotPresent();
@@ -184,8 +183,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Ensures that retrieving the target security is only permitted with the necessary permissions.")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 1) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     void getTargetSecurityTokenOnlyWithCorrectPermission() throws Exception {
         final Target createdTarget = targetManagement
                 .create(entityFactory.target().create().controllerId("targetWithSecurityToken").securityToken("token"));
@@ -221,8 +219,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verify that a target with same controller ID than another device cannot be created.")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 1) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     void createTargetThatViolatesUniqueConstraintFails() {
         targetManagement.create(entityFactory.target().create().controllerId("123"));
 
@@ -388,8 +385,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Checks if the EntityAlreadyExistsException is thrown if the targets with the same controller ID are created twice.")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 5) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 5) })
     void createMultipleTargetsDuplicate() {
         testdataFactory.createTargets(5, "mySimpleTargs", "my simple targets");
         try {
@@ -402,8 +398,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Checks if the EntityAlreadyExistsException is thrown if a single target with the same controller ID are created twice.")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 1) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     void createTargetDuplicate() {
         targetManagement.create(entityFactory.target().create().controllerId("4711"));
         try {
@@ -743,8 +738,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verify that the find all targets by ids method contains the entities that we are looking for")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 12) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 12) })
     void verifyFindTargetAllById() {
         final List<Long> searchIds = Arrays.asList(testdataFactory.createTarget("target-4").getId(),
                 testdataFactory.createTarget("target-5").getId(), testdataFactory.createTarget("target-6").getId());
