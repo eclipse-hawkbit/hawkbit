@@ -61,8 +61,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Verfies that a paged result list of DS tags reflects the content on the repository side.")
-    @ExpectEvents({
-            @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
+    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
     public void getDistributionSetTags() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
         final DistributionSetTag assigned = tags.get(0);
@@ -162,8 +161,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Verfies that a single result of a DS tag reflects the content on the repository side.")
-    @ExpectEvents({
-            @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
+    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
     public void getDistributionSetTag() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
         final DistributionSetTag assigned = tags.get(0);
@@ -181,8 +179,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Verifies that created DS tags are stored in the repository as send to the API.")
-    @ExpectEvents({
-            @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
+    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
     public void createDistributionSetTags() throws Exception {
         final Tag tagOne = entityFactory.tag().create().colour("testcol1").description("its a test1").name("thetest1")
                 .build();

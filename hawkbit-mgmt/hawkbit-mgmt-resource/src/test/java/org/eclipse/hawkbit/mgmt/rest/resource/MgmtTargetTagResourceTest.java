@@ -68,8 +68,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
     @Test
     @Description("Verfies that a paged result list of target tags reflects the content on the repository side.")
-    @ExpectEvents({
-            @Expect(type = TargetTagCreatedEvent.class, count = 2) })
+    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
     public void getTargetTags() throws Exception {
         final List<TargetTag> tags = testdataFactory.createTargetTags(2, "");
         final TargetTag assigned = tags.get(0);
@@ -132,8 +131,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
     @Test
     @Description("Verfies that a single result of a target tag reflects the content on the repository side.")
-    @ExpectEvents({
-            @Expect(type = TargetTagCreatedEvent.class, count = 2) })
+    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
     public void getTargetTag() throws Exception {
         final List<TargetTag> tags = testdataFactory.createTargetTags(2, "");
         final TargetTag assigned = tags.get(0);
@@ -152,8 +150,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
     @Test
     @Description("Verifies that created target tags are stored in the repository as send to the API.")
-    @ExpectEvents({
-            @Expect(type = TargetTagCreatedEvent.class, count = 2) })
+    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
     public void createTargetTags() throws Exception {
         final Tag tagOne = entityFactory.tag().create().colour("testcol1").description("its a test1").name("thetest1")
                 .build();
