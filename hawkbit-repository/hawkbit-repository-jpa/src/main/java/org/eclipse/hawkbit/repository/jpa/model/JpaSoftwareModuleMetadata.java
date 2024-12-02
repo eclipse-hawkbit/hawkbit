@@ -67,5 +67,4 @@ public class JpaSoftwareModuleMetadata extends AbstractJpaMetaData implements So
     public SwMetadataCompositeKey getId() {
         return new SwMetadataCompositeKey(softwareModule.getId(), getKey());
     }
-
 }

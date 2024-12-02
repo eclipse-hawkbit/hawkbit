@@ -79,22 +79,26 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = JpaDistributionSetType.class)
-    @JoinColumn(name = "ds_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstype_ds"))
+    @JoinColumn(
+            name = "ds_id", nullable = false, updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstype_ds"))
     @NotNull
     private DistributionSetType type;
 
-    @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
+    @ManyToMany(
+            targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
             name = "sp_ds_module",
             joinColumns = {
                     @JoinColumn(
-                            name = "ds_id", nullable = false, insertable = false, updatable = false, foreignKey =
-                    @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) },
+                            name = "ds_id", nullable = false, insertable = false, updatable = false,
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) },
             inverseJoinColumns = {
                     @JoinColumn(
                             name = "module_id", nullable = false, insertable = false, updatable = false,
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
-    private Set<SoftwareModule> modules;
+    private Set<SoftwareModule> modules = new HashSet<>();
 
     @ManyToMany(targetEntity = JpaDistributionSetTag.class)
     @JoinTable(
@@ -107,11 +111,12 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
                     @JoinColumn(
                             name = "TAG", nullable = false, insertable = false, updatable = false,
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag")) })
-    private Set<DistributionSetTag> tags;
+    private Set<DistributionSetTag> tags = new HashSet<>();
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "distributionSet", fetch = FetchType.LAZY, cascade = {
-            CascadeType.REMOVE }, targetEntity = JpaDistributionSetMetadata.class)
+    @OneToMany(mappedBy = "distributionSet", fetch = FetchType.LAZY,
+            cascade = { CascadeType.REMOVE },
+            targetEntity = JpaDistributionSetMetadata.class)
     private List<DistributionSetMetadata> metadata;
 
     @Column(name = "complete")
@@ -131,10 +136,8 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Column(name = "required_migration_step")
     private boolean requiredMigrationStep;
 
-    /**
-     * Parameterized constructor.
-     */
-    public JpaDistributionSet(final String name, final String version, final String description,
+    public JpaDistributionSet(
+            final String name, final String version, final String description,
             final DistributionSetType type, final Collection<SoftwareModule> moduleList,
             final boolean requiredMigrationStep) {
         super(name, version, description);
@@ -152,9 +155,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         this.requiredMigrationStep = requiredMigrationStep;
     }
 
-    /**
-     * Parameterized constructor.
-     */
     public JpaDistributionSet(final String name, final String version, final String description,
             final DistributionSetType type, final Collection<SoftwareModule> moduleList) {
         this(name, version, description, type, moduleList, false);
@@ -162,20 +162,12 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @Override
     public Set<SoftwareModule> getModules() {
-        if (modules == null) {
-            return Collections.emptySet();
-        }
-
         return Collections.unmodifiableSet(modules);
     }
 
     public void addModule(final SoftwareModule softwareModule) {
         if (isLocked()) {
             throw new LockedException(JpaDistributionSet.class, getId(), "ADD_SOFTWARE_MODULE");
-        }
-
-        if (modules == null) {
-            modules = new HashSet<>();
         }
 
         checkTypeCompatability(softwareModule);
@@ -187,8 +179,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
             return;
         }
 
-        final long already = modules.stream()
-                .filter(module -> module.getType().getKey().equals(softwareModule.getType().getKey())).count();
+        final long already = modules.stream().filter(module -> module.getType().getKey().equals(softwareModule.getType().getKey())).count();
 
         if (already >= softwareModule.getType().getMaxAssignments()) {
             modules.stream().filter(module -> module.getType().getKey().equals(softwareModule.getType().getKey()))
@@ -211,10 +202,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     }
 
     public Set<DistributionSetTag> getTags() {
-        if (tags == null) {
-            return Collections.emptySet();
-        }
-
         return Collections.unmodifiableSet(tags);
     }
 

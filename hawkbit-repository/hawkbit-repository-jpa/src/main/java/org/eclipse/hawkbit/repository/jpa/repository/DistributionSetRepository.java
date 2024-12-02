@@ -85,7 +85,7 @@ public interface DistributionSetRepository extends BaseEntityRepository<JpaDistr
      * @param ids to search for
      * @return list of {@link DistributionSet#getId()}
      */
-    @Query("select ac.distributionSet.id from JpaAction ac where ac.distributionSet.id in :ids")
+    @Query("SELECT ac.distributionSet.id FROM JpaAction ac WHERE ac.distributionSet.id IN :ids")
     List<Long> findAssignedToTargetDistributionSetsById(@Param("ids") Collection<Long> ids);
 
     /**
@@ -97,7 +97,7 @@ public interface DistributionSetRepository extends BaseEntityRepository<JpaDistr
      * @param ids to search for
      * @return list of {@link DistributionSet#getId()}
      */
-    @Query("select ra.distributionSet.id from JpaRollout ra where ra.distributionSet.id in :ids")
+    @Query("SELECT ra.distributionSet.id FROM JpaRollout ra WHERE ra.distributionSet.id IN :ids")
     List<Long> findAssignedToRolloutDistributionSetsById(@Param("ids") Collection<Long> ids);
 
     /**

@@ -491,7 +491,6 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Checks that metadata for a software module can be created.")
     public void createSoftwareModuleMetadata() {
-
         final String knownKey1 = "myKnownKey1";
         final String knownValue1 = "myKnownValue1";
 

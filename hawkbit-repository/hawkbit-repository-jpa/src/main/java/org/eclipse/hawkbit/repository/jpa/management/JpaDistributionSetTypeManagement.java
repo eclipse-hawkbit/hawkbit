@@ -278,8 +278,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
         final Collection<JpaSoftwareModuleType> foundModules =
                 softwareModuleTypeRepository.findAllById(softwareModulesTypeIds);
         if (foundModules.size() < softwareModulesTypeIds.size()) {
-            throw new EntityNotFoundException(SoftwareModuleType.class, softwareModulesTypeIds,
-                    foundModules.stream().map(SoftwareModuleType::getId).toList());
+            throw new EntityNotFoundException(
+                    SoftwareModuleType.class, softwareModulesTypeIds, foundModules.stream().map(SoftwareModuleType::getId).toList());
         }
 
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);

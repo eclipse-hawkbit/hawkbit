@@ -1584,8 +1584,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Delete a target with a non existing thingId")
-    @ExpectEvents({
-            @Expect(type = TargetDeletedEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = TargetDeletedEvent.class, count = 0) })
     void deleteTargetWithInvalidThingId() {
         assertThatExceptionOfType(EntityNotFoundException.class)
                 .as("No EntityNotFoundException thrown when deleting a non-existing target")
