@@ -66,7 +66,8 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     @Test
     @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
             + "of Optional not present.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(targetFilterQueryManagement.get(NOT_EXIST_IDL)).isNotPresent();
         assertThat(targetFilterQueryManagement.getByName(NOT_EXIST_ID)).isNotPresent();
@@ -75,7 +76,8 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     @Test
     @Description("Verifies that management queries react as specfied on calls for non existing entities "
             + " by means of throwing EntityNotFoundException.")
-    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = TargetFilterQueryCreatedEvent.class, count = 1) })
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {

@@ -86,7 +86,8 @@ public final class JpaManagementHelper {
 
     public static <J extends AbstractJpaBaseEntity> J touch(final EntityManager entityManager,
             final CrudRepository<J, ?> repository, final J entity) {
-        // merge base entity so optLockRevision gets updated and auditing log written because modifying e.g. metadata is modifying the base
+        // merge base entity so optLockRevision gets updated and audit
+        // log written because modifying e.g. metadata is modifying the base
         // entity itself for auditing purposes.
         final J result = entityManager.merge(entity);
         result.setLastModifiedAt(0L);

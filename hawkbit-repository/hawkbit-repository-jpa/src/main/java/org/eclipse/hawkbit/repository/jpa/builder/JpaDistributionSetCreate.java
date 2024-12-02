@@ -51,7 +51,8 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
 
     @Override
     public JpaDistributionSet build() {
-        return new JpaDistributionSet(name, version, description,
+        return new JpaDistributionSet(
+                name, version, description,
                 Optional.ofNullable(type).map(this::findDistributionSetTypeWithExceptionIfNotFound).orElse(null),
                 findSoftwareModuleWithExceptionIfNotFound(modules),
                 Optional.ofNullable(requiredMigrationStep).orElse(Boolean.FALSE));

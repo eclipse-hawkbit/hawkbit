@@ -283,7 +283,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management get access reacts as specified on calls for non existing entities by means "
             + "of Optional not present.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(rolloutManagement.get(NOT_EXIST_IDL)).isNotPresent();
         assertThat(rolloutManagement.getByName(NOT_EXIST_ID)).isNotPresent();
@@ -293,14 +294,16 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management queries react as specified on calls for non existing entities "
             + " by means of throwing EntityNotFoundException.")
-    @ExpectEvents({ @Expect(type = RolloutDeletedEvent.class, count = 0),
+    @ExpectEvents({
+            @Expect(type = RolloutDeletedEvent.class, count = 0),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 5),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
-            @Expect(type = RolloutCreatedEvent.class, count = 1), @Expect(type = RolloutUpdatedEvent.class, count = 1),
+            @Expect(type = RolloutCreatedEvent.class, count = 1), 
+            @Expect(type = RolloutUpdatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 125) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         testdataFactory.createRollout("xxx");
@@ -1766,8 +1769,10 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @ExpectEvents({ @Expect(type = RolloutDeletedEvent.class, count = 1),
-            @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = RolloutUpdatedEvent.class, count = 2),
+    @ExpectEvents({
+            @Expect(type = RolloutDeletedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 25), 
+            @Expect(type = RolloutUpdatedEvent.class, count = 2),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = RolloutGroupDeletedEvent.class, count = 5),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
@@ -1798,16 +1803,19 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+    @ExpectEvents({
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 10),
             @Expect(type = RolloutUpdatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
-            @Expect(type = TargetCreatedEvent.class, count = 25), @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetCreatedEvent.class, count = 25), 
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
-            @Expect(type = ActionCreatedEvent.class, count = 10), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = ActionCreatedEvent.class, count = 10), 
+            @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = RolloutDeletedEvent.class, count = 1),
             @Expect(type = RolloutCreatedEvent.class, count = 1) })
     void deleteRolloutWhichHasBeenStartedBeforeIsSoftDeleted() {

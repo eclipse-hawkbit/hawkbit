@@ -92,7 +92,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management get access react as specified on calls for non existing entities by means "
             + "of Optional not present.")
-    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
     void nonExistingEntityAccessReturnsNotPresent() {
         final DistributionSet set = testdataFactory.createDistributionSet();
@@ -105,7 +106,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management queries react as specfied on calls for non existing entities "
             + " by means of throwing EntityNotFoundException.")
-    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 4) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
@@ -202,7 +204,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verify that a DistributionSet with invalid properties cannot be created or updated")
-    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class) })
     void createAndUpdateDistributionSetWithInvalidFields() {
@@ -941,7 +944,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verify that the find all by ids contains the entities which are looking for")
-    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 12),
+    @ExpectEvents({
+            @Expect(type = DistributionSetCreatedEvent.class, count = 12),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 36) })
     void verifyFindDistributionSetAllById() {
         final List<Long> searchIds = new ArrayList<>();

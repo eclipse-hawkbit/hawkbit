@@ -36,11 +36,4 @@ public final class SystemManagementHolder {
     public static SystemManagementHolder getInstance() {
         return INSTANCE;
     }
-
-    /**
-     * @return the {@link SystemManagement#currentTenant()}.
-     */
-    public String currentTenant() {
-        return systemManagement.currentTenant();
-    }
 }

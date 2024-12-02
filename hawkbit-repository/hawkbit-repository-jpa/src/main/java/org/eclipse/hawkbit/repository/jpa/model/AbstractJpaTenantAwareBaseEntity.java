@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.persistence.annotations.Multitenant;
 import org.eclipse.persistence.annotations.MultitenantType;
 import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
+import org.hibernate.annotations.TenantId;
 
 /**
  * Holder of the base attributes common to all tenant aware entities.
@@ -88,11 +89,14 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
 
     /**
      * PrePersist listener method for all {@link TenantAwareBaseEntity} entities.
+     *
+     * // TODO - check if the tenant support should set tenant from context
+     * // TODO - should we check if tenant exists in the system? Note: seems it's not good to work with db in the listener
      */
     @PrePersist
     void prePersist() {
         // before persisting the entity check the current ID of the tenant by using the TenantAware service
-        final String currentTenant = SystemManagementHolder.getInstance().currentTenant();
+        final String currentTenant = TenantAwareHolder.getInstance().getTenantAware().getCurrentTenant();
         if (currentTenant == null) {
             throw new TenantNotExistException(
                     String.format(

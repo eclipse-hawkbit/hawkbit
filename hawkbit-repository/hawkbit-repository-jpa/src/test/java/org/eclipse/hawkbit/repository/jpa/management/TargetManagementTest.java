@@ -96,7 +96,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management get access react as specified on calls for non existing entities by means "
             + "of Optional not present.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1) })
     void nonExistingEntityAccessReturnsNotPresent() {
         final Target target = testdataFactory.createTarget();
         assertThat(targetManagement.getByControllerID(NOT_EXIST_ID)).isNotPresent();
@@ -107,7 +108,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management queries react as specified on calls for non existing entities "
             + " by means of throwing EntityNotFoundException.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetTagCreatedEvent.class, count = 1) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         final TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("A"));
@@ -182,7 +184,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Ensures that retrieving the target security is only permitted with the necessary permissions.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1) })
     void getTargetSecurityTokenOnlyWithCorrectPermission() throws Exception {
         final Target createdTarget = targetManagement
                 .create(entityFactory.target().create().controllerId("targetWithSecurityToken").securityToken("token"));
@@ -217,21 +220,9 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists.")
-    @WithUser(tenantId = "tenantWhichDoesNotExists", allSpPermissions = true, autoCreateTenant = false)
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
-    void createTargetForTenantWhichDoesNotExistThrowsTenantNotExistException() {
-        try {
-            targetManagement.create(entityFactory.target().create().controllerId("targetId123"));
-            fail("should not be possible as the tenant does not exist");
-        } catch (final TenantNotExistException e) {
-            // ok
-        }
-    }
-
-    @Test
     @Description("Verify that a target with same controller ID than another device cannot be created.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1) })
     void createTargetThatViolatesUniqueConstraintFails() {
         targetManagement.create(entityFactory.target().create().controllerId("123"));
 
@@ -241,7 +232,9 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verify that a target with with invalid properties cannot be created or updated")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1), 
+            @Expect(type = TargetUpdatedEvent.class) })
     void createAndUpdateTargetWithInvalidFields() {
         final Target target = testdataFactory.createTarget();
 
@@ -254,7 +247,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Ensures that targets can assigned and unassigned to a target tag. Not exists target will be ignored for the assignment.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 4),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 4),
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 5) })
     void assignAndUnassignTargetsToTag() {
@@ -294,8 +288,10 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Ensures that targets can deleted e.g. test all cascades")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 12),
-            @Expect(type = TargetDeletedEvent.class, count = 12), @Expect(type = TargetUpdatedEvent.class, count = 6) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 12),
+            @Expect(type = TargetDeletedEvent.class, count = 12), 
+            @Expect(type = TargetUpdatedEvent.class, count = 6) })
     void deleteAndCreateTargets() {
         Target target = targetManagement.create(entityFactory.target().create().controllerId("targetId123"));
         assertThat(targetManagement.count()).as("target count is wrong").isEqualTo(1);
@@ -322,12 +318,15 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Finds a target by given ID and checks if all data is in the response (including the data defined as lazy).")
-    @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+    @ExpectEvents({
+            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6), // implicit lock
-            @Expect(type = TargetCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 5),
-            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = TargetCreatedEvent.class, count = 1), 
+            @Expect(type = TargetUpdatedEvent.class, count = 5),
+            @Expect(type = ActionCreatedEvent.class, count = 2), 
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
@@ -389,7 +388,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Checks if the EntityAlreadyExistsException is thrown if the targets with the same controller ID are created twice.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 5) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 5) })
     void createMultipleTargetsDuplicate() {
         testdataFactory.createTargets(5, "mySimpleTargs", "my simple targets");
         try {
@@ -402,7 +402,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Checks if the EntityAlreadyExistsException is thrown if a single target with the same controller ID are created twice.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1) })
     void createTargetDuplicate() {
         targetManagement.create(entityFactory.target().create().controllerId("4711"));
         try {
@@ -415,7 +416,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @WithUser(allSpPermissions = true)
     @Description("Creates and updates a target and verifies the changes in the repository.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1) })
     void singleTargetIsInsertedIntoRepo() throws Exception {
 
@@ -452,7 +454,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @WithUser(allSpPermissions = true)
     @Description("Create multiple targets as bulk operation and delete them in bulk.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 101),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 101),
             @Expect(type = TargetUpdatedEvent.class, count = 100),
             @Expect(type = TargetDeletedEvent.class, count = 51) })
     void bulkTargetCreationAndDelete() {
@@ -518,7 +521,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests the assignment of tags to the a single target.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetTagCreatedEvent.class, count = 7),
             @Expect(type = TargetUpdatedEvent.class, count = 7) })
     void targetTagAssignment() {
@@ -550,7 +554,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests the assignment of tags to multiple targets.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 50),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 50),
             @Expect(type = TargetTagCreatedEvent.class, count = 4),
             @Expect(type = TargetUpdatedEvent.class, count = 80) })
     void targetTagBulkAssignments() {
@@ -619,7 +624,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests the unassigment of tags to multiple targets.")
-    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 3),
+    @ExpectEvents({
+            @Expect(type = TargetTagCreatedEvent.class, count = 3),
             @Expect(type = TargetCreatedEvent.class, count = 109),
             @Expect(type = TargetUpdatedEvent.class, count = 227) })
     void targetTagBulkUnassignments() {
@@ -677,7 +683,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test that NO TAG functionality which gives all targets with no tag assigned.")
-    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 50),
             @Expect(type = TargetUpdatedEvent.class, count = 25) })
     void findTargetsWithNoTag() {
@@ -698,7 +705,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests the a target can be read with only the read target permission")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void targetCanBeReadWithOnlyReadTargetPermission() throws Exception {
         final String knownTargetControllerId = "readTarget";
@@ -735,7 +743,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verify that the find all targets by ids method contains the entities that we are looking for")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 12) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 12) })
     void verifyFindTargetAllById() {
         final List<Long> searchIds = Arrays.asList(testdataFactory.createTarget("target-4").getId(),
                 testdataFactory.createTarget("target-5").getId(), testdataFactory.createTarget("target-6").getId());
@@ -933,9 +942,11 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @WithUser(allSpPermissions = true)
     @Description("Tests the assignment of types to multiple targets.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 20),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 20),
             @Expect(type = TargetTypeCreatedEvent.class, count = 2),
-            @Expect(type = TargetUpdatedEvent.class, count = 29), @Expect(type = TargetDeletedEvent.class, count = 1) })
+            @Expect(type = TargetUpdatedEvent.class, count = 29), 
+            @Expect(type = TargetDeletedEvent.class, count = 1) })
     void targetTypeBulkAssignments() {
         final List<Target> typeATargets = testdataFactory.createTargets(10, "typeATargets", "first description");
         final List<Target> typeBTargets = testdataFactory.createTargets(10, "typeBTargets", "first description");

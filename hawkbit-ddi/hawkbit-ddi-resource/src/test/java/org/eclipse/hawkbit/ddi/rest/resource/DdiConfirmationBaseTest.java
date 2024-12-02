@@ -255,9 +255,11 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = ActionCreatedEvent.class, count = 1), 
+            @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), 
+            @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void sendConfirmedActionStateFeedbackTest() throws Exception {
         enableConfirmationFlow();
@@ -419,7 +421,8 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = ActionCreatedEvent.class, count = 1), 
+            @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void testActionHistoryCount() throws Exception {

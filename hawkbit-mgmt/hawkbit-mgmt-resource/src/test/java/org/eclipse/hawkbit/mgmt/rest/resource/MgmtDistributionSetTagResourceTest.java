@@ -61,7 +61,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Verfies that a paged result list of DS tags reflects the content on the repository side.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
     public void getDistributionSetTags() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
         final DistributionSetTag assigned = tags.get(0);
@@ -161,7 +162,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Verfies that a single result of a DS tag reflects the content on the repository side.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
     public void getDistributionSetTag() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
         final DistributionSetTag assigned = tags.get(0);
@@ -179,7 +181,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Verifies that created DS tags are stored in the repository as send to the API.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
     public void createDistributionSetTags() throws Exception {
         final Tag tagOne = entityFactory.tag().create().colour("testcol1").description("its a test1").name("thetest1")
                 .build();
@@ -209,7 +212,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Verifies that an updated DS tag is stored in the repository as send to the API.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetTagUpdatedEvent.class, count = 1) })
     public void updateDistributionSetTag() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(1);
@@ -237,7 +241,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Verfies that the delete call is reflected by the repository.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetTagDeletedEvent.class, count = 1) })
     public void deleteDistributionSetTag() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(1);
@@ -252,7 +257,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Ensures that assigned DS to tag in repository are listed with proper paging results.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 5),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 5) })
     public void getAssignedDistributionSets() throws Exception {
@@ -271,7 +277,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Ensures that assigned DS to tag in repository are listed with proper paging results with paging limit parameter.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 5),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 5) })
     public void getAssignedDistributionSetsWithPagingLimitRequestParameter() throws Exception {
@@ -292,7 +299,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Ensures that assigned DS to tag in repository are listed with proper paging results with paging limit and offset parameter.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 5),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 5) })
     public void getAssignedDistributionSetsWithPagingLimitAndOffsetRequestParameter() throws Exception {
@@ -316,7 +324,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Verfies that tag assignments done through toggle API command are correctly assigned or unassigned.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 4) })
     public void toggleTagAssignment() throws Exception {
@@ -390,7 +399,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Verifies that tag unassignments done through tag API command are correctly stored in the repository.")
-    @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 3) })
     public void unassignDistributionSet() throws Exception {

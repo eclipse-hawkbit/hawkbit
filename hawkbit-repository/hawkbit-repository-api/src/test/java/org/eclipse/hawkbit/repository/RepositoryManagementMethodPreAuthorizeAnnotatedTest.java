@@ -30,11 +30,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @Story("Security Test")
 public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
 
+    // if some methods are to be excluded
     private static final Set<Method> METHOD_SECURITY_EXCLUSION = new HashSet<>();
-
-    static {
-        METHOD_SECURITY_EXCLUSION.add(getMethod(SystemManagement.class, "currentTenant"));
-    }
 
     @Test
     @Description("Verifies that repository methods are @PreAuthorize annotated")
@@ -74,16 +71,10 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
                 continue;
             }
             final PreAuthorize annotation = method.getAnnotation(PreAuthorize.class);
-            assertThat(annotation).as("The public method " + method.getName() + " in class " + clazz.getName()
-                    + " is not annotated with @PreAuthorize, security leak?").isNotNull();
-        }
-    }
-
-    private static Method getMethod(final Class<?> clazz, final String methodName, final Class<?>... parameterTypes) {
-        try {
-            return clazz.getMethod(methodName, parameterTypes);
-        } catch (NoSuchMethodException | SecurityException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            assertThat(annotation)
+                    .as("The public method " + method.getName() + " in class " + clazz.getName() +
+                            " is not annotated with @PreAuthorize, security leak?")
+                    .isNotNull();
         }
     }
 }
