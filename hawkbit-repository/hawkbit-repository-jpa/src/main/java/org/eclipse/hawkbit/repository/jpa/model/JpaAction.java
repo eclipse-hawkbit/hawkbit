@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -51,6 +53,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.springframework.data.annotation.CreatedDate;
 
 /**
  * JPA implementation of {@link Action}.
@@ -131,6 +134,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     private String initiatedBy;
     @Column(name = "last_action_status_code", nullable = true, updatable = true)
     private Integer lastActionStatusCode;
+    @Column(name = "timestamp", updatable = false, nullable = false)
+    private long timestamp;
 
     @Override
     public DistributionSet getDistributionSet() {
@@ -281,6 +286,17 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Override
     public Optional<Integer> getLastActionStatusCode() {
         return Optional.ofNullable(lastActionStatusCode);
+    }
+
+    @Override
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    @Override
+    @CreatedDate
+    public void setTimestamp(final long timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override

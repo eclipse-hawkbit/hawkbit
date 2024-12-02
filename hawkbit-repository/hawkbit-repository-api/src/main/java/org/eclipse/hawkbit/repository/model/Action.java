@@ -142,6 +142,16 @@ public interface Action extends TenantAwareBaseEntity {
     Optional<Integer> getLastActionStatusCode();
 
     /**
+     * Timestamp of the action when it actually happened (e.g. could be on offline action)
+     */
+    long getTimestamp();
+
+    /**
+     * Timestamp of the action when it actually happened (e.g. could be an offline action)
+     */
+    void setTimestamp(long timestamp);
+
+    /**
      * checks if the {@link #getForcedTime()} is hit by the given
      * {@code hitTimeMillis}, by means if the given milliseconds are greater
      * than the forcedTime.
