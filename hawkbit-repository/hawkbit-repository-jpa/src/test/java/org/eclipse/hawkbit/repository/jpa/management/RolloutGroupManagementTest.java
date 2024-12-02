@@ -49,7 +49,8 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management get access reacts as specified on calls for non existing entities by means " +
             "of Optional not present.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(rolloutGroupManagement.get(NOT_EXIST_IDL)).isNotPresent();
         assertThat(rolloutGroupManagement.getWithDetailedStatus(NOT_EXIST_IDL)).isNotPresent();
@@ -58,7 +59,8 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management queries react as specified on calls for non existing entities " +
             " by means of throwing EntityNotFoundException.")
-    @ExpectEvents({ @Expect(type = RolloutDeletedEvent.class, count = 0),
+    @ExpectEvents({
+            @Expect(type = RolloutDeletedEvent.class, count = 0),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 5),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),

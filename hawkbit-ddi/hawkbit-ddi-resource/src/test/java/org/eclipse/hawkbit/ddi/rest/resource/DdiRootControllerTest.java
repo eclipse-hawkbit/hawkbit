@@ -113,35 +113,6 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists but can be created if the tenant exists.")
-    @WithUser(tenantId = "tenantDoesNotExists", allSpPermissions = true,
-            authorities = { CONTROLLER_ROLE, SYSTEM_ROLE }, autoCreateTenant = false)
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 1),
-            @Expect(type = DistributionSetTypeCreatedEvent.class, count = 3),
-            @Expect(type = SoftwareModuleTypeCreatedEvent.class, count = 2) })
-    void targetCannotBeRegisteredIfTenantDoesNotExistsButWhenExists() throws Exception {
-        mvc.perform(get("/default-tenant/", tenantAware.getCurrentTenant()))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isNotFound());
-
-        // create tenant -- creates software module types and distribution set types
-        systemManagement.createTenantMetadata("tenantDoesNotExists");
-
-        mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), "aControllerId"))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
-
-        // delete tenant again, will also deleted target aControllerId
-        systemManagement.deleteTenant("tenantDoesNotExists");
-
-        mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), "aControllerId"))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     @Description("Ensures that target poll request does not change audit data on the entity.")
     @WithUser(principal = "knownPrincipal", authorities = { SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET, SpPermission.CREATE_TARGET })
     @ExpectEvents({
@@ -175,7 +146,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that server returns a not found response in case of empty controller ID.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 0) })
     void rootRsWithoutId() throws Exception {
         mvc.perform(get("/controller/v1/"))
                 .andDo(MockMvcResultPrinter.print())
@@ -341,8 +313,10 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Test
     @Description("Ensures that the target state machine of a precomissioned target switches from "
             + "UNKNOWN to REGISTERED when the target polls for the first time.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), 
+            @Expect(type = TargetPollEvent.class, count = 1) })
     void rootRsPreCommissioned() throws Exception {
         final String controllerId = "4711";
         testdataFactory.createTarget(controllerId);
@@ -572,7 +546,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = ActionCreatedEvent.class, count = 1), 
+            @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1) })
     void testActionHistoryNegativeInput() throws Exception {

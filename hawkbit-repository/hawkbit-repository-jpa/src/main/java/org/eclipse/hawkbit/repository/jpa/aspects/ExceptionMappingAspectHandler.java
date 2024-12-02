@@ -42,9 +42,8 @@ public class ExceptionMappingAspectHandler implements Ordered {
     private static final Map<String, String> EXCEPTION_MAPPING = new HashMap<>(4);
 
     /**
-     * this is required to enable a certain order of exception and to select the
-     * most specific mappable exception according to the type hierarchy of the
-     * exception.
+     * this is required to enable a certain order of exception and to select the most specific mappable exception according to the type
+     * hierarchy of the exception.
      */
     private static final List<Class<?>> MAPPED_EXCEPTION_ORDER = new ArrayList<>(4);
 
@@ -72,22 +71,18 @@ public class ExceptionMappingAspectHandler implements Ordered {
     // It is a AspectJ proxy which deals with exceptions.
     @SuppressWarnings({ "squid:S00112", "squid:S1162" })
     public void catchAndWrapJpaExceptionsService(final Exception ex) throws Throwable {
-
-        // Workaround for EclipseLink merge where it does not throw ConstraintViolationException directly in case of
-        // existing entity update
+        // Workaround for EclipseLink merge where it does not throw ConstraintViolationException directly in case of existing entity update
         if (ex instanceof TransactionSystemException) {
             throw replaceWithCauseIfConstraintViolationException((TransactionSystemException) ex);
         }
 
         for (final Class<?> mappedEx : MAPPED_EXCEPTION_ORDER) {
-
             if (!mappedEx.isAssignableFrom(ex.getClass())) {
                 continue;
             }
 
             if (EXCEPTION_MAPPING.containsKey(mappedEx.getName())) {
-                throw (Exception) Class.forName(EXCEPTION_MAPPING.get(mappedEx.getName()))
-                        .getConstructor(Throwable.class).newInstance(ex);
+                throw (Exception) Class.forName(EXCEPTION_MAPPING.get(mappedEx.getName())).getConstructor(Throwable.class).newInstance(ex);
             }
 
             log.error("there is no mapping configured for exception class {}", mappedEx.getName());

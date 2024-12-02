@@ -71,7 +71,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      */
     @Modifying
     @Transactional
-    @Query("UPDATE JpaAction a SET a.status = :statusToSet WHERE a.target IN :targetsIds AND a.active = :active AND a.status = :currentStatus AND a.distributionSet.requiredMigrationStep = false")
+    @Query("UPDATE JpaAction a SET a.status = :statusToSet WHERE a.target.id IN :targetsIds AND a.active = :active AND a.status = :currentStatus AND a.distributionSet.requiredMigrationStep = false")
     void switchStatus(@Param("statusToSet") Action.Status statusToSet, @Param("targetsIds") List<Long> targetIds,
             @Param("active") boolean active, @Param("currentStatus") Action.Status currentStatus);
 

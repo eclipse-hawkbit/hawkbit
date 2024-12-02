@@ -64,20 +64,15 @@ import org.springframework.validation.annotation.Validated;
 public class JpaDistributionSetTypeManagement implements DistributionSetTypeManagement {
 
     private final DistributionSetTypeRepository distributionSetTypeRepository;
-
     private final SoftwareModuleTypeRepository softwareModuleTypeRepository;
-
     private final DistributionSetRepository distributionSetRepository;
-
     private final TargetTypeRepository targetTypeRepository;
-
     private final VirtualPropertyReplacer virtualPropertyReplacer;
-
     private final Database database;
-
     private final QuotaManagement quotaManagement;
 
-    public JpaDistributionSetTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
+    public JpaDistributionSetTypeManagement(
+            final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository, final TargetTypeRepository targetTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,

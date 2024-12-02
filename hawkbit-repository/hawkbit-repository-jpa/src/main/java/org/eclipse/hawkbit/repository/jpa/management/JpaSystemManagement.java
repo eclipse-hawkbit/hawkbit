@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.CurrentTenantCacheKeyGenerator;
 import org.eclipse.hawkbit.repository.jpa.SystemManagementCacheKeyGenerator;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantMetaData;
@@ -139,16 +138,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Transactional(propagation = Propagation.SUPPORTS)
     public KeyGenerator currentTenantKeyGenerator() {
         return currentTenantCacheKeyGenerator.currentTenantKeyGenerator();
-    }
-
-    @Override
-    @Cacheable(value = "currentTenant", keyGenerator = "currentTenantKeyGenerator", cacheManager = "directCacheManager", unless = "#result == null")
-    public String currentTenant() {
-        return currentTenantCacheKeyGenerator.getTenantInCreation().orElseGet(() -> {
-            final TenantMetaData findByTenant = tenantMetaDataRepository
-                    .findByTenantIgnoreCase(tenantAware.getCurrentTenant());
-            return findByTenant != null ? findByTenant.getTenant() : null;
-        });
     }
 
     @Override
@@ -295,6 +284,12 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                 .orElseThrow(() -> new EntityNotFoundException(TenantMetaData.class, tenantId));
     }
 
+    @Override
+    @Cacheable(value = "currentTenant", keyGenerator = "currentTenantKeyGenerator", cacheManager = "directCacheManager", unless = "#result == null")
+    public boolean tenantExists(final String tenant) {
+        return tenantMetaDataRepository.findByTenantIgnoreCase(tenant) != null;
+    }
+
     private static boolean isPostgreSql(final JpaProperties properties) {
         return Database.POSTGRESQL == properties.getDatabase();
     }
@@ -342,13 +337,13 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     /**
-     * Creating the initial tenant meta-data in a new transaction. Due the
-     * {@link MultiTenantJpaTransactionManager} is using the current tenant to
+     * Creating the initial tenant meta-data in a new transaction. Due to the
+     * {@link org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager} is using the current tenant to
      * set the necessary tenant discriminator to the query. This is not working
-     * if we don't have a current tenant set. Due the
+     * if we don't have a current tenant set. Due to the
      * {@link #createTenantMetadata(String)} is maybe called without having a
      * current tenant we need to re-open a new transaction so the
-     * {@link MultiTenantJpaTransactionManager} is called again and set the
+     * {@link org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager} is called again and set the
      * tenant for this transaction.
      *
      * @param tenant the tenant to be created

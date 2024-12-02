@@ -29,12 +29,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface SystemManagement {
 
-    /**
-     * Checks if a specific tenant exists. The tenant will not be created lazy.
-     *
-     * @return {@code true} in case the tenant exits or {@code false} if not
-     */
-    String currentTenant();
 
     /**
      * Deletes all data related to a given tenant.
@@ -113,13 +107,9 @@ public interface SystemManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     TenantMetaData updateTenantMetadata(long defaultDsType);
 
-    /**
-     * Returns {@link TenantMetaData} of given tenant ID.
-     *
-     * @param tenantId to retrieve data for
-     * @return {@link TenantMetaData} of given tenant
-     */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     TenantMetaData getTenantMetadata(long tenantId);
 
+    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
+    boolean tenantExists(String tenant);
 }

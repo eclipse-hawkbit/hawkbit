@@ -146,7 +146,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management get access react as specified on calls for non existing entities by means " +
             "of Optional not present.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(deploymentManagement.findAction(1234L)).isNotPresent();
         assertThat(deploymentManagement.findActionWithDetails(NOT_EXIST_IDL)).isNotPresent();
@@ -155,7 +156,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that management queries react as specified on calls for non existing entities " +
             " by means of throwing EntityNotFoundException.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         final Target target = testdataFactory.createTarget();
         final String dsName = "DistributionSet";
@@ -307,7 +309,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test verifies that an assignment with automatic cancelation works correctly even if the update is split into multiple partitions on the database.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 20),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 20),
             @Expect(type = TargetUpdatedEvent.class, count = 40),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = ActionCreatedEvent.class, count = 40),
@@ -491,8 +494,10 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Simple offline deployment of a distribution set to a list of targets. Verifies that offline assigment "
             + "is correctly executed for targets that do not have a running update already. Those are ignored.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 20),
-            @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 20),
+            @Expect(type = TargetUpdatedEvent.class, count = 20), 
+            @Expect(type = ActionCreatedEvent.class, count = 20),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
@@ -535,8 +540,10 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Offline assign multiple DSs to a single Target in multiassignment mode.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 4), 
+            @Expect(type = ActionCreatedEvent.class, count = 4),
             @Expect(type = DistributionSetCreatedEvent.class, count = 4),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 12),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 4), // implicit lock
@@ -571,8 +578,10 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that if an account is set to action autoclose running actions in case of a new assigned set get closed and set to CANCELED.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 10),
-            @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 10),
+            @Expect(type = TargetUpdatedEvent.class, count = 20), 
+            @Expect(type = ActionCreatedEvent.class, count = 20),
             @Expect(type = ActionUpdatedEvent.class, count = 10),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
@@ -612,8 +621,10 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("If multi-assignment is enabled, verify that the previous Distribution Set assignment is not canceled when a new one is assigned.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 10),
-            @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 10),
+            @Expect(type = TargetUpdatedEvent.class, count = 20), 
+            @Expect(type = ActionCreatedEvent.class, count = 20),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
@@ -643,8 +654,10 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Assign multiple DSs to a single Target in one request in multiassignment mode.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 4), 
+            @Expect(type = ActionCreatedEvent.class, count = 4),
             @Expect(type = DistributionSetCreatedEvent.class, count = 4),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 12),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 4), // implicit lock
@@ -679,8 +692,10 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Assign multiple DSs to single Target in one request in multiAssignment mode and cancel each created action afterwards.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 4), 
+            @Expect(type = ActionCreatedEvent.class, count = 4),
             @Expect(type = DistributionSetCreatedEvent.class, count = 4),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 12),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 4), // implicit lock
@@ -900,13 +915,15 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Duplicate Assignments are removed from a request when multiassignment is disabled, otherwise not")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = ActionCreatedEvent.class, count = 2), 
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = MultiActionAssignEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void duplicateAssignmentsInRequestAreRemovedIfMultiassignmentEnabled() {
@@ -928,7 +945,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("An assignment request is not accepted if it would lead to a target exceeding the max actions per target quota.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 21), // max actions per target are 20 for test
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3 * 21),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
@@ -980,12 +998,14 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Weights are validated and contained in the resulting Action.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
-            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = ActionCreatedEvent.class, count = 2), 
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = MultiActionAssignEvent.class, count = 2),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void weightValidatedAndSaved() {
@@ -1019,12 +1039,14 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     @Description("Simple deployment or distribution set to target assignment test.")
-    @ExpectEvents({ @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
-            @Expect(type = TargetCreatedEvent.class, count = 30), @Expect(type = ActionCreatedEvent.class, count = 20),
+            @Expect(type = TargetCreatedEvent.class, count = 30), 
+            @Expect(type = ActionCreatedEvent.class, count = 20),
             @Expect(type = TargetUpdatedEvent.class, count = 20) })
     void assignDistributionSet2Targets() {
 
@@ -1078,12 +1100,14 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test that it is not possible to assign a distribution set that is not complete.")
-    @ExpectEvents({ @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+    @ExpectEvents({
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 2),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 2), // implicit lock
-            @Expect(type = TargetCreatedEvent.class, count = 10), @Expect(type = ActionCreatedEvent.class, count = 10),
+            @Expect(type = TargetCreatedEvent.class, count = 10), 
+            @Expect(type = ActionCreatedEvent.class, count = 10),
             @Expect(type = TargetUpdatedEvent.class, count = 10) })
     void failDistributionSetAssigmentThatIsNotComplete() throws InterruptedException {
         final List<Target> targets = testdataFactory.createTargets(10);
@@ -1108,7 +1132,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Multiple deployments or distribution set to target assignment test. Expected behaviour is that a new deployment "
             + "overides unfinished old one which are canceled as part of the operation.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 5 + 4),
+    @ExpectEvents({
+            @Expect(type = TargetCreatedEvent.class, count = 5 + 4),
             @Expect(type = TargetUpdatedEvent.class, count = 3 * 4),
             @Expect(type = ActionCreatedEvent.class, count = 3 * 4),
             @Expect(type = ActionUpdatedEvent.class, count = 4 * 2),

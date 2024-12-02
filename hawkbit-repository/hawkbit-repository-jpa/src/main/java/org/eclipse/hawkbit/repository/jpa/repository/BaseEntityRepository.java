@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
 
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
@@ -64,6 +65,17 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
      */
     @Override
     List<T> findAll();
+
+    /**
+     * Gets by id requiring entity to exists
+     *
+     * @param id the entity id
+     * @return the existing entity.
+     * @throws EntityNotFoundException if the entity doesn't exist
+     */
+    default T getById(final Long id) {
+        return findById(id).orElseThrow(() -> new EntityNotFoundException(getDomainClass(), id));
+    }
 
     /**
      * Overrides
