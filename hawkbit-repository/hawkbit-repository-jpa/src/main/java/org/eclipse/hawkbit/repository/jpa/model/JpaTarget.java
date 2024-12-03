@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import java.io.Serial;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -148,7 +147,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
 
     @Setter
     @Getter
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "target", orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "target", cascade = { CascadeType.ALL }, orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private JpaAutoConfirmationStatus autoConfirmationStatus;
 

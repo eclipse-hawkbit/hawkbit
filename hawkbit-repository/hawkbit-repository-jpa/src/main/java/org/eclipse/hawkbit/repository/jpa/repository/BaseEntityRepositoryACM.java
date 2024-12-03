@@ -294,8 +294,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
             final R repository, @NonNull final AccessController<T> accessController) {
         Objects.requireNonNull(repository);
         Objects.requireNonNull(accessController);
-        final BaseEntityRepositoryACM<T> repositoryACM =
-                new BaseEntityRepositoryACM<>(repository, accessController);
+        final BaseEntityRepositoryACM<T> repositoryACM = new BaseEntityRepositoryACM<>(repository, accessController);
         final R acmProxy = (R) Proxy.newProxyInstance(
                 Thread.currentThread().getContextClassLoader(),
                 repository.getClass().getInterfaces(),
@@ -312,6 +311,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
                         }
                         if (method.getName().startsWith("find") || method.getName().startsWith("get")) {
                             final Object result = method.invoke(repository, args);
+                            // Iterable, List, Page, Slice
                             if (Iterable.class.isAssignableFrom(method.getReturnType())) {
                                 for (final Object e : (Iterable<?>) result) {
                                     if (repository.getDomainClass().isAssignableFrom(e.getClass())) {

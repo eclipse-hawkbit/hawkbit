@@ -298,10 +298,11 @@ public class JpaTargetManagement implements TargetManagement {
         final DistributionSet jpaDistributionSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
         final Long distSetTypeId = jpaDistributionSet.getType().getId();
 
-        return targetRepository.count(AccessController.Operation.UPDATE,
+        return targetRepository.count(
+                AccessController.Operation.UPDATE,
                 combineWithAnd(List.of(
-                        RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
-                                virtualPropertyReplacer, database),
+                        RSQLUtility.buildRsqlSpecification(
+                                targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
                         TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
                         TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId))));
     }

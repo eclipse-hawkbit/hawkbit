@@ -863,21 +863,18 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetPollEvent.class, count = 3), 
             @Expect(type = TargetUpdatedEvent.class, count = 1) })
     void findOrRegisterTargetIfItDoesNotExistDoesUpdateNameOnExistingTargetProperly() {
-
         final String controllerId = "12345";
         final String targetName = "UpdatedName";
 
         final Target newTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, LOCALHOST);
         assertThat(newTarget.getName()).isEqualTo(controllerId);
 
-        final Target firstTimeUpdatedTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId,
-                LOCALHOST, targetName, null);
+        final Target firstTimeUpdatedTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist(
+                controllerId, LOCALHOST, targetName, null);
         assertThat(firstTimeUpdatedTarget.getName()).isEqualTo(targetName);
 
-        // Name should not change to default (name=targetId) if target is
-        // updated without new name provided
-        final Target secondTimeUpdatedTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId,
-                LOCALHOST);
+        // Name should not change to default (name=targetId) if target is updated without new name provided
+        final Target secondTimeUpdatedTarget = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, LOCALHOST);
         assertThat(secondTimeUpdatedTarget.getName()).isEqualTo(targetName);
     }
 

@@ -40,7 +40,7 @@ import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
- * Test rule to setup and verify the event count for a method.
+ * Test rule to set up and verify the event count for a method.
  */
 @Slf4j
 public class EventVerifier extends AbstractTestExecutionListener {
@@ -53,7 +53,7 @@ public class EventVerifier extends AbstractTestExecutionListener {
      * {@code @Before} annotations which are actually counted to the executed
      * test-method and maybe fire events which are not covered / recognized by
      * the test-method itself and reset the counter again.
-     *
+     * <p/>
      * Note that this approach is only working when using a single-thread
      * executor in the ApplicationEventMultiCaster, so the order of the events
      * keep the same.
@@ -74,7 +74,7 @@ public class EventVerifier extends AbstractTestExecutionListener {
     public void afterTestMethod(final TestContext testContext) {
         final Optional<Expect[]> expectedEvents = getExpectationsFrom(testContext.getTestMethod());
         try {
-            expectedEvents.ifPresent(events -> afterTest(events));
+            expectedEvents.ifPresent(this::afterTest);
         } finally {
             expectedEvents.ifPresent(listener -> removeEventListener(testContext));
         }
@@ -85,10 +85,8 @@ public class EventVerifier extends AbstractTestExecutionListener {
     }
 
     private void beforeTest(final TestContext testContext) {
-        final ConfigurableApplicationContext context = (ConfigurableApplicationContext) testContext
-                .getApplicationContext();
         eventCaptor = new EventCaptor();
-        context.addApplicationListener(eventCaptor);
+        ((ConfigurableApplicationContext) testContext.getApplicationContext()).addApplicationListener(eventCaptor);
     }
 
     private void afterTest(final Expect[] expectedEvents) {
@@ -97,39 +95,33 @@ public class EventVerifier extends AbstractTestExecutionListener {
     }
 
     private void verifyRightCountOfEvents(final Expect[] expectedEvents) {
-
         for (final Expect expectedEvent : expectedEvents) {
             try {
-                Awaitility.await().atMost(5, TimeUnit.SECONDS)
+                Awaitility.await()
+                        .atMost(5, TimeUnit.SECONDS)
                         .until(() -> eventCaptor.getCountFor(expectedEvent.type()), equalTo(expectedEvent.count()));
-
             } catch (final ConditionTimeoutException ex) {
-                fail("Did not receive the expected amount of events form " + expectedEvent.type() + " Expected: "
-                        + expectedEvent.count() + " but was: " + eventCaptor.getCountFor(expectedEvent.type()));
+                fail(String.format(
+                        "Did not receive the expected amount of events form %s Expected: %d but was: %d",
+                        expectedEvent.type(), expectedEvent.count(), eventCaptor.getCountFor(expectedEvent.type())));
             }
         }
     }
 
     private void verifyAllEventsCounted(final Expect[] expectedEvents) {
-
         final Set<Class<?>> diffSet = eventCaptor.diff(expectedEvents);
-        if (diffSet.size() > 0) {
+        if (!diffSet.isEmpty()) {
             final StringBuilder failMessage = new StringBuilder("Missing event verification for ");
-            final Iterator<Class<?>> itr = diffSet.iterator();
-            while (itr.hasNext()) {
-                final Class<?> element = itr.next();
+            for (final Class<?> element : diffSet) {
                 final int count = eventCaptor.getCountFor(element);
-                failMessage.append(element + " with count: " + count + " ");
+                failMessage.append(element).append(" with count: ").append(count).append(" ");
             }
             fail(failMessage.toString());
         }
-
     }
 
     private void removeEventListener(final TestContext testContext) {
-        final ApplicationEventMulticaster multicaster = testContext.getApplicationContext()
-                .getBean(ApplicationEventMulticaster.class);
-        multicaster.removeApplicationListener(eventCaptor);
+        testContext.getApplicationContext().getBean(ApplicationEventMulticaster.class).removeApplicationListener(eventCaptor);
     }
 
     private static class EventCaptor implements ApplicationListener<RemoteApplicationEvent> {
