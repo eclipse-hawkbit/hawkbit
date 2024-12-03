@@ -53,7 +53,7 @@ class DdiActionFeedbackTest {
     @Description("Verify the correct serialization and deserialization of the model with all values provided")
     void shouldSerializeAndDeserializeObjectWithOptionalValues() throws IOException {
         // Setup
-        final Long timestamp = Instant.now().toEpochMilli();
+        final Long timestamp = System.currentTimeMillis();
         final DdiResult ddiResult = new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(10, 10));
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, ddiResult, 200, Collections.singletonList("myMessage"));
         final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(ddiStatus, timestamp);

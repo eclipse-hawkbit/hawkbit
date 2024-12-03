@@ -37,7 +37,7 @@ public final class TimestampCalculator {
      * @return <em>overdue_ts</em> in milliseconds since Unix epoch as long value
      */
     public static long calculateOverdueTimestamp() {
-        return Instant.now().toEpochMilli() - getDurationForKey(TenantConfigurationKey.POLLING_TIME_INTERVAL).toMillis()
+        return System.currentTimeMillis() - getDurationForKey(TenantConfigurationKey.POLLING_TIME_INTERVAL).toMillis()
                 - getDurationForKey(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL).toMillis();
     }
 
