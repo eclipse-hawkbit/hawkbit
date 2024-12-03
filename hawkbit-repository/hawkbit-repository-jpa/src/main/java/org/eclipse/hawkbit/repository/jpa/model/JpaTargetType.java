@@ -54,11 +54,11 @@ public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, 
             name = "sp_target_type_ds_type_relation",
             joinColumns = {
                     @JoinColumn(
-                            name = "target_type", nullable = false, insertable = false, updatable = false,
+                            name = "target_type", nullable = false,
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_target_type")) },
             inverseJoinColumns = {
                     @JoinColumn(
-                            name = "distribution_set_type", nullable = false, insertable = false, updatable = false,
+                            name = "distribution_set_type", nullable = false,
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_ds_type")) })
     private Set<DistributionSetType> distributionSetTypes = new HashSet<>();
 
