@@ -85,18 +85,16 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @NotNull
     private DistributionSetType type;
 
-    @ManyToMany(
-            targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY,
-            cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
     @JoinTable(
             name = "sp_ds_module",
             joinColumns = {
                     @JoinColumn(
-                            name = "ds_id", nullable = false, insertable = false, updatable = false,
+                            name = "ds_id", nullable = false,
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) },
             inverseJoinColumns = {
                     @JoinColumn(
-                            name = "module_id", nullable = false, insertable = false, updatable = false,
+                            name = "module_id", nullable = false,
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
     private Set<SoftwareModule> modules = new HashSet<>();
 
@@ -105,11 +103,11 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
             name = "sp_ds_dstag",
             joinColumns = {
                     @JoinColumn(
-                            name = "ds", nullable = false, insertable = false, updatable = false,
+                            name = "ds", nullable = false,
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds")) },
             inverseJoinColumns = {
                     @JoinColumn(
-                            name = "TAG", nullable = false, insertable = false, updatable = false,
+                            name = "TAG", nullable = false,
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag")) })
     private Set<DistributionSetTag> tags = new HashSet<>();
 

@@ -162,11 +162,11 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             name = "sp_target_target_tag",
             joinColumns = {
                     @JoinColumn(
-                            name = "target", nullable = false, insertable = false, updatable = false,
+                            name = "target", nullable = false,
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_target")) },
             inverseJoinColumns = {
                     @JoinColumn(
-                            name = "tag", nullable = false, insertable = false, updatable = false,
+                            name = "tag", nullable = false,
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_tag"))
             })
     private Set<TargetTag> tags;
