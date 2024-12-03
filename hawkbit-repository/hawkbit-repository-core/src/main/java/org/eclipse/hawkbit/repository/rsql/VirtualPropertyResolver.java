@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.rsql;
 
 import java.io.Serial;
-import java.time.Instant;
 
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;

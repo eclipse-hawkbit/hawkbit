@@ -47,10 +47,14 @@ public class DmfActionUpdateStatus {
     private Integer code;
 
     public DmfActionUpdateStatus(@JsonProperty(value = "actionId", required = true) final Long actionId,
-            @JsonProperty(value = "actionStatus", required = true) final DmfActionStatus actionStatus, @JsonProperty(value = "timestamp", required = false) final Long timestamp) {
+            @JsonProperty(value = "actionStatus", required = true) final DmfActionStatus actionStatus, @JsonProperty(value = "timestamp") final Long timestamp) {
         this.actionId = actionId;
         this.actionStatus = actionStatus;
         this.timestamp = timestamp != null ? timestamp : System.currentTimeMillis();
+    }
+
+    public DmfActionUpdateStatus(final Long actionId, final DmfActionStatus actionStatus) {
+        this(actionId, actionStatus, null);
     }
 
     @JsonIgnore

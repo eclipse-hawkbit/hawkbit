@@ -134,8 +134,6 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     private String initiatedBy;
     @Column(name = "last_action_status_code", nullable = true, updatable = true)
     private Integer lastActionStatusCode;
-    @Column(name = "timestamp")
-    private Long timestamp;
 
     @Override
     public DistributionSet getDistributionSet() {
