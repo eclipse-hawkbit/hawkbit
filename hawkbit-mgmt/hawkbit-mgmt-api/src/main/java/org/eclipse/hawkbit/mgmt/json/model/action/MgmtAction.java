@@ -35,7 +35,6 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
         {
           "createdBy" : "bumlux",
           "createdAt" : 1682408571231,
-          "timestamp" : 1682408571245,
           "lastModifiedBy" : "bumlux",
           "lastModifiedAt" : 1682408571265,
           "type" : "update",
@@ -133,7 +132,4 @@ public class MgmtAction extends MgmtBaseEntity {
     @Schema(description = "If created by external system this field contains the external reference for the action")
     private String externalRef;
 
-    @JsonProperty
-    @Schema(description = "The timestamp when the action has happened on Device", example = "1691065903238")
-    private Long timestamp;
 }

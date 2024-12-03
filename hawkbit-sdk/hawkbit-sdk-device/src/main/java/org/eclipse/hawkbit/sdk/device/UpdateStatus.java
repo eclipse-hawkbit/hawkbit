@@ -18,8 +18,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 public record UpdateStatus(Status status, List<String> messages) {
 
     DdiActionFeedback feedback() {
-        return new DdiActionFeedback(null,
-                new DdiStatus(status.executionStatus, new DdiResult(status.finalResult, null), status.code, messages));
+        return new DdiActionFeedback(new DdiStatus(status.executionStatus, new DdiResult(status.finalResult, null), status.code, messages));
     }
 
     /**

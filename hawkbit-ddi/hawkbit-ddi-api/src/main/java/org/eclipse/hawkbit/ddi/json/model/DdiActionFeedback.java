@@ -62,9 +62,14 @@ public class DdiActionFeedback {
      */
     @JsonCreator
     public DdiActionFeedback(
-            @JsonProperty(value = "timestamp") final Long timestamp,
-            @JsonProperty(value = "status", required = true) final DdiStatus status) {
-        this.timestamp = timestamp != null ? timestamp : System.currentTimeMillis();
+            @JsonProperty(value = "status", required = true) final DdiStatus status,
+            @JsonProperty(value = "timestamp") final Long timestamp) {
         this.status = status;
+        this.timestamp = timestamp != null ? timestamp : System.currentTimeMillis();
     }
+
+    public DdiActionFeedback(final DdiStatus status) {
+        this(status, null);
+    }
+
 }

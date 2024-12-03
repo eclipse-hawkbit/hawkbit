@@ -184,7 +184,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             case ERROR: {
                 final JpaTarget target = (JpaTarget) action.getTarget();
                 target.setUpdateStatus(TargetUpdateStatus.ERROR);
-                handleErrorOnAction(occurredAt, action, target);
+                handleErrorOnAction(action, target);
                 break;
             }
             case FINISHED: {
@@ -192,7 +192,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 break;
             }
             case DOWNLOADED: {
-                handleDownloadedActionStatus(occurredAt, action).ifPresent(this::requestControllerAttributes);
+                handleDownloadedActionStatus(action).ifPresent(this::requestControllerAttributes);
                 break;
             }
             default: {
@@ -824,7 +824,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
      * @return a present controllerId in case the attributes needs to be
      *         requested.
      */
-    private Optional<String> handleDownloadedActionStatus(final long occurredAt, final JpaAction action) {
+    private Optional<String> handleDownloadedActionStatus(final JpaAction action) {
         if (!isDownloadOnly(action)) {
             return Optional.empty();
         }
@@ -832,7 +832,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         final JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(DOWNLOADED);
-        action.setTimestamp(occurredAt);
         target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
         targetRepository.save(target);
 
@@ -851,10 +850,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                         JpaTarget.class, eventPublisherHolder.getApplicationId()));
     }
 
-    private void handleErrorOnAction(final long occurredAt, final JpaAction mergedAction, final JpaTarget mergedTarget) {
+    private void handleErrorOnAction(final JpaAction mergedAction, final JpaTarget mergedTarget) {
         mergedAction.setActive(false);
         mergedAction.setStatus(Status.ERROR);
-        mergedAction.setTimestamp(occurredAt);
         mergedTarget.setAssignedDistributionSet(null);
 
         targetRepository.save(mergedTarget);
@@ -873,12 +871,11 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         final JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(Status.FINISHED);
-        action.setTimestamp(occurredAt);
         if (target.getInstallationDate() == null || target.getInstallationDate() < occurredAt) {
             final JpaDistributionSet ds = (JpaDistributionSet) entityManager.merge(action.getDistributionSet());
 
             target.setInstalledDistributionSet(ds);
-            target.setInstallationDate(System.currentTimeMillis());
+            target.setInstallationDate(occurredAt);
 
             // Target reported an installation of a DOWNLOAD_ONLY assignment, the
             // assigned DS has to be adapted

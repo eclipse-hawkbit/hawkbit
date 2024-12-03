@@ -288,15 +288,6 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         return Optional.ofNullable(lastActionStatusCode);
     }
 
-    @Override
-    public Optional<Long> getTimestamp() {
-        return Optional.ofNullable(timestamp);
-    }
-
-    @Override
-    public void setTimestamp(final Long timestamp) {
-        this.timestamp = timestamp;
-    }
 
     @Override
     public Optional<ZonedDateTime> getMaintenanceWindowStartTime() {
