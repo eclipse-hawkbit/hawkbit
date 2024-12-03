@@ -58,7 +58,6 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -791,8 +790,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies the enforcement of the metadata quota per target.")
     void createTargetMetadataUntilQuotaIsExceeded() {
-
-        // add meta data one by one
+        // add meta-data one by one
         final Target target1 = testdataFactory.createTarget("target1");
         final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerTarget();
         for (int i = 0; i < maxMetaData; ++i) {
@@ -815,7 +813,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         // add some meta data entries
         final Target target3 = testdataFactory.createTarget("target3");
-        final int firstHalf = Math.round(maxMetaData / 2);
+        final int firstHalf = maxMetaData / 2;
         for (int i = 0; i < firstHalf; ++i) {
             insertTargetMetadata("k" + i, "v" + i, target3);
         }
