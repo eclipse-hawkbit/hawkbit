@@ -39,7 +39,7 @@ class DdiActionFeedbackTest {
     void shouldSerializeAndDeserializeObjectWithoutOptionalValues() throws IOException {
         // Setup
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null, null, Collections.emptyList());
-        final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(null, null, ddiStatus);
+        final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(null, ddiStatus);
 
         // Test
         final String serializedDdiActionFeedback = mapper.writeValueAsString(ddiActionFeedback);
@@ -57,14 +57,13 @@ class DdiActionFeedbackTest {
         final Long timestamp = Instant.now().toEpochMilli();
         final DdiResult ddiResult = new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(10, 10));
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, ddiResult, 200, Collections.singletonList("myMessage"));
-        final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(time, timestamp, ddiStatus);
+        final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(timestamp, ddiStatus);
 
         // Test
         final String serializedDdiActionFeedback = mapper.writeValueAsString(ddiActionFeedback);
         final DdiActionFeedback deserializedDdiActionFeedback = mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class);
 
         assertThat(serializedDdiActionFeedback).contains(time);
-        assertThat(deserializedDdiActionFeedback.getTime()).isEqualTo(time);
         assertThat(deserializedDdiActionFeedback.getTimestamp()).isEqualTo(timestamp);
         assertThat(deserializedDdiActionFeedback.getStatus()).hasToString(ddiStatus.toString());
     }
@@ -81,7 +80,7 @@ class DdiActionFeedbackTest {
 
     @Test
     @Description("Verify that deserialization works if optional fields are not parsed")
-    void shouldConvertItWithoutOptionalFieldTime() throws JsonProcessingException {
+    void shouldConvertItWithoutOptionalFieldTimestamp() throws JsonProcessingException {
         // Setup
         final String serializedDdiActionFeedback = "{\n" + //
                 "  \"status\" : {\n" + //
@@ -94,7 +93,6 @@ class DdiActionFeedbackTest {
                 "}";//
 
         assertThat(mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class)).satisfies(deserializedDdiActionFeedback -> {
-            assertThat(deserializedDdiActionFeedback.getTime()).isNull();
             assertThat(deserializedDdiActionFeedback.getTimestamp()).isNotNull();
             assertThat(deserializedDdiActionFeedback.getStatus()).isNotNull();
             assertThat(deserializedDdiActionFeedback.getStatus().getResult()).isNotNull();

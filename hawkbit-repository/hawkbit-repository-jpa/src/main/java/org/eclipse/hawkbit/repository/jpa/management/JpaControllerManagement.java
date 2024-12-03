@@ -178,23 +178,21 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     protected void onActionStatusUpdate(final JpaActionStatus newActionStatus, final JpaAction action) {
-        Action.Status updatedActionStatus = newActionStatus.getStatus();
+        final Action.Status updatedActionStatus = newActionStatus.getStatus();
+        final long occurredAt = newActionStatus.getOccurredAt();
         switch (updatedActionStatus) {
             case ERROR: {
                 final JpaTarget target = (JpaTarget) action.getTarget();
                 target.setUpdateStatus(TargetUpdateStatus.ERROR);
-                action.setTimestamp(newActionStatus.getOccurredAt());
-                handleErrorOnAction(action, target);
+                handleErrorOnAction(occurredAt, action, target);
                 break;
             }
             case FINISHED: {
-                action.setTimestamp(newActionStatus.getOccurredAt());
-                handleFinishedAndStoreInTargetStatus(action).ifPresent(this::requestControllerAttributes);
+                handleFinishedAndStoreInTargetStatus(occurredAt, action).ifPresent(this::requestControllerAttributes);
                 break;
             }
             case DOWNLOADED: {
-                action.setTimestamp(newActionStatus.getOccurredAt());
-                handleDownloadedActionStatus(action).ifPresent(this::requestControllerAttributes);
+                handleDownloadedActionStatus(occurredAt, action).ifPresent(this::requestControllerAttributes);
                 break;
             }
             default: {
@@ -826,7 +824,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
      * @return a present controllerId in case the attributes needs to be
      *         requested.
      */
-    private Optional<String> handleDownloadedActionStatus(final JpaAction action) {
+    private Optional<String> handleDownloadedActionStatus(final long occurredAt, final JpaAction action) {
         if (!isDownloadOnly(action)) {
             return Optional.empty();
         }
@@ -834,6 +832,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         final JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(DOWNLOADED);
+        action.setTimestamp(occurredAt);
         target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
         targetRepository.save(target);
 
@@ -852,9 +851,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                         JpaTarget.class, eventPublisherHolder.getApplicationId()));
     }
 
-    private void handleErrorOnAction(final JpaAction mergedAction, final JpaTarget mergedTarget) {
+    private void handleErrorOnAction(final long occurredAt, final JpaAction mergedAction, final JpaTarget mergedTarget) {
         mergedAction.setActive(false);
         mergedAction.setStatus(Status.ERROR);
+        mergedAction.setTimestamp(occurredAt);
         mergedTarget.setAssignedDistributionSet(null);
 
         targetRepository.save(mergedTarget);
@@ -869,32 +869,35 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
      * @return a present controllerId in case the attributes needs to be
      *         requested.
      */
-    private Optional<String> handleFinishedAndStoreInTargetStatus(final JpaAction action) {
+    private Optional<String> handleFinishedAndStoreInTargetStatus(final long occurredAt, final JpaAction action) {
         final JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(Status.FINISHED);
-        final JpaDistributionSet ds = (JpaDistributionSet) entityManager.merge(action.getDistributionSet());
+        action.setTimestamp(occurredAt);
+        if (target.getInstallationDate() == null || target.getInstallationDate() < occurredAt) {
+            final JpaDistributionSet ds = (JpaDistributionSet) entityManager.merge(action.getDistributionSet());
 
-        target.setInstalledDistributionSet(ds);
-        target.setInstallationDate(System.currentTimeMillis());
+            target.setInstalledDistributionSet(ds);
+            target.setInstallationDate(System.currentTimeMillis());
 
-        // Target reported an installation of a DOWNLOAD_ONLY assignment, the
-        // assigned DS has to be adapted
-        // because the currently assigned DS can be unequal to the currently
-        // installed DS (the downloadOnly DS)
-        if (isDownloadOnly(action)) {
-            target.setAssignedDistributionSet((JpaDistributionSet) action.getDistributionSet());
+            // Target reported an installation of a DOWNLOAD_ONLY assignment, the
+            // assigned DS has to be adapted
+            // because the currently assigned DS can be unequal to the currently
+            // installed DS (the downloadOnly DS)
+            if (isDownloadOnly(action)) {
+                target.setAssignedDistributionSet((JpaDistributionSet) action.getDistributionSet());
+            }
+
+            // check if the assigned set is equal to the installed set (not
+            // necessarily the case as another update might be pending already).
+            if (target.getAssignedDistributionSet() != null
+                    && target.getAssignedDistributionSet().getId().equals(target.getInstalledDistributionSet().getId())) {
+                target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
+            }
+
+            targetRepository.save(target);
+            entityManager.detach(ds);
         }
-
-        // check if the assigned set is equal to the installed set (not
-        // necessarily the case as another update might be pending already).
-        if (target.getAssignedDistributionSet() != null
-                && target.getAssignedDistributionSet().getId().equals(target.getInstalledDistributionSet().getId())) {
-            target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
-        }
-
-        targetRepository.save(target);
-        entityManager.detach(ds);
 
         return Optional.of(target.getControllerId());
     }
