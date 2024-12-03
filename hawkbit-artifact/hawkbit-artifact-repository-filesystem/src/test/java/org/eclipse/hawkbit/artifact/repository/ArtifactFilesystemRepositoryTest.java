@@ -71,7 +71,7 @@ class ArtifactFilesystemRepositoryTest {
 
     @Test
     @Description("Verifies that an artifact can be successfully stored in the file-system repository")
-    void getStoredArtifactBasedOnSHA1Hash() {
+    void getStoredArtifactBasedOnSHA1Hash() throws IOException {
         final byte[] fileContent = randomBytes();
         final AbstractDbArtifact artifact = storeRandomArtifact(fileContent);
 
@@ -80,7 +80,7 @@ class ArtifactFilesystemRepositoryTest {
 
     @Test
     @Description("Verifies that an artifact can be deleted in the file-system repository")
-    void deleteStoredArtifactBySHA1Hash() {
+    void deleteStoredArtifactBySHA1Hash() throws IOException {
         final AbstractDbArtifact artifact = storeRandomArtifact(randomBytes());
         artifactFilesystemRepository.deleteBySha1(TENANT, artifact.getHashes().getSha1());
 
@@ -89,7 +89,7 @@ class ArtifactFilesystemRepositoryTest {
 
     @Test
     @Description("Verifies that all artifacts of a tenant can be deleted in the file-system repository")
-    void deleteStoredArtifactOfTenant() {
+    void deleteStoredArtifactOfTenant() throws IOException {
         final AbstractDbArtifact artifact = storeRandomArtifact(randomBytes());
         artifactFilesystemRepository.deleteByTenant(TENANT);
 
@@ -98,7 +98,7 @@ class ArtifactFilesystemRepositoryTest {
 
     @Test
     @Description("Verfies that an artifact which does not exists is deleted quietly in the file-system repository")
-    void deleteArtifactWhichDoesNotExistsBySHA1HashWithoutException() {
+    void deleteArtifactWhichDoesNotExistsBySHA1HashWithoutException() throws IOException {
         try {
             artifactFilesystemRepository.deleteBySha1(TENANT, "sha1HashWhichDoesNotExists");
         } catch (final Exception e) {
@@ -119,17 +119,9 @@ class ArtifactFilesystemRepositoryTest {
         return randomBytes;
     }
 
-    private AbstractDbArtifact storeRandomArtifact(final byte[] fileContent) {
-        final ByteArrayInputStream inputStream = new ByteArrayInputStream(fileContent);
-        try {
+    private AbstractDbArtifact storeRandomArtifact(final byte[] fileContent) throws IOException {
+        try (final ByteArrayInputStream inputStream = new ByteArrayInputStream(fileContent)) {
             return artifactFilesystemRepository.store(TENANT, inputStream, "filename.tmp", "application/txt", null);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                // do nothing
-                // still return the artifact
-            }
         }
     }
 }

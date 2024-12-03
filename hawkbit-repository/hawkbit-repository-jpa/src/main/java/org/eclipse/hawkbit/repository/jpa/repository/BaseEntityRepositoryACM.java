@@ -345,17 +345,6 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
         return acmProxy;
     }
 
-    private static <T> boolean isOperationAllowed(
-            final AccessController.Operation operation, T entity,
-            final AccessController<T> accessController) {
-        try {
-            accessController.assertOperationAllowed(operation, entity);
-            return true;
-        } catch (final InsufficientPermissionException e) {
-            return false;
-        }
-    }
-
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static <T extends Long> Set<Long> toSetDistinct(final Iterable<T> i) {
         final Set<Long> set = new HashSet<>();
