@@ -465,8 +465,9 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds1, smIds2, smIds1));
 
         final List<Long> installActions = getLatestMultiActionMessageActions(controllerId).stream()
-                .filter(entry -> entry.getValue().equals(EventTopic.DOWNLOAD_AND_INSTALL)).map(Entry::getKey)
-                .collect(Collectors.toList());
+                .filter(entry -> entry.getValue().equals(EventTopic.DOWNLOAD_AND_INSTALL))
+                .map(Entry::getKey)
+                .toList();
 
         updateActionViaDmfClient(controllerId, installActions.get(0), DmfActionStatus.FINISHED);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.REQUEST_ATTRIBUTES_UPDATE, EventTopic.MULTI_ACTION);

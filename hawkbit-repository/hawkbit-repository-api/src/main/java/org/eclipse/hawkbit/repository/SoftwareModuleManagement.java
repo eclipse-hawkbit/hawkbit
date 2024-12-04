@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.validation.Valid;
@@ -173,8 +174,7 @@ public interface SoftwareModuleManagement
      * @throws EntityNotFoundException if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleIdAndTargetVisible(@NotNull Pageable pageable,
-            long id);
+    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleIdAndTargetVisible(@NotNull Pageable pageable, long id);
 
     /**
      * Finds all meta data by the given software module id.
@@ -190,8 +190,7 @@ public interface SoftwareModuleManagement
      * @throws EntityNotFoundException if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleMetadata> findMetaDataByRsql(@NotNull Pageable pageable, long id,
-            @NotNull String rsqlParam);
+    Page<SoftwareModuleMetadata> findMetaDataByRsql(@NotNull Pageable pageable, long id, @NotNull String rsqlParam);
 
     /**
      * Retrieves the {@link SoftwareModule}s by their {@link SoftwareModuleType}
@@ -235,4 +234,7 @@ public interface SoftwareModuleManagement
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     SoftwareModuleMetadata updateMetaData(@NotNull @Valid SoftwareModuleMetadataUpdate update);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Map<Long, List<SoftwareModuleMetadata>> findMetaDataBySoftwareModuleIdsAndTargetVisible(Collection<Long> moduleIds);
 }

@@ -304,7 +304,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
         if (!rolloutGroupIds.isEmpty()) {
             final List<TotalTargetCountActionStatus> resultList = actionRepository
-                    .getStatusCountByRolloutGroupId(rolloutGroupIds);
+                    .getStatusCountByRolloutGroupIds(rolloutGroupIds);
             final Map<Long, List<TotalTargetCountActionStatus>> fromDb = resultList.stream()
                     .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
 

@@ -29,8 +29,7 @@ public interface BaseEntity extends Serializable, Identifiable<Long> {
     String getCreatedBy();
 
     /**
-     * @return time in {@link TimeUnit#MILLISECONDS} when the {@link BaseEntity}
-     *         was created.
+     * @return time in {@link TimeUnit#MILLISECONDS} when the {@link BaseEntity} was created.
      */
     long getCreatedAt();
 

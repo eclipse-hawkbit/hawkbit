@@ -144,9 +144,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    public ResponseEntity<DdiControllerBase> getControllerBase(
-            final String tenant,
-            final String controllerId) {
+    public ResponseEntity<DdiControllerBase> getControllerBase(final String tenant, final String controllerId) {
         log.debug("getControllerBase({})", controllerId);
 
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, IpUtil

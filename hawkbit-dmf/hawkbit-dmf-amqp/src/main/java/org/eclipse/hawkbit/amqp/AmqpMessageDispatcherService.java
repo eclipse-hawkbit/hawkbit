@@ -81,9 +81,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
 
 /**
- * {@link AmqpMessageDispatcherService} create all outgoing AMQP messages and
- * delegate the messages to a {@link AmqpMessageSenderService}.
- *
+ * {@link AmqpMessageDispatcherService} create all outgoing AMQP messages and delegate the messages to a {@link AmqpMessageSenderService}.
+ * <p/>
  * Additionally, the dispatcher listener/subscribe for some target events e.g. assignment.
  */
 @Slf4j
@@ -173,7 +172,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         }
 
         log.debug("MultiActionEvent received for {}", multiActionEvent.getControllerIds());
-        sendMultiActionRequestMessages(multiActionEvent.getTenant(), multiActionEvent.getControllerIds());
+        sendMultiActionRequestMessages(multiActionEvent.getControllerIds());
     }
 
     protected void sendUpdateMessageToTarget(
@@ -182,27 +181,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         final Map<String, ActionProperties> actionProp = new HashMap<>();
         actionProp.put(target.getControllerId(), actionsProps);
         sendUpdateMessageToTargets(actionProp, Collections.singletonList(target), softwareModules);
-    }
-
-    protected void sendMultiActionRequestToTarget(
-            final String tenant, final Target target, final List<Action> actions,
-            final Function<Action, Map<SoftwareModule, List<SoftwareModuleMetadata>>> getSoftwareModuleMetaData) {
-        final URI targetAddress = target.getAddress();
-        if (!IpUtil.isAmqpUri(targetAddress) || CollectionUtils.isEmpty(actions)) {
-            return;
-        }
-
-        final DmfMultiActionRequest multiActionRequest = new DmfMultiActionRequest();
-        actions.forEach(action -> {
-            final DmfActionRequest actionRequest = createDmfActionRequest(target, action, getSoftwareModuleMetaData.apply(action));
-            final int weight = deploymentManagement.getWeightConsideringDefault(action);
-            multiActionRequest.addElement(getEventTypeForAction(action), actionRequest, weight);
-        });
-
-        final Message message = getMessageConverter().toMessage(
-                multiActionRequest,
-                createConnectorMessagePropertiesEvent(tenant, target.getControllerId(), EventTopic.MULTI_ACTION));
-        amqpSenderService.sendMessage(message, targetAddress);
     }
 
     protected DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(
@@ -303,14 +281,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return dmfTarget;
     }
 
-    /**
-     * Creates a Confirmation request.
-     *
-     * @param target the target
-     * @param actionId the actionId
-     * @param softwareModules the software modules
-     * @return confirm request
-     */
     protected DmfConfirmRequest createConfirmRequest(
             final Target target, final Long actionId, final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
         final DmfConfirmRequest request = new DmfConfirmRequest();
@@ -323,6 +293,33 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                     request.addSoftwareModule(convertToAmqpSoftwareModule(target, entry)));
         }
         return request;
+    }
+
+    void sendMultiActionRequestToTarget(
+            final Target target, final List<Action> actions,
+            final Function<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModuleMetaData) {
+        final URI targetAddress = target.getAddress();
+        if (!IpUtil.isAmqpUri(targetAddress) || CollectionUtils.isEmpty(actions)) {
+            return;
+        }
+
+        final DmfMultiActionRequest multiActionRequest = new DmfMultiActionRequest();
+        actions.forEach(action -> {
+            final DmfActionRequest actionRequest = createDmfActionRequest(
+                    target, action,
+                    action.getDistributionSet().getModules().stream()
+                            .collect(Collectors.toMap(Function.identity(), module -> {
+                                final List<SoftwareModuleMetadata> softwareModuleMetadata = getSoftwareModuleMetaData.apply(module);
+                                return softwareModuleMetadata == null ? Collections.emptyList() : softwareModuleMetadata;
+                            })));
+            final int weight = deploymentManagement.getWeightConsideringDefault(action);
+            multiActionRequest.addElement(getEventTypeForAction(action), actionRequest, weight);
+        });
+
+        final Message message = getMessageConverter().toMessage(
+                multiActionRequest,
+                createConnectorMessagePropertiesEvent(target.getTenant(), target.getControllerId(), EventTopic.MULTI_ACTION));
+        amqpSenderService.sendMessage(message, targetAddress);
     }
 
     private static DmfActionRequest createPlainActionRequest(final Action action) {
@@ -463,23 +460,27 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         }
     }
 
-    private void sendMultiActionRequestMessages(final String tenant, final List<String> controllerIds) {
-        final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModuleMetadata = new HashMap<>();
-        targetManagement.getByControllerID(controllerIds).stream()
-                .filter(target -> IpUtil.isAmqpUri(target.getAddress())).forEach(target -> {
-                    final List<Action> activeActions = deploymentManagement
-                            .findActiveActionsWithHighestWeight(target.getControllerId(), MAX_ACTION_COUNT);
+    private void sendMultiActionRequestMessages(final List<String> controllerIds) {
+        final Map<String, List<Action>> controllerIdToActions = controllerIds.stream()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        controllerId -> deploymentManagement.findActiveActionsWithHighestWeight(controllerId, MAX_ACTION_COUNT)));
 
-                    activeActions.forEach(action ->
-                            action.getDistributionSet().getModules().forEach(module ->
-                                    softwareModuleMetadata.computeIfAbsent(module, this::getSoftwareModuleMetadata)));
+        // gets all software modules for all action at once
+        final Set<Long> allSmIds = controllerIdToActions.values().stream()
+                .flatMap(actions -> actions.stream()
+                        .map(Action::getDistributionSet)
+                        .flatMap(ds -> ds.getModules().stream())
+                        .map(SoftwareModule::getId))
+                .collect(Collectors.toSet());
+        final Map<Long, List<SoftwareModuleMetadata>> getSoftwareModuleMetadata =
+                allSmIds.isEmpty()
+                        ? Collections.emptyMap()
+                        : softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(allSmIds);
 
-                    if (!activeActions.isEmpty()) {
-                        sendMultiActionRequestToTarget(tenant, target, activeActions,
-                                action -> action.getDistributionSet().getModules().stream()
-                                        .collect(Collectors.toMap(m -> m, softwareModuleMetadata::get)));
-                    }
-                });
+        targetManagement.getByControllerID(controllerIds).forEach(target ->
+                sendMultiActionRequestToTarget(
+                        target, controllerIdToActions.get(target.getControllerId()), module -> getSoftwareModuleMetadata.get(module.getId())));
     }
 
     private DmfActionRequest createDmfActionRequest(
@@ -602,7 +603,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     private Map<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModulesWithMetadata(final DistributionSet distributionSet) {
-        return distributionSet.getModules().stream().collect(Collectors.toMap(m -> m, this::getSoftwareModuleMetadata));
+        return distributionSet.getModules().stream().collect(Collectors.toMap(Function.identity(), this::getSoftwareModuleMetadata));
     }
 
     private List<SoftwareModuleMetadata> getSoftwareModuleMetadata(final SoftwareModule module) {

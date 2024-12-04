@@ -411,7 +411,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         assertSoftwareModuleExists(id);
 
         return JpaManagementHelper.convertPage(softwareModuleMetadataRepository.findBySoftwareModuleIdAndTargetVisible(
-                PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT), id, true), pageable);
+                id, true, PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT)), pageable);
     }
 
     @Override
@@ -484,6 +484,14 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         JpaManagementHelper.touch(entityManager, softwareModuleRepository,
                 (JpaSoftwareModule) metadata.getSoftwareModule());
         return softwareModuleMetadataRepository.save(metadata);
+    }
+
+    @Override
+    public Map<Long, List<SoftwareModuleMetadata>> findMetaDataBySoftwareModuleIdsAndTargetVisible(final Collection<Long> moduleIds) {
+        return softwareModuleMetadataRepository
+                .findBySoftwareModuleIdInAndTargetVisible(moduleIds, true, PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT))
+                .getContent().stream()
+                .collect(Collectors.groupingBy(o -> (Long) o[0], Collectors.mapping(o -> (SoftwareModuleMetadata) o[1], Collectors.toList())));
     }
 
     private static Stream<JpaSoftwareModuleMetadataCreate> createJpaMetadataCreateStream(

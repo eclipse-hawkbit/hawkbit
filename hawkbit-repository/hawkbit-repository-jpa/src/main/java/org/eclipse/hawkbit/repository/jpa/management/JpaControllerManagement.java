@@ -21,6 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +33,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -250,8 +252,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Override
     public Map<Long, List<SoftwareModuleMetadata>> findTargetVisibleMetaDataBySoftwareModuleId(final Collection<Long> moduleId) {
         return softwareModuleMetadataRepository
-                .findBySoftwareModuleIdInAndTargetVisible(
-                        PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT), moduleId, true)
+                .findBySoftwareModuleIdInAndTargetVisible(moduleId, true, PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT))
                 .getContent().stream()
                 .collect(Collectors.groupingBy(o -> (Long) o[0], Collectors.mapping(o -> (SoftwareModuleMetadata) o[1], Collectors.toList())));
     }
@@ -280,14 +281,23 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         return addActionStatus((JpaActionStatusCreate) statusCreate);
     }
 
+    private static final Pageable PAGEABLE_1 = PageRequest.of(0, 1);
+
     @Override
     public Optional<Action> findActiveActionWithHighestWeight(final String controllerId) {
-        return findActiveActionsWithHighestWeight(controllerId, 1).stream().findFirst();
+        return Stream.concat(
+                        // get the highest action with weight
+                        actionRepository
+                                .findByTarget_ControllerIdAndActiveIsTrueAndWeightNotNullOrderByWeightDescIdAsc(controllerId, PAGEABLE_1)
+                                .stream(),
+                        // get the oldest action without weight
+                        actionRepository.findByTarget_ControllerIdAndActiveIsTrueAndWeightIsNullOrderByIdAsc(controllerId, PAGEABLE_1).stream())
+                .min(Comparator.comparingInt(this::getWeightConsideringDefault).reversed().thenComparing(Action::getId));
     }
 
     @Override
     public List<Action> findActiveActionsWithHighestWeight(final String controllerId, final int maxActionCount) {
-        return findActiveActionsWithHighestWeightConsideringDefault(controllerId, maxActionCount);
+        return super.findActiveActionsWithHighestWeightConsideringDefault(controllerId, maxActionCount);
     }
 
     @Override
@@ -453,7 +463,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public Optional<Target> get(final long targetId) {
-        return targetRepository.findById(targetId).map(t -> (Target) t);
+        return targetRepository.findById(targetId).map(Target.class::cast);
     }
 
     @Override
@@ -463,18 +473,16 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             return Collections.emptyList();
         }
 
-        // For negative and large value of messageCount, limit the number of
-        // messages.
+        // For negative and large value of messageCount, limit the number of messages.
         final int limit = messageCount < 0 || messageCount >= RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT
                 ? RepositoryConstants.MAX_ACTION_HISTORY_MSG_COUNT
                 : messageCount;
 
         final PageRequest pageable = PageRequest.of(0, limit, Sort.by(Direction.DESC, "occurredAt"));
-        final Page<String> messages = actionStatusRepository.findMessagesByActionIdAndMessageNotLike(pageable, actionId,
-                RepositoryConstants.SERVER_MESSAGE_PREFIX + "%");
+        final Page<String> messages = actionStatusRepository.findMessagesByActionIdAndMessageNotLike(
+                actionId, RepositoryConstants.SERVER_MESSAGE_PREFIX + "%", pageable);
 
-        log.debug("Retrieved {} message(s) from action history for action {}.", messages.getNumberOfElements(),
-                actionId);
+        log.debug("Retrieved {} message(s) from action history for action {}.", messages.getNumberOfElements(), actionId);
 
         return messages.getContent();
     }

@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
@@ -69,6 +70,8 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
 import org.eclipse.persistence.queries.UpdateObjectQuery;
+import org.hibernate.event.spi.PreUpdateEvent;
+import org.hibernate.event.spi.PreUpdateEventListener;
 
 /**
  * JPA implementation of {@link Target}.
@@ -174,12 +177,12 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     // no cascade option on an ElementCollection, the target objects are always persisted, merged, removed with their parent.
     @Getter
     @ElementCollection
-    @Column(name = "attribute_value", length = Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE)
-    @MapKeyColumn(name = "attribute_key", nullable = false, length = Target.CONTROLLER_ATTRIBUTE_KEY_SIZE)
     @CollectionTable(
             name = "sp_target_attributes",
-            joinColumns = { @JoinColumn(name = "target_id", nullable = false, insertable = false, updatable = false) },
+            joinColumns = { @JoinColumn(name = "target_id", nullable = false) },
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
+    @Column(name = "attribute_value", length = Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE)
+    @MapKeyColumn(name = "attribute_key", length = Target.CONTROLLER_ATTRIBUTE_KEY_SIZE)
     private Map<String, String> controllerAttributes;
 
     @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaTargetMetadata.class)
@@ -331,7 +334,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     /**
      * Listens to updates on {@link JpaTarget} entities, Filtering out updates that only change the "lastTargetQuery" or "address" fields.
      */
-    public static class EntityPropertyChangeListener extends DescriptorEventAdapter {
+    public static class EntityPropertyChangeListener extends DescriptorEventAdapter implements PreUpdateEventListener {
 
         private static final List<String> TARGET_UPDATE_EVENT_IGNORE_FIELDS = List.of(
                 "lastTargetQuery", "address", // actual to be skipped
@@ -345,6 +348,22 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
                     .anyMatch(field -> !TARGET_UPDATE_EVENT_IGNORE_FIELDS.contains(field))) {
                 doNotify(() -> ((EventAwareEntity) object).fireUpdateEvent());
             }
+        }
+
+        @Override
+        public boolean onPreUpdate(final PreUpdateEvent event) {
+            final Object[] oldState = event.getOldState();
+            final Object[] newState = event.getState();
+            for (int i = 0; i < newState.length; i++) {
+                if (!Objects.equals(oldState[i], newState[i])) {
+                    final String attribute = event.getPersister().getAttributeMapping(i).getAttributeName();
+                    if (!TARGET_UPDATE_EVENT_IGNORE_FIELDS.contains(attribute)) {
+                        doNotify(() -> ((EventAwareEntity) event.getEntity()).fireUpdateEvent());
+                        break;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

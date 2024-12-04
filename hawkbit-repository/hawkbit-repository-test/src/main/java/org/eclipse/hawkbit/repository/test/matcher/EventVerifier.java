@@ -72,6 +72,12 @@ public class EventVerifier extends AbstractTestExecutionListener {
 
     @Override
     public void afterTestMethod(final TestContext testContext) {
+        if (testContext.getTestException() != null) {
+            // test has failed anyway
+            // not expected event set could be result of failed test / incomplete steps - no need to check and mess up with real exception
+            return;
+        }
+
         final Optional<Expect[]> expectedEvents = getExpectationsFrom(testContext.getTestMethod());
         try {
             expectedEvents.ifPresent(this::afterTest);
