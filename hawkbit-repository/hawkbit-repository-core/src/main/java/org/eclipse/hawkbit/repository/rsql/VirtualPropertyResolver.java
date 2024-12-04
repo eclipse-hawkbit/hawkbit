@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.rsql;
 
 import java.io.Serial;
-import java.time.Instant;
 
 import org.apache.commons.lang3.text.StrLookup;
 import org.apache.commons.lang3.text.StrSubstitutor;
@@ -54,7 +53,7 @@ public class VirtualPropertyResolver extends StrLookup<String> implements Virtua
         String resolved = null;
 
         if ("now_ts".equalsIgnoreCase(rhs)) {
-            resolved = String.valueOf(Instant.now().toEpochMilli());
+            resolved = String.valueOf(System.currentTimeMillis());
         } else if ("overdue_ts".equalsIgnoreCase(rhs)) {
             resolved = String.valueOf(TimestampCalculator.calculateOverdueTimestamp());
         }

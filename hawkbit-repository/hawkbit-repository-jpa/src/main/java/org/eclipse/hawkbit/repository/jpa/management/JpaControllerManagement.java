@@ -177,7 +177,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    protected void onActionStatusUpdate(final Action.Status updatedActionStatus, final JpaAction action) {
+    protected void onActionStatusUpdate(final JpaActionStatus newActionStatus, final JpaAction action) {
+        final Action.Status updatedActionStatus = newActionStatus.getStatus();
+        final long occurredAt = newActionStatus.getOccurredAt();
         switch (updatedActionStatus) {
             case ERROR: {
                 final JpaTarget target = (JpaTarget) action.getTarget();
@@ -186,7 +188,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 break;
             }
             case FINISHED: {
-                handleFinishedAndStoreInTargetStatus(action).ifPresent(this::requestControllerAttributes);
+                handleFinishedAndStoreInTargetStatus(occurredAt, action).ifPresent(this::requestControllerAttributes);
                 break;
             }
             case DOWNLOADED: {
@@ -865,32 +867,34 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
      * @return a present controllerId in case the attributes needs to be
      *         requested.
      */
-    private Optional<String> handleFinishedAndStoreInTargetStatus(final JpaAction action) {
+    private Optional<String> handleFinishedAndStoreInTargetStatus(final long occurredAt, final JpaAction action) {
         final JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(Status.FINISHED);
-        final JpaDistributionSet ds = (JpaDistributionSet) entityManager.merge(action.getDistributionSet());
+        if (target.getInstallationDate() == null || target.getInstallationDate() < occurredAt) {
+            final JpaDistributionSet ds = (JpaDistributionSet) entityManager.merge(action.getDistributionSet());
 
-        target.setInstalledDistributionSet(ds);
-        target.setInstallationDate(System.currentTimeMillis());
+            target.setInstalledDistributionSet(ds);
+            target.setInstallationDate(occurredAt);
 
-        // Target reported an installation of a DOWNLOAD_ONLY assignment, the
-        // assigned DS has to be adapted
-        // because the currently assigned DS can be unequal to the currently
-        // installed DS (the downloadOnly DS)
-        if (isDownloadOnly(action)) {
-            target.setAssignedDistributionSet((JpaDistributionSet) action.getDistributionSet());
+            // Target reported an installation of a DOWNLOAD_ONLY assignment, the
+            // assigned DS has to be adapted
+            // because the currently assigned DS can be unequal to the currently
+            // installed DS (the downloadOnly DS)
+            if (isDownloadOnly(action)) {
+                target.setAssignedDistributionSet((JpaDistributionSet) action.getDistributionSet());
+            }
+
+            // check if the assigned set is equal to the installed set (not
+            // necessarily the case as another update might be pending already).
+            if (target.getAssignedDistributionSet() != null
+                    && target.getAssignedDistributionSet().getId().equals(target.getInstalledDistributionSet().getId())) {
+                target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
+            }
+
+            targetRepository.save(target);
+            entityManager.detach(ds);
         }
-
-        // check if the assigned set is equal to the installed set (not
-        // necessarily the case as another update might be pending already).
-        if (target.getAssignedDistributionSet() != null
-                && target.getAssignedDistributionSet().getId().equals(target.getInstalledDistributionSet().getId())) {
-            target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
-        }
-
-        targetRepository.save(target);
-        entityManager.detach(ds);
 
         return Optional.of(target.getControllerId());
     }

@@ -89,7 +89,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet installedSet = testdataFactory.createDistributionSet("another");
 
-        final Long lastTargetQueryNotOverdue = Instant.now().toEpochMilli();
+        final Long lastTargetQueryNotOverdue = System.currentTimeMillis();
         final Long lastTargetQueryAlwaysOverdue = 0L;
 
         final String targetDsAIdPref = "targ-A";
@@ -276,7 +276,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     void targetSearchWithOverdueFilterAndOrderByDistributionSet() {
 
         final Long lastTargetQueryAlwaysOverdue = 0L;
-        final long lastTargetQueryNotOverdue = Instant.now().toEpochMilli();
+        final long lastTargetQueryNotOverdue = System.currentTimeMillis();
 
         final Long[] overdueMix = { lastTargetQueryAlwaysOverdue, lastTargetQueryNotOverdue,
                 lastTargetQueryAlwaysOverdue, null, lastTargetQueryAlwaysOverdue };

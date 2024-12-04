@@ -354,6 +354,7 @@ public final class MgmtTargetMapper {
 
         result.setMessages(messages);
         result.setReportedAt(actionStatus.getCreatedAt());
+        result.setTimestamp(actionStatus.getOccurredAt());
         result.setStatusId(actionStatus.getId());
         result.setType(actionStatus.getStatus().name().toLowerCase());
         actionStatus.getCode().ifPresent(result::setCode);

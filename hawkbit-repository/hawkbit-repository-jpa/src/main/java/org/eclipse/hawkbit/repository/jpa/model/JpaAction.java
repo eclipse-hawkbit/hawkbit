@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.persistence.Access;
+import jakarta.persistence.AccessType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -51,6 +53,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.springframework.data.annotation.CreatedDate;
 
 /**
  * JPA implementation of {@link Action}.
@@ -282,6 +285,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     public Optional<Integer> getLastActionStatusCode() {
         return Optional.ofNullable(lastActionStatusCode);
     }
+
 
     @Override
     public Optional<ZonedDateTime> getMaintenanceWindowStartTime() {

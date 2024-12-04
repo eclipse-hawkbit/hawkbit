@@ -330,7 +330,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
 
     protected void createAndSendActionStatusUpdateMessage(final String target, final long actionId,
             final DmfActionStatus status) {
-        final DmfActionUpdateStatus dmfActionUpdateStatus = new DmfActionUpdateStatus(actionId, status);
+        final DmfActionUpdateStatus dmfActionUpdateStatus = new DmfActionUpdateStatus(actionId, status, System.currentTimeMillis());
 
         final Message eventMessage = createUpdateActionEventMessage(dmfActionUpdateStatus);
         eventMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.THING_ID, target);

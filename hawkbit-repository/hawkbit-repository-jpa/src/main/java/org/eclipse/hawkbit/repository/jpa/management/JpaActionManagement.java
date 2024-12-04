@@ -88,7 +88,7 @@ public class JpaActionManagement {
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
     }
 
-    protected void onActionStatusUpdate(final Action.Status updatedActionStatus, final JpaAction action) {
+    protected void onActionStatusUpdate(final JpaActionStatus newActionStatus, final JpaAction action) {
         // can be overwritten to intercept the persistence of the action status
     }
 
@@ -165,7 +165,7 @@ public class JpaActionManagement {
         assertActionStatusMessageQuota(actionStatus);
         actionStatus.setAction(action);
 
-        onActionStatusUpdate(actionStatus.getStatus(), action);
+        onActionStatusUpdate(actionStatus, action);
 
         actionStatusRepository.save(actionStatus);
 

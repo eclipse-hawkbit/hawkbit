@@ -44,6 +44,10 @@ public class MgmtActionStatus {
     private Long reportedAt;
 
     @JsonProperty
+    @Schema(example = "1691065929524")
+    private Long timestamp;
+
+    @JsonProperty
     @Schema(example = "200")
     private Integer code;
 }

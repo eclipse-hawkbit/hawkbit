@@ -131,4 +131,5 @@ public class MgmtAction extends MgmtBaseEntity {
     @JsonProperty
     @Schema(description = "If created by external system this field contains the external reference for the action")
     private String externalRef;
+
 }
