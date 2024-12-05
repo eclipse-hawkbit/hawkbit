@@ -13,10 +13,9 @@ import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ON
 import static org.eclipse.hawkbit.repository.model.Action.Status.ERROR;
 import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -25,7 +24,6 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
@@ -34,7 +32,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Implements utility methods for managing {@link Action}s
@@ -104,32 +102,19 @@ public class JpaActionManagement {
                 quotaManagement.getMaxMessagesPerActionStatus(), "Message", ActionStatus.class.getSimpleName(), null);
     }
 
-    List<Action> findActiveActionsWithHighestWeightConsideringDefault(final String controllerId,
-            final int maxActionCount) {
-        final List<Action> actions = new ArrayList<>();
-        actions.addAll(
-                actionRepository
-                        .findAll(
-                                ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNullFetchDS(controllerId, false),
-                                PageRequest.of(
-                                        0, maxActionCount,
-                                        Sort.by(
-                                                Sort.Order.desc(JpaAction_.WEIGHT),
-                                                Sort.Order.asc(JpaAction_.ID))))
-                        .getContent());
-
-        actions.addAll(
-                actionRepository
-                        .findAll(
-                                ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNullFetchDS(controllerId, true),
-                                PageRequest.of(
-                                        0, maxActionCount,
-                                        Sort.by(
-                                                Sort.Order.asc(JpaAction_.ID))))
-                        .getContent());
-        final Comparator<Action> actionImportance = Comparator.comparingInt(this::getWeightConsideringDefault)
-                .reversed().thenComparing(Action::getId);
-        return actions.stream().sorted(actionImportance).limit(maxActionCount).collect(Collectors.toList());
+    protected List<Action> findActiveActionsWithHighestWeightConsideringDefault(final String controllerId, final int maxActionCount) {
+        final Pageable pageable = PageRequest.of(0, maxActionCount);
+        return Stream.concat(
+                        // get the highest actions with weight
+                        actionRepository
+                                .findFetchDsByTarget_ControllerIdAndActiveIsTrueAndWeightNotNullOrderByWeightDescIdAsc(controllerId, pageable)
+                                .stream(),
+                        // get the oldest actions without weight
+                        actionRepository.findFetchDsByTarget_ControllerIdAndActiveIsTrueAndWeightIsNullOrderByIdAsc(controllerId, pageable)
+                                .stream())
+                .sorted(Comparator.comparingInt(this::getWeightConsideringDefault).reversed().thenComparing(Action::getId))
+                .limit(maxActionCount)
+                .toList();
     }
 
     private static boolean isIntermediateStatus(final JpaActionStatus actionStatus) {

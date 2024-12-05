@@ -967,38 +967,29 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
 
         // test and verify
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RUNNING));
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
-                Action.Status.RUNNING, true);
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RUNNING));
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING, Action.Status.RUNNING, true);
 
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.ERROR));
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR, Action.Status.ERROR,
-                Action.Status.ERROR, false);
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.ERROR));
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR, Action.Status.ERROR, Action.Status.ERROR, false);
 
         // try with disabled late feedback
         repositoryProperties.setRejectActionStatusForClosedAction(true);
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
 
         // test
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR, Action.Status.ERROR,
-                Action.Status.ERROR, false);
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR, Action.Status.ERROR, Action.Status.ERROR, false);
 
         // try with enabled late feedback - should not make a difference as it
         // only allows intermediate feedback and not multiple close
         repositoryProperties.setRejectActionStatusForClosedAction(false);
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
 
         // test
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR, Action.Status.ERROR,
-                Action.Status.ERROR, false);
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR, Action.Status.ERROR, Action.Status.ERROR, false);
 
         assertThat(actionStatusRepository.count()).isEqualTo(3);
         assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(3);
-
     }
 
     @Test
@@ -1716,27 +1707,24 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 actionStatus, true);
     }
 
-    private void assertActionStatus(final Long actionId, final String controllerId,
+    private void assertActionStatus(
+            final Long actionId, final String controllerId,
             final TargetUpdateStatus expectedTargetUpdateStatus, final Action.Status expectedActionActionStatus,
             final Action.Status expectedActionStatus, final boolean actionActive) {
-        final TargetUpdateStatus targetStatus = targetManagement.getByControllerID(controllerId).get()
-                .getUpdateStatus();
+        final TargetUpdateStatus targetStatus = targetManagement.getByControllerID(controllerId).get().getUpdateStatus();
         assertThat(targetStatus).isEqualTo(expectedTargetUpdateStatus);
         final Action action = deploymentManagement.findAction(actionId).get();
         assertThat(action.getStatus()).isEqualTo(expectedActionActionStatus);
         assertThat(action.isActive()).isEqualTo(actionActive);
-        final List<ActionStatus> actionStatusList = controllerManagement.findActionStatusByAction(PAGE, actionId)
-                .getContent();
+        final List<ActionStatus> actionStatusList = controllerManagement.findActionStatusByAction(PAGE, actionId).getContent();
         assertThat(actionStatusList.get(actionStatusList.size() - 1).getStatus()).isEqualTo(expectedActionStatus);
         if (actionActive) {
-            assertThat(controllerManagement.findActiveActionWithHighestWeight(controllerId).get().getId())
-                    .isEqualTo(actionId);
+            assertThat(controllerManagement.findActiveActionWithHighestWeight(controllerId).get().getId()).isEqualTo(actionId);
         }
     }
 
     private void createTargetType(String targetTypeName) {
-        systemSecurityContext.runAsSystem(() ->
-                targetTypeManagement.create(entityFactory.targetType().create().name(targetTypeName)));
+        systemSecurityContext.runAsSystem(() -> targetTypeManagement.create(entityFactory.targetType().create().name(targetTypeName)));
     }
 
     @Step

@@ -52,15 +52,22 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * @param targetId the action belongs to
      * @param dsId of the ds that is assigned to the target
      * @param status of the action
-     * @return action if there is one with assigned target and assigned
-     *         {@link DistributionSet}.
+     * @return action if there is one with assigned target and assigned {@link DistributionSet}.
      */
-    Optional<Action> findFirstByTargetIdAndDistributionSetIdAndStatusOrderByIdDesc(@Param("target") long targetId,
-            @Param("ds") Long dsId, @Param("status") Action.Status status);
+    Optional<Action> findFirstByTargetIdAndDistributionSetIdAndStatusOrderByIdDesc(
+            @Param("target") long targetId, @Param("ds") Long dsId, @Param("status") Action.Status status);
+
+    List<Action> findByTarget_ControllerIdAndActiveIsTrueAndWeightIsNullOrderByIdAsc(String controllerId, Pageable pageable);
+    List<Action> findByTarget_ControllerIdAndActiveIsTrueAndWeightNotNullOrderByWeightDescIdAsc(String controllerId, Pageable pageable);
+
+    @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
+    List<Action> findFetchDsByTarget_ControllerIdAndActiveIsTrueAndWeightIsNullOrderByIdAsc(String controllerId, Pageable pageable);
+    @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
+    List<Action> findFetchDsByTarget_ControllerIdAndActiveIsTrueAndWeightNotNullOrderByWeightDescIdAsc(String controllerId, Pageable pageable);
 
     /**
-     * Switches the status of actions from one specific status into another, only if
-     * the actions are in a specific status. This should be a atomic operation.
+     * Switches the status of actions from one specific status into another, only if the actions are in a specific status. This should be
+     * an atomic operation.
      * <p/>
      * No access control applied
      *
@@ -72,7 +79,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     @Modifying
     @Transactional
     @Query("UPDATE JpaAction a SET a.status = :statusToSet WHERE a.target.id IN :targetsIds AND a.active = :active AND a.status = :currentStatus AND a.distributionSet.requiredMigrationStep = false")
-    void switchStatus(@Param("statusToSet") Action.Status statusToSet, @Param("targetsIds") List<Long> targetIds,
+    void switchStatus(
+            @Param("statusToSet") Action.Status statusToSet, @Param("targetsIds") List<Long> targetIds,
             @Param("active") boolean active, @Param("currentStatus") Action.Status currentStatus);
 
     /**
@@ -124,8 +132,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     Long countByDistributionSetIdAndActiveIsTrue(Long distributionSet);
 
     /**
-     * Counts all active {@link Action}s referring to the given DistributionSet
-     * that are not in a given state.
+     * Counts all active {@link Action}s referring to the given DistributionSet that are not in a given state.
      * <p/>
      * No access control applied
      *
@@ -136,43 +143,39 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     Long countByDistributionSetIdAndActiveIsTrueAndStatusIsNot(Long distributionSet, Status status);
 
     /**
-     * Counts all actions referring to a given rollout and rolloutgroup which
-     * are currently not in the given status. An in-clause statement does not
-     * work with the spring-data, so this is specific usecase regarding to the
-     * rollout-management to find out actions which are not in specific states.
+     * Counts all actions referring to a given rollout and rolloutgroup which are currently not in the given status. An in-clause statement
+     * does not work with the spring-data, so this is specific usecase regarding the rollout-management to find out actions which are not in
+     * specific states.
      * <p/>
      * No access control applied
      *
      * @param rollout the rollout the actions are belong to
-     * @param rolloutGroup the rolloutgroup the actions are belong to
+     * @param rolloutGroup the rollout group the actions are belong to
      * @param statuses the list of statuses the action should not have
-     * @return the count of actions referring the rollout and rolloutgroup and
-     *         are not in given states
+     * @return the count of actions referring the rollout and rollout group and are not in given states
      */
-    Long countByRolloutAndRolloutGroupAndStatusNotIn(JpaRollout rollout, JpaRolloutGroup rolloutGroup,
-            List<Status> statuses);
+    Long countByRolloutAndRolloutGroupAndStatusNotIn(JpaRollout rollout, JpaRolloutGroup rolloutGroup, List<Status> statuses);
 
     /**
-     * Counts all actions referring to a given rollout and rolloutgroup.
+     * Counts all actions referring to a given rollout and rollout group.
      * <p/>
      * No access control applied
      *
      * @param rollout the rollout the actions belong to
-     * @param rolloutGroup the rolloutgroup the actions belong to
-     * @return the count of actions referring to a rollout and rolloutgroup
+     * @param rolloutGroup the rollout group the actions belong to
+     * @return the count of actions referring to a rollout and rollout group
      */
     Long countByRolloutAndRolloutGroup(JpaRollout rollout, JpaRolloutGroup rolloutGroup);
 
     /**
-     * Counts all actions referring to a given rollout, rolloutgroup and status.
+     * Counts all actions referring to a given rollout, rollout group and status.
      * <p/>
      * No access control applied
      *
      * @param rolloutId the ID of rollout the actions belong to
-     * @param rolloutGroupId the ID rolloutgroup the actions belong to
+     * @param rolloutGroupId the ID rollout group the actions belong to
      * @param status the status the actions should have
-     * @return the count of actions referring to a rollout, rolloutgroup and are
-     *         in a given status
+     * @return the count of actions referring to a rollout, rollout group and are in a given status
      */
     Long countByRolloutIdAndRolloutGroupIdAndStatus(Long rolloutId, Long rolloutGroupId, Action.Status status);
 
@@ -189,50 +192,43 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     Long countByRolloutIdAndStatus(Long rolloutId, Action.Status status);
 
     /**
-     * Returns {@code true} if actions for the given rollout exists, otherwise
-     * {@code false}
+     * Returns {@code true} if actions for the given rollout exists, otherwise {@code false}
      * <p/>
      * No access control applied
      *
      * @param rolloutId the ID of the rollout the actions belong to
-     * @return {@code true} if actions for the given rollout exists, otherwise
-     *         {@code false}
+     * @return {@code true} if actions for the given rollout exists, otherwise {@code false}
      */
     @Query("SELECT CASE WHEN COUNT(a)>0 THEN 'true' ELSE 'false' END FROM JpaAction a WHERE a.rollout.id=:rolloutId")
     boolean existsByRolloutId(@Param("rolloutId") Long rolloutId);
 
     /**
-     * Returns {@code true} if actions for the given rollout exists, otherwise
-     * {@code false}
+     * Returns {@code true} if actions for the given rollout exists, otherwise {@code false}
      * <p/>
      * No access control applied
      *
      * @param rolloutId the ID of the rollout the actions belong to
      * @param status the action is not to be in
-     * @return {@code true} if actions for the given rollout exists, otherwise
-     *         {@code false}
+     * @return {@code true} if actions for the given rollout exists, otherwise {@code false}
      */
     @Query("SELECT CASE WHEN COUNT(a)>0 THEN 'true' ELSE 'false' END FROM JpaAction a WHERE a.rollout.id=:rolloutId AND a.status != :status")
     boolean existsByRolloutIdAndStatusNotIn(@Param("rolloutId") Long rolloutId, @Param("status") Status status);
 
     /**
-     * Retrieving all actions referring to a given rollout with a specific action as
-     * parent reference and a specific status.
+     * Retrieving all actions referring to a given rollout with a specific action as parent reference and a specific status.
      * <p/>
-     * Finding all actions of a specific rolloutgroup parent relation.
+     * Finding all actions of a specific rollout group parent relation.
      * <p/>
      * No access control applied
      *
      * @param pageable page parameters
      * @param rollout the rollout the actions belong to
-     * @param rolloutGroupParent the parent rolloutgroup the actions should reference
+     * @param rolloutGroupParent the parent rollout group the actions should reference
      * @param actionStatus the status the actions have
-     * @return the actions referring a specific rollout and a specific parent
-     *         rolloutgroup in a specific status
+     * @return the actions referring a specific rollout and a specific parent rolloutgroup in a specific status
      */
     @EntityGraph(attributePaths = { "target", "target.autoConfirmationStatus", "rolloutGroup" }, type = EntityGraphType.LOAD)
-    Page<Action> findByRolloutIdAndRolloutGroupParentIdAndStatus(Pageable pageable, Long rollout,
-            Long rolloutGroupParent, Status actionStatus);
+    Page<Action> findByRolloutIdAndRolloutGroupParentIdAndStatus(Pageable pageable, Long rollout, Long rolloutGroupParent, Status actionStatus);
 
     /**
      * Retrieving all actions referring to the first group of a rollout.
@@ -242,13 +238,10 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * @param pageable page parameters
      * @param rollout the rollout the actions belong to
      * @param actionStatus the status the actions have
-     * @return the actions referring a specific rollout and a specific parent
-     *         rolloutgroup in a specific status
+     * @return the actions referring a specific rollout and a specific parent rolloutgroup in a specific status
      */
-    @EntityGraph(attributePaths = { "target", "target.autoConfirmationStatus",
-            "rolloutGroup" }, type = EntityGraphType.LOAD)
-    Page<Action> findByRolloutIdAndRolloutGroupParentIsNullAndStatus(Pageable pageable, Long rollout,
-            Status actionStatus);
+    @EntityGraph(attributePaths = { "target", "target.autoConfirmationStatus", "rolloutGroup" }, type = EntityGraphType.LOAD)
+    Page<Action> findByRolloutIdAndRolloutGroupParentIsNullAndStatus(Pageable pageable, Long rollout, Status actionStatus);
 
     /**
      * Retrieves all actions for a specific rollout and in a specific status.
@@ -263,44 +256,40 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     Page<JpaAction> findByRolloutIdAndStatus(Pageable pageable, Long rolloutId, Status actionStatus);
 
     /**
-     * Get list of objects which has details of status and count of targets in
-     * each status in specified rollout.
+     * Get list of objects which has details of status and count of targets in each status in specified rollout.
      * <p/>
      * No access control applied
      *
      * @param rolloutId id of {@link Rollout}
      * @return list of objects with status and target count
      */
-    @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus( a.rollout.id, a.status , COUNT(a.id)) FROM JpaAction a WHERE a.rollout.id IN ?1 GROUP BY a.rollout.id,a.status")
-    List<TotalTargetCountActionStatus> getStatusCountByRolloutId(List<Long> rolloutId);
-
-    /**
-     * Get list of objects which has details of status and count of targets in
-     * each status in specified rollout.
-     * <p/>
-     * No access control applied
-     *
-     * @param rolloutId id of {@link Rollout}
-     * @return list of objects with status and target count
-     */
-    @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus( a.rollout.id, a.status , COUNT(a.id)) FROM JpaAction a WHERE a.rollout.id = ?1 GROUP BY a.rollout.id,a.status")
+    @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rollout.id, a.status, COUNT(a.id)) FROM JpaAction a WHERE a.rollout.id = ?1 GROUP BY a.rollout.id,a.status")
     List<TotalTargetCountActionStatus> getStatusCountByRolloutId(Long rolloutId);
 
     /**
-     * Get list of objects which has details of status and count of targets in
-     * each status in specified rollout group.
+     * Get list of objects which has details of status and count of targets in each status in specified rollout.
+     * <p/>
+     * No access control applied
+     *
+     * @param rolloutId id of {@link Rollout}
+     * @return list of objects with status and target count
+     */
+    @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rollout.id, a.status, COUNT(a.id)) FROM JpaAction a WHERE a.rollout.id IN ?1 GROUP BY a.rollout.id,a.status")
+    List<TotalTargetCountActionStatus> getStatusCountByRolloutIds(List<Long> rolloutId);
+
+    /**
+     * Get list of objects which has details of status and count of targets in each status in specified rollout group.
      * <p/>
      * No access control applied
      *
      * @param rolloutGroupId id of {@link RolloutGroup}
      * @return list of objects with status and target count
      */
-    @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rolloutGroup.id, a.status , COUNT(a.id)) FROM JpaAction a WHERE a.rolloutGroup.id = ?1 GROUP BY a.rolloutGroup.id, a.status")
+    @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rolloutGroup.id, a.status, COUNT(a.id)) FROM JpaAction a WHERE a.rolloutGroup.id = ?1 GROUP BY a.rolloutGroup.id, a.status")
     List<TotalTargetCountActionStatus> getStatusCountByRolloutGroupId(Long rolloutGroupId);
 
     /**
-     * Get list of objects which has details of status and count of targets in
-     * each status in specified rollout group.
+     * Get list of objects which has details of status and count of targets in each status in specified rollout group.
      * <p/>
      * No access control applied
      *
@@ -308,7 +297,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * @return list of objects with status and target count
      */
     @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rolloutGroup.id, a.status , COUNT(a.id)) FROM JpaAction a WHERE a.rolloutGroup.id IN ?1 GROUP BY a.rolloutGroup.id, a.status")
-    List<TotalTargetCountActionStatus> getStatusCountByRolloutGroupId(List<Long> rolloutGroupId);
+    List<TotalTargetCountActionStatus> getStatusCountByRolloutGroupIds(List<Long> rolloutGroupId);
 
     /**
      * Updates the externalRef of an action by its actionId.

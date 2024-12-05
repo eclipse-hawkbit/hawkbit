@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -67,9 +68,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link AmqpMessageHandlerService} handles all incoming target interaction
- * AMQP messages (e.g. create target, check for updates etc.) for the queue
- * which is configured for the property hawkbit.dmf.rabbitmq.receiverQueue.
+ * {@link AmqpMessageHandlerService} handles all incoming target interaction AMQP messages (e.g. create target, check for updates etc.) for the
+ * queue which is configured for the property hawkbit.dmf.rabbitmq.receiverQueue.
  */
 @Slf4j
 public class AmqpMessageHandlerService extends BaseAmqpService {
@@ -344,41 +344,39 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private void sendCurrentActionsAsMultiActionToTarget(final Target target) {
         final List<Action> actions = controllerManagement.findActiveActionsWithHighestWeight(target.getControllerId(), MAX_ACTION_COUNT);
 
-        final Set<DistributionSet> distributionSets = actions.stream().map(Action::getDistributionSet).collect(Collectors.toSet());
-        final Map<Long, Map<SoftwareModule, List<SoftwareModuleMetadata>>> softwareModulesPerDistributionSet = distributionSets
-                .stream().collect(Collectors.toMap(DistributionSet::getId, this::getSoftwareModulesWithMetadata));
+        // gets all software modules for all action at once
+        final Set<Long> allSmIds = actions.stream()
+                .map(Action::getDistributionSet)
+                .flatMap(ds -> ds.getModules().stream())
+                .map(SoftwareModule::getId)
+                .collect(Collectors.toSet());
+        final Map<Long, List<SoftwareModuleMetadata>> getSoftwareModuleMetadata =
+                allSmIds.isEmpty() ? Collections.emptyMap() : controllerManagement.findTargetVisibleMetaDataBySoftwareModuleId(allSmIds);
 
-        amqpMessageDispatcherService.sendMultiActionRequestToTarget(
-                target.getTenant(), target, actions,
-                action -> softwareModulesPerDistributionSet.get(action.getDistributionSet().getId()));
+        amqpMessageDispatcherService.sendMultiActionRequestToTarget(target, actions, module -> getSoftwareModuleMetadata.get(module.getId()));
     }
 
     private void sendOldestActionToTarget(final Target target) {
         final Optional<Action> actionOptional = controllerManagement.findActiveActionWithHighestWeight(target.getControllerId());
-
         if (actionOptional.isEmpty()) {
             return;
         }
 
         final Action action = actionOptional.get();
         if (action.isCancelingOrCanceled()) {
-            amqpMessageDispatcherService.sendCancelMessageToTarget(target.getTenant(), target.getControllerId(),
-                    action.getId(), target.getAddress());
+            amqpMessageDispatcherService.sendCancelMessageToTarget(
+                    target.getTenant(), target.getControllerId(), action.getId(), target.getAddress());
         } else {
-            amqpMessageDispatcherService.sendUpdateMessageToTarget(new ActionProperties(action), action.getTarget(),
-                    getSoftwareModulesWithMetadata(action.getDistributionSet()));
+            amqpMessageDispatcherService.sendUpdateMessageToTarget(
+                    new ActionProperties(action), action.getTarget(), getSoftwareModulesWithMetadata(action.getDistributionSet()));
         }
     }
 
     private Map<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModulesWithMetadata(final DistributionSet distributionSet) {
-        final List<Long> smIds = distributionSet.getModules().stream().map(SoftwareModule::getId)
-                .collect(Collectors.toList());
-
-        final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement
-                .findTargetVisibleMetaDataBySoftwareModuleId(smIds);
-
-        return distributionSet.getModules().stream()
-                .collect(Collectors.toMap(sm -> sm, sm -> metadata.getOrDefault(sm.getId(), Collections.emptyList())));
+        final List<Long> smIds = distributionSet.getModules().stream().map(SoftwareModule::getId).collect(Collectors.toList());
+        final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement.findTargetVisibleMetaDataBySoftwareModuleId(smIds);
+        return distributionSet.getModules().stream().collect(Collectors.toMap(
+                Function.identity(), sm -> metadata.getOrDefault(sm.getId(), Collections.emptyList())));
 
     }
 

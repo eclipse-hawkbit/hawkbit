@@ -711,8 +711,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .collect(Collectors.toList());
 
         if (!rolloutIds.isEmpty()) {
-            final List<TotalTargetCountActionStatus> resultList = actionRepository
-                    .getStatusCountByRolloutId(rolloutIds);
+            final List<TotalTargetCountActionStatus> resultList = actionRepository.getStatusCountByRolloutIds(rolloutIds);
             final Map<Long, List<TotalTargetCountActionStatus>> fromDb = resultList.stream()
                     .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
 

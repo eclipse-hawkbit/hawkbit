@@ -33,40 +33,37 @@ public interface SoftwareModuleMetadataRepository
         JpaSpecificationExecutor<JpaSoftwareModuleMetadata> {
 
     /**
-     * Locates the meta data entries that match the given software module ID and
-     * target visibility flag.
+     * Locates the meta-data entries that match the given software module ID and target visibility flag.
      *
-     * @param page The pagination parameters.
      * @param moduleId The ID of the software module.
      * @param targetVisible The target visibility flag.
-     * @return A {@link Page} with the matching meta data entries.
+     * @param page The pagination parameters.
+     * @return A {@link Page} with the matching meta-data entries.
      */
-    Page<JpaSoftwareModuleMetadata> findBySoftwareModuleIdAndTargetVisible(Pageable page, Long moduleId,
-            boolean targetVisible);
+    Page<JpaSoftwareModuleMetadata> findBySoftwareModuleIdAndTargetVisible(
+            @Param("moduleId") Long moduleId, @Param("targetVisible") boolean targetVisible, Pageable page);
 
     /**
-     * Locates the meta data entries that match the given software module IDs
-     * and target visibility flag.
+     * Locates the meta-data entries that match the given software module IDs and target visibility flag.
      * <p/>
      * No access control applied
      *
-     * @param page The pagination parameters.
      * @param moduleId List of software module IDs.
      * @param targetVisible The target visibility flag.
-     * @return A {@link Page} with the matching meta data entries.
+     * @param page The pagination parameters.
+     * @return A {@link Page} with the matching meta-data entries.
      */
     @Query("SELECT smd.softwareModule.id, smd FROM JpaSoftwareModuleMetadata smd WHERE smd.softwareModule.id IN :moduleId AND smd.targetVisible = :targetVisible")
-    Page<Object[]> findBySoftwareModuleIdInAndTargetVisible(Pageable page, @Param("moduleId") Collection<Long> moduleId,
-            @Param("targetVisible") boolean targetVisible);
+    Page<Object[]> findBySoftwareModuleIdInAndTargetVisible(
+            @Param("moduleId") Collection<Long> moduleId, @Param("targetVisible") boolean targetVisible, Pageable page);
 
     /**
-     * Counts the meta data entries that are associated with the addressed
-     * software module.
+     * Counts the meta-data entries that are associated with the addressed software module.
      * <p/>
      * No access control applied
      *
      * @param moduleId The ID of the software module.
-     * @return The number of meta data entries associated with the software module.
+     * @return The number of meta-data entries associated with the software module.
      */
     long countBySoftwareModuleId(@Param("moduleId") Long moduleId);
 }

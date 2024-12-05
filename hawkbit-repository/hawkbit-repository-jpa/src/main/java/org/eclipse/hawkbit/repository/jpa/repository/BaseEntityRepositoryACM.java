@@ -133,8 +133,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     @Override
     public void deleteByTenant(final String tenant) {
         if (accessController.getAccessRules(AccessController.Operation.DELETE).isPresent()) {
-            throw new InsufficientPermissionException(
-                    "DELETE operation has restriction for given context! deleteAll can't be executed!");
+            throw new InsufficientPermissionException("DELETE operation has restriction for given context! deleteAll can't be executed!");
         }
         repository.deleteByTenant(tenant);
     }
@@ -185,8 +184,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     }
 
     @Override
-    public <S extends T, R> R findBy(final Specification<T> spec,
-            final Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+    public <S extends T, R> R findBy(final Specification<T> spec, final Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
         return repository.findBy(accessController.appendAccessRules(AccessController.Operation.READ, spec), queryFunction);
     }
 
