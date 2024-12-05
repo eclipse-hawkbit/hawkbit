@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -285,6 +286,30 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     @NonNull
     public Class<T> getDomainClass() {
         return repository.getDomainClass();
+    }
+
+    @Override
+    public Optional<T> findOne(final Specification<T> spec, final String entityGraph) {
+        return repository.findOne(
+                accessController.appendAccessRules(AccessController.Operation.READ, spec), entityGraph);
+    }
+
+    @Override
+    public List<T> findAll(final Specification<T> spec, final String entityGraph) {
+        return repository.findAll(
+                accessController.appendAccessRules(AccessController.Operation.READ, spec), entityGraph);
+    }
+
+    @Override
+    public Page<T> findAll(final Specification<T> spec, final String entityGraph, final Pageable pageable) {
+        return repository.findAll(
+                accessController.appendAccessRules(AccessController.Operation.READ, spec), entityGraph, pageable);
+    }
+
+    @Override
+    public List<T> findAll(final Specification<T> spec, final String entityGraph, final Sort sort) {
+        return repository.findAll(
+                accessController.appendAccessRules(AccessController.Operation.READ, spec), entityGraph, sort);
     }
 
     @SuppressWarnings("unchecked")

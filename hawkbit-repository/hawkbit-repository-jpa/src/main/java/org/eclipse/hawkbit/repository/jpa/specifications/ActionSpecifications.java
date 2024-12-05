@@ -78,16 +78,17 @@ public final class ActionSpecifications {
 
     /**
      * Returns active actions by target controller that has null or non-null depending on <code>isNull</code> value.
-     * Fetches action's distribution set.
      *
      * @param controllerId controller id
+     * @param isNull if <code>true</code> return with <code>null</code> weight, otherwise with non-<code>null</code>
      * @return the matching action s.
      */
-    public static Specification<JpaAction> byTargetControllerIdAndActive(final String controllerId) {
+    public static Specification<JpaAction> byTargetControllerIdAndActiveAndWeightIsNull(final String controllerId, final boolean isNull) {
         return (root, query, cb) ->
                 cb.and(
-                    cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId),
-                    cb.equal(root.get(JpaAction_.active), true));
+                        cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId),
+                        cb.equal(root.get(JpaAction_.active), true),
+                        isNull ? cb.isNull(root.get(JpaAction_.weight)) : cb.isNotNull(root.get(JpaAction_.weight)));
     }
 
     public static Specification<JpaAction> byDistributionSetId(final Long distributionSetId) {

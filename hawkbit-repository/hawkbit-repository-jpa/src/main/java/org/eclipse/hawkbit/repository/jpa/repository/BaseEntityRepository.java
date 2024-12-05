@@ -10,16 +10,20 @@
 package org.eclipse.hawkbit.repository.jpa.repository;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
@@ -36,8 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
 @NoRepositoryBean
 @Transactional(readOnly = true)
 public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity>
-        extends PagingAndSortingRepository<T, Long>, CrudRepository<T, Long>, JpaSpecificationExecutor<T>, NoCountSliceRepository<T>,
-        ACMRepository<T> {
+        extends PagingAndSortingRepository<T, Long>, CrudRepository<T, Long>, JpaSpecificationExecutor<T>,
+        JpaSpecificationEntityGraphExecutor<T>, NoCountSliceRepository<T>, ACMRepository<T> {
 
     /**
      * Overrides {@link org.springframework.data.repository.CrudRepository#saveAll(Iterable)} to return a list of created entities instead

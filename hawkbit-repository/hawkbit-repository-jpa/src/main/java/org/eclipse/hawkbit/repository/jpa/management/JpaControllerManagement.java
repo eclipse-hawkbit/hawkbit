@@ -287,12 +287,15 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     public Optional<Action> findActiveActionWithHighestWeight(final String controllerId) {
         return Stream.concat(
                         // get the highest action with weight
-                        actionRepository
-                                .findByTarget_ControllerIdAndActiveIsTrueAndWeightNotNullOrderByWeightDescIdAsc(controllerId, PAGEABLE_1)
-                                .stream(),
+                        actionRepository.findAll(
+                                ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, false),
+                                PageRequest.of(0, 1, Sort.by(Sort.Order.desc(JpaAction_.WEIGHT), Sort.Order.asc(JpaAction_.ID)))).stream(),
                         // get the oldest action without weight
-                        actionRepository.findByTarget_ControllerIdAndActiveIsTrueAndWeightIsNullOrderByIdAsc(controllerId, PAGEABLE_1).stream())
-                .min(Comparator.comparingInt(this::getWeightConsideringDefault).reversed().thenComparing(Action::getId));
+                        actionRepository.findAll(
+                                ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, false),
+                                PageRequest.of(0, 1, Sort.by(Sort.Order.asc(JpaAction_.ID)))).stream())
+                .min(Comparator.comparingInt(this::getWeightConsideringDefault).reversed().thenComparing(Action::getId))
+                .map(Action.class::cast);
     }
 
     @Override
