@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
@@ -32,7 +33,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 /**
  * Implements utility methods for managing {@link Action}s
@@ -103,17 +104,20 @@ public class JpaActionManagement {
     }
 
     protected List<Action> findActiveActionsWithHighestWeightConsideringDefault(final String controllerId, final int maxActionCount) {
-        final Pageable pageable = PageRequest.of(0, maxActionCount);
         return Stream.concat(
                         // get the highest actions with weight
-                        actionRepository
-                                .findFetchDsByTarget_ControllerIdAndActiveIsTrueAndWeightNotNullOrderByWeightDescIdAsc(controllerId, pageable)
-                                .stream(),
+                        actionRepository.findAll(
+                                ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, false),
+                                JpaAction_.GRAPH_ACTION_DS,
+                                PageRequest.of(0, maxActionCount, Sort.by(Sort.Order.desc(JpaAction_.WEIGHT), Sort.Order.asc(JpaAction_.ID)))).stream(),
                         // get the oldest actions without weight
-                        actionRepository.findFetchDsByTarget_ControllerIdAndActiveIsTrueAndWeightIsNullOrderByIdAsc(controllerId, pageable)
-                                .stream())
+                        actionRepository.findAll(
+                                ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, true),
+                                JpaAction_.GRAPH_ACTION_DS,
+                                PageRequest.of(0, maxActionCount, Sort.by(Sort.Order.asc(JpaAction_.ID)))).stream())
                 .sorted(Comparator.comparingInt(this::getWeightConsideringDefault).reversed().thenComparing(Action::getId))
                 .limit(maxActionCount)
+                .map(Action.class::cast)
                 .toList();
     }
 

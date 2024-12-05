@@ -57,14 +57,6 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     Optional<Action> findFirstByTargetIdAndDistributionSetIdAndStatusOrderByIdDesc(
             @Param("target") long targetId, @Param("ds") Long dsId, @Param("status") Action.Status status);
 
-    List<Action> findByTarget_ControllerIdAndActiveIsTrueAndWeightIsNullOrderByIdAsc(String controllerId, Pageable pageable);
-    List<Action> findByTarget_ControllerIdAndActiveIsTrueAndWeightNotNullOrderByWeightDescIdAsc(String controllerId, Pageable pageable);
-
-    @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
-    List<Action> findFetchDsByTarget_ControllerIdAndActiveIsTrueAndWeightIsNullOrderByIdAsc(String controllerId, Pageable pageable);
-    @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
-    List<Action> findFetchDsByTarget_ControllerIdAndActiveIsTrueAndWeightNotNullOrderByWeightDescIdAsc(String controllerId, Pageable pageable);
-
     /**
      * Switches the status of actions from one specific status into another, only if the actions are in a specific status. This should be
      * an atomic operation.

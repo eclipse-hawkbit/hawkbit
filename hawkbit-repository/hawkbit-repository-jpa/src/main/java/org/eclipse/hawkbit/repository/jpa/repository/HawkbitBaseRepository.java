@@ -10,10 +10,15 @@
 package org.eclipse.hawkbit.repository.jpa.repository;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 
@@ -23,11 +28,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Repository implementation that allows findAll with disabled count query.
@@ -36,14 +43,18 @@ import org.springframework.lang.Nullable;
  * @param <ID> the type of the id of the entity the repository manages
  */
 public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpaRepository<T, ID>
-        implements NoCountSliceRepository<T>, ACMRepository<T> {
+        implements JpaSpecificationEntityGraphExecutor<T>, NoCountSliceRepository<T>, ACMRepository<T> {
 
-    public HawkbitBaseRepository(final Class<T> domainClass, final EntityManager em) {
-        super(domainClass, em);
+    private final EntityManager entityManager;
+
+    public HawkbitBaseRepository(final Class<T> domainClass, final EntityManager entityManager) {
+        super(domainClass, entityManager);
+        this.entityManager = entityManager;
     }
 
     public HawkbitBaseRepository(final JpaEntityInformation<T, ?> entityInformation, final EntityManager entityManager) {
         super(entityInformation, entityManager);
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -93,6 +104,32 @@ public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpa
         return count(spec);
     }
 
+    @Override
+    public Optional<T> findOne(final Specification<T> spec, final String entityGraph) {
+        try {
+            return Optional.of(withEntityGraph(getQuery(spec, Sort.unsorted()), entityGraph).setMaxResults(2).getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public List<T> findAll(final Specification<T> spec, final String entityGraph) {
+        return withEntityGraph(getQuery(spec, Sort.unsorted()), entityGraph).getResultList();
+    }
+
+    @Override
+    public Page<T> findAll(final Specification<T> spec, final String entityGraph, final Pageable pageable) {
+        final TypedQuery<T> query = withEntityGraph(getQuery(spec, pageable), entityGraph);
+        return pageable.isUnpaged() ? new PageImpl<>(query.getResultList())
+                : readPage(query, getDomainClass(), pageable, spec);
+    }
+
+    @Override
+    public List<T> findAll(final Specification<T> spec, final String entityGraph, final Sort sort) {
+        return withEntityGraph(getQuery(spec, sort), entityGraph).getResultList();
+    }
+
     @NonNull
     @Override
     public Slice<T> findAllWithoutCount(@Nullable final AccessController.Operation operation, @Nullable Specification<T> spec,
@@ -109,6 +146,11 @@ public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpa
     @Override
     public String toString() {
         return getClass().getSimpleName() + '<' + getDomainClass().getSimpleName() + '>';
+    }
+
+    private TypedQuery<T> withEntityGraph(final TypedQuery<T> query, final String entityGraph) {
+        final EntityGraph<?> graph = ObjectUtils.isEmpty(entityGraph) ? null : entityManager.createEntityGraph(entityGraph);
+        return graph == null ? query : query.setHint("javax.persistence.loadgraph", graph);
     }
 
     private <S extends T> Page<S> readPageWithoutCount(final TypedQuery<S> query, final Pageable pageable) {
