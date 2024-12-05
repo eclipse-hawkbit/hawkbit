@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.builder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -51,18 +52,20 @@ public abstract class AbstractActionStatusCreate<T> {
     public T messages(final Collection<String> messages) {
         if (this.messages == null) {
             // create modifiable list
-            this.messages = messages.stream().map(String::strip).collect(Collectors.toCollection(ArrayList::new));
+            this.messages = messages.stream().filter(Objects::nonNull).map(String::strip).collect(Collectors.toCollection(ArrayList::new));
         } else {
-            this.messages.addAll(messages.stream().map(String::strip).toList());
+            this.messages.addAll(messages.stream().filter(Objects::nonNull).map(String::strip).toList());
         }
         return (T) this;
     }
 
     public T message(final String message) {
-        if (this.messages == null) {
-            this.messages = new ArrayList<>();
+        if (message != null) {
+            if (this.messages == null) {
+                this.messages = new ArrayList<>();
+            }
+            this.messages.add(message.strip());
         }
-        this.messages.add(message.strip());
         return (T) this;
     }
 
