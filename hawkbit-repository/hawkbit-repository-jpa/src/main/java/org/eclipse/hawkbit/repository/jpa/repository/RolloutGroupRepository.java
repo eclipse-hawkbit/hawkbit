@@ -35,8 +35,7 @@ public interface RolloutGroupRepository
      * Retrieves all {@link RolloutGroup} referring a specific rollout in the
      * order of creating them. ID ASC.
      *
-     * @param rollout
-     *            the rollout the rolloutgroups belong to
+     * @param rollout the rollout the rolloutgroups belong to
      * @return the rollout groups belonging to a rollout ordered by ID ASC.
      */
     List<JpaRolloutGroup> findByRolloutOrderByIdAsc(JpaRollout rollout);
@@ -45,10 +44,8 @@ public interface RolloutGroupRepository
      * Retrieves all {@link RolloutGroup} referring a specific rollout in a
      * specific {@link RolloutGroupStatus}.
      *
-     * @param rollout
-     *            the rollout the rolloutgroup belong to
-     * @param status
-     *            the status of the rollout groups
+     * @param rollout the rollout the rolloutgroup belong to
+     * @param status the status of the rollout groups
      * @return the rollout groups belonging to a rollout in a specific status
      */
     List<JpaRolloutGroup> findByRolloutAndStatus(Rollout rollout, RolloutGroupStatus status);
@@ -60,12 +57,9 @@ public interface RolloutGroupRepository
      * rollout-management to find out rolloutgroups which are in specific
      * states.
      *
-     * @param rolloutId
-     *            the ID of the rollout the rolloutgroup belong to
-     * @param rolloutGroupStatus1
-     *            the status of the rollout groups
-     * @param rolloutGroupStatus2
-     *            the status of the rollout groups
+     * @param rolloutId the ID of the rollout the rolloutgroup belong to
+     * @param rolloutGroupStatus1 the status of the rollout groups
+     * @param rolloutGroupStatus2 the status of the rollout groups
      * @return the count of rollout groups belonging to a rollout in specific
      *         status
      */
@@ -75,34 +69,27 @@ public interface RolloutGroupRepository
             @Param("status2") RolloutGroupStatus rolloutGroupStatus2);
 
     /**
-     *
      * Counts all rollout-groups refering to a given {@link Rollout} by its ID
      * and groups which not having the given status.
      *
-     * @param rolloutId
-     *            the ID of the rollout refering the groups
-     * @param status1
-     *            the status which the groups should not have
-     * @param status2
-     *            the status which the groups should not have
-     * @param status2
-     *            the status which the groups should not have
+     * @param rolloutId the ID of the rollout refering the groups
+     * @param status1 the status which the groups should not have
+     * @param status2 the status which the groups should not have
+     * @param status2 the status which the groups should not have
      * @return count of rollout-groups referning a rollout and not in the given
      *         states
      */
     long countByRolloutIdAndStatusNotAndStatusNotAndStatusNot(@Param("rolloutId") long rolloutId,
-            @Param("status1") JpaRolloutGroup.RolloutGroupStatus status1,
-            @Param("status2") JpaRolloutGroup.RolloutGroupStatus status2,
-            @Param("status3") JpaRolloutGroup.RolloutGroupStatus status3);
+            @Param("status1") RolloutGroup.RolloutGroupStatus status1,
+            @Param("status2") RolloutGroup.RolloutGroupStatus status2,
+            @Param("status3") RolloutGroup.RolloutGroupStatus status3);
 
     /**
      * Retrieves all {@link RolloutGroup} for a specific parent in a specific
      * status. Retrieves the child rolloutgroup for a specific status.
      *
-     * @param rolloutGroupId
-     *            the rolloutgroupId to find the parents
-     * @param status
-     *            the status of the rolloutgroups
+     * @param rolloutGroupId the rolloutgroupId to find the parents
+     * @param status the status of the rolloutgroups
      * @return The child {@link RolloutGroup}s in a specific status
      */
     @Query("SELECT g FROM JpaRolloutGroup g WHERE g.parent.id=:rolloutGroupId and g.status=:status")
@@ -113,24 +100,20 @@ public interface RolloutGroupRepository
      * Updates all {@link RolloutGroup#getStatus()} of children for given
      * parent.
      *
-     * @param parent
-     *            the parent rolloutgroup
-     * @param status
-     *            the status of the rolloutgroups
+     * @param parent the parent rolloutgroup
+     * @param status the status of the rolloutgroups
      */
     @Modifying
     @Transactional
     @Query("UPDATE JpaRolloutGroup g SET g.status = :status WHERE g.parent = :parent")
-    void setStatusForCildren(@Param("status") RolloutGroupStatus status, @Param("parent") RolloutGroup parent);
+    void setStatusForChildren(@Param("status") RolloutGroupStatus status, @Param("parent") RolloutGroup parent);
 
     /**
      * Retrieves all {@link RolloutGroup} for a specific rollout and status not
      * having ordered by ID DESC, latest top.
      *
-     * @param rollout
-     *            the rollout the rolloutgroup belong to
-     * @param notStatus
-     *            the status which the rolloutgroup should not have
+     * @param rollout the rollout the rolloutgroup belong to
+     * @param notStatus the status which the rolloutgroup should not have
      * @return rolloutgroup referring to a rollout and not having a specific
      *         status ordered by ID DESC.
      */
@@ -140,10 +123,8 @@ public interface RolloutGroupRepository
      * Retrieves all {@link RolloutGroup}s for a specific rollout and status not
      * having.
      *
-     * @param rollout
-     *            the rollout the rolloutgroup belong to
-     * @param status
-     *            the status which the rolloutgroup should not have
+     * @param rollout the rollout the rolloutgroup belong to
+     * @param status the status which the rolloutgroup should not have
      * @return rolloutgroup referring to a rollout and not having a specific
      *         status.
      */
@@ -152,10 +133,8 @@ public interface RolloutGroupRepository
     /**
      * Retrieves all {@link RolloutGroup} for a specific rollout.
      *
-     * @param rolloutId
-     *            the ID of the rollout to find the rollout groups
-     * @param page
-     *            the page request to sort, limit the result
+     * @param rolloutId the ID of the rollout to find the rollout groups
+     * @param page the page request to sort, limit the result
      * @return a page of found {@link RolloutGroup} or {@code empty}.
      */
     Page<JpaRolloutGroup> findByRolloutId(Long rolloutId, Pageable page);
@@ -163,9 +142,7 @@ public interface RolloutGroupRepository
     /**
      * Counts all {@link RolloutGroup} for a specific rollout.
      *
-     * @param rolloutId
-     *            the ID of the rollout to find the rollout groups
-     *
+     * @param rolloutId the ID of the rollout to find the rollout groups
      * @return the amount of found {@link RolloutGroup}s.
      */
     long countByRolloutId(Long rolloutId);

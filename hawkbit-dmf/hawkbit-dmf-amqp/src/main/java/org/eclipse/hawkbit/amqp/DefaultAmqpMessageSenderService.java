@@ -29,7 +29,7 @@ public class DefaultAmqpMessageSenderService extends BaseAmqpService implements 
 
     /**
      * Constructor.
-     * 
+     *
      * @param rabbitTemplate the AMQP template
      */
     public DefaultAmqpMessageSenderService(final RabbitTemplate rabbitTemplate) {
@@ -61,5 +61,4 @@ public class DefaultAmqpMessageSenderService extends BaseAmqpService implements 
     protected static boolean isCorrelationIdEmpty(final Message message) {
         return !StringUtils.hasLength(message.getMessageProperties().getCorrelationId());
     }
-
 }

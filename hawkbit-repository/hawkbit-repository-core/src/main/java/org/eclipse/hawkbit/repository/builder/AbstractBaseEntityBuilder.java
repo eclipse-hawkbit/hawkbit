@@ -19,5 +19,4 @@ public abstract class AbstractBaseEntityBuilder implements Identifiable<Long> {
     public Long getId() {
         return id;
     }
-
 }

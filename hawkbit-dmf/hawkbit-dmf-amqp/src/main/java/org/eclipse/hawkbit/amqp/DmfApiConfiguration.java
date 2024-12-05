@@ -19,6 +19,4 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @ComponentScan
 @Import(AmqpConfiguration.class)
-public class DmfApiConfiguration {
-
-}
+public class DmfApiConfiguration {}

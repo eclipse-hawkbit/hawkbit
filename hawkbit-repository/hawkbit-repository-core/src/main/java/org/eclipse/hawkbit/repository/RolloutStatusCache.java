@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import jakarta.validation.constraints.NotNull;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
@@ -31,26 +32,21 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.event.EventListener;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-
 /**
  * Internal cache for Rollout status.
- *
  */
 public class RolloutStatusCache {
 
     private static final String CACHE_RO_NAME = "RolloutStatus";
     private static final String CACHE_GR_NAME = "RolloutGroupStatus";
     private static final long DEFAULT_SIZE = 50_000;
-    
+
     private final TenancyCacheManager cacheManager;
     private final TenantAware tenantAware;
 
     /**
-     * @param tenantAware
-     *            to get current tenant
-     * @param size
-     *            the maximum size of the cache
+     * @param tenantAware to get current tenant
+     * @param size the maximum size of the cache
      */
     public RolloutStatusCache(final TenantAware tenantAware, final long size) {
         this.tenantAware = tenantAware;
@@ -63,8 +59,7 @@ public class RolloutStatusCache {
     }
 
     /**
-     * @param tenantAware
-     *            to get current tenant
+     * @param tenantAware to get current tenant
      */
     public RolloutStatusCache(final TenantAware tenantAware) {
         this(tenantAware, DEFAULT_SIZE);
@@ -74,8 +69,7 @@ public class RolloutStatusCache {
      * Retrieves cached list of {@link TotalTargetCountActionStatus} of
      * {@link Rollout}s.
      *
-     * @param rollouts
-     *            rolloutIds to retrieve cache entries for
+     * @param rollouts rolloutIds to retrieve cache entries for
      * @return map of cached entries
      */
     public Map<Long, List<TotalTargetCountActionStatus>> getRolloutStatus(final List<Long> rollouts) {
@@ -86,8 +80,7 @@ public class RolloutStatusCache {
      * Retrieves cached list of {@link TotalTargetCountActionStatus} of
      * {@link Rollout}s.
      *
-     * @param rolloutId
-     *            to retrieve cache entries for
+     * @param rolloutId to retrieve cache entries for
      * @return map of cached entries
      */
     public List<TotalTargetCountActionStatus> getRolloutStatus(final Long rolloutId) {
@@ -98,8 +91,7 @@ public class RolloutStatusCache {
      * Retrieves cached list of {@link TotalTargetCountActionStatus} of
      * {@link RolloutGroup}s.
      *
-     * @param rolloutGroups
-     *            rolloutGroupsIds to retrieve cache entries for
+     * @param rolloutGroups rolloutGroupsIds to retrieve cache entries for
      * @return map of cached entries
      */
     public Map<Long, List<TotalTargetCountActionStatus>> getRolloutGroupStatus(final List<Long> rolloutGroups) {
@@ -110,8 +102,7 @@ public class RolloutStatusCache {
      * Retrieves cached list of {@link TotalTargetCountActionStatus} of
      * {@link RolloutGroup}.
      *
-     * @param groupId
-     *            to retrieve cache entries for
+     * @param groupId to retrieve cache entries for
      * @return map of cached entries
      */
     public List<TotalTargetCountActionStatus> getRolloutGroupStatus(final Long groupId) {
@@ -122,8 +113,7 @@ public class RolloutStatusCache {
      * Put map of {@link TotalTargetCountActionStatus} for multiple
      * {@link Rollout}s into cache.
      *
-     * @param put
-     *            map of cached entries
+     * @param put map of cached entries
      */
     public void putRolloutStatus(final Map<Long, List<TotalTargetCountActionStatus>> put) {
         putIntoCache(put, getRolloutStatusCache());
@@ -133,23 +123,18 @@ public class RolloutStatusCache {
      * Put {@link TotalTargetCountActionStatus} for one {@link Rollout}s into
      * cache.
      *
-     * @param rolloutId
-     *            the cache entries belong to
-     * @param status
-     *            list to cache
-     *
+     * @param rolloutId the cache entries belong to
+     * @param status list to cache
      */
     public void putRolloutStatus(final Long rolloutId, final List<TotalTargetCountActionStatus> status) {
         putIntoCache(rolloutId, status, getRolloutStatusCache());
     }
 
-
     /**
      * Put {@link TotalTargetCountActionStatus} for multiple
      * {@link RolloutGroup}s into cache.
      *
-     * @param put
-     *            map of cached entries
+     * @param put map of cached entries
      */
     public void putRolloutGroupStatus(final Map<Long, List<TotalTargetCountActionStatus>> put) {
         putIntoCache(put, getGroupStatusCache());
@@ -159,39 +144,11 @@ public class RolloutStatusCache {
      * Put {@link TotalTargetCountActionStatus} for multiple
      * {@link RolloutGroup}s into cache.
      *
-     * @param groupId
-     *            the cache entries belong to
-     * @param status
-     *            list to cache
+     * @param groupId the cache entries belong to
+     * @param status list to cache
      */
     public void putRolloutGroupStatus(final Long groupId, final List<TotalTargetCountActionStatus> status) {
         putIntoCache(groupId, status, getGroupStatusCache());
-    }
-
-    private Map<Long, List<TotalTargetCountActionStatus>> retrieveFromCache(final List<Long> ids,
-            @NotNull final Cache cache) {
-        return ids.stream().map(id -> cache.get(id, CachedTotalTargetCountActionStatus.class)).filter(Objects::nonNull)
-                .collect(Collectors.toMap(CachedTotalTargetCountActionStatus::getId,
-                        CachedTotalTargetCountActionStatus::getStatus));
-    }
-
-    private List<TotalTargetCountActionStatus> retrieveFromCache(final Long id, @NotNull final Cache cache) {
-        final CachedTotalTargetCountActionStatus cacheItem = cache.get(id, CachedTotalTargetCountActionStatus.class);
-
-        if (cacheItem == null) {
-            return Collections.emptyList();
-        }
-
-        return cacheItem.getStatus();
-    }
-
-    private void putIntoCache(final Long id, final List<TotalTargetCountActionStatus> status,
-            @NotNull final Cache cache) {
-        cache.put(id, new CachedTotalTargetCountActionStatus(id, status));
-    }
-
-    private void putIntoCache(final Map<Long, List<TotalTargetCountActionStatus>> put, @NotNull final Cache cache) {
-        put.forEach((k, v) -> cache.put(k, new CachedTotalTargetCountActionStatus(k, v)));
     }
 
     @EventListener(classes = AbstractActionEvent.class)
@@ -235,11 +192,36 @@ public class RolloutStatusCache {
      * Evicts all caches for a given tenant. All caches under a certain tenant
      * gets evicted.
      *
-     * @param tenant
-     *            the tenant to evict caches
+     * @param tenant the tenant to evict caches
      */
     public void evictCaches(final String tenant) {
         cacheManager.evictCaches(tenant);
+    }
+
+    private Map<Long, List<TotalTargetCountActionStatus>> retrieveFromCache(final List<Long> ids,
+            @NotNull final Cache cache) {
+        return ids.stream().map(id -> cache.get(id, CachedTotalTargetCountActionStatus.class)).filter(Objects::nonNull)
+                .collect(Collectors.toMap(CachedTotalTargetCountActionStatus::getId,
+                        CachedTotalTargetCountActionStatus::getStatus));
+    }
+
+    private List<TotalTargetCountActionStatus> retrieveFromCache(final Long id, @NotNull final Cache cache) {
+        final CachedTotalTargetCountActionStatus cacheItem = cache.get(id, CachedTotalTargetCountActionStatus.class);
+
+        if (cacheItem == null) {
+            return Collections.emptyList();
+        }
+
+        return cacheItem.getStatus();
+    }
+
+    private void putIntoCache(final Long id, final List<TotalTargetCountActionStatus> status,
+            @NotNull final Cache cache) {
+        cache.put(id, new CachedTotalTargetCountActionStatus(id, status));
+    }
+
+    private void putIntoCache(final Map<Long, List<TotalTargetCountActionStatus>> put, @NotNull final Cache cache) {
+        put.forEach((k, v) -> cache.put(k, new CachedTotalTargetCountActionStatus(k, v)));
     }
 
     private @NotNull Cache getRolloutStatusCache() {
@@ -251,6 +233,7 @@ public class RolloutStatusCache {
     }
 
     private static final class CachedTotalTargetCountActionStatus {
+
         private final long id;
         private final List<TotalTargetCountActionStatus> status;
 

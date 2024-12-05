@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link ActionStatus} repository.
- *
  */
 @Transactional(readOnly = true)
 public interface ActionStatusRepository extends BaseEntityRepository<JpaActionStatus> {
@@ -53,17 +52,11 @@ public interface ActionStatusRepository extends BaseEntityRepository<JpaActionSt
      * <p/>
      * No access control applied
      *
-     * @param pageable
-     *            for page configuration
-     * @param actionId
-     *            for which to get the status messages
-     * @param filter
-     *            is the SQL like pattern to use for filtering out or excluding
-     *            the messages
-     *
+     * @param actionId for which to get the status messages
+     * @param filter is the SQL like pattern to use for filtering out or excluding the messages
+     * @param pageable for page configuration
      * @return Page with found status messages.
      */
     @Query("SELECT message FROM JpaActionStatus actionstatus JOIN actionstatus.messages message WHERE actionstatus.action.id = :actionId AND message NOT LIKE :filter")
-    Page<String> findMessagesByActionIdAndMessageNotLike(Pageable pageable, @Param("actionId") Long actionId,
-            @Param("filter") String filter);
+    Page<String> findMessagesByActionIdAndMessageNotLike(@Param("actionId") Long actionId, @Param("filter") String filter, Pageable pageable);
 }

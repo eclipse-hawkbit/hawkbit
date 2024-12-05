@@ -21,7 +21,7 @@ import org.springframework.data.repository.core.support.RepositoryFactorySupport
  * A {@link JpaRepositoryFactoryBean} extension that allow injection of custom
  * repository factories by using a {@link BaseRepositoryTypeProvider}
  * implementation, allows injecting different base repository implementations based on repository type
- * 
+ *
  * @param <T>
  * @param <S>
  * @param <ID>
@@ -36,8 +36,7 @@ public class CustomBaseRepositoryFactoryBean<T extends Repository<S, ID>, S, ID>
      * Creates a new {@link JpaRepositoryFactoryBean} for the given repository
      * interface.
      *
-     * @param repositoryInterface
-     *            must not be {@literal null}.
+     * @param repositoryInterface must not be {@literal null}.
      */
     public CustomBaseRepositoryFactoryBean(final Class<? extends T> repositoryInterface) {
         super(repositoryInterface);

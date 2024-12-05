@@ -34,6 +34,7 @@ public class DmfActionUpdateStatus {
 
     private final Long actionId;
     private final DmfActionStatus actionStatus;
+    private final long timestamp;
 
     @JsonProperty
     private Long softwareModuleId;
@@ -46,9 +47,14 @@ public class DmfActionUpdateStatus {
     private Integer code;
 
     public DmfActionUpdateStatus(@JsonProperty(value = "actionId", required = true) final Long actionId,
-            @JsonProperty(value = "actionStatus", required = true) final DmfActionStatus actionStatus) {
+            @JsonProperty(value = "actionStatus", required = true) final DmfActionStatus actionStatus, @JsonProperty(value = "timestamp") final Long timestamp) {
         this.actionId = actionId;
         this.actionStatus = actionStatus;
+        this.timestamp = timestamp != null ? timestamp : System.currentTimeMillis();
+    }
+
+    public DmfActionUpdateStatus(final Long actionId, final DmfActionStatus actionStatus) {
+        this(actionId, actionStatus, null);
     }
 
     @JsonIgnore

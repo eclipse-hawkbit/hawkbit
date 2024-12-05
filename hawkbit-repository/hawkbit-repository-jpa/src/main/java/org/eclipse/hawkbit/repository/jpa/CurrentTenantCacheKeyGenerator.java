@@ -19,13 +19,12 @@ import org.springframework.stereotype.Service;
  * used by spring caching framework to resolve the key-generator. The
  * key-generator must registered as bean so spring can resolve the key-generator
  * by its name.
- * 
+ *
  * When using the {@link Service} annotation e.g. by {@link JpaSystemManagement}
  * the bean registration must be declared by the interface due spring registers
  * the bean by the implemented interfaces. So introduce a single interface for
  * the {@link JpaSystemManagement} implementation to allow it to register the
  * key-generator bean.
- * 
  */
 @FunctionalInterface
 public interface CurrentTenantCacheKeyGenerator {
@@ -33,7 +32,7 @@ public interface CurrentTenantCacheKeyGenerator {
     /**
      * Bean declaration to register a {@code currentTenantKeyGenerator} bean
      * which is used by the caching framework.
-     * 
+     *
      * @return the {@link KeyGenerator} to be used to cache the values of the
      *         current used tenant in the {@link JpaSystemManagement}
      */

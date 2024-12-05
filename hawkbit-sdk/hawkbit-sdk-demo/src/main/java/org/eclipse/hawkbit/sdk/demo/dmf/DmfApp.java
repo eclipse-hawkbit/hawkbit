@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.sdk.demo.dmf;
 
+import java.util.Optional;
+import java.util.concurrent.Executors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.sdk.Controller;
 import org.eclipse.hawkbit.sdk.Tenant;
@@ -25,9 +28,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-
-import java.util.Optional;
-import java.util.concurrent.Executors;
 
 /**
  * Abstract class representing DDI device connecting directly to hawkVit.
@@ -74,7 +74,7 @@ public class DmfApp {
         public void stopOne(@ShellOption("--id") final String controllerId) {
             dmfTenant.getController(controllerId).ifPresentOrElse(
                     DmfController::stop,
-                    () -> log.error("Controller with id " + controllerId + " not found!"));
+                    () -> log.error("Controller with id {} not found!", controllerId));
         }
 
         @ShellMethod(key = "start")

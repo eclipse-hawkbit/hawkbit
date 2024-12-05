@@ -34,8 +34,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ExtendWith({SharedSqlTestDatabaseExtension.class})
+@ExtendWith({ SharedSqlTestDatabaseExtension.class })
 class RestApiDocTest {
+
     private static final String MANAGEMENT_PREFIX = "mgmt";
     private static final String DDI_PREFIX = "ddi";
     private static final String TARGET_DIRECTORY = "content/rest-api/";
@@ -87,6 +88,7 @@ class RestApiDocTest {
 
         ((ObjectNode) rootNode).set("tags", modifiedTagsNode);
     }
+
     private static void removePaths(final JsonNode rootNode, final boolean isMgmt) {
         final ObjectNode pathsNode = (ObjectNode) rootNode.get("paths");
         final List<String> fieldsToRemove = new ArrayList<>();

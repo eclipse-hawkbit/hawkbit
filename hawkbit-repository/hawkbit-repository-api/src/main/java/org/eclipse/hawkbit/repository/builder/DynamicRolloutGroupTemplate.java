@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.builder;
 
 import jakarta.validation.constraints.NotNull;
+
 import lombok.Builder;
 import lombok.Data;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;

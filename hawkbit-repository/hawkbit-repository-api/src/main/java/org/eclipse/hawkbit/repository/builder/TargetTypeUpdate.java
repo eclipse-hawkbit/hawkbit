@@ -9,35 +9,33 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import jakarta.validation.constraints.Size;
+
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetType;
-
-import jakarta.validation.constraints.Size;
+import org.eclipse.hawkbit.repository.model.Type;
 
 /**
  * Builder to update an existing {@link TargetType} entry. Defines all
  * fields that can be updated.
- *
  */
 public interface TargetTypeUpdate {
+
     /**
-     * @param description
-     *            for {@link TargetType#getDescription()}
+     * @param description for {@link TargetType#getDescription()}
      * @return updated builder instance
      */
     TargetTypeUpdate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
-     * @param colour
-     *            for {@link TargetType#getColour()}
+     * @param colour for {@link TargetType#getColour()}
      * @return updated builder instance
      */
-    TargetTypeUpdate colour(@Size(max = TargetType.COLOUR_MAX_SIZE) String colour);
+    TargetTypeUpdate colour(@Size(max = Type.COLOUR_MAX_SIZE) String colour);
 
     /**
-     * @param name
-     *            Name
+     * @param name Name
      * @return updated builder instance
      */
-    TargetTypeUpdate name(@Size(max = TargetType.NAME_MAX_SIZE) String name);
+    TargetTypeUpdate name(@Size(max = NamedEntity.NAME_MAX_SIZE) String name);
 }

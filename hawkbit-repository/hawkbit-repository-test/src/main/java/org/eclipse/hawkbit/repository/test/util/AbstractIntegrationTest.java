@@ -73,9 +73,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.bus.ServiceMatcher;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.auditing.AuditingHandler;
@@ -93,10 +93,10 @@ import org.springframework.test.context.TestPropertySource;
 
 @Slf4j
 @ActiveProfiles({ "test" })
-@ExtendWith({ JUnitTestLoggerExtension.class , SharedSqlTestDatabaseExtension.class })
+@ExtendWith({ JUnitTestLoggerExtension.class, SharedSqlTestDatabaseExtension.class })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
-@SpringBootTest
-@ContextConfiguration(classes = { TestConfiguration.class})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@ContextConfiguration(classes = { TestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
 // destroy the context after each test class because otherwise we get problem
 // when context is
@@ -106,15 +106,13 @@ import org.springframework.test.context.TestPropertySource;
 // Cleaning repository will fire "delete" events. We won't count them to the
 // test execution. So, the order execution between EventVerifier and Cleanup is
 // important!
-@TestExecutionListeners(listeners = { EventVerifier.class, CleanupTestExecutionListener.class }, 
+@TestExecutionListeners(listeners = { EventVerifier.class, CleanupTestExecutionListener.class },
         mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
 public abstract class AbstractIntegrationTest {
 
     protected static final Pageable PAGE = PageRequest.of(0, 500, Sort.by(Direction.ASC, "id"));
-
     protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
-
     protected static final int DEFAULT_TEST_WEIGHT = 500;
 
     /**
@@ -124,81 +122,56 @@ public abstract class AbstractIntegrationTest {
      * {@link SystemManagement#getTenantMetadata()};
      */
     protected static final int DEFAULT_DS_TYPES = RepositoryConstants.DEFAULT_DS_TYPES_IN_TENANT + 1;
-
     @Autowired
     protected EntityFactory entityFactory;
-
     @Autowired
     protected SoftwareModuleManagement softwareModuleManagement;
-
     @Autowired
     protected SoftwareModuleTypeManagement softwareModuleTypeManagement;
-
     @Autowired
     protected DistributionSetManagement distributionSetManagement;
-
     @Autowired
     protected DistributionSetTypeManagement distributionSetTypeManagement;
-
     @Autowired
     protected ControllerManagement controllerManagement;
-
     @Autowired
     protected TargetManagement targetManagement;
-
     @Autowired
     protected TargetTypeManagement targetTypeManagement;
-
     @Autowired
     protected TargetFilterQueryManagement targetFilterQueryManagement;
-
     @Autowired
     protected TargetTagManagement targetTagManagement;
-
     @Autowired
     protected DistributionSetTagManagement distributionSetTagManagement;
-
     @Autowired
     protected DeploymentManagement deploymentManagement;
-
     @Autowired
     protected ConfirmationManagement confirmationManagement;
     @Autowired
     protected DistributionSetInvalidationManagement distributionSetInvalidationManagement;
-
     @Autowired
     protected ArtifactManagement artifactManagement;
-
     @Autowired
     protected AuditingHandler auditingHandler;
-
     @Autowired
     protected TenantAware tenantAware;
-
     @Autowired
     protected SystemManagement systemManagement;
-
     @Autowired
     protected TenantConfigurationManagement tenantConfigurationManagement;
-
     @Autowired
     protected RolloutManagement rolloutManagement;
-
     @Autowired
     protected RolloutHandler rolloutHandler;
-
     @Autowired
     protected RolloutGroupManagement rolloutGroupManagement;
-
     @Autowired
     protected SystemSecurityContext systemSecurityContext;
-
     @Autowired
     protected ArtifactRepository binaryArtifactRepository;
-
     @Autowired
     protected TenantAwareCacheManager cacheManager;
-
     @Autowired
     protected QuotaManagement quotaManagement;
 
@@ -210,12 +183,113 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected TestdataFactory testdataFactory;
-
     @Autowired
     protected ServiceMatcher serviceMatcher;
-
     @Autowired
     protected ApplicationEventPublisher eventPublisher;
+    private static final String ARTIFACT_DIRECTORY = createTempDir();
+
+    @BeforeAll
+    public static void beforeClass() {
+        System.setProperty("org.eclipse.hawkbit.repository.file.path", ARTIFACT_DIRECTORY);
+    }
+
+    @AfterAll
+    public static void afterClass() {
+        if (new File(ARTIFACT_DIRECTORY).exists()) {
+            try {
+                FileUtils.deleteDirectory(new File(ARTIFACT_DIRECTORY));
+            } catch (final IOException | IllegalArgumentException e) {
+                log.warn("Cannot delete file-directory", e);
+            }
+        }
+    }
+
+    @BeforeEach
+    public void beforeAll() throws Exception {
+
+        final String description = "Updated description.";
+
+        osType = SecurityContextSwitch
+                .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
+        osType = SecurityContextSwitch.runAsPrivileged(() -> softwareModuleTypeManagement
+                .update(entityFactory.softwareModuleType().update(osType.getId()).description(description)));
+
+        appType = SecurityContextSwitch.runAsPrivileged(
+                () -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_APP, Integer.MAX_VALUE));
+        appType = SecurityContextSwitch.runAsPrivileged(() -> softwareModuleTypeManagement
+                .update(entityFactory.softwareModuleType().update(appType.getId()).description(description)));
+
+        runtimeType = SecurityContextSwitch
+                .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
+        runtimeType = SecurityContextSwitch.runAsPrivileged(() -> softwareModuleTypeManagement
+                .update(entityFactory.softwareModuleType().update(runtimeType.getId()).description(description)));
+
+        standardDsType = SecurityContextSwitch.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
+
+        // publish the reset counter market event to reset the counters after
+        // setup. The setup is transparent by the test and its @ExpectedEvent
+        // counting so we reset the counter here after the setup. Note that this
+        // approach is only working when using a single-thread executor in the
+        // ApplicationEventMultiCaster which the TestConfiguration is doing so
+        // the order of the events keep the same.
+        EventVerifier.publishResetMarkerEvent(eventPublisher);
+
+    }
+
+    @AfterEach
+    public void cleanUp() {
+        if (new File(ARTIFACT_DIRECTORY).exists()) {
+            try {
+                FileUtils.cleanDirectory(new File(ARTIFACT_DIRECTORY));
+            } catch (final IOException | IllegalArgumentException e) {
+                log.warn("Cannot cleanup file-directory", e);
+            }
+        }
+    }
+
+    /**
+     * Gets a valid cron expression describing a schedule with a single
+     * maintenance window, starting specified number of minutes after current
+     * time.
+     *
+     * @param minutesToAdd is the number of minutes after the current time
+     * @return {@link String} containing a valid cron expression.
+     */
+    protected static String getTestSchedule(final int minutesToAdd) {
+        ZonedDateTime currentTime = ZonedDateTime.now();
+        currentTime = currentTime.plusMinutes(minutesToAdd);
+        return String.format("%d %d %d %d %d ? %d", currentTime.getSecond(), currentTime.getMinute(),
+                currentTime.getHour(), currentTime.getDayOfMonth(), currentTime.getMonthValue(), currentTime.getYear());
+    }
+
+    protected static String getTestDuration(final int duration) {
+        return String.format("%02d:%02d:00", duration / 60, duration % 60);
+    }
+
+    protected static String getTestTimeZone() {
+        final ZonedDateTime currentTime = ZonedDateTime.now();
+        return currentTime.getOffset().getId().replace("Z", "+00:00");
+    }
+
+    protected static Action getFirstAssignedAction(
+            final DistributionSetAssignmentResult distributionSetAssignmentResult) {
+        return distributionSetAssignmentResult.getAssignedEntity().stream().findFirst()
+                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"));
+    }
+
+    protected static Long getFirstAssignedActionId(
+            final DistributionSetAssignmentResult distributionSetAssignmentResult) {
+        return getFirstAssignedAction(distributionSetAssignmentResult).getId();
+    }
+
+    protected static Target getFirstAssignedTarget(final DistributionSetAssignmentResult assignment) {
+        return getFirstAssignedAction(assignment).getTarget();
+    }
+
+    protected static Comparator<Target> controllerIdComparator() {
+        return (o1, o2) -> o1.getControllerId().equals(o2.getControllerId()) ? 0 : 1;
+    }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId) {
         return assignDistributionSet(dsID, controllerId, ActionType.FORCED);
@@ -286,25 +360,19 @@ public abstract class AbstractIntegrationTest {
      * Test helper method to assign distribution set to a target with a
      * maintenance schedule.
      *
-     * @param dsID
-     *            is the ID for the distribution set being assigned
-     * @param controllerId
-     *            is the ID for the controller to which the distribution set is
-     *            being assigned
-     * @param maintenanceWindowSchedule
-     *            is the cron expression to be used for scheduling the
-     *            maintenance window. Expression has 6 mandatory fields and 1
-     *            last optional field: "second minute hour dayofmonth month
-     *            weekday year"
-     * @param maintenanceWindowDuration
-     *            in HH:mm:ss format specifying the duration of a maintenance
-     *            window, for example 00:30:00 for 30 minutes
-     * @param maintenanceWindowTimeZone
-     *            is the time zone specified as +/-hh:mm offset from UTC, for
-     *            example +02:00 for CET summer time and +00:00 for UTC. The
-     *            start time of a maintenance window calculated based on the
-     *            cron expression is relative to this time zone
-     *
+     * @param dsID is the ID for the distribution set being assigned
+     * @param controllerId is the ID for the controller to which the distribution set is
+     *         being assigned
+     * @param maintenanceWindowSchedule is the cron expression to be used for scheduling the
+     *         maintenance window. Expression has 6 mandatory fields and 1
+     *         last optional field: "second minute hour dayofmonth month
+     *         weekday year"
+     * @param maintenanceWindowDuration in HH:mm:ss format specifying the duration of a maintenance
+     *         window, for example 00:30:00 for 30 minutes
+     * @param maintenanceWindowTimeZone is the time zone specified as +/-hh:mm offset from UTC, for
+     *         example +02:00 for CET summer time and +00:00 for UTC. The
+     *         start time of a maintenance window calculated based on the
+     *         cron expression is relative to this time zone
      * @return result of the assignment as { @link
      *         DistributionSetAssignmentResult}.
      */
@@ -355,10 +423,6 @@ public abstract class AbstractIntegrationTest {
         createTargetMetadata(controllerId, Collections.singletonList(md));
     }
 
-    private void createTargetMetadata(final String controllerId, final List<MetaData> md) {
-        targetManagement.createMetaData(controllerId, md);
-    }
-
     protected Long getOsModule(final DistributionSet ds) {
         return ds.findFirstModuleByType(osType).orElseThrow(NoSuchElementException::new).getId();
     }
@@ -387,120 +451,6 @@ public abstract class AbstractIntegrationTest {
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
     }
 
-    @BeforeEach
-    public void beforeAll() throws Exception {
-
-        final String description = "Updated description.";
-
-        osType = SecurityContextSwitch
-                .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
-        osType = SecurityContextSwitch.runAsPrivileged(() -> softwareModuleTypeManagement
-                .update(entityFactory.softwareModuleType().update(osType.getId()).description(description)));
-
-        appType = SecurityContextSwitch.runAsPrivileged(
-                () -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_APP, Integer.MAX_VALUE));
-        appType = SecurityContextSwitch.runAsPrivileged(() -> softwareModuleTypeManagement
-                .update(entityFactory.softwareModuleType().update(appType.getId()).description(description)));
-
-        runtimeType = SecurityContextSwitch
-                .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
-        runtimeType = SecurityContextSwitch.runAsPrivileged(() -> softwareModuleTypeManagement
-                .update(entityFactory.softwareModuleType().update(runtimeType.getId()).description(description)));
-
-        standardDsType = SecurityContextSwitch.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
-
-        // publish the reset counter market event to reset the counters after
-        // setup. The setup is transparent by the test and its @ExpectedEvent
-        // counting so we reset the counter here after the setup. Note that this
-        // approach is only working when using a single-thread executor in the
-        // ApplicationEventMultiCaster which the TestConfiguration is doing so
-        // the order of the events keep the same.
-        EventVerifier.publishResetMarkerEvent(eventPublisher);
-
-    }
-
-    private static final String ARTIFACT_DIRECTORY = createTempDir();
-
-    private static String createTempDir() {
-        try {
-            return Files.createTempDirectory(null).toString() + "/" + RandomStringUtils.randomAlphanumeric(20);
-        } catch (final IOException e) {
-            throw new IllegalStateException("Failed to create temp directory");
-        }
-    }
-
-    @AfterEach
-    public void cleanUp() {
-        if (new File(ARTIFACT_DIRECTORY).exists()) {
-            try {
-                FileUtils.cleanDirectory(new File(ARTIFACT_DIRECTORY));
-            } catch (final IOException | IllegalArgumentException e) {
-                log.warn("Cannot cleanup file-directory", e);
-            }
-        }
-    }
-
-    @BeforeAll
-    public static void beforeClass() {
-        System.setProperty("org.eclipse.hawkbit.repository.file.path", ARTIFACT_DIRECTORY);
-    }
-
-    @AfterAll
-    public static void afterClass() {
-        if (new File(ARTIFACT_DIRECTORY).exists()) {
-            try {
-                FileUtils.deleteDirectory(new File(ARTIFACT_DIRECTORY));
-            } catch (final IOException | IllegalArgumentException e) {
-                log.warn("Cannot delete file-directory", e);
-            }
-        }
-    }
-
-    /**
-     * Gets a valid cron expression describing a schedule with a single
-     * maintenance window, starting specified number of minutes after current
-     * time.
-     *
-     * @param minutesToAdd
-     *            is the number of minutes after the current time
-     *
-     * @return {@link String} containing a valid cron expression.
-     */
-    protected static String getTestSchedule(final int minutesToAdd) {
-        ZonedDateTime currentTime = ZonedDateTime.now();
-        currentTime = currentTime.plusMinutes(minutesToAdd);
-        return String.format("%d %d %d %d %d ? %d", currentTime.getSecond(), currentTime.getMinute(),
-                currentTime.getHour(), currentTime.getDayOfMonth(), currentTime.getMonthValue(), currentTime.getYear());
-    }
-
-    protected static String getTestDuration(final int duration) {
-        return String.format("%02d:%02d:00", duration / 60, duration % 60);
-    }
-
-    protected static String getTestTimeZone() {
-        final ZonedDateTime currentTime = ZonedDateTime.now();
-        return currentTime.getOffset().getId().replace("Z", "+00:00");
-    }
-
-    protected static Action getFirstAssignedAction(
-            final DistributionSetAssignmentResult distributionSetAssignmentResult) {
-        return distributionSetAssignmentResult.getAssignedEntity().stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("expected one assigned action, found none"));
-    }
-
-    protected static Long getFirstAssignedActionId(
-            final DistributionSetAssignmentResult distributionSetAssignmentResult) {
-        return getFirstAssignedAction(distributionSetAssignmentResult).getId();
-    }
-
-    protected static Target getFirstAssignedTarget(final DistributionSetAssignmentResult assignment) {
-        return getFirstAssignedAction(assignment).getTarget();
-    }
-
-    protected static Comparator<Target> controllerIdComparator() {
-        return (o1, o2) -> o1.getControllerId().equals(o2.getControllerId()) ? 0 : 1;
-    }
-
     protected void enableBatchAssignments() {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED, true);
     }
@@ -524,5 +474,17 @@ public abstract class AbstractIntegrationTest {
                 Thread.currentThread().interrupt();
             }
         }
+    }
+
+    private static String createTempDir() {
+        try {
+            return Files.createTempDirectory(null).toString() + "/" + RandomStringUtils.randomAlphanumeric(20);
+        } catch (final IOException e) {
+            throw new IllegalStateException("Failed to create temp directory");
+        }
+    }
+
+    private void createTargetMetadata(final String controllerId, final List<MetaData> md) {
+        targetManagement.createMetaData(controllerId, md);
     }
 }

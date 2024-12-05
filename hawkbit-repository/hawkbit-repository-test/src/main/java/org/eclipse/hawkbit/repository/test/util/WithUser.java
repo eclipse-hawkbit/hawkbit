@@ -9,15 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.test.context.support.WithSecurityContext;
-import org.springframework.security.test.context.support.WithSecurityContextFactory;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.test.context.support.WithSecurityContext;
+import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
 /**
  * Annotation to run test classes or test methods with a specific user with
@@ -31,49 +31,49 @@ public @interface WithUser {
 
     /**
      * Gets the test principal.
-     * 
+     *
      * @return test principal
      */
     String principal() default "TestPrincipal";
 
     /**
      * Gets the test credentials.
-     * 
+     *
      * @return test credentials
      */
     String credentials() default "TestCredentials";
 
     /**
      * Gets the test tenant id.
-     * 
+     *
      * @return test tenant id
      */
-    String tenantId() default "default";
+    String tenantId() default "DEFAULT";
 
     /**
      * Should tenant auto created.
-     * 
+     *
      * @return <code>true</code> = auto create <code>false</code> not create
      */
     boolean autoCreateTenant() default true;
 
     /**
      * Gets the test authorities.
-     * 
+     *
      * @return authorities
      */
     String[] authorities() default {};
 
     /**
      * Gets the test all permissions.
-     * 
+     *
      * @return permissions
      */
     boolean allSpPermissions() default false;
 
     /**
      * Gets the test removeFromAllPermission.
-     * 
+     *
      * @return removeFromAllPermission
      */
     String[] removeFromAllPermission() default {};
@@ -81,6 +81,7 @@ public @interface WithUser {
     boolean controller() default false;
 
     class WithTenantAwareUserSecurityContextFactory implements WithSecurityContextFactory<WithUser> {
+
         @Override
         public SecurityContext createSecurityContext(final WithUser withTenantAwareUser) {
             return new SecurityContextSwitch.WithUserSecurityContext(withTenantAwareUser);

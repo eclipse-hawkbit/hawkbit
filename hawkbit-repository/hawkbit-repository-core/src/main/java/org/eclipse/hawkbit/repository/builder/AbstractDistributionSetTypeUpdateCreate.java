@@ -12,14 +12,10 @@ package org.eclipse.hawkbit.repository.builder;
 import java.util.Collection;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.repository.ValidString;
-import org.springframework.util.StringUtils;
-
 /**
  * Create and update builder DTO.
  *
- * @param <T>
- *            update or create builder interface
+ * @param <T> update or create builder interface
  */
 public abstract class AbstractDistributionSetTypeUpdateCreate<T> extends AbstractTypeUpdateCreate<T> {
 

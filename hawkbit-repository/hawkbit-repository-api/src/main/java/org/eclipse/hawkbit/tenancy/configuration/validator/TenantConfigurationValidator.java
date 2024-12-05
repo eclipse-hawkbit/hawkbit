@@ -9,32 +9,29 @@
  */
 package org.eclipse.hawkbit.tenancy.configuration.validator;
 
+import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
+
 /**
  * base interface for clases which can validate tenant configuration values.
- *
  */
 public interface TenantConfigurationValidator {
 
     /**
      * validates the tenant configuration value
-     * 
-     * @param tenantConfigurationValue
-     *            value which will be validated.
-     * @throws TenantConfigurationValidatorException
-     *             is thrown, when parameter is invalid.
+     *
+     * @param tenantConfigurationValue value which will be validated.
+     * @throws TenantConfigurationValidatorException is thrown, when parameter is invalid.
      */
     default void validate(final Object tenantConfigurationValue) {
-        if (tenantConfigurationValue != null
-                && validateToClass().isAssignableFrom(tenantConfigurationValue.getClass())) {
+        if (tenantConfigurationValue != null && validateToClass().isAssignableFrom(tenantConfigurationValue.getClass())) {
             return;
         }
-        throw new TenantConfigurationValidatorException(
-                "The given configuration value is expected as a " + validateToClass().getSimpleName());
+        throw new TenantConfigurationValidatorException("The given configuration value is expected as a " + validateToClass().getSimpleName());
     }
 
     /**
      * Return the generic class to check the object
-     * 
+     *
      * @return the class to check the value
      */
     default Class<?> validateToClass() {

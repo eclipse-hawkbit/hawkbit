@@ -11,8 +11,7 @@
 package org.eclipse.hawkbit.tenancy.configuration.validator;
 
 /**
- * Specific tenant configuration validator, which validates that the given value
- * is an Integer.
+ * Specific tenant configuration validator, which validates that the given value is an Integer.
  */
 public class TenantConfigurationIntegerValidator implements TenantConfigurationValidator {
 

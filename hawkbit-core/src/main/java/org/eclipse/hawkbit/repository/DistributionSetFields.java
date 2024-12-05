@@ -9,52 +9,52 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import lombok.Getter;
-
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import lombok.Getter;
+
 /**
  * Describing the fields of the DistributionSet model which can be used in the
  * REST API e.g. for sorting etc.
  */
 @Getter
-public enum DistributionSetFields implements FieldNameProvider {
+public enum DistributionSetFields implements RsqlQueryField {
 
     ID("id"),
-    TYPE("type.key"),
+    TYPE("type", "key"),
     NAME("name"),
     DESCRIPTION("description"),
     CREATEDAT("createdAt"),
     LASTMODIFIEDAT("lastModifiedAt"),
     VERSION("version"),
     COMPLETE("complete"),
-    MODULE("modules", SoftwareModuleFields.ID.getFieldName(), SoftwareModuleFields.NAME.getFieldName()),
-    TAG("tags.name"),
+    MODULE("modules", SoftwareModuleFields.ID.getJpaEntityFieldName(), SoftwareModuleFields.NAME.getJpaEntityFieldName()),
+    TAG("tags", "name"),
     METADATA("metadata", new SimpleImmutableEntry<>("key", "value")),
     VALID("valid");
 
-    private final String fieldName;
-    private final Entry<String, String> subEntityMapTuple;
+    private final String jpaEntityFieldName;
     private final List<String> subEntityAttributes;
+    private final Entry<String, String> subEntityMapTuple;
 
-    DistributionSetFields(final String fieldName) {
-        this(fieldName, null, Collections.emptyList());
+    DistributionSetFields(final String jpaEntityFieldName) {
+        this(jpaEntityFieldName, Collections.emptyList(), null);
     }
 
-    DistributionSetFields(final String fieldName, final String... subEntityAttributes) {
-        this(fieldName, null, List.of(subEntityAttributes));
+    DistributionSetFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
+        this(jpaEntityFieldName, List.of(subEntityAttributes), null);
     }
 
-    DistributionSetFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
-        this(fieldName, subEntityMapTuple, Collections.emptyList());
+    DistributionSetFields(final String jpaEntityFieldName, final Entry<String, String> subEntityMapTuple) {
+        this(jpaEntityFieldName, Collections.emptyList(), subEntityMapTuple);
     }
 
-    DistributionSetFields(final String fieldName, final Entry<String, String> subEntityMapTuple, List<String> subEntityAttributes) {
-        this.fieldName = fieldName;
+    DistributionSetFields(final String jpaEntityFieldName, List<String> subEntityAttributes, final Entry<String, String> subEntityMapTuple) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
         this.subEntityMapTuple = subEntityMapTuple;
         this.subEntityAttributes = subEntityAttributes;
     }

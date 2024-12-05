@@ -9,16 +9,16 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import lombok.Getter;
-
 import java.util.Collections;
 import java.util.List;
+
+import lombok.Getter;
 
 /**
  * Sort and search fields for actions.
  */
 @Getter
-public enum ActionFields implements FieldNameProvider, FieldValueConverter<ActionFields> {
+public enum ActionFields implements RsqlQueryField, FieldValueConverter<ActionFields> {
 
     ID("id"),
     STATUS("active"),
@@ -26,29 +26,29 @@ public enum ActionFields implements FieldNameProvider, FieldValueConverter<Actio
     LASTSTATUSCODE("lastActionStatusCode"),
     WEIGHT("weight"),
     TARGET("target",
-            TargetFields.ID.getFieldName(), TargetFields.NAME.getFieldName(),
-            TargetFields.UPDATESTATUS.getFieldName(), TargetFields.IPADDRESS.getFieldName()),
+            TargetFields.ID.getJpaEntityFieldName(), TargetFields.NAME.getJpaEntityFieldName(),
+            TargetFields.UPDATESTATUS.getJpaEntityFieldName(), TargetFields.IPADDRESS.getJpaEntityFieldName()),
     DISTRIBUTIONSET("distributionSet",
-            DistributionSetFields.ID.getFieldName(),
-            DistributionSetFields.NAME.getFieldName(), DistributionSetFields.VERSION.getFieldName(),
-            DistributionSetFields.TYPE.getFieldName()),
-    ROLLOUT("rollout", RolloutFields.ID.getFieldName(), RolloutFields.NAME.getFieldName()),
-    ROLLOUTGROUP("rolloutGroup", RolloutGroupFields.ID.getFieldName(), RolloutGroupFields.NAME.getFieldName()),
+            DistributionSetFields.ID.getJpaEntityFieldName(),
+            DistributionSetFields.NAME.getJpaEntityFieldName(), DistributionSetFields.VERSION.getJpaEntityFieldName(),
+            DistributionSetFields.TYPE.getJpaEntityFieldName()),
+    ROLLOUT("rollout", RolloutFields.ID.getJpaEntityFieldName(), RolloutFields.NAME.getJpaEntityFieldName()),
+    ROLLOUTGROUP("rolloutGroup", RolloutGroupFields.ID.getJpaEntityFieldName(), RolloutGroupFields.NAME.getJpaEntityFieldName()),
     EXTERNALREF("externalRef");
 
     private static final String ACTIVE = "pending";
     private static final String INACTIVE = "finished";
 
-    private final String fieldName;
+    private final String jpaEntityFieldName;
     private final List<String> subEntityAttributes;
 
-    ActionFields(final String fieldName) {
-        this.fieldName = fieldName;
+    ActionFields(final String jpaEntityFieldName) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
         this.subEntityAttributes = Collections.emptyList();
     }
 
-    ActionFields(final String fieldName, final String... subEntityAttributes) {
-        this.fieldName = fieldName;
+    ActionFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
         this.subEntityAttributes = List.of(subEntityAttributes);
     }
 

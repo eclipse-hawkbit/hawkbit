@@ -20,22 +20,18 @@ import java.util.Set;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ScanResult;
-import org.junit.jupiter.api.Test;
-import org.springframework.security.access.prepost.PreAuthorize;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @Feature("Unit Tests - Repository")
 @Story("Security Test")
 public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
 
+    // if some methods are to be excluded
     private static final Set<Method> METHOD_SECURITY_EXCLUSION = new HashSet<>();
-
-    static {
-        METHOD_SECURITY_EXCLUSION.add(getMethod(SystemManagement.class, "currentTenant"));
-    }
 
     @Test
     @Description("Verifies that repository methods are @PreAuthorize annotated")
@@ -62,9 +58,8 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
      * {@link PreAuthorize} annotation for security. Inherited methods are not
      * checked. The following methods are excluded due inherited from
      * {@link Object}, like equals() or toString().
-     * 
-     * @param clazz
-     *            the class to retrieve the public declared methods
+     *
+     * @param clazz the class to retrieve the public declared methods
      */
     private static void assertDeclaredMethodsContainsPreAuthorizeAnnotations(final Class<?> clazz) {
         final Method[] declaredMethods = clazz.getDeclaredMethods();
@@ -76,16 +71,10 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
                 continue;
             }
             final PreAuthorize annotation = method.getAnnotation(PreAuthorize.class);
-            assertThat(annotation).as("The public method " + method.getName() + " in class " + clazz.getName()
-                    + " is not annotated with @PreAuthorize, security leak?").isNotNull();
-        }
-    }
-
-    private static Method getMethod(final Class<?> clazz, final String methodName, final Class<?>... parameterTypes) {
-        try {
-            return clazz.getMethod(methodName, parameterTypes);
-        } catch (NoSuchMethodException | SecurityException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            assertThat(annotation)
+                    .as("The public method " + method.getName() + " in class " + clazz.getName() +
+                            " is not annotated with @PreAuthorize, security leak?")
+                    .isNotNull();
         }
     }
 }

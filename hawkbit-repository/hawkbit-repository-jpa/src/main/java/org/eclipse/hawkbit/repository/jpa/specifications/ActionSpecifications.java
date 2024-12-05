@@ -9,9 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
+import java.util.List;
+
 import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.ListJoin;
 import jakarta.persistence.criteria.SetJoin;
 
@@ -27,12 +27,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.List;
-
 /**
  * Utility class for {@link Action}s {@link Specification}s. The class provides
  * Spring Data JPQL Specifications.
- *
  */
 public final class ActionSpecifications {
 
@@ -73,28 +70,25 @@ public final class ActionSpecifications {
     public static Specification<JpaAction> byTargetIdsAndActiveAndStatusAndDSNotRequiredMigrationStep(
             final List<Long> targetIds, final boolean active, final Action.Status status) {
         return (root, query, cb) -> cb.and(
-                    root.get(JpaAction_.target).in(targetIds),
-                    cb.equal(root.get(JpaAction_.active), active),
-                    cb.equal(root.get(JpaAction_.status), status),
-                    cb.equal(root.get(JpaAction_.distributionSet).get(JpaDistributionSet_.requiredMigrationStep), false));
+                root.get(JpaAction_.target).in(targetIds),
+                cb.equal(root.get(JpaAction_.active), active),
+                cb.equal(root.get(JpaAction_.status), status),
+                cb.equal(root.get(JpaAction_.distributionSet).get(JpaDistributionSet_.requiredMigrationStep), false));
     }
 
     /**
      * Returns active actions by target controller that has null or non-null depending on <code>isNull</code> value.
-     * Fetches action's distribution set.
      *
      * @param controllerId controller id
      * @param isNull if <code>true</code> return with <code>null</code> weight, otherwise with non-<code>null</code>
      * @return the matching action s.
      */
-    public static Specification<JpaAction> byTargetControllerIdAndActiveAndWeightIsNullFetchDS(final String controllerId, final boolean isNull) {
-        return (root, query, cb) -> {
-            root.fetch(JpaAction_.distributionSet, JoinType.LEFT);
-            return cb.and(
-                    cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId),
-                    cb.equal(root.get(JpaAction_.active), true),
-                    isNull ? cb.isNull(root.get(JpaAction_.weight)) : cb.isNotNull(root.get(JpaAction_.weight)));
-        };
+    public static Specification<JpaAction> byTargetControllerIdAndActiveAndWeightIsNull(final String controllerId, final boolean isNull) {
+        return (root, query, cb) ->
+                cb.and(
+                        cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId),
+                        cb.equal(root.get(JpaAction_.active), true),
+                        isNull ? cb.isNull(root.get(JpaAction_.weight)) : cb.isNotNull(root.get(JpaAction_.weight)));
     }
 
     public static Specification<JpaAction> byDistributionSetId(final Long distributionSetId) {
@@ -119,13 +113,11 @@ public final class ActionSpecifications {
      * Specification which joins all necessary tables to retrieve the dependency
      * between a target and a local file assignment through the assigned action
      * of the target. All actions are included, not only active actions.
-     * 
-     * @param controllerId
-     *            the target to verify if the given artifact is currently
-     *            assigned or had been assigned
-     * @param sha1Hash
-     *            of the local artifact to check wherever the target had ever
-     *            been assigned
+     *
+     * @param controllerId the target to verify if the given artifact is currently
+     *         assigned or had been assigned
+     * @param sha1Hash of the local artifact to check wherever the target had ever
+     *         been assigned
      * @return a specification to use with spring JPA
      */
     public static Specification<JpaAction> hasTargetAssignedArtifact(final String controllerId, final String sha1Hash) {
@@ -144,13 +136,11 @@ public final class ActionSpecifications {
      * Specification which joins all necessary tables to retrieve the dependency
      * between a target and a local file assignment through the assigned action
      * of the target. All actions are included, not only active actions.
-     * 
-     * @param targetId
-     *            the target to verify if the given artifact is currently
-     *            assigned or had been assigned
-     * @param sha1Hash
-     *            of the local artifact to check wherever the target had ever
-     *            been assigned
+     *
+     * @param targetId the target to verify if the given artifact is currently
+     *         assigned or had been assigned
+     * @param sha1Hash of the local artifact to check wherever the target had ever
+     *         been assigned
      * @return a specification to use with spring JPA
      */
     public static Specification<JpaAction> hasTargetAssignedArtifact(final Long targetId, final String sha1Hash) {

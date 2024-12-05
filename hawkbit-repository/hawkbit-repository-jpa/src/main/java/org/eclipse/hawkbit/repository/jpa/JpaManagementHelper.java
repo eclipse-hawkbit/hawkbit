@@ -15,10 +15,7 @@ import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
 
-import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
-import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
-import org.eclipse.hawkbit.repository.jpa.repository.BaseEntityRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.NoCountSliceRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.springframework.data.domain.Page;
@@ -36,6 +33,7 @@ import org.springframework.util.StringUtils;
  * A collection of static helper methods for the management classes
  */
 public final class JpaManagementHelper {
+
     private JpaManagementHelper() {
     }
 

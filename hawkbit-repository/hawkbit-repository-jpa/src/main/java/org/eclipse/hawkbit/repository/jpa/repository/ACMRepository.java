@@ -9,15 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Repository interface that offers some actions that takes in account a target operation.
@@ -31,7 +31,7 @@ public interface ACMRepository<T> {
      * check CREATE access in creating an entity (save without operation would check for UPDATE access).
      *
      * @param operation access operationIf operation is <code>null</code> no access is checked! Should be used
-     *                  only for tenant context.
+     *         only for tenant context.
      * @param entity the entity to save
      * @return the saved entity
      */
@@ -43,7 +43,7 @@ public interface ACMRepository<T> {
      * check CREATE access in creating an entity (save without operation would check for UPDATE access).
      *
      * @param operation access operationIf operation is <code>null</code> no access is checked! Should be used
-     *                  only for tenant context.
+     *         only for tenant context.
      * @param entities the entities to save
      * @return the saved entities
      */
@@ -53,7 +53,7 @@ public interface ACMRepository<T> {
      * Returns single entry that match specification and the operation is allowed for.
      *
      * @param operation access operation. If operation is <code>null</code> no access is checked! Should be used
-     *                  only for tenant context.
+     *         only for tenant context.
      * @param spec specification
      * @return matching entity
      */
@@ -64,7 +64,7 @@ public interface ACMRepository<T> {
      * Returns all entries that match specification and the operation is allowed for.
      *
      * @param operation access operation. If operation is <code>null</code> no access is checked! Should be used
-     *                  only for tenant context.
+     *         only for tenant context.
      * @param spec specification
      * @return matching entities
      */
@@ -75,7 +75,7 @@ public interface ACMRepository<T> {
      * Returns all entries that match specification and the operation is allowed for.
      *
      * @param operation access operation. If operation is <code>null</code> no access is checked! Should be used
-     *                  only for tenant context.
+     *         only for tenant context.
      * @param spec specification
      * @return matching entities
      */
@@ -86,7 +86,7 @@ public interface ACMRepository<T> {
      * Returns count of all entries that match specification and the operation is allowed for.
      *
      * @param operation access operation. If operation is <code>null</code> no access is checked! Should be used
-     *                  only for tenant context.
+     *         only for tenant context.
      * @param spec specification
      * @return count of matching entities
      */
@@ -97,7 +97,7 @@ public interface ACMRepository<T> {
      * Returns all entries, without count, that match specification and the operation is allowed for.
      *
      * @param operation access operation. If operation is <code>null</code> no access is checked! Should be used
-     *                  only for tenant context.
+     *         only for tenant context.
      * @param spec specification
      * @param pageable pageable
      * @return count of matching entities

@@ -43,16 +43,11 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
     /**
      * Instantiates a new auto assign checker
      *
-     * @param targetFilterQueryManagement
-     *            to get all target filter queries
-     * @param targetManagement
-     *            to get targets
-     * @param deploymentManagement
-     *            to assign distribution sets to targets
-     * @param transactionManager
-     *            to run transactions
-     * @param contextAware
-     *            to handle the context
+     * @param targetFilterQueryManagement to get all target filter queries
+     * @param targetManagement to get targets
+     * @param deploymentManagement to assign distribution sets to targets
+     * @param transactionManager to run transactions
+     * @param contextAware to handle the context
      */
     public AutoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
@@ -71,11 +66,9 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
 
     @Override
     public void checkSingleTarget(String controllerId) {
-        log.debug("Auto assign check call for tenant {} and device {} started", getContextAware().getCurrentTenant(),
-                controllerId);
+        log.debug("Auto assign check call for tenant {} and device {} started", getContextAware().getCurrentTenant(), controllerId);
         forEachFilterWithAutoAssignDS(filter -> checkForDevice(controllerId, filter));
-        log.debug("Auto assign check call for tenant {} and device {} finished", getContextAware().getCurrentTenant(),
-                controllerId);
+        log.debug("Auto assign check call for tenant {} and device {} finished", getContextAware().getCurrentTenant(), controllerId);
     }
 
     /**
@@ -83,8 +76,7 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
      * them. Catches PersistenceException and own exceptions derived from
      * AbstractServerRtException
      *
-     * @param targetFilterQuery
-     *            the target filter query
+     * @param targetFilterQuery the target filter query
      */
     private void checkByTargetFilterQueryAndAssignDS(final TargetFilterQuery targetFilterQuery) {
         log.debug("Auto assign check call for tenant {} and target filter query id {} started",
@@ -128,7 +120,7 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
         } catch (final PersistenceException | AbstractServerRtException e) {
             log.error("Error during auto assign check of target filter query id {}", targetFilterQuery.getId(), e);
         }
-        log.debug("Auto assign check call for tenant {} and target filter query id {} finished",
-                getContextAware().getCurrentTenant(), targetFilterQuery.getId());
+        log.debug("Auto assign check call for tenant {} and target filter query id {} for device {} finished",
+                getContextAware().getCurrentTenant(), targetFilterQuery.getId(), controllerId);
     }
 }

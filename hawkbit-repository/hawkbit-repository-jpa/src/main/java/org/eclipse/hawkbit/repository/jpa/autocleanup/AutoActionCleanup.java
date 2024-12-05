@@ -32,7 +32,7 @@ import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
  * actions which are in a certain {@link Action.Status}. It is recommended to
  * only clean up actions which have terminated already (i.e. actions in status
  * CANCELLED or ERROR).
- * 
+ *
  * The cleanup task can be enabled /disabled and configured on a per tenant
  * basis.
  */
@@ -49,21 +49,17 @@ public class AutoActionCleanup implements CleanupTask {
 
     /**
      * Constructs the action cleanup handler.
-     * 
-     * @param deploymentMgmt
-     *            The {@link DeploymentManagement} to operate on.
-     * @param configMgmt
-     *            The {@link TenantConfigurationManagement} service.
+     *
+     * @param deploymentMgmt The {@link DeploymentManagement} to operate on.
+     * @param configMgmt The {@link TenantConfigurationManagement} service.
      */
-    public AutoActionCleanup(final DeploymentManagement deploymentMgmt,
-            final TenantConfigurationManagement configMgmt) {
+    public AutoActionCleanup(final DeploymentManagement deploymentMgmt, final TenantConfigurationManagement configMgmt) {
         this.deploymentMgmt = deploymentMgmt;
         this.config = configMgmt;
     }
 
     @Override
     public void run() {
-
         if (!isEnabled()) {
             log.debug("Action cleanup is disabled for this tenant...");
             return;
@@ -106,5 +102,4 @@ public class AutoActionCleanup implements CleanupTask {
             final Class<T> valueType) {
         return config.getConfigurationValue(key, valueType);
     }
-
 }

@@ -21,27 +21,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The spring-data repository for the entity {@link TenantConfiguration}.
- *
  */
 @Transactional(readOnly = true)
 public interface TenantConfigurationRepository extends BaseEntityRepository<JpaTenantConfiguration> {
 
     /**
      * Finds a specific {@link TenantConfiguration} by the configuration key.
-     * 
-     * @param configurationKey
-     *            the configuration key to find the configuration for
+     *
+     * @param configurationKey the configuration key to find the configuration for
      * @return the found tenant configuration object otherwise {@code null}
      */
     JpaTenantConfiguration findByKey(String configurationKey);
 
     /**
      * Deletes a tenant configuration by tenant and key.
-     * 
-     * @param tenant
-     *            the tenant for this configuration
-     * @param keyName
-     *            the name of the key to be deleted
+     *
+     * @param tenant the tenant for this configuration
+     * @param keyName the name of the key to be deleted
      */
     void deleteByKey(String keyName);
 
@@ -51,8 +47,7 @@ public interface TenantConfigurationRepository extends BaseEntityRepository<JpaT
      * manually to query even if this will by done by {@link EntityManager}
      * anyhow. The DB should take care of optimizing this away.
      *
-     * @param tenant
-     *            to delete data from
+     * @param tenant to delete data from
      */
     @Modifying
     @Transactional

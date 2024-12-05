@@ -9,6 +9,10 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -16,19 +20,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * JSON representation of batch download and update request.
- *
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfBatchDownloadAndUpdateRequest {
 
-    @Getter @Setter
+    @Getter
+    @Setter
     @JsonProperty
     private Long timestamp;
 
@@ -70,8 +70,7 @@ public class DmfBatchDownloadAndUpdateRequest {
     /**
      * Add a Target.
      *
-     * @param target
-     *            the target
+     * @param target the target
      */
     public void addTarget(final DmfTarget target) {
         if (targets == null) {

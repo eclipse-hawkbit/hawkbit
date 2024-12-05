@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 
 /**
  * Create/build implementation.
- *
  */
 public class JpaTargetFilterQueryCreate extends AbstractTargetFilterQueryUpdateCreate<TargetFilterQueryCreate>
         implements TargetFilterQueryCreate {
@@ -45,5 +44,4 @@ public class JpaTargetFilterQueryCreate extends AbstractTargetFilterQueryUpdateC
 
         return true;
     }
-
 }

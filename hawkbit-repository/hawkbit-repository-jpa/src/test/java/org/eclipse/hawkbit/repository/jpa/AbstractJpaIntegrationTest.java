@@ -9,9 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
@@ -46,17 +45,14 @@ import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TenantMetaDataRepository;
-import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
@@ -72,8 +68,6 @@ import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ContextConfiguration(classes = {
         RepositoryApplicationConfiguration.class, TestConfiguration.class })
@@ -145,6 +139,34 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     @Autowired
     private JpaProperties jpaProperties;
 
+    protected static void verifyThrownExceptionBy(final ThrowingCallable tc, final String objectType) {
+        Assertions.assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(tc)
+                .withMessageContaining(NOT_EXIST_ID).withMessageContaining(objectType);
+    }
+
+    protected static <T> List<T> toList(final Iterable<? extends T> it) {
+        return StreamSupport.stream(it.spliterator(), false).map(e -> (T) e).toList();
+    }
+
+    protected static <T> T[] toArray(final Iterable<? extends T> it, final Class<T> type) {
+        final List<T> list = toList(it);
+        final T[] array = (T[]) Array.newInstance(type, list.size());
+        for (int i = 0; i < array.length; i++) {
+            array[i] = list.get(i);
+        }
+        return array;
+    }
+
+    // just increase the opt lock revision if the instance in order to match it against locked db instance - not really locking
+    protected static void implicitLock(final DistributionSet set) {
+        ((JpaDistributionSet) set).setOptLockRevision(set.getOptLockRevision() + 1);
+    }
+
+    // just increase the opt lock revision if the instance in order to match it against locked db instance - not really locking
+    protected static void implicitLock(final SoftwareModule module) {
+        ((JpaSoftwareModule) module).setOptLockRevision(module.getOptLockRevision() + 1);
+    }
+
     protected Database getDatabase() {
         return jpaProperties.getDatabase();
     }
@@ -154,20 +176,26 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
         return toList(actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), actionStatus));
     }
 
-    protected static void verifyThrownExceptionBy(final ThrowingCallable tc, final String objectType) {
-        Assertions.assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(tc)
-                .withMessageContaining(NOT_EXIST_ID).withMessageContaining(objectType);
+    protected List<Target> assignTag(final Collection<Target> targets, final TargetTag tag) {
+        return targetManagement.assignTag(
+                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
     }
 
-    protected TargetTagAssignmentResult toggleTagAssignment(final Collection<Target> targets, final TargetTag tag) {
-        return targetManagement.toggleTagAssignment(
-                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getName());
+    protected List<Target> unassignTag(final Collection<Target> targets, final TargetTag tag) {
+        return targetManagement.unassignTag(
+                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
     }
 
-    public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<DistributionSet> sets,
+    protected List<DistributionSet> assignTag(final Collection<DistributionSet> sets,
             final DistributionSetTag tag) {
-        return distributionSetManagement.toggleTagAssignment(
-                sets.stream().map(DistributionSet::getId).collect(Collectors.toList()), tag.getName());
+        return distributionSetManagement.assignTag(
+                sets.stream().map(DistributionSet::getId).collect(Collectors.toList()), tag.getId());
+    }
+
+    protected List<DistributionSet> unassignTag(final Collection<DistributionSet> sets,
+            final DistributionSetTag tag) {
+        return distributionSetManagement.unassignTag(
+                sets.stream().map(DistributionSet::getId).collect(Collectors.toList()), tag.getId());
     }
 
     protected TargetTypeAssignmentResult initiateTypeAssignment(final Collection<Target> targets, final TargetType type) {
@@ -175,7 +203,8 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
                 targets.stream().map(Target::getControllerId).collect(Collectors.toList()), type.getId());
     }
 
-    protected void assertRollout(final Rollout rollout, final boolean dynamic, final Rollout.RolloutStatus status, final int groupCreated, final long totalTargets) {
+    protected void assertRollout(final Rollout rollout, final boolean dynamic, final Rollout.RolloutStatus status, final int groupCreated,
+            final long totalTargets) {
         final Rollout refreshed = refresh(rollout);
         assertThat(refreshed.isDynamic()).as("Is dynamic").isEqualTo(dynamic);
         assertThat(refreshed.getStatus()).as("Status").isEqualTo(status);
@@ -183,7 +212,8 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
         assertThat(refreshed.getTotalTargets()).as("Total targets").isEqualTo(totalTargets);
     }
 
-    protected void assertGroup(final RolloutGroup group, final boolean dynamic, final RolloutGroup.RolloutGroupStatus status, final long totalTargets) {
+    protected void assertGroup(final RolloutGroup group, final boolean dynamic, final RolloutGroup.RolloutGroupStatus status,
+            final long totalTargets) {
         final RolloutGroup refreshed = refresh(group);
         assertThat(refreshed.isDynamic()).as("Is dynamic").isEqualTo(dynamic);
         assertThat(refreshed.getStatus()).as("Status").isEqualTo(status);
@@ -210,34 +240,11 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
         return targetManagement.getTagsByControllerId(controllerId);
     }
 
-    private JpaRollout refresh(final Rollout rollout) {
-        return rolloutRepository.findById(rollout.getId()).get();
-    }
-
     protected JpaRolloutGroup refresh(final RolloutGroup group) {
         return rolloutGroupRepository.findById(group.getId()).get();
     }
 
-    protected static <T> List<T> toList(final Iterable<? extends T> it) {
-        return StreamSupport.stream(it.spliterator(), false).map(e -> (T)e).toList();
-    }
-
-    protected static <T> T[] toArray(final Iterable<? extends T> it, final Class<T> type) {
-        final List<T> list = toList(it);
-        final T[] array = (T[])Array.newInstance(type, list.size());
-        for (int i = 0; i < array.length; i++) {
-            array[i] = list.get(i);
-        }
-        return array;
-    }
-
-    // just increase the opt lock revision if the instance in order to match it against locked db instance - not really locking
-    protected static void implicitLock(final DistributionSet set) {
-        ((JpaDistributionSet) set).setOptLockRevision(set.getOptLockRevision() + 1);
-    }
-
-    // just increase the opt lock revision if the instance in order to match it against locked db instance - not really locking
-    protected static void implicitLock(final SoftwareModule module) {
-        ((JpaSoftwareModule) module).setOptLockRevision(module.getOptLockRevision() + 1);
+    private JpaRollout refresh(final Rollout rollout) {
+        return rolloutRepository.findById(rollout.getId()).get();
     }
 }

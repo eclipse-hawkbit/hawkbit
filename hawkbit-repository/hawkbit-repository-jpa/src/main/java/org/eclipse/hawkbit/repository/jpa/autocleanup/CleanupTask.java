@@ -24,5 +24,4 @@ public interface CleanupTask extends Runnable {
      * @return The identifier of this cleanup task. Never null.
      */
     String getId();
-
 }

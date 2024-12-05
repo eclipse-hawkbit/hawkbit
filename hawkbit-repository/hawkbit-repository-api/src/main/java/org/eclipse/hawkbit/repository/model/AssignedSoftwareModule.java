@@ -9,19 +9,19 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import lombok.Data;
 import org.eclipse.hawkbit.repository.Identifiable;
 
-import java.io.Serializable;
-
-
 /**
  * Use to display software modules for the selected distribution.
- *
  */
 @Data
 public class AssignedSoftwareModule implements Serializable, Identifiable<Long> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final SoftwareModule softwareModule;
@@ -31,11 +31,9 @@ public class AssignedSoftwareModule implements Serializable, Identifiable<Long> 
     /**
      * Constructor.
      *
-     * @param softwareModule
-     *            entity.
-     * @param assigned
-     *            as true if the software module is assigned and false if not
-     *            assigned.
+     * @param softwareModule entity.
+     * @param assigned as true if the software module is assigned and false if not
+     *         assigned.
      */
     public AssignedSoftwareModule(final SoftwareModule softwareModule, final boolean assigned) {
         this.softwareModule = softwareModule;

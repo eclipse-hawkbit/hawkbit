@@ -9,14 +9,14 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import java.io.Serial;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.entity.EntityDeletedEvent;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-
-import java.io.Serial;
 
 /**
  * Defines the remote event of deleting a {@link org.eclipse.hawkbit.repository.model.TenantConfiguration}.

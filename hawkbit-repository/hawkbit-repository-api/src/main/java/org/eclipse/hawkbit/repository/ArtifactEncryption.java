@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.repository.exception.ArtifactEncryptionFailedExceptio
 
 /**
  * Interface definition for artifact encryption.
- *
  */
 public interface ArtifactEncryption {
 
@@ -32,40 +31,33 @@ public interface ArtifactEncryption {
      * Generates required secrets key/value pairs.
      *
      * @return secrets key/value pairs
-     * @throws ArtifactEncryptionFailedException
-     *             thrown in case of an error while generating secrets
+     * @throws ArtifactEncryptionFailedException thrown in case of an error while generating secrets
      */
     Map<String, String> generateSecrets();
 
     /**
      * Encrypts artifact stream with provided secrets.
      *
-     * @param secrets
-     *            secrets key/value pairs to be used for encryption
-     * @param stream
-     *            artifact stream to encrypt
+     * @param secrets secrets key/value pairs to be used for encryption
+     * @param stream artifact stream to encrypt
      * @return encrypted input stream
-     * @throws ArtifactEncryptionFailedException
-     *             thrown in case of an error while encrypting the provided stream
+     * @throws ArtifactEncryptionFailedException thrown in case of an error while encrypting the provided stream
      */
     InputStream encryptStream(final Map<String, String> secrets, final InputStream stream);
 
     /**
      * Decrypts encrypted artifact stream based on provided secrets.
      *
-     * @param secrets
-     *            secrets key/value pairs to be used for decryption
-     * @param stream
-     *            artifact stream to decrypt
+     * @param secrets secrets key/value pairs to be used for decryption
+     * @param stream artifact stream to decrypt
      * @return decrypted input stream
-     * @throws ArtifactEncryptionFailedException
-     *             thrown in case of an error while decrypting the provided stream
+     * @throws ArtifactEncryptionFailedException thrown in case of an error while decrypting the provided stream
      */
     InputStream decryptStream(final Map<String, String> secrets, final InputStream stream);
 
     /**
      * Size of the underlying encryption algorithm overhead in bytes
-     * 
+     *
      * @return encryption overhead in byte
      */
     int encryptionSizeOverhead();

@@ -19,52 +19,47 @@ import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.repository.model.Type;
 
 /**
  * Builder to create a new {@link SoftwareModule} entry. Defines all fields that
  * can be set at creation time. Other fields are set by the repository
  * automatically, e.g. {@link BaseEntity#getCreatedAt()}.
- *
  */
 public interface SoftwareModuleCreate {
+
     /**
-     * @param name
-     *            for {@link SoftwareModule#getName()}
+     * @param name for {@link SoftwareModule#getName()}
      * @return updated builder instance
      */
     SoftwareModuleCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
 
     /**
-     * @param version
-     *            for {@link SoftwareModule#getVersion()}
+     * @param version for {@link SoftwareModule#getVersion()}
      * @return updated builder instance
      */
     SoftwareModuleCreate version(@Size(min = 1, max = NamedVersionedEntity.VERSION_MAX_SIZE) @NotNull String version);
 
     /**
-     * @param description
-     *            for {@link SoftwareModule#getDescription()}
+     * @param description for {@link SoftwareModule#getDescription()}
      * @return updated builder instance
      */
     SoftwareModuleCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
-     * @param vendor
-     *            for {@link SoftwareModule#getVendor()}
+     * @param vendor for {@link SoftwareModule#getVendor()}
      * @return updated builder instance
      */
     SoftwareModuleCreate vendor(@Size(max = SoftwareModule.VENDOR_MAX_SIZE) String vendor);
 
     /**
-     * @param typeKey
-     *            for {@link SoftwareModule#getType()}
+     * @param typeKey for {@link SoftwareModule#getType()}
      * @return updated builder instance
      */
-    SoftwareModuleCreate type(@Size(min = 1, max = SoftwareModuleType.KEY_MAX_SIZE) @NotNull String typeKey);
+    SoftwareModuleCreate type(@Size(min = 1, max = Type.KEY_MAX_SIZE) @NotNull String typeKey);
 
     /**
-     * @param type
-     *            for {@link SoftwareModule#getType()}
+     * @param type for {@link SoftwareModule#getType()}
      * @return updated builder instance
      */
     default SoftwareModuleCreate type(final SoftwareModuleType type) {
@@ -72,8 +67,7 @@ public interface SoftwareModuleCreate {
     }
 
     /**
-     * @param encrypted
-     *            if should be encrypted
+     * @param encrypted if should be encrypted
      * @return updated builder instance
      */
     SoftwareModuleCreate encrypted(boolean encrypted);

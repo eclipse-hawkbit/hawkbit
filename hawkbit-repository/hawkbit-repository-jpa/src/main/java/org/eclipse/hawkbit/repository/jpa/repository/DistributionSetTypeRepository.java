@@ -23,34 +23,24 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * {@link PagingAndSortingRepository} and {@link  org.springframework.data.repository.CrudRepository} for
- * {@link DistributionSetType}.
- *
+ * {@link PagingAndSortingRepository} and {@link  org.springframework.data.repository.CrudRepository} for {@link DistributionSetType}.
  */
 @Transactional(readOnly = true)
-public interface DistributionSetTypeRepository
-        extends BaseEntityRepository<JpaDistributionSetType> {
+public interface DistributionSetTypeRepository extends BaseEntityRepository<JpaDistributionSetType> {
 
     /**
-     * Counts all distribution set type where a specific software module type is
-     * assigned to.
+     * Counts all distribution set type where a specific software module type is assigned to.
      * <p/>
      * No access control applied
-     * 
-     * @param softwareModuleType
-     *            the software module type to count the distribution set type
-     *            which has this software module type assigned
-     * 
-     * @return the number of {@link DistributionSetType}s in the repository
-     *         assigned to the given software module type
+     *
+     * @param softwareModuleType the software module type to count the distribution set type which has this software module type assigned
+     * @return the number of {@link DistributionSetType}s in the repository assigned to the given software module type
      */
     long countByElementsSmType(JpaSoftwareModuleType softwareModuleType);
 
     /**
-     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
-     * reasons (this is a "delete everything" query after all) we add the tenant
-     * manually to query even if this will by done by {@link EntityManager}
-     * anyhow. The DB should take care of optimizing this away.
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety reasons (this is a "delete everything" query after all) we add
+     * the tenant manually to query even if this will by done by {@link EntityManager} anyhow. The DB should take care of optimizing this away.
      *
      * @param tenant to delete data from
      */
@@ -60,14 +50,11 @@ public interface DistributionSetTypeRepository
     void deleteByTenant(@Param("tenant") String tenant);
 
     /**
-     * Counts the {@link SoftwareModuleType}s which are associated with the
-     * addressed {@link DistributionSetType}.
+     * Counts the {@link SoftwareModuleType}s which are associated with the addressed {@link DistributionSetType}.
      * <p/>
      * No access control applied
-     * 
-     * @param id
-     *            of the distribution set type
-     * 
+     *
+     * @param id of the distribution set type
      * @return the number of associated software module types
      */
     @Query("SELECT COUNT (e.smType) FROM DistributionSetTypeElement e WHERE e.dsType.id = :id")

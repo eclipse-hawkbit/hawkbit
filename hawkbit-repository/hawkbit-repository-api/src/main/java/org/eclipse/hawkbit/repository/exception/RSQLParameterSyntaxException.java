@@ -9,21 +9,17 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Exception used by the REST API in case of RSQL search filter query.
- * 
- *
- *
- *
  */
 public class RSQLParameterSyntaxException extends AbstractServerRtException {
 
-    /**
-    * 
-    */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -37,9 +33,8 @@ public class RSQLParameterSyntaxException extends AbstractServerRtException {
     /**
      * Creates a new RSQLParameterSyntaxException with
      * {@link SpServerError#SP_REST_RSQL_SEARCH_PARAM_SYNTAX} error.
-     * 
-     * @param message
-     *            the message of the exception
+     *
+     * @param message the message of the exception
      */
     public RSQLParameterSyntaxException(final String message) {
         super(message, SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX);
@@ -48,9 +43,8 @@ public class RSQLParameterSyntaxException extends AbstractServerRtException {
     /**
      * Creates a new RSQLSyntaxException with
      * {@link SpServerError#SP_REST_RSQL_SEARCH_PARAM_SYNTAX} error.
-     * 
-     * @param cause
-     *            the cause of this exception
+     *
+     * @param cause the cause of this exception
      */
     public RSQLParameterSyntaxException(final Throwable cause) {
         super(SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX, cause);
@@ -59,13 +53,11 @@ public class RSQLParameterSyntaxException extends AbstractServerRtException {
     /**
      * Creates a new RSQLParameterSyntaxException with
      * {@link SpServerError#SP_REST_RSQL_SEARCH_PARAM_SYNTAX} error.
-     * 
-     * @param message
-     *            the message of the exception
-     * @param cause
-     *            the cause (which is saved for later retrieval by the
-     *            getCause() method). (A null value is permitted, and indicates
-     *            that the cause is nonexistent or unknown.)
+     *
+     * @param message the message of the exception
+     * @param cause the cause (which is saved for later retrieval by the
+     *         getCause() method). (A null value is permitted, and indicates
+     *         that the cause is nonexistent or unknown.)
      */
     public RSQLParameterSyntaxException(final String message, final Throwable cause) {
         super(message, SpServerError.SP_REST_RSQL_SEARCH_PARAM_SYNTAX, cause);

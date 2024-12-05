@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
@@ -20,7 +22,9 @@ import org.eclipse.hawkbit.exception.SpServerError;
  */
 public class AutoConfirmationAlreadyActiveException extends AbstractServerRtException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_AUTO_CONFIRMATION_ALREADY_ACTIVE;
 
     /**
@@ -32,9 +36,8 @@ public class AutoConfirmationAlreadyActiveException extends AbstractServerRtExce
 
     /**
      * Parameterized constructor.
-     * 
-     * @param cause
-     *            of the exception
+     *
+     * @param cause of the exception
      */
     public AutoConfirmationAlreadyActiveException(final Throwable cause) {
         super(THIS_ERROR, cause);
@@ -44,8 +47,7 @@ public class AutoConfirmationAlreadyActiveException extends AbstractServerRtExce
      * Parameterized constructor for auto confirmation is already active for given
      * controller ID
      *
-     * @param controllerId
-     *            of affected device
+     * @param controllerId of affected device
      */
     public AutoConfirmationAlreadyActiveException(final String controllerId) {
         super("Auto confirmation is already active for device " + controllerId, THIS_ERROR);

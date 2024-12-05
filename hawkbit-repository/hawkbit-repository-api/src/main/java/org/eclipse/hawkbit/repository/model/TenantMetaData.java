@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.model;
 
 /**
  * MetaData of a tenant account.
- *
  */
 public interface TenantMetaData extends BaseEntity {
 

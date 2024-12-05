@@ -15,7 +15,7 @@ import lombok.Getter;
  * Describing the fields of the SoftwareModuleType model which can be used in the REST API e.g. for sorting etc.
  */
 @Getter
-public enum SoftwareModuleTypeFields implements FieldNameProvider {
+public enum SoftwareModuleTypeFields implements RsqlQueryField {
 
     ID("id"),
     KEY("key"),
@@ -23,9 +23,9 @@ public enum SoftwareModuleTypeFields implements FieldNameProvider {
     DESCRIPTION("description"),
     MAXASSIGNMENTS("maxAssignments");
 
-    private final String fieldName;
+    private final String jpaEntityFieldName;
 
-    SoftwareModuleTypeFields(final String fieldName) {
-        this.fieldName = fieldName;
+    SoftwareModuleTypeFields(final String jpaEntityFieldName) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
     }
 }

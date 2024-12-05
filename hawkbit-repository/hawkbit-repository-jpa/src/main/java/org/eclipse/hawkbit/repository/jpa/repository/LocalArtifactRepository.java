@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link Artifact} repository.
- *
  */
 @Transactional(readOnly = true)
 public interface LocalArtifactRepository
@@ -80,11 +79,8 @@ public interface LocalArtifactRepository
      * Searches for a {@link Artifact} based user provided filename at upload and
      * selected software module id.
      *
-     * @param filename
-     *            to search
-     * @param softwareModuleId
-     *            selected software module id
-     * 
+     * @param filename to search
+     * @param softwareModuleId selected software module id
      * @return list of {@link Artifact}.
      */
     Optional<Artifact> findFirstByFilenameAndSoftwareModuleId(String filename, Long softwareModuleId);

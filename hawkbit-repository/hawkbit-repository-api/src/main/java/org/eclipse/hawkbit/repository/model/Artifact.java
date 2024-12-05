@@ -15,9 +15,9 @@ import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
  * Binaries for a {@link SoftwareModule} Note: the decision which artifacts have
  * to be downloaded are done on the device side. e.g. Full Package, Signatures,
  * binary deltas
- *
  */
 public interface Artifact extends TenantAwareBaseEntity {
+
     /**
      * @return the filename that was provided during upload.
      */

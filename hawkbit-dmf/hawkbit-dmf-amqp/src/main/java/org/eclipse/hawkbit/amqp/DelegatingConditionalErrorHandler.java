@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.amqp;
 
 import java.util.List;
+
 import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
@@ -21,16 +22,15 @@ import org.springframework.util.ErrorHandler;
  */
 @Slf4j
 public class DelegatingConditionalErrorHandler implements ErrorHandler {
+
     private final List<AmqpErrorHandler> handlers;
     private final ErrorHandler defaultHandler;
 
     /**
      * Constructor
      *
-     * @param handlers
-     *                 {@link List} of error handlers
-     * @param defaultHandler
-     *                  the default error handler
+     * @param handlers {@link List} of error handlers
+     * @param defaultHandler the default error handler
      */
     public DelegatingConditionalErrorHandler(final List<AmqpErrorHandler> handlers, @NotNull final ErrorHandler defaultHandler) {
         this.handlers = handlers;
@@ -53,7 +53,7 @@ public class DelegatingConditionalErrorHandler implements ErrorHandler {
     }
 
     private boolean includesAmqpRejectException(final Throwable t) {
-        if (t instanceof AmqpRejectAndDontRequeueException){
+        if (t instanceof AmqpRejectAndDontRequeueException) {
             return true;
         }
         if (t.getCause() != null) {

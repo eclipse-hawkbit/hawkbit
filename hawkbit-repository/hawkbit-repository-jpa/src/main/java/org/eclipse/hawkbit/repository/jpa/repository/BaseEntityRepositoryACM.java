@@ -9,6 +9,19 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
@@ -23,17 +36,6 @@ import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import jakarta.transaction.Transactional;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-
 @Slf4j
 public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity> implements BaseEntityRepository<T> {
 
@@ -45,74 +47,17 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
         this.accessController = accessController;
     }
 
-    @SuppressWarnings("unchecked")
-    static <T extends AbstractJpaTenantAwareBaseEntity, R extends BaseEntityRepository<T>> R of(
-            final R repository, @NonNull final AccessController<T> accessController) {
-        Objects.requireNonNull(repository);
-        Objects.requireNonNull(accessController);
-        final BaseEntityRepositoryACM<T> repositoryACM =
-                new BaseEntityRepositoryACM<>(repository, accessController);
-        final R acmProxy = (R) Proxy.newProxyInstance(
-                Thread.currentThread().getContextClassLoader(),
-                repository.getClass().getInterfaces(),
-                (proxy, method, args) -> {
-                    try {
-                        try {
-                            // TODO - cache mapping so to speed things
-                            final Method delegateMethod =
-                                    BaseEntityRepositoryACM.class.getDeclaredMethod(
-                                            method.getName(), method.getParameterTypes());
-                            return delegateMethod.invoke(repositoryACM, args);
-                        } catch (final NoSuchMethodException e) {
-                            // call to repository itself
-                        }
-                        if (method.getName().startsWith("find") || method.getName().startsWith("get")) {
-                            final Object result = method.invoke(repository, args);
-                            if (Iterable.class.isAssignableFrom(method.getReturnType())) {
-                                for (final Object e : (Iterable<?>) result) {
-                                    if (repository.getDomainClass().isAssignableFrom(e.getClass())) {
-                                        accessController.assertOperationAllowed(AccessController.Operation.READ, (T) e);
-                                    }
-                                }
-                            } else if (Optional.class.isAssignableFrom(method.getReturnType()) && ((Optional<?>) result)
-                                    .filter(value -> repository.getDomainClass().isAssignableFrom(value.getClass()))
-                                    .isPresent()) {
-                                return ((Optional<T>) result).filter(
-                                        t -> isOperationAllowed(AccessController.Operation.READ, t, accessController));
-                            } else if (repository.getDomainClass().isAssignableFrom(method.getReturnType())) {
-                                accessController.assertOperationAllowed(AccessController.Operation.READ, (T) result);
-                            }
-                            return result;
-                        } else if ("toString".equals(method.getName()) && method.getParameterCount() == 0) {
-                            return BaseEntityRepositoryACM.class.getSimpleName() +
-                                    "(repository: " + repository + ", accessController: " +  accessController + ")";
-                        } else {
-                            return method.invoke(repository, args);
-                        }
-                    } catch (final InvocationTargetException e) {
-                        throw e.getCause() == null ? e : e.getCause();
-                    }
-                });
-        log.info("Proxy created -> {}", acmProxy);
-        return acmProxy;
+    @Override
+    @NonNull
+    public <S extends T> S save(@NonNull final S entity) {
+        accessController.assertOperationAllowed(AccessController.Operation.UPDATE, entity);
+        return repository.save(entity);
     }
 
     @Override
     @NonNull
     public Optional<T> findById(@NonNull final Long id) {
         return findOne(byIdSpec(id));
-    }
-
-    @Override
-    @NonNull
-    public List<T> findAll() {
-        return findAll((Specification<T>) null);
-    }
-
-    @Override
-    @NonNull
-    public List<T> findAllById(@NonNull final Iterable<Long> ids) {
-        return findAll(byIdsSpec(ids));
     }
 
     @Override
@@ -126,20 +71,20 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     }
 
     @Override
-    public void delete(@NonNull final T entity) {
-        accessController.assertOperationAllowed(AccessController.Operation.DELETE, entity);
-        repository.delete(entity);
-    }
-
-    @Override
     public void deleteById(@NonNull final Long id) {
         if (!exists(AccessController.Operation.READ, byIdSpec(id))) {
-          throw new EntityNotFoundException(repository.getDomainClass(), id);
+            throw new EntityNotFoundException(repository.getDomainClass(), id);
         }
         if (!exists(AccessController.Operation.DELETE, byIdSpec(id))) {
             throw new InsufficientPermissionException();
         }
         repository.deleteById(id);
+    }
+
+    @Override
+    public void delete(@NonNull final T entity) {
+        accessController.assertOperationAllowed(AccessController.Operation.DELETE, entity);
+        repository.delete(entity);
     }
 
     @Override
@@ -169,13 +114,6 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     }
 
     @Override
-    @NonNull
-    public <S extends T> S save(@NonNull final S entity) {
-        accessController.assertOperationAllowed(AccessController.Operation.UPDATE, entity);
-        return repository.save(entity);
-    }
-
-    @Override
     public <S extends T> List<S> saveAll(final Iterable<S> entities) {
         accessController.assertOperationAllowed(AccessController.Operation.UPDATE, entities);
         return repository.saveAll(entities);
@@ -183,20 +121,33 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
 
     @Override
     @NonNull
+    public List<T> findAll() {
+        return findAll((Specification<T>) null);
+    }
+
+    @Override
+    @NonNull
+    public List<T> findAllById(@NonNull final Iterable<Long> ids) {
+        return findAll(byIdsSpec(ids));
+    }
+
+    @Override
+    public void deleteByTenant(final String tenant) {
+        if (accessController.getAccessRules(AccessController.Operation.DELETE).isPresent()) {
+            throw new InsufficientPermissionException("DELETE operation has restriction for given context! deleteAll can't be executed!");
+        }
+        repository.deleteByTenant(tenant);
+    }
+
+    @Override
+    public Optional<AccessController<T>> getAccessController() {
+        return Optional.of(accessController);
+    }
+
+    @Override
+    @NonNull
     public Optional<T> findOne(final Specification<T> spec) {
         return repository.findOne(accessController.appendAccessRules(AccessController.Operation.READ, spec));
-    }
-
-    @Override
-    @NonNull
-    public Iterable<T> findAll(@NonNull final Sort sort) {
-        return findAll(null, sort);
-    }
-
-    @Override
-    @NonNull
-    public Page<T> findAll(@NonNull final Pageable pageable) {
-        return findAll(null, pageable);
     }
 
     @Override
@@ -218,9 +169,8 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     }
 
     @Override
-    public <S extends T, R> R findBy(final Specification<T> spec,
-            final Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
-        return repository.findBy(accessController.appendAccessRules(AccessController.Operation.READ, spec), queryFunction);
+    public long count(final Specification<T> spec) {
+        return repository.count(accessController.appendAccessRules(AccessController.Operation.READ, spec));
     }
 
     @Override
@@ -235,8 +185,20 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     }
 
     @Override
-    public long count(final Specification<T> spec) {
-        return repository.count(accessController.appendAccessRules(AccessController.Operation.READ, spec));
+    public <S extends T, R> R findBy(final Specification<T> spec, final Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+        return repository.findBy(accessController.appendAccessRules(AccessController.Operation.READ, spec), queryFunction);
+    }
+
+    @Override
+    @NonNull
+    public Iterable<T> findAll(@NonNull final Sort sort) {
+        return findAll(null, sort);
+    }
+
+    @Override
+    @NonNull
+    public Page<T> findAll(@NonNull final Pageable pageable) {
+        return findAll(null, pageable);
     }
 
     @Override
@@ -253,7 +215,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     @Override
     @Transactional
     @NonNull
-    public <S  extends T> S save(@Nullable AccessController.Operation operation, @NonNull final S entity) {
+    public <S extends T> S save(@Nullable AccessController.Operation operation, @NonNull final S entity) {
         if (operation != null) {
             accessController.assertOperationAllowed(operation, entity);
         }
@@ -327,31 +289,86 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     }
 
     @Override
-    public Optional<AccessController<T>> getAccessController() {
-        return Optional.of(accessController);
+    public Optional<T> findOne(final Specification<T> spec, final String entityGraph) {
+        return repository.findOne(
+                accessController.appendAccessRules(AccessController.Operation.READ, spec), entityGraph);
     }
 
     @Override
-    public void deleteByTenant(final String tenant) {
-        if (accessController.getAccessRules(AccessController.Operation.DELETE).isPresent()) {
-            throw new InsufficientPermissionException(
-                    "DELETE operation has restriction for given context! deleteAll can't be executed!");
-        }
-        repository.deleteByTenant(tenant);
+    public List<T> findAll(final Specification<T> spec, final String entityGraph) {
+        return repository.findAll(
+                accessController.appendAccessRules(AccessController.Operation.READ, spec), entityGraph);
     }
 
-    private static <T> boolean isOperationAllowed(
-            final AccessController.Operation operation, T entity,
-            final AccessController<T> accessController) {
-        try {
-            accessController.assertOperationAllowed(operation, entity);
-            return true;
-        } catch (final InsufficientPermissionException e) {
-            return false;
-        }
+    @Override
+    public Page<T> findAll(final Specification<T> spec, final String entityGraph, final Pageable pageable) {
+        return repository.findAll(
+                accessController.appendAccessRules(AccessController.Operation.READ, spec), entityGraph, pageable);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @Override
+    public List<T> findAll(final Specification<T> spec, final String entityGraph, final Sort sort) {
+        return repository.findAll(
+                accessController.appendAccessRules(AccessController.Operation.READ, spec), entityGraph, sort);
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T extends AbstractJpaTenantAwareBaseEntity, R extends BaseEntityRepository<T>> R of(
+            final R repository, @NonNull final AccessController<T> accessController) {
+        Objects.requireNonNull(repository);
+        Objects.requireNonNull(accessController);
+        final BaseEntityRepositoryACM<T> repositoryACM = new BaseEntityRepositoryACM<>(repository, accessController);
+        final R acmProxy = (R) Proxy.newProxyInstance(
+                Thread.currentThread().getContextClassLoader(),
+                repository.getClass().getInterfaces(),
+                (proxy, method, args) -> {
+                    try {
+                        try {
+                            // TODO - cache mapping so to speed things
+                            final Method delegateMethod =
+                                    BaseEntityRepositoryACM.class.getDeclaredMethod(
+                                            method.getName(), method.getParameterTypes());
+                            return delegateMethod.invoke(repositoryACM, args);
+                        } catch (final NoSuchMethodException e) {
+                            // call to repository itself
+                        }
+                        if (method.getName().startsWith("find") || method.getName().startsWith("get")) {
+                            final Object result = method.invoke(repository, args);
+                            // Iterable, List, Page, Slice
+                            if (Iterable.class.isAssignableFrom(method.getReturnType())) {
+                                for (final Object e : (Iterable<?>) result) {
+                                    if (repository.getDomainClass().isAssignableFrom(e.getClass())) {
+                                        accessController.assertOperationAllowed(AccessController.Operation.READ, (T) e);
+                                    }
+                                }
+                            } else if (Optional.class.isAssignableFrom(method.getReturnType()) && ((Optional<?>) result)
+                                    .filter(value -> repository.getDomainClass().isAssignableFrom(value.getClass()))
+                                    .isPresent()) {
+                                return ((Optional<T>) result).filter(
+                                        t -> {
+                                            // if not accessible - throws exception (as for iterables or single entities)
+                                            accessController.assertOperationAllowed(AccessController.Operation.READ, t);
+                                            return true;
+                                        });
+                            } else if (repository.getDomainClass().isAssignableFrom(method.getReturnType())) {
+                                accessController.assertOperationAllowed(AccessController.Operation.READ, (T) result);
+                            }
+                            return result;
+                        } else if ("toString".equals(method.getName()) && method.getParameterCount() == 0) {
+                            return BaseEntityRepositoryACM.class.getSimpleName() +
+                                    "(repository: " + repository + ", accessController: " + accessController + ")";
+                        } else {
+                            return method.invoke(repository, args);
+                        }
+                    } catch (final InvocationTargetException e) {
+                        throw e.getCause() == null ? e : e.getCause();
+                    }
+                });
+        log.info("Proxy created -> {}", acmProxy);
+        return acmProxy;
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static <T extends Long> Set<Long> toSetDistinct(final Iterable<T> i) {
         final Set<Long> set = new HashSet<>();
         i.forEach(set::add);

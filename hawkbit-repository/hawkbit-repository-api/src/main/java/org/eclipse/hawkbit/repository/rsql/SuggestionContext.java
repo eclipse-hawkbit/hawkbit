@@ -30,13 +30,10 @@ public class SuggestionContext {
 
     /**
      * Constructor.
-     * 
-     * @param rsqlQuery
-     *            the original RSQL based query the suggestions based on
-     * @param cursorPosition
-     *            the current cursor position
-     * @param suggestions
-     *            the suggestions for the current cursor position
+     *
+     * @param rsqlQuery the original RSQL based query the suggestions based on
+     * @param cursorPosition the current cursor position
+     * @param suggestions the suggestions for the current cursor position
      */
     public SuggestionContext(final String rsqlQuery, final int cursorPosition, final List<SuggestToken> suggestions) {
         this.rsqlQuery = rsqlQuery;
@@ -48,8 +45,16 @@ public class SuggestionContext {
         return suggestions;
     }
 
+    public void setSuggestions(final List<SuggestToken> suggestions) {
+        this.suggestions = suggestions;
+    }
+
     public int getCursorPosition() {
         return cursorPosition;
+    }
+
+    public void setCursorPosition(final int cursorPosition) {
+        this.cursorPosition = cursorPosition;
     }
 
     public String getRsqlQuery() {
@@ -58,13 +63,5 @@ public class SuggestionContext {
 
     public void setRsqlQuery(final String rsqlQuery) {
         this.rsqlQuery = rsqlQuery;
-    }
-
-    public void setCursorPosition(final int cursorPosition) {
-        this.cursorPosition = cursorPosition;
-    }
-
-    public void setSuggestions(final List<SuggestToken> suggestions) {
-        this.suggestions = suggestions;
     }
 }

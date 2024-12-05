@@ -15,16 +15,16 @@ import lombok.Getter;
  * Describing the fields of the TargetType model which can be used in the REST API
  */
 @Getter
-public enum TargetTypeFields implements FieldNameProvider {
+public enum TargetTypeFields implements RsqlQueryField {
 
     ID("id"),
     KEY("key"),
     NAME("name"),
     DESCRIPTION("description");
 
-    private final String fieldName;
+    private final String jpaEntityFieldName;
 
-    TargetTypeFields(final String fieldName) {
-        this.fieldName = fieldName;
+    TargetTypeFields(final String jpaEntityFieldName) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
     }
 }

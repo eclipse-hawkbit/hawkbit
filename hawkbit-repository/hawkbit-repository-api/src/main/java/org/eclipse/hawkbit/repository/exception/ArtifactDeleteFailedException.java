@@ -9,20 +9,17 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Thrown if artifact deletion failed.
- *
- *
- *
- *
  */
 public final class ArtifactDeleteFailedException extends AbstractServerRtException {
-    /**
-    *
-    */
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -34,16 +31,14 @@ public final class ArtifactDeleteFailedException extends AbstractServerRtExcepti
     }
 
     /**
-     * @param cause
-     *            for the exception
+     * @param cause for the exception
      */
     public ArtifactDeleteFailedException(final Throwable cause) {
         super(SpServerError.SP_ARTIFACT_DELETE_FAILED, cause);
     }
 
     /**
-     * @param message
-     *            of the error
+     * @param message of the error
      */
     public ArtifactDeleteFailedException(final String message) {
         super(message, SpServerError.SP_ARTIFACT_DELETE_FAILED);

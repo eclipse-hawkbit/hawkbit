@@ -20,8 +20,9 @@ import org.junit.jupiter.api.extension.Extension;
  */
 @Slf4j
 public class PostgreSqlTestDatabase extends AbstractSqlTestDatabase {
-    
+
     private static final String POSTGRESQL_URI_PATTERN = "jdbc:postgresql://{host}:{port}/{db}*";
+    private static final String CURRENT_SCHEMA_AND_SURROUNDINGS = "?currentSchema=";
 
     public PostgreSqlTestDatabase(final DatasourceContext context) {
         super(context);
@@ -30,7 +31,7 @@ public class PostgreSqlTestDatabase extends AbstractSqlTestDatabase {
     @Override
     protected PostgreSqlTestDatabase createRandomSchema() {
         log.info("\033[0;33mCreating postgreSql schema {} \033[0m", context.getRandomSchemaName());
-        final String uri = getBaseUri() + "?currentSchema=" + getSchemaName();
+        final String uri = getBaseUri() + CURRENT_SCHEMA_AND_SURROUNDINGS + getSchemaName();
         executeStatement(uri, "CREATE SCHEMA " + context.getRandomSchemaName() + ";");
         return this;
     }
@@ -38,13 +39,13 @@ public class PostgreSqlTestDatabase extends AbstractSqlTestDatabase {
     @Override
     protected void dropRandomSchema() {
         log.info("\033[0;33mDropping postgreSql schema {}\033[0m", context.getRandomSchemaName());
-        final String uri = getBaseUri() + "?currentSchema=" + getSchemaName();
+        final String uri = getBaseUri() + CURRENT_SCHEMA_AND_SURROUNDINGS + getSchemaName();
         executeStatement(uri, "DROP SCHEMA " + context.getRandomSchemaName() + " CASCADE;");
     }
 
     @Override
     protected String getRandomSchemaUri() {
-        return getBaseUri() + "?currentSchema=" + context.getRandomSchemaName();
+        return getBaseUri() + CURRENT_SCHEMA_AND_SURROUNDINGS + context.getRandomSchemaName();
     }
 
     private String getBaseUri() {

@@ -25,9 +25,7 @@ public interface AutoAssignExecutor {
     /**
      * Method performs an auto assign check for a specific device only
      *
-     * @param controllerId
-     *            of the device to check
+     * @param controllerId of the device to check
      */
     void checkSingleTarget(String controllerId);
-
 }

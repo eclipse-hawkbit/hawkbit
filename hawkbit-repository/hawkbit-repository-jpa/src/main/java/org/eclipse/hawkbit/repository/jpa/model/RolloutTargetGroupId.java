@@ -9,46 +9,36 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * Combined unique key of the table {@link RolloutTargetGroup}.
- *
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@Getter
 public class RolloutTargetGroupId implements Serializable {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private Long rolloutGroup;
     private Long target;
 
     /**
-     * default constructor necessary for JPA.
-     */
-    public RolloutTargetGroupId() {
-        // default constructor necessary for JPA, empty.
-    }
-
-    /**
      * Constructor.
-     * 
-     * @param rolloutGroup
-     *            the rollout group for this key
-     * @param target
-     *            the target for this key
+     *
+     * @param rolloutGroup the rollout group for this key
+     * @param target the target for this key
      */
     public RolloutTargetGroupId(final RolloutGroup rolloutGroup, final Target target) {
         this.rolloutGroup = rolloutGroup.getId();
         this.target = target.getId();
-    }
-
-    public Long getRolloutGroup() {
-        return rolloutGroup;
-    }
-
-    public Long getTarget() {
-        return target;
     }
 }

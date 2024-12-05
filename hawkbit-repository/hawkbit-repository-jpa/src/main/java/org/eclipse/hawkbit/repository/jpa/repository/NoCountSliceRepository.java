@@ -18,16 +18,14 @@ import org.springframework.lang.Nullable;
 /**
  * Repository interface that offers findAll with disabled count query.
  *
- * @param <T>
- *            entity type
+ * @param <T> entity type
  */
 public interface NoCountSliceRepository<T> {
 
     /**
      * Retrieves a slice of {@link BaseEntity}s without keeping the count updated
      *
-     * @param pageable
-     *            page to keep track of slices
+     * @param pageable page to keep track of slices
      * @return {@link BaseEntity}
      */
     Slice<T> findAllWithoutCount(Pageable pageable);
@@ -36,10 +34,8 @@ public interface NoCountSliceRepository<T> {
      * Retrieves a slice of {@link BaseEntity}s based on spec without keeping the
      * count updated
      *
-     * @param spec
-     *            to search for
-     * @param pageable
-     *            page to keep track of slices
+     * @param spec to search for
+     * @param pageable page to keep track of slices
      * @return {@link BaseEntity}
      */
     Slice<T> findAllWithoutCount(@Nullable Specification<T> spec, Pageable pageable);

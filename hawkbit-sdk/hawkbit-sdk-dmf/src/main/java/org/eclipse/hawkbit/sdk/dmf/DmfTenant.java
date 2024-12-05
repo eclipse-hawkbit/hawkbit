@@ -9,6 +9,12 @@
  */
 package org.eclipse.hawkbit.sdk.dmf;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+
 import lombok.Getter;
 import org.eclipse.hawkbit.sdk.Controller;
 import org.eclipse.hawkbit.sdk.Tenant;
@@ -16,14 +22,8 @@ import org.eclipse.hawkbit.sdk.dmf.amqp.Amqp;
 import org.eclipse.hawkbit.sdk.dmf.amqp.VHost;
 import org.springframework.amqp.core.Message;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
-
 /**
- * An in-memory simulated DMF Tenant to hold the controller twins in
- * memory and be able to retrieve them again.
+ * An in-memory simulated DMF Tenant to hold the controller twins in memory and be able to retrieve them again.
  */
 public class DmfTenant {
 
@@ -31,7 +31,6 @@ public class DmfTenant {
     private final Tenant tenant;
 
     private final Map<String, DmfController> controllers = new ConcurrentHashMap<>();
-    private final Amqp amqp;
     private final VHost vHost;
 
     public DmfTenant(final Tenant tenant, final Amqp amqp) {
@@ -40,7 +39,6 @@ public class DmfTenant {
 
     public DmfTenant(final Tenant tenant, final Amqp amqp, final boolean initVHost) {
         this.tenant = tenant;
-        this.amqp = amqp;
         this.vHost = amqp.getVhost(tenant.getDmf(), initVHost);
         this.vHost.register(this);
     }
@@ -66,6 +64,10 @@ public class DmfTenant {
 
     public Optional<DmfController> getController(final String controllerId) {
         return Optional.ofNullable(controllers.get(controllerId));
+    }
+
+    public Map<String, DmfController> controllers() {
+        return Collections.unmodifiableMap(controllers);
     }
 
     public void ping(final String correlationId, final BiConsumer<String, Message> listener) {

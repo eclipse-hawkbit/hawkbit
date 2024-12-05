@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.sdk;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.ToString;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 

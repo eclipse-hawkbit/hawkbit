@@ -15,6 +15,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.Arrays;
 import java.util.List;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
@@ -24,10 +27,6 @@ import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @Feature("Component Tests - Access Control")
 @Story("Test Target Type Access Controller")
@@ -59,7 +58,7 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
         // verify targetTypeManagement#findByName
         assertThat(targetTypeManagement.findByName(Pageable.unpaged(), permittedTargetType.getName()).getContent())
                 .hasSize(1).satisfies(results ->
-                    assertThat(results.get(0).getId()).isEqualTo(permittedTargetType.getId()));
+                        assertThat(results.get(0).getId()).isEqualTo(permittedTargetType.getId()));
         assertThat(targetTypeManagement.findByName(Pageable.unpaged(), hiddenTargetType.getName())).isEmpty();
 
         // verify targetTypeManagement#count
@@ -144,7 +143,7 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
         // verify targetTypeManagement#update for readOnlyTargetType is not possible
         assertThatThrownBy(() ->
                 targetTypeManagement.update(entityFactory.targetType().update(readOnlyTargetType.getId())
-                    .name(readOnlyTargetType.getName() + "/new").description("newDesc")))
+                        .name(readOnlyTargetType.getName() + "/new").description("newDesc")))
                 .isInstanceOf(InsufficientPermissionException.class);
     }
 

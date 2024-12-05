@@ -12,10 +12,6 @@ package org.eclipse.hawkbit.dmf.json.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -25,6 +21,9 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonValue;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 
 /**
  * JSON representation of a multi-action request.

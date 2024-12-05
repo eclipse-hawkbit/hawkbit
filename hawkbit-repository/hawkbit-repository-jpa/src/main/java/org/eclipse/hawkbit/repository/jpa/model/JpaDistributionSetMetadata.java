@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -19,27 +21,29 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 
 /**
  * Meta data for {@link DistributionSet}.
- *
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor needed for JPA entities.
+@Getter
 @IdClass(DsMetadataCompositeKey.class)
 @Entity
 @Table(name = "sp_ds_metadata")
 public class JpaDistributionSetMetadata extends AbstractJpaMetaData implements DistributionSetMetadata {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ds_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_ds"))
     private JpaDistributionSet distributionSet;
-
-    public JpaDistributionSetMetadata() {
-        // default public constructor for JPA
-    }
 
     public JpaDistributionSetMetadata(final String key, final String value) {
         super(key, value);
@@ -59,11 +63,6 @@ public class JpaDistributionSetMetadata extends AbstractJpaMetaData implements D
     }
 
     @Override
-    public DistributionSet getDistributionSet() {
-        return distributionSet;
-    }
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = super.hashCode();
@@ -80,12 +79,9 @@ public class JpaDistributionSetMetadata extends AbstractJpaMetaData implements D
         }
         final JpaDistributionSetMetadata other = (JpaDistributionSetMetadata) obj;
         if (distributionSet == null) {
-            if (other.distributionSet != null) {
-                return false;
-            }
-        } else if (!distributionSet.equals(other.distributionSet)) {
-            return false;
+            return other.distributionSet == null;
+        } else {
+            return distributionSet.equals(other.distributionSet);
         }
-        return true;
     }
 }

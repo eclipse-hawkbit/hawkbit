@@ -11,15 +11,14 @@ package org.eclipse.hawkbit.amqp;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.util.ErrorHandler;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Feature("Unit Tests - Delegating Conditional Error Handler")
 @Story("Delegating Conditional Error Handler")
@@ -27,19 +26,19 @@ public class DelegatingAmqpErrorHandlerTest {
 
     @Test
     @Description("Verifies that with a list of conditional error handlers, the error is delegated to specific handler.")
-    public void verifyDelegationHandling(){
+    public void verifyDelegationHandling() {
         List<AmqpErrorHandler> handlers = new ArrayList<>();
         handlers.add(new IllegalArgumentExceptionHandler());
         handlers.add(new IndexOutOfBoundsExceptionHandler());
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .as("Expected handled exception to be of type IllegalArgumentException")
                 .isThrownBy(() -> new DelegatingConditionalErrorHandler(handlers, new DefaultErrorHandler())
-                                .handleError(new Throwable(new IllegalArgumentException())));
+                        .handleError(new Throwable(new IllegalArgumentException())));
     }
 
     @Test
     @Description("Verifies that default handler is used if no handlers are defined for the specific exception.")
-    public void verifyDefaultDelegationHandling(){
+    public void verifyDefaultDelegationHandling() {
         List<AmqpErrorHandler> handlers = new ArrayList<>();
         handlers.add(new IllegalArgumentExceptionHandler());
         handlers.add(new IndexOutOfBoundsExceptionHandler());

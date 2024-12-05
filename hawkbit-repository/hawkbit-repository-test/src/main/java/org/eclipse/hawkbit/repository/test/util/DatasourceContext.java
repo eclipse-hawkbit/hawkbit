@@ -55,10 +55,6 @@ public class DatasourceContext {
                 System.getProperty(upperCaseVariant(SPRING_DATABASE_PASSWORD_KEY)));
     }
 
-    private static String upperCaseVariant(final String key) {
-        return key.toUpperCase().replace('.', '_');
-    }
-    
     public String getDatabase() {
         return database;
     }
@@ -82,7 +78,11 @@ public class DatasourceContext {
     public boolean isNotProperlyConfigured() {
         log.debug("Datasource environment variables: [database: {}, username: {}, password: {}, datasourceUrl: {}]",
                 database, username, password, datasourceUrl);
-        
+
         return database == null || datasourceUrl == null || username == null || password == null;
+    }
+
+    private static String upperCaseVariant(final String key) {
+        return key.toUpperCase().replace('.', '_');
     }
 }

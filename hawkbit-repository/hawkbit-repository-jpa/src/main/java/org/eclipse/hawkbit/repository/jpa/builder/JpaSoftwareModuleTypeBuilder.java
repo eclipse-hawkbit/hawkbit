@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 
 /**
  * Builder implementation for {@link SoftwareModuleType}.
- *
  */
 public class JpaSoftwareModuleTypeBuilder implements SoftwareModuleTypeBuilder {
 
@@ -30,5 +29,4 @@ public class JpaSoftwareModuleTypeBuilder implements SoftwareModuleTypeBuilder {
     public SoftwareModuleTypeCreate create() {
         return new JpaSoftwareModuleTypeCreate();
     }
-
 }

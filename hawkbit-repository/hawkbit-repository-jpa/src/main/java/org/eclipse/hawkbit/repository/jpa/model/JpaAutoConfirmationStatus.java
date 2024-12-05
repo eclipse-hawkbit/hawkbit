@@ -9,11 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
-import org.eclipse.hawkbit.repository.model.NamedEntity;
-import org.eclipse.hawkbit.repository.model.Target;
-import org.springframework.util.StringUtils;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -24,6 +19,16 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
+import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.Target;
+import org.springframework.util.StringUtils;
+
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor needed for JPA entities.
+@Getter
 @Entity
 @Table(name = "sp_target_conf_status")
 public class JpaAutoConfirmationStatus extends AbstractJpaTenantAwareBaseEntity implements AutoConfirmationStatus {
@@ -40,13 +45,6 @@ public class JpaAutoConfirmationStatus extends AbstractJpaTenantAwareBaseEntity 
     @Size(max = NamedEntity.DESCRIPTION_MAX_SIZE)
     private String remark;
 
-    /**
-     * Default constructor needed for JPA entities.
-     */
-    public JpaAutoConfirmationStatus() {
-        // Default constructor needed for JPA entities.
-    }
-
     public JpaAutoConfirmationStatus(final String initiator, final String remark, final Target target) {
         this.target = (JpaTarget) target;
         this.initiator = StringUtils.isEmpty(initiator) ? null : initiator;
@@ -54,23 +52,8 @@ public class JpaAutoConfirmationStatus extends AbstractJpaTenantAwareBaseEntity 
     }
 
     @Override
-    public Target getTarget() {
-        return target;
-    }
-
-    @Override
-    public String getInitiator() {
-        return initiator;
-    }
-
-    @Override
     public long getActivatedAt() {
         return getCreatedAt();
-    }
-
-    @Override
-    public String getRemark() {
-        return remark;
     }
 
     @Override
@@ -81,18 +64,17 @@ public class JpaAutoConfirmationStatus extends AbstractJpaTenantAwareBaseEntity 
         // https://docs.oracle.com/en/java/javase/17/text-blocks/index.html#normalization-of-line-terminators
         // nevertheless of the end of line of the file (\r\n, \n or \r) the result will contains \n
         return """
-            Assignment automatically confirmed by initiator '%s'.\040
-            
-            Auto confirmation activated by system user: '%s'\040
-            
-            Remark: %s""".formatted(formattedInitiator, createdByRolloutsUser, remarkMessage);
+                Assignment automatically confirmed by initiator '%s'.\040
+                
+                Auto confirmation activated by system user: '%s'\040
+                
+                Remark: %s""".formatted(formattedInitiator, createdByRolloutsUser, remarkMessage);
     }
 
     @Override
     public String toString() {
-        return "AutoConfirmationStatus [id=" + getId() + ", target=" + target.getControllerId() + ", initiator="
-                + initiator + ", bosch_user=" + getCreatedBy() + ", activatedAt=" + getCreatedAt() + ", remark="
-                + remark + "]";
+        return "AutoConfirmationStatus [id=" + getId() + ", target=" + target.getControllerId() +
+                ", initiator=" + initiator + ", bosch_user=" + getCreatedBy() + ", activatedAt=" + getCreatedAt() +
+                ", remark=" + remark + "]";
     }
-
 }

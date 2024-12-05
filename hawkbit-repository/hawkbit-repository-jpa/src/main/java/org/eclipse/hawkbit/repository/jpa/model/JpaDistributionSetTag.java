@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.util.Collections;
+import java.io.Serial;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -19,67 +19,58 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
-import org.eclipse.persistence.annotations.CascadeOnDelete;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
- * A {@link DistributionSetTag} is used to describe DistributionSet attributes
- * and use them also for filtering the DistributionSet list.
- *
+ * A {@link DistributionSetTag} is used to describe DistributionSet attributes and use them also for filtering the DistributionSet list.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor needed for JPA entities.
 @Entity
-@Table(name = "sp_distributionset_tag", indexes = {
-        @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id"),
-        @Index(name = "sp_idx_distribution_set_tag_01", columnList = "tenant,name") }, uniqueConstraints = @UniqueConstraint(columnNames = {
-                "name", "tenant" }, name = "uk_ds_tag"))
+@Table(name = "sp_distributionset_tag",
+        indexes = {
+                @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id"),
+                @Index(name = "sp_idx_distribution_set_tag_01", columnList = "tenant,name") },
+        uniqueConstraints = @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_ds_tag"))
 public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag, EventAwareEntity {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
-    @CascadeOnDelete
     @ManyToMany(mappedBy = "tags", targetEntity = JpaDistributionSet.class, fetch = FetchType.LAZY)
     private List<DistributionSet> assignedToDistributionSet;
 
     /**
      * Public constructor.
      *
-     * @param name
-     *            of the {@link DistributionSetTag}
-     * @param description
-     *            of the {@link DistributionSetTag}
-     * @param colour
-     *            of tag in UI
+     * @param name of the {@link DistributionSetTag}
+     * @param description of the {@link DistributionSetTag}
+     * @param colour of tag in UI
      */
     public JpaDistributionSetTag(final String name, final String description, final String colour) {
         super(name, description, colour);
     }
 
-    /**
-     * Default constructor for JPA.
-     */
-    public JpaDistributionSetTag() {
-        // Default constructor for JPA.
-    }
-
     @Override
-    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new DistributionSetTagCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new DistributionSetTagUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+    public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionSetTagDeletedEvent(
                 getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
 

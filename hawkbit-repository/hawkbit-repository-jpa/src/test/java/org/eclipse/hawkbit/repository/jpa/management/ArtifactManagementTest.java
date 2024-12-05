@@ -27,6 +27,9 @@ import java.util.concurrent.Callable;
 
 import jakarta.validation.ConstraintViolationException;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
@@ -56,10 +59,6 @@ import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-
 /**
  * Test class for {@link ArtifactManagement}.
  */
@@ -68,8 +67,7 @@ import io.qameta.allure.Story;
 public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
-    @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
-            + "of Optional not present.")
+    @Description("Verifies that management get access react as specfied on calls for non existing entities by means of Optional not present.")
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
     public void nonExistingEntityAccessReturnsNotPresent() {
         final SoftwareModule module = testdataFactory.createSoftwareModuleOs();
@@ -280,7 +278,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         final int artifactSize = 5 * 1024;
         try (final InputStream inputStream1 = new RandomGeneratedInputStream(artifactSize);
-             final InputStream inputStream2 = new RandomGeneratedInputStream(artifactSize)) {
+                final InputStream inputStream2 = new RandomGeneratedInputStream(artifactSize)) {
 
             final Artifact artifact1 = createArtifactForSoftwareModule("file1", sm.getId(), artifactSize, inputStream1);
             final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize,
@@ -294,10 +292,10 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
             assertThat(
                     binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
-                            .isNotNull();
+                    .isNotNull();
             assertThat(
                     binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact2.getSha1Hash()))
-                            .isNotNull();
+                    .isNotNull();
 
             artifactManagement.delete(artifact1.getId());
 
@@ -305,25 +303,24 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
             assertThat(
                     binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
-                            .isNull();
+                    .isNull();
             assertThat(
                     binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact2.getSha1Hash()))
-                            .isNotNull();
+                    .isNotNull();
 
             artifactManagement.delete(artifact2.getId());
             assertThat(
                     binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact2.getSha1Hash()))
-                            .isNull();
+                    .isNull();
 
             assertThat(artifactRepository.findAll()).hasSize(0);
         }
     }
 
     @Test
-    @Description("Test the deletion of an artifact metadata where the binary is still linked to another "
-            + "metadata element. The expected result is that the metadata is deleted but the binary kept.")
+    @Description("Test the deletion of an artifact metadata where the binary is still linked to another metadata element. " +
+            "The expected result is that the metadata is deleted but the binary kept.")
     public void deleteDuplicateArtifacts() throws IOException {
-
         final JpaSoftwareModule sm = softwareModuleRepository
                 .save(new JpaSoftwareModule(osType, "name 1", "version 1"));
         final JpaSoftwareModule sm2 = softwareModuleRepository
@@ -335,29 +332,21 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         try (final InputStream inputStream1 = new ByteArrayInputStream(randomBytes);
                 final InputStream inputStream2 = new ByteArrayInputStream(randomBytes)) {
             final Artifact artifact1 = createArtifactForSoftwareModule("file1", sm.getId(), artifactSize, inputStream1);
-            final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize,
-                    inputStream2);
+            final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize, inputStream2);
 
-            assertThat(artifactRepository.findAll()).hasSize(2);
             assertThat(artifact1.getId()).isNotNull();
             assertThat(artifact2.getId()).isNotNull();
-            assertThat(((JpaArtifact) artifact1).getSha1Hash()).isEqualTo(((JpaArtifact) artifact2).getSha1Hash());
-
-            assertThat(
-                    binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
-                            .isNotNull();
+            assertThat((artifact1).getSha1Hash()).isEqualTo(artifact2.getSha1Hash());
+            assertThat(artifactRepository.findAll()).hasSize(2);
+            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash())).isNotNull();
 
             artifactManagement.delete(artifact1.getId());
-            assertThat(
-                    binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
-                            .isNotNull();
-            assertThat(artifactRepository.findAll()).hasSize(1);
             assertThat(artifactRepository.existsById(artifact1.getId())).isFalse();
+            assertThat(artifactRepository.findAll()).hasSize(1);
+            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash())).isNotNull();
 
             artifactManagement.delete(artifact2.getId());
-            assertThat(
-                    binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash()))
-                            .isNull();
+            assertThat(binaryArtifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), artifact1.getSha1Hash())).isNull();
             assertThat(artifactRepository.findAll()).hasSize(0);
         }
     }
@@ -422,7 +411,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(runAsTenant(tenant1, () -> artifactRepository
                 .countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(artifactTenant2.getSha1Hash(), tenant2)))
-                        .isLessThanOrEqualTo(1);
+                .isLessThanOrEqualTo(1);
         runAsTenant(tenant2, () -> {
             artifactRepository.deleteById(artifactTenant2.getId());
             return null;
@@ -436,8 +425,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     public void findArtifact() throws IOException {
         final int artifactSize = 5 * 1024;
         try (final InputStream inputStream = new RandomGeneratedInputStream(artifactSize)) {
-            final Artifact artifact = createArtifactForSoftwareModule("file1",
-                    testdataFactory.createSoftwareModuleOs().getId(), artifactSize, inputStream);
+            final Artifact artifact = createArtifactForSoftwareModule(
+                    "file1", testdataFactory.createSoftwareModuleOs().getId(), artifactSize, inputStream);
             assertThat(artifactManagement.get(artifact.getId()).get()).isEqualTo(artifact);
         }
     }
@@ -579,6 +568,10 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         }
     }
 
+    private static byte[] randomBytes(final int len) {
+        return RandomStringUtils.randomAlphanumeric(len).getBytes();
+    }
+
     private DbArtifactHash calcHashes(final byte[] input) throws NoSuchAlgorithmException {
         final String sha1Hash = toBase16Hash("SHA1", input);
         final String md5Hash = toBase16Hash("MD5", input);
@@ -604,10 +597,6 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     private Artifact createArtifactForSoftwareModule(final String filename, final long moduleId, final int artifactSize,
             final InputStream inputStream) {
         return artifactManagement.create(new ArtifactUpload(inputStream, moduleId, filename, false, artifactSize));
-    }
-
-    private static byte[] randomBytes(final int len) {
-        return RandomStringUtils.randomAlphanumeric(len).getBytes();
     }
 
     private <T> T runAsTenant(final String tenant, final Callable<T> callable) throws Exception {

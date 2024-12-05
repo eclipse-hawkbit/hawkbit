@@ -23,16 +23,14 @@ import org.eclipse.hawkbit.repository.jpa.EntityInterceptor;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 
 /**
- * Entity listener which calls the callback's of all registered entity
- * interceptors.
+ * Entity listener which calls the callback's of all registered entity interceptors.
  */
 public class EntityInterceptorListener {
 
     /**
      * Callback for lifecyle event <i>pre persist</i>.
      *
-     * @param entity
-     *            the JPA entity which this listener is associated with
+     * @param entity the JPA entity which this listener is associated with
      */
     @PrePersist
     public void prePersist(final Object entity) {
@@ -42,8 +40,7 @@ public class EntityInterceptorListener {
     /**
      * Callback for lifecyle event <i>post persist</i>.
      *
-     * @param entity
-     *            the JPA entity which this listener is associated with
+     * @param entity the JPA entity which this listener is associated with
      */
     @PostPersist
     public void postPersist(final Object entity) {
@@ -53,8 +50,7 @@ public class EntityInterceptorListener {
     /**
      * Callback for lifecyle event <i>post remove</i>.
      *
-     * @param entity
-     *            the JPA entity which this listener is associated with
+     * @param entity the JPA entity which this listener is associated with
      */
     @PostRemove
     public void postRemove(final Object entity) {
@@ -64,8 +60,7 @@ public class EntityInterceptorListener {
     /**
      * Callback for lifecyle event <i>pre remove</i>.
      *
-     * @param entity
-     *            the JPA entity which this listener is associated with
+     * @param entity the JPA entity which this listener is associated with
      */
     @PreRemove
     public void preRemove(final Object entity) {
@@ -75,8 +70,7 @@ public class EntityInterceptorListener {
     /**
      * Callback for lifecyle event <i>post load</i>.
      *
-     * @param entity
-     *            the JPA entity which this listener is associated with
+     * @param entity the JPA entity which this listener is associated with
      */
     @PostLoad
     public void postLoad(final Object entity) {
@@ -86,8 +80,7 @@ public class EntityInterceptorListener {
     /**
      * Callback for lifecyle event <i>pre update</i>.
      *
-     * @param entity
-     *            the JPA entity which this listener is associated with
+     * @param entity the JPA entity which this listener is associated with
      */
     @PreUpdate
     public void preUpdate(final Object entity) {
@@ -97,8 +90,7 @@ public class EntityInterceptorListener {
     /**
      * Callback for lifecyle event <i>post update</i>.
      *
-     * @param entity
-     *            the JPA entity which this listener is associated with
+     * @param entity the JPA entity which this listener is associated with
      */
     @PostUpdate
     public void postUpdate(final Object entity) {

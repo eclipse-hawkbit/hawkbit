@@ -9,6 +9,10 @@
  */
 package org.eclipse.hawkbit.event;
 
+import io.protostuff.LinkedBuffer;
+import io.protostuff.ProtobufIOUtil;
+import io.protostuff.Schema;
+import io.protostuff.runtime.RuntimeSchema;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.messaging.Message;
@@ -17,34 +21,22 @@ import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.util.MimeType;
 
-import io.protostuff.LinkedBuffer;
-import io.protostuff.ProtobufIOUtil;
-import io.protostuff.Schema;
-import io.protostuff.runtime.RuntimeSchema;
-
 /**
- * A customize message converter for the spring cloud events. The converter is
- * registered for the application/binary+protostuff type.
- * 
- * The clazz-type-information is encoded into the message payload infront with a
- * length of {@link #EVENT_TYPE_LENGTH}. This is necessary due in case of
- * rabbitMQ batching the message headers will be merged together and custom
- * message header information will get lost. So in this implementation the
- * information about the event-type is encoded in the payload of the message
- * directly using the encoded values of {@link EventType}.
+ * A customize message converter for the spring cloud events. The converter is registered for the application/binary+protostuff type.
+ * <p/>
+ * The clazz-type-information is encoded into the message payload infront with a length of {@link #EVENT_TYPE_LENGTH}. This is necessary
+ * due in case of rabbitMQ batching the message headers will be merged together and custom message header information will get lost.
+ * So in this implementation the information about the event-type is encoded in the payload of the message directly using the encoded
+ * values of {@link EventType}.
  */
 @Slf4j
 public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
 
     public static final MimeType APPLICATION_BINARY_PROTOSTUFF = new MimeType("application", "binary+protostuff");
-    /**
-     * The length of the class type length of the payload.
-     */
+
+    /** The length of the class type length of the payload. */
     private static final byte EVENT_TYPE_LENGTH = 2;
 
-    /**
-     * Constructor.
-     */
     public BusProtoStuffMessageConverter() {
         super(APPLICATION_BINARY_PROTOSTUFF);
     }
@@ -55,8 +47,7 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
     }
 
     @Override
-    public Object convertFromInternal(final Message<?> message, final Class<?> targetClass,
-            final Object conversionHint) {
+    public Object convertFromInternal(final Message<?> message, final Class<?> targetClass, final Object conversionHint) {
         final Object objectPayload = message.getPayload();
         if (objectPayload instanceof byte[] payload) {
             final byte[] clazzHeader = extractClazzHeader(payload);
@@ -69,13 +60,9 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
     }
 
     @Override
-    protected Object convertToInternal(final Object payload, final MessageHeaders headers,
-            final Object conversionHint) {
-
+    protected Object convertToInternal(final Object payload, final MessageHeaders headers, final Object conversionHint) {
         final byte[] clazzHeader = writeClassHeader(payload.getClass());
-
         final byte[] writeContent = writeContent(payload);
-
         return mergeClassHeaderAndContent(clazzHeader, writeContent);
     }
 
@@ -85,8 +72,7 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
             log.error("Cannot read clazz header for given EventType value {}, missing mapping", eventType.getValue());
             throw new MessageConversionException("Missing mapping of EventType for value " + eventType.getValue());
         }
-        @SuppressWarnings("unchecked")
-        final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema(targetClass);
+        @SuppressWarnings("unchecked") final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema(targetClass);
         final Object deserializeEvent = schema.newMessage();
         ProtobufIOUtil.mergeFrom(content, deserializeEvent, schema);
         return deserializeEvent;
@@ -120,8 +106,7 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
 
     private static byte[] writeContent(final Object payload) {
         final Class<?> serializeClass = payload.getClass();
-        @SuppressWarnings("unchecked")
-        final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema(serializeClass);
+        @SuppressWarnings("unchecked") final Schema<Object> schema = (Schema<Object>) RuntimeSchema.getSchema(serializeClass);
         final LinkedBuffer buffer = LinkedBuffer.allocate();
         return ProtobufIOUtil.toByteArray(payload, schema, buffer);
     }
@@ -132,8 +117,7 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
             log.error("There is no mapping to EventType for the given class {}", clazz);
             throw new MessageConversionException("Missing EventType for given class : " + clazz);
         }
-        @SuppressWarnings("unchecked")
-        final Schema<Object> schema = (Schema<Object>) RuntimeSchema
+        @SuppressWarnings("unchecked") final Schema<Object> schema = (Schema<Object>) RuntimeSchema
                 .getSchema((Class<?>) EventType.class);
         final LinkedBuffer buffer = LinkedBuffer.allocate();
         return ProtobufIOUtil.toByteArray(clazzEventType, schema, buffer);

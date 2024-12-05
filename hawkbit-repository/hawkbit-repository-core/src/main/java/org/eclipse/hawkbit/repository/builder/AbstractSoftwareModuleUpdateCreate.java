@@ -17,16 +17,14 @@ import org.springframework.util.StringUtils;
 /**
  * Create and update builder DTO.
  *
- * @param <T>
- *            update or create builder interface
+ * @param <T> update or create builder interface
  */
 public abstract class AbstractSoftwareModuleUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
+
     @ValidString
     protected String version;
-
     @ValidString
     protected String vendor;
-
     @ValidString
     protected String type;
 
@@ -56,5 +54,4 @@ public abstract class AbstractSoftwareModuleUpdateCreate<T> extends AbstractName
     public Optional<String> getVersion() {
         return Optional.ofNullable(version);
     }
-
 }

@@ -15,13 +15,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 
-import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
-
 import com.cronutils.model.Cron;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Repository")
@@ -48,7 +46,7 @@ public class MaintenanceScheduleHelperTest {
         final String duration = "10";
         assertThatThrownBy(() -> MaintenanceScheduleHelper.validateDuration(duration))
                 .isInstanceOf(InvalidMaintenanceScheduleException.class).hasMessage("Provided duration is not valid")
-            .extracting("durationErrorIndex").isEqualTo(2);
+                .extracting("durationErrorIndex").isEqualTo(2);
     }
 
     @Test
@@ -91,7 +89,7 @@ public class MaintenanceScheduleHelperTest {
         final String timezone = ZonedDateTime.now().getOffset().getId().replace("Z", "+00:00");
         assertThatThrownBy(
                 () -> MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone))
-                        .isInstanceOf(InvalidMaintenanceScheduleException.class)
-                        .hasMessage("No valid maintenance window available after current time");
+                .isInstanceOf(InvalidMaintenanceScheduleException.class)
+                .hasMessage("No valid maintenance window available after current time");
     }
 }

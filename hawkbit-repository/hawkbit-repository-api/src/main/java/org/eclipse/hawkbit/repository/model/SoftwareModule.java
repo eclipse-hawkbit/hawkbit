@@ -56,8 +56,7 @@ public interface SoftwareModule extends NamedVersionedEntity {
     boolean isDeleted();
 
     /**
-     * @param artifactId
-     *            to look for
+     * @param artifactId to look for
      * @return found {@link Artifact}
      */
     default Optional<Artifact> getArtifact(final Long artifactId) {
@@ -65,8 +64,7 @@ public interface SoftwareModule extends NamedVersionedEntity {
     }
 
     /**
-     * @param fileName
-     *            to look for
+     * @param fileName to look for
      * @return found {@link Artifact}
      */
     default Optional<Artifact> getArtifactByFilename(final String fileName) {

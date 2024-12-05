@@ -9,35 +9,28 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import java.io.Serial;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityDeletedEvent;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 /**
- *
  * Defines the remote event of deleting a {@link TargetFilterQuery}.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
 public class TargetFilterQueryDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
 
+    @Serial
     private static final long serialVersionUID = 2L;
 
     /**
-     * Default constructor.
-     */
-    public TargetFilterQueryDeletedEvent() {
-        // for serialization libs like jackson
-    }
-
-    /**
-     *
-     * @param tenant
-     *            the tenant
-     * @param entityId
-     *            the entity id
-     * @param entityClass
-     *            the entity class
-     * @param applicationId
-     *            the origin application id
+     * @param tenant the tenant
+     * @param entityId the entity id
+     * @param entityClass the entity class
+     * @param applicationId the origin application id
      */
     public TargetFilterQueryDeletedEvent(final String tenant, final Long entityId,
             final Class<? extends TenantAwareBaseEntity> entityClass, final String applicationId) {

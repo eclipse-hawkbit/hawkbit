@@ -33,16 +33,15 @@ public final class SoftwareModuleJsonMatcher {
      * <code>null</code>
      * <p>
      * For example:
-     * 
+     *
      * <pre>
      * List<SoftwareModule> modules;
      * List<org.eclipse.hawkbit.dmf.json.model.SoftwareModule> expectedModules;
-     * 
+     *
      * assertThat(modules, containsExactly(expectedModules));
      * </pre>
-     * 
-     * @param expectedModules
-     *            the json sofware modules.
+     *
+     * @param expectedModules the json sofware modules.
      */
     public static SoftwareModulesMatcher containsExactly(final List<DmfSoftwareModule> expectedModules) {
         return new SoftwareModulesMatcher(expectedModules);
@@ -56,13 +55,22 @@ public final class SoftwareModuleJsonMatcher {
             this.expectedModules = expectedModules;
         }
 
+        @Override
+        public boolean matches(final Object actualValue) {
+            return containsExactly(actualValue);
+        }
+
+        @Override
+        public void describeTo(final Description description) {
+            description.appendValue(expectedModules);
+        }
+
         boolean containsExactly(final Object actual) {
             if (actual == null) {
                 return expectedModules == null;
             }
 
-            @SuppressWarnings("unchecked")
-            final Collection<SoftwareModule> modules = (Collection<SoftwareModule>) actual;
+            @SuppressWarnings("unchecked") final Collection<SoftwareModule> modules = (Collection<SoftwareModule>) actual;
 
             return expectedModules.stream().allMatch(e -> existsIn(e, modules));
         }
@@ -72,16 +80,6 @@ public final class SoftwareModuleJsonMatcher {
                     .anyMatch(e -> module.getModuleType().equals(e.getType().getKey())
                             && module.getModuleVersion().equals(e.getVersion())
                             && module.getArtifacts().size() == e.getArtifacts().size());
-        }
-
-        @Override
-        public boolean matches(final Object actualValue) {
-            return containsExactly(actualValue);
-        }
-
-        @Override
-        public void describeTo(final Description description) {
-            description.appendValue(expectedModules);
         }
     }
 

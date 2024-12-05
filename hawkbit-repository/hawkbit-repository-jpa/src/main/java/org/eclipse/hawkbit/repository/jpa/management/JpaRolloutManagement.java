@@ -24,9 +24,10 @@ import java.util.stream.Collectors;
 import jakarta.validation.ConstraintDeclarationException;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
-
 import jakarta.validation.constraints.NotNull;
+
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -37,7 +38,6 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
 import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
@@ -106,34 +106,9 @@ public class JpaRolloutManagement implements RolloutManagement {
     private static final List<RolloutStatus> ACTIVE_ROLLOUTS = Arrays.asList(RolloutStatus.CREATING,
             RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING,
             RolloutStatus.STOPPING);
-
     private static final List<RolloutStatus> ROLLOUT_STATUS_STOPPABLE = Arrays.asList(RolloutStatus.RUNNING,
             RolloutStatus.CREATING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.STARTING,
             RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.APPROVAL_DENIED);
-
-    @Autowired
-    private RepositoryProperties repositoryProperties;
-
-    @Autowired
-    private RolloutRepository rolloutRepository;
-
-    @Autowired
-    private RolloutGroupRepository rolloutGroupRepository;
-
-    @Autowired
-    private ActionRepository actionRepository;
-
-    @Autowired
-    private AfterTransactionCommitExecutor afterCommit;
-
-    @Autowired
-    private QuotaManagement quotaManagement;
-
-    @Autowired
-    private RolloutStatusCache rolloutStatusCache;
-
-    @Autowired
-    private StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction;
 
     private final TargetManagement targetManagement;
     private final DistributionSetManagement distributionSetManagement;
@@ -144,6 +119,22 @@ public class JpaRolloutManagement implements RolloutManagement {
     private final EventPublisherHolder eventPublisherHolder;
     private final ContextAware contextAware;
     private final Database database;
+    @Autowired
+    private RepositoryProperties repositoryProperties;
+    @Autowired
+    private RolloutRepository rolloutRepository;
+    @Autowired
+    private RolloutGroupRepository rolloutGroupRepository;
+    @Autowired
+    private ActionRepository actionRepository;
+    @Autowired
+    private AfterTransactionCommitExecutor afterCommit;
+    @Autowired
+    private QuotaManagement quotaManagement;
+    @Autowired
+    private RolloutStatusCache rolloutStatusCache;
+    @Autowired
+    private StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction;
 
     public JpaRolloutManagement(final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement, final EventPublisherHolder eventPublisherHolder,
@@ -163,40 +154,35 @@ public class JpaRolloutManagement implements RolloutManagement {
         this.contextAware = contextAware;
     }
 
-    @Override
-    public Page<Rollout> findAll(final Pageable pageable, final boolean deleted) {
-        return JpaManagementHelper.findAllWithCountBySpec(rolloutRepository, pageable, Collections
-                .singletonList(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort())));
+    public static String createRolloutLockKey(final String tenant) {
+        return tenant + "-rollout";
+    }
+
+    public void publishRolloutGroupCreatedEventAfterCommit(final RolloutGroup group, final Rollout rollout) {
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
+                new RolloutGroupCreatedEvent(group, rollout.getId(), eventPublisherHolder.getApplicationId())));
     }
 
     @Override
-    public Page<Rollout> findByRsql(final Pageable pageable, final String rsqlParam, final boolean deleted) {
-        final List<Specification<JpaRollout>> specList = new ArrayList<>(2);
-        specList.add(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
-        specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort()));
-
-        return JpaManagementHelper.findAllWithCountBySpec(rolloutRepository, pageable, specList);
+    public long count() {
+        return rolloutRepository.count(
+                RolloutSpecification.isDeletedWithDistributionSet(false, Sort.by(Direction.DESC, JpaRollout_.ID)));
     }
 
     @Override
-    public Optional<Rollout> get(final long rolloutId) {
-        return rolloutRepository.findById(rolloutId).map(Rollout.class::cast);
+    public long countByFilters(final String searchText) {
+        return rolloutRepository.count(RolloutSpecification.likeName(searchText, false));
     }
 
     @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout create(@NotNull @Valid RolloutCreate create, int amountGroup, boolean confirmationRequired,
-            @NotNull RolloutGroupConditions conditions) {
-        return create(create, amountGroup, confirmationRequired, conditions, null);
+    public long countByDistributionSetIdAndRolloutIsStoppable(final long setId) {
+        return rolloutRepository.countByDistributionSetIdAndStatusIn(setId, ROLLOUT_STATUS_STOPPABLE);
     }
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout create(final RolloutCreate rollout, final int amountGroup, final boolean confirmationRequired,
             final RolloutGroupConditions conditions, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
         if (amountGroup < 0) {
@@ -204,7 +190,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         } else if (amountGroup == 0) {
             if (dynamicRolloutGroupTemplate == null) {
                 throw new ValidationException(
-                    "When amount of groups is 0, the rollouts shall be dynamic and a dynamic group template must be provided");
+                        "When amount of groups is 0, the rollouts shall be dynamic and a dynamic group template must be provided");
             }
         } else {
             RolloutHelper.verifyRolloutGroupAmount(amountGroup, quotaManagement);
@@ -221,8 +207,17 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Rollout create(@NotNull @Valid RolloutCreate create, int amountGroup, boolean confirmationRequired,
+            @NotNull RolloutGroupConditions conditions) {
+        return create(create, amountGroup, confirmationRequired, conditions, null);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout create(final RolloutCreate rollout, final List<RolloutGroupCreate> groups,
             final RolloutGroupConditions conditions) {
         if (groups.isEmpty()) {
@@ -232,6 +227,315 @@ public class JpaRolloutManagement implements RolloutManagement {
         final JpaRollout rolloutRequest = (JpaRollout) rollout.build();
         final JpaRollout savedRollout = createRollout(rolloutRequest, false);
         return createRolloutGroups(groups, conditions, savedRollout);
+    }
+
+    @Override
+    @Async
+    public ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(final List<RolloutGroupCreate> groups,
+            final String targetFilter, final Long createdAt, final Long dsTypeId) {
+
+        final TargetCount targets = calculateTargets(targetFilter, createdAt, dsTypeId);
+        long totalTargets = targets.total();
+        final String baseFilter = targets.filter();
+
+        if (totalTargets == 0) {
+            throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
+        }
+
+        return new AsyncResult<>(
+                validateTargetsInGroups(groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()),
+                        baseFilter, totalTargets, dsTypeId));
+    }
+
+    @Override
+    public Page<Rollout> findAll(final Pageable pageable, final boolean deleted) {
+        return JpaManagementHelper.findAllWithCountBySpec(rolloutRepository, pageable, Collections
+                .singletonList(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort())));
+    }
+
+    @Override
+    public Slice<Rollout> findAllWithDetailedStatus(final Pageable pageable, final boolean deleted) {
+        final Slice<Rollout> rollouts = JpaManagementHelper.findAllWithoutCountBySpec(rolloutRepository, pageable,
+                Collections
+                        .singletonList(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort())));
+        setRolloutStatusDetails(rollouts);
+        return rollouts;
+    }
+
+    @Override
+    public Page<Rollout> findByRsql(final Pageable pageable, final String rsqlParam, final boolean deleted) {
+        final List<Specification<JpaRollout>> specList = new ArrayList<>(2);
+        specList.add(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
+        specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort()));
+
+        return JpaManagementHelper.findAllWithCountBySpec(rolloutRepository, pageable, specList);
+    }
+
+    @Override
+    public Slice<Rollout> findByFiltersWithDetailedStatus(final Pageable pageable, final String searchText,
+            final boolean deleted) {
+        final Slice<Rollout> findAll = JpaManagementHelper.findAllWithoutCountBySpec(rolloutRepository, pageable,
+                Collections.singletonList(RolloutSpecification.likeName(searchText, deleted)));
+        setRolloutStatusDetails(findAll);
+        return findAll;
+    }
+
+    @Override
+    public List<Long> findActiveRollouts() {
+        return rolloutRepository.findByStatusIn(ACTIVE_ROLLOUTS);
+    }
+
+    @Override
+    public Optional<Rollout> get(final long rolloutId) {
+        return rolloutRepository.findById(rolloutId).map(Rollout.class::cast);
+    }
+
+    @Override
+    public Optional<Rollout> getByName(final String rolloutName) {
+        return rolloutRepository.findByName(rolloutName);
+    }
+
+    @Override
+    public Optional<Rollout> getWithDetailedStatus(final long rolloutId) {
+        final Optional<Rollout> rollout = get(rolloutId);
+
+        if (!rollout.isPresent()) {
+            return rollout;
+        }
+
+        List<TotalTargetCountActionStatus> rolloutStatusCountItems = rolloutStatusCache.getRolloutStatus(rolloutId);
+
+        if (CollectionUtils.isEmpty(rolloutStatusCountItems)) {
+            rolloutStatusCountItems = actionRepository.getStatusCountByRolloutId(rolloutId);
+            rolloutStatusCache.putRolloutStatus(rolloutId, rolloutStatusCountItems);
+        }
+
+        final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
+                rollout.get().getTotalTargets(), rollout.get().getActionType());
+        ((JpaRollout) rollout.get()).setTotalTargetCountStatus(totalTargetCountStatus);
+        return rollout;
+    }
+
+    @Override
+    public boolean exists(final long rolloutId) {
+        return rolloutRepository.existsById(rolloutId);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void pauseRollout(final long rolloutId) {
+        final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
+        if (RolloutStatus.RUNNING != rollout.getStatus()) {
+            throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is "
+                    + rollout.getStatus().name().toLowerCase());
+        }
+        // setting the complete rollout only in paused state. This is sufficient
+        // due the currently running groups will be completed and new groups are
+        // not started until rollout goes back to running state again. The
+        // periodically check for running rollouts will skip rollouts in pause
+        // state.
+        rollout.setStatus(RolloutStatus.PAUSED);
+        rolloutRepository.save(rollout);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void resumeRollout(final long rolloutId) {
+        final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
+        if (RolloutStatus.PAUSED != rollout.getStatus()) {
+            throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is "
+                    + rollout.getStatus().name().toLowerCase());
+        }
+        rollout.setStatus(RolloutStatus.RUNNING);
+        rolloutRepository.save(rollout);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision) {
+        return this.approveOrDeny(rolloutId, decision, null);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision, final String remark) {
+        log.debug("approveOrDeny rollout called for rollout {} with decision {}", rolloutId, decision);
+        final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
+        RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.WAITING_FOR_APPROVAL);
+        switch (decision) {
+            case APPROVED: {
+                rollout.setStatus(RolloutStatus.READY);
+                break;
+            }
+            case DENIED: {
+                rollout.setStatus(RolloutStatus.APPROVAL_DENIED);
+                break;
+            }
+            default: {
+                throw new IllegalArgumentException("Unknown approval decision: " + decision);
+            }
+        }
+        rollout.setApprovalDecidedBy(rolloutApprovalStrategy.getApprovalUser(rollout));
+        if (remark != null) {
+            rollout.setApprovalRemark(remark);
+        }
+        return rolloutRepository.save(rollout);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Rollout start(final long rolloutId) {
+        log.debug("startRollout called for rollout {}", rolloutId);
+
+        final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
+        RolloutHelper.checkIfRolloutCanStarted(rollout, rollout);
+        rollout.setStatus(RolloutStatus.STARTING);
+        rollout.setLastCheck(0);
+        return rolloutRepository.save(rollout);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Rollout update(final RolloutUpdate u) {
+        final GenericRolloutUpdate update = (GenericRolloutUpdate) u;
+        final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(update.getId());
+
+        checkIfDeleted(update.getId(), rollout.getStatus());
+
+        update.getName().ifPresent(rollout::setName);
+        update.getDescription().ifPresent(rollout::setDescription);
+        return rolloutRepository.save(rollout);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void delete(final long rolloutId) {
+        final JpaRollout jpaRollout = rolloutRepository.findById(rolloutId)
+                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
+
+        if (jpaRollout == null) {
+            throw new EntityNotFoundException(Rollout.class, rolloutId);
+        }
+
+        if (RolloutStatus.DELETING == jpaRollout.getStatus()) {
+            return;
+        }
+
+        jpaRollout.setStatus(RolloutStatus.DELETING);
+        rolloutRepository.save(jpaRollout);
+    }
+
+    @Override
+    @Transactional
+    public void cancelRolloutsForDistributionSet(final DistributionSet set) {
+        // stop all rollouts for this distribution set
+        rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
+            final JpaRollout jpaRollout = (JpaRollout) rollout;
+            jpaRollout.setStatus(RolloutStatus.STOPPING);
+            rolloutRepository.save(jpaRollout);
+            log.debug("Rollout {} stopped", jpaRollout.getId());
+        });
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void triggerNextGroup(final long rolloutId) {
+        final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
+        if (RolloutStatus.RUNNING != rollout.getStatus()) {
+            throw new RolloutIllegalStateException("Rollout is not in running state");
+        }
+        final List<RolloutGroup> groups = rollout.getRolloutGroups();
+
+        final boolean isNextGroupTriggerable = groups.stream()
+                .anyMatch(g -> RolloutGroupStatus.SCHEDULED.equals(g.getStatus()));
+
+        if (!isNextGroupTriggerable) {
+            throw new RolloutIllegalStateException("Rollout does not have any groups left to be triggered");
+        }
+
+        final RolloutGroup latestRunning = groups.stream()
+                .sorted(Comparator.comparingLong(RolloutGroup::getId).reversed())
+                .filter(g -> RolloutGroupStatus.RUNNING.equals(g.getStatus()))
+                .findFirst()
+                .orElseThrow(() -> new RolloutIllegalStateException("No group is running"));
+
+        startNextRolloutGroupAction.exec(rollout, latestRunning);
+    }
+
+    @Override
+    public void setRolloutStatusDetails(final Slice<Rollout> rollouts) {
+        final List<Long> rolloutIds = rollouts.getContent().stream().map(Rollout::getId).collect(Collectors.toList());
+        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(rolloutIds);
+
+        if (allStatesForRollout != null) {
+            rollouts.forEach(rollout -> {
+                final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
+                        allStatesForRollout.get(rollout.getId()), rollout.getTotalTargets(), rollout.getActionType());
+                ((JpaRollout) rollout).setTotalTargetCountStatus(totalTargetCountStatus);
+            });
+        }
+    }
+
+    /**
+     * In case the given group is missing conditions or actions, they will be set from the supplied default conditions.
+     *
+     * @param create group to check
+     * @param conditions default conditions and actions
+     */
+    private static JpaRolloutGroup prepareRolloutGroupWithDefaultConditions(
+            final RolloutGroupCreate create, final RolloutGroupConditions conditions) {
+        final JpaRolloutGroup group = ((JpaRolloutGroupCreate) create).build();
+
+        if (group.getSuccessCondition() == null) {
+            group.setSuccessCondition(conditions.getSuccessCondition());
+        }
+        if (group.getSuccessConditionExp() == null) {
+            group.setSuccessConditionExp(conditions.getSuccessConditionExp());
+        }
+        if (group.getSuccessAction() == null) {
+            group.setSuccessAction(conditions.getSuccessAction());
+        }
+        if (group.getSuccessActionExp() == null) {
+            group.setSuccessActionExp(conditions.getSuccessActionExp());
+        }
+
+        if (group.getErrorCondition() == null) {
+            group.setErrorCondition(conditions.getErrorCondition());
+        }
+        if (group.getErrorConditionExp() == null) {
+            group.setErrorConditionExp(conditions.getErrorConditionExp());
+        }
+        if (group.getErrorAction() == null) {
+            group.setErrorAction(conditions.getErrorAction());
+        }
+        if (group.getErrorActionExp() == null) {
+            group.setErrorActionExp(conditions.getErrorActionExp());
+        }
+
+        return group;
+    }
+
+    private static void checkIfDeleted(final Long rolloutId, final RolloutStatus status) {
+        if (RolloutStatus.DELETING == status || RolloutStatus.DELETED == status) {
+            throw new EntityReadOnlyException("Rollout " + rolloutId + " is soft deleted and cannot be changed");
+        }
     }
 
     private JpaRollout createRollout(final JpaRollout rollout, final boolean pureDynamic) {
@@ -259,7 +563,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             rollout.setTotalTargets(totalTargets);
         }
 
-        if (((JpaDistributionSetManagement)distributionSetManagement).isImplicitLockApplicable(distributionSet)) {
+        if (((JpaDistributionSetManagement) distributionSetManagement).isImplicitLockApplicable(distributionSet)) {
             distributionSetManagement.lock(distributionSet.getId());
         }
 
@@ -275,7 +579,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.CREATING);
         RolloutHelper.verifyRolloutGroupConditions(conditions);
 
-        RolloutGroup lastSavedGroup = null;
+        JpaRolloutGroup lastSavedGroup = null;
         if (amountOfGroups == 0) {
             if (dynamicRolloutGroupTemplate == null) {
                 throw new ConstraintDeclarationException(
@@ -361,7 +665,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
 
         // create and persist the groups (w/o filling them with targets)
-        RolloutGroup lastSavedGroup = null;
+        JpaRolloutGroup lastSavedGroup = null;
         for (final RolloutGroup srcGroup : groups) {
             final JpaRolloutGroup group = new JpaRolloutGroup();
             group.setName(srcGroup.getName());
@@ -391,251 +695,9 @@ public class JpaRolloutManagement implements RolloutManagement {
         return rolloutRepository.save(savedRollout);
     }
 
-    /**
-     * In case the given group is missing conditions or actions, they will be set
-     * from the supplied default conditions.
-     *
-     * @param create
-     *            group to check
-     * @param conditions
-     *            default conditions and actions
-     */
-    private static JpaRolloutGroup prepareRolloutGroupWithDefaultConditions(final RolloutGroupCreate create,
-            final RolloutGroupConditions conditions) {
-        final JpaRolloutGroup group = ((JpaRolloutGroupCreate) create).build();
-
-        if (group.getSuccessCondition() == null) {
-            group.setSuccessCondition(conditions.getSuccessCondition());
-        }
-        if (group.getSuccessConditionExp() == null) {
-            group.setSuccessConditionExp(conditions.getSuccessConditionExp());
-        }
-        if (group.getSuccessAction() == null) {
-            group.setSuccessAction(conditions.getSuccessAction());
-        }
-        if (group.getSuccessActionExp() == null) {
-            group.setSuccessActionExp(conditions.getSuccessActionExp());
-        }
-
-        if (group.getErrorCondition() == null) {
-            group.setErrorCondition(conditions.getErrorCondition());
-        }
-        if (group.getErrorConditionExp() == null) {
-            group.setErrorConditionExp(conditions.getErrorConditionExp());
-        }
-        if (group.getErrorAction() == null) {
-            group.setErrorAction(conditions.getErrorAction());
-        }
-        if (group.getErrorActionExp() == null) {
-            group.setErrorActionExp(conditions.getErrorActionExp());
-        }
-
-        return group;
-    }
-
-    public void publishRolloutGroupCreatedEventAfterCommit(final RolloutGroup group, final Rollout rollout) {
-        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
-                new RolloutGroupCreatedEvent(group, rollout.getId(), eventPublisherHolder.getApplicationId())));
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision) {
-        return this.approveOrDeny(rolloutId, decision, null);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision, final String remark) {
-        log.debug("approveOrDeny rollout called for rollout {} with decision {}", rolloutId, decision);
-        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
-        RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.WAITING_FOR_APPROVAL);
-        switch (decision) {
-        case APPROVED:
-            rollout.setStatus(RolloutStatus.READY);
-            break;
-        case DENIED:
-            rollout.setStatus(RolloutStatus.APPROVAL_DENIED);
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown approval decision: " + decision);
-        }
-        rollout.setApprovalDecidedBy(rolloutApprovalStrategy.getApprovalUser(rollout));
-        if (remark != null) {
-            rollout.setApprovalRemark(remark);
-        }
-        return rolloutRepository.save(rollout);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout start(final long rolloutId) {
-        log.debug("startRollout called for rollout {}", rolloutId);
-
-        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
-        RolloutHelper.checkIfRolloutCanStarted(rollout, rollout);
-        rollout.setStatus(RolloutStatus.STARTING);
-        rollout.setLastCheck(0);
-        return rolloutRepository.save(rollout);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void pauseRollout(final long rolloutId) {
-        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
-        if (RolloutStatus.RUNNING != rollout.getStatus()) {
-            throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is "
-                    + rollout.getStatus().name().toLowerCase());
-        }
-        // setting the complete rollout only in paused state. This is sufficient
-        // due the currently running groups will be completed and new groups are
-        // not started until rollout goes back to running state again. The
-        // periodically check for running rollouts will skip rollouts in pause
-        // state.
-        rollout.setStatus(RolloutStatus.PAUSED);
-        rolloutRepository.save(rollout);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void resumeRollout(final long rolloutId) {
-        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
-        if (RolloutStatus.PAUSED != rollout.getStatus()) {
-            throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is "
-                    + rollout.getStatus().name().toLowerCase());
-        }
-        rollout.setStatus(RolloutStatus.RUNNING);
-        rolloutRepository.save(rollout);
-    }
-
-    public static String createRolloutLockKey(final String tenant) {
-        return tenant + "-rollout";
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final long rolloutId) {
-        final JpaRollout jpaRollout = rolloutRepository.findById(rolloutId)
-                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
-
-        if (jpaRollout == null) {
-            throw new EntityNotFoundException(Rollout.class, rolloutId);
-        }
-
-        if (RolloutStatus.DELETING == jpaRollout.getStatus()) {
-            return;
-        }
-
-        jpaRollout.setStatus(RolloutStatus.DELETING);
-        rolloutRepository.save(jpaRollout);
-    }
-
-    @Override
-    public long count() {
-        return rolloutRepository.count(
-                RolloutSpecification.isDeletedWithDistributionSet(false, Sort.by(Direction.DESC, JpaRollout_.ID)));
-    }
-
-    @Override
-    public long countByFilters(final String searchText) {
-        return rolloutRepository.count(RolloutSpecification.likeName(searchText, false));
-    }
-
-    @Override
-    public long countByDistributionSetIdAndRolloutIsStoppable(final long setId) {
-        return rolloutRepository.countByDistributionSetIdAndStatusIn(setId, ROLLOUT_STATUS_STOPPABLE);
-    }
-
-    @Override
-    public Slice<Rollout> findByFiltersWithDetailedStatus(final Pageable pageable, final String searchText,
-            final boolean deleted) {
-        final Slice<Rollout> findAll = JpaManagementHelper.findAllWithoutCountBySpec(rolloutRepository, pageable,
-                Collections.singletonList(RolloutSpecification.likeName(searchText, deleted)));
-        setRolloutStatusDetails(findAll);
-        return findAll;
-    }
-
-    @Override
-    public List<Long> findActiveRollouts() {
-        return rolloutRepository.findByStatusIn(ACTIVE_ROLLOUTS);
-    }
-
-    @Override
-    public Optional<Rollout> getByName(final String rolloutName) {
-        return rolloutRepository.findByName(rolloutName);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout update(final RolloutUpdate u) {
-        final GenericRolloutUpdate update = (GenericRolloutUpdate) u;
-        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(update.getId());
-
-        checkIfDeleted(update.getId(), rollout.getStatus());
-
-        update.getName().ifPresent(rollout::setName);
-        update.getDescription().ifPresent(rollout::setDescription);
-        return rolloutRepository.save(rollout);
-    }
-
-    private static void checkIfDeleted(final Long rolloutId, final RolloutStatus status) {
-        if (RolloutStatus.DELETING == status || RolloutStatus.DELETED == status) {
-            throw new EntityReadOnlyException("Rollout " + rolloutId + " is soft deleted and cannot be changed");
-        }
-    }
-
-    private JpaRollout getRolloutAndThrowExceptionIfNotFound(final Long rolloutId) {
+    private JpaRollout getRolloutOrThrowExceptionIfNotFound(final Long rolloutId) {
         return rolloutRepository.findById(rolloutId)
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
-    }
-
-    @Override
-    public Slice<Rollout> findAllWithDetailedStatus(final Pageable pageable, final boolean deleted) {
-        final Slice<Rollout> rollouts = JpaManagementHelper.findAllWithoutCountBySpec(rolloutRepository, pageable,
-                Collections
-                        .singletonList(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort())));
-        setRolloutStatusDetails(rollouts);
-        return rollouts;
-    }
-
-    @Override
-    public Optional<Rollout> getWithDetailedStatus(final long rolloutId) {
-        final Optional<Rollout> rollout = get(rolloutId);
-
-        if (!rollout.isPresent()) {
-            return rollout;
-        }
-
-        List<TotalTargetCountActionStatus> rolloutStatusCountItems = rolloutStatusCache.getRolloutStatus(rolloutId);
-
-        if (CollectionUtils.isEmpty(rolloutStatusCountItems)) {
-            rolloutStatusCountItems = actionRepository.getStatusCountByRolloutId(rolloutId);
-            rolloutStatusCache.putRolloutStatus(rolloutId, rolloutStatusCountItems);
-        }
-
-        final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
-                rollout.get().getTotalTargets(), rollout.get().getActionType());
-        ((JpaRollout) rollout.get()).setTotalTargetCountStatus(totalTargetCountStatus);
-        return rollout;
-    }
-
-    @Override
-    public boolean exists(final long rolloutId) {
-        return rolloutRepository.existsById(rolloutId);
     }
 
     private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rollouts) {
@@ -649,8 +711,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .collect(Collectors.toList());
 
         if (!rolloutIds.isEmpty()) {
-            final List<TotalTargetCountActionStatus> resultList = actionRepository
-                    .getStatusCountByRolloutId(rolloutIds);
+            final List<TotalTargetCountActionStatus> resultList = actionRepository.getStatusCountByRolloutIds(rolloutIds);
             final Map<Long, List<TotalTargetCountActionStatus>> fromDb = resultList.stream()
                     .collect(Collectors.groupingBy(TotalTargetCountActionStatus::getId));
 
@@ -662,43 +723,15 @@ public class JpaRolloutManagement implements RolloutManagement {
         return fromCache;
     }
 
-    @Override
-    public void setRolloutStatusDetails(final Slice<Rollout> rollouts) {
-        final List<Long> rolloutIds = rollouts.getContent().stream().map(Rollout::getId).collect(Collectors.toList());
-        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(
-                rolloutIds);
-
-        if (allStatesForRollout != null) {
-            rollouts.forEach(rollout -> {
-                final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
-                        allStatesForRollout.get(rollout.getId()), rollout.getTotalTargets(), rollout.getActionType());
-                ((JpaRollout) rollout).setTotalTargetCountStatus(totalTargetCountStatus);
-            });
-        }
-    }
-
     /**
      * Enforces the quota defining the maximum number of {@link Target}s per
      * {@link RolloutGroup}.
      *
-     * @param requested
-     *            number of targets to check
+     * @param requested number of targets to check
      */
     private void assertTargetsPerRolloutGroupQuota(final long requested) {
         final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
         QuotaHelper.assertAssignmentQuota(requested, quota, Target.class, RolloutGroup.class);
-    }
-
-    @Override
-    @Transactional
-    public void cancelRolloutsForDistributionSet(final DistributionSet set) {
-        // stop all rollouts for this distribution set
-        rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
-            final JpaRollout jpaRollout = (JpaRollout) rollout;
-            jpaRollout.setStatus(RolloutStatus.STOPPING);
-            rolloutRepository.save(jpaRollout);
-            log.debug("Rollout {} stopped", jpaRollout.getId());
-        });
     }
 
     private RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroup> groups, final String baseFilter,
@@ -707,15 +740,15 @@ public class JpaRolloutManagement implements RolloutManagement {
         Map<String, Long> targetFilterCounts;
         if (!RolloutHelper.isRolloutRetried(baseFilter)) {
             targetFilterCounts = groups.stream()
-                .map(group -> RolloutHelper.getGroupTargetFilter(baseFilter, group)).distinct()
-                .collect(Collectors.toMap(Function.identity(),
-                    groupTargetFilter -> targetManagement.countByRsqlAndCompatible(groupTargetFilter, dsTypeId)));
+                    .map(group -> RolloutHelper.getGroupTargetFilter(baseFilter, group)).distinct()
+                    .collect(Collectors.toMap(Function.identity(),
+                            groupTargetFilter -> targetManagement.countByRsqlAndCompatible(groupTargetFilter, dsTypeId)));
         } else {
             targetFilterCounts = groups.stream()
-                .map(group -> RolloutHelper.getGroupTargetFilter(baseFilter, group)).distinct()
-                .collect(Collectors.toMap(Function.identity(),
-                    groupTargetFilter -> targetManagement.countByFailedInRollout(
-                        RolloutHelper.getIdFromRetriedTargetFilter(baseFilter), dsTypeId)));
+                    .map(group -> RolloutHelper.getGroupTargetFilter(baseFilter, group)).distinct()
+                    .collect(Collectors.toMap(Function.identity(),
+                            groupTargetFilter -> targetManagement.countByFailedInRollout(
+                                    RolloutHelper.getIdFromRetriedTargetFilter(baseFilter), dsTypeId)));
         }
 
         long unusedTargetsCount = 0;
@@ -786,50 +819,6 @@ public class JpaRolloutManagement implements RolloutManagement {
         return totalTargets - validation.getTargetsInGroups();
     }
 
-    @Override
-    @Async
-    public ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(final List<RolloutGroupCreate> groups,
-            final String targetFilter, final Long createdAt, final Long dsTypeId) {
-
-        final TargetCount targets = calculateTargets(targetFilter, createdAt, dsTypeId);
-        long totalTargets = targets.total();
-        final String baseFilter = targets.filter();
-
-        if (totalTargets == 0) {
-            throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
-        }
-
-        return new AsyncResult<>(
-                validateTargetsInGroups(groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()),
-                        baseFilter, totalTargets, dsTypeId));
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void triggerNextGroup(final long rolloutId) {
-        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
-        if (RolloutStatus.RUNNING != rollout.getStatus()) {
-            throw new RolloutIllegalStateException("Rollout is not in running state");
-        }
-        final List<RolloutGroup> groups = rollout.getRolloutGroups();
-
-        final boolean isNextGroupTriggerable = groups.stream()
-                .anyMatch(g -> RolloutGroupStatus.SCHEDULED.equals(g.getStatus()));
-
-        if (!isNextGroupTriggerable) {
-            throw new RolloutIllegalStateException("Rollout does not have any groups left to be triggered");
-        }
-
-        final RolloutGroup latestRunning = groups.stream()
-                .sorted(Comparator.comparingLong(RolloutGroup::getId).reversed())
-                .filter(g -> RolloutGroupStatus.RUNNING.equals(g.getStatus())).findFirst()
-                .orElseThrow(() -> new RolloutIllegalStateException("No group is running"));
-
-        startNextRolloutGroupAction.exec(rollout, latestRunning);
-    }
-
     private TargetCount calculateTargets(final String targetFilter, final Long createdAt, final Long dsTypeId) {
         String baseFilter;
         long totalTargets;
@@ -838,7 +827,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             totalTargets = targetManagement.countByRsqlAndCompatible(baseFilter, dsTypeId);
         } else {
             totalTargets = targetManagement.countByFailedInRollout(
-                RolloutHelper.getIdFromRetriedTargetFilter(targetFilter), dsTypeId);
+                    RolloutHelper.getIdFromRetriedTargetFilter(targetFilter), dsTypeId);
             baseFilter = targetFilter;
         }
 

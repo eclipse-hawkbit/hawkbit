@@ -9,7 +9,11 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import lombok.Data;
+import java.io.Serial;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
@@ -20,9 +24,12 @@ import org.springframework.data.domain.Sort;
  * the REST-API is working with {@code offset} and {@code limit} parameter we
  * need an offset based page request.
  */
-@Data
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public final class OffsetBasedPageRequest extends PageRequest {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final long offset;
@@ -30,11 +37,9 @@ public final class OffsetBasedPageRequest extends PageRequest {
     /**
      * Creates a new {@link OffsetBasedPageRequest}. Offsets are zero indexed,
      * thus providing 0 for {@code offset} will return the first entry.
-     * 
-     * @param offset
-     *            zero-based offset index.
-     * @param limit
-     *            the limit of the page to be returned.
+     *
+     * @param offset zero-based offset index.
+     * @param limit the limit of the page to be returned.
      */
     public OffsetBasedPageRequest(final long offset, final int limit) {
         this(offset, limit, Sort.unsorted());
@@ -43,13 +48,10 @@ public final class OffsetBasedPageRequest extends PageRequest {
     /**
      * Creates a new {@link OffsetBasedPageRequest}. Offsets are zero indexed,
      * thus providing 0 for {@code offset} will return the first entry.
-     * 
-     * @param offset
-     *            zero-based offset index.
-     * @param limit
-     *            the limit of the page to be returned.
-     * @param sort
-     *            sort can be {@literal null}.
+     *
+     * @param offset zero-based offset index.
+     * @param limit the limit of the page to be returned.
+     * @param sort sort can be {@literal null}.
      */
     public OffsetBasedPageRequest(final long offset, final int limit, final Sort sort) {
         super(0, limit, sort);

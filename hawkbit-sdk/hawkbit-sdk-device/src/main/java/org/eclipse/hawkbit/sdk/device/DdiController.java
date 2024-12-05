@@ -9,6 +9,17 @@
  */
 package org.eclipse.hawkbit.sdk.device;
 
+import java.time.LocalTime;
+import java.time.temporal.ChronoField;
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -27,17 +38,6 @@ import org.eclipse.hawkbit.sdk.Tenant;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.time.LocalTime;
-import java.time.temporal.ChronoField;
-import java.util.AbstractMap;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Class representing DDI device connecting directly to hawkBit.
@@ -81,10 +81,10 @@ public class DdiController {
      * @param tenant the tenant of the device belongs to
      * @param controller the controller
      * @param hawkbitClient a factory for creating to {@link DdiRootControllerRestApi} (and used)
-     *                      for communication to hawkBit
+     *         for communication to hawkBit
      */
     public DdiController(final Tenant tenant, final Controller controller,
-                         final UpdateHandler updateHandler, final HawkbitClient hawkbitClient) {
+            final UpdateHandler updateHandler, final HawkbitClient hawkbitClient) {
         this.tenantId = tenant.getTenantId();
         gatewayToken = tenant.getGatewayToken();
         downloadAuthenticationEnabled = tenant.isDownloadAuthenticationEnabled();
@@ -105,64 +105,95 @@ public class DdiController {
 
     public void stop() {
         if (executorService != null) {
-            executorService.shutdown();
+            executorService.shutdownNow();
         }
         executorService = null;
         lastActionId = null;
         currentActionId = null;
     }
 
+    public void updateAttribute(final String mode, final String key, final String value) {
+        final DdiUpdateMode updateMode = switch (mode.toLowerCase()) {
+            case "replace" -> DdiUpdateMode.REPLACE;
+            case "remove" -> DdiUpdateMode.REMOVE;
+            default -> DdiUpdateMode.MERGE;
+        };
+
+        final DdiConfigData configData = new DdiConfigData(Collections.singletonMap(key, value), updateMode);
+
+        getDdiApi().putConfigData(configData, getTenantId(), getControllerId());
+    }
+
+    public void sendFeedback(final UpdateStatus updateStatus) {
+        log.debug(LOG_PREFIX + "Send feedback {} -> {}", getTenantId(), getControllerId(), currentActionId, updateStatus);
+        try {
+            getDdiApi().postDeploymentBaseActionFeedback(updateStatus.feedback(), getTenantId(), getControllerId(),
+                    currentActionId);
+        } catch (final RuntimeException e) {
+            log.error(LOG_PREFIX + "Failed to send feedback {} -> {}", getTenantId(), getControllerId(),
+                    currentActionId, updateStatus, e);
+        }
+
+        if (updateStatus.status() == UpdateStatus.Status.SUCCESSFUL ||
+                updateStatus.status() == UpdateStatus.Status.FAILURE) {
+            lastActionId = currentActionId;
+            currentActionId = null;
+        }
+    }
+
     private void poll() {
+        log.debug(LOG_PREFIX + " Polling ...", tenantId, controllerId);
         Optional.ofNullable(executorService).ifPresent(executor ->
-            getControllerBase().ifPresentOrElse(
-                    controllerBase -> {
-                        final Optional<Link> confirmationBaseLink = getRequiredLink(controllerBase, CONFIRMATION_BASE_LINK);
-                        if (confirmationBaseLink.isPresent()) {
-                            final long actionId = getActionId(confirmationBaseLink.get());
-                            log.info(LOG_PREFIX + "Confirmation is required for action {}!", getTenantId(),
-                                    getControllerId(), actionId);
-                            // TODO - confirmation handler
-                            sendConfirmationFeedback(actionId);
-                            executor.schedule(this::poll, IMMEDIATE_MS, TimeUnit.MILLISECONDS);
-                        } else {
-                            getRequiredLink(controllerBase, DEPLOYMENT_BASE_LINK).flatMap(this::getActionWithDeployment).ifPresentOrElse(actionWithDeployment -> {
-                                final long actionId = actionWithDeployment.getKey();
-                                if (currentActionId == null) {
-                                    if (lastActionId != null && lastActionId == actionId) {
-                                        log.info(LOG_PREFIX + "Still receive the last action {}",
-                                                getTenantId(), getControllerId(), actionId);
-                                        return;
-                                    }
+                getControllerBase().ifPresentOrElse(
+                        controllerBase -> {
+                            final Optional<Link> confirmationBaseLink = getRequiredLink(controllerBase, CONFIRMATION_BASE_LINK);
+                            if (confirmationBaseLink.isPresent()) {
+                                final long actionId = getActionId(confirmationBaseLink.get());
+                                log.info(LOG_PREFIX + "Confirmation is required for action {}!", getTenantId(),
+                                        getControllerId(), actionId);
+                                // TODO - confirmation handler
+                                sendConfirmationFeedback(actionId);
+                                executor.schedule(this::poll, IMMEDIATE_MS, TimeUnit.MILLISECONDS);
+                            } else {
+                                getRequiredLink(controllerBase, DEPLOYMENT_BASE_LINK).flatMap(this::getActionWithDeployment)
+                                        .ifPresentOrElse(actionWithDeployment -> {
+                                            final long actionId = actionWithDeployment.getKey();
+                                            if (currentActionId == null) {
+                                                if (lastActionId != null && lastActionId == actionId) {
+                                                    log.info(LOG_PREFIX + "Still receive the last action {}",
+                                                            getTenantId(), getControllerId(), actionId);
+                                                    return;
+                                                }
 
-                                    log.info(LOG_PREFIX + "Process action {}", getTenantId(), getControllerId(),
-                                            actionId);
-                                    final DdiDeployment deployment = actionWithDeployment.getValue().getDeployment();
-                                    final DdiDeployment.HandlingType updateType = deployment.getUpdate();
-                                    final List<DdiChunk> modules = deployment.getChunks();
+                                                log.info(LOG_PREFIX + "Process action {}", getTenantId(), getControllerId(),
+                                                        actionId);
+                                                final DdiDeployment deployment = actionWithDeployment.getValue().getDeployment();
+                                                final DdiDeployment.HandlingType updateType = deployment.getUpdate();
+                                                final List<DdiChunk> modules = deployment.getChunks();
 
-                                    currentActionId = actionId;
-                                    executor.submit(
-                                            updateHandler.getUpdateProcessor(this, updateType, modules));
-                                } else if (currentActionId != actionId) {
-                                    // TODO - cancel and start new one?
-                                    log.info(LOG_PREFIX + "Action {} is canceled while in process (new {})!", getTenantId(),
-                                            getControllerId(), currentActionId, actionId);
-                                } // else same action - already processing
-                            }, () -> {
-                                if (currentActionId != null) {
-                                    // TODO - cancel current?
-                                    log.info(LOG_PREFIX + "Action {} is canceled while in process (not returned)!", getTenantId(),
-                                            getControllerId(), getCurrentActionId());
-                                }
-                            });
-                            executor.schedule(this::poll, getPollMillis(controllerBase), TimeUnit.MILLISECONDS);
+                                                currentActionId = actionId;
+                                                executor.submit(
+                                                        updateHandler.getUpdateProcessor(this, updateType, modules));
+                                            } else if (currentActionId != actionId) {
+                                                // TODO - cancel and start new one?
+                                                log.info(LOG_PREFIX + "Action {} is canceled while in process (new {})!", getTenantId(),
+                                                        getControllerId(), currentActionId, actionId);
+                                            } // else same action - already processing
+                                        }, () -> {
+                                            if (currentActionId != null) {
+                                                // TODO - cancel current?
+                                                log.info(LOG_PREFIX + "Action {} is canceled while in process (not returned)!", getTenantId(),
+                                                        getControllerId(), getCurrentActionId());
+                                            }
+                                        });
+                                executor.schedule(this::poll, getPollMillis(controllerBase), TimeUnit.MILLISECONDS);
+                            }
+                        },
+                        () -> {
+                            // error has occurred or no controller base hasn't been acquired
+                            executor.schedule(this::poll, DEFAULT_POLL_MS, TimeUnit.MILLISECONDS);
                         }
-                    },
-                    () -> {
-                        // error has occurred or no controller base hasn't been acquired
-                        executor.schedule(this::poll, DEFAULT_POLL_MS, TimeUnit.MILLISECONDS);
-                    }
-            ));
+                ));
     }
 
     private Optional<DdiControllerBase> getControllerBase() {
@@ -210,40 +241,12 @@ public class DdiController {
         final ResponseEntity<DdiDeploymentBase> action = getDdiApi()
                 .getControllerDeploymentBaseAction(getTenantId(), getControllerId(), actionId, -1, null);
         if (action.getStatusCode() != HttpStatus.OK) {
-            log.warn(LOG_PREFIX + "Fail to get deployment action: {} -> {}", getTenantId(), getControllerId(), actionId, action.getStatusCode());
+            log.warn(LOG_PREFIX + "Fail to get deployment action: {} -> {}", getTenantId(), getControllerId(), actionId,
+                    action.getStatusCode());
             return Optional.empty();
         }
 
         return Optional.ofNullable(action.getBody() == null ? null : new AbstractMap.SimpleEntry<>(actionId, action.getBody()));
-    }
-
-    public void updateAttribute(final String mode, final String key, final String value) {
-        final DdiUpdateMode updateMode = switch (mode.toLowerCase()) {
-            case "replace" -> DdiUpdateMode.REPLACE;
-            case "remove" -> DdiUpdateMode.REMOVE;
-            default -> DdiUpdateMode.MERGE;
-        };
-
-        final DdiConfigData configData = new DdiConfigData(Collections.singletonMap(key, value), updateMode);
-
-        getDdiApi().putConfigData(configData, getTenantId(), getControllerId());
-    }
-
-    void sendFeedback(final UpdateStatus updateStatus) {
-        log.debug(LOG_PREFIX + "Send feedback {} -> {}", getTenantId(), getControllerId(), currentActionId, updateStatus);
-        try {
-            getDdiApi().postDeploymentBaseActionFeedback(updateStatus.feedback(), getTenantId(), getControllerId(),
-                    currentActionId);
-        } catch (final RuntimeException e) {
-            log.error(LOG_PREFIX + "Failed to send feedback {} -> {}", getTenantId(), getControllerId(),
-                    currentActionId, updateStatus, e);
-        }
-
-        if (updateStatus.status() == UpdateStatus.Status.SUCCESSFUL ||
-                updateStatus.status() == UpdateStatus.Status.FAILURE) {
-            lastActionId = currentActionId;
-            currentActionId = null;
-        }
     }
 
     private void sendConfirmationFeedback(final long actionId) {

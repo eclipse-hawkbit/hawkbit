@@ -9,10 +9,10 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
-
-import java.io.Serial;
 
 /**
  * Thrown if tried creation of type with no key nor name.
@@ -21,6 +21,7 @@ public class TargetTypeKeyOrNameRequiredException extends AbstractServerRtExcept
 
     @Serial
     private static final long serialVersionUID = 1L;
+
     private static final SpServerError THIS_ERROR = SpServerError.SP_TARGET_TYPE_KEY_OR_NAME_REQUIRED;
 
     /**

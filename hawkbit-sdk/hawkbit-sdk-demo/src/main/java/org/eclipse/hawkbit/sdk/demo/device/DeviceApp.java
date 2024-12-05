@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.sdk.demo.device;
 
+import java.util.Optional;
+import java.util.concurrent.Executors;
+
 import feign.Client;
 import feign.Contract;
 import feign.codec.Decoder;
@@ -28,9 +31,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.util.ObjectUtils;
-
-import java.util.Optional;
-import java.util.concurrent.Executors;
 
 /**
  * Abstract class representing DDI device connecting directly to hawkVit.
@@ -52,7 +52,7 @@ public class DeviceApp {
 
     @Bean
     DdiTenant ddiTenant(final Tenant defaultTenant,
-                        final HawkbitClient hawkbitClient) {
+            final HawkbitClient hawkbitClient) {
         return new DdiTenant(defaultTenant, hawkbitClient);
     }
 
@@ -68,7 +68,6 @@ public class DeviceApp {
 
         private final DdiController device;
         private final MgmtApi mgmtApi;
-
 
         Shell(final DdiTenant ddiTenant, final MgmtApi mgmtApi, final Optional<UpdateHandler> updateHandler) {
             this.ddiTenant = ddiTenant;
@@ -88,7 +87,7 @@ public class DeviceApp {
         @ShellMethod(key = "setup")
         public void setup() {
             mgmtApi.setupTargetAuthentication();
-            mgmtApi.setupTargetToken(device.getControllerId(),device.getTargetSecurityToken());
+            mgmtApi.setupTargetToken(device.getControllerId(), device.getTargetSecurityToken());
         }
 
         @ShellMethod(key = "start")

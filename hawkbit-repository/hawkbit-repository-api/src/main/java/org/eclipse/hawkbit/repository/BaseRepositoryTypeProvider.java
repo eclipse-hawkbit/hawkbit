@@ -17,6 +17,7 @@ public interface BaseRepositoryTypeProvider {
 
     /**
      * Return a base repository implementation that shall be used based on provided repository type
+     *
      * @param repositoryType type of repository
      * @return base repository implementation class
      */

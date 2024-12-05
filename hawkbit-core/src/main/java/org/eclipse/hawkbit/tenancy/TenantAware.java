@@ -15,8 +15,7 @@ package org.eclipse.hawkbit.tenancy;
 public interface TenantAware {
 
     /**
-     * Implementation might retrieve the current tenant from a session or
-     * thread-local.
+     * Implementation might retrieve the current tenant from a session or thread-local.
      *
      * @return the current tenant
      */
@@ -28,52 +27,38 @@ public interface TenantAware {
     String getCurrentUsername();
 
     /**
-     * Gives the possibility to run a certain code under a specific given
-     * {@code tenant}. Only the given {@link TenantRunner} is executed under the
-     * specific tenant e.g. under control of an {@link ThreadLocal}. After the
-     * {@link TenantRunner} it must be ensured that the original tenant before
-     * this invocation is reset.
+     * Gives the possibility to run a certain code under a specific given {@code tenant}. Only the given {@link TenantRunner} is executed
+     * under the specific tenant e.g. under control of an {@link ThreadLocal}. After the {@link TenantRunner} it must be ensured that the
+     * original tenant before this invocation is reset.
      *
-     * @param tenant
-     *            the tenant which the specific code should run
-     * @param tenantRunner
-     *            the runner which is implemented to run this specific code
-     *            under the given tenant
+     * @param tenant the tenant which the specific code should run
+     * @param tenantRunner the runner which is implemented to run this specific code
+     *         under the given tenant
      * @return the return type of the {@link TenantRunner}
      */
     <T> T runAsTenant(String tenant, TenantRunner<T> tenantRunner);
 
     /**
-     * Gives the possibility to run a certain code under a specific given
-     * {@code tenant} and {@code username}. Only the given {@link TenantRunner} is executed under the
-     * specific tenant and user e.g. under control of an {@link ThreadLocal}. After the
-     * {@link TenantRunner} it must be ensured that the original tenant before
-     * this invocation is reset.
+     * Gives the possibility to run a certain code under a specific given {@code tenant} and {@code username}.
+     * Only the given {@link TenantRunner} is executed under the specific tenant and user e.g. under control of an {@link ThreadLocal}.
+     * After the {@link TenantRunner} it must be ensured that the original tenant before this invocation is reset.
      *
-     * @param tenant
-     *            the tenant which the specific code should run with
-     * @param username
-     *            the username which the specific code should run with
-     * @param tenantRunner
-     *            the runner which is implemented to run this specific code
-     *            under the given tenant
+     * @param tenant the tenant which the specific code should run with
+     * @param username the username which the specific code should run with
+     * @param tenantRunner the runner which is implemented to run this specific code under the given tenant
      * @return the return type of the {@link TenantRunner}
      */
     <T> T runAsTenantAsUser(String tenant, String username, TenantRunner<T> tenantRunner);
 
     /**
-     * An {@link TenantRunner} interface which allows to run specific code under
-     * a given tenant by using the
+     * An {@link TenantRunner} interface which allows to run specific code under a given tenant by using the
      * {@link TenantAware#runAsTenant(String, TenantRunner)}.
      *
-     *
-     *
-     *
-     * @param <T>
-     *            the return type of the runner
+     * @param <T> the return type of the runner
      */
     @FunctionalInterface
     interface TenantRunner<T> {
+
         /**
          * Called to run specific code and a given tenant.
          *

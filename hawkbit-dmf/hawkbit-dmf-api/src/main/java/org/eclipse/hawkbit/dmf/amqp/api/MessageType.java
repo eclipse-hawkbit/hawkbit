@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.dmf.amqp.api;
 
 /**
  * The amqp message types which can be handled.
- *
  */
 public enum MessageType {
 

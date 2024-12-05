@@ -9,19 +9,26 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.eclipse.hawkbit.repository.model.Type;
+import java.io.Serial;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.io.Serial;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.eclipse.hawkbit.repository.model.Type;
 
 /**
- * {@link TenantAwareBaseEntity} extension for all entities that are named in
- * addition to their technical ID.
+ * {@link TenantAwareBaseEntity} extension for all entities that are named in addition to their technical ID.
  */
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // Default constructor needed for JPA entities
+@Setter
+@Getter
 @MappedSuperclass
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
@@ -39,42 +46,9 @@ public abstract class AbstractJpaTypeEntity extends AbstractJpaNamedEntity imple
     @Size(max = COLOUR_MAX_SIZE)
     private String colour;
 
-    /**
-     * Default constructor.
-     */
-    protected AbstractJpaTypeEntity() {
-        // Default constructor needed for JPA entities
-    }
-
-    /**
-     * Parameterized constructor.
-     *
-     * @param key
-     *            of the {@link Type}
-     * @param colour
-     *            of the {@link Type}
-     */
-    AbstractJpaTypeEntity(final String name, final String description, final String key, final String colour) {
+    protected AbstractJpaTypeEntity(final String name, final String description, final String key, final String colour) {
         super(name, description);
         this.key = key;
-        this.colour = colour;
-    }
-
-    @Override
-    public String getKey() {
-        return key;
-    }
-
-    @Override
-    public String getColour() {
-        return colour;
-    }
-
-    public void setKey(final String key) {
-        this.key = key;
-    }
-
-    public void setColour(final String colour) {
         this.colour = colour;
     }
 }

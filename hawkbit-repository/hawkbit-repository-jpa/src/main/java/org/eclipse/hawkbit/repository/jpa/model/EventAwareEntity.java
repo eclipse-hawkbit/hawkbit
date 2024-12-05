@@ -9,43 +9,24 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.eclipse.persistence.descriptors.DescriptorEvent;
-
 /**
- * Interfaces which can be implemented by entities to be called when the entity
- * should fire an event because the entity has been created, updated or deleted.
+ * Interfaces which can be implemented by entities to be called when the entity should fire an event because the entity has been created,
+ * updated or deleted.
  */
 public interface EventAwareEntity {
 
     /**
      * Fired for the Entity creation.
-     * 
-     * @param descriptorEvent
      */
-    void fireCreateEvent(DescriptorEvent descriptorEvent);
+    void fireCreateEvent();
 
     /**
-     * Fired for the Entity updation.
-     * 
-     * @param descriptorEvent
+     * Fired for the Entity update.
      */
-    void fireUpdateEvent(DescriptorEvent descriptorEvent);
+    void fireUpdateEvent();
 
     /**
      * Fired for the Entity deletion.
-     * 
-     * @param descriptorEvent
      */
-    void fireDeleteEvent(DescriptorEvent descriptorEvent);
-
-    /**
-     * @return list of entity fields that if the only changed fields prevents
-     *         {@link #fireUpdateEvent(DescriptorEvent)} call.
-     */
-    default List<String> getUpdateIgnoreFields() {
-        return Collections.emptyList();
-    }
+    void fireDeleteEvent();
 }

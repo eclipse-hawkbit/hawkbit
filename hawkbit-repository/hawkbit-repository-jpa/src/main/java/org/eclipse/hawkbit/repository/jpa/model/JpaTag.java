@@ -9,53 +9,38 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.Size;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.eclipse.hawkbit.repository.model.Tag;
 
 /**
- * A Tag can be used as describing and organizational meta information for any
- * kind of entity.
- *
+ * A Tag can be used as describing and organizational meta information for any kind of entity.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@Setter
+@Getter
 @MappedSuperclass
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
-// sub entities
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaTag extends AbstractJpaNamedEntity implements Tag {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Column(name = "colour", nullable = true, length = Tag.COLOUR_MAX_SIZE)
     @Size(max = Tag.COLOUR_MAX_SIZE)
     private String colour;
 
-    protected JpaTag() {
-        // Default constructor needed for JPA entities
-    }
-
-    /**
-     * Public constructor.
-     *
-     * @param name
-     *            of the {@link Tag}
-     * @param description
-     *            of the {@link Tag}
-     * @param colour
-     *            of tag in UI
-     */
     public JpaTag(final String name, final String description, final String colour) {
         super(name, description);
-        this.colour = colour;
-    }
-
-    @Override
-    public String getColour() {
-        return colour;
-    }
-
-    public void setColour(final String colour) {
         this.colour = colour;
     }
 

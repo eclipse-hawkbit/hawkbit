@@ -97,6 +97,26 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
         }
     }
 
+    @Override
+    public DistributionSetInvalidationCount countEntitiesForInvalidation(
+            final DistributionSetInvalidation distributionSetInvalidation) {
+        return systemSecurityContext.runAsSystem(() -> {
+            final Collection<Long> setIds = distributionSetInvalidation.getDistributionSetIds();
+            final long rolloutsCount = shouldRolloutsBeCanceled(distributionSetInvalidation.getCancelationType(),
+                    distributionSetInvalidation.isCancelRollouts()) ? countRolloutsForInvalidation(setIds) : 0;
+            final long autoAssignmentsCount = countAutoAssignmentsForInvalidation(setIds);
+            final long actionsCount = countActionsForInvalidation(setIds,
+                    distributionSetInvalidation.getCancelationType());
+
+            return new DistributionSetInvalidationCount(rolloutsCount, autoAssignmentsCount, actionsCount);
+        });
+    }
+
+    private static boolean shouldRolloutsBeCanceled(final CancelationType cancelationType,
+            final boolean cancelRollouts) {
+        return cancelationType != CancelationType.NONE || cancelRollouts;
+    }
+
     private void invalidateDistributionSetsInTransaction(final DistributionSetInvalidation distributionSetInvalidation,
             final String tenant) {
         DeploymentHelper.runInNewTransaction(txManager, tenant + "-invalidateDS", status -> {
@@ -132,26 +152,6 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
             log.debug("Cancel auto assignments after ds invalidation. ID: {}", setId);
             targetFilterQueryManagement.cancelAutoAssignmentForDistributionSet(setId);
             return null;
-        });
-    }
-
-    private static boolean shouldRolloutsBeCanceled(final CancelationType cancelationType,
-            final boolean cancelRollouts) {
-        return cancelationType != CancelationType.NONE || cancelRollouts;
-    }
-
-    @Override
-    public DistributionSetInvalidationCount countEntitiesForInvalidation(
-            final DistributionSetInvalidation distributionSetInvalidation) {
-        return systemSecurityContext.runAsSystem(() -> {
-            final Collection<Long> setIds = distributionSetInvalidation.getDistributionSetIds();
-            final long rolloutsCount = shouldRolloutsBeCanceled(distributionSetInvalidation.getCancelationType(),
-                    distributionSetInvalidation.isCancelRollouts()) ? countRolloutsForInvalidation(setIds) : 0;
-            final long autoAssignmentsCount = countAutoAssignmentsForInvalidation(setIds);
-            final long actionsCount = countActionsForInvalidation(setIds,
-                    distributionSetInvalidation.getCancelationType());
-
-            return new DistributionSetInvalidationCount(rolloutsCount, autoAssignmentsCount, actionsCount);
         });
     }
 

@@ -26,30 +26,20 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Central system management operations of the update server.
- *
  */
 public interface SystemManagement {
 
-    /**
-     * Checks if a specific tenant exists. The tenant will not be created lazy.
-     *
-     * @return {@code true} in case the tenant exits or {@code false} if not
-     */
-    String currentTenant();
 
     /**
      * Deletes all data related to a given tenant.
      *
-     * @param tenant
-     *            to delete
+     * @param tenant to delete
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
     void deleteTenant(@NotNull String tenant);
 
     /**
-     *
-     * @param pageable
-     *            for paging information
+     * @param pageable for paging information
      * @return list of all tenant names in the system.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_SYSTEM_ADMIN)
@@ -60,9 +50,8 @@ public interface SystemManagement {
      * {@link TenantAware#runAsTenant(String, org.eclipse.hawkbit.tenancy.TenantAware.TenantRunner)}
      * sliently (i.e. exceptions will be logged but operations will continue for
      * further tenants).
-     * 
-     * @param consumer
-     *            to run as teanant
+     *
+     * @param consumer to run as teanant
      */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     void forEachTenant(Consumer<String> consumer);
@@ -103,8 +92,7 @@ public interface SystemManagement {
      * is not yet in the session). Please user {@link #getTenantMetadata()} for
      * regular requests.
      *
-     * @param tenant
-     *            to retrieve data for
+     * @param tenant to retrieve data for
      * @return {@link TenantMetaData} of given tenant
      */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
@@ -113,21 +101,12 @@ public interface SystemManagement {
     /**
      * Update call for {@link TenantMetaData} of the current tenant.
      *
-     * @param defaultDsType
-     *            to update
+     * @param defaultDsType to update
      * @return updated {@link TenantMetaData} entity
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     TenantMetaData updateTenantMetadata(long defaultDsType);
 
-    /**
-     * Returns {@link TenantMetaData} of given tenant ID.
-     *
-     * @param tenantId
-     *            to retrieve data for
-     * @return {@link TenantMetaData} of given tenant
-     */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     TenantMetaData getTenantMetadata(long tenantId);
-
 }

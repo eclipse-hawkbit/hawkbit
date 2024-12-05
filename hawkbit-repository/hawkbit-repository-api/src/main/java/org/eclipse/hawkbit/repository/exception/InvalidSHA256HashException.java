@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
@@ -17,6 +19,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
  */
 public class InvalidSHA256HashException extends AbstractServerRtException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -28,18 +31,15 @@ public class InvalidSHA256HashException extends AbstractServerRtException {
     }
 
     /**
-     * @param message
-     *            of the error
-     * @param cause
-     *            for the exception
+     * @param message of the error
+     * @param cause for the exception
      */
     public InvalidSHA256HashException(final String message, final Throwable cause) {
         super(message, SpServerError.SP_ARTIFACT_UPLOAD_FAILED_SHA256_MATCH, cause);
     }
 
     /**
-     * @param message
-     *            of the error
+     * @param message of the error
      */
     public InvalidSHA256HashException(final String message) {
         super(message, SpServerError.SP_ARTIFACT_UPLOAD_FAILED_SHA256_MATCH);

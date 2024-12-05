@@ -4,7 +4,8 @@ parent: API
 weight: 83
 ---
 
-The DMF API provides Java classes which allows that the message body can be deserialized at runtime into a Java object. Also Java classes can be used to serialize Java objects into JSON bodies to send a message to hawkBit.
+The DMF API provides Java classes which allows that the message body can be deserialized at runtime into a Java object.
+Also Java classes can be used to serialize Java objects into JSON bodies to send a message to hawkBit.
 Currently, bodies of messages are based on JSON.
 
 <!--more-->
@@ -22,19 +23,21 @@ Bindings determine how messages get put in this place
 Queues can also be bound to multiple exchanges.
 
 **Exchanges** are just publish messages.
-The user decides who can produce on an exchange and who can create bindings on that exchange for delivery to a specific queue.
+The user decides who can produce on an exchange and who can create bindings on that exchange for delivery to a specific
+queue.
 
 hawkBit will create all necessary queues, exchanges and bindings for the user, making it easy to get started.
 The exchange name for outgoing messages is **dmf.exchange**.
 
-The user has to set a `reply_to` header (see chapter below), in order to specify the exchange to which hawkBit should reply to.
+The user has to set a `reply_to` header (see chapter below), in order to specify the exchange to which hawkBit should
+reply to.
 
 The following chapter describes the message body, header and properties.
 
-Note: the DMF protocol was intended to be compatible to other use cases by design. As a result, DMF uses the term **thing** and not **target** but they are actually synonyms in this case.
+Note: the DMF protocol was intended to be compatible to other use cases by design. As a result, DMF uses the term *
+*thing** and not **target** but they are actually synonyms in this case.
 
 ## Messages sent to hawkBit (Client -> hawkBit)
-
 
 ### THING_CREATED
 
@@ -76,9 +79,10 @@ Payload Template (optional):
 
 The "name" property specifies the name of the thing, which by default is the thing ID. This property is optional.<br />
 <br />
-The "type" property specifies name of a target type which should be assigned to the created/updated target. The 
+The "type" property specifies name of a target type which should be assigned to the created/updated target. The
 target type with the specified name should be created in advance, otherwise it can't be assigned to the target,
 resulting in:
+
 * error is logged
 * if the target does not exist then it is created without any target type assigned
 * if it exists already then no changes to its target type assignment are made.
@@ -87,8 +91,8 @@ If the "type" property is set to a blank string while updating an existing targe
 assignment is removed from the target. This property is optional and if omitted then no changes to the target type
 assignment are made.<br />
 <br />
-The "attributeUpdate" property provides the attributes of the thing, for details see UPDATE_ATTRIBUTES message. This property is optional.
-
+The "attributeUpdate" property provides the attributes of the thing, for details see UPDATE_ATTRIBUTES message. This
+property is optional.
 
 ### THING_REMOVED
 
@@ -112,7 +116,8 @@ Example headers
 
 ### UPDATE_ATTRIBUTES
 
-Message to update target attributes. This message can be send in response to a REQUEST_ATTRIBUTES_UPDATE event, sent by hawkBit.
+Message to update target attributes. This message can be send in response to a REQUEST_ATTRIBUTES_UPDATE event, sent by
+hawkBit.
 
 | Header  | Description                      | Type                             | Mandatory |
 |---------|----------------------------------|----------------------------------|-----------|
@@ -121,9 +126,9 @@ Message to update target attributes. This message can be send in response to a R
 | thingId | The ID of the registered thing   | String                           | true      |
 | tenant  | The tenant this thing belongs to | String                           | false     |
 
-| Message Properties          | Description                      | Type   | Mandatory |
-|-----------------------------|----------------------------------|--------|-----------|
-| content_type                | The content type of the payload  | String | true      |
+| Message Properties | Description                     | Type   | Mandatory |
+|--------------------|---------------------------------|--------|-----------|
+| content_type       | The content type of the payload | String | true      |
 
 Example header and payload:
 
@@ -143,7 +148,9 @@ Payload Template:
 }
 ```
 
-The "mode" property specifies the update mode that should be applied. This property is optional. Possible [mode](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfUpdateMode.java) values:
+The "mode" property specifies the update mode that should be applied. This property is optional.
+Possible [mode](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfUpdateMode.java)
+values:
 
 | Value   | Description                                                                                                                                                                         |
 |---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -165,7 +172,8 @@ Message to send an action status event to hawkBit.
 |--------------------|---------------------------------|--------|-----------|
 | content_type       | The content type of the payload | String | true      |
 
-Payload Template (the Java representation is [ActionUpdateStatus](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfActionUpdateStatus.java)):
+Payload Template (the Java representation
+is [ActionUpdateStatus](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfActionUpdateStatus.java)):
 
 ```json
 {
@@ -176,7 +184,8 @@ Payload Template (the Java representation is [ActionUpdateStatus](https://github
 }
 ```
 
-Possible [actionStatus](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfActionStatus.java) values:
+Possible [actionStatus](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfActionStatus.java)
+values:
 
 | Value           | Description                             |
 |-----------------|-----------------------------------------|
@@ -207,7 +216,8 @@ Example header and payload:
 
 ### PING
 
-hawkBit allows DMF clients to check the availability of the DMF service. For this scenario DMF specifies a PING message that can be sent by the client:
+hawkBit allows DMF clients to check the availability of the DMF service. For this scenario DMF specifies a PING message
+that can be sent by the client:
 
 | Header | Description                    | Type                | Mandatory |
 |--------|--------------------------------|---------------------|-----------|
@@ -255,7 +265,8 @@ Example Headers and Payload:
 }
 ```
 
-After sending this message, an action status event with either actionStatus=CANCELED or actionStatus=CANCEL_REJECTED has to be returned.
+After sending this message, an action status event with either actionStatus=CANCELED or actionStatus=CANCEL_REJECTED has
+to be returned.
 
 Example header and payload when cancellation is successful:
 
@@ -287,10 +298,10 @@ Example header and payload when cancellation is rejected:
 }
 ```
 
-
 ### DOWNLOAD_AND_INSTALL or DOWNLOAD
 
-Message sent by hawkBit to initialize an update or download task. Note: in case of a maintenance window configured but not yet active the message will have the topic _DOWNLOAD_ instead of _DOWNLOAD_AND_INSTALL_.
+Message sent by hawkBit to initialize an update or download task. Note: in case of a maintenance window configured but
+not yet active the message will have the topic _DOWNLOAD_ instead of _DOWNLOAD_AND_INSTALL_.
 
 | Header  | Description                                    | Type                                              | Mandatory |
 |---------|------------------------------------------------|---------------------------------------------------|-----------|
@@ -303,7 +314,8 @@ Message sent by hawkBit to initialize an update or download task. Note: in case 
 |--------------------|---------------------------------|--------|-----------|
 | content_type       | The content type of the payload | String | true      |
 
-Payload Template (the Java representation is [DmfDownloadAndUpdateRequest](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfDownloadAndUpdateRequest.java)):
+Payload Template (the Java representation
+is [DmfDownloadAndUpdateRequest](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfDownloadAndUpdateRequest.java)):
 
 ```json
 {
@@ -375,13 +387,13 @@ Example header and payload:
 }
 ```
 
-
 ### MULTI_ACTION
 
-If `multi.assignments.enabled` is enabled, this message is sent instead of DOWNLOAD_AND_INSTALL, DOWNLOAD, or CANCEL_DOWNLOAD
- by hawkBit to initialize update, download, or cancel task(s).
+If `multi.assignments.enabled` is enabled, this message is sent instead of DOWNLOAD_AND_INSTALL, DOWNLOAD, or
+CANCEL_DOWNLOAD
+by hawkBit to initialize update, download, or cancel task(s).
 
- With weight, one can set the priority to the action. The higher the weight, the higher is the priority of an action.
+With weight, one can set the priority to the action. The higher the weight, the higher is the priority of an action.
 
 | Header  | Description                                    | Type                        | Mandatory |
 |---------|------------------------------------------------|-----------------------------|-----------|
@@ -394,7 +406,8 @@ If `multi.assignments.enabled` is enabled, this message is sent instead of DOWNL
 |--------------------|---------------------------------|--------|-----------|
 | content_type       | The content type of the payload | String | true      |
 
-Payload Template (the Java representation is [DmfMultiActionRequest](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfMultiActionRequest.java)):
+Payload Template (the Java representation
+is [DmfMultiActionRequest](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfMultiActionRequest.java)):
 
 ```json
 [{
@@ -540,7 +553,6 @@ Example header and payload:
 }]
 ```
 
-
 ### THING_DELETED
 
 Message sent by hawkBit when a target has been deleted.
@@ -556,7 +568,6 @@ Example header:
 | Header                                                       | MessageProperties |
 |--------------------------------------------------------------|-------------------|
 | type=THING\_DELETED <br /> tenant=default <br /> thingId=abc |                   |
-
 
 ### REQUEST_ATTRIBUTES_UPDATE
 
@@ -575,10 +586,10 @@ Example headers:
 |----------------------------------------------------------------------------------------------|-------------------|
 | type=EVENT <br /> tenant=default <br /> thingId=abc <br /> topic=REQUEST\_ATTRIBUTES\_UPDATE |                   |
 
-
 ### PING_RESPONSE
 
-_hawkBit_ will respond to the PING message with a PING_RESPONSE type message that has the same correlationId as the original PING message:
+_hawkBit_ will respond to the PING message with a PING_RESPONSE type message that has the same correlationId as the
+original PING message:
 
 | Header | Description                    | Type                         | Mandatory |
 |--------|--------------------------------|------------------------------|-----------|
@@ -590,7 +601,8 @@ _hawkBit_ will respond to the PING message with a PING_RESPONSE type message tha
 | correlationId      | CorrelationId of the original PING request | String | true      |
 | content_type       | The content type of the payload            | String | true      |
 
-The PING_RESPONSE also contains a timestamp (i.e. the difference, measured in milliseconds, between the current time and midnight, January 1, 1970 UTC) as plain text. It is not guaranteed that this timestamp is completely accurate.
+The PING_RESPONSE also contains a timestamp (i.e. the difference, measured in milliseconds, between the current time and
+midnight, January 1, 1970 UTC) as plain text. It is not guaranteed that this timestamp is completely accurate.
 
 | Header                                    | MessageProperties       |
 |-------------------------------------------|-------------------------|

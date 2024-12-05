@@ -19,6 +19,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.exception.AutoConfirmationAlreadyActiveException;
 import org.eclipse.hawkbit.repository.exception.InvalidConfirmationFeedbackException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -29,10 +32,6 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.jupiter.api.Test;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -40,7 +39,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 /**
  * Test class testing the functionality of triggering a deployment of
  * {@link DistributionSet}s to {@link Target}s with AutoConfirmation active.
- *
  */
 @Feature("Component Tests - Repository")
 @Story("Confirmation Management")
@@ -140,9 +138,9 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
         assertThat(newAction.getStatus()).isEqualTo(Status.RUNNING);
 
         assertThatThrownBy(() -> confirmationManagement.confirmAction(actions.get(0).getId(), null, null))
-              .isInstanceOf(InvalidConfirmationFeedbackException.class)
-              .matches(e -> ((InvalidConfirmationFeedbackException) e)
-                    .getReason() == InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION);
+                .isInstanceOf(InvalidConfirmationFeedbackException.class)
+                .matches(e -> ((InvalidConfirmationFeedbackException) e)
+                        .getReason() == InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION);
     }
 
     @Test
@@ -152,9 +150,9 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
         final Action action = prepareFinishedUpdate();
 
         assertThatThrownBy(() -> confirmationManagement.confirmAction(action.getId(), null, null))
-              .isInstanceOf(InvalidConfirmationFeedbackException.class)
-              .matches(e -> ((InvalidConfirmationFeedbackException) e)
-                    .getReason() == InvalidConfirmationFeedbackException.Reason.ACTION_CLOSED);
+                .isInstanceOf(InvalidConfirmationFeedbackException.class)
+                .matches(e -> ((InvalidConfirmationFeedbackException) e)
+                        .getReason() == InvalidConfirmationFeedbackException.Reason.ACTION_CLOSED);
     }
 
     @Test
@@ -197,7 +195,7 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
 
         final List<Action> actions = assignDistributionSets(
                 Arrays.asList(toDeploymentRequest(controllerId, dsId), toDeploymentRequest(controllerId, dsId2)))
-                        .stream().flatMap(s -> s.getAssignedEntity().stream()).collect(Collectors.toList());
+                .stream().flatMap(s -> s.getAssignedEntity().stream()).collect(Collectors.toList());
         assertThat(actions).hasSize(2);
 
         assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(2)
@@ -276,11 +274,6 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
         verifyAutoConfirmationIsDisabled(controllerId);
     }
 
-    private static Stream<Arguments> getAutoConfirmationArguments() {
-        return Stream.of(Arguments.of("TestUser", "TestRemark"), Arguments.of("TestUser", null),
-                Arguments.of(null, "TestRemark"), Arguments.of(null, null));
-    }
-
     @Test
     @Description("Verify activating already active auto confirmation will throw exception.")
     void verifyActivateAlreadyActiveAutoConfirmationThrowException() {
@@ -305,13 +298,18 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
         verifyAutoConfirmationIsDisabled(controllerId);
     }
 
-    private void verifyAutoConfirmationIsDisabled(final String controllerId) {
-        assertThat(targetManagement.getByControllerID(controllerId))
-                .hasValueSatisfying(target -> assertThat(target.getAutoConfirmationStatus()).isNull());
+    private static Stream<Arguments> getAutoConfirmationArguments() {
+        return Stream.of(Arguments.of("TestUser", "TestRemark"), Arguments.of("TestUser", null),
+                Arguments.of(null, "TestRemark"), Arguments.of(null, null));
     }
 
     private static DeploymentRequest toDeploymentRequest(final String controllerId, final Long distributionSetId) {
         return new DeploymentRequestBuilder(controllerId, distributionSetId).setConfirmationRequired(true).build();
+    }
+
+    private void verifyAutoConfirmationIsDisabled(final String controllerId) {
+        assertThat(targetManagement.getByControllerID(controllerId))
+                .hasValueSatisfying(target -> assertThat(target.getAutoConfirmationStatus()).isNull());
     }
 
 }

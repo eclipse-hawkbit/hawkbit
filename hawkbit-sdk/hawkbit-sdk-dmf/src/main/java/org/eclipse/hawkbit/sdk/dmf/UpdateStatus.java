@@ -9,8 +9,8 @@
  */
 package org.eclipse.hawkbit.sdk.dmf;
 
-import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
-
 import java.util.List;
+
+import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 
 public record UpdateStatus(DmfActionStatus status, List<String> messages) {}

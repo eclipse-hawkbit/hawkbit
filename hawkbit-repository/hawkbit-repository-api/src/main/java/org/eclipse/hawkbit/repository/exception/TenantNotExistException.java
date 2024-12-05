@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.io.Serial;
+
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
@@ -17,13 +19,12 @@ import org.eclipse.hawkbit.exception.SpServerError;
  * register itself at SP as plug'n play target and the tenant specified in the
  * URL for this target does not exist. To avoid that targets could register
  * automatically new tenants.
- * 
- *
- *
  */
 public class TenantNotExistException extends AbstractServerRtException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_TENANT_NOT_EXISTS;
 
     /**
@@ -35,9 +36,8 @@ public class TenantNotExistException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
-     * @param cause
-     *            of the exception
+     *
+     * @param cause of the exception
      */
     public TenantNotExistException(final Throwable cause) {
         super(THIS_ERROR, cause);
@@ -45,11 +45,9 @@ public class TenantNotExistException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
-     * @param cause
-     *            of the exception
+     *
+     * @param message of the exception
+     * @param cause of the exception
      */
     public TenantNotExistException(final String message, final Throwable cause) {
         super(message, THIS_ERROR, cause);
@@ -57,9 +55,8 @@ public class TenantNotExistException extends AbstractServerRtException {
 
     /**
      * Parameterized constructor.
-     * 
-     * @param message
-     *            of the exception
+     *
+     * @param message of the exception
      */
     public TenantNotExistException(final String message) {
         super(message, THIS_ERROR);

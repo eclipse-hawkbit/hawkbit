@@ -16,7 +16,6 @@ import jakarta.persistence.EntityManager;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,11 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Spring data repositories for {@link TargetFilterQuery}s.
- *
  */
 @Transactional(readOnly = true)
-public interface TargetFilterQueryRepository
-        extends BaseEntityRepository<JpaTargetFilterQuery> {
+public interface TargetFilterQueryRepository extends BaseEntityRepository<JpaTargetFilterQuery> {
 
     /**
      * Find customer target filter by name
@@ -39,8 +36,7 @@ public interface TargetFilterQueryRepository
     Optional<TargetFilterQuery> findByName(String name);
 
     /**
-     * Sets the auto assign distribution sets and action types to null which
-     * match the ds ids.
+     * Sets the auto assign distribution sets and action types to null which match the ds ids.
      * <p/>
      * No access control applied
      *
@@ -48,29 +44,24 @@ public interface TargetFilterQueryRepository
      */
     @Modifying
     @Transactional
-    @Query("update JpaTargetFilterQuery d set d.autoAssignDistributionSet = NULL, d.autoAssignActionType = NULL, d.accessControlContext = NULL where d.autoAssignDistributionSet in :ids")
+    @Query("UPDATE JpaTargetFilterQuery d SET d.autoAssignDistributionSet = NULL, d.autoAssignActionType = NULL, d.accessControlContext = NULL WHERE d.autoAssignDistributionSet.id IN :ids")
     void unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(@Param("ids") Long... dsIds);
 
     /**
-     * Counts all target filters that have a given auto assign distribution set
-     * assigned.
+     * Counts all target filters that have a given auto assign distribution set assigned.
      * <p/>
      * No access control applied
      *
-     * @param autoAssignDistributionSetId
-     *            the id of the distribution set
+     * @param autoAssignDistributionSetId the id of the distribution set
      * @return the count
      */
     long countByAutoAssignDistributionSetId(long autoAssignDistributionSetId);
 
     /**
-     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
-     * reasons (this is a "delete everything" query after all) we add the tenant
-     * manually to query even if this will by done by {@link EntityManager}
-     * anyhow. The DB should take care of optimizing this away.
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety reasons (this is a "delete everything" query after all) we add
+     * the tenant manually to query even if this will by done by {@link EntityManager} anyhow. The DB should take care of optimizing this away.
      *
-     * @param tenant
-     *            to delete data from
+     * @param tenant to delete data from
      */
     @Modifying
     @Transactional

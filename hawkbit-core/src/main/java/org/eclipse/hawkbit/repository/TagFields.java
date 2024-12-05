@@ -15,16 +15,16 @@ import lombok.Getter;
  * Describing the fields of the Tag model which can be used in the REST API e.g. for sorting etc.
  */
 @Getter
-public enum TagFields implements FieldNameProvider {
+public enum TagFields implements RsqlQueryField {
 
     ID("id"),
     NAME("name"),
     DESCRIPTION("description"),
     COLOUR("colour");
 
-    private final String fieldName;
+    private final String jpaEntityFieldName;
 
-    TagFields(final String fieldName) {
-        this.fieldName = fieldName;
+    TagFields(final String jpaEntityFieldName) {
+        this.jpaEntityFieldName = jpaEntityFieldName;
     }
 }

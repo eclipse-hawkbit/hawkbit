@@ -22,20 +22,16 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * Management service for statistics of a single tenant.
- *
  */
 @Validated
 public class JpaTenantStatsManagement implements TenantStatsManagement {
 
     @Autowired
     private TargetRepository targetRepository;
-
     @Autowired
     private LocalArtifactRepository artifactRepository;
-
     @Autowired
     private ActionRepository actionRepository;
-
     @Autowired
     private TenantAware tenantAware;
 

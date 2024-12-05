@@ -15,6 +15,9 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Random;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
@@ -26,10 +29,6 @@ import org.eclipse.hawkbit.repository.test.util.DisposableSqlTestDatabaseExtensi
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("System Management")
@@ -69,13 +68,13 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         // per tenant data
         final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
         assertThat(tenants).hasSize(3);
-        final TenantUsage tenantUsage0 = new TenantUsage("tenant0");
+        final TenantUsage tenantUsage0 = new TenantUsage("TENANT0");
         tenantUsage0.setArtifacts(1);
         tenantUsage0.setOverallArtifactVolumeInBytes(1234);
-        final TenantUsage tenantUsage1 = new TenantUsage("tenant1");
+        final TenantUsage tenantUsage1 = new TenantUsage("TENANT1");
         tenantUsage1.setArtifacts(1);
         tenantUsage1.setOverallArtifactVolumeInBytes(1234);
-        assertThat(tenants).containsOnly(new TenantUsage("default"),
+        assertThat(tenants).containsOnly(new TenantUsage("DEFAULT"),
                 tenantUsage0,
                 tenantUsage1);
     }
@@ -93,13 +92,11 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         // per tenant data
         final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
         assertThat(tenants).hasSize(3);
-        final TenantUsage tenantUsage0 = new TenantUsage("tenant0");
+        final TenantUsage tenantUsage0 = new TenantUsage("TENANT0");
         tenantUsage0.setTargets(100);
-        final TenantUsage tenantUsage1 = new TenantUsage("tenant1");
+        final TenantUsage tenantUsage1 = new TenantUsage("TENANT1");
         tenantUsage1.setTargets(100);
-        assertThat(tenants).containsOnly(new TenantUsage("default"),
-                tenantUsage0,
-                tenantUsage1);
+        assertThat(tenants).containsOnly(new TenantUsage("DEFAULT"), tenantUsage0, tenantUsage1);
     }
 
     @Test
@@ -114,15 +111,13 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         // per tenant data
         final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
         assertThat(tenants).hasSize(3);
-        final TenantUsage tenantUsage0 = new TenantUsage("tenant0");
+        final TenantUsage tenantUsage0 = new TenantUsage("TENANT0");
         tenantUsage0.setTargets(20);
         tenantUsage0.setActions(40);
-        final TenantUsage tenantUsage1 = new TenantUsage("tenant1");
+        final TenantUsage tenantUsage1 = new TenantUsage("TENANT1");
         tenantUsage1.setTargets(20);
         tenantUsage1.setActions(40);
-        assertThat(tenants).containsOnly(new TenantUsage("default"),
-                tenantUsage0,
-                tenantUsage1);
+        assertThat(tenants).containsOnly(new TenantUsage("DEFAULT"), tenantUsage0, tenantUsage1);
     }
 
     private byte[] createTestTenantsForSystemStatistics(final int tenants, final int artifactSize, final int targets,
@@ -132,28 +127,28 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         randomgen.nextBytes(random);
 
         for (int i = 0; i < tenants; i++) {
-            final String tenantname = "tenant" + i;
+            final String tenantname = "TENANT" + i;
             SecurityContextSwitch.runAs(SecurityContextSwitch.withUserAndTenant("bumlux", tenantname, true, true, false,
                     SpringEvalExpressions.SYSTEM_ROLE), () -> {
-                        systemManagement.getTenantMetadata();
-                        if (artifactSize > 0) {
-                            createTestArtifact(random);
-                            createDeletedTestArtifact(random);
-                        }
-                        if (targets > 0) {
-                            final List<Target> createdTargets = createTestTargets(targets);
-                            if (updates > 0) {
-                                for (int x = 0; x < updates; x++) {
-                                    final DistributionSet ds = testdataFactory
-                                            .createDistributionSet("to be deployed" + x, true);
+                systemManagement.getTenantMetadata();
+                if (artifactSize > 0) {
+                    createTestArtifact(random);
+                    createDeletedTestArtifact(random);
+                }
+                if (targets > 0) {
+                    final List<Target> createdTargets = createTestTargets(targets);
+                    if (updates > 0) {
+                        for (int x = 0; x < updates; x++) {
+                            final DistributionSet ds = testdataFactory
+                                    .createDistributionSet("to be deployed" + x, true);
 
-                                    assignDistributionSet(ds, createdTargets);
-                                }
-                            }
+                            assignDistributionSet(ds, createdTargets);
                         }
+                    }
+                }
 
-                        return null;
-                    });
+                return null;
+            });
         }
 
         return random;
@@ -172,9 +167,9 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
 
     private void createDeletedTestArtifact(final byte[] random) {
         final DistributionSet ds = testdataFactory.createDistributionSet("deleted garbage", true);
-        ds.getModules().stream().forEach(module -> {
-            artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "file1",
-                    false, random.length));
+        ds.getModules().forEach(module -> {
+            artifactManagement.create(
+                    new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "file1", false, random.length));
             softwareModuleManagement.delete(module.getId());
         });
     }

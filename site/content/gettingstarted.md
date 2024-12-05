@@ -3,30 +3,14 @@ title: Getting Started
 weight: 20
 ---
 
-## On Sandbox
-
-We offer a sandbox installation that is free for everyone to try out hawkBit's [Management UI](/hawkbit/ui/),
-[Management API](/hawkbit/apis/management_api/), and [Direct Device Integration API](/hawkbit/apis/ddi_api/): &nbsp;
-**[<i class="fas fa-desktop">&nbsp;</i> https://hawkbit.eclipseprojects.io](https://hawkbit.eclipseprojects.io)**
-
-{{% warning %}}
-The sandbox is a shared installation that will be reset from time to time. Therefore, it is not allowed to upload
-any personal data.
-{{% /warning %}}
-
-In addition, the following vendors offer free trial accounts for their Eclipse hawkBit compatible products:
-
-* [Bosch IoT Rollouts](https://bosch-iot-suite.com/service/rollouts/) (by [Bosch Digital](https://www.bosch-digital.com))
-* [Kynetics Update Factory](https://www.kynetics.com/update-factory) (by [Kynetics LLC](https://www.kynetics.com/))
-
-
 ## From Docker Image
 
 ### Overview
 
-HawkBit Update Server username/password -> admin/admin as default login credentials. They can be overridden by the environment variables spring.security.user.name and spring.security.user.password which are defined in the corresponding default [application.properties](hawkbit-runtime/hawkbit-update-server/src/main/resources/application.properties).
+HawkBit Update Server default user has _admin/admin_ as default credentials. See below how the user can be changed.
 
 It supports two configurations:
+
 * monolith - hawkbit-update-server
 * micro-service - hawkbit-mgmt-server, hawkbit-ddi-server, hawkbit-dmf-server.
 
@@ -37,57 +21,115 @@ Start the hawkBit Update Server as a single container
 ```bash
 $ docker run -p 8080:8080 hawkbit/hawkbit-update-server:latest
 ```
+This will start hawkBit update server with embedded H2 database for evaluation purposes.
 
 ### B: Run hawkBit Update Server (Monolith) with services as Docker Compose
-
-Start the hawkBit Update Server together with an MySQL and RabbitMQ instance as containers
+Start the hawkBit Update Server together with an PostgreSQL and RabbitMQ instance as containers
 
 ```bash
-$ git clone https://github.com/eclipse/hawkbit.git
-$ cd hawkbit/hawkbit-runtime/docker
+$ git clone https://github.com/eclipse-hawkbit/hawkbit.git
+$ cd hawkbit/docker
+$ docker-compose -f docker-compose-monolith-postgres.yml up -d
+```
+or with MySQL
+```bash
+$ git clone https://github.com/eclipse-hawkbit/hawkbit.git
+$ cd hawkbit/docker
 $ docker-compose -f docker-compose-monolith-mysql.yml up -d
 ```
 
-### C: Run hawkBit Update Server (Micro-Service) with services as Docker Compose
+If you want to start also the Simple UI, you can use, for PostgreSQL:
+```bash
+$ git clone https://github.com/eclipse-hawkbit/hawkbit.git
+$ cd hawkbit/docker
+$ docker-compose -f docker-compose-monolith-with-simple-ui-postgres.yml up -d
+```
+or with MySQL
+```bash
+$ git clone https://github.com/eclipse-hawkbit/hawkbit.git
+$ cd hawkbit/docker
+$ docker-compose -f docker-compose-monolith-simple-ui-mysql.yml up -d
+```
 
-Start the hawkBit Update Server together with an MySQL and RabbitMQ instance as containers
+Note: _-d_ flag is used to run the containers in detached mode. If you want to see the logs, you can remove the flag.
+
+### C: Run hawkBit Update Server (Micro-Service) with services as Docker Compose
+Start the hawkBit Update Server together with an PostgreSQL and RabbitMQ instance as containers
 
 ```bash
-$ git clone https://github.com/eclipse/hawkbit.git
-$ cd hawkbit/hawkbit-runtime/docker
-$ docker-compose -f docker-compose-micro-service-mysql.yml up -d
+$ git clone https://github.com/eclipse-hawkbit/hawkbit.git
+$ cd hawkbit/docker
+$ docker-compose -f docker-compose-micro-services-postgres.yml up -d
 ```
+or with MySQL
+```bash
+$ git clone https://github.com/eclipse-hawkbit/hawkbit.git
+$ cd hawkbit/docker
+$ docker-compose -f docker-compose-micro-services-mysql.yml up -d
+```
+
+If you want to start also the Simple UI, you can use, for PostgreSQL:
+```bash
+$ git clone https://github.com/eclipse-hawkbit/hawkbit.git
+$ cd hawkbit/docker
+$ docker-compose -f docker-compose-micro-services-with-simple-ui-postgres.yml up -d
+```
+or with MySQL
+```bash
+$ git clone https://github.com/eclipse-hawkbit/hawkbit.git
+$ cd hawkbit/docker
+$ docker-compose -f docker-compose-micro-services-simple-ui-mysql.yml up -d
+```
+
+Note: _-d_ flag is used to run the containers in detached mode. If you want to see the logs, you can remove the flag.
 
 ## From Sources
 
 ### 1: Clone and build hawkBit
+
 ```sh
-$ git clone https://github.com/eclipse/hawkbit.git
+$ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit
-$ mvn clean install
+$ mvn clean install -DskipTests
 ```
 
-### 2: Start hawkBit [update server](https://github.com/eclipse/hawkbit/tree/master/hawkbit-runtime/hawkbit-update-server) (Monolith)
+### 2: Start hawkBit [update server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-monolith/hawkbit-update-server) (Monolith)
 
 ```sh
-$ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-#version#-SNAPSHOT.jar
+$ java -jar ./hawkbit-monolith/hawkbit-update-server/target/hawkbit-update-server-0-SNAPSHOT.jar
 ```
 
-### 3: Build hawkBit examples
+Note: you could start it also in microservices mode by:
+```sh
+$ java -jar ./hawkbit-mgmt/hawkbit-mgmt-server/target/hawkbit-mgmt-server-0-SNAPSHOT.jar
+```
+```sh
+$ java -jar ./hawkbit-ddi/hawkbit-ddi-server/target/hawkbit-ddi-server-0-SNAPSHOT.jar
+```
+and (only if you want to use the DMF feature):
 
 ```sh
-$ git clone https://github.com/eclipse/hawkbit-examples.git
-$ cd hawkbit-examples
-$ mvn clean install
+$ java -jar ./hawkbit-dmf/hawkbit-dmf-server/target/hawkbit-dmf-server-0-SNAPSHOT.jar
 ```
 
-### 4: Start hawkBit [Device Simulator](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-device-simulator)
+Note: you could starte the Simple UI by:
 ```sh
-$ java -jar ./hawkbit-device-simulator/target/hawkbit-device-simulator-#version#.jar
+$ java -jar ./hawkbit-simple-ui/target/hawkbit-simple-ui-0-SNAPSHOT.jar
 ```
 
-### 5: Generate Getting Started data with [Example Management API Client](https://github.com/eclipse/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator)
-
-```sh
-$ java -jar ./hawkbit-example-mgmt-simulator/target/hawkbit-example-mgmt-simulator-#version#.jar
+## Configuration
+### Change credentials
+As stated before the default user is _admin/admin_. It could be overridden by changing the [TenantAwareUserProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-core/src/main/java/org/eclipse/hawkbit/tenancy/TenantAwareUserProperties.java) configuration using Spring ways. For instance, using a properties file like:
+```properties 
+# should remove the admin/admin user
+hawkbit.security.user.admin.tenant=#{null}
+hawkbit.security.user.admin.password=#{null}
+hawkbit.security.user.admin.roles=#{null}
+# should add a hawkbit/isAwesome! user
+hawkbit.security.user.hawkbit.tenant=DEFAULT
+hawkbit.security.user.hawkbit.password={noop}isAwesome!
+hawkbit.security.user.hawkbit.roles=TENANT_ADMIN
 ```
+which should remove the default _admin/admin_ user and add a hawkbit user _hawkbit_ with password _isAwesome!_ and a role _TENANT_ADMIN_. 
+
+You could create multiple users with specified roles.

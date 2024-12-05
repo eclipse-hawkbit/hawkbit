@@ -9,32 +9,27 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.io.Serial;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 
 /**
  * Defines the remote event for update a {@link DistributionSetTag}.
- *
  */
-public class DistributionSetTagUpdatedEvent extends RemoteEntityEvent<DistributionSetTag>
-        implements EntityUpdatedEvent {
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
+public class DistributionSetTagUpdatedEvent extends RemoteEntityEvent<DistributionSetTag> implements EntityUpdatedEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * Default constructor.
-     */
-    public DistributionSetTagUpdatedEvent() {
-        // for serialization libs like jackson
-    }
-
-    /**
      * Constructor.
-     * 
-     * @param tag
-     *            tag the tag which is updated
-     * @param applicationId
-     *            the applicationID
+     *
+     * @param tag tag the tag which is updated
+     * @param applicationId the applicationID
      */
     public DistributionSetTagUpdatedEvent(final DistributionSetTag tag, final String applicationId) {
         super(tag, applicationId);

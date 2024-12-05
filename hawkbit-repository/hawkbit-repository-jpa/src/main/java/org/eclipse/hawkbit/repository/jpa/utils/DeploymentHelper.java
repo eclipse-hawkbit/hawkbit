@@ -16,11 +16,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -45,12 +46,9 @@ public final class DeploymentHelper {
      * action to canceled, resets the meta data of the target and in case there
      * is a new action this action is triggered.
      *
-     * @param action
-     *            the action which is set to canceled
-     * @param actionRepository
-     *            for the operation
-     * @param targetRepository
-     *            for the operation
+     * @param action the action which is set to canceled
+     * @param actionRepository for the operation
+     * @param targetRepository for the operation
      */
     public static void successCancellation(final JpaAction action, final ActionRepository actionRepository,
             final TargetRepository targetRepository) {
@@ -71,7 +69,7 @@ public final class DeploymentHelper {
             target.setAssignedDistributionSet(target.getInstalledDistributionSet());
             target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
         } else {
-            target.setAssignedDistributionSet(nextActiveActions.get(0).getDistributionSet());
+            target.setAssignedDistributionSet((JpaDistributionSet) nextActiveActions.get(0).getDistributionSet());
         }
 
         targetRepository.save(target);
@@ -80,13 +78,9 @@ public final class DeploymentHelper {
     /**
      * Executes the modifying action in new transaction
      *
-     * @param txManager
-     *            transaction manager interface
-     * @param transactionName
-     *            the name of the new transaction
-     * @param action
-     *            the callback to execute in new tranaction
-     *
+     * @param txManager transaction manager interface
+     * @param transactionName the name of the new transaction
+     * @param action the callback to execute in new tranaction
      * @return the result of the action
      */
     public static <T> T runInNewTransaction(@NotNull final PlatformTransactionManager txManager,
@@ -97,15 +91,10 @@ public final class DeploymentHelper {
     /**
      * Executes the modifying action in new transaction
      *
-     * @param txManager
-     *            transaction manager interface
-     * @param transactionName
-     *            the name of the new transaction
-     * @param isolationLevel
-     *            isolation level of the new transaction
-     * @param action
-     *            the callback to execute in new tranaction
-     *
+     * @param txManager transaction manager interface
+     * @param transactionName the name of the new transaction
+     * @param isolationLevel isolation level of the new transaction
+     * @param action the callback to execute in new tranaction
      * @return the result of the action
      */
     public static <T> T runInNewTransaction(@NotNull final PlatformTransactionManager txManager,

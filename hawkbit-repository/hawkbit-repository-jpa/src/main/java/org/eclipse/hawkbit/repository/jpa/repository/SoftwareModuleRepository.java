@@ -22,11 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * {@link SoftwareModule} repository.
- *
  */
 @Transactional(readOnly = true)
-public interface SoftwareModuleRepository
-        extends BaseEntityRepository<JpaSoftwareModule> {
+public interface SoftwareModuleRepository extends BaseEntityRepository<JpaSoftwareModule> {
 
     /**
      * Counts all {@link SoftwareModule}s based on the given {@link JpaSoftwareModuleType}.
@@ -43,9 +41,8 @@ public interface SoftwareModuleRepository
      * with the given ID.
      * <p/>
      * No access control applied
-     * 
+     *
      * @param distributionSetId the distribution set ID
-     * 
      * @return the number of software modules matching the given distribution set ID.
      */
     long countByAssignedToId(Long distributionSetId);
@@ -56,8 +53,7 @@ public interface SoftwareModuleRepository
      * manually to query even if this will by done by {@link EntityManager}
      * anyhow. The DB should take care of optimizing this away.
      *
-     * @param tenant
-     *            to delete data from
+     * @param tenant to delete data from
      */
     @Modifying
     @Transactional

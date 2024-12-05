@@ -9,104 +9,32 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
- * The Software Module meta data composite key which contains the meta data key
- * and the ID of the software module itself.
+ * The Software Module meta-data composite key which contains the meta-data key and the ID of the software module itself.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@Data
 public final class SwMetadataCompositeKey implements Serializable {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private String key;
-
     private Long softwareModule;
 
     /**
-     * Default constructor for JPA.
-     */
-    public SwMetadataCompositeKey() {
-        // Default constructor for JPA.
-    }
-
-    /**
-     * @param moduleId
-     *            the software module for this meta data
-     * @param key
-     *            the key of the meta data
+     * @param moduleId the software module for this meta-data
+     * @param key the key of the meta-data
      */
     public SwMetadataCompositeKey(final Long moduleId, final String key) {
         this.softwareModule = moduleId;
         this.key = key;
     }
-
-    /**
-     * @return the key
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * @param key
-     *            the key to set
-     */
-    public void setKey(final String key) {
-        this.key = key;
-    }
-
-    /**
-     * @return the softwareModule
-     */
-    public Long getSoftwareModule() {
-        return softwareModule;
-    }
-
-    /**
-     * @param softwareModule
-     *            the softwareModule to set
-     */
-    public void setSoftwareModule(final Long softwareModule) {
-        this.softwareModule = softwareModule;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (key == null ? 0 : key.hashCode());
-        result = prime * result + (softwareModule == null ? 0 : softwareModule.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SwMetadataCompositeKey other = (SwMetadataCompositeKey) obj;
-        if (key == null) {
-            if (other.key != null) {
-                return false;
-            }
-        } else if (!key.equals(other.key)) {
-            return false;
-        }
-        if (softwareModule == null) {
-            if (other.softwareModule != null) {
-                return false;
-            }
-        } else if (!softwareModule.equals(other.softwareModule)) {
-            return false;
-        }
-        return true;
-    }
-
 }

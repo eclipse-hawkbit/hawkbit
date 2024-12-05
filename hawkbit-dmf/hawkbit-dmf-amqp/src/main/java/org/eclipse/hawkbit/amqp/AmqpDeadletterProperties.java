@@ -28,16 +28,14 @@ public class AmqpDeadletterProperties {
     private static final int THREE_WEEKS = 21;
 
     /**
-     * Message time to live (ttl) for the deadletter queue. Default ttl is 3
-     * weeks.
+     * Message time to live (ttl) for the dead letter queue. Default ttl is 3 weeks.
      */
     private long ttl = Duration.ofDays(THREE_WEEKS).toMillis();
 
     /**
-     * Return the deadletter arguments.
-     * 
-     * @param exchange
-     *            the deadletter exchange
+     * Return the dead letter arguments.
+     *
+     * @param exchange the dead letter exchange
      * @return map which holds the properties
      */
     public Map<String, Object> getDeadLetterExchangeArgs(final String exchange) {
@@ -47,10 +45,10 @@ public class AmqpDeadletterProperties {
     }
 
     /**
-     * Create a deadletter queue with ttl for messages
-     * 
-     * @param queueName the deadletter queue name
-     * @return the deadletter queue
+     * Create a dead letter queue with ttl for messages
+     *
+     * @param queueName the dead letter queue name
+     * @return the dead letter queue
      */
     public Queue createDeadletterQueue(final String queueName) {
         return new Queue(queueName, true, false, false, getTTLArgs());

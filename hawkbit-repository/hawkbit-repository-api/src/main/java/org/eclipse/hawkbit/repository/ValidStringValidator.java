@@ -9,11 +9,10 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import com.cronutils.utils.StringUtils;
-
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
+import com.cronutils.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -34,15 +33,6 @@ public class ValidStringValidator implements ConstraintValidator<ValidString, St
         return StringUtils.isEmpty(value) || isValidString(value);
     }
 
-    private boolean isValidString(final String value) {
-        try {
-            return cleaner.isValid(stringToDocument(value));
-        } catch (final Exception ex) {
-            log.error(String.format("There was an exception during bean field value (%s) validation", value), ex);
-            return false;
-        }
-    }
-
     private static Document stringToDocument(final String value) {
         final Document xmlFragment = Jsoup.parse(value, "", Parser.xmlParser());
         final Document resultingDocument = Document.createShell("");
@@ -50,5 +40,14 @@ public class ValidStringValidator implements ConstraintValidator<ValidString, St
         xmlFragment.childNodes().forEach(xmlNode -> resultingDocument.body().appendChild(xmlNode.clone()));
 
         return resultingDocument;
+    }
+
+    private boolean isValidString(final String value) {
+        try {
+            return cleaner.isValid(stringToDocument(value));
+        } catch (final Exception ex) {
+            log.error(String.format("There was an exception during bean field value (%s) validation", value), ex);
+            return false;
+        }
     }
 }

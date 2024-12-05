@@ -41,7 +41,6 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * JPA implementation of {@link TargetTagManagement}.
- *
  */
 @Transactional(readOnly = true)
 @Validated
@@ -62,14 +61,14 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     }
 
     @Override
-    public Optional<TargetTag> getByName(final String name) {
-        return targetTagRepository.findByNameEquals(name);
+    public long count() {
+        return targetTagRepository.count();
     }
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetTag create(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
 
@@ -78,8 +77,8 @@ public class JpaTargetTagManagement implements TargetTagManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<TargetTag> create(final Collection<TagCreate> tt) {
         final List<JpaTargetTag> targetTagList = tt.stream().map(JpaTagCreate.class::cast)
                 .map(JpaTagCreate::buildTargetTag).toList();
@@ -89,13 +88,18 @@ public class JpaTargetTagManagement implements TargetTagManagement {
 
     @Override
     @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final String targetTagName) {
         targetTagRepository.delete(
                 targetTagRepository
-                    .findOne(((root, query, cb) -> cb.equal(root.get(JpaTargetTag_.name), targetTagName)))
-                    .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagName)));
+                        .findOne(((root, query, cb) -> cb.equal(root.get(JpaTargetTag_.name), targetTagName)))
+                        .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagName)));
+    }
+
+    @Override
+    public Page<TargetTag> findAll(final Pageable pageable) {
+        return JpaManagementHelper.findAllWithCountBySpec(targetTagRepository, pageable, null);
     }
 
     @Override
@@ -105,25 +109,8 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     }
 
     @Override
-    public long count() {
-        return targetTagRepository.count();
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public TargetTag update(final TagUpdate u) {
-        final GenericTagUpdate update = (GenericTagUpdate) u;
-
-        final JpaTargetTag tag = targetTagRepository.findById(update.getId())
-                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, update.getId()));
-
-        update.getName().ifPresent(tag::setName);
-        update.getDescription().ifPresent(tag::setDescription);
-        update.getColour().ifPresent(tag::setColour);
-
-        return targetTagRepository.save(tag);
+    public Optional<TargetTag> getByName(final String name) {
+        return targetTagRepository.findByNameEquals(name);
     }
 
     @Override
@@ -137,7 +124,19 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     }
 
     @Override
-    public Page<TargetTag> findAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithCountBySpec(targetTagRepository, pageable, null);
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public TargetTag update(final TagUpdate u) {
+        final GenericTagUpdate update = (GenericTagUpdate) u;
+
+        final JpaTargetTag tag = targetTagRepository.findById(update.getId())
+                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, update.getId()));
+
+        update.getName().ifPresent(tag::setName);
+        update.getDescription().ifPresent(tag::setDescription);
+        update.getColour().ifPresent(tag::setColour);
+
+        return targetTagRepository.save(tag);
     }
 }

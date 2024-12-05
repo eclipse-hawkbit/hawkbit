@@ -9,26 +9,22 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model.helper;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
-import org.eclipse.hawkbit.repository.jpa.model.EntityPropertyChangeListener;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A singleton bean which holds the {@link AfterTransactionCommitExecutor} to
- * have to the cache manager in beans not instantiated by spring e.g. JPA
- * entities or {@link EntityPropertyChangeListener} which cannot be autowired.
- *
+ * A singleton bean which holds the {@link AfterTransactionCommitExecutor} to provide it to in beans not instantiated by spring e.g. JPA
+ * entities which cannot be autowired.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AfterTransactionCommitExecutorHolder {
 
     private static final AfterTransactionCommitExecutorHolder SINGLETON = new AfterTransactionCommitExecutorHolder();
 
     @Autowired
     private AfterTransactionCommitExecutor afterCommit;
-
-    private AfterTransactionCommitExecutorHolder() {
-
-    }
 
     /**
      * @return the cache manager holder singleton instance
@@ -45,11 +41,9 @@ public final class AfterTransactionCommitExecutorHolder {
     }
 
     /**
-     * @param afterCommit
-     *            the afterCommit to set
+     * @param afterCommit the afterCommit to set
      */
     public void setAfterCommit(final AfterTransactionCommitExecutor afterCommit) {
         this.afterCommit = afterCommit;
     }
-
 }

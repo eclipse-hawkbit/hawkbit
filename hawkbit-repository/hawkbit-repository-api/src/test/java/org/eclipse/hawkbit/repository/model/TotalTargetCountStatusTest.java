@@ -9,16 +9,16 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
 
 @Feature("Component Tests - TotalTargetCountStatus")
 @Story("TotalTargetCountStatus should correctly present finished DOWNLOAD_ONLY actions")

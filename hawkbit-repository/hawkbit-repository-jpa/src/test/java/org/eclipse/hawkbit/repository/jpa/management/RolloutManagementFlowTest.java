@@ -9,6 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
@@ -24,16 +29,9 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.test.context.TestPropertySource;
-
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Junit tests for RolloutManagement.
@@ -300,7 +298,6 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 4); // assign the target created when paused
     }
 
-
     @Test
     @Description("Verifies a simple pure (no static groups) dynamic rollout flow with a dynamic group template")
     void dynamicRolloutPureFlow() {
@@ -362,7 +359,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertAndGetRunning(rollout, 1); // remains on in the first dynamic
 
         rolloutHandler.handleAll();
-        assertRollout(rollout, true, RolloutStatus.RUNNING,  2, 8);
+        assertRollout(rollout, true, RolloutStatus.RUNNING, 2, 8);
         assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
         // first dynamic threshold is reached, second is started
         assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 2);

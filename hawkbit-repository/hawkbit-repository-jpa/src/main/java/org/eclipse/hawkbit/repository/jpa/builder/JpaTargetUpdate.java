@@ -17,5 +17,4 @@ public class JpaTargetUpdate extends AbstractTargetUpdateCreate<TargetUpdate> im
     JpaTargetUpdate(final String controllerId) {
         super(controllerId);
     }
-
 }

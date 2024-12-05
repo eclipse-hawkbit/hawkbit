@@ -9,64 +9,58 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.Type;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import java.util.Collection;
-import java.util.Collections;
-
 /**
  * Builder to create a new {@link TargetType} entry. Defines all fields
  * that can be set at creation time. Other fields are set by the repository
  * automatically, e.g. {@link BaseEntity#getCreatedAt()}.
- *
  */
 public interface TargetTypeCreate {
 
     /**
-     * @param name
-     *            for {@link TargetType#getName()}
+     * @param name for {@link TargetType#getName()}
      * @return updated builder instance
      */
     TargetTypeCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotEmpty String name);
 
     /**
-     * @param description
-     *            for {@link TargetType#getDescription()}
+     * @param description for {@link TargetType#getDescription()}
      * @return updated builder instance
      */
     TargetTypeCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
-     * @param key
-     *            for {@link TargetType#getName()}
+     * @param key for {@link TargetType#getName()}
      * @return updated builder instance
      */
     TargetTypeCreate key(@Size(min = 1, max = Type.KEY_MAX_SIZE) @NotEmpty String key);
 
     /**
-     * @param colour
-     *            for {@link TargetType#getColour()}
+     * @param colour for {@link TargetType#getColour()}
      * @return updated builder instance
      */
     TargetTypeCreate colour(@Size(max = Type.COLOUR_MAX_SIZE) String colour);
 
     /**
-     * @param compatible
-     *            for {@link TargetType#getCompatibleDistributionSetTypes()}
+     * @param compatible for {@link TargetType#getCompatibleDistributionSetTypes()}
      * @return updated builder instance
      */
     TargetTypeCreate compatible(@NotEmpty Collection<Long> compatible);
 
     /**
-     * @param compatible
-     *            for {@link TargetType#getCompatibleDistributionSetTypes()}
+     * @param compatible for {@link TargetType#getCompatibleDistributionSetTypes()}
      * @return updated builder instance
      */
     default TargetTypeCreate compatible(@NotNull final Long compatible) {
@@ -74,8 +68,7 @@ public interface TargetTypeCreate {
     }
 
     /**
-     * @param compatible
-     *            for {@link TargetType#getCompatibleDistributionSetTypes()}
+     * @param compatible for {@link TargetType#getCompatibleDistributionSetTypes()}
      * @return updated builder instance
      */
     default TargetTypeCreate compatible(@NotNull final DistributionSetType compatible) {

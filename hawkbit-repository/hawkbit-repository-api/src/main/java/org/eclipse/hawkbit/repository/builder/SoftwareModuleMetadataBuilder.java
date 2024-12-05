@@ -15,24 +15,19 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 
 /**
  * Builder for {@link SoftwareModuleMetadata}.
- *
  */
 public interface SoftwareModuleMetadataBuilder {
 
     /**
-     * @param softwareModuleId
-     *            of the {@link SoftwareModule} the {@link MetaData} belongs to
-     * @param key
-     *            of {@link MetaData#getKey()}
+     * @param softwareModuleId of the {@link SoftwareModule} the {@link MetaData} belongs to
+     * @param key of {@link MetaData#getKey()}
      * @return builder instance
      */
     SoftwareModuleMetadataUpdate update(long softwareModuleId, String key);
 
     /**
-     * @param softwareModuleId
-     *            of the {@link SoftwareModule} the {@link MetaData} belongs to
+     * @param softwareModuleId of the {@link SoftwareModule} the {@link MetaData} belongs to
      * @return builder instance
      */
     SoftwareModuleMetadataCreate create(long softwareModuleId);
-
 }

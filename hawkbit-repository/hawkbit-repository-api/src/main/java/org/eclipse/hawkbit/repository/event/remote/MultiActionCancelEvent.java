@@ -9,8 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import java.io.Serial;
 import java.util.List;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.Action;
 
 /**
@@ -20,26 +23,18 @@ import org.eclipse.hawkbit.repository.model.Action;
  * actionIds containing the identifiers of the affected actions
  * as payload. This event is only published in case of an cancellation.
  */
+@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
 public class MultiActionCancelEvent extends MultiActionEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Default constructor.
-     */
-    public MultiActionCancelEvent() {
-        // for serialization libs like jackson
-    }
 
     /**
      * Constructor.
      *
-     * @param tenant
-     *            tenant the event is scoped to
-     * @param applicationId
-     *            the application id
-     * @param actions
-     *            the actions to be canceled
+     * @param tenant tenant the event is scoped to
+     * @param applicationId the application id
+     * @param actions the actions to be canceled
      */
     public MultiActionCancelEvent(String tenant, String applicationId, List<Action> actions) {
         super(tenant, applicationId, actions);

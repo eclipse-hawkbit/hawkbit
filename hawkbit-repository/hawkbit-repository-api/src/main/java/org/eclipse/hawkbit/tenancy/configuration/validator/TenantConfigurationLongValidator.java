@@ -10,8 +10,7 @@
 package org.eclipse.hawkbit.tenancy.configuration.validator;
 
 /**
- * Specific tenant configuration validator, which validates that the given value
- * is a {@link Long}.
+ * Specific tenant configuration validator, which validates that the given value is a {@link Long}.
  */
 public class TenantConfigurationLongValidator implements TenantConfigurationValidator {
 

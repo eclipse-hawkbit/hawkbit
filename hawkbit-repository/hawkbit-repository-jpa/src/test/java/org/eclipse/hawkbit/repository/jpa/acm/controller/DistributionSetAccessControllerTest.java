@@ -16,6 +16,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -34,10 +37,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 
 @Feature("Component Tests - Access Control")
 @Story("Test Distribution Set Access Controller")
@@ -139,8 +138,8 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         // verify distributionSetManagement#assignSoftwareModules
         assertThat(distributionSetManagement.assignSoftwareModules(permitted.getId(),
                 Collections.singletonList(swModule.getId()))).satisfies(ds -> {
-                    assertThat(ds.getModules().stream().map(Identifiable::getId).toList()).contains(swModule.getId());
-                });
+            assertThat(ds.getModules().stream().map(Identifiable::getId).toList()).contains(swModule.getId());
+        });
         assertThatThrownBy(() -> {
             distributionSetManagement.assignSoftwareModules(readOnly.getId(),
                     Collections.singletonList(swModule.getId()));
@@ -191,6 +190,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         final DistributionSet readOnly = testdataFactory.createDistributionSet();
         final DistributionSet hidden = testdataFactory.createDistributionSet();
         final DistributionSetTag dsTag = distributionSetTagManagement.create(entityFactory.tag().create().name("dsTag"));
+        final DistributionSetTag dsTag2 = distributionSetTagManagement.create(entityFactory.tag().create().name("dsTag2"));
 
         // perform tag assignment before setting access rules
         distributionSetManagement.assignTag(Arrays.asList(permitted.getId(), readOnly.getId(), hidden.getId()),
@@ -210,41 +210,35 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         assertThat(distributionSetManagement.findByRsqlAndTag(Pageable.unpaged(), "id==*", dsTag.getId()).get()
                 .map(Identifiable::getId).toList()).containsOnly(permitted.getId(), readOnly.getId());
 
-        // verify distributionSetManagement#toggleTagAssignment on permitted target
+        // verify distributionSetManagement#unassignTag on permitted target
         assertThat(distributionSetManagement
-                .toggleTagAssignment(Collections.singletonList(permitted.getId()), dsTag.getName()).getUnassigned())
+                .unassignTag(Collections.singletonList(permitted.getId()), dsTag.getId()))
+                .size()
                 .isEqualTo(1);
         // verify distributionSetManagement#assignTag on permitted target
         assertThat(distributionSetManagement.assignTag(Collections.singletonList(permitted.getId()), dsTag.getId()))
                 .hasSize(1);
         // verify distributionSetManagement#unAssignTag on permitted target
-        assertThat(distributionSetManagement.unassignTag(permitted.getId(), dsTag.getId()).getId())
+        assertThat(distributionSetManagement.unassignTag(List.of(permitted.getId()), dsTag.getId())
+                .get(0).getId())
                 .isEqualTo(permitted.getId());
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
-        assertThatThrownBy(() -> {
-            distributionSetManagement.toggleTagAssignment(Collections.singletonList(readOnly.getId()), dsTag.getName())
-                    .getUnassigned();
-        }).as("Missing update permissions for target to toggle tag assignment.")
+        assertThatThrownBy(() ->
+                distributionSetManagement.unassignTag(Collections.singletonList(readOnly.getId()), dsTag.getId()))
+                .as("Missing update permissions for target to toggle tag assignment.")
                 .isInstanceOf(InsufficientPermissionException.class);
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
+        // dsTag2- since - it is tagged with dsTag and won't do anything if assigning dsTag
         assertThatThrownBy(() -> {
-            distributionSetManagement.assignTag(Collections.singletonList(readOnly.getId()), dsTag.getId());
-        }).as("Missing update permissions for target to toggle tag assignment.")
-                .isInstanceOf(InsufficientPermissionException.class);
-
-        // assignment is denied for readOnlyTarget (read, but no update permissions)
-        assertThatThrownBy(() -> {
-            distributionSetManagement.unassignTag(readOnly.getId(), dsTag.getId());
+            distributionSetManagement.assignTag(Collections.singletonList(readOnly.getId()), dsTag2.getId());
         }).as("Missing update permissions for target to toggle tag assignment.")
                 .isInstanceOf(InsufficientPermissionException.class);
 
         // assignment is denied for hiddenTarget since it's hidden
-        assertThatThrownBy(() -> {
-            distributionSetManagement.toggleTagAssignment(Collections.singletonList(hidden.getId()), dsTag.getName())
-                    .getUnassigned();
-        }).as("Missing update permissions for target to toggle tag assignment.")
+        assertThatThrownBy(() -> distributionSetManagement.unassignTag(Collections.singletonList(hidden.getId()), dsTag.getId()))
+                .as("Missing update permissions for target to toggle tag assignment.")
                 .isInstanceOf(EntityNotFoundException.class);
 
         // assignment is denied for hiddenTarget since it's hidden
@@ -300,7 +294,6 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
                     .getAutoAssignDistributionSet().getId();
         }).isInstanceOf(EntityNotFoundException.class);
     }
-
 
     private void defineAccess(final AccessController.Operation operation, final DistributionSet... distributionSets) {
         defineAccess(operation, List.of(distributionSets));

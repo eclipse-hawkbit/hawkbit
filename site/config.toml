@@ -35,7 +35,7 @@ canonifyurls = false
 
 	# Repository
 	provider = "GitHub"
-	repo_url = "https://github.com/eclipse/hawkbit"
+	repo_url = "https://github.com/eclipse-hawkbit/hawkbit"
 
 	permalink = "#"
 
@@ -88,11 +88,6 @@ canonifyurls = false
 	name   = "Architecture"
 	url    = "/architecture/"
 	weight = 60
-
-[[menu.main]]
-	name   = "Management UI"
-	url    = "/ui/"
-	weight = 70
 
 [[menu.main]]
 	name   = "APIs"

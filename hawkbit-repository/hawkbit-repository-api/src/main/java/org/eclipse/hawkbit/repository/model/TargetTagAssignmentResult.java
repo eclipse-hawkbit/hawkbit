@@ -9,15 +9,21 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import lombok.Data;
-
 import java.util.List;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  * Result object for {@link TargetTag} assignments.
  *
+ * @deprecated since 0.6.0 with deprecation of toggle assignments
  */
-@Data
+@Deprecated(forRemoval = true, since = "0.6.0")
+@Getter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public class TargetTagAssignmentResult extends AbstractAssignmentResult<Target> {
 
     private final TargetTag targetTag;
@@ -25,14 +31,10 @@ public class TargetTagAssignmentResult extends AbstractAssignmentResult<Target> 
     /**
      * Constructor.
      *
-     * @param alreadyAssigned
-     *            count of already assigned (ignored) elements
-     * @param assigned
-     *            {@link List} of assigned {@link Target}s.
-     * @param unassigned
-     *            {@link List} of unassigned {@link Target}s.
-     * @param targetTag
-     *            the assigned or unassigned tag
+     * @param alreadyAssigned count of already assigned (ignored) elements
+     * @param assigned {@link List} of assigned {@link Target}s.
+     * @param unassigned {@link List} of unassigned {@link Target}s.
+     * @param targetTag the assigned or unassigned tag
      */
     public TargetTagAssignmentResult(final int alreadyAssigned, final List<? extends Target> assigned,
             final List<? extends Target> unassigned, final TargetTag targetTag) {

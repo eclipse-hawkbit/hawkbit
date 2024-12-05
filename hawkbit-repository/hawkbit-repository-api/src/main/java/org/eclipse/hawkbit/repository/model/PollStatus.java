@@ -9,15 +9,14 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import lombok.Data;
-
 import java.time.LocalDateTime;
+
+import lombok.Data;
 
 /**
  * The poll time object which holds all the necessary information around the
  * target poll time, e.g. the last poll time, the next poll time and the overdue
  * poll time.
- *
  */
 @Data
 public class PollStatus {

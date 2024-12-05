@@ -17,8 +17,7 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * A TenantAwareEvent entity manager, which loads an entity by id and type for
- * remote events.
+ * A TenantAwareEvent entity manager, which loads an entity by id and type for remote events.
  */
 @Transactional(readOnly = true)
 public class JpaEventEntityManager implements EventEntityManager {
@@ -38,8 +37,7 @@ public class JpaEventEntityManager implements EventEntityManager {
     }
 
     @Override
-    public <E extends TenantAwareBaseEntity> E findEntity(final String tenant, final Long id,
-            final Class<E> entityType) {
+    public <E extends TenantAwareBaseEntity> E findEntity(final String tenant, final Long id, final Class<E> entityType) {
         return tenantAware.runAsTenant(tenant, () -> entityManager.find(entityType, id));
     }
 }

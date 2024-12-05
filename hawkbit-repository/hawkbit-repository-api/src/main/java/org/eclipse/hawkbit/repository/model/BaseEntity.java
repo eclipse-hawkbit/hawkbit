@@ -9,14 +9,13 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import org.eclipse.hawkbit.repository.Identifiable;
-
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.hawkbit.repository.Identifiable;
+
 /**
  * Core information of all entities.
- *
  */
 public interface BaseEntity extends Serializable, Identifiable<Long> {
 
@@ -25,15 +24,19 @@ public interface BaseEntity extends Serializable, Identifiable<Long> {
     }
 
     /**
-     * @return time in {@link TimeUnit#MILLISECONDS} when the {@link BaseEntity}
-     *         was created.
+     * @return user that created the {@link BaseEntity}.
+     */
+    String getCreatedBy();
+
+    /**
+     * @return time in {@link TimeUnit#MILLISECONDS} when the {@link BaseEntity} was created.
      */
     long getCreatedAt();
 
     /**
-     * @return user that created the {@link BaseEntity}.
+     * @return user that updated the {@link BaseEntity} last.
      */
-    String getCreatedBy();
+    String getLastModifiedBy();
 
     /**
      * @return time in {@link TimeUnit#MILLISECONDS} when the {@link BaseEntity}
@@ -42,13 +45,7 @@ public interface BaseEntity extends Serializable, Identifiable<Long> {
     long getLastModifiedAt();
 
     /**
-     * @return user that updated the {@link BaseEntity} last.
-     */
-    String getLastModifiedBy();
-
-    /**
      * @return version of the {@link BaseEntity}.
      */
     int getOptLockRevision();
-
 }

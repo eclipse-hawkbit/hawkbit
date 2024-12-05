@@ -35,21 +35,15 @@ public class FilterParams {
     /**
      * Constructor for the filter parameters of a Simple Filter.
      *
-     * @param filterByInstalledOrAssignedDistributionSetId
-     *            if set, a filter is added for the given
-     *            {@link DistributionSet#getId()}
-     * @param filterByStatus
-     *            if set, a filter is added for target states included by the
-     *            collection
-     * @param overdueState
-     *            if set, a filter is added for overdued devices
-     * @param filterBySearchText
-     *            if set, a filter is added for the given search text
-     * @param selectTargetWithNoTag
-     *            if set, tag-filtering is enabled
-     * @param filterByTagNames
-     *            if tag-filtering is enabled, a filter is added for the given
-     *            tag-names
+     * @param filterByInstalledOrAssignedDistributionSetId if set, a filter is added for the given
+     *         {@link DistributionSet#getId()}
+     * @param filterByStatus if set, a filter is added for target states included by the
+     *         collection
+     * @param overdueState if set, a filter is added for overdued devices
+     * @param filterBySearchText if set, a filter is added for the given search text
+     * @param selectTargetWithNoTag if set, tag-filtering is enabled
+     * @param filterByTagNames if tag-filtering is enabled, a filter is added for the given
+     *         tag-names
      */
     public FilterParams(final Collection<TargetUpdateStatus> filterByStatus, final Boolean overdueState,
             final String filterBySearchText, final Long filterByInstalledOrAssignedDistributionSetId,
@@ -67,18 +61,14 @@ public class FilterParams {
     /**
      * Constructor for the filter parameters of a Type Filter.
      *
-     * @param filterBySearchText
-     *            if set, a filter is added for the given search text
-     * @param filterByInstalledOrAssignedDistributionSetId
-     *            if set, a filter is added for the given
-     *            {@link DistributionSet#getId()}
-     * @param selectTargetWithNoType
-     *            if true, a filter is added with no type
-     * @param filterByType
-     *            if set, a filter is added for the given target type
+     * @param filterBySearchText if set, a filter is added for the given search text
+     * @param filterByInstalledOrAssignedDistributionSetId if set, a filter is added for the given
+     *         {@link DistributionSet#getId()}
+     * @param selectTargetWithNoType if true, a filter is added with no type
+     * @param filterByType if set, a filter is added for the given target type
      */
     public FilterParams(final String filterBySearchText, final Long filterByInstalledOrAssignedDistributionSetId,
-                        final Boolean selectTargetWithNoType, final Long filterByType) {
+            final Boolean selectTargetWithNoType, final Long filterByType) {
         this.filterBySearchText = filterBySearchText;
         this.filterByDistributionId = filterByInstalledOrAssignedDistributionSetId;
         this.filterByStatus = null;

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.model;
 
 /**
  * Target tag element.
- *
  */
 public interface TargetTag extends Tag {
 

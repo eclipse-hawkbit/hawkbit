@@ -1,0 +1,46 @@
+name: Verify
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '.3rd-party/**'
+      - 'site/**'
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '.3rd-party/**'
+      - 'site/**'
+      - '**.md'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    services:
+      rabbitmq:
+        image: rabbitmq:3-management-alpine
+        env:
+          RABBITMQ_DEFAULT_VHOST: /
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: guest
+        ports:
+          - 15672:15672
+          - 5672:5672
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'maven'
+
+      - name: Check file license headers
+        run: mvn license:check --batch-mode
+
+      - name: Run tests & javadoc
+        run: mvn verify javadoc:javadoc --batch-mode

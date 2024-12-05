@@ -9,19 +9,18 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
-import org.eclipse.hawkbit.repository.FieldNameProvider;
-import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;
-
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
+import org.eclipse.hawkbit.repository.RsqlQueryField;
+import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;
 
 /**
  * Factory providing {@link RSQLVisitor} instances which validate the nodes
- * based on a given {@link FieldNameProvider}.
+ * based on a given {@link RsqlQueryField}.
  */
 public class DefaultRsqlVisitorFactory implements RsqlVisitorFactory {
 
     @Override
-    public <A extends Enum<A> & FieldNameProvider> RSQLVisitor<Void, String> validationRsqlVisitor(
+    public <A extends Enum<A> & RsqlQueryField> RSQLVisitor<Void, String> validationRsqlVisitor(
             final Class<A> fieldNameProvider) {
         return new FieldValidationRsqlVisitor<>(fieldNameProvider);
     }

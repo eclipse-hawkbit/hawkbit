@@ -11,15 +11,14 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.EntityInterceptor;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
-
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -131,6 +130,7 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     }
 
     private static class PrePersistEntityListener extends AbstractEntityListener {
+
         @Override
         public void prePersist(final Object entity) {
             setEntity(entity);
@@ -138,6 +138,7 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     }
 
     private static class PostPersistEntityListener extends AbstractEntityListener {
+
         @Override
         public void postPersist(final Object entity) {
             setEntity(entity);
@@ -146,6 +147,7 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     }
 
     private static class PostLoadEntityListener extends AbstractEntityListener {
+
         @Override
         public void postLoad(final Object entity) {
             setEntity(entity);
@@ -154,6 +156,7 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     }
 
     private static class PreUpdateEntityListener extends AbstractEntityListener {
+
         @Override
         public void preUpdate(final Object entity) {
             setEntity(entity);
@@ -161,6 +164,7 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     }
 
     private static class PostUpdateEntityListener extends AbstractEntityListener {
+
         @Override
         public void postUpdate(final Object entity) {
             setEntity(entity);
@@ -168,6 +172,7 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     }
 
     private static class PreRemoveEntityListener extends AbstractEntityListener {
+
         @Override
         public void preRemove(final Object entity) {
             setEntity(entity);
@@ -175,6 +180,7 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     }
 
     private static class PostRemoveEntityListener extends AbstractEntityListener {
+
         @Override
         public void postRemove(final Object entity) {
             setEntity(entity);

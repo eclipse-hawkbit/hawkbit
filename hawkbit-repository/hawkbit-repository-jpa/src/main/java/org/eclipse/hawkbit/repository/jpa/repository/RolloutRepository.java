@@ -35,8 +35,7 @@ public interface RolloutRepository
     /**
      * Retrieves all {@link Rollout} for given status.
      *
-     * @param status
-     *            the status of the rollouts to find
+     * @param status the status of the rollouts to find
      * @return the list of {@link Rollout} for specific status
      */
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
@@ -46,8 +45,7 @@ public interface RolloutRepository
     /**
      * Retrieves all {@link Rollout} for a specific {@code name}
      *
-     * @param name
-     *            the rollout name
+     * @param name the rollout name
      * @return {@link Rollout} for specific name
      */
     Optional<Rollout> findByName(String name);
@@ -58,8 +56,7 @@ public interface RolloutRepository
      * manually to query even if this will by done by {@link EntityManager}
      * anyhow. The DB should take care of optimizing this away.
      *
-     * @param tenant
-     *            to delete data from
+     * @param tenant to delete data from
      */
     @Modifying
     @Transactional
@@ -70,10 +67,8 @@ public interface RolloutRepository
      * Retrieves all {@link Rollout}s for a specific {@link DistributionSet} in
      * a given {@link RolloutStatus}.
      *
-     * @param set
-     *            the distribution set
-     * @param status
-     *            the status of the rollout
+     * @param set the distribution set
+     * @param status the status of the rollout
      * @return {@link Rollout} for specific distribution set
      */
     List<Rollout> findByDistributionSetAndStatusIn(DistributionSet set, Collection<RolloutStatus> status);
@@ -82,10 +77,8 @@ public interface RolloutRepository
      * Counts all {@link Rollout}s for a specific {@link DistributionSet} in a
      * given {@link RolloutStatus}.
      *
-     * @param distributionSetId
-     *            the distribution set
-     * @param status
-     *            the status of the rollout
+     * @param distributionSetId the distribution set
+     * @param status the status of the rollout
      * @return the count
      */
     long countByDistributionSetIdAndStatusIn(long distributionSetId, Collection<RolloutStatus> status);

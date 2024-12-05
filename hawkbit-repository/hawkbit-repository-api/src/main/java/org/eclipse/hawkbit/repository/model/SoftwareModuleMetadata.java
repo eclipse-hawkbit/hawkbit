@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.model;
 
 /**
  * {@link MetaData} element of a {@link SoftwareModule}.
- *
  */
 public interface SoftwareModuleMetadata extends MetaData {
 
