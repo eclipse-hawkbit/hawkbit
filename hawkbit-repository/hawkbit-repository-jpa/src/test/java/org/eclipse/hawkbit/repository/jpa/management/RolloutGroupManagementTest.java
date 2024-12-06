@@ -59,35 +59,27 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that management queries react as specified on calls for non existing entities " +
             " by means of throwing EntityNotFoundException.")
     @ExpectEvents({
-            @Expect(type = RolloutDeletedEvent.class, count = 0),
+            @Expect(type = RolloutCreatedEvent.class, count = 1),
+            @Expect(type = RolloutUpdatedEvent.class, count = 1),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 5),
+            @Expect(type = RolloutDeletedEvent.class, count = 0),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
-            @Expect(type = RolloutUpdatedEvent.class, count = 1),
-            @Expect(type = TargetCreatedEvent.class, count = 125),
-            @Expect(type = RolloutCreatedEvent.class, count = 1) })
+            @Expect(type = TargetCreatedEvent.class, count = 125) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         testdataFactory.createRollout();
 
         verifyThrownExceptionBy(() -> rolloutGroupManagement.countByRollout(NOT_EXIST_IDL), "Rollout");
-        verifyThrownExceptionBy(() -> rolloutGroupManagement.countTargetsOfRolloutsGroup(NOT_EXIST_IDL),
-                "RolloutGroup");
-        verifyThrownExceptionBy(() -> rolloutGroupManagement.findByRolloutWithDetailedStatus(PAGE, NOT_EXIST_IDL),
-                "Rollout");
-        verifyThrownExceptionBy(
-                () -> rolloutGroupManagement.findAllTargetsOfRolloutGroupWithActionStatus(PAGE, NOT_EXIST_IDL),
-                "RolloutGroup");
-        verifyThrownExceptionBy(() -> rolloutGroupManagement.findByRolloutAndRsql(PAGE, NOT_EXIST_IDL, "name==*"),
-                "Rollout");
+        verifyThrownExceptionBy(() -> rolloutGroupManagement.countTargetsOfRolloutsGroup(NOT_EXIST_IDL), "RolloutGroup");
+        verifyThrownExceptionBy(() -> rolloutGroupManagement.findByRolloutWithDetailedStatus(PAGE, NOT_EXIST_IDL), "Rollout");
+        verifyThrownExceptionBy(() -> rolloutGroupManagement.findAllTargetsOfRolloutGroupWithActionStatus(PAGE, NOT_EXIST_IDL), "RolloutGroup");
+        verifyThrownExceptionBy(() -> rolloutGroupManagement.findByRolloutAndRsql(PAGE, NOT_EXIST_IDL, "name==*"), "Rollout");
 
-        verifyThrownExceptionBy(() -> rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, NOT_EXIST_IDL),
-                "RolloutGroup");
-        verifyThrownExceptionBy(
-                () -> rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(PAGE, NOT_EXIST_IDL, "name==*"),
-                "RolloutGroup");
+        verifyThrownExceptionBy(() -> rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, NOT_EXIST_IDL), "RolloutGroup");
+        verifyThrownExceptionBy(() -> rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(PAGE, NOT_EXIST_IDL, "name==*"), "RolloutGroup");
     }
 
     @Test

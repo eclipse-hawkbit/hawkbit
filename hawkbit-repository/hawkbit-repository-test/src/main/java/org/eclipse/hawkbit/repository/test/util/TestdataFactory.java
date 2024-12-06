@@ -1051,8 +1051,13 @@ public class TestdataFactory {
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
         final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name(rolloutName).description(rolloutDescription)
-                        .targetFilterQuery(filterQuery).distributionSetId(distributionSet).actionType(actionType).weight(weight)
+                entityFactory.rollout().create()
+                        .name(rolloutName)
+                        .description(rolloutDescription)
+                        .targetFilterQuery(filterQuery)
+                        .distributionSetId(distributionSet)
+                        .actionType(actionType)
+                        .weight(weight)
                         .dynamic(dynamic),
                 groupSize, confirmationRequired, conditions, dynamicRolloutGroupTemplate);
 
