@@ -244,10 +244,10 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     public Page<DistributionSetType> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTypeRepository, pageable, List.of(
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTypeRepository, List.of(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTypeFields.class, virtualPropertyReplacer,
                         database),
-                DistributionSetTypeSpecification.isNotDeleted()));
+                DistributionSetTypeSpecification.isNotDeleted()), pageable);
     }
 
     private static void removeModuleTypes(final Collection<Long> currentSmTypeIds,

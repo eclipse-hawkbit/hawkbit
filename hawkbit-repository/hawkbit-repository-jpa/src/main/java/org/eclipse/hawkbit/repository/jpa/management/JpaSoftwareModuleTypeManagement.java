@@ -163,11 +163,11 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
 
     @Override
     public Page<SoftwareModuleType> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleTypeRepository, pageable,
-                List.of(
-                        RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleTypeFields.class,
-                                virtualPropertyReplacer, database),
-                        SoftwareModuleTypeSpecification.isNotDeleted()));
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleTypeRepository, List.of(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleTypeFields.class,
+                        virtualPropertyReplacer, database),
+                SoftwareModuleTypeSpecification.isNotDeleted()), pageable
+        );
     }
 
     private void delete(JpaSoftwareModuleType toDelete) {

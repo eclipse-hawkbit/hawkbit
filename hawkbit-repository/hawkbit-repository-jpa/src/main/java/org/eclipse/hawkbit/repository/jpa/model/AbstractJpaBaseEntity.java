@@ -85,12 +85,6 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         this.createdBy = createdBy;
     }
 
-    // maybe needed to have correct createdBy value in the database
-    @Access(AccessType.PROPERTY)
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
     @CreatedDate
     public void setCreatedAt(final long createdAt) {
         this.createdAt = createdAt;
@@ -111,18 +105,6 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         this.lastModifiedBy = lastModifiedBy;
     }
 
-    // maybe needed to have correct createdAt value in the database
-    @Access(AccessType.PROPERTY)
-    public long getCreatedAt() {
-        return createdAt;
-    }
-
-    // seems needed to have correct lastModifiedBy value in the database
-    @Access(AccessType.PROPERTY)
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
     @LastModifiedDate
     public void setLastModifiedAt(final long lastModifiedAt) {
         if (isController()) {
@@ -130,12 +112,6 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         }
 
         this.lastModifiedAt = lastModifiedAt;
-    }
-
-    // property access to make entity manager to detect touch
-    @Access(AccessType.PROPERTY)
-    public long getLastModifiedAt() {
-        return lastModifiedAt;
     }
 
     /**

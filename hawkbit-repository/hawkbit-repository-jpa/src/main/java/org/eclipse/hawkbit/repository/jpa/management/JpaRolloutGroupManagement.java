@@ -171,7 +171,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
                         database),
                 (root, query, cb) -> cb.equal(root.get(JpaRolloutGroup_.rollout).get(JpaRollout_.id), rolloutId));
 
-        return JpaManagementHelper.findAllWithCountBySpec(rolloutGroupRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithCountBySpec(rolloutGroupRepository, specList, pageable);
     }
 
     @Override
@@ -224,11 +224,13 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
             // in case of status ready the action has not been created yet and
             // the relation information between target and rollout-group is
             // stored in the #TargetRolloutGroup.
-            return JpaManagementHelper.findAllWithCountBySpec(targetRepository, page,
-                    Collections.singletonList(TargetSpecifications.isInRolloutGroup(rolloutGroupId)));
+            return JpaManagementHelper.findAllWithCountBySpec(targetRepository,
+                    Collections.singletonList(TargetSpecifications.isInRolloutGroup(rolloutGroupId)), page
+            );
         }
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, page,
-                Collections.singletonList(TargetSpecifications.isInActionRolloutGroup(rolloutGroupId)));
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository,
+                Collections.singletonList(TargetSpecifications.isInActionRolloutGroup(rolloutGroupId)), page
+        );
     }
 
     @Override
@@ -245,7 +247,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
                             rolloutGroupId);
                 });
 
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
     }
 
     @Override

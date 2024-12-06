@@ -249,8 +249,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public Page<Rollout> findAll(final Pageable pageable, final boolean deleted) {
-        return JpaManagementHelper.findAllWithCountBySpec(rolloutRepository, pageable, Collections
-                .singletonList(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort())));
+        return JpaManagementHelper.findAllWithCountBySpec(rolloutRepository, Collections
+                .singletonList(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort())), pageable);
     }
 
     @Override
@@ -269,7 +269,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
         specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort()));
 
-        return JpaManagementHelper.findAllWithCountBySpec(rolloutRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithCountBySpec(rolloutRepository, specList, pageable);
     }
 
     @Override

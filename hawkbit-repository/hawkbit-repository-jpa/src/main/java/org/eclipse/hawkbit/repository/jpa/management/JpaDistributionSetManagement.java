@@ -284,10 +284,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Page<DistributionSet> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, pageable, List.of(
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, List.of(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class, virtualPropertyReplacer,
                         database),
-                DistributionSetSpecification.isNotDeleted()));
+                DistributionSetSpecification.isNotDeleted()), pageable);
     }
 
     @Override
@@ -470,8 +470,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final long id) {
         assertDistributionSetExists(id);
 
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetMetadataRepository, pageable,
-                Collections.singletonList(byDsIdSpec(id)));
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetMetadataRepository, Collections.singletonList(byDsIdSpec(id)), pageable
+        );
     }
 
     @Override
@@ -490,7 +490,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                 .asList(RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetMetadataFields.class,
                         virtualPropertyReplacer, database), byDsIdSpec(id));
 
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetMetadataRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetMetadataRepository, specList, pageable);
     }
 
     @Override
@@ -542,18 +542,18 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Page<DistributionSet> findByTag(final Pageable pageable, final long tagId) {
         assertDsTagExists(tagId);
 
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, pageable, List.of(
-                DistributionSetSpecification.hasTag(tagId)));
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, List.of(
+                DistributionSetSpecification.hasTag(tagId)), pageable);
     }
 
     @Override
     public Page<DistributionSet> findByRsqlAndTag(final Pageable pageable, final String rsqlParam, final long tagId) {
         assertDsTagExists(tagId);
 
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, pageable, List.of(
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, List.of(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class, virtualPropertyReplacer,
                         database),
-                DistributionSetSpecification.hasTag(tagId), DistributionSetSpecification.isNotDeleted()));
+                DistributionSetSpecification.hasTag(tagId), DistributionSetSpecification.isNotDeleted()), pageable);
     }
 
     @Override

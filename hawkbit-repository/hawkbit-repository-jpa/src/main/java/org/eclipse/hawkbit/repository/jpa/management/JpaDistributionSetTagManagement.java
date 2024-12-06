@@ -158,8 +158,8 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
         final Specification<JpaDistributionSetTag> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTagFields.class,
                 virtualPropertyReplacer, database);
 
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, pageable,
-                Collections.singletonList(spec));
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, Collections.singletonList(spec), pageable
+        );
     }
 
     @Override
@@ -185,7 +185,8 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
             throw new EntityNotFoundException(DistributionSet.class, distributionSetId);
         }
 
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, pageable,
-                Collections.singletonList(TagSpecification.ofDistributionSet(distributionSetId)));
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository,
+                Collections.singletonList(TagSpecification.ofDistributionSet(distributionSetId)), pageable
+        );
     }
 }

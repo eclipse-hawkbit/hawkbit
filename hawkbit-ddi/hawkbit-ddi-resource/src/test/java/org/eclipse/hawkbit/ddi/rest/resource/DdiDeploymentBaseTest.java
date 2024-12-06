@@ -794,7 +794,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     private Page<ActionStatus> findActionStatusAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithCountBySpec(actionStatusRepository, pageable, null);
+        return JpaManagementHelper.findAllWithCountBySpec(actionStatusRepository, null, pageable);
     }
 
     private static class ActionStatusCondition extends Condition<ActionStatus> {

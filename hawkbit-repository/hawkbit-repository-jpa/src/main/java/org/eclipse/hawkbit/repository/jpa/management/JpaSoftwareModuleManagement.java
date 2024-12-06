@@ -259,10 +259,10 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Page<SoftwareModule> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository, pageable, List.of(
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository, List.of(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleFields.class, virtualPropertyReplacer,
                         database),
-                SoftwareModuleSpecification.isNotDeleted()));
+                SoftwareModuleSpecification.isNotDeleted()), pageable);
     }
 
     @Override
@@ -336,8 +336,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     public Page<SoftwareModule> findByAssignedTo(final Pageable pageable, final long distributionSetId) {
         assertDistributionSetExists(distributionSetId);
 
-        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository, pageable,
-                Collections.singletonList(SoftwareModuleSpecification.byAssignedToDs(distributionSetId)));
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository,
+                Collections.singletonList(SoftwareModuleSpecification.byAssignedToDs(distributionSetId)), pageable
+        );
     }
 
     @Override
@@ -394,8 +395,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     public Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(final Pageable pageable, final long id) {
         assertSoftwareModuleExists(id);
 
-        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleMetadataRepository, pageable,
-                Collections.singletonList(metadataBySoftwareModuleIdSpec(id)));
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleMetadataRepository,
+                Collections.singletonList(metadataBySoftwareModuleIdSpec(id)), pageable
+        );
     }
 
     @Override
@@ -422,7 +424,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         final List<Specification<JpaSoftwareModuleMetadata>> specList = Arrays
                 .asList(RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleMetadataFields.class,
                         virtualPropertyReplacer, database), metadataBySoftwareModuleIdSpec(id));
-        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleMetadataRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleMetadataRepository, specList, pageable);
     }
 
     @Override

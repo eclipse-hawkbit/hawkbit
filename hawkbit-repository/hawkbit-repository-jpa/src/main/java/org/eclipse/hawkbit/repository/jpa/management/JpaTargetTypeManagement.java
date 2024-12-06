@@ -144,10 +144,10 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     @Override
     public Page<TargetType> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return JpaManagementHelper.findAllWithCountBySpec(targetTypeRepository, pageable,
-                List.of(
-                        RSQLUtility.buildRsqlSpecification(
-                                rsqlParam, TargetTypeFields.class, virtualPropertyReplacer, database)));
+        return JpaManagementHelper.findAllWithCountBySpec(targetTypeRepository, List.of(
+                RSQLUtility.buildRsqlSpecification(
+                        rsqlParam, TargetTypeFields.class, virtualPropertyReplacer, database)), pageable
+        );
     }
 
     @Override
