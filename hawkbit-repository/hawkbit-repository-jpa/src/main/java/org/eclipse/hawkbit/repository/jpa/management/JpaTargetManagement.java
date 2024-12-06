@@ -198,26 +198,23 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public long countByRsqlAndCompatible(final String targetFilterQuery, final Long distributionSetIdTypeId) {
-        final List<Specification<JpaTarget>> specList = List.of(RSQLUtility.buildRsqlSpecification(
-                        targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
+        final List<Specification<JpaTarget>> specList = List.of(
+                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetIdTypeId));
-
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }
 
     @Override
     public long countByRsqlAndCompatibleAndUpdatable(String targetFilterQuery, Long distributionSetIdTypeId) {
-        final List<Specification<JpaTarget>> specList = List.of(RSQLUtility.buildRsqlSpecification(
-                        targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
+        final List<Specification<JpaTarget>> specList = List.of(
+                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetIdTypeId));
         return targetRepository.count(AccessController.Operation.UPDATE, combineWithAnd(specList));
     }
 
     @Override
     public long countByFailedInRollout(final String rolloutId, final Long dsTypeId) {
-        final List<Specification<JpaTarget>> specList = List
-                .of(TargetSpecifications.failedActionsForRollout(rolloutId));
-
+        final List<Specification<JpaTarget>> specList = List.of(TargetSpecifications.failedActionsForRollout(rolloutId));
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }
 
@@ -225,7 +222,6 @@ public class JpaTargetManagement implements TargetManagement {
     public long countByTargetFilterQuery(final long targetFilterQueryId) {
         final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
-
         return countByRsql(targetFilterQuery.getQuery());
     }
 

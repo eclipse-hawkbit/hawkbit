@@ -132,26 +132,26 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public Page<TargetWithActionStatus> findAllTargetsOfRolloutGroupWithActionStatus(final Pageable pageRequest,
-            final long rolloutGroupId) {
-
+    public Page<TargetWithActionStatus> findAllTargetsOfRolloutGroupWithActionStatus(final Pageable pageRequest, final long rolloutGroupId) {
         throwExceptionIfRolloutGroupDoesNotExist(rolloutGroupId);
 
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
         final Root<RolloutTargetGroup> targetRoot = query.distinct(true).from(RolloutTargetGroup.class);
         final Join<RolloutTargetGroup, JpaTarget> targetJoin = targetRoot.join(RolloutTargetGroup_.target);
-        final ListJoin<RolloutTargetGroup, JpaAction> actionJoin = targetRoot.join(RolloutTargetGroup_.actions,
-                JoinType.LEFT);
+        final ListJoin<RolloutTargetGroup, JpaAction> actionJoin = targetRoot.join(RolloutTargetGroup_.actions, JoinType.LEFT);
 
         final CriteriaQuery<Object[]> multiselect = query
-                .multiselect(targetJoin, actionJoin.get(JpaAction_.status),
-                        actionJoin.get(JpaAction_.lastActionStatusCode))
+                .multiselect(targetJoin, actionJoin.get(JpaAction_.status), actionJoin.get(JpaAction_.lastActionStatusCode))
                 .where(getRolloutGroupTargetWithRolloutGroupJoinCondition(rolloutGroupId, cb, targetRoot))
                 .orderBy(getOrderBy(pageRequest, cb, targetJoin, actionJoin));
         final List<TargetWithActionStatus> targetWithActionStatus = entityManager.createQuery(multiselect)
-                .setFirstResult((int) pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList()
-                .stream().map(this::getTargetWithActionStatusFromQuery).collect(Collectors.toList());
+                .setFirstResult((int) pageRequest.getOffset())
+                .setMaxResults(pageRequest.getPageSize())
+                .getResultList()
+                .stream()
+                .map(this::getTargetWithActionStatusFromQuery)
+                .toList();
 
         return new PageImpl<>(targetWithActionStatus, pageRequest, 0);
     }

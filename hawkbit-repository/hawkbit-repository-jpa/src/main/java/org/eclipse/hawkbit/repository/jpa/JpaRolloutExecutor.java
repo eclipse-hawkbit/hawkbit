@@ -850,7 +850,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
             if (targets.getNumberOfElements() > 0) {
                 final DistributionSet distributionSet = rollout.getDistributionSet();
-                entityManager.detach(distributionSet); // if lazy loaded with different session
+                entityManager.detach(distributionSet); // LAZY_LOAD - if lazy loaded with different session
                 final ActionType actionType = rollout.getActionType();
                 final long forceTime = rollout.getForcedTime();
                 createActions(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);

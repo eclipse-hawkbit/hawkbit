@@ -301,7 +301,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
-            @Expect(type = RolloutCreatedEvent.class, count = 1), 
+            @Expect(type = RolloutCreatedEvent.class, count = 1),
             @Expect(type = RolloutUpdatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 125) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
@@ -1411,7 +1411,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verify that a rollout cannot be created based on group definitions if the 'max targets per rollout group' quota is violated for one of the groups.")
     void createRolloutWithGroupDefinitionsFailsIfQuotaGroupQuotaIsViolated() {
-
         final int maxTargets = quotaManagement.getMaxTargetsPerRolloutGroup();
 
         final int amountTargetsForRollout = maxTargets * 2 + 2;
@@ -1422,43 +1421,45 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
         // create group definitions
-        final RolloutGroupCreate group1 = entityFactory.rolloutGroup().create().conditions(conditions).name("group1")
-                .targetPercentage(50.0F);
-        final RolloutGroupCreate group2 = entityFactory.rolloutGroup().create().conditions(conditions).name("group2")
-                .targetPercentage(50.0F);
+        final RolloutGroupCreate group1 = entityFactory.rolloutGroup().create().conditions(conditions).name("group1").targetPercentage(50.0F);
+        final RolloutGroupCreate group2 = entityFactory.rolloutGroup().create().conditions(conditions).name("group2").targetPercentage(50.0F);
 
         // group1 exceeds the quota
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
-                entityFactory.rollout().create().name(rolloutName).description(rolloutName)
-                        .targetFilterQuery("controllerId==" + rolloutName + "-*").distributionSetId(distributionSet),
-                Arrays.asList(group1, group2), conditions));
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> rolloutManagement.create(
+                        entityFactory.rollout().create()
+                                .name(rolloutName)
+                                .description(rolloutName)
+                                .targetFilterQuery("controllerId==" + rolloutName + "-*")
+                                .distributionSetId(distributionSet),
+                        Arrays.asList(group1, group2), conditions));
 
         // create group definitions
-        final RolloutGroupCreate group3 = entityFactory.rolloutGroup().create().conditions(conditions).name("group3")
-                .targetPercentage(1.0F);
-        final RolloutGroupCreate group4 = entityFactory.rolloutGroup().create().conditions(conditions).name("group4")
-                .targetPercentage(100.0F);
+        final RolloutGroupCreate group3 = entityFactory.rolloutGroup().create().conditions(conditions).name("group3").targetPercentage(1.0F);
+        final RolloutGroupCreate group4 = entityFactory.rolloutGroup().create().conditions(conditions).name("group4").targetPercentage(100.0F);
 
         // group4 exceeds the quota
         assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
-                entityFactory.rollout().create().name(rolloutName).description(rolloutName)
-                        .targetFilterQuery("controllerId==" + rolloutName + "-*").distributionSetId(distributionSet),
+                entityFactory.rollout().create()
+                        .name(rolloutName)
+                        .description(rolloutName)
+                        .targetFilterQuery("controllerId==" + rolloutName + "-*")
+                        .distributionSetId(distributionSet),
                 Arrays.asList(group3, group4), conditions));
 
         // create group definitions
-        final RolloutGroupCreate group5 = entityFactory.rolloutGroup().create().conditions(conditions).name("group5")
-                .targetPercentage(33.3F);
-        final RolloutGroupCreate group6 = entityFactory.rolloutGroup().create().conditions(conditions).name("group6")
-                .targetPercentage(33.3F);
-        final RolloutGroupCreate group7 = entityFactory.rolloutGroup().create().conditions(conditions).name("group7")
-                .targetPercentage(33.3F);
+        final RolloutGroupCreate group5 = entityFactory.rolloutGroup().create().conditions(conditions).name("group5").targetPercentage(33.3F);
+        final RolloutGroupCreate group6 = entityFactory.rolloutGroup().create().conditions(conditions).name("group6").targetPercentage(33.3F);
+        final RolloutGroupCreate group7 = entityFactory.rolloutGroup().create().conditions(conditions).name("group7").targetPercentage(33.3F);
 
         // should work fine
         assertThat(rolloutManagement.create(
-                entityFactory.rollout().create().name(rolloutName).description(rolloutName)
-                        .targetFilterQuery("controllerId==" + rolloutName + "-*").distributionSetId(distributionSet),
+                entityFactory.rollout().create()
+                        .name(rolloutName)
+                        .description(rolloutName)
+                        .targetFilterQuery("controllerId==" + rolloutName + "-*")
+                        .distributionSetId(distributionSet),
                 Arrays.asList(group5, group6, group7), conditions)).isNotNull();
-
     }
 
     @Test
@@ -1770,7 +1771,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @ExpectEvents({
             @Expect(type = RolloutDeletedEvent.class, count = 1),
-            @Expect(type = TargetCreatedEvent.class, count = 25), 
+            @Expect(type = TargetCreatedEvent.class, count = 25),
             @Expect(type = RolloutUpdatedEvent.class, count = 2),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = RolloutGroupDeletedEvent.class, count = 5),
@@ -1809,11 +1810,11 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
-            @Expect(type = TargetCreatedEvent.class, count = 25), 
+            @Expect(type = TargetCreatedEvent.class, count = 25),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
-            @Expect(type = ActionCreatedEvent.class, count = 10), 
+            @Expect(type = ActionCreatedEvent.class, count = 10),
             @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = RolloutDeletedEvent.class, count = 1),
             @Expect(type = RolloutCreatedEvent.class, count = 1) })
