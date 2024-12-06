@@ -105,8 +105,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             this.rolloutManagement.setRolloutStatusDetails(rollouts);
         }
 
-        final List<MgmtRolloutResponseBody> rest = MgmtRolloutMapper.toResponseRollout(rollouts.getContent(),
-                isFullMode);
+        final List<MgmtRolloutResponseBody> rest = MgmtRolloutMapper.toResponseRollout(rollouts.getContent(), isFullMode);
 
         return ResponseEntity.ok(new PagedList<>(rest, totalElements));
     }

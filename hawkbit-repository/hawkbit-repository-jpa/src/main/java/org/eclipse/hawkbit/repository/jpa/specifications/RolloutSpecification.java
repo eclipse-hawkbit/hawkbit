@@ -29,23 +29,17 @@ public final class RolloutSpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Rollout}s by its DELETED
-     * attribute. Includes fetch for stuff that is required for {@link Rollout}
-     * queries.
+     * {@link Specification} for retrieving {@link Rollout}s by its <code>deleted</code> attribute.
      *
-     * @param isDeleted TRUE/FALSE are compared to the attribute DELETED. If NULL the
-     *         attribute is ignored
+     * @param isDeleted true/false are compared to the attribute <code>deleted</code>. If NULL the attribute is ignored
      * @return the {@link Rollout} {@link Specification}
      */
-    public static Specification<JpaRollout> isDeletedWithDistributionSet(final Boolean isDeleted, final Sort sort) {
+    public static Specification<JpaRollout> isDeleted(final Boolean isDeleted, final Sort sort) {
         return (root, query, cb) -> {
-
             final Predicate predicate = cb.equal(root.<Boolean> get(JpaRollout_.deleted), isDeleted);
-            root.fetch(JpaRollout_.distributionSet);
             query.orderBy(QueryUtils.toOrders(sort, root, cb));
             return predicate;
         };
-
     }
 
     /**

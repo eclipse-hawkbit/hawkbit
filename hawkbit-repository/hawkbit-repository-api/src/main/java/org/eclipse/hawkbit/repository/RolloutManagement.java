@@ -414,5 +414,4 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
     void setRolloutStatusDetails(final Slice<Rollout> rollouts);
-
 }

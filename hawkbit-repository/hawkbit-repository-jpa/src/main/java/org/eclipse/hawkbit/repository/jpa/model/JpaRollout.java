@@ -26,6 +26,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -57,8 +60,8 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
  */
 @NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor needed for JPA entities.
 @Entity
-@Table(name = "sp_rollout", uniqueConstraints = @UniqueConstraint(columnNames = { "name",
-        "tenant" }, name = "uk_rollout"))
+@Table(name = "sp_rollout", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_rollout"))
+@NamedEntityGraphs({ @NamedEntityGraph(name = "Rollout.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }) })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, EventAwareEntity {

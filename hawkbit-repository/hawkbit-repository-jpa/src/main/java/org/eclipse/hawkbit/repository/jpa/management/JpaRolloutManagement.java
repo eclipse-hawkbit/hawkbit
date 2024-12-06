@@ -165,8 +165,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public long count() {
-        return rolloutRepository.count(
-                RolloutSpecification.isDeletedWithDistributionSet(false, Sort.by(Direction.DESC, JpaRollout_.ID)));
+        return rolloutRepository.count(RolloutSpecification.isDeleted(false, Sort.by(Direction.DESC, JpaRollout_.ID)));
     }
 
     @Override
@@ -225,7 +224,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new ValidationException("The amount of groups cannot be 0");
         }
         RolloutHelper.verifyRolloutGroupAmount(groups.size(), quotaManagement);
-        return createRolloutGroups(groups, conditions, createRollout((JpaRollout)rollout.build(), false));
+        return createRolloutGroups(groups, conditions, createRollout((JpaRollout) rollout.build(), false));
     }
 
     @Override
@@ -248,15 +247,14 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public Page<Rollout> findAll(final Pageable pageable, final boolean deleted) {
-        return JpaManagementHelper.findAllWithCountBySpec(rolloutRepository, pageable, Collections
-                .singletonList(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort())));
+        return JpaManagementHelper.convertPage(
+                rolloutRepository.findAll(RolloutSpecification.isDeleted(deleted, pageable.getSort()), pageable), pageable);
     }
 
     @Override
     public Slice<Rollout> findAllWithDetailedStatus(final Pageable pageable, final boolean deleted) {
-        final Slice<Rollout> rollouts = JpaManagementHelper.findAllWithoutCountBySpec(rolloutRepository, pageable,
-                Collections
-                        .singletonList(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort())));
+        final Slice<Rollout> rollouts = JpaManagementHelper.convertPage(
+                rolloutRepository.findAll(RolloutSpecification.isDeleted(deleted, pageable.getSort()), JpaRollout_.GRAPH_ROLLOUT_DS, pageable), pageable);
         setRolloutStatusDetails(rollouts);
         return rollouts;
     }
@@ -264,11 +262,10 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     public Page<Rollout> findByRsql(final Pageable pageable, final String rsqlParam, final boolean deleted) {
         final List<Specification<JpaRollout>> specList = new ArrayList<>(2);
-        specList.add(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
-        specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort()));
-
-        return JpaManagementHelper.findAllWithCountBySpec(rolloutRepository, pageable, specList);
+        specList.add(RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
+        specList.add(RolloutSpecification.isDeleted(deleted, pageable.getSort()));
+        return JpaManagementHelper.convertPage(
+                rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(specList), JpaRollout_.GRAPH_ROLLOUT_DS, pageable), pageable);
     }
 
     @Override
@@ -732,9 +729,11 @@ public class JpaRolloutManagement implements RolloutManagement {
         return fromCache;
     }
 
+//    private v isDeletedWithDistributionSet(final Boolean isDeleted, final Sort sort) {
+
+
     /**
-     * Enforces the quota defining the maximum number of {@link Target}s per
-     * {@link RolloutGroup}.
+     * Enforces the quota defining the maximum number of {@link Target}s per {@link RolloutGroup}.
      *
      * @param requested number of targets to check
      */
@@ -743,8 +742,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         QuotaHelper.assertAssignmentQuota(requested, quota, Target.class, RolloutGroup.class);
     }
 
-    private RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroup> groups, final String baseFilter,
-            final long totalTargets, final Long dsTypeId) {
+    private RolloutGroupsValidation validateTargetsInGroups(
+            final List<RolloutGroup> groups, final String baseFilter, final long totalTargets, final Long dsTypeId) {
         final List<Long> groupTargetCounts = new ArrayList<>(groups.size());
         Map<String, Long> targetFilterCounts;
         if (!RolloutHelper.isRolloutRetried(baseFilter)) {
