@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serial;
+import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
@@ -76,11 +77,7 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
             return false;
         }
         final AbstractJpaTenantAwareBaseEntity other = (AbstractJpaTenantAwareBaseEntity) obj;
-        if (tenant == null) {
-            return other.tenant == null;
-        } else {
-            return tenant.equals(other.tenant);
-        }
+        return Objects.equals(getTenant(), other.getTenant());
     }
 
     @Override

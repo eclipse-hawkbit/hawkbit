@@ -290,9 +290,7 @@ public final class TargetSpecifications {
     public static Specification<JpaTarget> hasNotDistributionSetInActions(final Long distributionSetId) {
         return (targetRoot, query, cb) -> {
             final ListJoin<JpaTarget, JpaAction> actionsJoin = targetRoot.join(JpaTarget_.actions, JoinType.LEFT);
-            actionsJoin.on(cb.equal(actionsJoin.get(JpaAction_.distributionSet).get(JpaDistributionSet_.id),
-                    distributionSetId));
-
+            actionsJoin.on(cb.equal(actionsJoin.get(JpaAction_.distributionSet).get(JpaDistributionSet_.id), distributionSetId));
             return cb.isNull(actionsJoin.get(JpaAction_.id));
         };
     }
@@ -308,10 +306,8 @@ public final class TargetSpecifications {
      */
     public static Specification<JpaTarget> isCompatibleWithDistributionSetType(final Long distributionSetTypeId) {
         return (targetRoot, query, cb) -> {
-            // Since the targetRoot is changed by joining we need to get the
-            // isNull predicate first
+            // Since the targetRoot is changed by joining we need to get the isNull predicate first
             final Predicate targetTypeIsNull = getTargetTypeIsNullPredicate(targetRoot);
-
             return cb.or(targetTypeIsNull, cb.equal(getDsTypeIdPath(targetRoot), distributionSetTypeId));
         };
     }
@@ -328,15 +324,15 @@ public final class TargetSpecifications {
      */
     public static Specification<JpaTarget> notCompatibleWithDistributionSetType(final Long distributionSetTypeId) {
         return (targetRoot, query, cb) -> {
-            // Since the targetRoot is changed by joining we need to get the
-            // isNotNull predicate first
+            // Since the targetRoot is changed by joining we need to get the isNotNull predicate first
             final Predicate targetTypeNotNull = targetRoot.get(JpaTarget_.targetType).isNotNull();
 
             final Subquery<Long> compatibilitySubQuery = query.subquery(Long.class);
             final Root<JpaTarget> subQueryTargetRoot = compatibilitySubQuery.from(JpaTarget.class);
 
             compatibilitySubQuery.select(subQueryTargetRoot.get(JpaTarget_.id))
-                    .where(cb.and(cb.equal(targetRoot.get(JpaTarget_.id), subQueryTargetRoot.get(JpaTarget_.id)),
+                    .where(cb.and(
+                            cb.equal(targetRoot.get(JpaTarget_.id), subQueryTargetRoot.get(JpaTarget_.id)),
                             cb.equal(getDsTypeIdPath(subQueryTargetRoot), distributionSetTypeId)));
 
             return cb.and(targetTypeNotNull, cb.not(cb.exists(compatibilitySubQuery)));
@@ -599,10 +595,6 @@ public final class TargetSpecifications {
 
     private static Path<Long> getDsTypeIdPath(final Root<JpaTarget> root) {
         final Join<JpaTarget, JpaTargetType> targetTypeJoin = root.join(JpaTarget_.targetType, JoinType.LEFT);
-        targetTypeJoin.fetch(JpaTargetType_.distributionSetTypes);
-        final SetJoin<JpaTargetType, JpaDistributionSetType> dsTypeTargetTypeJoin = targetTypeJoin
-                .join(JpaTargetType_.distributionSetTypes, JoinType.LEFT);
-
-        return dsTypeTargetTypeJoin.get(JpaDistributionSetType_.id);
+        return targetTypeJoin.join(JpaTargetType_.distributionSetTypes, JoinType.LEFT).get(JpaDistributionSetType_.id);
     }
 }

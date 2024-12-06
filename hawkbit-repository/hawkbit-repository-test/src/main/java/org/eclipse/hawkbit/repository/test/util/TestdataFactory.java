@@ -296,9 +296,7 @@ public class TestdataFactory {
      * @param isRequiredMigrationStep for {@link DistributionSet#isRequiredMigrationStep()}
      * @return {@link DistributionSet} entity.
      */
-    public DistributionSet createDistributionSet(final String prefix, final String version,
-            final boolean isRequiredMigrationStep) {
-
+    public DistributionSet createDistributionSet(final String prefix, final String version, final boolean isRequiredMigrationStep) {
         final SoftwareModule appMod = softwareModuleManagement.create(entityFactory.softwareModule().create()
                 .type(findOrCreateSoftwareModuleType(SM_TYPE_APP, Integer.MAX_VALUE)).name(prefix + SM_TYPE_APP)
                 .version(version + "." + new SecureRandom().nextInt(100)).description(randomDescriptionLong())

@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import java.io.Serial;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,11 +37,13 @@ import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.NamedEntityGraphs;
 import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PostUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
+import lombok.Setter;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
@@ -96,42 +99,65 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     @Column(name = "active")
     private boolean active;
+
     @Column(name = "action_type", nullable = false)
     @Convert(converter = ActionTypeConverter.class)
     @NotNull
     private ActionType actionType;
+
     @Column(name = "forced_time")
     private long forcedTime;
+
+    @Setter
     @Column(name = "weight")
     @Min(Action.WEIGHT_MIN)
     @Max(Action.WEIGHT_MAX)
     private Integer weight;
+
     @Column(name = "status", nullable = false)
     @Convert(converter = StatusConverter.class)
     @NotNull
     private Status status;
+
     @OneToMany(mappedBy = "action", targetEntity = JpaActionStatus.class, fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE })
-    private List<JpaActionStatus> actionStatus;
+    private List<JpaActionStatus> actionStatus = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "rolloutgroup", updatable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rolloutgroup"))
     private JpaRolloutGroup rolloutGroup;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "rollout", updatable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout"))
     private JpaRollout rollout;
+
+    // a cron expression to be used for scheduling.
+    @Setter
     @Column(name = "maintenance_cron_schedule", updatable = false, length = Action.MAINTENANCE_WINDOW_SCHEDULE_LENGTH)
     private String maintenanceWindowSchedule;
+
+    // the duration of an available maintenance schedule indexes HH:mm:ss format
+    @Setter
     @Column(name = "maintenance_duration", updatable = false, length = Action.MAINTENANCE_WINDOW_DURATION_LENGTH)
     private String maintenanceWindowDuration;
+
+    // the time zone specified as +/-hh:mm offset from UTC for example +02:00 for CET summer time and +00:00 for UTC. The
+    // start time of a maintenance window calculated based on the cron expression is relative to this time zone.
+    @Setter
     @Column(name = "maintenance_time_zone", updatable = false, length = Action.MAINTENANCE_WINDOW_TIMEZONE_LENGTH)
     private String maintenanceWindowTimeZone;
+
     @Column(name = "external_ref", length = Action.EXTERNAL_REF_MAX_LENGTH)
     private String externalRef;
+
+    @Setter
     @Column(name = "initiated_by", updatable = false, nullable = false, length = USERNAME_FIELD_LENGTH)
     private String initiatedBy;
+
+    @Setter
     @Column(name = "last_action_status_code", nullable = true, updatable = true)
     private Integer lastActionStatusCode;
 
@@ -194,10 +220,6 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         return Optional.ofNullable(weight);
     }
 
-    public void setWeight(final Integer weight) {
-        this.weight = weight;
-    }
-
     @Override
     public RolloutGroup getRolloutGroup() {
         return rolloutGroup;
@@ -221,45 +243,14 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         return maintenanceWindowSchedule;
     }
 
-    /**
-     * Sets the maintenance schedule.
-     *
-     * @param maintenanceWindowSchedule is a cron expression to be used for scheduling.
-     */
-    public void setMaintenanceWindowSchedule(final String maintenanceWindowSchedule) {
-        this.maintenanceWindowSchedule = maintenanceWindowSchedule;
-    }
-
     @Override
     public String getMaintenanceWindowDuration() {
         return maintenanceWindowDuration;
     }
 
-    /**
-     * Sets the maintenance window duration.
-     *
-     * @param maintenanceWindowDuration is the duration of an available maintenance schedule in
-     *         HH:mm:ss format.
-     */
-    public void setMaintenanceWindowDuration(final String maintenanceWindowDuration) {
-        this.maintenanceWindowDuration = maintenanceWindowDuration;
-    }
-
     @Override
     public String getMaintenanceWindowTimeZone() {
         return maintenanceWindowTimeZone;
-    }
-
-    /**
-     * Sets the time zone to be used for maintenance window.
-     *
-     * @param maintenanceWindowTimeZone is the time zone specified as +/-hh:mm offset from UTC for
-     *         example +02:00 for CET summer time and +00:00 for UTC. The
-     *         start time of a maintenance window calculated based on the
-     *         cron expression is relative to this time zone.
-     */
-    public void setMaintenanceWindowTimeZone(final String maintenanceWindowTimeZone) {
-        this.maintenanceWindowTimeZone = maintenanceWindowTimeZone;
     }
 
     @Override
@@ -277,20 +268,15 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         return initiatedBy;
     }
 
-    public void setInitiatedBy(final String initiatedBy) {
-        this.initiatedBy = initiatedBy;
-    }
-
     @Override
     public Optional<Integer> getLastActionStatusCode() {
         return Optional.ofNullable(lastActionStatusCode);
     }
 
-
     @Override
     public Optional<ZonedDateTime> getMaintenanceWindowStartTime() {
-        return MaintenanceScheduleHelper.getNextMaintenanceWindow(maintenanceWindowSchedule, maintenanceWindowDuration,
-                maintenanceWindowTimeZone);
+        return MaintenanceScheduleHelper.getNextMaintenanceWindow(
+                maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone);
     }
 
     @Override
@@ -330,24 +316,15 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
         return status == Status.WAIT_FOR_CONFIRMATION;
     }
 
-    public void setLastActionStatusCode(final Integer lastActionStatusCode) {
-        this.lastActionStatusCode = lastActionStatusCode;
-    }
-
     public List<ActionStatus> getActionStatus() {
-        if (actionStatus == null) {
-            return Collections.emptyList();
-        }
-
         return Collections.unmodifiableList(actionStatus);
     }
 
     @Override
     public String toString() {
-        return "JpaAction [distributionSet=" + distributionSet.getId() + ", version=" + getOptLockRevision() + ", id="
-                + getId() + ", actionType=" + getActionType() + ", weight=" + getWeight() + ", isActive=" + isActive()
-                + ",  createdAt=" + getCreatedAt() + ", lastModifiedAt=" + getLastModifiedAt() + ", status="
-                + getStatus().name() + "]";
+        return "JpaAction [distributionSet=" + distributionSet.getId() + ", version=" + getOptLockRevision() + ", id=" + getId() +
+                ", actionType=" + getActionType() + ", weight=" + getWeight() + ", isActive=" + isActive() +
+                ",  createdAt=" + getCreatedAt() + ", lastModifiedAt=" + getLastModifiedAt() + ", status=" + getStatus().name() + "]";
     }
 
     @Override

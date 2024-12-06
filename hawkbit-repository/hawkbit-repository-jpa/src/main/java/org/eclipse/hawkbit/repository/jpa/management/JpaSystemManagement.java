@@ -128,12 +128,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
      * @param properties properties to get the underlying database
      */
     public JpaSystemManagement(final JpaProperties properties) {
-
         final String isDeleted = isPostgreSql(properties) ? "false" : "0";
-        countArtifactQuery = "SELECT COUNT(a.id) FROM sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = "
-                + isDeleted;
-        countSoftwareModulesQuery = "select SUM(file_size) from sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = "
-                + isDeleted;
+        countArtifactQuery = "SELECT COUNT(a.id) FROM sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = " + isDeleted;
+        countSoftwareModulesQuery = "select SUM(file_size) from sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = " + isDeleted;
     }
 
     @Override

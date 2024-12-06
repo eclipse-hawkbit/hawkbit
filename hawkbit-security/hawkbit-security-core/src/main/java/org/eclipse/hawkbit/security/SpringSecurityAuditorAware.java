@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.security;
 
 import java.util.Optional;
 
+import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -58,6 +59,9 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
     }
 
     protected String getCurrentAuditor(final Authentication authentication) {
+        if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails && tenantAwareDetails.isController()) {
+            return "CONTROLLER_PLUG_AND_PLAY";
+        }
         if (authentication.getPrincipal() instanceof UserDetails) {
             return ((UserDetails) authentication.getPrincipal()).getUsername();
         }
