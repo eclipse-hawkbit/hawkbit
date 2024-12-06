@@ -157,7 +157,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule updated = softwareModuleManagement
                 .update(entityFactory.softwareModule().update(ah.getId()).description("changed").vendor("changed"));
 
-        assertThat(updated.getOptLockRevision()).as("Expected version number of updated entitity is")
+        assertThat(updated.getOptLockRevision())
+                .as("Expected version number of updated entitity is")
                 .isEqualTo(ah.getOptLockRevision() + 1);
         assertThat(updated.getDescription()).as("Updated description is").isEqualTo("changed");
         assertThat(updated.getVendor()).as("Updated vendor is").isEqualTo("changed");
