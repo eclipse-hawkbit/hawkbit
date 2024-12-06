@@ -458,7 +458,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that all undeleted software modules are found in the repository.")
+    @Description("Verifies that all undeleted software modules are found in the repository.")
     public void countSoftwareModuleTypesAll() {
         testdataFactory.createSoftwareModuleOs();
 
@@ -472,7 +472,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that software modules are returned that are assigned to given DS.")
+    @Description("Verifies that software modules are returned that are assigned to given DS.")
     public void findSoftwareModuleByAssignedTo() {
         // test modules
         final SoftwareModule one = testdataFactory.createSoftwareModuleOs();
@@ -499,7 +499,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
 
-        assertThat(ah.getOptLockRevision()).isEqualTo(1);
+        assertThat(ah.getOptLockRevision()).isEqualTo(version(1));
 
         final SoftwareModuleMetadataCreate swMetadata1 = entityFactory.softwareModuleMetadata().create(ah.getId())
                 .key(knownKey1).value(knownValue1);
@@ -511,7 +511,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                 .createMetaData(Arrays.asList(swMetadata1, swMetadata2));
 
         final SoftwareModule changedLockRevisionModule = softwareModuleManagement.get(ah.getId()).get();
-        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
+        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(version(2));
 
         assertThat(softwareModuleMetadata).hasSize(2);
         assertThat(softwareModuleMetadata.get(0)).isNotNull();
@@ -604,7 +604,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // create a base software module
         final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
         // initial opt lock revision must be 1
-        assertThat(ah.getOptLockRevision()).isEqualTo(1);
+        assertThat(ah.getOptLockRevision()).isEqualTo(version(1));
 
         // create an software module meta data entry
         final SoftwareModuleMetadata softwareModuleMetadata = softwareModuleManagement.createMetaData(
@@ -615,7 +615,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // base software module should have now the opt lock revision one
         // because we are modifying the base software module
         SoftwareModule changedLockRevisionModule = softwareModuleManagement.get(ah.getId()).get();
-        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(2);
+        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(version(2));
 
         // update the software module metadata
         final SoftwareModuleMetadata updated = softwareModuleManagement.updateMetaData(entityFactory
@@ -624,7 +624,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // we are updating the sw metadata so also modifying the base software
         // module so opt lock revision must be two
         changedLockRevisionModule = softwareModuleManagement.get(ah.getId()).get();
-        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(3);
+        assertThat(changedLockRevisionModule.getOptLockRevision()).isEqualTo(version(3));
 
         // verify updated meta data contains the updated value
         assertThat(updated).isNotNull();

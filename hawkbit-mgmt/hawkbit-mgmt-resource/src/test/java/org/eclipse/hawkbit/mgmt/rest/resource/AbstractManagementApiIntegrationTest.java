@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
+import org.eclipse.hawkbit.repository.jpa.JpaConstants;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
@@ -200,5 +201,13 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
             ((JpaDistributionSet) set).setOptLockRevision(set.getOptLockRevision() + 1);
             ((JpaDistributionSet) set).lock();
         }
+    }
+
+    // version is 1, 2 ... based
+    protected int version(final int version) {
+        return switch (JpaConstants.JPA_VENDOR) {
+            case ECLIPSELINK -> version;
+            case HIBERNATE -> version - 1;
+        };
     }
 }

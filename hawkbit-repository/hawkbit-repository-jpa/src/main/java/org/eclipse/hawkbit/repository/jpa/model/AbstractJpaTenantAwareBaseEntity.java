@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.eclipse.persistence.annotations.Multitenant;
 import org.eclipse.persistence.annotations.MultitenantType;
 import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
-import org.hibernate.annotations.TenantId;
 
 /**
  * Holder of the base attributes common to all tenant aware entities.
@@ -45,11 +44,9 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "tenant", nullable = false, insertable = false, updatable = false, length = 40) // eclipselink
-//    @Column(name = "tenant", nullable = false, updatable = false, length = 40) // hibernate
+    @Column(name = "tenant", nullable = false, insertable = false, updatable = false, length = 40)
     @Size(min = 1, max = 40)
     @NotNull
-    @TenantId // Hibernate MultiTenant support
     private String tenant;
 
     /**

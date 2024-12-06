@@ -615,9 +615,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public List<Statistic> countRolloutsByStatusForDistributionSet(final Long id) {
         assertDistributionSetExists(id);
-
-        return distributionSetRepository.countRolloutsByStatusForDistributionSet(id).stream()
-                .map(Statistic.class::cast).toList();
+        return distributionSetRepository.countRolloutsByStatusForDistributionSet(id).stream().map(Statistic.class::cast).toList();
     }
 
     @Override

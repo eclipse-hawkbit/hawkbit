@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.jpa.JpaConstants;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -155,7 +156,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     public void addMandatoryModuleToDistributionSetType() throws Exception {
         DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
                 .key("test123").name("TestName123").description("Desc123").colour("col12"));
-        assertThat(testType.getOptLockRevision()).isEqualTo(1);
+        assertThat(testType.getOptLockRevision()).isEqualTo(version(1));
 
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType.getId())
                         .content("{\"id\":" + osType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
@@ -164,7 +165,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         testType = distributionSetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
-        assertThat(testType.getOptLockRevision()).isEqualTo(2);
+        assertThat(testType.getOptLockRevision()).isEqualTo(version(2));
         assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
         assertThat(testType.getOptionalModuleTypes()).isEmpty();
     }
@@ -175,7 +176,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     public void addOptionalModuleToDistributionSetType() throws Exception {
         DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
                 .key("test123").name("TestName123").description("Desc123").colour("col12"));
-        assertThat(testType.getOptLockRevision()).isEqualTo(1);
+        assertThat(testType.getOptLockRevision()).isEqualTo(version(1));
 
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
                         .content("{\"id\":" + osType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
@@ -184,7 +185,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         testType = distributionSetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
-        assertThat(testType.getOptLockRevision()).isEqualTo(2);
+        assertThat(testType.getOptLockRevision()).isEqualTo(version(2));
         assertThat(testType.getOptionalModuleTypes()).containsExactly(osType);
         assertThat(testType.getMandatoryModuleTypes()).isEmpty();
 
@@ -207,7 +208,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
                 .create().key("testType").name("testType").description("testType").colour("col12"));
-        assertThat(testType.getOptLockRevision()).isEqualTo(1);
+        assertThat(testType.getOptLockRevision()).isEqualTo(version(1));
 
         for (int i = 0; i < moduleTypeIds.size() - 1; ++i) {
             mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
@@ -228,7 +229,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         final DistributionSetType testType2 = distributionSetTypeManagement.create(entityFactory.distributionSetType()
                 .create().key("testType2").name("testType2").description("testType2").colour("col12"));
-        assertThat(testType2.getOptLockRevision()).isEqualTo(1);
+        assertThat(testType2.getOptLockRevision()).isEqualTo(version(1));
 
         for (int i = 0; i < moduleTypeIds.size() - 1; ++i) {
             mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType2.getId())
@@ -331,7 +332,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         testType = distributionSetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
-        assertThat(testType.getOptLockRevision()).isEqualTo(2);
+        assertThat(testType.getOptLockRevision()).isEqualTo(version(2));
         assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
         assertThat(testType.getMandatoryModuleTypes()).isEmpty();
     }
@@ -349,7 +350,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         testType = distributionSetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
-        assertThat(testType.getOptLockRevision()).isEqualTo(2);
+        assertThat(testType.getOptLockRevision()).isEqualTo(version(2));
         assertThat(testType.getOptionalModuleTypes()).isEmpty();
         assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
     }
@@ -736,7 +737,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
         final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
                 .create().key("test123").name("TestName123").description("Desc123").colour("col")
                 .mandatory(Collections.singletonList(osType.getId())).optional(Collections.singletonList(appType.getId())));
-        assertThat(testType.getOptLockRevision()).isEqualTo(1);
+        assertThat(testType.getOptLockRevision()).isEqualTo(version(1));
         assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
         assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
         return testType;

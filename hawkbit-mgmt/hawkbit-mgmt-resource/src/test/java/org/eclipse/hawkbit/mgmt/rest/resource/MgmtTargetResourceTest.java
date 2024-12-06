@@ -947,7 +947,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that a  properties of new targets are validated as in allowed size range.")
+    @Description("Verifies that a  properties of new targets are validated as in allowed size range.")
     void createTargetWithInvalidPropertyBadRequest() throws Exception {
         final Target test1 = entityFactory.target().create().controllerId("id1")
                 .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1)).build();
@@ -1413,7 +1413,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that an action is switched from soft to forced if requested by management API")
+    @Description("Verifies that an action is switched from soft to forced if requested by management API")
     void updateAction() throws Exception {
         final Target target = testdataFactory.createTarget();
         final DistributionSet set = testdataFactory.createDistributionSet();
@@ -1516,7 +1516,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that a DOWNLOAD_ONLY DS to target assignment is properly handled")
+    @Description("Verifies that a DOWNLOAD_ONLY DS to target assignment is properly handled")
     void assignDownloadOnlyDistributionSetToTarget() throws Exception {
         final Target target = testdataFactory.createTarget();
         final DistributionSet set = testdataFactory.createDistributionSet("one");
@@ -1538,7 +1538,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that an offline DS to target assignment is reflected by the repository and that repeating "
+    @Description("Verifies that an offline DS to target assignment is reflected by the repository and that repeating "
             + "the assignment does not change the target.")
     void offlineAssignDistributionSetToTarget() throws Exception {
         Target target = testdataFactory.createTarget();
