@@ -844,14 +844,13 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         return totalActionsCreated;
     }
 
-    private Long createActionsForTargetsInNewTransaction(
-            final Rollout rollout, final RolloutGroup group, final int limit) {
+    private Long createActionsForTargetsInNewTransaction(final Rollout rollout, final RolloutGroup group, final int limit) {
         return DeploymentHelper.runInNewTransaction(txManager, "createActionsForTargets", status -> {
-            final Slice<Target> targets =
-                    targetManagement.findByInRolloutGroupWithoutAction(PageRequest.of(0, limit), group.getId());
+            final Slice<Target> targets = targetManagement.findByInRolloutGroupWithoutAction(PageRequest.of(0, limit), group.getId());
 
             if (targets.getNumberOfElements() > 0) {
                 final DistributionSet distributionSet = rollout.getDistributionSet();
+                entityManager.detach(distributionSet); // if lazy loaded with different session
                 final ActionType actionType = rollout.getActionType();
                 final long forceTime = rollout.getForcedTime();
                 createActions(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
@@ -866,17 +865,13 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     /**
-     * Creates an action entry into the action repository. In case of existing
-     * scheduled actions the scheduled actions gets canceled. A scheduled action
-     * is created in-active for static and running for dynamic groups.
+     * Creates an action entry into the action repository. In case of existing scheduled actions the scheduled actions gets canceled.
+     * A scheduled action is created in-active for static and running for dynamic groups.
      */
     private List<Action> createActions(final Collection<Target> targets, final DistributionSet distributionSet,
-            final ActionType actionType, final Long forcedTime, final Rollout rollout,
-            final RolloutGroup rolloutGroup) {
-        // cancel all current scheduled actions for this target. E.g. an action
-        // is already scheduled and a next action is created then cancel the
-        // current scheduled action to cancel. E.g. a new scheduled action is
-        // created.
+            final ActionType actionType, final Long forcedTime, final Rollout rollout, final RolloutGroup rolloutGroup) {
+        // cancel all current scheduled actions for this target. E.g. an action is already scheduled and a next action is created
+        // then cancel the current scheduled action to cancel. E.g. a new scheduled action is created.
         final List<Long> targetIds = targets.stream().map(Target::getId).toList();
         deploymentManagement.cancelInactiveScheduledActionsForTargets(targetIds);
         return targets.stream()
