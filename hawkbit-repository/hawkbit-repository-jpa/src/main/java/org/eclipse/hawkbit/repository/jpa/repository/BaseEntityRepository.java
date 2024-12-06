@@ -10,20 +10,18 @@
 package org.eclipse.hawkbit.repository.jpa.repository;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
@@ -42,6 +40,10 @@ import org.springframework.transaction.annotation.Transactional;
 public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity>
         extends PagingAndSortingRepository<T, Long>, CrudRepository<T, Long>, JpaSpecificationExecutor<T>,
         JpaSpecificationEntityGraphExecutor<T>, NoCountSliceRepository<T>, ACMRepository<T> {
+
+    default T getById(final Long id) {
+        return findOne(byIdSpec(id)).orElseThrow(() -> new EntityNotFoundException(getManagementClass(), id));
+    }
 
     /**
      * Overrides {@link org.springframework.data.repository.CrudRepository#saveAll(Iterable)} to return a list of created entities instead
@@ -132,5 +134,27 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
 
     default Optional<AccessController<T>> getAccessController() {
         return Optional.empty();
+    }
+
+    @SuppressWarnings("uchecked")
+    default Class<? extends BaseEntity> getManagementClass() {
+        final Class<T> domainClass = getDomainClass();
+        final String domainClassSimpleName = domainClass.getSimpleName();
+        if (!domainClassSimpleName.toLowerCase().startsWith("jpa")) {
+            return domainClass;
+        }
+        final String managementClassSimpleName = domainClassSimpleName.substring(3);
+        final Class<?> superClass = domainClass.getSuperclass();
+        if (superClass != null) {
+            if (superClass.getSimpleName().equals(managementClassSimpleName) && BaseEntity.class.isAssignableFrom(superClass)) {
+                return (Class<? extends BaseEntity>)superClass;
+            }
+        }
+        for (final Class<?> interfaceClass : domainClass.getInterfaces()) {
+            if (interfaceClass.getSimpleName().equals(managementClassSimpleName) && BaseEntity.class.isAssignableFrom(interfaceClass)) {
+                return (Class<? extends BaseEntity>)interfaceClass;
+            }
+        }
+        return domainClass;
     }
 }

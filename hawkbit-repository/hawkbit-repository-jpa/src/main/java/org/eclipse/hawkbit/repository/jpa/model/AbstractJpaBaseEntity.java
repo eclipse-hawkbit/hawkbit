@@ -58,6 +58,12 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     @Column(name = "id")
     private Long id;
 
+    @Version
+    @Column(name = "optlock_revision")
+    private int optLockRevision;
+
+    // Audit fields. use property access to ensure that setters will be called and checked for modification
+    // (touch implementation depends on setLastModifiedAt(0).
     @Column(name = "created_by", updatable = false, nullable = false, length = USERNAME_FIELD_LENGTH)
     private String createdBy;
     @Column(name = "created_at", updatable = false, nullable = false)
@@ -66,10 +72,6 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     private String lastModifiedBy;
     @Column(name = "last_modified_at", nullable = false)
     private long lastModifiedAt;
-
-    @Version
-    @Column(name = "optlock_revision")
-    private int optLockRevision;
 
     @CreatedBy
     public void setCreatedBy(final String createdBy) {
@@ -170,14 +172,16 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
             return false;
         }
         final AbstractJpaBaseEntity other = (AbstractJpaBaseEntity) obj;
+        final Long id = getId();
+        final Long otherId = other.getId();
         if (id == null) {
-            if (other.id != null) {
+            if (otherId != null) {
                 return false;
             }
-        } else if (!id.equals(other.id)) {
+        } else if (!id.equals(otherId)) {
             return false;
         }
-        return optLockRevision == other.optLockRevision;
+        return getOptLockRevision() == other.getOptLockRevision();
     }
 
     @Override

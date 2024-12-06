@@ -132,7 +132,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
 
     @Setter
     @Getter
-    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "installed_distribution_set", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_inst_ds"))
     private JpaDistributionSet installedDistributionSet;
 

@@ -85,13 +85,13 @@ import org.springframework.data.domain.Sort.Direction;
 @Story("DistributionSet Management")
 class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
-    public static final String TAG1_NAME = "Tag1";
+    private static final String TAG1_NAME = "Tag1";
+
     @Autowired
     RepositoryProperties repositoryProperties;
 
     @Test
-    @Description("Verifies that management get access react as specified on calls for non existing entities by means "
-            + "of Optional not present.")
+    @Description("Verifies that management get access react as specified on calls for non existing entities by means of Optional not present.")
     @ExpectEvents({
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
@@ -104,8 +104,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that management queries react as specfied on calls for non existing entities "
-            + " by means of throwing EntityNotFoundException.")
+    @Description("Verifies that management queries react as specified on calls for non existing entities by means of " +
+            "throwing EntityNotFoundException.")
     @ExpectEvents({
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
@@ -116,52 +116,36 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
 
         verifyThrownExceptionBy(
-                () -> distributionSetManagement.assignSoftwareModules(NOT_EXIST_IDL, singletonList(module.getId())),
-                "DistributionSet");
+                () -> distributionSetManagement.assignSoftwareModules(NOT_EXIST_IDL, singletonList(module.getId())), "DistributionSet");
         verifyThrownExceptionBy(
-                () -> distributionSetManagement.assignSoftwareModules(set.getId(), singletonList(NOT_EXIST_IDL)),
-                "SoftwareModule");
+                () -> distributionSetManagement.assignSoftwareModules(set.getId(), singletonList(NOT_EXIST_IDL)), "SoftwareModule");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.countByTypeId(NOT_EXIST_IDL), "DistributionSet");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.unassignSoftwareModule(NOT_EXIST_IDL, module.getId()),
-                "DistributionSet");
-        verifyThrownExceptionBy(() -> distributionSetManagement.unassignSoftwareModule(set.getId(), NOT_EXIST_IDL),
-                "SoftwareModule");
+        verifyThrownExceptionBy(() -> distributionSetManagement.unassignSoftwareModule(NOT_EXIST_IDL, module.getId()), "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.unassignSoftwareModule(set.getId(), NOT_EXIST_IDL), "SoftwareModule");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.assignTag(singletonList(set.getId()), NOT_EXIST_IDL),
-                "DistributionSetTag");
-
-        verifyThrownExceptionBy(() -> distributionSetManagement.assignTag(singletonList(NOT_EXIST_IDL), dsTag.getId()),
-                "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.assignTag(singletonList(set.getId()), NOT_EXIST_IDL), "DistributionSetTag");
+        verifyThrownExceptionBy(() -> distributionSetManagement.assignTag(singletonList(NOT_EXIST_IDL), dsTag.getId()), "DistributionSet");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.findByTag(PAGE, NOT_EXIST_IDL), "DistributionSetTag");
-        verifyThrownExceptionBy(() -> distributionSetManagement.findByRsqlAndTag(PAGE, "name==*", NOT_EXIST_IDL),
-                "DistributionSetTag");
+        verifyThrownExceptionBy(() -> distributionSetManagement.findByRsqlAndTag(PAGE, "name==*", NOT_EXIST_IDL), "DistributionSetTag");
 
-        verifyThrownExceptionBy(
-                () -> distributionSetManagement.assignTag(singletonList(NOT_EXIST_IDL), dsTag.getId()),
-                "DistributionSet");
-        verifyThrownExceptionBy(
-                () -> distributionSetManagement.assignTag(singletonList(set.getId()), Long.parseLong(NOT_EXIST_ID)),
-                "DistributionSetTag");
+        verifyThrownExceptionBy(() -> distributionSetManagement.assignTag(singletonList(NOT_EXIST_IDL), dsTag.getId()), "DistributionSet");
+        verifyThrownExceptionBy(() ->
+                distributionSetManagement.assignTag(singletonList(set.getId()), Long.parseLong(NOT_EXIST_ID)), "DistributionSetTag");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.unassignTag(set.getId(), NOT_EXIST_IDL),
-                "DistributionSetTag");
+        verifyThrownExceptionBy(() -> distributionSetManagement.unassignTag(set.getId(), NOT_EXIST_IDL), "DistributionSetTag");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.unassignTag(NOT_EXIST_IDL, dsTag.getId()),
-                "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.unassignTag(NOT_EXIST_IDL, dsTag.getId()), "DistributionSet");
 
-        verifyThrownExceptionBy(
-                () -> distributionSetManagement
-                        .create(entityFactory.distributionSet().create().name("xxx").type(NOT_EXIST_ID)),
-                "DistributionSetType");
+        verifyThrownExceptionBy(() -> distributionSetManagement.create(
+                entityFactory.distributionSet().create().name("xxx").type(NOT_EXIST_ID)), "DistributionSetType");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.createMetaData(NOT_EXIST_IDL,
-                singletonList(entityFactory.generateDsMetadata("123", "123"))), "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.createMetaData(
+                NOT_EXIST_IDL, singletonList(entityFactory.generateDsMetadata("123", "123"))), "DistributionSet");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.delete(singletonList(NOT_EXIST_IDL)),
-                "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.delete(singletonList(NOT_EXIST_IDL)), "DistributionSet");
         verifyThrownExceptionBy(() -> distributionSetManagement.delete(NOT_EXIST_IDL), "DistributionSet");
         verifyThrownExceptionBy(() -> distributionSetManagement.deleteMetaData(NOT_EXIST_IDL, "xxx"),
                 "DistributionSet");
@@ -249,22 +233,20 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that multiple DS are of default type if not specified explicitly at creation time.")
     void createMultipleDistributionSetsWithImplicitType() {
-
         final List<DistributionSetCreate> creates = new ArrayList<>(10);
         for (int i = 0; i < 10; i++) {
             creates.add(entityFactory.distributionSet().create().name("newtypesoft" + i).version("1" + i));
         }
 
-        final List<DistributionSet> sets = distributionSetManagement.create(creates);
+        assertThat(distributionSetManagement.create(creates))
+                .as("Type should be equal to default type of tenant")
+                .are(new Condition<>() {
 
-        assertThat(sets).as("Type should be equal to default type of tenant").are(new Condition<DistributionSet>() {
-
-            @Override
-            public boolean matches(final DistributionSet value) {
-                return value.getType().equals(systemManagement.getTenantMetadata().getDefaultDsType());
-            }
-        });
-
+                    @Override
+                    public boolean matches(final DistributionSet value) {
+                        return value.getType().equals(systemManagement.getTenantMetadata().getDefaultDsType());
+                    }
+                });
     }
 
     @Test
@@ -338,13 +320,13 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
         }
 
-        final DistributionSetTag tag = distributionSetTagManagement
-                .create(entityFactory.tag().create().name(TAG1_NAME));
+        final DistributionSetTag tag = distributionSetTagManagement.create(entityFactory.tag().create().name(TAG1_NAME));
 
         final List<DistributionSet> assignedDS = distributionSetManagement.assignTag(assignDS, tag.getId());
         assertThat(assignedDS.size()).as("assigned ds has wrong size").isEqualTo(4);
-        assignedDS.stream().map(c -> (JpaDistributionSet) c)
-                .forEach(ds -> assertThat(ds.getTags().size()).as("ds has wrong tag size").isEqualTo(1));
+        assignedDS.stream().map(JpaDistributionSet.class::cast).forEach(ds -> assertThat(ds.getTags().size())
+                .as("ds has wrong tag size")
+                .isEqualTo(1));
 
         final DistributionSetTag findDistributionSetTag = getOrThrow(distributionSetTagManagement.getByName(TAG1_NAME));
 
@@ -1046,16 +1028,15 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Get the Rollouts count by status statistics for a specific Distribution Set")
     void getActionsCountStatisticsForDistributionSet() {
-        DistributionSet ds = testdataFactory.createDistributionSet("DS");
-        DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
+        final DistributionSet ds = testdataFactory.createDistributionSet("DS");
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
         testdataFactory.createTargets("targets", 4);
-        Rollout rollout = testdataFactory.createRolloutByVariables("rollout", "description",
-                1, "name==targets*", ds, "50", "5", false);
+        final Rollout rollout = testdataFactory.createRolloutByVariables("rollout", "description", 1, "name==targets*", ds, "50", "5", false);
 
         rolloutManagement.start(rollout.getId());
         rolloutHandler.handleAll();
 
-        List<Statistic> statistics = distributionSetManagement.countActionsByStatusForDistributionSet(ds.getId());
+        final List<Statistic> statistics = distributionSetManagement.countActionsByStatusForDistributionSet(ds.getId());
 
         assertThat(statistics).hasSize(1);
         assertThat(distributionSetManagement.countActionsByStatusForDistributionSet(ds2.getId())).isEmpty();

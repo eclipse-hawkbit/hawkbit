@@ -553,7 +553,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public void deleteExistingTarget(@NotEmpty final String controllerId) {
-        targetRepository.deleteById(targetRepository.getByControllerId(controllerId).getId());
+        final JpaTarget target = targetRepository.getByControllerId(controllerId);
+        targetRepository.deleteById(target.getId());
+        entityManager.flush();
     }
 
     @Override

@@ -421,7 +421,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Optional<DistributionSet> getWithDetails(final long id) {
-        return distributionSetRepository.findById(id).map(DistributionSet.class::cast);
+        return distributionSetRepository
+                .findOne(distributionSetRepository.byIdSpec(id), JpaDistributionSet_.GRAPH_DISTRIBUTION_SET_DETAIL)
+                .map(DistributionSet.class::cast);
     }
 
     @Override

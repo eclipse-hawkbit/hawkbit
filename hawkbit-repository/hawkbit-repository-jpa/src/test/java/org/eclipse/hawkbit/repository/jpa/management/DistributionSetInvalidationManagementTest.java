@@ -49,8 +49,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     @Test
     @Description("Verify invalidation of distribution sets that only removes distribution sets from auto assignments")
     void verifyInvalidateDistributionSetStopAutoAssignment() {
-        final InvalidationTestData invalidationTestData = createInvalidationTestData(
-                "verifyInvalidateDistributionSetStopAutoAssignment");
+        final InvalidationTestData invalidationTestData = createInvalidationTestData("verifyInvalidateDistributionSetStopAutoAssignment");
 
         final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
                 Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.NONE,
