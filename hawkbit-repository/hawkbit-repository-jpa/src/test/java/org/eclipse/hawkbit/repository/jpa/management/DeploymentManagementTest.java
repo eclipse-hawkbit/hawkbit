@@ -1360,7 +1360,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // checking the revisions of the created entities
         // verifying that the revision of the object and the revision within the
         // DB has incremented by implicit lock
-        assertThat(dsA.getOptLockRevision()).as("lock revision is wrong")
+        assertThat(dsA.getOptLockRevision())
+                .as("lock revision is wrong")
                 .isEqualTo(distributionSetManagement.getWithDetails(dsA.getId()).get().getOptLockRevision());
 
         // verifying that the assignment is correct
@@ -1422,7 +1423,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.createDistributionSet("b");
         final Target targ = testdataFactory.createTarget("target-id-A");
 
-        assertThat(dsA.getOptLockRevision()).as("lock revision is wrong")
+        assertThat(dsA.getOptLockRevision())
+                .as("lock revision is wrong")
                 .isEqualTo(distributionSetManagement.getWithDetails(dsA.getId()).get().getOptLockRevision());
 
         assignDistributionSet(dsA, Collections.singletonList(targ));
