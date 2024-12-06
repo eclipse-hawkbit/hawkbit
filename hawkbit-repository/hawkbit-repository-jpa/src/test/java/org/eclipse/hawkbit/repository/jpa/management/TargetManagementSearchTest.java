@@ -327,7 +327,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that targets with given assigned DS are returned from repository.")
+    @Description("Verifies that targets with given assigned DS are returned from repository.")
     void findTargetByAssignedDistributionSet() {
         final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
         testdataFactory.createTargets(10, "unassigned", "unassigned");

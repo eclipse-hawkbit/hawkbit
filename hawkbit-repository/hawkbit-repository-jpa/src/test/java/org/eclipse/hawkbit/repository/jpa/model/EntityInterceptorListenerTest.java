@@ -35,19 +35,19 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that the pre persist is called after a entity creation.")
+    @Description("Verifies that the pre persist is called after a entity creation.")
     public void prePersistIsCalledWhenPersistingATarget() {
         executePersistAndAssertCallbackResult(new PrePersistEntityListener());
     }
 
     @Test
-    @Description("Verfies that the post persist is called after a entity creation.")
+    @Description("Verifies that the post persist is called after a entity creation.")
     public void postPersistIsCalledWhenPersistingATarget() {
         executePersistAndAssertCallbackResult(new PostPersistEntityListener());
     }
 
     @Test
-    @Description("Verfies that the post load is called after a entity is loaded.")
+    @Description("Verifies that the post load is called after a entity is loaded.")
     public void postLoadIsCalledWhenLoadATarget() {
         final PostLoadEntityListener postLoadEntityListener = new PostLoadEntityListener();
         EntityInterceptorHolder.getInstance().getEntityInterceptors().add(postLoadEntityListener);
@@ -60,25 +60,25 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that the pre update is called after a entity update.")
+    @Description("Verifies that the pre update is called after a entity update.")
     public void preUpdateIsCalledWhenUpdateATarget() {
         executeUpdateAndAssertCallbackResult(new PreUpdateEntityListener());
     }
 
     @Test
-    @Description("Verfies that the post update is called after a entity update.")
+    @Description("Verifies that the post update is called after a entity update.")
     public void postUpdateIsCalledWhenUpdateATarget() {
         executeUpdateAndAssertCallbackResult(new PostUpdateEntityListener());
     }
 
     @Test
-    @Description("Verfies that the pre remove is called after a entity deletion.")
+    @Description("Verifies that the pre remove is called after a entity deletion.")
     public void preRemoveIsCalledWhenDeletingATarget() {
         executeDeleteAndAssertCallbackResult(new PreRemoveEntityListener());
     }
 
     @Test
-    @Description("Verfies that the post remove is called after a entity deletion.")
+    @Description("Verifies that the post remove is called after a entity deletion.")
     public void postRemoveIsCalledWhenDeletingATarget() {
         executeDeleteAndAssertCallbackResult(new PostRemoveEntityListener());
     }

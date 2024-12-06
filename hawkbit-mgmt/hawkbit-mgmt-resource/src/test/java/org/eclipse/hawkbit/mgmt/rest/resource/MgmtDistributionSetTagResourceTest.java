@@ -60,7 +60,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     private static final Random RND = new Random();
 
     @Test
-    @Description("Verfies that a paged result list of DS tags reflects the content on the repository side.")
+    @Description("Verifies that a paged result list of DS tags reflects the content on the repository side.")
     @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
     public void getDistributionSetTags() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
@@ -132,7 +132,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     }
 
     @Test
-    @Description("Verfies that a paged result list of DS tags reflects the content on the repository side when filtered by distribution set id field AND tag field.")
+    @Description("Verifies that a paged result list of DS tags reflects the content on the repository side when filtered by distribution set id field AND tag field.")
     public void getDistributionSetTagsByDistributionSetIdAndTagDescription() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
         final DistributionSetTag tag1 = tags.get(0);
@@ -160,7 +160,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     }
 
     @Test
-    @Description("Verfies that a single result of a DS tag reflects the content on the repository side.")
+    @Description("Verifies that a single result of a DS tag reflects the content on the repository side.")
     @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
     public void getDistributionSetTag() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
@@ -237,7 +237,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     }
 
     @Test
-    @Description("Verfies that the delete call is reflected by the repository.")
+    @Description("Verifies that the delete call is reflected by the repository.")
     @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetTagDeletedEvent.class, count = 1) })
@@ -320,7 +320,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     }
 
     @Test
-    @Description("Verfies that tag assignments done through toggle API command are correctly assigned or unassigned.")
+    @Description("Verifies that tag assignments done through toggle API command are correctly assigned or unassigned.")
     @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),

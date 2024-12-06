@@ -97,7 +97,7 @@ class ArtifactFilesystemRepositoryTest {
     }
 
     @Test
-    @Description("Verfies that an artifact which does not exists is deleted quietly in the file-system repository")
+    @Description("Verifies that an artifact which does not exists is deleted quietly in the file-system repository")
     void deleteArtifactWhichDoesNotExistsBySHA1HashWithoutException() throws IOException {
         try {
             artifactFilesystemRepository.deleteBySha1(TENANT, "sha1HashWhichDoesNotExists");

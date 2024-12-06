@@ -151,7 +151,7 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
     }
 
     @Test
-    @Description("Verfies that it is not possible to create a type that alrady exists.")
+    @Description("Verifies that it is not possible to create a type that alrady exists.")
     public void createSoftwareModuleTypeFailsWithExistingEntity() {
         softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
         try {
@@ -165,7 +165,7 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
     }
 
     @Test
-    @Description("Verfies that it is not possible to create a list of types where one already exists.")
+    @Description("Verifies that it is not possible to create a list of types where one already exists.")
     public void createSoftwareModuleTypesFailsWithExistingEntity() {
         softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
         try {
@@ -191,7 +191,7 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
     }
 
     @Test
-    @Description("Verfies that multiple types are created as requested.")
+    @Description("Verifies that multiple types are created as requested.")
     public void createMultipleSoftwareModuleTypes() {
         final List<SoftwareModuleType> created = softwareModuleTypeManagement
                 .create(Arrays.asList(entityFactory.softwareModuleType().create().key("thetype").name("thename"),

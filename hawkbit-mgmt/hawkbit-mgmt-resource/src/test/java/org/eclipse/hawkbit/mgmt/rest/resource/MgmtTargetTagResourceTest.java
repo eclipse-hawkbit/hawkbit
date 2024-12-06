@@ -67,7 +67,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     private static final Random RND = new Random();
 
     @Test
-    @Description("Verfies that a paged result list of target tags reflects the content on the repository side.")
+    @Description("Verifies that a paged result list of target tags reflects the content on the repository side.")
     @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
     public void getTargetTags() throws Exception {
         final List<TargetTag> tags = testdataFactory.createTargetTags(2, "");
@@ -130,7 +130,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     }
 
     @Test
-    @Description("Verfies that a single result of a target tag reflects the content on the repository side.")
+    @Description("Verifies that a single result of a target tag reflects the content on the repository side.")
     @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
     public void getTargetTag() throws Exception {
         final List<TargetTag> tags = testdataFactory.createTargetTags(2, "");
@@ -208,7 +208,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     }
 
     @Test
-    @Description("Verfies that the delete call is reflected by the repository.")
+    @Description("Verifies that the delete call is reflected by the repository.")
     @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetTagDeletedEvent.class, count = 1) })
@@ -650,7 +650,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     }
 
     @Test
-    @Description("Verfies that tag assignments done through tag API command are correctly stored in the repository.")
+    @Description("Verifies that tag assignments done through tag API command are correctly stored in the repository.")
     @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2), 
