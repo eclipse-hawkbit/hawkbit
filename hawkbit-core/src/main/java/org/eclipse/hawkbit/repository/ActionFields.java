@@ -65,9 +65,9 @@ public enum ActionFields implements RsqlQueryField, FieldValueConverter<ActionFi
     private static Object convertStatusValue(final String value) {
         final String trimmedValue = value.trim();
         if (trimmedValue.equalsIgnoreCase(ACTIVE)) {
-            return 1;
+            return true;
         } else if (trimmedValue.equalsIgnoreCase(INACTIVE)) {
-            return 0;
+            return false;
         } else {
             return null;
         }

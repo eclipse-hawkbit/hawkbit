@@ -52,7 +52,7 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
                 .containsOnly(permittedTargetType.getId());
 
         // verify targetTypeManagement#findByRsql
-        assertThat(targetTypeManagement.findByRsql(Pageable.unpaged(), "id==*").get().map(Identifiable::getId).toList())
+        assertThat(targetTypeManagement.findByRsql(Pageable.unpaged(), "name==*").get().map(Identifiable::getId).toList())
                 .containsOnly(permittedTargetType.getId());
 
         // verify targetTypeManagement#findByName
