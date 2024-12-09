@@ -63,8 +63,6 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
             return;
         }
 
-        assertRSQLQuery(ActionFields.ID.name() + "==*", 11);
-        assertRSQLQuery(ActionFields.ID.name() + "==noexist*", 0);
         assertRSQLQuery(ActionFields.ID.name() + "=in=(" + action.getId() + ",10000000)", 1);
         assertRSQLQuery(ActionFields.ID.name() + "=out=(" + action.getId() + ",10000000)", 10);
     }

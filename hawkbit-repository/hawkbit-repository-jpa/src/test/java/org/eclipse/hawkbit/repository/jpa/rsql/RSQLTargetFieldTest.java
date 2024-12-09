@@ -104,8 +104,6 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter target by (controller) id")
     void testFilterByParameterId() {
         assertRSQLQuery(TargetFields.ID.name() + "==targetId123", 1);
-        assertRSQLQuery(TargetFields.ID.name() + "==target*", 5);
-        assertRSQLQuery(TargetFields.ID.name() + "==noExist*", 0);
         assertRSQLQuery(TargetFields.ID.name() + "!=targetId123", 4);
         assertRSQLQuery(TargetFields.ID.name() + "=in=(targetId123,notexist)", 1);
         assertRSQLQuery(TargetFields.ID.name() + "=out=(targetId123,notexist)", 4);

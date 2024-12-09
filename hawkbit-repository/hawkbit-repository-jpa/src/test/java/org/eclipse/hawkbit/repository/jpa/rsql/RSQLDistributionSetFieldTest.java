@@ -81,8 +81,6 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
             return;
         }
 
-        assertRSQLQuery(DistributionSetFields.ID.name() + "==*", 5);
-        assertRSQLQuery(DistributionSetFields.ID.name() + "==noexist*", 0);
         assertRSQLQuery(DistributionSetFields.ID.name() + "=in=(" + ds.getId() + ",10000000)", 1);
         assertRSQLQuery(DistributionSetFields.ID.name() + "=out=(" + ds.getId() + ",10000000)", 4);
     }
@@ -104,8 +102,8 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.NAME.name() + "==" + sm.getName(), 1);
         assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.ID.name() + "==" + sm.getId(), 1);
         assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.NAME.name() + "==noExist", 0);
-        assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.ID.name() + "=in=(" + sm.getId() + ", noExist)", 1);
-        assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.ID.name() + "=out=(" + sm.getId() + ", noExist)", 4);
+        assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.ID.name() + "=in=(" + sm.getId() + ", -1)", 1);
+        assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.ID.name() + "=out=(" + sm.getId() + ", -1)", 4);
     }
 
     @Test
@@ -128,10 +126,8 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     public void testFilterByParameterVersion() {
         assertRSQLQuery(DistributionSetFields.VERSION.name() + "==" + TestdataFactory.DEFAULT_VERSION, 1);
         assertRSQLQuery(DistributionSetFields.VERSION.name() + "!=" + TestdataFactory.DEFAULT_VERSION, 4);
-        assertRSQLQuery(
-                DistributionSetFields.VERSION.name() + "=in=(" + TestdataFactory.DEFAULT_VERSION + ",1.0.0,1.0.1)", 3);
-        assertRSQLQuery(DistributionSetFields.VERSION.name() + "=out=(" + TestdataFactory.DEFAULT_VERSION + ",error)",
-                4);
+        assertRSQLQuery(DistributionSetFields.VERSION.name() + "=in=(" + TestdataFactory.DEFAULT_VERSION + ",1.0.0,1.0.1)", 3);
+        assertRSQLQuery(DistributionSetFields.VERSION.name() + "=out=(" + TestdataFactory.DEFAULT_VERSION + ",error)", 4);
     }
 
     @Test

@@ -17,11 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.MapJoin;
 import jakarta.persistence.criteria.Path;
@@ -185,7 +183,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         final String keyValue = graph[graph.length - 1];
         if (fieldPath instanceof MapJoin) {
             // Currently we support only string key. So below cast is safe.
-            return equal((Expression<String>) (((MapJoin<?, ?, ?>) fieldPath).key()), keyValue);
+            return equal((Path<String>) (((MapJoin<?, ?, ?>) fieldPath).key()), keyValue);
         }
 
         final String keyFieldName = queryField.getEnumValue().getSubEntityMapTuple().map(Entry::getKey)
@@ -225,7 +223,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
                 return cb.or(cb.isNull(fieldPath), cb.equal(pathOfString(fieldPath), ""));
             }
 
-            final Expression<String> stringExpression = pathOfString(fieldPath);
+            final Path<String> stringExpression = pathOfString(fieldPath);
             if (isPattern(transformedValueStr)) { // a pattern, use like
                 return like(stringExpression, toSQL(transformedValueStr));
             } else {
@@ -311,14 +309,10 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         }
     }
 
-    private Object convertValueIfNecessary(
-            final ComparisonNode node, final A fieldName, final Path<?> fieldPath, final String value) {
-        // in case the value of an RSQL query e.g. type==application is an
-        // enum we need to handle it separately because JPA needs the
-        // correct java-type to build an expression. So String and numeric
-        // values JPA can do it by its own but not for classes like enums.
-        // So we need to transform the given value string into the enum
-        // class.
+    private Object convertValueIfNecessary(final ComparisonNode node, final A fieldName, final Path<?> fieldPath, final String value) {
+        // in case the value of an RSQL query e.g. type==application is an enum we need to handle it separately because JPA needs the
+        // correct java-type to build an expression. So String and numeric values JPA can do it by its own but not for classes like enums.
+        // So we need to transform the given value string into the enum class.
         final Class<?> javaType = fieldPath.getJavaType();
         if (javaType != null && javaType.isEnum()) {
             return transformEnumValue(node, javaType, value);
@@ -327,7 +321,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
             return convertFieldConverterValue(node, fieldName, value);
         }
 
-        if (Boolean.TYPE.equals(javaType)) {
+        if (Boolean.TYPE.equals(javaType) || Boolean.class.equals(javaType)) {
             return convertBooleanValue(node, javaType, value);
         }
 
@@ -368,7 +362,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private Predicate toNotExistsSubQueryPredicate(final QuertPath queryField, final Path<?> fieldPath,
-            final Function<Expression<String>, Predicate> subQueryPredicateProvider) {
+            final Function<Path<String>, Predicate> subQueryPredicateProvider) {
         // if a subquery the field's parent joins are not actually used
         if (!inOr) {
             // so, if not in or (hence not reused) we remove them. Parent shall be a Join
@@ -383,24 +377,27 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
                         .where(cb.and(
                                 cb.equal(root.get(queryField.getEnumValue().identifierFieldName()),
                                         subqueryRoot.get(queryField.getEnumValue().identifierFieldName())),
-                                subQueryPredicateProvider.apply(getExpressionToCompare(queryField.getEnumValue(),
-                                        getFieldPath(subqueryRoot, queryField)))))));
+                                subQueryPredicateProvider.apply(
+                                        getExpressionToCompare(queryField.getEnumValue(),
+                                                getFieldPath(subqueryRoot, queryField)))))));
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Expression<String> getExpressionToCompare(final A enumField, final Path fieldPath) {
+    private Path<String> getExpressionToCompare(final A enumField, final Path fieldPath) {
         if (!enumField.isMap()) {
             return pathOfString(fieldPath);
         }
         if (fieldPath instanceof MapJoin) {
             // Currently we support only string key. So below cast is safe.
-            return (Expression<String>) (((MapJoin<?, ?, ?>) fieldPath).value());
+            return (Path<String>) (((MapJoin<?, ?, ?>) fieldPath).value());
         }
         return enumField.getSubEntityMapTuple()
                 .map(Entry::getValue)
                 .map(valueFieldName -> fieldPath.<String> get(valueFieldName))
-                .orElseThrow(() -> new UnsupportedOperationException(
-                        "For the fields, defined as Map, only Map java type or tuple in the form of SimpleImmutableEntry are allowed. Neither of those could be found!"));
+                .orElseThrow(() ->
+                        new UnsupportedOperationException(
+                                "For the fields, defined as Map, only Map java type or tuple in the form of SimpleImmutableEntry are allowed." +
+                                        " Neither of those could be found!"));
     }
 
     private String toSQL(final String transformedValue) {
@@ -437,33 +434,50 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         return children;
     }
 
-    private Predicate equal(final Expression<String> expressionToCompare, final String sqlValue) {
-        return cb.equal(caseWise(cb, expressionToCompare), caseWise(sqlValue));
+    private Predicate equal(final Path<String> expressionToCompare, final String sqlValue) {
+        if (caseWise(expressionToCompare)) {
+            return cb.equal(cb.upper(expressionToCompare), sqlValue.toUpperCase());
+        } else {
+            return cb.equal(expressionToCompare, sqlValue);
+        }
     }
 
-    private Predicate notEqual(final Expression<String> expressionToCompare, String transformedValueStr) {
-        return cb.notEqual(caseWise(cb, expressionToCompare), caseWise(transformedValueStr));
+    private Predicate notEqual(final Path<String> expressionToCompare, String transformedValueStr) {
+        if (caseWise(expressionToCompare)) {
+            return cb.notEqual(cb.upper(expressionToCompare), transformedValueStr.toUpperCase());
+        } else {
+            return cb.notEqual(expressionToCompare, transformedValueStr);
+        }
     }
 
-    private Predicate like(final Expression<String> expressionToCompare, final String sqlValue) {
-        return cb.like(caseWise(cb, expressionToCompare), caseWise(sqlValue), ESCAPE_CHAR);
+    private Predicate like(final Path<String> expressionToCompare, final String sqlValue) {
+        if (caseWise(expressionToCompare)) {
+            return cb.like(cb.upper(expressionToCompare), sqlValue.toUpperCase(), ESCAPE_CHAR);
+        } else {
+            return cb.like(expressionToCompare, sqlValue, ESCAPE_CHAR);
+        }
     }
 
-    private Predicate notLike(final Expression<String> expressionToCompare, final String sqlValue) {
-        return cb.notLike(caseWise(cb, expressionToCompare), caseWise(sqlValue), ESCAPE_CHAR);
+    private Predicate notLike(final Path<String> expressionToCompare, final String sqlValue) {
+        if (caseWise(expressionToCompare)) {
+            return cb.notLike(cb.upper(expressionToCompare), sqlValue.toUpperCase(), ESCAPE_CHAR);
+        } else {
+            return cb.notLike(expressionToCompare, sqlValue, ESCAPE_CHAR);
+        }
     }
 
-    private Predicate in(final Expression<String> expressionToCompare, final List<Object> transformedValues) {
-        final List<String> inParams = transformedValues.stream().filter(String.class::isInstance)
-                .map(String.class::cast).map(this::caseWise).collect(Collectors.toList());
-        return inParams.isEmpty() ? expressionToCompare.in(transformedValues) : caseWise(cb, expressionToCompare).in(inParams);
+    private Predicate in(final Path<String> expressionToCompare, final List<Object> transformedValues) {
+        if (ensureIgnoreCase && expressionToCompare.getJavaType() == String.class) {
+            final List<String> inParams = transformedValues.stream()
+                    .filter(String.class::isInstance)
+                    .map(String.class::cast).map(String::toUpperCase).toList();
+            return inParams.isEmpty() ? expressionToCompare.in(transformedValues) : cb.upper(expressionToCompare).in(inParams);
+        } else {
+            return expressionToCompare.in(transformedValues);
+        }
     }
 
-    private Expression<String> caseWise(final CriteriaBuilder cb, final Expression<String> expression) {
-        return ensureIgnoreCase ? cb.upper(expression) : expression;
-    }
-
-    private String caseWise(final String str) {
-        return ensureIgnoreCase ? str.toUpperCase() : str;
+    private boolean caseWise(final Path<?> fieldPath) {
+        return ensureIgnoreCase && fieldPath.getJavaType() == String.class;
     }
 }

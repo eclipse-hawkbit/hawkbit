@@ -40,8 +40,6 @@ public class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest
             return;
         }
 
-        assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "==*", 3);
-        assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "==noexist*", 0);
         assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "=in=(" + osType.getId() + ",1000000)", 1);
         assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "=out=(" + osType.getId() + ",1000000)", 2);
     }

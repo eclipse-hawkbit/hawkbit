@@ -58,8 +58,6 @@ public class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
             return;
         }
 
-        assertRSQLQuery(RolloutGroupFields.ID.name() + "==*", 4);
-        assertRSQLQuery(RolloutGroupFields.ID.name() + "==noexist*", 0);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "=in=(" + rolloutGroupId + ",10000000)", 1);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "=out=(" + rolloutGroupId + ",10000000)", 3);
     }

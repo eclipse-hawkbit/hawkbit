@@ -104,6 +104,12 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         }
     }
 
+    @Column(name = "created_at", updatable = false, nullable = false)
+    @Access(AccessType.PROPERTY)
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
     @LastModifiedBy
     public void setLastModifiedBy(final String lastModifiedBy) {
         if (isController()) {
@@ -113,13 +119,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
         this.lastModifiedBy = lastModifiedBy;
     }
 
-    // maybe needed to have correct createdAt value in the database
-    @Access(AccessType.PROPERTY)
-    public long getCreatedAt() {
-        return createdAt;
-    }
-
-    // seems needed to have correct lastModifiedBy value in the database
+    @Column(name = "last_modified_by", nullable = false, length = USERNAME_FIELD_LENGTH)
     @Access(AccessType.PROPERTY)
     public String getLastModifiedBy() {
         return lastModifiedBy;
