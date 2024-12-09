@@ -180,7 +180,8 @@ is [ActionUpdateStatus](https://github.com/eclipse-hawkbit/hawkbit/tree/master/h
   "actionId": long,
   "softwareModuleId": long,
   "actionStatus":"String",
-  "message":["String"]
+  "message":["String"],
+  "timestamp": long
 }
 ```
 
@@ -210,7 +211,8 @@ Example header and payload:
   "actionId":137,
   "softwareModuleId":17,
   "actionStatus":"DOWNLOAD",
-  "message":["The download has started"]
+  "message":["The download has started"],
+  "timestamp": 1704070800000
 }
 ```
 
@@ -279,7 +281,8 @@ Example header and payload when cancellation is successful:
   "actionId":137,
   "softwareModuleId":17,
   "actionStatus":"CANCELED",
-  "message":["The update was canceled."]
+  "message":["The update was canceled."],
+  "timestamp": 1704070800000
 }
 ```
 
@@ -294,7 +297,8 @@ Example header and payload when cancellation is rejected:
   "actionId":137,
   "softwareModuleId":17,
   "actionStatus":"CANCEL_REJECTED",
-  "message":["The cancellation was not possible since the target sent an unexpected response."]
+  "message":["The cancellation was not possible since the target sent an unexpected response."],
+  "timestamp": 1704070800000
 }
 ```
 
