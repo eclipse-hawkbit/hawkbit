@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
@@ -53,6 +52,7 @@ import org.eclipse.hawkbit.repository.exception.IncompatibleTargetTypeException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -123,8 +123,28 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      */
     private static final int ACTION_PAGE_LIMIT = 1000;
     private static final String QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED_DEFAULT =
-            "DELETE FROM sp_action WHERE tenant=#tenant AND status IN (%s) AND last_modified_at<#last_modified_at LIMIT " + ACTION_PAGE_LIMIT;
+            "DELETE FROM sp_action " +
+                    "WHERE tenant=" + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "tenant" +
+                    " AND status IN (%s)" +
+                    " AND last_modified_at<" + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "last_modified_at LIMIT " + ACTION_PAGE_LIMIT;
     private static final EnumMap<Database, String> QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED;
+
+    static {
+        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED = new EnumMap<>(Database.class);
+        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(
+                Database.SQL_SERVER,
+                "DELETE TOP (" + ACTION_PAGE_LIMIT + ") FROM sp_action " +
+                        "WHERE tenant=" + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "tenant" +
+                        " AND status IN (%s)" +
+                        " AND last_modified_at<" + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "last_modified_at ");
+        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(
+                Database.POSTGRESQL,
+                "DELETE FROM sp_action " +
+                        "WHERE id IN (SELECT id FROM sp_action " +
+                        "WHERE tenant=" + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "tenant" +
+                        " AND status IN (%s)" +
+                        " AND last_modified_at<" + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "last_modified_at LIMIT " + ACTION_PAGE_LIMIT + ")");
+    }
 
     private final EntityManager entityManager;
     private final DistributionSetManagement distributionSetManagement;
@@ -140,18 +160,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final AuditorAware<String> auditorAware;
     private final Database database;
     private final RetryTemplate retryTemplate;
-
-    static {
-        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED = new EnumMap<>(Database.class);
-        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(
-                Database.SQL_SERVER,
-                "DELETE TOP (" + ACTION_PAGE_LIMIT + ") FROM sp_action " +
-                        "WHERE tenant=#tenant AND status IN (%s) AND last_modified_at<#last_modified_at ");
-        QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(
-                Database.POSTGRESQL,
-                "DELETE FROM sp_action " +
-                        "WHERE id IN (SELECT id FROM sp_action WHERE tenant=#tenant AND status IN (%s) AND last_modified_at<#last_modified_at LIMIT " + ACTION_PAGE_LIMIT + ")");
-    }
 
     public JpaDeploymentManagement(
             final EntityManager entityManager, final ActionRepository actionRepository,
@@ -500,23 +508,18 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         if (status.isEmpty()) {
             return 0;
         }
-        /*
-         * We use a native query here because Spring JPA does not support to specify a
-         * LIMIT clause on a DELETE statement. However, for this specific use case
-         * (action cleanup), we must specify a row limit to reduce the overall load on
-         * the database.
-         */
 
-        final int statusCount = status.size();
-        final Status[] statusArr = status.toArray(new Status[statusCount]);
+        // We use a native query here because Spring JPA does not support to specify a LIMIT clause on a DELETE statement.
+        // However, for this specific use case (action cleanup), we must specify a row limit to reduce the overall load of
+        // the database.
+        final List<Integer> statusList = status.stream().map(Status::ordinal).toList();
 
-        final String queryStr = String.format(getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(database),
-                formatInClauseWithNumberKeys(statusCount));
-        final Query deleteQuery = entityManager.createNativeQuery(queryStr);
+        final Query deleteQuery = entityManager.createNativeQuery(String.format(
+                getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(database),
+                Jpa.formatNativeQueryInClause("status", statusList)));
 
-        IntStream.range(0, statusCount)
-                .forEach(i -> deleteQuery.setParameter(String.valueOf(i), statusArr[i].ordinal()));
         deleteQuery.setParameter("tenant", tenantAware.getCurrentTenant().toUpperCase());
+        Jpa.setNativeQueryInParameter(deleteQuery, "status", statusList);
         deleteQuery.setParameter("last_modified_at", lastModified);
 
         log.debug("Action cleanup: Executing the following (native) query: {}", deleteQuery);
@@ -598,14 +601,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private static String getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(final Database database) {
         return QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.getOrDefault(database,
                 QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED_DEFAULT);
-    }
-
-    private static String formatInClauseWithNumberKeys(final int count) {
-        return formatInClause(IntStream.range(0, count).mapToObj(String::valueOf).collect(Collectors.toList()));
-    }
-
-    private static String formatInClause(final Collection<String> elements) {
-        return "#" + String.join(",#", elements);
     }
 
     private static RetryTemplate createRetryTemplate() {

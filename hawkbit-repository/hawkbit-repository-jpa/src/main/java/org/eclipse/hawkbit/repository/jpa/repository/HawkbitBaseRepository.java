@@ -150,7 +150,7 @@ public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpa
 
     private TypedQuery<T> withEntityGraph(final TypedQuery<T> query, final String entityGraph) {
         final EntityGraph<?> graph = ObjectUtils.isEmpty(entityGraph) ? null : entityManager.createEntityGraph(entityGraph);
-        return graph == null ? query : query.setHint("javax.persistence.loadgraph", graph);
+        return graph == null ? query : query.setHint("jakarta.persistence.loadgraph", graph);
     }
 
     private <S extends T> Page<S> readPageWithoutCount(final TypedQuery<S> query, final Pageable pageable) {
