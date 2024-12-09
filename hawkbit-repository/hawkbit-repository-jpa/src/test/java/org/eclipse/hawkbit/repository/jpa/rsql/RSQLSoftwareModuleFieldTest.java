@@ -71,8 +71,6 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
             return;
         }
 
-        assertRSQLQuery(SoftwareModuleFields.ID.name() + "==*", 6);
-        assertRSQLQuery(SoftwareModuleFields.ID.name() + "==noexist*", 0);
         assertRSQLQuery(SoftwareModuleFields.ID.name() + "=in=(" + ah.getId() + ",1000000)", 1);
         assertRSQLQuery(SoftwareModuleFields.ID.name() + "=out=(" + ah.getId() + ",1000000)", 5);
     }

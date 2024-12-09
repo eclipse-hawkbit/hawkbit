@@ -25,28 +25,24 @@ import org.springframework.transaction.annotation.Transactional;
  * Repository for {@link SoftwareModuleType}.
  */
 @Transactional(readOnly = true)
-public interface SoftwareModuleTypeRepository
-        extends BaseEntityRepository<JpaSoftwareModuleType> {
+public interface SoftwareModuleTypeRepository extends BaseEntityRepository<JpaSoftwareModuleType> {
 
     /**
      * @param key to search for
-     * @return all {@link SoftwareModuleType}s in the repository with given
-     *         {@link SoftwareModuleType#getKey()}
+     * @return all {@link SoftwareModuleType}s in the repository with given {@link SoftwareModuleType#getKey()}
      */
     Optional<SoftwareModuleType> findByKey(String key);
 
     /**
      * @param name to search for
-     * @return all {@link SoftwareModuleType}s in the repository with given
-     *         {@link SoftwareModuleType#getName()}
+     * @return all {@link SoftwareModuleType}s in the repository with given {@link SoftwareModuleType#getName()}
      */
     Optional<SoftwareModuleType> findByName(String name);
 
     /**
-     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
-     * reasons (this is a "delete everything" query after all) we add the tenant
-     * manually to query even if this will by done by {@link EntityManager}
-     * anyhow. The DB should take care of optimizing this away.
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety reasons (this is a "delete everything" query
+     * after all) we add the tenant manually to query even if this is done by {@link EntityManager} anyhow. The DB should take
+     * care of optimizing this away.
      *
      * @param tenant to delete data from
      */

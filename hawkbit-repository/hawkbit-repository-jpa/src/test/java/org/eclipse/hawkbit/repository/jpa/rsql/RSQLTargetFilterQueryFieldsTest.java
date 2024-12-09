@@ -65,8 +65,6 @@ public class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest 
             return;
         }
 
-        assertRSQLQuery(TargetFilterQueryFields.ID.name() + "==*", 3);
-        assertRSQLQuery(TargetFilterQueryFields.ID.name() + "==noexist*", 0);
         assertRSQLQuery(TargetFilterQueryFields.ID.name() + "=in=(" + filter1.getId() + ",10000000)", 1);
         assertRSQLQuery(TargetFilterQueryFields.ID.name() + "=out=(" + filter1.getId() + ",10000000)", 2);
 

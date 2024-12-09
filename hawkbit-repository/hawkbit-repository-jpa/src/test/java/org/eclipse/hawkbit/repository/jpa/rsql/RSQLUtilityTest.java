@@ -270,7 +270,7 @@ public class RSQLUtilityTest {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name!=abc";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
-        when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
+        when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) String.class);
 
         when(criteriaBuilderMock.isNull(any(Expression.class))).thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.notEqual(any(Expression.class), anyString()))
@@ -285,8 +285,7 @@ public class RSQLUtilityTest {
         // verification
         verify(criteriaBuilderMock, times(1)).or(any(Predicate.class), any(Predicate.class));
         verify(criteriaBuilderMock, times(1)).isNull(eq(pathOfString(baseSoftwareModuleRootMock)));
-        verify(criteriaBuilderMock, times(1)).notEqual(eq(pathOfString(baseSoftwareModuleRootMock)),
-                eq("abc".toUpperCase()));
+        verify(criteriaBuilderMock, times(1)).notEqual(eq(pathOfString(baseSoftwareModuleRootMock)), eq("abc".toUpperCase()));
     }
 
     @Test
@@ -294,7 +293,7 @@ public class RSQLUtilityTest {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name!=abc*";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
-        when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
+        when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) String.class);
 
         when(criteriaBuilderMock.isNull(any(Expression.class))).thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.notLike(any(Expression.class), anyString(), eq('\\')))
@@ -346,7 +345,7 @@ public class RSQLUtilityTest {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name==a%";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
-        when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
+        when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) String.class);
         when(criteriaBuilderMock.equal(any(Expression.class), anyString())).thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
                 .thenReturn(mock(Predicate.class));
@@ -367,7 +366,7 @@ public class RSQLUtilityTest {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name==a%*";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
-        when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
+        when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) String.class);
         when(criteriaBuilderMock.like(any(Expression.class), anyString(), eq('\\'))).thenReturn(mock(Predicate.class));
         when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
                 .thenReturn(mock(Predicate.class));
@@ -388,7 +387,7 @@ public class RSQLUtilityTest {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name==a%*";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
-        when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
+        when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) String.class);
         when(criteriaBuilderMock.upper(eq(pathOfString(baseSoftwareModuleRootMock))))
                 .thenReturn(pathOfString(baseSoftwareModuleRootMock));
         when(criteriaBuilderMock.like(any(Expression.class), anyString(), eq('\\'))).thenReturn(mock(Predicate.class));

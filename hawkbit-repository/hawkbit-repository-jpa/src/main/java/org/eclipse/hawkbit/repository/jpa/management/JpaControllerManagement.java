@@ -64,6 +64,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -748,24 +749,17 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     /**
-     * Sets {@link Target#getLastTargetQuery()} by native SQL in order to avoid
-     * raising opt lock revision as this update is not mission critical and in
-     * fact only written by {@link ControllerManagement}, i.e. the target
-     * itself.
+     * Sets {@link Target#getLastTargetQuery()} by native SQL in order to avoid raising opt lock revision as this update is not mission-critical
+     * and in fact only written by {@link ControllerManagement}, i.e. the target itself.
      */
     private void setLastTargetQuery(final String tenant, final long currentTimeMillis, final List<String> chunk) {
-        final Map<String, String> paramMapping = new HashMap<>(chunk.size());
-
-        for (int i = 0; i < chunk.size(); i++) {
-            paramMapping.put("cid" + i, chunk.get(i));
-        }
-
         final Query updateQuery = entityManager.createNativeQuery(
-                "UPDATE sp_target SET last_target_query = #last_target_query WHERE controller_id IN ("
-                        + formatQueryInStatementParams(paramMapping.keySet()) + ") AND tenant = #tenant");
+                "UPDATE sp_target SET last_target_query = " + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "last_target_query " +
+                        "WHERE controller_id IN (" + Jpa.formatNativeQueryInClause("cid", chunk) + ")" +
+                        " AND tenant = " + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "tenant");
 
-        paramMapping.forEach(updateQuery::setParameter);
         updateQuery.setParameter("last_target_query", currentTimeMillis);
+        Jpa.setNativeQueryInParameter(updateQuery, "cid", chunk);
         updateQuery.setParameter("tenant", tenant);
 
         final int updated = updateQuery.executeUpdate();
