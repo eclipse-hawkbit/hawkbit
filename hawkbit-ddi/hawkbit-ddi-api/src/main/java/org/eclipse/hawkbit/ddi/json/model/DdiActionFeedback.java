@@ -47,7 +47,7 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiActionFeedback {
 
-    @Schema(description = "Timestamp of the action in milliseconds since epoch", example = "1627997501890")
+    @Schema(description = "Timestamp (in milliseconds) when this status change occurred on Device.", example = "1627997501890")
     private final Long timestamp;
 
     @NotNull
