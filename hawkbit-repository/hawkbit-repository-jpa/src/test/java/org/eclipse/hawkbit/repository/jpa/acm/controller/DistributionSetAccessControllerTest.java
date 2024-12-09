@@ -207,7 +207,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         assertThat(distributionSetManagement.findByTag(Pageable.unpaged(), dsTag.getId()).get().map(Identifiable::getId)
                 .toList()).containsOnly(permitted.getId(), readOnly.getId());
 
-        assertThat(distributionSetManagement.findByRsqlAndTag(Pageable.unpaged(), "id==*", dsTag.getId()).get()
+        assertThat(distributionSetManagement.findByRsqlAndTag(Pageable.unpaged(), "name==*", dsTag.getId()).get()
                 .map(Identifiable::getId).toList()).containsOnly(permitted.getId(), readOnly.getId());
 
         // verify distributionSetManagement#unassignTag on permitted target
