@@ -160,8 +160,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that Rollouts in different states are handled correctly.")
     void findAllTargetsOfRolloutGroupWithActionStatus() {
         final Rollout rollout = testdataFactory.createRollout();
-        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(PAGE, rollout.getId())
-                .getContent();
+        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getContent();
         rolloutHandler.handleAll();
 
         // check query when no actions exist
@@ -170,8 +169,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
                         PageRequest.of(0, 500, Sort.by(Direction.DESC, "lastActionStatusCode")),
                         rolloutGroups.get(0).getId())
                 .getContent();
-        assertThat(targetsWithActionStatus)
-                .hasSize((int) rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroups.get(0).getId()));
+        assertThat(targetsWithActionStatus).hasSize((int) rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroups.get(0).getId()));
         assertTargetNotNullAndActionStatusNullAndActionStatusCode(targetsWithActionStatus, null);
 
         rolloutManagement.start(rollout.getId());

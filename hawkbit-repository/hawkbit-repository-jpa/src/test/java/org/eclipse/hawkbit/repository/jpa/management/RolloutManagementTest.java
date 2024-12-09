@@ -1805,19 +1805,19 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @ExpectEvents({
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 10),
-            @Expect(type = RolloutUpdatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = TargetCreatedEvent.class, count = 25),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = RolloutGroupCreatedEvent.class, count = 5),
             @Expect(type = ActionCreatedEvent.class, count = 10),
             @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = RolloutCreatedEvent.class, count = 1),
+            @Expect(type = RolloutUpdatedEvent.class, count = 6),
             @Expect(type = RolloutDeletedEvent.class, count = 1),
-            @Expect(type = RolloutCreatedEvent.class, count = 1) })
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 10),
+            @Expect(type = RolloutGroupCreatedEvent.class, count = 5) })
     void deleteRolloutWhichHasBeenStartedBeforeIsSoftDeleted() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
@@ -1825,17 +1825,15 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final String successCondition = "50";
         final String errorCondition = "80";
         final Rollout createdRollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(
-                amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
+                amountTargetsForRollout, amountOtherTargets, amountGroups, successCondition, errorCondition);
 
-        // start the rollout, so it has active running actions and a group which
-        // has been started
+        // start the rollout, so it has active running actions and a group which has been started
         rolloutManagement.start(createdRollout.getId());
         rolloutHandler.handleAll();
 
         // verify we have running actions
-        assertThat(actionRepository.findByRolloutIdAndStatus(PAGE, createdRollout.getId(), Status.RUNNING)
-                .getNumberOfElements()).isEqualTo(2);
+        assertThat(actionRepository.findByRolloutIdAndStatus(PAGE, createdRollout.getId(), Status.RUNNING).getNumberOfElements())
+                .isEqualTo(2);
 
         // test
         rolloutManagement.delete(createdRollout.getId());

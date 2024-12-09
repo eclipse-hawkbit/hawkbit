@@ -246,7 +246,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     // version is 1, 2 ... based
     protected int version(final int version) {
-        return switch (JpaConstants.JPA_VENDOR) {
+        return switch (Jpa.JPA_VENDOR) {
             case ECLIPSELINK -> version;
             case HIBERNATE -> version - 1;
         };
