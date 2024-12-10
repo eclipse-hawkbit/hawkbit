@@ -60,6 +60,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.model.TargetMetadataCompositeKey;
+import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetMetadataRepository;
@@ -648,15 +649,20 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void requestControllerAttributes(final String controllerId) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
         targetRepository.getAccessController()
                 .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, target));
         target.setRequestControllerAttributes(true);
-        eventPublisherHolder.getEventPublisher()
-                .publishEvent(new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
-                        target.getControllerId(), target.getAddress() != null ? target.getAddress().toString() : null,
-                        JpaTarget.class, eventPublisherHolder.getApplicationId()));
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() ->
+                eventPublisherHolder.getEventPublisher()
+                        .publishEvent(new TargetAttributesRequestedEvent(
+                                tenantAware.getCurrentTenant(), target.getId(), target.getControllerId(),
+                                target.getAddress() != null ? target.getAddress().toString() : null,
+                                JpaTarget.class, eventPublisherHolder.getApplicationId())));
     }
 
     @Override
@@ -718,14 +724,12 @@ public class JpaTargetManagement implements TargetManagement {
         final JpaTarget updatedTarget = JpaManagementHelper.touch(entityManager, targetRepository, target);
 
         final List<TargetMetadata> createdMetadata = md.stream()
-                .map(meta -> targetMetadataRepository
-                        .save(new JpaTargetMetadata(meta.getKey(), meta.getValue(), updatedTarget)))
+                .map(meta -> targetMetadataRepository.save(new JpaTargetMetadata(meta.getKey(), meta.getValue(), updatedTarget)))
                 .collect(Collectors.toUnmodifiableList());
 
         // TargetUpdatedEvent is not sent within the touch() method due to the
         // "lastModifiedAt" field being ignored in JpaTarget
-        eventPublisherHolder.getEventPublisher()
-                .publishEvent(new TargetUpdatedEvent(updatedTarget, eventPublisherHolder.getApplicationId()));
+        eventPublisherHolder.getEventPublisher().publishEvent(new TargetUpdatedEvent(updatedTarget, eventPublisherHolder.getApplicationId()));
 
         return createdMetadata;
     }
@@ -738,8 +742,8 @@ public class JpaTargetManagement implements TargetManagement {
         final JpaTargetMetadata metadata = (JpaTargetMetadata) getMetaDataByControllerId(controllerId, key)
                 .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, controllerId, key));
 
-        final JpaTarget target = JpaManagementHelper.touch(entityManager, targetRepository,
-                getByControllerIdAndThrowIfNotFound(controllerId));
+        final JpaTarget target = JpaManagementHelper.touch(
+                entityManager, targetRepository, getByControllerIdAndThrowIfNotFound(controllerId));
 
         targetRepository.getAccessController()
                 .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, target));

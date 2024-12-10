@@ -36,26 +36,31 @@ import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA256HashException;
 import org.eclipse.hawkbit.repository.jpa.EncryptionAwareDbArtifact;
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.ArtifactSpecifications;
+import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.FileSizeAndStorageQuotaCheckingInputStream;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -70,6 +75,7 @@ import org.springframework.validation.annotation.Validated;
 public class JpaArtifactManagement implements ArtifactManagement {
 
     private final EntityManager entityManager;
+    private final PlatformTransactionManager txManager;
     private final LocalArtifactRepository localArtifactRepository;
     private final SoftwareModuleRepository softwareModuleRepository;
     @Nullable
@@ -79,10 +85,13 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     public JpaArtifactManagement(
             final EntityManager entityManager,
+            final PlatformTransactionManager txManager,
             final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, @Nullable final ArtifactRepository artifactRepository,
-            final QuotaManagement quotaManagement, final TenantAware tenantAware) {
+            final QuotaManagement quotaManagement,
+            final TenantAware tenantAware) {
         this.entityManager = entityManager;
+        this.txManager = txManager;
         this.localArtifactRepository = localArtifactRepository;
         this.softwareModuleRepository = softwareModuleRepository;
         this.artifactRepository = artifactRepository;
@@ -137,18 +146,19 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long id) {
-        final JpaArtifact toDelete = (JpaArtifact) get(id)
-                .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
+        final JpaArtifact toDelete = (JpaArtifact) get(id).orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
 
+        final JpaSoftwareModule softwareModule = toDelete.getSoftwareModule();
         // clearArtifactBinary checks (unconditionally) software module UPDATE access
         softwareModuleRepository.getAccessController().ifPresent(accessController ->
-                accessController.assertOperationAllowed(AccessController.Operation.UPDATE,
-                        (JpaSoftwareModule) toDelete.getSoftwareModule()));
-        ((JpaSoftwareModule) toDelete.getSoftwareModule()).removeArtifact(toDelete);
-        softwareModuleRepository.save((JpaSoftwareModule) toDelete.getSoftwareModule());
+                accessController.assertOperationAllowed(AccessController.Operation.UPDATE, softwareModule));
+        softwareModule.removeArtifact(toDelete);
+        softwareModuleRepository.save(softwareModule);
 
         localArtifactRepository.deleteById(id);
-        clearArtifactBinary(toDelete.getSha1Hash());
+
+        final String sha1Hash = toDelete.getSha1Hash();
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> clearArtifactBinary(sha1Hash));
     }
 
     @Override
@@ -211,39 +221,35 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     /**
-     * Garbage collects artifact binaries if only referenced by given
-     * {@link SoftwareModule#getId()} or {@link SoftwareModule}'s that are
+     * Garbage collects artifact binaries if only referenced by given {@link SoftwareModule#getId()} or {@link SoftwareModule}'s that are
      * marked as deleted.
      * <p/>
      * Software module related UPDATE permission shall be checked by the callers!
+     * <p/>
+     * Note: Internal method. Shall be called ONLY if @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
+     * has already been checked
      *
      * @param sha1Hash no longer needed
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     void clearArtifactBinary(final String sha1Hash) {
         assertArtifactRepositoryAvailable();
 
-        // countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse will skip ACM checks and
-        // will return total count as it should be
-        final long count = localArtifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(
-                sha1Hash,
-                tenantAware.getCurrentTenant());
-        if (count <= 1) { // 1 artifact is the one being deleted!
-            // removes the real artifact ONLY AFTER the delete of artifact or software module
-            // in local history has passed successfully (caller has permission and no errors)
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-
-                @Override
-                public void afterCommit() {
+        DeploymentHelper.runInNewTransaction(txManager, "clearArtifactBinary", status -> {
+            // countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse will skip ACM checks and will return total count as it should be
+            if (localArtifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(sha1Hash, tenantAware.getCurrentTenant()) <= 0) { // 1 artifact is the one being deleted!
+                // removes the real artifact ONLY AFTER the delete of artifact or software module
+                // in local history has passed successfully (caller has permission and no errors)
+                AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() -> {
                     try {
                         log.debug("deleting artifact from repository {}", sha1Hash);
                         artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), sha1Hash);
                     } catch (final ArtifactStoreException e) {
                         throw new ArtifactDeleteFailedException(e);
                     }
-                }
-            });
-        } // else there are still other artifacts that need the binary
+                });
+            } // else there are still other artifacts that need the binary
+            return null;
+        });
     }
 
     private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload, final boolean isSmEncrypted) {

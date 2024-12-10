@@ -357,8 +357,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final List<RolloutGroupConditionEvaluator<RolloutGroup.RolloutGroupSuccessCondition>> successConditionEvaluators,
             final List<RolloutGroupActionEvaluator<RolloutGroup.RolloutGroupErrorAction>> errorActionEvaluators,
             final List<RolloutGroupActionEvaluator<RolloutGroup.RolloutGroupSuccessAction>> successActionEvaluators) {
-        return new RolloutGroupEvaluationManager(errorConditionEvaluators, successConditionEvaluators,
-                errorActionEvaluators, successActionEvaluators);
+        return new RolloutGroupEvaluationManager(
+                errorConditionEvaluators, successConditionEvaluators, errorActionEvaluators, successActionEvaluators);
     }
 
     @Bean
@@ -696,8 +696,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetTagRepository distributionSetTagRepository,
             final DistributionSetRepository distributionSetRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties) {
-        return new JpaDistributionSetTagManagement(distributionSetTagRepository, distributionSetRepository,
-                virtualPropertyReplacer, properties.getDatabase());
+        return new JpaDistributionSetTagManagement(
+                distributionSetTagRepository, distributionSetRepository, virtualPropertyReplacer, properties.getDatabase());
     }
 
     /**
@@ -735,8 +735,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SoftwareModuleRepository softwareModuleRepository,
             final JpaProperties properties) {
         return new JpaSoftwareModuleTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
-                virtualPropertyReplacer, softwareModuleRepository,
-                properties.getDatabase());
+                virtualPropertyReplacer, softwareModuleRepository, properties.getDatabase());
     }
 
     @Bean
@@ -744,8 +743,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     RolloutHandler rolloutHandler(final TenantAware tenantAware, final RolloutManagement rolloutManagement,
             final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
             final PlatformTransactionManager txManager, final ContextAware contextAware) {
-        return new JpaRolloutHandler(tenantAware, rolloutManagement, rolloutExecutor, lockRegistry, txManager,
-                contextAware);
+        return new JpaRolloutHandler(tenantAware, rolloutManagement, rolloutExecutor, lockRegistry, txManager, contextAware);
     }
 
     @Bean
@@ -777,8 +775,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final ContextAware contextAware) {
         return new JpaRolloutManagement(targetManagement, distributionSetManagement, eventPublisherHolder,
                 virtualPropertyReplacer, properties.getDatabase(), rolloutApprovalStrategy,
-                tenantConfigurationManagement, systemSecurityContext,
-                contextAware);
+                tenantConfigurationManagement, systemSecurityContext, contextAware);
     }
 
     /**
@@ -860,10 +857,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     ArtifactManagement artifactManagement(
-            final EntityManager entityManager, final LocalArtifactRepository localArtifactRepository,
-            final SoftwareModuleRepository softwareModuleRepository, final Optional<ArtifactRepository> artifactRepository,
+            final EntityManager entityManager, final PlatformTransactionManager txManager,
+            final LocalArtifactRepository localArtifactRepository, final SoftwareModuleRepository softwareModuleRepository,
+            final Optional<ArtifactRepository> artifactRepository,
             final QuotaManagement quotaManagement, final TenantAware tenantAware) {
-        return new JpaArtifactManagement(entityManager, localArtifactRepository, softwareModuleRepository, artifactRepository.orElse(null),
+        return new JpaArtifactManagement(
+                entityManager, txManager, localArtifactRepository, softwareModuleRepository, artifactRepository.orElse(null),
                 quotaManagement, tenantAware);
     }
 
