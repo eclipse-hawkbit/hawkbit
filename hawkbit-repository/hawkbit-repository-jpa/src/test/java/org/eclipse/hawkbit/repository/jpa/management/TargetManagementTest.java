@@ -343,7 +343,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.existsByInstalledOrAssignedDistributionSet(testDs2.getId()))
                 .as("For newly created distributions sets the assigned target count should be zero").isFalse();
 
-        Target target = createTargetWithAttributes("4711");
+        createTargetWithAttributes("4711");
 
         final long current = System.currentTimeMillis();
         controllerManagement.findOrRegisterTargetIfItDoesNotExist("4711", LOCALHOST);
@@ -356,7 +356,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(testDs2.getId(), "4711");
         implicitLock(testDs2);
 
-        target = targetManagement.getByControllerID("4711").orElseThrow(IllegalStateException::new);
+        Target target = targetManagement.getByControllerID("4711").orElseThrow(IllegalStateException::new);
         // read data
 
         assertThat(targetManagement.countByAssignedDistributionSet(testDs1.getId())).as("Target count is wrong")
@@ -1362,8 +1362,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         targetManagement.create(entityFactory.target().create().controllerId(controllerId));
         final Target target = controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
-        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong")
-                .isEqualTo(testData);
+        assertThat(targetManagement.getControllerAttributes(controllerId)).as("Controller Attributes are wrong").isEqualTo(testData);
         return target;
     }
 

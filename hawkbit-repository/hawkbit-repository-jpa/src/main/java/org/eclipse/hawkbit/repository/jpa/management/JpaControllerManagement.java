@@ -22,7 +22,6 @@ import java.time.temporal.TemporalUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -191,11 +190,14 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 break;
             }
             case FINISHED: {
-                handleFinishedAndStoreInTargetStatus(occurredAt, action).ifPresent(this::requestControllerAttributes);
+                requestControllerAttributes(handleFinishedAndStoreInTargetStatus(occurredAt, action));
                 break;
             }
             case DOWNLOADED: {
-                handleDownloadedActionStatus(action).ifPresent(this::requestControllerAttributes);
+                handleDownloadedActionStatus(action).ifPresent(controllerId ->
+                        requestControllerAttributes(getByControllerId(controllerId)
+                                .map(JpaTarget.class::cast)
+                                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId))));
                 break;
             }
             default: {
@@ -282,8 +284,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         return addActionStatus((JpaActionStatusCreate) statusCreate);
     }
 
-    private static final Pageable PAGEABLE_1 = PageRequest.of(0, 1);
-
     @Override
     public Optional<Action> findActiveActionWithHighestWeight(final String controllerId) {
         return Stream.concat(
@@ -328,11 +328,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(retryFor = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address,
-            final String name, final String type) {
-        final Specification<JpaTarget> spec =
-                (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
-
+    public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address, final String name, final String type) {
+        final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
         return targetRepository.findOne(spec).map(target -> updateTarget(target, address, name, type))
                 .orElseGet(() -> createTarget(controllerId, address, name, type));
     }
@@ -845,10 +842,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         return Optional.of(target.getControllerId());
     }
 
-    private void requestControllerAttributes(final String controllerId) {
-        final JpaTarget target = (JpaTarget) getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-
+    private void requestControllerAttributes(final JpaTarget target) {
         target.setRequestControllerAttributes(true);
 
         eventPublisherHolder.getEventPublisher()
@@ -866,15 +860,13 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     /**
-     * Handles the case where the {@link Action.Status#FINISHED} status is
-     * reported by the device. In case the update is finished, a controllerId
-     * will be returned to trigger a request for attributes.
+     * Handles the case where the {@link Action.Status#FINISHED} status is reported by the device. In case the update is finished,
+     * a controllerId will be returned to trigger a request for attributes.
      *
      * @param action updated action
-     * @return a present controllerId in case the attributes needs to be
-     *         requested.
+     * @return a present controllerId in case the attributes needs to be requested.
      */
-    private Optional<String> handleFinishedAndStoreInTargetStatus(final long occurredAt, final JpaAction action) {
+    private JpaTarget handleFinishedAndStoreInTargetStatus(final long occurredAt, final JpaAction action) {
         final JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(Status.FINISHED);
@@ -884,10 +876,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             target.setInstalledDistributionSet(ds);
             target.setInstallationDate(occurredAt);
 
-            // Target reported an installation of a DOWNLOAD_ONLY assignment, the
-            // assigned DS has to be adapted
-            // because the currently assigned DS can be unequal to the currently
-            // installed DS (the downloadOnly DS)
+            // Target reported an installation of a DOWNLOAD_ONLY assignment, the assigned DS has to be adapted
+            // because the currently assigned DS can be unequal to the currently installed DS (the downloadOnly DS)
             if (isDownloadOnly(action)) {
                 target.setAssignedDistributionSet((JpaDistributionSet) action.getDistributionSet());
             }
@@ -899,11 +889,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
             }
 
-            targetRepository.save(target);
             entityManager.detach(ds);
         }
 
-        return Optional.of(target.getControllerId());
+        return target;
     }
 
     private void assertTargetAttributesQuota(final JpaTarget target) {
