@@ -36,12 +36,12 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
 @Disabled("For manual run only, while playing around with RSQL to SQL")
-public class RSQLToSQLTest {
+class RSQLToSQLTest {
 
     private RSQLToSQL rsqlToSQL;
 
     @Test
-    public void print() {
+    void print() {
         print(JpaTarget.class, TargetFields.class, "tag==tag1 and tag==tag2");
         print(JpaTarget.class, TargetFields.class, "tag==tag1 or tag==tag2 or tag==tag3");
         print(JpaTarget.class, TargetFields.class, "targettype.key==type1 and metadata.key1==target1-value1");
@@ -49,7 +49,12 @@ public class RSQLToSQLTest {
     }
 
     @Test
-    public void printPG() {
+    void printSameTableMultiJoin() {
+        print(JpaTarget.class, TargetFields.class, "installedds.version==1.0.0 or assignedds.version==2.0.0");
+    }
+
+    @Test
+    void printPG() {
         printFrom(JpaTarget.class, TargetFields.class, "tag!=TAG1 and tag==TAG2");
         printFrom(JpaTarget.class, TargetFields.class, "tag==TAG1 and tag!=TAG2");
     }
