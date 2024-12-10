@@ -47,10 +47,8 @@ import org.eclipse.hawkbit.repository.report.model.SystemUsageReport;
 import org.eclipse.hawkbit.repository.report.model.SystemUsageReportWithTenants;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -140,7 +138,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteTenant(final String t) {
@@ -151,8 +148,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         final String tenant = t.toUpperCase();
         cacheManager.evictCaches(tenant);
         rolloutStatusCache.evictCaches(tenant);
-        tenantAware.runAsTenant(tenant, () -> {
-            entityManager.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, tenant);
+        tenantAware.runAsTenant(tenant, () -> DeploymentHelper.runInNewTransaction(txManager, "deleteTenant", status -> {
             tenantMetaDataRepository.deleteByTenantIgnoreCase(tenant);
             tenantConfigurationRepository.deleteByTenant(tenant);
             targetRepository.deleteByTenant(tenant);
@@ -167,7 +163,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             artifactRepository.deleteByTenant(tenant);
             softwareModuleTypeRepository.deleteByTenant(tenant);
             return null;
-        });
+        }));
     }
 
     @Override
@@ -292,13 +288,16 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     private DistributionSetType createStandardSoftwareDataSetup() {
-        final SoftwareModuleType app = softwareModuleTypeRepository
-                .save(new JpaSoftwareModuleType(org.eclipse.hawkbit.repository.Constants.SMT_DEFAULT_APP_KEY,
-                        org.eclipse.hawkbit.repository.Constants.SMT_DEFAULT_APP_NAME, "Application Addons",
-                        Integer.MAX_VALUE));
-        final SoftwareModuleType os = softwareModuleTypeRepository.save(new JpaSoftwareModuleType(
-                org.eclipse.hawkbit.repository.Constants.SMT_DEFAULT_OS_KEY,
-                org.eclipse.hawkbit.repository.Constants.SMT_DEFAULT_OS_NAME, "Core firmware or operation system", 1));
+        final SoftwareModuleType app = softwareModuleTypeRepository.save(
+                new JpaSoftwareModuleType(
+                        org.eclipse.hawkbit.repository.Constants.SMT_DEFAULT_APP_KEY,
+                        org.eclipse.hawkbit.repository.Constants.SMT_DEFAULT_APP_NAME,
+                        "Application Addons", Integer.MAX_VALUE));
+        final SoftwareModuleType os = softwareModuleTypeRepository.save(
+                new JpaSoftwareModuleType(
+                        org.eclipse.hawkbit.repository.Constants.SMT_DEFAULT_OS_KEY,
+                        org.eclipse.hawkbit.repository.Constants.SMT_DEFAULT_OS_NAME,
+                        "Core firmware or operation system", 1));
 
         // make sure the module types get their IDs
         entityManager.flush();

@@ -22,12 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
  * {@link Artifact} repository.
  */
 @Transactional(readOnly = true)
-public interface LocalArtifactRepository
-        extends BaseEntityRepository<JpaArtifact> {
+public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifact> {
 
     /**
-     * Counts artifacts size where the related software module is not
-     * deleted/archived.
+     * Counts artifacts size where the related software module is not deleted/archived.
      * <p/>
      * No access control applied.
      *
@@ -47,8 +45,7 @@ public interface LocalArtifactRepository
     Long countBySoftwareModuleDeleted(boolean deleted);
 
     /**
-     * Counts current elements based on the sha1 and tenant, as well as having the
-     * {@link SoftwareModule} property 'deleted' with value 'false'
+     * Counts current elements based on the sha1 and tenant, as well as having the {@link SoftwareModule} property 'deleted' with value 'false'
      * <p/>
      * No access control applied
      *
@@ -56,8 +53,7 @@ public interface LocalArtifactRepository
      * @param tenant the current tenant\
      * @return the count of the elements
      */
-    long countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(
-            @Param("sha1") String sha1, @Param("tenant") String tenant);
+    long countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(@Param("sha1") String sha1, @Param("tenant") String tenant);
 
     /**
      * Searches for a {@link Artifact} based on given gridFsFileName.

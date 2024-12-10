@@ -21,12 +21,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * repository for operations on {@link TenantMetaData} entity.
+ * Repository for operations on {@link TenantMetaData} entity.
  */
 @Transactional(readOnly = true)
-public interface TenantMetaDataRepository
-        extends PagingAndSortingRepository<JpaTenantMetaData, Long>,
-        CrudRepository<JpaTenantMetaData, Long> {
+public interface TenantMetaDataRepository extends PagingAndSortingRepository<JpaTenantMetaData, Long>, CrudRepository<JpaTenantMetaData, Long> {
 
     /**
      * Search {@link TenantMetaData} by tenant name.
