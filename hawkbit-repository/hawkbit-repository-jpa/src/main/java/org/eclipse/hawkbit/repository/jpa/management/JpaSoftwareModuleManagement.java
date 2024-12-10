@@ -474,14 +474,12 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         // check if exists otherwise throw entity not found exception
         final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) getMetaDataBySoftwareModuleId(
                 update.getSoftwareModuleId(), update.getKey())
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class,
-                        update.getSoftwareModuleId(), update.getKey()));
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, update.getSoftwareModuleId(), update.getKey()));
 
         update.getValue().ifPresent(metadata::setValue);
         update.isTargetVisible().ifPresent(metadata::setTargetVisible);
 
-        JpaManagementHelper.touch(entityManager, softwareModuleRepository,
-                (JpaSoftwareModule) metadata.getSoftwareModule());
+        JpaManagementHelper.touch(entityManager, softwareModuleRepository, metadata.getSoftwareModule());
         return softwareModuleMetadataRepository.save(metadata);
     }
 
