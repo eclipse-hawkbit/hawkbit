@@ -476,9 +476,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private void updateTotalTargetCount(final JpaRolloutGroup rolloutGroup, final long countTargetsOfRolloutGroup) {
-        final JpaRollout jpaRollout = (JpaRollout) rolloutGroup.getRollout();
-        final long updatedTargetCount = jpaRollout.getTotalTargets()
-                - (rolloutGroup.getTotalTargets() - countTargetsOfRolloutGroup);
+        final JpaRollout jpaRollout = rolloutGroup.getRollout();
+        final long updatedTargetCount = jpaRollout.getTotalTargets() - (rolloutGroup.getTotalTargets() - countTargetsOfRolloutGroup);
         jpaRollout.setTotalTargets(updatedTargetCount);
         rolloutGroup.setTotalTargets((int) countTargetsOfRolloutGroup);
         rolloutRepository.save(jpaRollout);
@@ -574,12 +573,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     private boolean ensureAllGroupsAreScheduled(final Rollout rollout) {
         final JpaRollout jpaRollout = (JpaRollout) rollout;
-
-        final List<JpaRolloutGroup> groupsToBeScheduled = rolloutGroupRepository.findByRolloutAndStatus(rollout,
-                RolloutGroupStatus.READY);
-        final long scheduledGroups = groupsToBeScheduled.stream()
-                .filter(group -> scheduleRolloutGroup(jpaRollout, group)).count();
-
+        final List<JpaRolloutGroup> groupsToBeScheduled = rolloutGroupRepository.findByRolloutAndStatus(rollout, RolloutGroupStatus.READY);
+        final long scheduledGroups = groupsToBeScheduled.stream().filter(group -> scheduleRolloutGroup(jpaRollout, group)).count();
         return scheduledGroups == groupsToBeScheduled.size();
     }
 
@@ -630,8 +625,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             do {
                 // Add up to TRANSACTION_TARGETS of the left targets
                 // In case a TransactionException is thrown this loop aborts
-                final long assigned = assignTargetsToGroupInNewTransaction(rollout, group, groupTargetFilter,
-                        Math.min(TRANSACTION_TARGETS, targetsLeftToAdd));
+                final long assigned = assignTargetsToGroupInNewTransaction(
+                        rollout, group, groupTargetFilter, Math.min(TRANSACTION_TARGETS, targetsLeftToAdd));
                 if (assigned == 0) {
                     break; // percent > 100 or some could have disappeared
                 } else {

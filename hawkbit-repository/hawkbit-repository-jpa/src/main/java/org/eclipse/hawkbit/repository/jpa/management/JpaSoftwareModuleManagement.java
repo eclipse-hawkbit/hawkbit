@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
 import org.eclipse.hawkbit.repository.jpa.model.SwMetadataCompositeKey;
+import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleMetadataRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
@@ -199,10 +200,6 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
         final Set<Long> assignedModuleIds = new HashSet<>();
         swModulesToDelete.forEach(swModule -> {
-
-            // delete binary data of artifacts
-            deleteGridFsArtifacts(swModule);
-
             // execute this count operation without access limitations since we have to
             // ensure it's not assigned when deleting it.
             if (distributionSetRepository.countByModulesId(swModule.getId()) <= 0) {
@@ -210,6 +207,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             } else {
                 assignedModuleIds.add(swModule.getId());
             }
+            // schedule delete binary data of artifacts
+            deleteGridFsArtifacts(swModule);
         });
 
         if (!assignedModuleIds.isEmpty()) {
@@ -507,10 +506,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     private void deleteGridFsArtifacts(final JpaSoftwareModule swModule) {
         softwareModuleRepository.getAccessController().ifPresent(accessController ->
                 accessController.assertOperationAllowed(AccessController.Operation.DELETE, swModule));
-        for (final Artifact localArtifact : swModule.getArtifacts()) {
-            ((JpaArtifactManagement) artifactManagement)
-                    .clearArtifactBinary(localArtifact.getSha1Hash());
-        }
+        final Set<String> sha1Hashes = swModule.getArtifacts().stream().map(Artifact::getSha1Hash).collect(Collectors.toSet());
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() ->
+                sha1Hashes.forEach(sha1Hash -> ((JpaArtifactManagement) artifactManagement).clearArtifactBinary(sha1Hash)));
     }
 
     private Specification<JpaSoftwareModule> buildSmSearchQuerySpec(final String searchText) {

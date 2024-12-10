@@ -13,15 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * A Service which calls register runnable. This runnables will executed after a
- * successful spring transaction commit.The class is thread safe.
+ * A Service which calls register runnable. This runnables will be executed after a successful spring transaction commit.
+ * The class is thread safe.
  */
 @Slf4j
-public class AfterTransactionCommitDefaultServiceExecutor extends TransactionSynchronizationAdapter implements AfterTransactionCommitExecutor {
+public class AfterTransactionCommitDefaultServiceExecutor implements TransactionSynchronization, AfterTransactionCommitExecutor {
 
     private static final ThreadLocal<List<Runnable>> THREAD_LOCAL_RUNNABLES = new ThreadLocal<>();
 
@@ -30,6 +30,14 @@ public class AfterTransactionCommitDefaultServiceExecutor extends TransactionSyn
     @SuppressWarnings({ "squid:S1217" })
     public void afterCommit() {
         final List<Runnable> afterCommitRunnables = THREAD_LOCAL_RUNNABLES.get();
+        if (afterCommitRunnables == null) {
+            log.trace("Transaction successfully committed, runnables is null");
+            return;
+        }
+
+        // removes the runnables that will process, so they would be able to start new transactions and
+        // inserting new after commit hooks
+        THREAD_LOCAL_RUNNABLES.remove();
         log.debug("Transaction successfully committed, executing {} runnables", afterCommitRunnables.size());
         for (final Runnable afterCommitRunnable : afterCommitRunnables) {
             log.debug("Executing runnable {}", afterCommitRunnable);
@@ -44,8 +52,7 @@ public class AfterTransactionCommitDefaultServiceExecutor extends TransactionSyn
     @Override
     @SuppressWarnings({ "squid:S1217" })
     public void afterCompletion(final int status) {
-        final String transactionStatus = status == STATUS_COMMITTED ? "COMMITTED" : "ROLLEDBACK";
-        log.debug("Transaction completed after commit with status {}", transactionStatus);
+        log.debug("Transaction completed after commit with status {}", status == STATUS_COMMITTED ? "COMMITTED" : "ROLLEDBACK");
         THREAD_LOCAL_RUNNABLES.remove();
     }
 

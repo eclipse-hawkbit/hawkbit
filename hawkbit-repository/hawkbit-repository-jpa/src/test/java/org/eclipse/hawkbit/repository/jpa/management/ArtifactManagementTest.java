@@ -64,12 +64,12 @@ import org.junit.jupiter.api.Test;
  */
 @Feature("Component Tests - Repository")
 @Story("Artifact Management")
-public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
+class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that management get access react as specfied on calls for non existing entities by means of Optional not present.")
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
-    public void nonExistingEntityAccessReturnsNotPresent() {
+    void nonExistingEntityAccessReturnsNotPresent() {
         final SoftwareModule module = testdataFactory.createSoftwareModuleOs();
 
         assertThat(artifactManagement.get(NOT_EXIST_IDL)).isNotPresent();
@@ -85,7 +85,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that management queries react as specfied on calls for non existing entities "
             + " by means of throwing EntityNotFoundException.")
     @ExpectEvents({ @Expect(type = SoftwareModuleDeletedEvent.class, count = 0) })
-    public void entityQueriesReferringToNotExistingEntitiesThrowsException() throws URISyntaxException {
+    void entityQueriesReferringToNotExistingEntitiesThrowsException() throws URISyntaxException {
 
         final String artifactData = "test";
         final int artifactSize = artifactData.length();
@@ -110,7 +110,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test if a local artifact can be created by API including metadata.")
-    public void createArtifact() throws IOException {
+    void createArtifact() throws IOException {
 
         // check baseline
         assertThat(softwareModuleRepository.findAll()).hasSize(0);
@@ -161,7 +161,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that artifact management does not create artifacts with illegal filename.")
-    public void entityQueryWithIllegalFilenameThrowsException() throws URISyntaxException {
+    void entityQueryWithIllegalFilenameThrowsException() throws URISyntaxException {
         final String illegalFilename = "<img src=ernw onerror=alert(1)>.xml";
         final String artifactData = "test";
         final int artifactSize = artifactData.length();
@@ -176,7 +176,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the quota specifying the maximum number of artifacts per software module is enforced.")
-    public void createArtifactsUntilQuotaIsExceeded() throws IOException {
+    void createArtifactsUntilQuotaIsExceeded() throws IOException {
         // create a software module
         final long smId = softwareModuleRepository.save(new JpaSoftwareModule(osType, "sm1", "1.0")).getId();
 
@@ -205,7 +205,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the quota specifying the maximum artifact storage is enforced (across software modules).")
-    public void createArtifactsUntilStorageQuotaIsExceeded() throws IOException {
+    void createArtifactsUntilStorageQuotaIsExceeded() throws IOException {
 
         // create as many small artifacts as possible w/o violating the storage
         // quota
@@ -235,7 +235,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that you cannot create artifacts which exceed the configured maximum size.")
-    public void createArtifactFailsIfTooLarge() {
+    void createArtifactFailsIfTooLarge() {
 
         // create a software module
         final JpaSoftwareModule sm1 = softwareModuleRepository.save(new JpaSoftwareModule(osType, "sm1", "1.0"));
@@ -248,7 +248,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests hard delete directly on repository.")
-    public void hardDeleteSoftwareModule() throws IOException {
+    void hardDeleteSoftwareModule() throws IOException {
 
         final JpaSoftwareModule sm = softwareModuleRepository
                 .save(new JpaSoftwareModule(osType, "name 1", "version 1"));
@@ -268,7 +268,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
      */
     @Test
     @Description("Tests the deletion of a local artifact including metadata.")
-    public void deleteArtifact() throws IOException {
+    void deleteArtifact() throws IOException {
         final JpaSoftwareModule sm = softwareModuleRepository
                 .save(new JpaSoftwareModule(osType, "name 1", "version 1"));
         final JpaSoftwareModule sm2 = softwareModuleRepository
@@ -320,7 +320,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test the deletion of an artifact metadata where the binary is still linked to another metadata element. " +
             "The expected result is that the metadata is deleted but the binary kept.")
-    public void deleteDuplicateArtifacts() throws IOException {
+    void deleteDuplicateArtifacts() throws IOException {
         final JpaSoftwareModule sm = softwareModuleRepository
                 .save(new JpaSoftwareModule(osType, "name 1", "version 1"));
         final JpaSoftwareModule sm2 = softwareModuleRepository
@@ -353,7 +353,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that you cannot delete an artifact which exists with the same hash, in the same tenant and the SoftwareModule is not deleted .")
-    public void deleteArtifactWithSameHashAndSoftwareModuleIsNotDeletedInSameTenants() throws IOException {
+    void deleteArtifactWithSameHashAndSoftwareModuleIsNotDeletedInSameTenants() throws IOException {
 
         final JpaSoftwareModule sm = softwareModuleRepository
                 .save(new JpaSoftwareModule(osType, "name 1", "version 1"));
@@ -395,7 +395,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that you can not delete artifacts from another tenant which exists in another tenant with the same hash and the SoftwareModule is not deleted")
-    public void deleteArtifactWithSameHashAndSoftwareModuleIsNotDeletedInDifferentTenants() throws Exception {
+    void deleteArtifactWithSameHashAndSoftwareModuleIsNotDeletedInDifferentTenants() throws Exception {
         final String tenant1 = "mytenant";
         final String tenant2 = "tenant2";
 
@@ -422,7 +422,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Loads an local artifact based on given ID.")
-    public void findArtifact() throws IOException {
+    void findArtifact() throws IOException {
         final int artifactSize = 5 * 1024;
         try (final InputStream inputStream = new RandomGeneratedInputStream(artifactSize)) {
             final Artifact artifact = createArtifactForSoftwareModule(
@@ -433,7 +433,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Loads an artifact binary based on given ID.")
-    public void loadStreamOfArtifact() throws IOException {
+    void loadStreamOfArtifact() throws IOException {
         final int artifactSize = 5 * 1024;
         final byte[] randomBytes = randomBytes(artifactSize);
         try (final InputStream input = new ByteArrayInputStream(randomBytes)) {
@@ -448,7 +448,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @WithUser(allSpPermissions = true, removeFromAllPermission = { SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT })
     @Description("Trys and fails to load an artifact without required permission. Checks if expected InsufficientPermissionException is thrown.")
-    public void loadArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
+    void loadArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
         assertThatExceptionOfType(InsufficientPermissionException.class)
                 .as("Should not have worked with missing permission.")
                 .isThrownBy(() -> artifactManagement.loadArtifactBinary("123", 1, false));
@@ -456,7 +456,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Searches an artifact through the relations of a software module.")
-    public void findArtifactBySoftwareModule() throws IOException {
+    void findArtifactBySoftwareModule() throws IOException {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
         assertThat(artifactManagement.findBySoftwareModule(PAGE, sm.getId())).isEmpty();
 
@@ -469,7 +469,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Searches an artifact through the relations of a software module and the filename.")
-    public void findByFilenameAndSoftwareModule() throws IOException {
+    void findByFilenameAndSoftwareModule() throws IOException {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         assertThat(artifactManagement.getByFilenameAndSoftwareModule("file1", sm.getId())).isNotPresent();
@@ -485,7 +485,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that creation of an artifact with none matching hashes fails.")
-    public void createArtifactWithNoneMatchingHashes() throws IOException, NoSuchAlgorithmException {
+    void createArtifactWithNoneMatchingHashes() throws IOException, NoSuchAlgorithmException {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final byte[] testData = RandomStringUtils.randomAlphanumeric(100).getBytes();
@@ -517,7 +517,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that creation of an artifact with matching hashes works.")
-    public void createArtifactWithMatchingHashes() throws IOException, NoSuchAlgorithmException {
+    void createArtifactWithMatchingHashes() throws IOException, NoSuchAlgorithmException {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final byte[] testData = RandomStringUtils.randomAlphanumeric(100).getBytes();
@@ -540,7 +540,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that creation of an existing artifact returns a full hash list.")
-    public void createExistingArtifactReturnsFullHashList() throws IOException, NoSuchAlgorithmException {
+    void createExistingArtifactReturnsFullHashList() throws IOException, NoSuchAlgorithmException {
         final SoftwareModule smOs = testdataFactory.createSoftwareModuleOs();
         final SoftwareModule smApp = testdataFactory.createSoftwareModuleApp();
 

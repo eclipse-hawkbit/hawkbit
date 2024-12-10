@@ -57,13 +57,13 @@ import org.springframework.data.domain.PageRequest;
 
 @Feature("Component Tests - Repository")
 @Story("Software Module Management")
-public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
+class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that management get access reacts as specified on calls for non existing entities by means "
             + "of Optional not present.")
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
-    public void nonExistingEntityAccessReturnsNotPresent() {
+    void nonExistingEntityAccessReturnsNotPresent() {
         final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
 
         assertThat(softwareModuleManagement.get(1234L)).isNotPresent();
@@ -78,7 +78,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that management queries react as specfied on calls for non existing entities "
             + " by means of throwing EntityNotFoundException.")
     @ExpectEvents({ @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
-    public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
+    void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
 
         verifyThrownExceptionBy(
@@ -138,7 +138,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.")
-    public void updateNothingResultsInUnchangedRepository() {
+    void updateNothingResultsInUnchangedRepository() {
         final SoftwareModule ah = testdataFactory.createSoftwareModuleOs();
 
         final SoftwareModule updated = softwareModuleManagement
@@ -151,7 +151,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Calling update for changed fields results in change in the repository.")
-    public void updateSoftwareModuleFieldsToNewValue() {
+    void updateSoftwareModuleFieldsToNewValue() {
         final SoftwareModule ah = testdataFactory.createSoftwareModuleOs();
 
         final SoftwareModule updated = softwareModuleManagement
@@ -166,7 +166,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Create Software Module call fails when called for existing entity.")
-    public void createModuleCallFailsForExistingModule() {
+    void createModuleCallFailsForExistingModule() {
         testdataFactory.createSoftwareModuleOs();
         assertThatExceptionOfType(EntityAlreadyExistsException.class)
                 .as("Should not have worked as module already exists.")
@@ -175,7 +175,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("searched for software modules based on the various filter options, e.g. name,desc,type, version.")
-    public void findSoftwareModuleByFilters() {
+    void findSoftwareModuleByFilters() {
         final SoftwareModule ah = softwareModuleManagement
                 .create(entityFactory.softwareModule().create().type(appType).name("agent-hub").version("1.0.1"));
         final SoftwareModule jvm = softwareModuleManagement
@@ -217,7 +217,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Searches for software modules based on a list of IDs.")
-    public void findSoftwareModulesById() {
+    void findSoftwareModulesById() {
 
         final List<Long> modules = Arrays.asList(testdataFactory.createSoftwareModuleOs().getId(),
                 testdataFactory.createSoftwareModuleApp().getId(), 624355263L);
@@ -227,7 +227,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Searches for software modules by type.")
-    public void findSoftwareModulesByType() {
+    void findSoftwareModulesByType() {
         // found in test
         final SoftwareModule one = testdataFactory.createSoftwareModuleOs("one");
         final SoftwareModule two = testdataFactory.createSoftwareModuleOs("two");
@@ -242,7 +242,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Counts all software modules in the repsitory that are not marked as deleted.")
-    public void countSoftwareModulesAll() {
+    void countSoftwareModulesAll() {
         // found in test
         testdataFactory.createSoftwareModuleOs("one");
         testdataFactory.createSoftwareModuleOs("two");
@@ -256,7 +256,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Deletes an artifact, which is not assigned to a Distribution Set")
-    public void hardDeleteOfNotAssignedArtifact() {
+    void hardDeleteOfNotAssignedArtifact() {
 
         // [STEP1]: Create SoftwareModuleX with Artifacts
         final SoftwareModule unassignedModule = createSoftwareModuleWithArtifacts(osType, "moduleX", "3.0.2", 2);
@@ -282,8 +282,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Deletes an artifact, which is assigned to a DistributionSet")
-    public void softDeleteOfAssignedArtifact() {
-
+    void softDeleteOfAssignedArtifact() {
         // [STEP1]: Create SoftwareModuleX with ArtifactX
         SoftwareModule assignedModule = createSoftwareModuleWithArtifacts(osType, "moduleX", "3.0.2", 2);
 
@@ -315,7 +314,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Delete an artifact, which has been assigned to a rolled out DistributionSet in the past")
-    public void softDeleteOfHistoricalAssignedArtifact() {
+    void softDeleteOfHistoricalAssignedArtifact() {
 
         // Init target
         final Target target = testdataFactory.createTarget();
@@ -355,7 +354,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Delete an software module with an artifact, which is also used by another software module.")
-    public void deleteSoftwareModulesWithSharedArtifact() {
+    void deleteSoftwareModulesWithSharedArtifact() {
 
         // Init artifact binary data, target and DistributionSets
         final int artifactSize = 1024;
@@ -401,7 +400,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Delete two assigned softwaremodules which share an artifact.")
-    public void deleteMultipleSoftwareModulesWhichShareAnArtifact() {
+    void deleteMultipleSoftwareModulesWhichShareAnArtifact() {
         // Init artifact binary data, target and DistributionSets
         final int artifactSize = 1024;
         final byte[] source = RandomUtils.nextBytes(artifactSize);
@@ -460,7 +459,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that all undeleted software modules are found in the repository.")
-    public void countSoftwareModuleTypesAll() {
+    void countSoftwareModuleTypesAll() {
         testdataFactory.createSoftwareModuleOs();
 
         // one soft deleted
@@ -474,7 +473,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that software modules are returned that are assigned to given DS.")
-    public void findSoftwareModuleByAssignedTo() {
+    void findSoftwareModuleByAssignedTo() {
         // test modules
         final SoftwareModule one = testdataFactory.createSoftwareModuleOs();
         testdataFactory.createSoftwareModuleOs("notassigned");
@@ -491,7 +490,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Checks that metadata for a software module can be created.")
-    public void createSoftwareModuleMetadata() {
+    void createSoftwareModuleMetadata() {
         final String knownKey1 = "myKnownKey1";
         final String knownValue1 = "myKnownValue1";
 
@@ -523,7 +522,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies the enforcement of the metadata quota per software module.")
-    public void createSoftwareModuleMetadataUntilQuotaIsExceeded() {
+    void createSoftwareModuleMetadataUntilQuotaIsExceeded() {
 
         // add meta data one by one
         final SoftwareModule module = testdataFactory.createSoftwareModuleApp("m1");
@@ -569,7 +568,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Checks that metadata for a software module cannot be created for an existing key.")
-    public void createSoftwareModuleMetadataFailsIfKeyExists() {
+    void createSoftwareModuleMetadataFailsIfKeyExists() {
 
         final String knownKey1 = "myKnownKey1";
         final String knownValue1 = "myKnownValue1";
@@ -597,7 +596,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @WithUser(allSpPermissions = true)
     @Description("Checks that metadata for a software module can be updated.")
-    public void updateSoftwareModuleMetadata() {
+    void updateSoftwareModuleMetadata() {
         final String knownKey = "myKnownKey";
         final String knownValue = "myKnownValue";
         final String knownUpdateValue = "myNewUpdatedValue";
@@ -637,7 +636,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that existing metadata can be deleted.")
-    public void deleteSoftwareModuleMetadata() {
+    void deleteSoftwareModuleMetadata() {
         final String knownKey1 = "myKnownKey1";
         final String knownValue1 = "myKnownValue1";
 
@@ -660,7 +659,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that non existing metadata find results in exception.")
-    public void findSoftwareModuleMetadataFailsIfEntryDoesNotExist() {
+    void findSoftwareModuleMetadataFailsIfEntryDoesNotExist() {
         final String knownKey1 = "myKnownKey1";
         final String knownValue1 = "myKnownValue1";
 
@@ -674,7 +673,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Queries and loads the metadata related to a given software module.")
-    public void findAllSoftwareModuleMetadataBySwId() {
+    void findAllSoftwareModuleMetadataBySwId() {
 
         final SoftwareModule sw1 = testdataFactory.createSoftwareModuleApp();
         final int metadataCountSw1 = 8;
