@@ -71,7 +71,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
     private final boolean ensureIgnoreCase;
 
     private final SimpleTypeConverter simpleTypeConverter = new SimpleTypeConverter();
-    private final Map<Class<?>, Path<?>> javaTypeToPath = new HashMap<>();
+    private final Map<String, Path<?>> attributeToPath = new HashMap<>();
     private boolean inOr;
 
     public JpaQueryRsqlVisitorG2(final Class<A> enumType,
@@ -100,7 +100,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
             return Collections.singletonList(children.isEmpty() ? cb.conjunction() : cb.or(children.toArray(new Predicate[0])));
         } finally {
             inOr = false;
-            javaTypeToPath.clear();
+            attributeToPath.clear();
         }
     }
 
@@ -303,7 +303,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
             }
         } // if a collection - it is a join
         if (inOr && root == this.root) { // try to reuse join of the same "or" level and no subquery
-            return javaTypeToPath.computeIfAbsent(attribute.getJavaType(), k -> root.join(fieldNameSplit, JoinType.LEFT));
+            return attributeToPath.computeIfAbsent(attribute.getName(), k -> root.join(fieldNameSplit, JoinType.LEFT));
         } else {
             return root.join(fieldNameSplit, JoinType.LEFT);
         }
