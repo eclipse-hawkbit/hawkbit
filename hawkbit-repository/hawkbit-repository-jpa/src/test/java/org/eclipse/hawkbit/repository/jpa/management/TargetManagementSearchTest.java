@@ -11,23 +11,18 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.FilterParams;
-import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -36,12 +31,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 
 @Feature("Component Tests - Repository")
 @Story("Target Management Searches")
@@ -142,12 +132,9 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final List<TargetUpdateStatus> both = List.of(TargetUpdateStatus.UNKNOWN, TargetUpdateStatus.PENDING);
 
         // get final updated version of targets
-        targAs = targetManagement
-                .getByControllerID(targAs.stream().map(Target::getControllerId).collect(Collectors.toList()));
-        targBs = targetManagement
-                .getByControllerID(targBs.stream().map(Target::getControllerId).collect(Collectors.toList()));
-        targCs = targetManagement
-                .getByControllerID(targCs.stream().map(Target::getControllerId).collect(Collectors.toList()));
+        targAs = targetManagement.getByControllerID(targAs.stream().map(Target::getControllerId).toList());
+        targBs = targetManagement.getByControllerID(targBs.stream().map(Target::getControllerId).toList());
+        targCs = targetManagement.getByControllerID(targCs.stream().map(Target::getControllerId).toList());
 
         // try to find several targets with different filter settings
         verifyThat1TargetHasNameAndId("targ-A-special", targSpecialName.getControllerId());
@@ -157,8 +144,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         verifyThat1TargetHasTagHasDescOrNameAndDs(targTagW, setA, targetManagement.getByControllerID(assignedC).get());
         verifyThat0TargetsWithTagAndDescOrNameHasDS(targTagW, setA);
         verifyThat0TargetsWithNameOrdescAndDSHaveTag(targTagX, setA);
-        verifyThat3TargetsHaveDSAssigned(setA,
-                targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC)));
+        verifyThat3TargetsHaveDSAssigned(setA, targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC)));
         verifyThat1TargetWithDescOrNameHasDS(setA, targetManagement.getByControllerID(assignedA).get());
         List<Target> expected = concat(targAs, targBs, targCs, targDs);
         expected.removeAll(targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC)));
@@ -185,7 +171,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 targetManagement.getByControllerID(Arrays.asList(assignedB, assignedC)));
         verifyThat2TargetsWithGivenTagAreInPending(targTagW, pending,
                 targetManagement.getByControllerID(Arrays.asList(assignedB, assignedC)));
-        verifyThat200targetsWithGivenTagAreInStatusPendingorUnknown(targTagW, both, concat(targBs, targCs));
+        verifyThat200targetsWithGivenTagAreInStatusPendingOrUnknown(targTagW, both, concat(targBs, targCs));
         verifyThat1TargetAIsInStatusPendingAndHasDSInstalled(installedSet, pending,
                 targetManagement.getByControllerID(installedC).get());
         verifyThat1TargetHasTypeAndDSAssigned(targetTypeX, setB, targetManagement.getByControllerID(assignedE).get());
@@ -202,131 +188,6 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Tests the correct order of targets based on selected distribution set. The system expects to have an order based on installed, assigned DS.")
-    void targetSearchWithVariousFilterCombinationsAndOrderByDistributionSet() {
-
-        final List<Target> notAssigned = testdataFactory.createTargets(3, "not", "first description");
-        List<Target> targAssigned = testdataFactory.createTargets(3, "assigned", "first description");
-        List<Target> targInstalled = testdataFactory.createTargets(3, "installed", "first description");
-
-        final DistributionSet ds = testdataFactory.createDistributionSet("a");
-
-        targAssigned = assignDistributionSet(ds, targAssigned).getAssignedEntity().stream().map(Action::getTarget)
-                .collect(Collectors.toList());
-        targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity().stream().map(Action::getTarget)
-                .collect(Collectors.toList());
-        targInstalled = testdataFactory
-                .sendUpdateActionStatusToTargets(targInstalled, Status.FINISHED, Collections.singletonList("installed"))
-                .stream().map(Action::getTarget).collect(Collectors.toList());
-
-        final Slice<Target> result = targetManagement.findByFilterOrderByLinkedDistributionSet(PAGE, ds.getId(),
-                new FilterParams(null, null, null, null, Boolean.FALSE));
-
-        final Comparator<TenantAwareBaseEntity> byId = Comparator.comparingLong(Identifiable::getId);
-
-        assertThat(result.getNumberOfElements()).isEqualTo(9);
-        final List<Target> expected = new ArrayList<>();
-        targInstalled.sort(byId);
-        targAssigned.sort(byId);
-        notAssigned.sort(byId);
-        expected.addAll(targInstalled);
-        expected.addAll(targAssigned);
-        expected.addAll(notAssigned);
-
-        assertThat(result.getContent()).usingElementComparator(controllerIdComparator())
-                .containsExactly(expected.toArray(new Target[0]));
-    }
-
-    @Test
-    @Description("Tests the correct order of targets based on selected distribution set and sort parameter. The system expects to have an order based on installed, assigned DS.")
-    void targetSearchWithOrderByDistributionSetAndSortParam() {
-
-        final List<Target> notAssigned = testdataFactory.createTargets(3, "not", "first description");
-        List<Target> targAssigned = testdataFactory.createTargets(3, "assigned", "first description");
-        List<Target> targInstalled = testdataFactory.createTargets(3, "installed", "first description");
-
-        final DistributionSet ds = testdataFactory.createDistributionSet("a");
-
-        targAssigned = assignDistributionSet(ds, targAssigned).getAssignedEntity().stream().map(Action::getTarget)
-                .collect(Collectors.toList());
-        targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity().stream().map(Action::getTarget)
-                .collect(Collectors.toList());
-        targInstalled = testdataFactory
-                .sendUpdateActionStatusToTargets(targInstalled, Status.FINISHED, Collections.singletonList("installed"))
-                .stream().map(Action::getTarget).collect(Collectors.toList());
-
-        final List<Target> targetsOrderedByDistAndName = targetManagement
-                .findByFilterOrderByLinkedDistributionSet(PageRequest.of(0, 500, Sort.by(Direction.DESC, "name")),
-                        ds.getId(), new FilterParams(null, null, null, null, Boolean.FALSE))
-                .getContent();
-        assertThat(targetsOrderedByDistAndName).hasSize(9);
-        assertThatTargetNameEquals(targetsOrderedByDistAndName, 0, targInstalled, 2);
-        assertThatTargetNameEquals(targetsOrderedByDistAndName, 1, targInstalled, 1);
-        assertThatTargetNameEquals(targetsOrderedByDistAndName, 2, targInstalled, 0);
-        assertThatTargetNameEquals(targetsOrderedByDistAndName, 3, targAssigned, 2);
-        assertThatTargetNameEquals(targetsOrderedByDistAndName, 4, targAssigned, 1);
-        assertThatTargetNameEquals(targetsOrderedByDistAndName, 5, targAssigned, 0);
-        assertThatTargetNameEquals(targetsOrderedByDistAndName, 6, notAssigned, 2);
-        assertThatTargetNameEquals(targetsOrderedByDistAndName, 7, notAssigned, 1);
-        assertThatTargetNameEquals(targetsOrderedByDistAndName, 8, notAssigned, 0);
-    }
-
-    @Test
-    @Description("Tests the correct order of targets with applied overdue filter based on selected distribution set. The system expects to have an order based on installed, assigned DS.")
-    void targetSearchWithOverdueFilterAndOrderByDistributionSet() {
-
-        final Long lastTargetQueryAlwaysOverdue = 0L;
-        final long lastTargetQueryNotOverdue = System.currentTimeMillis();
-
-        final Long[] overdueMix = { lastTargetQueryAlwaysOverdue, lastTargetQueryNotOverdue,
-                lastTargetQueryAlwaysOverdue, null, lastTargetQueryAlwaysOverdue };
-
-        final List<Target> notAssigned = new ArrayList<>(overdueMix.length);
-        List<Target> targAssigned = new ArrayList<>(overdueMix.length);
-        List<Target> targInstalled = new ArrayList<>(overdueMix.length);
-
-        for (int i = 0; i < overdueMix.length; i++) {
-            notAssigned.add(targetManagement
-                    .create(entityFactory.target().create().controllerId("not" + i).lastTargetQuery(overdueMix[i])));
-            targAssigned.add(targetManagement.create(
-                    entityFactory.target().create().controllerId("assigned" + i).lastTargetQuery(overdueMix[i])));
-            targInstalled.add(targetManagement.create(
-                    entityFactory.target().create().controllerId("installed" + i).lastTargetQuery(overdueMix[i])));
-        }
-
-        final DistributionSet ds = testdataFactory.createDistributionSet("a");
-
-        targAssigned = assignDistributionSet(ds, targAssigned).getAssignedEntity().stream().map(Action::getTarget)
-                .collect(Collectors.toList());
-        targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity().stream().map(Action::getTarget)
-                .collect(Collectors.toList());
-        targInstalled = testdataFactory
-                .sendUpdateActionStatusToTargets(targInstalled, Status.FINISHED, Collections.singletonList("installed"))
-                .stream().map(Action::getTarget).collect(Collectors.toList());
-
-        final Slice<Target> result = targetManagement.findByFilterOrderByLinkedDistributionSet(PAGE, ds.getId(),
-                new FilterParams(null, Boolean.TRUE, null, null, Boolean.FALSE));
-
-        final Comparator<TenantAwareBaseEntity> byId = Comparator.comparingLong(Identifiable::getId);
-
-        assertThat(result.getNumberOfElements()).isEqualTo(9);
-        final List<Target> expected = new ArrayList<>();
-        expected.addAll(targInstalled.stream().sorted(byId)
-                .filter(item -> lastTargetQueryAlwaysOverdue.equals(item.getLastTargetQuery()))
-                .toList());
-        expected.addAll(targAssigned.stream().sorted(byId)
-                .filter(item -> lastTargetQueryAlwaysOverdue.equals(item.getLastTargetQuery()))
-                .toList());
-        expected.addAll(notAssigned.stream().sorted(byId)
-                .filter(item -> lastTargetQueryAlwaysOverdue.equals(item.getLastTargetQuery()))
-                .toList());
-
-        assertThat(result.getContent()).usingElementComparator(controllerIdComparator())
-                .containsExactly(expected.toArray(new Target[0]));
-
-    }
-
-    @Test
     @Description("Verifies that targets with given assigned DS are returned from repository.")
     void findTargetByAssignedDistributionSet() {
         final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
@@ -336,8 +197,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(assignedSet, assignedtargets);
 
         // get final updated version of targets
-        assignedtargets = targetManagement
-                .getByControllerID(assignedtargets.stream().map(Target::getControllerId).collect(Collectors.toList()));
+        assignedtargets = targetManagement.getByControllerID(assignedtargets.stream().map(Target::getControllerId).toList());
 
         assertThat(targetManagement.findByAssignedDistributionSet(PAGE, assignedSet.getId()))
                 .as("Contains the assigned targets").containsAll(assignedtargets)
@@ -372,13 +232,12 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         List<Target> installedtargets = testdataFactory.createTargets(10, "assigned", "assigned");
 
         // set on installed and assign another one
-        assignDistributionSet(installedSet, installedtargets).getAssignedEntity().forEach(action -> controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Status.FINISHED)));
+        assignDistributionSet(installedSet, installedtargets).getAssignedEntity().forEach(action ->
+                controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Status.FINISHED)));
         assignDistributionSet(assignedSet, installedtargets);
 
         // get final updated version of targets
-        installedtargets = targetManagement
-                .getByControllerID(installedtargets.stream().map(Target::getControllerId).collect(Collectors.toList()));
+        installedtargets = targetManagement.getByControllerID(installedtargets.stream().map(Target::getControllerId).toList());
 
         assertThat(targetManagement.findByInstalledDistributionSet(PAGE, installedSet.getId()))
                 .as("Contains the assigned targets").containsAll(installedtargets)
@@ -450,7 +309,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     }
 
     @Step
-    private void verifyThat200targetsWithGivenTagAreInStatusPendingorUnknown(final TargetTag targTagW,
+    private void verifyThat200targetsWithGivenTagAreInStatusPendingOrUnknown(final TargetTag targTagW,
             final List<TargetUpdateStatus> both, final List<Target> expected) {
         final FilterParams filterParams = new FilterParams(both, null, null, null, Boolean.FALSE, targTagW.getName());
         final String query = "(updatestatus==pending or updatestatus==unknown) and tag==" + targTagW.getName();
@@ -591,8 +450,10 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final String query = "updatestatus==unknown and (assignedds.name==" + setA.getName() + " or installedds.name=="
                 + setA.getName() + ")";
 
-        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
-                .hasSize(0).as("that number is also returned by count query")
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent())
+                .as("has number of elements")
+                .hasSize(0)
+                .as("that number is also returned by count query")
                 .hasSize((int) targetManagement.countByFilters(filterParams))
                 .as("and filter query returns the same result")
                 .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size());
@@ -799,8 +660,8 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         // Comparing the controller ids, as one of the targets was modified, so
         // a 1:1
         // comparison of the objects is not possible
-        assertThat(filteredTargets.stream().map(Target::getControllerId).collect(Collectors.toList()))
-                .containsAll(expected.stream().map(Target::getControllerId).collect(Collectors.toList()));
+        assertThat(filteredTargets.stream().map(Target::getControllerId).toList())
+                .containsAll(expected.stream().map(Target::getControllerId).toList());
     }
 
     @Step

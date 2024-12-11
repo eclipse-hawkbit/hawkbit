@@ -454,30 +454,6 @@ public interface TargetManagement {
     Slice<Target> findByTargetFilterQuery(@NotNull Pageable pageable, long targetFilterQueryId);
 
     /**
-     * method retrieves all {@link Target}s from the repo in the following order:
-     * <p>
-     * <ol>
-     * <li>{@link Target}s which have the given {@link DistributionSet} as installed
-     * distribution set</li>
-     * <li>{@link Target}s which have the given {@link DistributionSet} as assigned
-     * distribution set</li>
-     * <li>{@link Target}s which have no connection to the given
-     * {@link DistributionSet}</li>
-     * </ol>
-     *
-     * @param pageable the page request to page the result set
-     * @param orderByDistributionSetId {@link DistributionSet#getId()} to be ordered by
-     * @param filterParams the filters to apply; only filters are enabled that have non-null
-     *         value; filters are AND-gated
-     * @return a paged result {@link Page} of the {@link Target}s in a defined
-     *         order.
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findByFilterOrderByLinkedDistributionSet(@NotNull Pageable pageable, long orderByDistributionSetId,
-            @NotNull FilterParams filterParams);
-
-    /**
      * Find targets by tag name.
      *
      * @param pageable the page request parameter for paging and sorting the result

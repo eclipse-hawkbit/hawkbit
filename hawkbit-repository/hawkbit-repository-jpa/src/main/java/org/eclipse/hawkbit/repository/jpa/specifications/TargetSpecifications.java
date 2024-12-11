@@ -14,11 +14,9 @@ import java.util.Collection;
 import java.util.List;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.ListJoin;
-import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
@@ -31,7 +29,6 @@ import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup_;
@@ -52,9 +49,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.query.QueryUtils;
 
 /**
  * Specifications class for {@link Target}s. The class provides Spring Data JPQL Specifications.
@@ -222,8 +217,7 @@ public final class TargetSpecifications {
     }
 
     /**
-     * Finds all targets by given {@link Target#getControllerId()}s and which
-     * are not yet assigned to given {@link DistributionSet}.
+     * Finds all targets by given {@link Target#getControllerId()}s and which are not yet assigned to given {@link DistributionSet}.
      *
      * @param tIDs to search for.
      * @param distributionId set that is not yet assigned
@@ -232,8 +226,8 @@ public final class TargetSpecifications {
     public static Specification<JpaTarget> hasControllerIdAndAssignedDistributionSetIdNot(final List<String> tIDs,
             @NotNull final Long distributionId) {
         return (targetRoot, query, cb) -> cb.and(targetRoot.get(JpaTarget_.controllerId).in(tIDs),
-                cb.or(cb.notEqual(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet)
-                                .get(JpaDistributionSet_.id), distributionId),
+                cb.or(
+                        cb.notEqual(targetRoot.get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id), distributionId),
                         cb.isNull(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet))));
     }
 
@@ -276,8 +270,7 @@ public final class TargetSpecifications {
      */
     public static Specification<JpaTarget> hasAssignedDistributionSet(final Long distributionSetId) {
         return (targetRoot, query, cb) -> cb.equal(
-                targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id),
-                distributionSetId);
+                targetRoot.get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id), distributionSetId);
     }
 
     /**
@@ -479,45 +472,6 @@ public final class TargetSpecifications {
     public static Specification<JpaTarget> hasTargetTypeNot(final Long typeId) {
         return (targetRoot, query, cb) -> cb.or(getTargetTypeIsNullPredicate(targetRoot),
                 cb.notEqual(targetRoot.get(JpaTarget_.targetType).get(JpaTargetType_.id), typeId));
-    }
-
-    /**
-     * Can be added to specification chain to order result by provided
-     * distribution set
-     *
-     * Order: 1. Targets with DS installed, 2. Targets with DS assigned, 3.
-     * Based on requested sorting or id if <code>null</code>.
-     *
-     * NOTE: Other specs, pagables and sort objects may alter the queries
-     * orderBy entry too, possibly invalidating the applied order, keep in mind
-     * when using this
-     *
-     * @param distributionSetIdForOrder distribution set to consider
-     * @param sort the sorting requested
-     * @return specification that applies order by ds, may be overwritten
-     */
-    public static Specification<JpaTarget> orderedByLinkedDistributionSet(final long distributionSetIdForOrder,
-            final Sort sort) {
-        return (targetRoot, query, cb) -> {
-            // Enhance query with custom select based sort
-            final Expression<Object> selectCase = cb.selectCase()
-                    .when(cb.equal(targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id),
-                            distributionSetIdForOrder), 1)
-                    .when(cb.equal(targetRoot.get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id),
-                            distributionSetIdForOrder), 2)
-                    .otherwise(100);
-            final List<Order> orders = new ArrayList<>();
-            orders.add(cb.asc(selectCase));
-            if (sort == null || sort.isEmpty()) {
-                orders.add(cb.desc(targetRoot.get(JpaTarget_.id)));
-            } else {
-                orders.addAll(QueryUtils.toOrders(sort, targetRoot, cb));
-            }
-            query.orderBy(orders);
-
-            // Spec only provides order, so no further filtering
-            return query.getRestriction();
-        };
     }
 
     public static Specification<JpaTarget> failedActionsForRollout(final String rolloutId) {
