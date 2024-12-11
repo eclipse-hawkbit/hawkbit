@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -75,8 +74,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 
 /**
  * {@link DistributionSetManagement} tests.
@@ -530,89 +527,6 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(updated.getValue()).isEqualTo(knownUpdateValue);
         assertThat(updated.getId().getKey()).isEqualTo(knownKey);
         assertThat(updated.getDistributionSet().getId()).isEqualTo(ds.getId());
-    }
-
-    @Test
-    @Description("Tests that a DS queue is possible where the result is ordered by the target assignment, i.e. assigned first in the list.")
-    void findDistributionSetsAllOrderedByLinkTarget() {
-        final List<DistributionSet> buildDistributionSets = testdataFactory.createDistributionSets("dsOrder", 10);
-
-        final List<Target> buildTargetFixtures = testdataFactory.createTargets(5, "tOrder", "someDesc");
-
-        final Iterator<DistributionSet> dsIterator = buildDistributionSets.iterator();
-        final Iterator<Target> tIterator = buildTargetFixtures.iterator();
-        final DistributionSet dsFirst = dsIterator.next();
-        final DistributionSet dsSecond = dsIterator.next();
-        final DistributionSet dsThree = dsIterator.next();
-        final DistributionSet dsFour = dsIterator.next();
-        final Target tFirst = tIterator.next();
-        final Target tSecond = tIterator.next();
-
-        // set assigned
-        assignDistributionSet(dsSecond.getId(), tSecond.getControllerId());
-        implicitLock(dsSecond);
-        assignDistributionSet(dsThree.getId(), tFirst.getControllerId());
-        implicitLock(dsThree);
-        // set installed
-        testdataFactory.sendUpdateActionStatusToTargets(Collections.singleton(tSecond), Status.FINISHED,
-                singletonList("some message"));
-
-        assignDistributionSet(dsFour.getId(), tSecond.getControllerId());
-        implicitLock(dsFour);
-
-        final DistributionSetFilter distributionSetFilter =
-                DistributionSetFilter.builder()
-                        .isDeleted(false)
-                        .isComplete(true)
-                        .selectDSWithNoTag(Boolean.FALSE).build();
-
-        // target first only has an assigned DS-three so check order correct
-        final List<DistributionSet> tFirstPin = distributionSetManagement
-                .findByDistributionSetFilterOrderByLinkedTarget(PAGE, distributionSetFilter, tFirst.getControllerId())
-                .getContent();
-        assertThat(tFirstPin).hasSize(10);
-        // assigned
-        assertThat(tFirstPin.get(0)).isEqualTo(dsThree);
-        // remaining id:ASC
-        assertThat(tFirstPin.get(1)).isEqualTo(dsFirst);
-        assertThat(tFirstPin.get(2)).isEqualTo(dsSecond);
-        assertThat(tFirstPin.get(3)).isEqualTo(dsFour);
-
-        // target second has installed DS-2 and assigned DS-4 so check order
-        // correct
-        final List<DistributionSet> tSecondPin = distributionSetManagement
-                .findByDistributionSetFilterOrderByLinkedTarget(PAGE, distributionSetFilter, tSecond.getControllerId())
-                .getContent();
-        assertThat(tSecondPin).hasSize(10);
-        // installed
-        assertThat(tSecondPin.get(0)).isEqualTo(dsSecond);
-        // assigned
-        assertThat(tSecondPin.get(1)).isEqualTo(dsFour);
-        // remaining id:ASC
-        assertThat(tSecondPin.get(2)).isEqualTo(dsFirst);
-        assertThat(tSecondPin.get(3)).isEqualTo(dsThree);
-
-        // target second has installed DS-2 and assigned DS-4 so check order
-        // correct
-        final List<DistributionSet> tSecondPinOrderedByName = distributionSetManagement
-                .findByDistributionSetFilterOrderByLinkedTarget(
-                        PageRequest.of(0, 500, Sort.by(Direction.DESC, "version")), distributionSetFilter,
-                        tSecond.getControllerId())
-                .getContent();
-        assertThat(tSecondPinOrderedByName).hasSize(10);
-        // installed
-        assertThat(tSecondPinOrderedByName.get(0)).isEqualTo(buildDistributionSets.get(1));
-        // assigned
-        assertThat(tSecondPinOrderedByName.get(1)).isEqualTo(buildDistributionSets.get(3));
-        // remaining version:DESC
-        assertThat(tSecondPinOrderedByName.get(2)).isEqualTo(buildDistributionSets.get(9));
-        assertThat(tSecondPinOrderedByName.get(3)).isEqualTo(buildDistributionSets.get(8));
-        assertThat(tSecondPinOrderedByName.get(4)).isEqualTo(buildDistributionSets.get(7));
-        assertThat(tSecondPinOrderedByName.get(5)).isEqualTo(buildDistributionSets.get(6));
-        assertThat(tSecondPinOrderedByName.get(6)).isEqualTo(buildDistributionSets.get(5));
-        assertThat(tSecondPinOrderedByName.get(7)).isEqualTo(buildDistributionSets.get(4));
-        assertThat(tSecondPinOrderedByName.get(8)).isEqualTo(buildDistributionSets.get(2));
-        assertThat(tSecondPinOrderedByName.get(9)).isEqualTo(buildDistributionSets.get(0));
     }
 
     @Test

@@ -41,12 +41,9 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
     }
 
     protected void permitAllOperations(final AccessController.Operation operation) {
-        testAccessControlManger.defineAccessRule(
-                JpaTarget.class, operation, Specification.where(null), type -> true);
-        testAccessControlManger.defineAccessRule(
-                JpaTargetType.class, operation, Specification.where(null), type -> true);
-        testAccessControlManger.defineAccessRule(
-                JpaDistributionSet.class, operation, Specification.where(null), type -> true);
+        testAccessControlManger.defineAccessRule(JpaTarget.class, operation, Specification.where(null), type -> true);
+        testAccessControlManger.defineAccessRule(JpaTargetType.class, operation, Specification.where(null), type -> true);
+        testAccessControlManger.defineAccessRule(JpaDistributionSet.class, operation, Specification.where(null), type -> true);
     }
 
     @BeforeEach
@@ -79,17 +76,17 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
 
                 @Override
                 public Optional<Specification<JpaTarget>> getAccessRules(final Operation operation) {
-                    if (contextAware.getCurrentTenant() != null && SecurityContextTenantAware.SYSTEM_USER.equals(
-                            contextAware.getCurrentUsername())) {
+                    if (contextAware.getCurrentTenant() != null
+                            && SecurityContextTenantAware.SYSTEM_USER.equals(contextAware.getCurrentUsername())) {
                         // as tenant, no restrictions
                         return Optional.empty();
                     }
+
                     return Optional.ofNullable(testAccessControlManger.getAccessRule(JpaTarget.class, operation));
                 }
 
                 @Override
-                public void assertOperationAllowed(final Operation operation, final JpaTarget entity)
-                        throws InsufficientPermissionException {
+                public void assertOperationAllowed(final Operation operation, final JpaTarget entity) throws InsufficientPermissionException {
                     testAccessControlManger.assertOperation(JpaTarget.class, operation, List.of(entity));
                 }
 
@@ -101,17 +98,17 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
         }
 
         @Bean
-        public AccessController<JpaTargetType> targetTypeAccessController(
-                final TestAccessControlManger testAccessControlManger) {
+        public AccessController<JpaTargetType> targetTypeAccessController(final TestAccessControlManger testAccessControlManger) {
             return new AccessController<>() {
 
                 @Override
                 public Optional<Specification<JpaTargetType>> getAccessRules(final Operation operation) {
-                    if (contextAware.getCurrentTenant() != null && SecurityContextTenantAware.SYSTEM_USER.equals(
-                            contextAware.getCurrentUsername())) {
+                    if (contextAware.getCurrentTenant() != null
+                            && SecurityContextTenantAware.SYSTEM_USER.equals(contextAware.getCurrentUsername())) {
                         // as tenant, no restrictions
                         return Optional.empty();
                     }
+
                     return Optional.ofNullable(testAccessControlManger.getAccessRule(JpaTargetType.class, operation));
                 }
 
@@ -129,17 +126,17 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
         }
 
         @Bean
-        public AccessController<JpaDistributionSet> distributionSetAccessController(
-                final TestAccessControlManger testAccessControlManger) {
+        public AccessController<JpaDistributionSet> distributionSetAccessController(final TestAccessControlManger testAccessControlManger) {
             return new AccessController<>() {
 
                 @Override
                 public Optional<Specification<JpaDistributionSet>> getAccessRules(final Operation operation) {
-                    if (contextAware.getCurrentTenant() != null && SecurityContextTenantAware.SYSTEM_USER.equals(
-                            contextAware.getCurrentUsername())) {
+                    if (contextAware.getCurrentTenant() != null
+                            && SecurityContextTenantAware.SYSTEM_USER.equals(contextAware.getCurrentUsername())) {
                         // as tenant, no restrictions
                         return Optional.empty();
                     }
+
                     return Optional.ofNullable(testAccessControlManger.getAccessRule(JpaDistributionSet.class, operation));
                 }
 
