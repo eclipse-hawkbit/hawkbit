@@ -206,8 +206,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         log.debug("handleCreateRollout called for rollout {}", rollout.getId());
 
         final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(
-                PageRequest.of(0, quotaManagement.getMaxRolloutGroupsPerRollout(), Sort.by(Direction.ASC, "id")),
-                rollout.getId()).getContent();
+                rollout.getId(), PageRequest.of(0, quotaManagement.getMaxRolloutGroupsPerRollout(), Sort.by(Direction.ASC, "id"))
+        ).getContent();
 
         int readyGroups = 0;
         int totalTargets = 0;

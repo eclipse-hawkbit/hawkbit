@@ -136,7 +136,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
         final RolloutGroup firstRolloutGroup = rolloutGroupManagement
-                .findByRollout(PageRequest.of(0, 1), rollout.getId()).getContent().get(0);
+                .findByRollout(rollout.getId(), PageRequest.of(0, 1)).getContent().get(0);
 
         mvc.perform(get(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups/{deployGroupId}/targets",
                         rollout.getId(), firstRolloutGroup.getId()).param("offset", "0").param("limit", "2")
@@ -485,10 +485,10 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         rolloutHandler.handleAll();
 
-        final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getContent();
+        final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getContent();
         groups.forEach(group -> {
             if (!group.isDynamic()) {
-                rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, group.getId())
+                rolloutGroupManagement.findTargetsOfRolloutGroup(group.getId(), PAGE)
                         .forEach(target -> deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE)
                                 .forEach(action -> {
                                     deploymentManagement.cancelAction(action.getId());
@@ -768,7 +768,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         final List<Rollout> content = rolloutManagement.findAll(PAGE, false).getContent();
         assertThat(content).hasSizeGreaterThan(0).allSatisfy(rollout -> {
-            assertThat(rolloutGroupManagement.findByRollout(PAGE, rollout.getId()))
+            assertThat(rolloutGroupManagement.findByRollout(rollout.getId(), PAGE))
                     .describedAs("Confirmation required flag depends on feature active.")
                     .allMatch(group -> group.isConfirmationRequired() == confirmationFlowActive);
         });
@@ -805,7 +805,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         final List<Rollout> content = rolloutManagement.findAll(PAGE, false).getContent();
         assertThat(content).hasSize(1).allSatisfy(rollout -> {
-            final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getContent();
+            final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getContent();
             assertThat(groups).hasSize(2).allMatch(group -> {
                 if (group.getName().equals("Group1")) {
                     return group.isConfirmationRequired();
@@ -848,7 +848,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         final List<Rollout> content = rolloutManagement.findAll(PAGE, false).getContent();
         assertThat(content).hasSize(1).allSatisfy(rollout -> {
-            final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getContent();
+            final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getContent();
             assertThat(groups).hasSize(2).allMatch(group -> {
                 if (group.getName().equals("Group1")) {
                     return !group.isConfirmationRequired();
@@ -1026,7 +1026,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         rolloutHandler.handleAll();
 
         final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout1.getId()).getContent().get(0);
+                .findByRollout(rollout1.getId(), PageRequest.of(0, 1, Direction.ASC, "id")).getContent().get(0);
 
         // make request for firstGroupId and the rolloutId of the second rollout (the one with no groups)
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}", rollout2.getId(), firstGroup.getId())
@@ -1240,9 +1240,9 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
         final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
+                .findByRollout(rollout.getId(), PageRequest.of(0, 1, Direction.ASC, "id")).getContent().get(0);
         final RolloutGroup secondGroup = rolloutGroupManagement
-                .findByRollout(PageRequest.of(1, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
+                .findByRollout(rollout.getId(), PageRequest.of(1, 1, Direction.ASC, "id")).getContent().get(0);
 
         retrieveAndVerifyRolloutGroupInCreating(rollout, firstGroup);
         retrieveAndVerifyRolloutGroupInReady(rollout, firstGroup);
@@ -1262,7 +1262,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
 
         final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
+                .findByRollout(rollout.getId(), PageRequest.of(0, 1, Direction.ASC, "id")).getContent().get(0);
 
         // retrieve targets from the first rollout group with known ID
         mvc.perform(
@@ -1287,9 +1287,9 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
 
         final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
+                .findByRollout(rollout.getId(), PageRequest.of(0, 1, Direction.ASC, "id")).getContent().get(0);
 
-        final String targetInGroup = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, firstGroup.getId())
+        final String targetInGroup = rolloutGroupManagement.findTargetsOfRolloutGroup(firstGroup.getId(), PAGE)
                 .getContent().get(0).getControllerId();
 
         // retrieve targets from the first rollout group with known ID
@@ -1320,7 +1320,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         rolloutHandler.handleAll();
 
         final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
+                .findByRollout(rollout.getId(), PageRequest.of(0, 1, Direction.ASC, "id")).getContent().get(0);
 
         // retrieve targets from the first rollout group with known ID
         mvc.perform(
@@ -1573,7 +1573,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<RolloutGroupStatus> groupStatus = rolloutGroupManagement.findByRollout(PAGE, rollout.getId())
+        final List<RolloutGroupStatus> groupStatus = rolloutGroupManagement.findByRollout(rollout.getId(), PAGE)
                 .getContent().stream().map(RolloutGroup::getStatus).collect(Collectors.toList());
         assertThat(groupStatus).containsExactly(RolloutGroupStatus.RUNNING, RolloutGroupStatus.RUNNING,
                 RolloutGroupStatus.SCHEDULED, RolloutGroupStatus.SCHEDULED);
