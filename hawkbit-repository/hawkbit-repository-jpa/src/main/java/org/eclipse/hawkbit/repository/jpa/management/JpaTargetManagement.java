@@ -465,19 +465,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Slice<Target> findByFilterOrderByLinkedDistributionSet(final Pageable pageable,
-            final long orderByDistributionSetId, final FilterParams filterParams) {
-        // remove default sort from pageable to not overwrite sorted spec
-        final OffsetBasedPageRequest unsortedPage = new OffsetBasedPageRequest(pageable.getOffset(),
-                pageable.getPageSize(), Sort.unsorted());
-
-        final List<Specification<JpaTarget>> specList = buildSpecificationList(filterParams);
-        specList.add(TargetSpecifications.orderedByLinkedDistributionSet(orderByDistributionSetId, pageable.getSort()));
-
-        return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, unsortedPage, specList);
-    }
-
-    @Override
     public Page<Target> findByTag(final Pageable pageable, final long tagId) {
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
 

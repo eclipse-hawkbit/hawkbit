@@ -288,7 +288,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected static Comparator<Target> controllerIdComparator() {
-        return (o1, o2) -> o1.getControllerId().equals(o2.getControllerId()) ? 0 : 1;
+        return Comparator.comparing(Target::getControllerId);
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId) {
