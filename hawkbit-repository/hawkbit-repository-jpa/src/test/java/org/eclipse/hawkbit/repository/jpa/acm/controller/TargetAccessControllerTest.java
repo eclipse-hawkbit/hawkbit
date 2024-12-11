@@ -317,12 +317,12 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
 
         assertThat(rollout.getTotalTargets()).isEqualTo(updateTargets.size());
 
-        final List<RolloutGroup> content = rolloutGroupManagement.findByRollout(Pageable.unpaged(), rollout.getId())
+        final List<RolloutGroup> content = rolloutGroupManagement.findByRollout(rollout.getId(), Pageable.unpaged())
                 .getContent();
         assertThat(content).hasSize(updateTargets.size());
 
         final List<Target> rolloutTargets = content.stream().flatMap(
-                        group -> rolloutGroupManagement.findTargetsOfRolloutGroup(Pageable.unpaged(), group.getId()).get())
+                        group -> rolloutGroupManagement.findTargetsOfRolloutGroup(group.getId(), Pageable.unpaged()).get())
                 .toList();
 
         assertThat(rolloutTargets).hasSize(updateTargets.size()).allMatch(

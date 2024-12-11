@@ -58,8 +58,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         final Rollout rollout = testdataFactory.createRolloutByVariables(rolloutName, rolloutName, amountGroups,
                 "controllerid==" + targetPrefix + "*", distributionSet, "60", "30", false, false);
         final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
-                rollout.getId()).getContent();
+                rollout.getId(), new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id"))
+        ).getContent();
 
         // add 2 targets not to be included
         testdataFactory.createTargets(targetPrefix, amountGroups * 3, 2);
@@ -101,8 +101,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         // rollout is READY
         assertRollout(rollout, true, RolloutStatus.READY, amountGroups + 1, amountGroups * 3);
         List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
-                rollout.getId()).getContent();
+                rollout.getId(), new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id"))
+        ).getContent();
         final RolloutGroup dynamic1 = groups.get(amountGroups);
         assertRollout(rollout, true, RolloutStatus.READY, amountGroups + 1, amountGroups * 3); // + dynamic
         for (int i = 0; i < amountGroups; i++) {
@@ -137,8 +137,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 3);
         assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 3);
         groups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
-                rollout.getId()).getContent();
+                rollout.getId(), new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id"))
+        ).getContent();
         final RolloutGroup dynamic2 = groups.get(amountGroups + 1);
         assertGroup(dynamic2, true, RolloutGroupStatus.SCHEDULED, 0);
 
@@ -190,8 +190,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         // create third dynamic group
         rolloutHandler.handleAll();
         assertThat(rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
-                rollout.getId()).getContent().size()).isEqualTo(amountGroups + 3);
+                rollout.getId(), new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id"))
+        ).getContent().size()).isEqualTo(amountGroups + 3);
         executeAllFromGroup(rollout, dynamic1, 1);
         executeAllFromGroup(rollout, dynamic2, 3);
         assertAndGetRunning(rollout, 0);
@@ -218,8 +218,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         // rollout is READY, amountGroups + 1 (dynamic) rollout groups and amountGroups * 3 targets in static groups
         assertRollout(rollout, true, RolloutStatus.READY, amountGroups + 1, amountGroups * 3);
         List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
-                rollout.getId()).getContent();
+                rollout.getId(), new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id"))
+        ).getContent();
         final RolloutGroup dynamic1 = groups.get(amountGroups);
         assertRollout(rollout, true, RolloutStatus.READY, amountGroups + 1, amountGroups * 3); // + dynamic
         for (int i = 0; i < amountGroups; i++) {
@@ -254,8 +254,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 6);
         assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
         groups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
-                rollout.getId()).getContent();
+                rollout.getId(), new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id"))
+        ).getContent();
         final RolloutGroup dynamic2 = groups.get(amountGroups + 1);
         assertGroup(dynamic2, true, RolloutGroupStatus.SCHEDULED, 0);
 
@@ -313,8 +313,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         // rollout is READY, amountGroups + 1 (dynamic) rollout groups and amountGroups * 3 targets in static groups
         assertRollout(rollout, true, RolloutStatus.READY, 1, 0);
         List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(0, 10, Sort.by(Direction.ASC, "id")),
-                rollout.getId()).getContent();
+                rollout.getId(), new OffsetBasedPageRequest(0, 10, Sort.by(Direction.ASC, "id"))
+        ).getContent();
         final RolloutGroup dynamic1 = groups.get(0);
         assertRollout(rollout, true, RolloutStatus.READY, 1, 0); // + dynamic
         assertGroup(dynamic1, true, RolloutGroupStatus.READY, 0);
@@ -341,8 +341,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertRollout(rollout, true, RolloutStatus.RUNNING, 2, 6);
         assertGroup(dynamic1, true, RolloutGroupStatus.RUNNING, 6);
         groups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(0, 10, Sort.by(Direction.ASC, "id")),
-                rollout.getId()).getContent();
+                rollout.getId(), new OffsetBasedPageRequest(0, 10, Sort.by(Direction.ASC, "id"))
+        ).getContent();
         final RolloutGroup dynamic2 = groups.get(1);
         assertGroup(dynamic2, true, RolloutGroupStatus.SCHEDULED, 0);
 
@@ -391,8 +391,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         final Rollout rollout = testdataFactory.createRolloutByVariables(rolloutName, rolloutName, amountGroups,
                 "controllerid==" + targetPrefix + "*", distributionSet, "0", "25", false, false);
         final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
-                rollout.getId()).getContent();
+                rollout.getId(), new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id"))
+        ).getContent();
 
         // start rollout
         rolloutManagement.start(rollout.getId());

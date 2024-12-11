@@ -220,16 +220,16 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final Page<RolloutGroup> rolloutGroups;
         if (rsqlParam != null) {
             if (isFullMode) {
-                rolloutGroups = this.rolloutGroupManagement.findByRolloutAndRsqlWithDetailedStatus(pageable,
-                        rolloutId, rsqlParam);
+                rolloutGroups = this.rolloutGroupManagement.findByRolloutAndRsqlWithDetailedStatus(rolloutId, rsqlParam, pageable
+                );
             } else {
-                rolloutGroups = this.rolloutGroupManagement.findByRolloutAndRsql(pageable, rolloutId, rsqlParam);
+                rolloutGroups = this.rolloutGroupManagement.findByRolloutAndRsql(rolloutId, rsqlParam, pageable);
             }
         } else {
             if (isFullMode) {
-                rolloutGroups = this.rolloutGroupManagement.findByRolloutWithDetailedStatus(pageable, rolloutId);
+                rolloutGroups = this.rolloutGroupManagement.findByRolloutWithDetailedStatus(rolloutId, pageable);
             } else {
-                rolloutGroups = this.rolloutGroupManagement.findByRollout(pageable, rolloutId);
+                rolloutGroups = this.rolloutGroupManagement.findByRollout(rolloutId, pageable);
             }
         }
 
@@ -269,7 +269,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             rolloutGroupTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(pageable, groupId,
                     rsqlParam);
         } else {
-            final Page<Target> pageTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroup(pageable, groupId);
+            final Page<Target> pageTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroup(groupId, pageable);
             rolloutGroupTargets = pageTargets;
         }
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(rolloutGroupTargets.getContent(), tenantConfigHelper);

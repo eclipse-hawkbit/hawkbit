@@ -72,7 +72,7 @@ public class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegr
         Awaitility.await().atMost(Duration.ofSeconds(5))
                 .pollInterval(Duration.ofMillis(100))
                 .until(() -> tenantAware.runAsTenant(tenant, () -> systemSecurityContext
-                        .runAsSystem(() -> rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getSize() > 0)));
+                        .runAsSystem(() -> rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getSize() > 0)));
 
         assertThatExceptionOfType(StopRolloutException.class)
                 .as("Invalidation of distributionSet should throw an exception")

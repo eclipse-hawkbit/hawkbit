@@ -42,7 +42,7 @@ public class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
         rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
         rollout = rolloutManagement.get(rollout.getId()).get();
 
-        this.rolloutGroupId = rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getContent().get(0).getId();
+        this.rolloutGroupId = rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getContent().get(0).getId();
     }
 
     @Test
@@ -85,8 +85,8 @@ public class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expectedTargets) {
-        final Page<RolloutGroup> findTargetPage = rolloutGroupManagement.findByRolloutAndRsql(PageRequest.of(0, 100),
-                rollout.getId(), rsqlParam);
+        final Page<RolloutGroup> findTargetPage = rolloutGroupManagement.findByRolloutAndRsql(rollout.getId(), rsqlParam, PageRequest.of(0, 100)
+        );
         final long countTargetsAll = findTargetPage.getTotalElements();
         assertThat(findTargetPage).isNotNull();
         assertThat(countTargetsAll).isEqualTo(expectedTargets);
