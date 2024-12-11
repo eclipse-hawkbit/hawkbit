@@ -280,28 +280,6 @@ public interface DistributionSetManagement
             @NotNull DistributionSetFilter distributionSetFilter);
 
     /**
-     * Method retrieves all {@link DistributionSet}s from the repository in the
-     * following order:
-     * <p>
-     * 1) {@link DistributionSet}s which have the given {@link Target} as
-     * {@link TargetInfo#getInstalledDistributionSet()}
-     * <p>
-     * 2) {@link DistributionSet}s which have the given {@link Target} as
-     * {@link Target#getAssignedDistributionSet()}
-     * <p>
-     * 3) {@link DistributionSet}s which have no connection to the given
-     * {@link Target} ordered by ID of the DistributionSet.
-     *
-     * @param pageable the page request to page the result set *
-     * @param distributionSetFilter has details of filters to be applied.
-     * @param assignedOrInstalled the id of the Target to be ordered by
-     * @return {@link DistributionSet}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Slice<DistributionSet> findByDistributionSetFilterOrderByLinkedTarget(@NotNull Pageable pageable,
-            @NotNull DistributionSetFilter distributionSetFilter, @NotEmpty String assignedOrInstalled);
-
-    /**
      * Counts all {@link DistributionSet}s in repository based on given filter.
      *
      * @param distributionSetFilter has details of filters to be applied.

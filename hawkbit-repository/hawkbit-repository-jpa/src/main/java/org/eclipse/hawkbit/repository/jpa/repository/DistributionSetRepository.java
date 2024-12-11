@@ -66,8 +66,7 @@ public interface DistributionSetRepository extends BaseEntityRepository<JpaDistr
     Long countAutoAssignmentsForDistributionSet(@Param("dsId") Long dsId);
 
     /**
-     * Finds {@link DistributionSet}s where given {@link SoftwareModule} is
-     * assigned.
+     * Finds {@link DistributionSet}s where given {@link SoftwareModule} is assigned.
      * <p/>
      * No access control applied.
      *
@@ -77,8 +76,7 @@ public interface DistributionSetRepository extends BaseEntityRepository<JpaDistr
     Long countByModulesId(Long moduleId);
 
     /**
-     * Finds {@link DistributionSet}s based on given ID that are assigned yet to
-     * an {@link Action}, i.e. in use.
+     * Finds {@link DistributionSet}s based on given ID that are assigned yet to an {@link Action}, i.e. in use.
      * <p/>
      * No access control applied.
      *
@@ -89,8 +87,7 @@ public interface DistributionSetRepository extends BaseEntityRepository<JpaDistr
     List<Long> findAssignedToTargetDistributionSetsById(@Param("ids") Collection<Long> ids);
 
     /**
-     * Finds {@link DistributionSet}s based on given ID that are assigned yet to
-     * an {@link Rollout}, i.e. in use.
+     * Finds {@link DistributionSet}s based on given ID that are assigned yet to an {@link Rollout}, i.e. in use.
      * <p/>
      * No access control applied.
      *
@@ -111,10 +108,8 @@ public interface DistributionSetRepository extends BaseEntityRepository<JpaDistr
     long countByTypeId(Long typeId);
 
     /**
-     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
-     * reasons (this is a "delete everything" query after all) we add the tenant
-     * manually to query even if this will by done by {@link EntityManager}
-     * anyhow. The DB should take care of optimizing this away.
+     * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety reasons (this is a "delete everything" query after all) we add
+     * the tenant manually to query even if this will by done by {@link EntityManager} anyhow. The DB should take care of optimizing this away.
      *
      * @param tenant to delete data from
      */

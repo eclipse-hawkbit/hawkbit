@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -83,7 +82,6 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
@@ -409,7 +407,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                         throw new InsufficientPermissionException("Target not accessible (or not found)!");
                     }
                     return distributionSetRepository
-                            .findOne(DistributionSetSpecification.byId(action.getDistributionSet().getId()))
+                            .findOne(DistributionSetSpecification.byIdFetch(action.getDistributionSet().getId()))
                             .orElseThrow(() ->
                                     new InsufficientPermissionException("DistributionSet not accessible (or not found)!"));
                 })
@@ -519,24 +517,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Slice<DistributionSet> findByDistributionSetFilterOrderByLinkedTarget(final Pageable pageable,
-            final DistributionSetFilter distributionSetFilter, final String assignedOrInstalled) {
-        // remove default sort from pageable to not overwrite sorted spec
-        final OffsetBasedPageRequest unsortedPage = new OffsetBasedPageRequest(pageable.getOffset(),
-                pageable.getPageSize(), Sort.unsorted());
-
-        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
-                distributionSetFilter);
-        specList.add(DistributionSetSpecification.orderedByLinkedTarget(assignedOrInstalled, pageable.getSort()));
-
-        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, unsortedPage, specList);
-    }
-
-    @Override
     public long countByDistributionSetFilter(@NotNull final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
-                distributionSetFilter);
-
+        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(distributionSetFilter);
         return JpaManagementHelper.countBySpec(distributionSetRepository, specList);
     }
 
@@ -791,7 +773,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                 distributionSetRepository.findById(dsIds.iterator().next())
                         .map(List::of)
                         .orElseGet(Collections::emptyList) :
-                distributionSetRepository.findAll(DistributionSetSpecification.byIds(dsIds));
+                distributionSetRepository.findAll(DistributionSetSpecification.byIdsFetch(dsIds));
         if (allDs.size() < dsIds.size()) {
             throw new EntityNotFoundException(DistributionSet.class, notFound(dsIds, allDs));
         }
@@ -898,7 +880,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final BiFunction<List<JpaDistributionSet>, DistributionSetTag, T> updater) {
         final List<JpaDistributionSet> allDs = dsIds.size() == 1 ?
                 distributionSetRepository.findById(dsIds.iterator().next()).map(List::of).orElseGet(Collections::emptyList) :
-                distributionSetRepository.findAll(DistributionSetSpecification.byIds(dsIds));
+                distributionSetRepository.findAll(DistributionSetSpecification.byIdsFetch(dsIds));
         if (allDs.size() < dsIds.size()) {
             throw new EntityNotFoundException(DistributionSet.class, dsIds, allDs.stream().map(DistributionSet::getId).toList());
         }

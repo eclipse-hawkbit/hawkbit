@@ -31,13 +31,13 @@ public class TestAccessControlManger {
     public <T> void defineAccessRule(
             final Class<T> ruleClass, final AccessController.Operation operation,
             final Specification<T> specification, final Predicate<T> check) {
-        accessRules.put(new AccessRuleId<T>(ruleClass, operation), new AccessRule<T>(specification, check));
+        accessRules.put(new AccessRuleId<>(ruleClass, operation), new AccessRule<>(specification, check));
     }
 
     public <T extends AbstractJpaBaseEntity> Specification<T> getAccessRule(final Class<T> ruleClass,
             final AccessController.Operation operation) {
-        @SuppressWarnings("unchecked") final AccessRule<T> accessRule = (AccessRule<T>) accessRules.getOrDefault(
-                new AccessRuleId<T>(ruleClass, operation), null);
+        @SuppressWarnings("unchecked")
+        final AccessRule<T> accessRule = (AccessRule<T>) accessRules.getOrDefault(new AccessRuleId<>(ruleClass, operation), null);
         if (accessRule == null) {
             return nop();
         } else {
@@ -46,8 +46,8 @@ public class TestAccessControlManger {
     }
 
     public <T> void assertOperation(final Class<T> ruleClass, final AccessController.Operation operation, final List<T> entities) {
-        @SuppressWarnings("unchecked") final AccessRule<T> accessRule = (AccessRule<T>) accessRules.getOrDefault(
-                new AccessRuleId<T>(ruleClass, operation), null);
+        @SuppressWarnings("unchecked")
+        final AccessRule<T> accessRule = (AccessRule<T>) accessRules.getOrDefault(new AccessRuleId<>(ruleClass, operation), null);
         if (accessRule == null) {
             throw new InsufficientPermissionException("No access define - reject all");
         } else {
