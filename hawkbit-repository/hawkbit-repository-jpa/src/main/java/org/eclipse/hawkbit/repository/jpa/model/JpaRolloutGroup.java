@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serial;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 

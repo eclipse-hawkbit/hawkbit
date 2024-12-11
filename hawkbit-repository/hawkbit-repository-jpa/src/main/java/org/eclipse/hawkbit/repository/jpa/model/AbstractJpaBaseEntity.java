@@ -42,8 +42,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
  * Base hawkBit entity class containing the common attributes.
  */
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // Default constructor needed for JPA entities.
-@Setter
-@Getter
 @MappedSuperclass
 @EntityListeners({ AuditingEntityListener.class, EntityInterceptorListener.class })
 public abstract class AbstractJpaBaseEntity implements BaseEntity {
@@ -53,17 +51,21 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @Setter // should be used just for test purposes
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
+    @Setter // should be used just for test purposes
+    @Getter
     @Version
     @Column(name = "optlock_revision")
     private int optLockRevision;
 
     // Audit fields. use property access to ensure that setters will be called and checked for modification
-    // (touch implementation depends on setLastModifiedAt(0).
+    // (touch implementation depends on setLastModifiedAt(1).
     @Column(name = "created_by", updatable = false, nullable = false, length = USERNAME_FIELD_LENGTH)
     private String createdBy;
     @Column(name = "created_at", updatable = false, nullable = false)
@@ -75,15 +77,6 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @CreatedBy
     public void setCreatedBy(final String createdBy) {
-        if (isController()) {
-            this.createdBy = "CONTROLLER_PLUG_AND_PLAY";
-
-            // In general modification audit entry is not changed by the controller.
-            // However, we want to stay consistent with EnableJpaAuditing#modifyOnCreate=true.
-            this.lastModifiedBy = this.createdBy;
-            return;
-        }
-
         this.createdBy = createdBy;
     }
 
@@ -96,15 +89,9 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     @CreatedDate
     public void setCreatedAt(final long createdAt) {
         this.createdAt = createdAt;
-
-        // In general modification audit entry is not changed by the controller.
-        // However, we want to stay consistent with EnableJpaAuditing#modifyOnCreate=true.
-        if (isController()) {
-            this.lastModifiedAt = createdAt;
-        }
     }
 
-    @Column(name = "created_at", updatable = false, nullable = false)
+    // property access to make entity manager to detect touch
     @Access(AccessType.PROPERTY)
     public long getCreatedAt() {
         return createdAt;
@@ -112,22 +99,24 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @LastModifiedBy
     public void setLastModifiedBy(final String lastModifiedBy) {
-        if (isController()) {
+        if (lastModifiedBy != null && isController()) {
+            // initialized and controller = doesn't update
             return;
         }
 
         this.lastModifiedBy = lastModifiedBy;
     }
 
-    @Column(name = "last_modified_by", nullable = false, length = USERNAME_FIELD_LENGTH)
+    // property access to make entity manager to detect touch
     @Access(AccessType.PROPERTY)
     public String getLastModifiedBy() {
-        return lastModifiedBy;
+        return lastModifiedBy == null ? createdBy : lastModifiedBy;
     }
 
     @LastModifiedDate
     public void setLastModifiedAt(final long lastModifiedAt) {
-        if (isController()) {
+        if (lastModifiedAt != 0 && isController()) {
+            // initialized and controller = doesn't update
             return;
         }
 
@@ -137,7 +126,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     // property access to make entity manager to detect touch
     @Access(AccessType.PROPERTY)
     public long getLastModifiedAt() {
-        return lastModifiedAt;
+        return lastModifiedAt == 0 ? createdAt : lastModifiedAt;
     }
 
     /**
