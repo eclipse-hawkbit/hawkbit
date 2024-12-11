@@ -90,7 +90,7 @@ public final class JpaManagementHelper {
         // log written because modifying e.g. metadata is modifying the base
         // entity itself for auditing purposes.
         final J result = entityManager.merge(entity);
-        result.setLastModifiedAt(0L);
+        result.setLastModifiedAt(1);
 
         return repository.save(result);
     }

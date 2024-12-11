@@ -104,7 +104,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2) })
-    public void updateTargetAttributesFailsIfTooManyEntries() throws Exception {
+    void updateTargetAttributesFailsIfTooManyEntries() throws Exception {
         final String controllerId = "test123";
         final int allowedAttributes = quotaManagement.getMaxAttributeEntriesPerTarget();
         testdataFactory.createTarget(controllerId);
@@ -139,7 +139,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Checks if invalid values of attribute-key and attribute-value are handled correctly")
-    public void updateTargetAttributesFailsForInvalidAttributes() {
+    void updateTargetAttributesFailsForInvalidAttributes() {
         final String controllerId = "targetId123";
         testdataFactory.createTarget(controllerId);
 
@@ -175,22 +175,23 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
-    public void controllerProvidesIntermediateFeedbackFailsIfQuotaHit() {
+    void controllerProvidesIntermediateFeedbackFailsIfQuotaHit() throws Exception {
         final int allowStatusEntries = 10;
         final Long actionId = createTargetAndAssignDs();
 
-        // Fails as one entry is already in there from the assignment
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> SecurityContextSwitch
-                        .runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
-                            writeStatus(actionId, allowStatusEntries);
-                            return null;
-                        })).withMessageContaining("" + allowStatusEntries);
+        SecurityContextSwitch
+                .runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+                    // Fails as one entry is already in there from the assignment
+                    assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                            .isThrownBy(() -> writeStatus(actionId, allowStatusEntries))
+                            .withMessageContaining(String.valueOf(allowStatusEntries));
+                    return null;
+                });
     }
 
     @Test
     @Description("Test to verify the storage and retrieval of action history.")
-    public void findMessagesByActionStatusId() {
+    void findMessagesByActionStatusId() {
         final DistributionSet testDs = testdataFactory.createDistributionSet("1");
         final List<Target> testTarget = testdataFactory.createTargets(1);
 
@@ -225,7 +226,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2) })
-    public void addActionStatusUpdatesUntilQuotaIsExceeded() {
+    void addActionStatusUpdatesUntilQuotaIsExceeded() {
 
         // any distribution set assignment causes 1 status entity to be created
         final int maxStatusEntries = quotaManagement.getMaxStatusEntriesPerAction() - 1;
@@ -265,7 +266,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
-    public void createActionStatusWithTooManyMessages() {
+    void createActionStatusWithTooManyMessages() {
 
         final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
 
@@ -297,7 +298,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
-    public void controllerReportsDownloadForDownloadOnlyAction() {
+    void controllerReportsDownloadForDownloadOnlyAction() {
         testdataFactory.createTarget();
         final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
         assertThat(actionId).isNotNull();
@@ -932,8 +933,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         testdataFactory.addSoftwareModuleMetadata(set);
 
         final Map<Long, List<SoftwareModuleMetadata>> result = controllerManagement
-                .findTargetVisibleMetaDataBySoftwareModuleId(
-                        set.getModules().stream().map(SoftwareModule::getId).collect(Collectors.toList()));
+                .findTargetVisibleMetaDataBySoftwareModuleId(set.getModules().stream().map(SoftwareModule::getId).toList());
 
         assertThat(result).hasSize(3);
         result.forEach((key, value) -> assertThat(value).hasSize(1));
