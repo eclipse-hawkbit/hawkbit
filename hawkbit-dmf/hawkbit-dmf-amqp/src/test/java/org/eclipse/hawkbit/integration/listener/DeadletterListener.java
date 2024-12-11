@@ -22,5 +22,4 @@ public class DeadletterListener implements TestRabbitListener {
     public void handleMessage(Message message) {
         // currently the message is not needed
     }
-
 }

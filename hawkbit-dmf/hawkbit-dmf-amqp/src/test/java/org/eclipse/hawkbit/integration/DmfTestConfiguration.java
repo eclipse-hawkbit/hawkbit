@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @RabbitListenerTest
-public class DmfTestConfiguration {
+class DmfTestConfiguration {
 
     public static final String REPLY_TO_EXCHANGE = "reply.queue";
 
@@ -52,5 +52,4 @@ public class DmfTestConfiguration {
     Binding bindQueueToReplyToExchange() {
         return BindingBuilder.bind(replyToQueue()).to(replyToExchange());
     }
-
 }

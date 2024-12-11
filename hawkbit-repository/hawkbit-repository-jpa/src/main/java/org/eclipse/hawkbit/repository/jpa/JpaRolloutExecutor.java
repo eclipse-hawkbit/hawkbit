@@ -574,7 +574,11 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private boolean ensureAllGroupsAreScheduled(final Rollout rollout) {
         final JpaRollout jpaRollout = (JpaRollout) rollout;
         final List<JpaRolloutGroup> groupsToBeScheduled = rolloutGroupRepository.findByRolloutAndStatus(rollout, RolloutGroupStatus.READY);
+        if (groupsToBeScheduled.isEmpty()) {
+            return true;
+        }
         final long scheduledGroups = groupsToBeScheduled.stream().filter(group -> scheduleRolloutGroup(jpaRollout, group)).count();
+        entityManager.flush(); // flush groups so scheduled group to start to have scheduled event
         return scheduledGroups == groupsToBeScheduled.size();
     }
 
