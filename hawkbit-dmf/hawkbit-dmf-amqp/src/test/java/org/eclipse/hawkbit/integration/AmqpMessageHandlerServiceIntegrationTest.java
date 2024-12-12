@@ -84,10 +84,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Story("Amqp Message Handler Service")
 class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegrationTest {
 
-    public static final String DMF_REGISTER_TEST_CONTROLLER_ID = "Dmf_hand_registerTargets_1";
-    public static final String DMF_ATTR_TEST_CONTROLLER_ID = "Dmf_hand_updateAttributes";
-    public static final String UPDATE_ATTR_TEST_CONTROLLER_ID = "ControllerAttributeTestTarget";
+    static final String DMF_REGISTER_TEST_CONTROLLER_ID = "Dmf_hand_registerTargets_1";
+    static final String DMF_ATTR_TEST_CONTROLLER_ID = "Dmf_hand_updateAttributes";
+    static final String UPDATE_ATTR_TEST_CONTROLLER_ID = "ControllerAttributeTestTarget";
     private static final String TARGET_PREFIX = "Dmf_hand_";
+    
     @Autowired
     private AmqpProperties amqpProperties;
 

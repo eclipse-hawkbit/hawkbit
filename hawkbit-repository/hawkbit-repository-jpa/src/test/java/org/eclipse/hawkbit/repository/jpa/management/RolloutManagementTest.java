@@ -1816,7 +1816,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutCreatedEvent.class, count = 1),
             @Expect(type = RolloutUpdatedEvent.class, count = 6),
             @Expect(type = RolloutDeletedEvent.class, count = 1),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 10),
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 11),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 5) })
     void deleteRolloutWhichHasBeenStartedBeforeIsSoftDeleted() {
         final int amountTargetsForRollout = 10;

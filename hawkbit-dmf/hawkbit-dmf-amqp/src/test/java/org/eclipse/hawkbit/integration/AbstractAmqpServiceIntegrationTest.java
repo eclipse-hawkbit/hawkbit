@@ -65,13 +65,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Common class for {@link AmqpMessageHandlerServiceIntegrationTest} and
- * {@link AmqpMessageDispatcherServiceIntegrationTest}.
+ * Common class for {@link AmqpMessageHandlerServiceIntegrationTest} and {@link AmqpMessageDispatcherServiceIntegrationTest}.
  */
-@ContextConfiguration(classes = { DmfApiConfiguration.class, DmfTestConfiguration.class,
+@ContextConfiguration(classes = {
+        DmfApiConfiguration.class, DmfTestConfiguration.class,
         RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
-public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
+abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegrationTest {
 
     protected static final String TENANT_EXIST = "DEFAULT";
     protected static final String CREATED_BY = "CONTROLLER_PLUG_AND_PLAY";
@@ -85,7 +85,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
     private RabbitListenerTestHarness harness;
 
     @BeforeEach
-    public void initListener() {
+    void initListener() {
         deadletterListener = harness.getSpy(DeadletterListener.LISTENER_ID);
         assertThat(deadletterListener).isNotNull();
         Mockito.reset(deadletterListener);

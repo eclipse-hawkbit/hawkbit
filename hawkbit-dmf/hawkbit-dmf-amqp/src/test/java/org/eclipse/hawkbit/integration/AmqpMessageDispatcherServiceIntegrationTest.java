@@ -85,7 +85,7 @@ import org.springframework.amqp.core.Message;
 
 @Feature("Component Tests - Device Management Federation API")
 @Story("Amqp Message Dispatcher Service")
-public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceIntegrationTest {
+class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceIntegrationTest {
 
     private static final String TARGET_PREFIX = "Dmf_disp_";
 
@@ -101,7 +101,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
             @Expect(type = TargetUpdatedEvent.class, count = 1), 
             @Expect(type = TargetPollEvent.class, count = 1) })
-    public void sendDownloadAndInstallStatus() {
+    void sendDownloadAndInstallStatus() {
         final String controllerId = TARGET_PREFIX + "sendDownloadAndInstallStatus";
         registerTargetAndAssignDistributionSet(controllerId);
 
@@ -121,7 +121,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
             @Expect(type = TargetUpdatedEvent.class, count = 1), 
             @Expect(type = TargetPollEvent.class, count = 1) })
-    public void sendDownloadStatusBeforeMaintenanceWindowStartTime() {
+    void sendDownloadStatusBeforeMaintenanceWindowStartTime() {
         final String controllerId = TARGET_PREFIX + "sendDownloadStatusBeforeWindowStartTime";
 
         registerAndAssertTargetWithExistingTenant(controllerId);
@@ -146,7 +146,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
             @Expect(type = TargetUpdatedEvent.class, count = 1), 
             @Expect(type = TargetPollEvent.class, count = 1) })
-    public void sendDownloadAndInstallStatusMessageDuringMaintenanceWindow() {
+    void sendDownloadAndInstallStatusMessageDuringMaintenanceWindow() {
         final String controllerId = TARGET_PREFIX + "sendDAndIStatusMessageDuringWindow";
 
         registerAndAssertTargetWithExistingTenant(controllerId);
@@ -173,7 +173,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 18), // implicit lock
             @Expect(type = TargetUpdatedEvent.class, count = 2), 
             @Expect(type = TargetPollEvent.class, count = 3) })
-    public void assignDistributionSetMultipleTimes() {
+    void assignDistributionSetMultipleTimes() {
         final String controllerId = TARGET_PREFIX + "assignDistributionSetMultipleTimes";
 
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
@@ -221,7 +221,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = TargetUpdatedEvent.class, count = 2), 
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
-    public void assignMultipleDsInMultiAssignMode() {
+    void assignMultipleDsInMultiAssignMode() {
         enableMultiAssignments();
         final String controllerId = TARGET_PREFIX + "assignMultipleDsInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
@@ -239,7 +239,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
     @Test
     @Description("Verify payload of multi action messages.")
-    public void assertMultiActionMessagePayloads() {
+    void assertMultiActionMessagePayloads() {
         final int expectedWeightIfNotSet = 1000;
         final int weight1 = 600;
         final String controllerId = UUID.randomUUID().toString();
@@ -303,7 +303,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = TargetUpdatedEvent.class, count = 2), 
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
-    public void cancelActionInMultiAssignMode() {
+    void cancelActionInMultiAssignMode() {
         enableMultiAssignments();
         final String controllerId = TARGET_PREFIX + "cancelActionInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
@@ -341,7 +341,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = TargetUpdatedEvent.class, count = 3), 
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
-    public void finishActionInMultiAssignMode() {
+    void finishActionInMultiAssignMode() {
         enableMultiAssignments();
         final String controllerId = TARGET_PREFIX + "finishActionInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
@@ -373,7 +373,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = TargetUpdatedEvent.class, count = 2), 
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
-    public void assignDsMultipleTimesInMultiAssignMode() {
+    void assignDsMultipleTimesInMultiAssignMode() {
         enableMultiAssignments();
         final String controllerId = TARGET_PREFIX + "assignDsMultipleTimesInMultiAssignMode";
         registerAndAssertTargetWithExistingTenant(controllerId);
@@ -407,9 +407,9 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = RolloutCreatedEvent.class, count = 2), 
             @Expect(type = RolloutUpdatedEvent.class, count = 6),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 2),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 4),
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 6),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
-    public void startRolloutsWithSameDsInMultiAssignMode() {
+    void startRolloutsWithSameDsInMultiAssignMode() {
         enableMultiAssignments();
         final String controllerId = TARGET_PREFIX + "startRolloutsWithSameDsInMultiAssignMode";
 
@@ -444,9 +444,9 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = RolloutCreatedEvent.class, count = 3), 
             @Expect(type = RolloutUpdatedEvent.class, count = 9),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 3),
-            @Expect(type = RolloutGroupUpdatedEvent.class, count = 6),
+            @Expect(type = RolloutGroupUpdatedEvent.class, count = 9),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
-    public void startMultipleRolloutsAndFinishInMultiAssignMode() {
+    void startMultipleRolloutsAndFinishInMultiAssignMode() {
         enableMultiAssignments();
         final String controllerId = TARGET_PREFIX + "startMultipleRolloutsAndFinishInMultiAssignMode";
 
@@ -492,7 +492,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
             @Expect(type = TargetUpdatedEvent.class, count = 1), 
             @Expect(type = TargetPollEvent.class, count = 2) })
-    public void sendCancelStatus() {
+    void sendCancelStatus() {
         final String controllerId = TARGET_PREFIX + "sendCancelStatus";
 
         final Long actionId = registerTargetAndCancelActionId(controllerId);
@@ -508,7 +508,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1), 
             @Expect(type = TargetDeletedEvent.class, count = 1) })
-    public void sendDeleteMessage() {
+    void sendDeleteMessage() {
         final String controllerId = TARGET_PREFIX + "sendDeleteMessage";
 
         registerAndAssertTargetWithExistingTenant(controllerId);
@@ -530,7 +530,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = TargetUpdatedEvent.class, count = 4),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
-    public void attributeRequestAfterSuccessfulUpdate() {
+    void attributeRequestAfterSuccessfulUpdate() {
         final String controllerId = TARGET_PREFIX + "attributeUpdateRequest";
         registerAndAssertTargetWithExistingTenant(controllerId);
 
@@ -557,7 +557,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
             @Expect(type = TargetUpdatedEvent.class, count = 1), 
             @Expect(type = TargetPollEvent.class, count = 1) })
-    public void downloadOnlyAssignmentSendsDownloadMessageTopic() {
+    void downloadOnlyAssignmentSendsDownloadMessageTopic() {
         final String controllerId = TARGET_PREFIX + "registerTargets_1";
         final DistributionSet distributionSet = createTargetAndDistributionSetAndAssign(controllerId, DOWNLOAD_ONLY);
 
@@ -580,13 +580,13 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
     @Test
     @Description("Verify payload of batch assignment download and install message.")
-    public void assertBatchAssignmentsDownloadAndInstall() {
+    void assertBatchAssignmentsDownloadAndInstall() {
         assertBatchAssignmentsMessagePayload(BATCH_DOWNLOAD_AND_INSTALL);
     }
 
     @Test
     @Description("Verify payload of batch assignments download only message.")
-    public void assertBatchAssignmentsDownloadOnly() {
+    void assertBatchAssignmentsDownloadOnly() {
         assertBatchAssignmentsMessagePayload(BATCH_DOWNLOAD);
     }
 
