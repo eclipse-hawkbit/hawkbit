@@ -99,7 +99,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 1), 
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void sendDownloadAndInstallStatus() {
         final String controllerId = TARGET_PREFIX + "sendDownloadAndInstallStatus";
@@ -119,7 +119,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 1), 
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void sendDownloadStatusBeforeMaintenanceWindowStartTime() {
         final String controllerId = TARGET_PREFIX + "sendDownloadStatusBeforeWindowStartTime";
@@ -144,7 +144,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 1), 
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void sendDownloadAndInstallStatusMessageDuringMaintenanceWindow() {
         final String controllerId = TARGET_PREFIX + "sendDAndIStatusMessageDuringWindow";
@@ -165,13 +165,13 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 2), 
+            @Expect(type = ActionCreatedEvent.class, count = 2),
             @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 18), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 2), 
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 3) })
     void assignDistributionSetMultipleTimes() {
         final String controllerId = TARGET_PREFIX + "assignDistributionSetMultipleTimes";
@@ -212,13 +212,13 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             @Expect(type = MultiActionAssignEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
-            @Expect(type = ActionCreatedEvent.class, count = 2), 
+            @Expect(type = ActionCreatedEvent.class, count = 2),
             @Expect(type = ActionUpdatedEvent.class, count = 0),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 2), 
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void assignMultipleDsInMultiAssignMode() {
@@ -290,19 +290,20 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
     @Description("Handle cancelation process of an action in multi assignment mode.")
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1),
             @Expect(type = MultiActionCancelEvent.class, count = 1),
             @Expect(type = MultiActionAssignEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
-            @Expect(type = ActionCreatedEvent.class, count = 2), 
+            @Expect(type = ActionCreatedEvent.class, count = 2),
             @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 2), 
-            @Expect(type = TargetPollEvent.class, count = 1),
-            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6) // implicit lock
+    })
     void cancelActionInMultiAssignMode() {
         enableMultiAssignments();
         final String controllerId = TARGET_PREFIX + "cancelActionInMultiAssignMode";
@@ -332,13 +333,13 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
-            @Expect(type = ActionCreatedEvent.class, count = 2), 
+            @Expect(type = ActionCreatedEvent.class, count = 2),
             @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 3), 
+            @Expect(type = TargetUpdatedEvent.class, count = 3),
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void finishActionInMultiAssignMode() {
@@ -364,13 +365,13 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             @Expect(type = MultiActionAssignEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
-            @Expect(type = ActionCreatedEvent.class, count = 2), 
+            @Expect(type = ActionCreatedEvent.class, count = 2),
             @Expect(type = ActionUpdatedEvent.class, count = 0),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 2), 
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void assignDsMultipleTimesInMultiAssignMode() {
@@ -396,15 +397,15 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             @Expect(type = MultiActionAssignEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 0),
-            @Expect(type = ActionCreatedEvent.class, count = 2), 
+            @Expect(type = ActionCreatedEvent.class, count = 2),
             @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 1), 
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1),
-            @Expect(type = RolloutCreatedEvent.class, count = 2), 
+            @Expect(type = RolloutCreatedEvent.class, count = 2),
             @Expect(type = RolloutUpdatedEvent.class, count = 6),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 2),
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 6),
@@ -432,16 +433,16 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = MultiActionAssignEvent.class, count = 3),
-            @Expect(type = ActionCreatedEvent.class, count = 3), 
+            @Expect(type = ActionCreatedEvent.class, count = 3),
             @Expect(type = ActionUpdatedEvent.class, count = 5),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 5), 
+            @Expect(type = TargetUpdatedEvent.class, count = 5),
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 2),
-            @Expect(type = RolloutCreatedEvent.class, count = 3), 
+            @Expect(type = RolloutCreatedEvent.class, count = 3),
             @Expect(type = RolloutUpdatedEvent.class, count = 9),
             @Expect(type = RolloutGroupCreatedEvent.class, count = 3),
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 9),
@@ -484,13 +485,13 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 1), 
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 1), 
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
     void sendCancelStatus() {
         final String controllerId = TARGET_PREFIX + "sendCancelStatus";
@@ -506,7 +507,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
     @Description("Verify that when a target is deleted a target delete message is send.")
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 1), 
+            @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TargetDeletedEvent.class, count = 1) })
     void sendDeleteMessage() {
         final String controllerId = TARGET_PREFIX + "sendDeleteMessage";
@@ -521,7 +522,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
-            @Expect(type = ActionUpdatedEvent.class, count = 2), 
+            @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = ActionCreatedEvent.class, count = 2),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
@@ -555,7 +556,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 1), 
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void downloadOnlyAssignmentSendsDownloadMessageTopic() {
         final String controllerId = TARGET_PREFIX + "registerTargets_1";
@@ -633,13 +634,13 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 3),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 3), 
+            @Expect(type = ActionCreatedEvent.class, count = 3),
             @Expect(type = ActionUpdatedEvent.class, count = 0),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
-            @Expect(type = TargetUpdatedEvent.class, count = 3), 
+            @Expect(type = TargetUpdatedEvent.class, count = 3),
             @Expect(type = TargetPollEvent.class, count = 3),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void assertBatchAssignmentsMessagePayload(final EventTopic topic) {

@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.EntityManager;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -25,6 +27,7 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.AutoConfirmationAlreadyActiveException;
 import org.eclipse.hawkbit.repository.exception.InvalidConfirmationFeedbackException;
+import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -56,6 +59,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
 
     public static final String CONFIRMATION_CODE_MSG_PREFIX = "Confirmation status code: %d";
 
+    private final EntityManager entityManager;
     private final EntityFactory entityFactory;
     private final TargetRepository targetRepository;
 
@@ -63,9 +67,10 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
             final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final RepositoryProperties repositoryProperties, final QuotaManagement quotaManagement,
-            final EntityFactory entityFactory) {
+            final EntityManager entityManager, final EntityFactory entityFactory) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.targetRepository = targetRepository;
+        this.entityManager = entityManager;
         this.entityFactory = entityFactory;
     }
 
@@ -86,6 +91,8 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         }
         final JpaAutoConfirmationStatus confirmationStatus = new JpaAutoConfirmationStatus(initiator, remark, target);
         target.setAutoConfirmationStatus(confirmationStatus);
+        // since the status is not part of the JpaTarget table (just ref) it might be needed to touch the entity to have updated lastModifiedAt
+        JpaManagementHelper.touch(entityManager, targetRepository, target);
         final JpaTarget updatedTarget = targetRepository.save(target);
         final AutoConfirmationStatus autoConfStatus = updatedTarget.getAutoConfirmationStatus();
         if (autoConfStatus == null) {
@@ -159,6 +166,8 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         log.debug("Deactivate auto confirmation for controllerId '{}'", controllerId);
         final JpaTarget target = targetRepository.getByControllerId(controllerId);
         target.setAutoConfirmationStatus(null);
+        // since the status is not part of the JpaTarget table (just ref) it might be needed to touch the entity to have updated lastModifiedAt
+        JpaManagementHelper.touch(entityManager, targetRepository, target);
         targetRepository.save(target);
     }
 

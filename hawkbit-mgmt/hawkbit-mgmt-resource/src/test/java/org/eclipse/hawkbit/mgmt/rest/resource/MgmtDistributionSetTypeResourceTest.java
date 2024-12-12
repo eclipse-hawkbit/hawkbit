@@ -54,16 +54,19 @@ import org.springframework.test.web.servlet.MvcResult;
  */
 @Feature("Component Tests - Management API")
 @Story("Distribution Set Type Resource")
-public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrationTest {
+class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes GET requests.")
-    public void getDistributionSetTypes() throws Exception {
-        DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
-                .key("test123").name("TestName123").description("Desc123").colour("col12"));
-        testType = distributionSetTypeManagement
-                .update(entityFactory.distributionSetType().update(testType.getId()).description("Desc1234"));
+    void getDistributionSetTypes() throws Exception {
+        DistributionSetType testType = distributionSetTypeManagement.create(
+                entityFactory.distributionSetType().create()
+                        .key("test123")
+                        .name("TestName123")
+                        .description("Desc123")
+                        .colour("col12"));
+        testType = distributionSetTypeManagement.update(entityFactory.distributionSetType().update(testType.getId()).description("Desc1234"));
 
         // 4 types overall (2 hawkbit tenant default, 1 test default and 1
         // generated in this test)
@@ -84,8 +87,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].createdBy", contains("uploadTester")))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].createdAt", contains(testType.getCreatedAt())))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].lastModifiedBy", contains("uploadTester")))
-                .andExpect(jsonPath("$.content.[?(@.key=='test123')].lastModifiedAt",
-                        contains(testType.getLastModifiedAt())))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].lastModifiedAt", contains(testType.getLastModifiedAt())))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].key", contains("test123")))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')]._links.self.href",
                         contains("http://localhost/rest/v1/distributionsettypes/" + testType.getId())))
@@ -95,15 +97,18 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes GET requests with sorting by KEY.")
-    public void getDistributionSetTypesSortedByKey() throws Exception {
-
-        DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
-                .key("zzzzz").name("TestName123").description("Desc123").colour("col12"));
-        testType = distributionSetTypeManagement
-                .update(entityFactory.distributionSetType().update(testType.getId()).description("Desc1234"));
+    void getDistributionSetTypesSortedByKey() throws Exception {
+        DistributionSetType testType = distributionSetTypeManagement.create(
+                entityFactory.distributionSetType().create()
+                        .key("zzzzz")
+                        .name("TestName123")
+                        .description("Desc123")
+                        .colour("col12"));
+        testType = distributionSetTypeManagement.update(entityFactory.distributionSetType().update(testType.getId()).description("Desc1234"));
 
         // descending
-        mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON)
+        mvc.perform(get("/rest/v1/distributionsettypes")
+                        .accept(MediaType.APPLICATION_JSON)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "KEY:DESC"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -120,7 +125,8 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andExpect(jsonPath("$.total", equalTo(DEFAULT_DS_TYPES + 1)));
 
         // ascending
-        mvc.perform(get("/rest/v1/distributionsettypes").accept(MediaType.APPLICATION_JSON)
+        mvc.perform(get("/rest/v1/distributionsettypes")
+                        .accept(MediaType.APPLICATION_JSON)
                         .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "KEY:ASC"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -140,31 +146,30 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes POST requests.")
-    public void createDistributionSetTypes() throws Exception {
-
-        final List<DistributionSetType> types = createTestDistributionSetTestTypes();
-
-        final MvcResult mvcResult = runPostDistributionSetType(types);
-
+    void createDistributionSetTypes() throws Exception {
+        final MvcResult mvcResult = runPostDistributionSetType(createTestDistributionSetTestTypes());
         verifyCreatedDistributionSetTypes(mvcResult);
     }
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes POST requests.")
-    public void addMandatoryModuleToDistributionSetType() throws Exception {
-        DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
-                .key("test123").name("TestName123").description("Desc123").colour("col12"));
-        assertThat(testType.getOptLockRevision()).isEqualTo(version(1));
+    void addMandatoryModuleToDistributionSetType() throws Exception {
+        DistributionSetType testType = distributionSetTypeManagement.create(
+                entityFactory.distributionSetType().create()
+                        .key("test123")
+                        .name("TestName123")
+                        .description("Desc123")
+                        .colour("col12"));
 
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType.getId())
-                        .content("{\"id\":" + osType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"id\":" + osType.getId() + "}"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         testType = distributionSetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
-        assertThat(testType.getOptLockRevision()).isEqualTo(version(2));
         assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
         assertThat(testType.getOptionalModuleTypes()).isEmpty();
     }
@@ -172,28 +177,30 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes POST requests.")
-    public void addOptionalModuleToDistributionSetType() throws Exception {
-        DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
-                .key("test123").name("TestName123").description("Desc123").colour("col12"));
-        assertThat(testType.getOptLockRevision()).isEqualTo(version(1));
+    void addOptionalModuleToDistributionSetType() throws Exception {
+        DistributionSetType testType = distributionSetTypeManagement.create(
+                entityFactory.distributionSetType().create()
+                        .key("test123")
+                        .name("TestName123")
+                        .description("Desc123")
+                        .colour("col12"));
 
         mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
-                        .content("{\"id\":" + osType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"id\":" + osType.getId() + "}"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         testType = distributionSetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
-        assertThat(testType.getOptLockRevision()).isEqualTo(version(2));
         assertThat(testType.getOptionalModuleTypes()).containsExactly(osType);
         assertThat(testType.getMandatoryModuleTypes()).isEmpty();
-
     }
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Verifies quota enforcement for /rest/v1/distributionsettypes/{ID}/optionalmoduletypes POST requests.")
-    public void assignModuleTypesToDistributionSetTypeUntilQuotaExceeded() throws Exception {
+    void assignModuleTypesToDistributionSetTypeUntilQuotaExceeded() throws Exception {
         // create software module types
         final int maxSoftwareModuleTypes = quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType();
         final List<Long> moduleTypeIds = new ArrayList<>();
@@ -249,7 +256,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes GET requests.")
-    public void getMandatoryModulesOfDistributionSetType() throws Exception {
+    void getMandatoryModulesOfDistributionSetType() throws Exception {
         final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType.getId())
@@ -266,7 +273,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes GET requests.")
-    public void getOptionalModulesOfDistributionSetType() throws Exception {
+    void getOptionalModulesOfDistributionSetType() throws Exception {
         final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
@@ -283,7 +290,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes/{ID} GET requests.")
-    public void getMandatoryModuleOfDistributionSetType() throws Exception {
+    void getMandatoryModuleOfDistributionSetType() throws Exception {
         final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes/{smtId}", testType.getId(),
@@ -302,7 +309,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes/{ID} GET requests.")
-    public void getOptionalModuleOfDistributionSetType() throws Exception {
+    void getOptionalModuleOfDistributionSetType() throws Exception {
         final DistributionSetType testType = generateTestType();
 
         mvc.perform(get("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes/{smtId}", testType.getId(),
@@ -321,7 +328,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/mandatorymoduletypes/{ID} DELETE requests.")
-    public void removeMandatoryModuleToDistributionSetType() throws Exception {
+    void removeMandatoryModuleToDistributionSetType() throws Exception {
         DistributionSetType testType = generateTestType();
 
         mvc.perform(delete("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes/{smtId}", testType.getId(),
@@ -331,7 +338,6 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         testType = distributionSetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
-        assertThat(testType.getOptLockRevision()).isEqualTo(version(2));
         assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
         assertThat(testType.getMandatoryModuleTypes()).isEmpty();
     }
@@ -339,7 +345,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID}/optionalmoduletypes/{ID} DELETE requests.")
-    public void removeOptionalModuleToDistributionSetType() throws Exception {
+    void removeOptionalModuleToDistributionSetType() throws Exception {
         DistributionSetType testType = generateTestType();
 
         mvc.perform(delete("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes/{smtId}", testType.getId(),
@@ -349,7 +355,6 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         testType = distributionSetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo("uploadTester");
-        assertThat(testType.getOptLockRevision()).isEqualTo(version(2));
         assertThat(testType.getOptionalModuleTypes()).isEmpty();
         assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
     }
@@ -357,7 +362,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID} GET requests.")
-    public void getDistributionSetType() throws Exception {
+    void getDistributionSetType() throws Exception {
         DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
                 .key("test123").name("TestName123").description("Desc123"));
         testType = distributionSetTypeManagement
@@ -378,7 +383,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
     @Test
     @Description("Handles the GET request of retrieving all distribution set types within SP based on parameter.")
-    public void getDistributionSetTypesWithParameter() throws Exception {
+    void getDistributionSetTypesWithParameter() throws Exception {
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                         + "?limit=10&sort=name:ASC&offset=0&q=name==a"))
                 .andDo(MockMvcResultPrinter.print())
@@ -388,7 +393,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/DistributionSetTypes/{ID} DELETE requests (hard delete scenario).")
-    public void deleteDistributionSetTypeUnused() throws Exception {
+    void deleteDistributionSetTypeUnused() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
                 .create().key("test123").name("TestName123").description("Desc123").colour("col12"));
 
@@ -403,7 +408,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
     @Test
     @Description("Ensures that DS type deletion request to API on an entity that does not exist results in NOT_FOUND.")
-    public void deleteDistributionSetTypeThatDoesNotExistLeadsToNotFound() throws Exception {
+    void deleteDistributionSetTypeThatDoesNotExistLeadsToNotFound() throws Exception {
         mvc.perform(delete("/rest/v1/distributionsettypes/1234"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
@@ -412,7 +417,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/DistributionSetTypes/{ID} DELETE requests (soft delete scenario).")
-    public void deleteDistributionSetTypeUsed() throws Exception {
+    void deleteDistributionSetTypeUsed() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
                 .create().key("test123").name("TestName123").description("Desc123").colour("col12"));
 
@@ -442,7 +447,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
     @Test
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID} PUT requests.")
-    public void updateDistributionSetTypeColourDescriptionAndNameUntouched() throws Exception {
+    void updateDistributionSetTypeColourDescriptionAndNameUntouched() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
                 .create().key("test123").name("TestName123").description("Desc123").colour("col"));
 
@@ -463,7 +468,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
     @Test
     @Description("Handles the PUT request for a single distribution set type within SP.")
-    public void updateDistributionSetTypeDescriptionAndColor() throws Exception {
+    void updateDistributionSetTypeDescriptionAndColor() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement.update(entityFactory.distributionSetType()
                 .update(testdataFactory.createDistributionSet().getType().getId()).description("Desc1234"));
         final String body = new JSONObject()
@@ -479,7 +484,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
     @Test
     @Description("Tests the update of the deletion flag. It is verfied that the distribution set type can't be marked as deleted through update operation.")
-    public void updateDistributionSetTypeDeletedFlag() throws Exception {
+    void updateDistributionSetTypeDeletedFlag() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("test123").name("TestName123").colour("col"));
 
@@ -495,7 +500,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
     @Test
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes GET requests with paging.")
-    public void getDistributionSetTypesWithoutAddtionalRequestParameters() throws Exception {
+    void getDistributionSetTypesWithoutAddtionalRequestParameters() throws Exception {
 
         // 4 types overall (3 hawkbit tenant default, 1 test default
         final int types = 4;
@@ -509,7 +514,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
     @Test
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes GET requests with paging.")
-    public void getDistributionSetTypesWithPagingLimitRequestParameter() throws Exception {
+    void getDistributionSetTypesWithPagingLimitRequestParameter() throws Exception {
 
         final int types = DEFAULT_DS_TYPES;
         final int limitSize = 1;
@@ -524,7 +529,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
     @Test
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes GET requests with paging.")
-    public void getDistributionSetTypesWithPagingLimitAndOffsetRequestParameter() throws Exception {
+    void getDistributionSetTypesWithPagingLimitAndOffsetRequestParameter() throws Exception {
         final int types = DEFAULT_DS_TYPES;
         final int offsetParam = 2;
         final int expectedSize = types - offsetParam;
@@ -540,7 +545,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
     @Test
     @Description("Ensures that the server is behaving as expected on invalid requests (wrong media type, wrong ID etc.).")
-    public void invalidRequestsOnDistributionSetTypesResource() throws Exception {
+    void invalidRequestsOnDistributionSetTypesResource() throws Exception {
         final SoftwareModuleType testSmType = softwareModuleTypeManagement
                 .create(entityFactory.softwareModuleType().create().key("test123").name("TestName123"));
 
@@ -651,7 +656,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
     @Test
     @Description("Search erquest of software module types.")
-    public void searchDistributionSetTypeRsql() throws Exception {
+    void searchDistributionSetTypeRsql() throws Exception {
         distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("test123").name("TestName123"));
         distributionSetTypeManagement
