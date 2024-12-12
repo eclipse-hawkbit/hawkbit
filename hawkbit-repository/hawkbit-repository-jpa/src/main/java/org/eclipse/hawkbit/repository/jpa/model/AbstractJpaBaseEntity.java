@@ -99,7 +99,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @LastModifiedBy
     public void setLastModifiedBy(final String lastModifiedBy) {
-        if (lastModifiedBy != null && isController()) {
+        if (this.lastModifiedBy != null && isController()) {
             // initialized and controller = doesn't update
             return;
         }
@@ -115,7 +115,7 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     @LastModifiedDate
     public void setLastModifiedAt(final long lastModifiedAt) {
-        if (lastModifiedAt != 0 && isController()) {
+        if (this.lastModifiedAt != 0 && isController()) {
             // initialized and controller = doesn't update
             return;
         }
