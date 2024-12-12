@@ -315,7 +315,8 @@ public abstract class AbstractIntegrationTest {
         return assignDistributionSet(dsID, controllerIds, actionType, forcedTime, null);
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
+    protected DistributionSetAssignmentResult assignDistributionSet(
+            final long dsID, final List<String> controllerIds,
             final ActionType actionType, final long forcedTime, final Integer weight) {
         final boolean confirmationFlowActive = isConfirmationFlowActive();
 
@@ -323,16 +324,14 @@ public abstract class AbstractIntegrationTest {
                 .map(id -> DeploymentManagement.deploymentRequest(id, dsID).setActionType(actionType)
                         .setForceTime(forcedTime).setWeight(weight).setConfirmationRequired(confirmationFlowActive)
                         .build())
-                .collect(Collectors.toList());
-        final List<DistributionSetAssignmentResult> results = deploymentManagement
-                .assignDistributionSets(deploymentRequests);
+                .toList();
+        final List<DistributionSetAssignmentResult> results = deploymentManagement.assignDistributionSets(deploymentRequests);
         assertThat(results).hasSize(1);
         return results.get(0);
     }
 
     protected List<DistributionSetAssignmentResult> assignDistributionSets(final List<DeploymentRequest> requests) {
-        final List<DistributionSetAssignmentResult> distributionSetAssignmentResults = deploymentManagement
-                .assignDistributionSets(requests);
+        final List<DistributionSetAssignmentResult> distributionSetAssignmentResults = deploymentManagement.assignDistributionSets(requests);
         assertThat(distributionSetAssignmentResults).hasSize(requests.size());
         return distributionSetAssignmentResults;
     }

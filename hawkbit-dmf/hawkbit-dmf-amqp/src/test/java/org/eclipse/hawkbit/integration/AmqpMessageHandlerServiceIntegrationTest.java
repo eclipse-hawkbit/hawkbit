@@ -978,24 +978,25 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @Description("Verify the DMF download and install message is send directly if auto-confirmation is active")
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionUpdatedEvent.class, count = 0),
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 2),
-            @Expect(type = TargetPollEvent.class, count = 1),
-            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1), })
     void verifyDownloadAndInstallDirectlySendOnAutoConfirmationEnabled() {
         enableConfirmationFlow();
         final String controllerId = TARGET_PREFIX + "confirmedActionStatus";
 
         registerAndAssertTargetWithExistingTenant(controllerId);
 
+        assertThat(targetManagement.getByControllerID(controllerId).map(Target::getAutoConfirmationStatus)).isEmpty();
         confirmationManagement.activateAutoConfirmation(controllerId, null, null);
+        assertThat(targetManagement.getByControllerID(controllerId).map(Target::getAutoConfirmationStatus)).isPresent();
 
         final DistributionSetAssignmentResult assignmentResult = prepareDistributionSetAndAssign(controllerId);
         final Long actionId = getFirstAssignedActionId(assignmentResult);

@@ -835,9 +835,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     ConfirmationManagement confirmationManagement(final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final RepositoryProperties repositoryProperties, final QuotaManagement quotaManagement,
-            final EntityFactory entityFactory) {
+            final EntityManager entityManager, final EntityFactory entityFactory) {
         return new JpaConfirmationManagement(targetRepository, actionRepository, actionStatusRepository,
-                repositoryProperties, quotaManagement, entityFactory);
+                repositoryProperties, quotaManagement, entityManager, entityFactory);
     }
 
     /**

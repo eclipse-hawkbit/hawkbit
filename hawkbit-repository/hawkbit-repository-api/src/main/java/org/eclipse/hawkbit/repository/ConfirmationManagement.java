@@ -41,21 +41,18 @@ public interface ConfirmationManagement {
      * confirmation is active already, this method will fail with an exception.
      *
      * @param controllerId to activate the feature for
-     * @param initiator who initiated this operation. If 'null' we will take the current
-     *         user from {@link TenantAware#getCurrentUsername()}
+     * @param initiator who initiated this operation. If 'null' we will take the current user from {@link TenantAware#getCurrentUsername()}
      * @param remark optional field to set a remark
      * @return the persisted {@link AutoConfirmationStatus}
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    AutoConfirmationStatus activateAutoConfirmation(@NotEmpty String controllerId, final String initiator,
-            final String remark);
+    AutoConfirmationStatus activateAutoConfirmation(@NotEmpty String controllerId, final String initiator, final String remark);
 
     /**
      * Get the current state of auto-confirmation for a given controllerId
      *
      * @param controllerId to check the state for
-     * @return instance of {@link AutoConfirmationStatus} wrapped in an
-     *         {@link Optional}. Present if active and empty if disabled.
+     * @return instance of {@link AutoConfirmationStatus} wrapped in an {@link Optional}. Present if active and empty if disabled.
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER + SpPermission.SpringEvalExpressions.HAS_AUTH_OR +
             SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)

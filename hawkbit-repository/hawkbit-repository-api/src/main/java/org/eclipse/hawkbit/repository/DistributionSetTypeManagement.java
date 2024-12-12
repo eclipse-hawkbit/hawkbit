@@ -31,18 +31,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface DistributionSetTypeManagement
         extends RepositoryManagement<DistributionSetType, DistributionSetTypeCreate, DistributionSetTypeUpdate> {
 
-    /**
-     * @param key as {@link DistributionSetType#getKey()}
-     * @return {@link DistributionSetType}
-     */
-
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<DistributionSetType> getByKey(@NotEmpty String key);
 
-    /**
-     * @param name as {@link DistributionSetType#getName()}
-     * @return {@link DistributionSetType}
-     */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Optional<DistributionSetType> getByName(@NotEmpty String name);
 
@@ -52,12 +43,10 @@ public interface DistributionSetTypeManagement
      * @param id to update
      * @param softwareModuleTypeIds to assign
      * @return updated {@link DistributionSetType}
-     * @throws EntityNotFoundException in case the {@link DistributionSetType} or at least one of
-     *         the {@link SoftwareModuleType}s do not exist
-     * @throws EntityReadOnlyException if the {@link DistributionSetType} while it is already in use
-     *         by a {@link DistributionSet}
-     * @throws AssignmentQuotaExceededException if the maximum number of {@link SoftwareModuleType}s is
-     *         exceeded for the addressed {@link DistributionSetType}
+     * @throws EntityNotFoundException in case the {@link DistributionSetType} or at least one of the {@link SoftwareModuleType}s do not exist
+     * @throws EntityReadOnlyException if the {@link DistributionSetType} while it is already in use by a {@link DistributionSet}
+     * @throws AssignmentQuotaExceededException if the maximum number of {@link SoftwareModuleType}s is exceeded for the addressed
+     *         {@link DistributionSetType}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetType assignOptionalSoftwareModuleTypes(long id, @NotEmpty Collection<Long> softwareModuleTypeIds);
@@ -68,27 +57,23 @@ public interface DistributionSetTypeManagement
      * @param id to update
      * @param softwareModuleTypeIds to assign
      * @return updated {@link DistributionSetType}
-     * @throws EntityNotFoundException in case the {@link DistributionSetType} or at least one of
-     *         the {@link SoftwareModuleType}s do not exist
-     * @throws EntityReadOnlyException if the {@link DistributionSetType} while it is already in use
-     *         by a {@link DistributionSet}
-     * @throws AssignmentQuotaExceededException if the maximum number of {@link SoftwareModuleType}s is
-     *         exceeded for the addressed {@link DistributionSetType}
+     * @throws EntityNotFoundException in case the {@link DistributionSetType} or at least one of the {@link SoftwareModuleType}s do not exist
+     * @throws EntityReadOnlyException if the {@link DistributionSetType} while it is already in use by a {@link DistributionSet}
+     * @throws AssignmentQuotaExceededException if the maximum number of {@link SoftwareModuleType}s is exceeded for the addressed
+     *         {@link DistributionSetType}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetType assignMandatorySoftwareModuleTypes(long id, @NotEmpty Collection<Long> softwareModuleTypeIds);
 
     /**
-     * Unassigns a {@link SoftwareModuleType} from the
-     * {@link DistributionSetType}. Does nothing if {@link SoftwareModuleType}
+     * Unassigns a {@link SoftwareModuleType} from the {@link DistributionSetType}. Does nothing if {@link SoftwareModuleType}
      * has not been assigned in the first place.
      *
      * @param id to update
      * @param softwareModuleTypeId to unassign
      * @return updated {@link DistributionSetType}
      * @throws EntityNotFoundException in case the {@link DistributionSetType} does not exist
-     * @throws EntityReadOnlyException if the {@link DistributionSetType} while it is already in use
-     *         by a {@link DistributionSet}
+     * @throws EntityReadOnlyException if the {@link DistributionSetType} while it is already in use by a {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     DistributionSetType unassignSoftwareModuleType(long id, long softwareModuleTypeId);

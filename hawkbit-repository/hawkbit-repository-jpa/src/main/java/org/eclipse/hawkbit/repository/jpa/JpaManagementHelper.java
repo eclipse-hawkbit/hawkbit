@@ -15,6 +15,8 @@ import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.repository.NoCountSliceRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
@@ -32,13 +34,12 @@ import org.springframework.util.StringUtils;
 /**
  * A collection of static helper methods for the management classes
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JpaManagementHelper {
 
-    private JpaManagementHelper() {
-    }
 
-    public static <T, J extends T> Optional<J> findOneBySpec(final JpaSpecificationExecutor<J> repository,
-            final List<Specification<J>> specList) {
+    public static <T, J extends T> Optional<J> findOneBySpec(
+            final JpaSpecificationExecutor<J> repository, final List<Specification<J>> specList) {
         return repository.findOne(combineWithAnd(specList));
     }
 
@@ -84,8 +85,8 @@ public final class JpaManagementHelper {
         return repository.count(combineWithAnd(specList));
     }
 
-    public static <J extends AbstractJpaBaseEntity> J touch(final EntityManager entityManager,
-            final CrudRepository<J, ?> repository, final J entity) {
+    public static <J extends AbstractJpaBaseEntity> J touch(
+            final EntityManager entityManager, final CrudRepository<J, ?> repository, final J entity) {
         // merge base entity so optLockRevision gets updated and audit
         // log written because modifying e.g. metadata is modifying the base
         // entity itself for auditing purposes.

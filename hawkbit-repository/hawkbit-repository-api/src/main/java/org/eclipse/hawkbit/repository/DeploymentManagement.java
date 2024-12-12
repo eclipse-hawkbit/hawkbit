@@ -79,8 +79,7 @@ public interface DeploymentManagement {
      *         target and multiassignment is disabled
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<DistributionSetAssignmentResult> assignDistributionSets(
-            @Valid @NotEmpty List<DeploymentRequest> deploymentRequests);
+    List<DistributionSetAssignmentResult> assignDistributionSets(@Valid @NotEmpty List<DeploymentRequest> deploymentRequests);
 
     /**
      * Assigns {@link DistributionSet}s to {@link Target}s according to the
