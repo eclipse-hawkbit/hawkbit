@@ -37,8 +37,7 @@ class ActionTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Ensures that timeforced moded switch from soft to forces after defined timeframe.")
-    void timeforcedHitNewHasCodeIsGenerated() {
-
+    void timeForcedHitNewHasCodeIsGenerated() {
         // current time + 1 seconds
         final long sleepTime = 1000;
         final long timeForceTimeAt = System.currentTimeMillis() + sleepTime;
@@ -48,8 +47,7 @@ class ActionTest extends AbstractJpaIntegrationTest {
         assertThat(timeforcedAction.isForcedOrTimeForced()).isFalse();
 
         // wait until timeforce time is hit
-        Awaitility.await().atMost(Duration.ofSeconds(2)).pollInterval(Duration.ofMillis(100))
-                .until(timeforcedAction::isForcedOrTimeForced);
+        Awaitility.await().atMost(Duration.ofSeconds(2)).pollInterval(Duration.ofMillis(100)).until(timeforcedAction::isForcedOrTimeForced);
     }
 
     @Test
@@ -57,12 +55,11 @@ class ActionTest extends AbstractJpaIntegrationTest {
     void testActionTypeConvert() {
         final long id = createAction().getId();
         for (final ActionType actionType : ActionType.values()) {
-            final JpaAction action = actionRepository
-                    .findById(id).orElseThrow(() -> new IllegalStateException("Action not found"));
+            final JpaAction action = actionRepository.findById(id).orElseThrow(() -> new IllegalStateException("Action not found"));
             action.setActionType(actionType);
             actionRepository.save(action);
-            assertThat(actionRepository.findById(id).orElseThrow(() -> new IllegalStateException("Action not found"))
-                    .getActionType()).isEqualTo(actionType);
+            assertThat(actionRepository.findById(id).orElseThrow(() -> new IllegalStateException("Action not found")).getActionType())
+                    .isEqualTo(actionType);
         }
     }
 
@@ -71,12 +68,11 @@ class ActionTest extends AbstractJpaIntegrationTest {
     void testStatusConvert() {
         final long id = createAction().getId();
         for (final Status status : Status.values()) {
-            final JpaAction action = actionRepository
-                    .findById(id).orElseThrow(() -> new IllegalStateException("Action not found"));
+            final JpaAction action = actionRepository.findById(id).orElseThrow(() -> new IllegalStateException("Action not found"));
             action.setStatus(status);
             actionRepository.save(action);
-            assertThat(actionRepository.findById(id).orElseThrow(() -> new IllegalStateException("Action not found"))
-                    .getStatus()).isEqualTo(status);
+            assertThat(actionRepository.findById(id).orElseThrow(() -> new IllegalStateException("Action not found")).getStatus())
+                    .isEqualTo(status);
         }
     }
 

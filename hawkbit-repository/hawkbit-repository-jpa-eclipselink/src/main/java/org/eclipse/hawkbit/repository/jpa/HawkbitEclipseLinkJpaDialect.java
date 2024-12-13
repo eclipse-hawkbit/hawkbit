@@ -49,7 +49,7 @@ import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
  * 3.b.) the cause is not an {@link SQLException} and as a result cannot be
  * mapped.
  */
-public class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
+class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
 
     @Serial
     private static final long serialVersionUID = 1L;

@@ -34,7 +34,6 @@ import org.eclipse.hawkbit.repository.rsql.SuggestToken;
 import org.eclipse.hawkbit.repository.rsql.SuggestionContext;
 import org.eclipse.hawkbit.repository.rsql.SyntaxErrorContext;
 import org.eclipse.hawkbit.repository.rsql.ValidationOracleContext;
-import org.eclipse.persistence.exceptions.ConversionException;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.util.CollectionUtils;
 
@@ -75,8 +74,14 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
         } catch (final RSQLParameterUnsupportedFieldException | IllegalArgumentException ex) {
             errorContext.setErrorMessage(getCustomMessage(ex.getMessage(), null));
             log.trace("Illegal argument on parsing :", ex);
-        } catch (@SuppressWarnings("squid:S1166") final ConversionException | JpaSystemException e) {
+        } catch (final JpaSystemException e) {
             // noop
+        } catch (final RuntimeException e) {
+            if ("org.eclipse.persistence.exceptions.ConversionException".equals(e.getClass().getName())) {
+                // noop
+            } else {
+                throw e;
+            }
         }
         return context;
     }

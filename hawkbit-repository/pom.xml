@@ -17,6 +17,7 @@
         <artifactId>hawkbit-parent</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-repository</artifactId>
     <name>hawkBit :: Repository :: Parent</name>
     <packaging>pom</packaging>
@@ -24,6 +25,9 @@
     <modules>
         <module>hawkbit-repository-api</module>
         <module>hawkbit-repository-core</module>
+        <module>hawkbit-repository-jpa-api</module>
+        <module>hawkbit-repository-jpa-eclipselink</module>
+        <module>hawkbit-repository-jpa-hibernate</module>
         <module>hawkbit-repository-jpa</module>
         <module>hawkbit-repository-jpa-flyway</module>
 

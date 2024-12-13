@@ -30,22 +30,21 @@ import org.springframework.dao.UncategorizedDataAccessException;
  */
 @Feature("Unit Tests - Repository")
 @Story("Exception handling")
-public class HawkBitEclipseLinkJpaDialectTest {
+class HawkBitEclipseLinkJpaDialectTest {
 
     private final HawkbitEclipseLinkJpaDialect hawkBitEclipseLinkJpaDialectUnderTest = new HawkbitEclipseLinkJpaDialect();
 
     @Test
     @Description("Use Case: PersistenceException that can be mapped by EclipseLinkJpaDialect into corresponding DataAccessException.")
-    public void jpaOptimisticLockExceptionIsConcurrencyFailureException() {
-        assertThat(
-                hawkBitEclipseLinkJpaDialectUnderTest.translateExceptionIfPossible(mock(OptimisticLockException.class)))
+    void jpaOptimisticLockExceptionIsConcurrencyFailureException() {
+        assertThat(hawkBitEclipseLinkJpaDialectUnderTest.translateExceptionIfPossible(mock(OptimisticLockException.class)))
                 .isInstanceOf(ConcurrencyFailureException.class);
     }
 
     @Test
     @Description("Use Case: PersistenceException that could not be mapped by EclipseLinkJpaDialect directly but "
             + "instead is wrapped into JpaSystemException. Cause of PersistenceException is an SQLException.")
-    public void jpaSystemExceptionWithSqlDeadLockExceptionIsConcurrencyFailureException() {
+    void jpaSystemExceptionWithSqlDeadLockExceptionIsConcurrencyFailureException() {
         final PersistenceException persEception = mock(PersistenceException.class);
         when(persEception.getCause()).thenReturn(new SQLException("simulated transaction ER_LOCK_DEADLOCK", "40001"));
 
@@ -56,7 +55,7 @@ public class HawkBitEclipseLinkJpaDialectTest {
     @Test
     @Description("Use Case: PersistenceException that could not be mapped by EclipseLinkJpaDialect directly but instead is wrapped"
             + " into JpaSystemException. Cause of PersistenceException is not an SQLException.")
-    public void jpaSystemExceptionWithNumberFormatExceptionIsNull() {
+    void jpaSystemExceptionWithNumberFormatExceptionIsNull() {
         final PersistenceException persEception = mock(PersistenceException.class);
         when(persEception.getCause()).thenReturn(new NumberFormatException());
 
@@ -67,7 +66,7 @@ public class HawkBitEclipseLinkJpaDialectTest {
     @Test
     @Description("Use Case: RuntimeException that could not be mapped by EclipseLinkJpaDialect directly. Cause of "
             + "RuntimeException is an SQLException.")
-    public void runtimeExceptionWithSqlDeadLockExceptionIsConcurrencyFailureException() {
+    void runtimeExceptionWithSqlDeadLockExceptionIsConcurrencyFailureException() {
         final RuntimeException persEception = mock(RuntimeException.class);
         when(persEception.getCause()).thenReturn(new SQLException("simulated transaction ER_LOCK_DEADLOCK", "40001"));
 
@@ -78,11 +77,10 @@ public class HawkBitEclipseLinkJpaDialectTest {
     @Test
     @Description("Use Case: RuntimeException that could not be mapped by EclipseLinkJpaDialect directly. Cause of "
             + "RuntimeException is not an SQLException.")
-    public void runtimeExceptionWithNumberFormatExceptionIsNull() {
+    void runtimeExceptionWithNumberFormatExceptionIsNull() {
         final RuntimeException persEception = mock(RuntimeException.class);
         when(persEception.getCause()).thenReturn(new NumberFormatException());
 
         assertThat(hawkBitEclipseLinkJpaDialectUnderTest.translateExceptionIfPossible(persEception)).isNull();
     }
-
 }

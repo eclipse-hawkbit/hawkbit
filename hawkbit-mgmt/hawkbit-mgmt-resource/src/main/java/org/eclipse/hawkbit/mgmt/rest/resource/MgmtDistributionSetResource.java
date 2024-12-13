@@ -131,8 +131,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtDistributionSet> getDistributionSet(
-            final Long distributionSetId) {
+    public ResponseEntity<MgmtDistributionSet> getDistributionSet(final Long distributionSetId) {
         final DistributionSet foundDs = distributionSetManagement.getOrElseThrowException(distributionSetId);
 
         final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(foundDs);
@@ -142,8 +141,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<List<MgmtDistributionSet>> createDistributionSets(
-            final List<MgmtDistributionSetRequestBodyPost> sets) {
+    public ResponseEntity<List<MgmtDistributionSet>> createDistributionSets(final List<MgmtDistributionSetRequestBodyPost> sets) {
         log.debug("creating {} distribution sets", sets.size());
         // set default Ds type if ds type is null
         final String defaultDsKey = systemSecurityContext
