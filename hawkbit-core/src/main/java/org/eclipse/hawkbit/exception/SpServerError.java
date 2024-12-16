@@ -36,7 +36,7 @@ public enum SpServerError {
             "hawkbit.server.error.repo.invalidTargetAddress",
             "The target address is not well formed"),
     SP_REPO_ENTITY_NOT_EXISTS(
-            "hawkbit.server.error.repo.entitiyNotFound",
+            "hawkbit.server.error.repo.entityNotFound",
             "The given entity does not exist in the repository"),
     SP_REPO_CONCURRENT_MODIFICATION(
             "hawkbit.server.error.repo.concurrentModification",
