@@ -77,9 +77,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
         } catch (final JpaSystemException e) {
             // noop
         } catch (final RuntimeException e) {
-            if ("org.eclipse.persistence.exceptions.ConversionException".equals(e.getClass().getName())) {
-                // noop
-            } else {
+            if (!"org.eclipse.persistence.exceptions.ConversionException".equals(e.getClass().getName())) {
                 throw e;
             }
         }

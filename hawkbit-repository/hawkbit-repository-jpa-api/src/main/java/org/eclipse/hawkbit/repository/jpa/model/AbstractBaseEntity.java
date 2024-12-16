@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serializable;
-import java.util.concurrent.TimeUnit;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
@@ -18,7 +17,6 @@ import jakarta.persistence.PostPersist;
 import jakarta.persistence.PostRemove;
 import jakarta.persistence.PostUpdate;
 
-import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
