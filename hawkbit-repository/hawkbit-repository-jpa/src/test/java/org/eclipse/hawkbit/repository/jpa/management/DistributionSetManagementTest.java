@@ -607,17 +607,15 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     void lockDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
         assertThat(
-                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked)
-                        .orElse(true))
+                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(true))
                 .isFalse();
         distributionSetManagement.lock(distributionSet.getId());
         assertThat(
-                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked)
-                        .orElse(false))
+                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(false))
                 .isTrue();
         // assert software modules are locked
         assertThat(distributionSet.getModules().size()).isNotEqualTo(0);
-        distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::getModules)
+        distributionSetManagement.getWithDetails(distributionSet.getId()).map(DistributionSet::getModules)
                 .orElseThrow().forEach(module -> assertThat(module.isLocked()).isTrue());
     }
 
@@ -668,7 +666,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .isFalse();
         // assert software modules are not unlocked
         assertThat(distributionSet.getModules().size()).isNotEqualTo(0);
-        distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::getModules)
+        distributionSetManagement.getWithDetails(distributionSet.getId()).map(DistributionSet::getModules)
                 .orElseThrow().forEach(module -> assertThat(module.isLocked()).isTrue());
     }
 
@@ -688,7 +686,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .as("Attempt to modify a locked DS software modules should throw an exception")
                 .isThrownBy(() -> distributionSetManagement.assignSoftwareModules(
                         distributionSet.getId(), List.of(testdataFactory.createSoftwareModule("sm-1").getId())));
-        assertThat(distributionSetManagement.get(distributionSet.getId()).get().getModules().size())
+        assertThat(distributionSetManagement.getWithDetails(distributionSet.getId()).get().getModules().size())
                 .as("Software module shall not be added to a locked DS.")
                 .isEqualTo(softwareModuleCount);
 
@@ -697,7 +695,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .as("Attempt to modify a locked DS software modules should throw an exception")
                 .isThrownBy(() -> distributionSetManagement.unassignSoftwareModule(
                         distributionSet.getId(), distributionSet.getModules().stream().findFirst().get().getId()));
-        assertThat(distributionSetManagement.get(distributionSet.getId()).get().getModules().size())
+        assertThat(distributionSetManagement.getWithDetails(distributionSet.getId()).get().getModules().size())
                 .as("Software module shall not be removed from a locked DS.")
                 .isEqualTo(softwareModuleCount);
     }
@@ -722,8 +720,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                         .toList());
         // assert that implicit lock locks for every skip tag
         skipTags.forEach(skipTag -> {
-            DistributionSet distributionSetWithSkipTag =
-                    testdataFactory.createDistributionSet("ds-skip-" + skipTag.getName());
+            DistributionSet distributionSetWithSkipTag = testdataFactory.createDistributionSet("ds-skip-" + skipTag.getName());
             distributionSetManagement.assignTag(List.of(distributionSetWithSkipTag.getId()), skipTag.getId());
             distributionSetWithSkipTag = distributionSetManagement.get(distributionSetWithSkipTag.getId()).orElseThrow();
             // assert that implicit lock isn't applicable for skip tags

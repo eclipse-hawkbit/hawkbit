@@ -746,14 +746,4 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
         assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
         return testType;
     }
-
-    private void createSoftwareModulesAlphabetical(final int amount) {
-        char character = 'a';
-        for (int index = 0; index < amount; index++) {
-            final String str = String.valueOf(character);
-            softwareModuleManagement.create(
-                    entityFactory.softwareModule().create().name(str).description(str).vendor(str).version(str));
-            character++;
-        }
-    }
 }

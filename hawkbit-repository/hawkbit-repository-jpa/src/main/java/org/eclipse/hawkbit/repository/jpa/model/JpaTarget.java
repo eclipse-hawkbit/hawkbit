@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
@@ -27,7 +26,6 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Converter;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Index;
@@ -67,11 +65,6 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.persistence.descriptors.DescriptorEvent;
-import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
-import org.eclipse.persistence.queries.UpdateObjectQuery;
-import org.hibernate.event.spi.PreUpdateEvent;
-import org.hibernate.event.spi.PreUpdateEventListener;
 
 /**
  * JPA implementation of {@link Target}.
@@ -88,7 +81,6 @@ import org.hibernate.event.spi.PreUpdateEventListener;
         uniqueConstraints = @UniqueConstraint(columnNames = { "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
-@EntityListeners({ JpaTarget.EntityPropertyChangeListener.class }) // add listener to the listeners declared into suppers
 @Slf4j
 public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAwareEntity {
 
@@ -328,42 +320,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
                     TargetUpdateStatus.ERROR, 3,
                     TargetUpdateStatus.REGISTERED, 4
             ), null);
-        }
-    }
-
-    /**
-     * Listens to updates on {@link JpaTarget} entities, Filtering out updates that only change the "lastTargetQuery" or "address" fields.
-     */
-    public static class EntityPropertyChangeListener extends DescriptorEventAdapter implements PreUpdateEventListener {
-
-        private static final List<String> TARGET_UPDATE_EVENT_IGNORE_FIELDS = List.of(
-                "lastTargetQuery", "address", // actual to be skipped
-                "optLockRevision", "lastModifiedAt", "lastModifiedBy" // system to be skipped
-        );
-
-        @Override
-        public void postUpdate(final DescriptorEvent event) {
-            final Object object = event.getObject();
-            if (((UpdateObjectQuery) event.getQuery()).getObjectChangeSet().getChangedAttributeNames().stream()
-                    .anyMatch(field -> !TARGET_UPDATE_EVENT_IGNORE_FIELDS.contains(field))) {
-                doNotify(() -> ((EventAwareEntity) object).fireUpdateEvent());
-            }
-        }
-
-        @Override
-        public boolean onPreUpdate(final PreUpdateEvent event) {
-            final Object[] oldState = event.getOldState();
-            final Object[] newState = event.getState();
-            for (int i = 0; i < newState.length; i++) {
-                if (!Objects.equals(oldState[i], newState[i])) {
-                    final String attribute = event.getPersister().getAttributeMapping(i).getAttributeName();
-                    if (!TARGET_UPDATE_EVENT_IGNORE_FIELDS.contains(attribute)) {
-                        doNotify(() -> ((EventAwareEntity) event.getEntity()).fireUpdateEvent());
-                        break;
-                    }
-                }
-            }
-            return false;
         }
     }
 }

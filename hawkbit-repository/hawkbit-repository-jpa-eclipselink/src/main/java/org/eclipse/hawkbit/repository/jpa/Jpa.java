@@ -16,36 +16,31 @@ import java.util.stream.IntStream;
 import jakarta.persistence.Query;
 
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
+@Slf4j
 public class Jpa {
 
     public enum JpaVendor {
         ECLIPSELINK,
-        HIBERNATE // NOT SUPPORTED!
+        HIBERNATE
     }
 
     public static final JpaVendor JPA_VENDOR = JpaVendor.ECLIPSELINK;
+    static {
+        log.info("JPA vendor: {}", JPA_VENDOR);
+    }
 
-    public static char NATIVE_QUERY_PARAMETER_PREFIX = switch (JPA_VENDOR) {
-        case ECLIPSELINK -> '?';
-        case HIBERNATE -> ':';
-    };
+    public static final char NATIVE_QUERY_PARAMETER_PREFIX  = '?';
 
     public static <T> String formatNativeQueryInClause(final String name, final List<T> list) {
-        return switch (Jpa.JPA_VENDOR) {
-            case ECLIPSELINK -> formatEclipseLinkNativeQueryInClause(IntStream.range(0, list.size()).mapToObj(i -> name + "_" + i).toList());
-            case HIBERNATE -> ":" + name;
-        };
+        return formatEclipseLinkNativeQueryInClause(IntStream.range(0, list.size()).mapToObj(i -> name + "_" + i).toList());
     }
 
     public static <T> void setNativeQueryInParameter(final Query deleteQuery, final String name, final List<T> list) {
-        if (Jpa.JPA_VENDOR == Jpa.JpaVendor.ECLIPSELINK) {
-            for (int i = 0, len = list.size(); i < len; i++) {
-                deleteQuery.setParameter(name + "_" + i, list.get(i));
-            }
-        } else if (Jpa.JPA_VENDOR == Jpa.JpaVendor.HIBERNATE) {
-            deleteQuery.setParameter(name, list);
+        for (int i = 0, len = list.size(); i < len; i++) {
+            deleteQuery.setParameter(name + "_" + i, list.get(i));
         }
     }
 

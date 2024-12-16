@@ -1,0 +1,46 @@
+<!--
+
+    Copyright (c) 2015 Bosch Software Innovations GmbH and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+-->
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.eclipse.hawkbit</groupId>
+        <version>${revision}</version>
+        <artifactId>hawkbit-repository</artifactId>
+    </parent>
+
+    <artifactId>hawkbit-repository-jpa-hibernate</artifactId>
+    <name>hawkBit :: Repository :: JPA Hibernate Vendor</name>
+
+    <properties>
+        <apt.source.dir>${project.build.directory}/generated-sources/apt/</apt.source.dir>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-repository-jpa-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+
+        <!-- Static class generation -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-jpamodelgen</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+</project>

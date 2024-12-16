@@ -9,13 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
-
-import javax.sql.DataSource;
 
 import jakarta.persistence.EntityManager;
 import jakarta.validation.Validation;
@@ -81,7 +77,6 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleMetadataBuild
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetTypeBuilder;
-import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitDefaultServiceExecutor;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -166,10 +161,7 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
-import org.eclipse.persistence.config.PersistenceUnitProperties;
-import org.hibernate.validator.BaseHibernateValidatorConfiguration;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -177,9 +169,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -191,14 +181,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.lang.NonNull;
-import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
-import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
-import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 /**
@@ -213,15 +199,9 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EnableRetry
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 @PropertySource("classpath:/hawkbit-jpa-defaults.properties")
-@Import({ RepositoryDefaultConfiguration.class, DataSourceAutoConfiguration.class,
-        SystemManagementCacheKeyGenerator.class })
+@Import({ JpaConfiguration.class, RepositoryDefaultConfiguration.class, DataSourceAutoConfiguration.class, SystemManagementCacheKeyGenerator.class })
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
-public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
-
-    protected RepositoryApplicationConfiguration(final DataSource dataSource, final JpaProperties properties,
-            final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider) {
-        super(dataSource, properties, jtaTransactionManagerProvider);
-    }
+public class RepositoryApplicationConfiguration {
 
     /**
      * Defines the validation processor bean.
@@ -233,56 +213,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         final MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
         // ValidatorFactory shall NOT be closed because after closing the generated Validator
         // methods shall not be called - we need the validator in future
-        processor.setValidator(Validation.byDefaultProvider().configure()
-                .addProperty(BaseHibernateValidatorConfiguration.ALLOW_PARALLEL_METHODS_DEFINE_PARAMETER_CONSTRAINTS,"true")
-                .buildValidatorFactory().getValidator());
+        processor.setValidator(Validation.byDefaultProvider()
+                .configure()
+                .addProperty(org.hibernate.validator.BaseHibernateValidatorConfiguration.ALLOW_PARALLEL_METHODS_DEFINE_PARAMETER_CONSTRAINTS, "true")
+                .buildValidatorFactory()
+                .getValidator());
         return processor;
-    }
-
-    /**
-     * {@link MultiTenantJpaTransactionManager} bean.
-     *
-     * @return a new {@link PlatformTransactionManager}
-     * @see org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration#transactionManager(ObjectProvider)
-     */
-    @Override
-    @Bean
-    public PlatformTransactionManager transactionManager(
-            final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
-        return new MultiTenantJpaTransactionManager();
-    }
-
-    @Override
-    protected AbstractJpaVendorAdapter createJpaVendorAdapter() {
-        return new EclipseLinkJpaVendorAdapter() {
-
-            private final HawkbitEclipseLinkJpaDialect jpaDialect = new HawkbitEclipseLinkJpaDialect();
-
-            @Override
-            public EclipseLinkJpaDialect getJpaDialect() {
-                return jpaDialect;
-            }
-        };
-    }
-
-    @Override
-    protected Map<String, Object> getVendorProperties() {
-        final Map<String, Object> properties = new HashMap<>(7);
-        // Turn off dynamic weaving to disable LTW lookup in static weaving mode
-        properties.put(PersistenceUnitProperties.WEAVING, "false");
-        // needed for reports
-        properties.put(PersistenceUnitProperties.ALLOW_NATIVE_SQL_QUERIES, "true");
-        // flyway
-        properties.put(PersistenceUnitProperties.DDL_GENERATION, "none");
-        // Embed into hawkBit logging
-        properties.put(PersistenceUnitProperties.LOGGING_LOGGER, "JavaLogger");
-        // Ensure that we flush only at the end of the transaction
-        properties.put(PersistenceUnitProperties.PERSISTENCE_CONTEXT_FLUSH_MODE, "COMMIT");
-        // Enable batch writing
-        properties.put(PersistenceUnitProperties.BATCH_WRITING, "JDBC");
-        // Batch size
-        properties.put(PersistenceUnitProperties.BATCH_WRITING_SIZE, "500");
-        return properties;
     }
 
     @Bean

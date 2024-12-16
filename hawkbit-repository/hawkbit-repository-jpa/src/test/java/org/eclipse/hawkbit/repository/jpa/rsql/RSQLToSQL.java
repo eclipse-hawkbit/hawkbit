@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import jakarta.persistence.EntityManager;
@@ -23,11 +25,9 @@ import cz.jirutka.rsql.parser.ast.Node;
 import cz.jirutka.rsql.parser.ast.RSQLOperators;
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
+import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
-import org.eclipse.persistence.config.PersistenceUnitProperties;
-import org.eclipse.persistence.jpa.JpaQuery;
-import org.eclipse.persistence.queries.DatabaseQuery;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.util.CollectionUtils;
 
@@ -40,23 +40,33 @@ public class RSQLToSQL {
         this.entityManager = entityManager;
     }
 
-    public <T, A extends Enum<A> & RsqlQueryField> String toSQL(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql,
-            final boolean legacyRsqlVisitor) {
-        return createDbQuery(domainClass, fieldsClass, rsql, legacyRsqlVisitor).getSQLString();
-    }
-
-    public <T, A extends Enum<A> & RsqlQueryField> DatabaseQuery createDbQuery(final Class<T> domainClass, final Class<A> fieldsClass,
-            final String rsql, final boolean legacyRsqlVisitor) {
+    public <T, A extends Enum<A> & RsqlQueryField> String toSQL(
+            final Class<T> domainClass, final Class<A> fieldsClass, final String rsql, final boolean legacyRsqlVisitor) {
         final CriteriaQuery<T> query = createQuery(domainClass, fieldsClass, rsql, legacyRsqlVisitor);
         final TypedQuery<?> typedQuery = entityManager.createQuery(query);
         // executes the query - otherwise the SQL string is not generated
-        typedQuery.setParameter(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, "DEFAULT");
-        typedQuery.getResultList();
-        return typedQuery.unwrap(JpaQuery.class).getDatabaseQuery();
+        if (Jpa.JPA_VENDOR.equals(Jpa.JpaVendor.ECLIPSELINK)) {
+            typedQuery.setParameter("eclipselink.tenant-id", "DEFAULT");
+            typedQuery.getResultList();
+            try {
+                final Class<?> jpaQueryClass = Class.forName("org.eclipse.persistence.jpa.JpaQuery");
+                final Method getDatabaseQueryMethod = jpaQueryClass.getMethod("getDatabaseQuery");
+                final Method getSQLString = getDatabaseQueryMethod.getReturnType().getMethod("getSQLString");
+                return (String)getSQLString.invoke(getDatabaseQueryMethod.invoke(typedQuery.unwrap(jpaQueryClass)));
+            } catch (final RuntimeException e) {
+                throw e;
+            } catch (final ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
+                throw new UnsupportedOperationException("EclipseLink is not supported", e);
+            } catch (final InvocationTargetException e) {
+                throw e.getCause() instanceof RuntimeException ? (RuntimeException)e.getCause() : new RuntimeException(e.getCause());
+            }
+        } else { // hibernate
+            throw new UnsupportedOperationException("Hibernate is not supported");
+        }
     }
 
-    private <T, A extends Enum<A> & RsqlQueryField> CriteriaQuery<T> createQuery(final Class<T> domainClass, final Class<A> fieldsClass,
-            final String rsql, final boolean legacyRsqlVisitor) {
+    private <T, A extends Enum<A> & RsqlQueryField> CriteriaQuery<T> createQuery(
+            final Class<T> domainClass, final Class<A> fieldsClass, final String rsql, final boolean legacyRsqlVisitor) {
         final CriteriaQuery<T> query = entityManager.getCriteriaBuilder().createQuery(domainClass);
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         return query.where(
@@ -78,16 +88,15 @@ public class RSQLToSQL {
         query.distinct(true);
 
         final RSQLVisitor<List<Predicate>, String> jpqQueryRSQLVisitor =
-                legacyRsqlVisitor ?
-                        new JpaQueryRsqlVisitor<>(
+                legacyRsqlVisitor
+                        ? new JpaQueryRsqlVisitor<>(
                                 root, cb, fieldsClass,
                                 virtualPropertyReplacer, DATABASE, query,
                                 !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase())
-                        :
-                                new JpaQueryRsqlVisitorG2<>(
-                                        fieldsClass, root, query, cb,
-                                        DATABASE, virtualPropertyReplacer,
-                                        !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase());
+                        : new JpaQueryRsqlVisitorG2<>(
+                                fieldsClass, root, query, cb,
+                                DATABASE, virtualPropertyReplacer,
+                                !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase());
         final List<Predicate> accept = rootNode.accept(jpqQueryRSQLVisitor);
 
         if (CollectionUtils.isEmpty(accept)) {

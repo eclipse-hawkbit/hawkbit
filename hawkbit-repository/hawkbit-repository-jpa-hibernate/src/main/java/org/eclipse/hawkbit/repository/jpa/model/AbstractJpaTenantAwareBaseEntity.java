@@ -25,9 +25,7 @@ import lombok.Setter;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.eclipse.persistence.annotations.Multitenant;
-import org.eclipse.persistence.annotations.MultitenantType;
-import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
+import org.hibernate.annotations.TenantId;
 
 /**
  * Holder of the base attributes common to all tenant aware entities.
@@ -36,17 +34,15 @@ import org.eclipse.persistence.annotations.TenantDiscriminatorColumn;
 @Setter
 @Getter
 @MappedSuperclass
-// Eclipse link MultiTenant support
-@TenantDiscriminatorColumn(name = "tenant", length = 40)
-@Multitenant(MultitenantType.SINGLE_TABLE)
 public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEntity implements TenantAwareBaseEntity {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "tenant", nullable = false, insertable = false, updatable = false, length = 40)
+    @Column(name = "tenant", nullable = false, insertable = true, updatable = false, length = 40)
     @Size(min = 1, max = 40)
     @NotNull
+    @TenantId // Hibernate MultiTenant support
     private String tenant;
 
     /**
@@ -55,10 +51,7 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
      */
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + (tenant == null ? 0 : tenant.hashCode());
-        return result;
+        return 31 * super.hashCode() + (tenant == null ? 0 : tenant.hashCode());
     }
 
     /**
@@ -73,13 +66,12 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
         if (!super.equals(obj)) {
             return false;
         }
-        final AbstractJpaTenantAwareBaseEntity other = (AbstractJpaTenantAwareBaseEntity) obj;
-        return Objects.equals(getTenant(), other.getTenant());
+        return Objects.equals(getTenant(), ((AbstractJpaTenantAwareBaseEntity) obj).getTenant());
     }
 
     @Override
     public String toString() {
-        return "BaseEntity [id=" + super.getId() + "]";
+        return getClass().getSimpleName() + " [tenant=" + getTenant() + ", id=" + getId() + "]";
     }
 
     /**
