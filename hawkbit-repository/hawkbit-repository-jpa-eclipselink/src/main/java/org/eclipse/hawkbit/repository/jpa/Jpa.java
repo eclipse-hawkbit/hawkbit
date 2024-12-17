@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -34,13 +35,14 @@ public class Jpa {
 
     public static final char NATIVE_QUERY_PARAMETER_PREFIX  = '?';
 
-    public static <T> String formatNativeQueryInClause(final String name, final List<T> list) {
-        return formatEclipseLinkNativeQueryInClause(IntStream.range(0, list.size()).mapToObj(i -> name + "_" + i).toList());
+    public static <T> String formatNativeQueryInClause(final String name, final Collection<T> collection) {
+        return formatEclipseLinkNativeQueryInClause(IntStream.range(0, collection.size()).mapToObj(i -> name + "_" + i).toList());
     }
 
-    public static <T> void setNativeQueryInParameter(final Query deleteQuery, final String name, final List<T> list) {
-        for (int i = 0, len = list.size(); i < len; i++) {
-            deleteQuery.setParameter(name + "_" + i, list.get(i));
+    public static <T> void setNativeQueryInParameter(final Query query, final String name, final Collection<T> collection) {
+        int i = 0;
+        for (final Iterator<T> iterator = collection.iterator(); iterator.hasNext(); i++) {
+            query.setParameter(name + "_" + i, iterator.next());
         }
     }
 
