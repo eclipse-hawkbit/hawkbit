@@ -19,9 +19,7 @@ import java.util.stream.Collectors;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.ListJoin;
-import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
@@ -31,7 +29,6 @@ import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
@@ -55,9 +52,7 @@ import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -106,17 +101,13 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
 
         final Page<JpaRolloutGroup> rolloutGroups = rolloutGroupRepository.findByRolloutId(rolloutId, pageable);
-        final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(RolloutGroup::getId)
-                .collect(Collectors.toList());
-
+        final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(RolloutGroup::getId).toList();
         if (rolloutGroupIds.isEmpty()) {
             // groups might have been already deleted, so return empty list.
             return new PageImpl<>(Collections.emptyList());
         }
 
-        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(
-                rolloutGroupIds);
-
+        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(rolloutGroupIds);
         for (final JpaRolloutGroup rolloutGroup : rolloutGroups) {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
                     allStatesForRollout.get(rolloutGroup.getId()), (long) rolloutGroup.getTotalTargets(),
@@ -149,20 +140,16 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
 
         final Page<RolloutGroup> rolloutGroups = findByRolloutAndRsql(rolloutId, rsqlParam, pageable);
-        final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(RolloutGroup::getId)
-                .collect(Collectors.toList());
-
+        final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(RolloutGroup::getId).toList();
         if (rolloutGroupIds.isEmpty()) {
-            // groups might already deleted, so return empty list.
+            // groups might already have been deleted, so return empty list.
             return new PageImpl<>(Collections.emptyList());
         }
 
-        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(
-                rolloutGroupIds);
-
+        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(rolloutGroupIds);
         for (final RolloutGroup rolloutGroup : rolloutGroups) {
             final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
-                    allStatesForRollout.get(rolloutGroup.getId()), Long.valueOf(rolloutGroup.getTotalTargets()),
+                    allStatesForRollout.get(rolloutGroup.getId()), (long) rolloutGroup.getTotalTargets(),
                     rolloutGroup.getRollout().getActionType());
             ((JpaRolloutGroup) rolloutGroup).setTotalTargetCountStatus(totalTargetCountStatus);
         }
@@ -220,8 +207,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     @Override
     public Optional<RolloutGroup> getWithDetailedStatus(final long rolloutGroupId) {
         final Optional<RolloutGroup> rolloutGroup = get(rolloutGroupId);
-
-        if (!rolloutGroup.isPresent()) {
+        if (rolloutGroup.isEmpty()) {
             return rolloutGroup;
         }
 
@@ -235,8 +221,8 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
             rolloutStatusCache.putRolloutGroupStatus(rolloutGroupId, rolloutStatusCountItems);
         }
 
-        final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
-                Long.valueOf(jpaRolloutGroup.getTotalTargets()), jpaRolloutGroup.getRollout().getActionType());
+        final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
+                rolloutStatusCountItems, (long) jpaRolloutGroup.getTotalTargets(), jpaRolloutGroup.getRollout().getActionType());
         jpaRolloutGroup.setTotalTargetCountStatus(totalTargetCountStatus);
         return rolloutGroup;
 
@@ -268,9 +254,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         final Map<Long, List<TotalTargetCountActionStatus>> fromCache = rolloutStatusCache
                 .getRolloutGroupStatus(groupIds);
 
-        final List<Long> rolloutGroupIds = groupIds.stream().filter(id -> !fromCache.containsKey(id))
-                .collect(Collectors.toList());
-
+        final List<Long> rolloutGroupIds = groupIds.stream().filter(id -> !fromCache.containsKey(id)).toList();
         if (!rolloutGroupIds.isEmpty()) {
             final List<TotalTargetCountActionStatus> resultList = actionRepository
                     .getStatusCountByRolloutGroupIds(rolloutGroupIds);
@@ -291,30 +275,9 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
                 rolloutGroupId);
     }
 
-    private List<Order> getOrderBy(final Pageable pageRequest, final CriteriaBuilder cb,
-            final Join<RolloutTargetGroup, JpaTarget> targetJoin,
-            final ListJoin<RolloutTargetGroup, JpaAction> actionJoin) {
-
-        return pageRequest.getSort().get().flatMap(order -> {
-            final List<Order> orders;
-            final String property = order.getProperty();
-            // we consider status, last_action_status_code as property from
-            // JpaAction ...
-            if ("status".equals(property) || "lastActionStatusCode".equals(property)) {
-                orders = QueryUtils.toOrders(Sort.by(order.getDirection(), property), actionJoin, cb);
-            }
-            // ... and every other property from JpaTarget
-            else {
-                orders = QueryUtils.toOrders(Sort.by(order.getDirection(), property), targetJoin, cb);
-            }
-            return orders.stream();
-        }).collect(Collectors.toList());
-    }
-
     private void throwExceptionIfRolloutGroupDoesNotExist(final Long rolloutGroupId) {
         if (!rolloutGroupRepository.existsById(rolloutGroupId)) {
             throw new EntityNotFoundException(RolloutGroup.class, rolloutGroupId);
         }
     }
-
 }

@@ -79,6 +79,7 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
     List<T> findAllById(final Iterable<Long> ids);
 
     // TODO To be considered if this method is needed at all
+
     /**
      * Deletes all entities of a given tenant from this repository. For safety reasons (this is a "delete everything" query after all) we add
      * the tenant manually to query even if this will be done by {@link EntityManager} anyhow. The DB should take care of optimizing this away.
@@ -145,14 +146,14 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
         }
         final String managementClassSimpleName = domainClassSimpleName.substring(3);
         final Class<?> superClass = domainClass.getSuperclass();
-        if (superClass != null) {
-            if (superClass.getSimpleName().equals(managementClassSimpleName) && BaseEntity.class.isAssignableFrom(superClass)) {
-                return (Class<? extends BaseEntity>)superClass;
-            }
+        if (superClass != null &&
+                superClass.getSimpleName().equals(managementClassSimpleName) && BaseEntity.class.isAssignableFrom(superClass)) {
+            return (Class<? extends BaseEntity>) superClass;
         }
+
         for (final Class<?> interfaceClass : domainClass.getInterfaces()) {
             if (interfaceClass.getSimpleName().equals(managementClassSimpleName) && BaseEntity.class.isAssignableFrom(interfaceClass)) {
-                return (Class<? extends BaseEntity>)interfaceClass;
+                return (Class<? extends BaseEntity>) interfaceClass;
             }
         }
         return domainClass;

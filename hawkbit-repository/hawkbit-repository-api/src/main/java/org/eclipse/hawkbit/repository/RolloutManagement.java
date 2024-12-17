@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
@@ -39,7 +40,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * RolloutManagement to control rollouts e.g. like creating, starting, resuming
@@ -184,8 +184,8 @@ public interface RolloutManagement {
      *         {@link RolloutGroupCreate} for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(@Valid List<RolloutGroupCreate> groups,
-            String targetFilter, Long createdAt, @NotNull Long dsTypeId);
+    CompletableFuture<RolloutGroupsValidation> validateTargetsInGroups(
+            @Valid List<RolloutGroupCreate> groups, String targetFilter, Long createdAt, @NotNull Long dsTypeId);
 
     /**
      * Retrieves all rollouts.

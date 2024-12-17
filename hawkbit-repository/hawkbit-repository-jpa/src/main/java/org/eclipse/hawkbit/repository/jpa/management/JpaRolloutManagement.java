@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -89,10 +90,8 @@ import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -229,8 +228,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     @Async
-    public ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(final List<RolloutGroupCreate> groups,
-            final String targetFilter, final Long createdAt, final Long dsTypeId) {
+    public CompletableFuture<RolloutGroupsValidation> validateTargetsInGroups(
+            final List<RolloutGroupCreate> groups, final String targetFilter, final Long createdAt, final Long dsTypeId) {
 
         final TargetCount targets = calculateTargets(targetFilter, createdAt, dsTypeId);
         long totalTargets = targets.total();
@@ -240,9 +239,8 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }
 
-        return new AsyncResult<>(
-                validateTargetsInGroups(groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()),
-                        baseFilter, totalTargets, dsTypeId));
+        return CompletableFuture.completedFuture(
+                validateTargetsInGroups(groups.stream().map(RolloutGroupCreate::build).toList(), baseFilter, totalTargets, dsTypeId));
     }
 
     @Override
@@ -295,8 +293,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     public Optional<Rollout> getWithDetailedStatus(final long rolloutId) {
         final Optional<Rollout> rollout = get(rolloutId);
-
-        if (!rollout.isPresent()) {
+        if (rollout.isEmpty()) {
             return rollout;
         }
 
@@ -713,9 +710,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         final Map<Long, List<TotalTargetCountActionStatus>> fromCache = rolloutStatusCache.getRolloutStatus(rollouts);
 
-        final List<Long> rolloutIds = rollouts.stream().filter(id -> !fromCache.containsKey(id))
-                .collect(Collectors.toList());
-
+        final List<Long> rolloutIds = rollouts.stream().filter(id -> !fromCache.containsKey(id)).toList();
         if (!rolloutIds.isEmpty()) {
             final List<TotalTargetCountActionStatus> resultList = actionRepository.getStatusCountByRolloutIds(rolloutIds);
             final Map<Long, List<TotalTargetCountActionStatus>> fromDb = resultList.stream()
@@ -728,9 +723,6 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         return fromCache;
     }
-
-//    private v isDeletedWithDistributionSet(final Boolean isDeleted, final Sort sort) {
-
 
     /**
      * Enforces the quota defining the maximum number of {@link Target}s per {@link RolloutGroup}.
@@ -783,8 +775,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             // new style percent - total percent
             final double percentFromRest = RolloutHelper.toPercentFromTheRest(group, groups);
 
-            final long reducedTargetsInGroup = Math
-                    .round(percentFromRest / 100 * (double) realTargetsInGroup);
+            final long reducedTargetsInGroup = Math.round(percentFromRest / 100 * realTargetsInGroup);
             groupTargetCounts.add(reducedTargetsInGroup);
             unusedTargetsCount += realTargetsInGroup - reducedTargetsInGroup;
         }
