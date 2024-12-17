@@ -673,15 +673,9 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .as("and contains the following elements").containsAll(expected);
     }
 
-    private void assertThatTargetNameEquals(final List<Target> targets1, final int index1, final List<Target> targets2,
-            final int index2) {
-        assertThat(targets1.get(index1).getName()).isEqualTo(targets2.get(index2).getName());
-    }
-
     private DistributionSet createDistSetWithType(final DistributionSetType type) {
         final DistributionSetCreate dsCreate = entityFactory.distributionSet().create().name("test-ds").version("1.0")
                 .type(type);
         return distributionSetManagement.create(dsCreate);
     }
-
 }

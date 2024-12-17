@@ -41,6 +41,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.validation.constraints.NotEmpty;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
@@ -222,13 +223,11 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         final JpaActionStatus actionStatus = create.build();
 
         switch (actionStatus.getStatus()) {
-            case CANCELED:
-            case FINISHED: {
+            case CANCELED, FINISHED: {
                 handleFinishedCancelation(actionStatus, action);
                 break;
             }
-            case ERROR:
-            case CANCEL_REJECTED: {
+            case ERROR, CANCEL_REJECTED: {
                 // Cancellation rejected. Back to running.
                 action.setStatus(Status.RUNNING);
                 break;
@@ -320,14 +319,14 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(retryFor = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = ConcurrencyFailureException.class, noRetryFor = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address) {
         return findOrRegisterTargetIfItDoesNotExist(controllerId, address, null, null);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Retryable(retryFor = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @Retryable(retryFor = ConcurrencyFailureException.class, noRetryFor = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address, final String name, final String type) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
         return targetRepository.findOne(spec).map(target -> updateTarget(target, address, name, type))
@@ -603,10 +602,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         this.targetRepository = targetRepositorySpy;
     }
 
-    private static String formatQueryInStatementParams(final Collection<String> paramNames) {
-        return "#" + String.join(",#", paramNames);
-    }
-
     private static boolean isAddressChanged(final URI addressToUpdate, final URI address) {
         return addressToUpdate == null || !addressToUpdate.equals(address);
     }
@@ -702,7 +697,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         log.debug("Run flushUpdateQueue.");
 
         final int size = queue.size();
-        if (size <= 0) {
+        if (size == 0) {
             return;
         }
 
@@ -733,7 +728,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         log.debug("Persist {} targetqueries.", polls.size());
 
         final List<List<String>> pollChunks = ListUtils.partition(
-                polls.stream().map(TargetPoll::getControllerId).collect(Collectors.toList()),
+                polls.stream().map(TargetPoll::getControllerId).toList(),
                 Constants.MAX_ENTRIES_IN_STATEMENT);
 
         pollChunks.forEach(chunk -> {
@@ -1034,6 +1029,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         }
     }
 
+    @Data
     private static class TargetPoll {
 
         private final String tenant;
@@ -1043,52 +1039,5 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             this.tenant = target.getTenant();
             this.controllerId = target.getControllerId();
         }
-
-        public String getTenant() {
-            return tenant;
-        }
-
-        public String getControllerId() {
-            return controllerId;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + (controllerId == null ? 0 : controllerId.hashCode());
-            result = prime * result + (tenant == null ? 0 : tenant.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final TargetPoll other = (TargetPoll) obj;
-            if (controllerId == null) {
-                if (other.controllerId != null) {
-                    return false;
-                }
-            } else if (!controllerId.equals(other.controllerId)) {
-                return false;
-            }
-            if (tenant == null) {
-                if (other.tenant != null) {
-                    return false;
-                }
-            } else if (!tenant.equals(other.tenant)) {
-                return false;
-            }
-            return true;
-        }
-
     }
 }
