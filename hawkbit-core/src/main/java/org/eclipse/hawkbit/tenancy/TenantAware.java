@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.tenancy;
 
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 /**
  * Interface for components that are aware of the application's current tenant.
  */
@@ -65,5 +68,30 @@ public interface TenantAware {
          * @return the return of the code block running under a certain tenant
          */
         T run();
+    }
+
+    /**
+     * Resolves the tenant from the current context.
+     */
+    interface TenantResolver {
+
+        String resolveTenant();
+    }
+
+    class DefaultTenantResolver implements TenantResolver {
+
+        @Override
+        public String resolveTenant() {
+            final SecurityContext context = SecurityContextHolder.getContext();
+            if (context.getAuthentication() != null) {
+                final Object principal = context.getAuthentication().getPrincipal();
+                if (context.getAuthentication().getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareAuthenticationDetails) {
+                    return tenantAwareAuthenticationDetails.getTenant();
+                } else if (principal instanceof TenantAwareUser tenantAwareUser) {
+                    return tenantAwareUser.getTenant();
+                }
+            }
+            return null;
+        }
     }
 }

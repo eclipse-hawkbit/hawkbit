@@ -49,9 +49,9 @@ public class JpaConfiguration extends JpaBaseConfiguration {
     protected JpaConfiguration(
             final DataSource dataSource, final JpaProperties properties,
             final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider,
-            final TenantAware tenantAware) {
+            final TenantAware.TenantResolver tenantResolver) {
         super(dataSource, properties, jtaTransactionManagerProvider);
-        tenantIdentifier = new TenantIdentifier(tenantAware);
+        tenantIdentifier = new TenantIdentifier(tenantResolver);
     }
 
     @Bean

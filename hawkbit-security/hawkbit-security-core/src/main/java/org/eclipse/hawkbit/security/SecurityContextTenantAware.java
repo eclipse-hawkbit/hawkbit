@@ -43,20 +43,19 @@ public class SecurityContextTenantAware implements ContextAware {
     public static final String SYSTEM_USER = "system";
 
     private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES =
-            Collections.singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
+            List.of(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
 
     private final UserAuthoritiesResolver authoritiesResolver;
     private final SecurityContextSerializer securityContextSerializer;
+    private final TenantResolver tenantResolver;
 
     /**
      * Creates the {@link SecurityContextTenantAware} based on the given {@link UserAuthoritiesResolver}.
      *
-     * @param authoritiesResolver Resolver to retrieve the authorities for a given user. Must
-     *         not be <code>null</code>..
+     * @param authoritiesResolver Resolver to retrieve the authorities for a given user. Must not be <code>null</code>..
      */
     public SecurityContextTenantAware(final UserAuthoritiesResolver authoritiesResolver) {
-        this.authoritiesResolver = authoritiesResolver;
-        this.securityContextSerializer = SecurityContextSerializer.NOP;
+        this(authoritiesResolver, null, null);
     }
 
     /**
@@ -65,24 +64,30 @@ public class SecurityContextTenantAware implements ContextAware {
      * @param authoritiesResolver Resolver to retrieve the authorities for a given user. Must not be <code>null</code>.
      * @param securityContextSerializer Serializer that is used to serialize / deserialize {@link SecurityContext}s.
      */
-    public SecurityContextTenantAware(final UserAuthoritiesResolver authoritiesResolver,
+    public SecurityContextTenantAware(
+            final UserAuthoritiesResolver authoritiesResolver,
             @Nullable final SecurityContextSerializer securityContextSerializer) {
+        this(authoritiesResolver, securityContextSerializer, null);
+    }
+
+    /**
+     * Creates the {@link SecurityContextTenantAware} based on the given {@link UserAuthoritiesResolver}.
+     *
+     * @param authoritiesResolver Resolver to retrieve the authorities for a given user. Must not be <code>null</code>.
+     * @param securityContextSerializer Serializer that is used to serialize / deserialize {@link SecurityContext}s.
+     */
+    public SecurityContextTenantAware(
+            final UserAuthoritiesResolver authoritiesResolver,
+            @Nullable final SecurityContextSerializer securityContextSerializer,
+            @Nullable final TenantResolver tenantResolver) {
         this.authoritiesResolver = authoritiesResolver;
         this.securityContextSerializer = securityContextSerializer == null ? SecurityContextSerializer.NOP : securityContextSerializer;
+        this.tenantResolver = tenantResolver == null ? new DefaultTenantResolver() : tenantResolver;
     }
 
     @Override
     public String getCurrentTenant() {
-        final SecurityContext context = SecurityContextHolder.getContext();
-        if (context.getAuthentication() != null) {
-            final Object principal = context.getAuthentication().getPrincipal();
-            if (context.getAuthentication().getDetails() instanceof TenantAwareAuthenticationDetails) {
-                return ((TenantAwareAuthenticationDetails) context.getAuthentication().getDetails()).getTenant();
-            } else if (principal instanceof TenantAwareUser) {
-                return ((TenantAwareUser) principal).getTenant();
-            }
-        }
-        return null;
+        return tenantResolver.resolveTenant();
     }
 
     @Override
@@ -90,11 +95,11 @@ public class SecurityContextTenantAware implements ContextAware {
         final SecurityContext context = SecurityContextHolder.getContext();
         if (context.getAuthentication() != null) {
             final Object principal = context.getAuthentication().getPrincipal();
-            if (principal instanceof OidcUser) {
-                return ((OidcUser) principal).getPreferredUsername();
+            if (principal instanceof OidcUser oidcUser) {
+                return oidcUser.getPreferredUsername();
             }
-            if (principal instanceof User) {
-                return ((User) principal).getUsername();
+            if (principal instanceof User user) {
+                return user.getUsername();
             }
         }
         return null;

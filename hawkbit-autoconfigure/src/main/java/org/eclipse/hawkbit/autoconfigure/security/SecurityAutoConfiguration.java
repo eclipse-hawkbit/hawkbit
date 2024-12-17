@@ -16,9 +16,10 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.im.authentication.SpRole;
+import org.eclipse.hawkbit.tenancy.TenantAware.DefaultTenantResolver;
+import org.eclipse.hawkbit.tenancy.TenantAware.TenantResolver;
 import org.eclipse.hawkbit.tenancy.TenantAwareUserProperties;
 import org.eclipse.hawkbit.tenancy.TenantAwareUserProperties.User;
-import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.InMemoryUserAuthoritiesResolver;
 import org.eclipse.hawkbit.security.MdcHandler;
@@ -56,6 +57,12 @@ import org.springframework.util.CollectionUtils;
 @EnableConfigurationProperties({ SecurityProperties.class, HawkbitSecurityProperties.class, TenantAwareUserProperties.class })
 public class SecurityAutoConfiguration {
 
+    @Bean
+    @ConditionalOnMissingBean
+    public TenantResolver tenantResolver() {
+        return new DefaultTenantResolver();
+    }
+
     /**
      * Creates a {@link ContextAware} (hence {@link TenantAware}) bean based on the given {@link UserAuthoritiesResolver} and
      * {@link SecurityContextSerializer}.
@@ -68,8 +75,9 @@ public class SecurityAutoConfiguration {
     @ConditionalOnMissingBean
     public ContextAware contextAware(
             final UserAuthoritiesResolver authoritiesResolver,
-            @Autowired(required = false) final SecurityContextSerializer securityContextSerializer) {
-        return new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer);
+            @Autowired(required = false) final SecurityContextSerializer securityContextSerializer,
+            @Autowired(required = false) final TenantResolver tenantResolver) {
+        return new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer, tenantResolver);
     }
 
     /**

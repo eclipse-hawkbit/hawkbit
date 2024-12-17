@@ -161,8 +161,8 @@ public class RestConfiguration {
             logRequest(request, ex);
             final ExceptionInfo response = createExceptionInfo(ex);
             final HttpStatus responseStatus;
-            if (ex instanceof AbstractServerRtException) {
-                responseStatus = getStatusOrDefault(((AbstractServerRtException) ex).getError());
+            if (ex instanceof AbstractServerRtException abstractServerRtException) {
+                responseStatus = getStatusOrDefault(abstractServerRtException.getError());
             } else {
                 responseStatus = DEFAULT_RESPONSE_STATUS;
             }
@@ -278,16 +278,20 @@ public class RestConfiguration {
         }
 
         private void logRequest(final HttpServletRequest request, final Exception ex) {
-            log.debug("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL());
+            if (log.isTraceEnabled()) {
+                log.debug("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL(), ex);
+            } else {
+                log.debug("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL());
+            }
         }
 
         private ExceptionInfo createExceptionInfo(final Exception ex) {
             final ExceptionInfo response = new ExceptionInfo();
             response.setMessage(ex.getMessage());
             response.setExceptionClass(ex.getClass().getName());
-            if (ex instanceof AbstractServerRtException) {
-                response.setErrorCode(((AbstractServerRtException) ex).getError().getKey());
-                response.setInfo(((AbstractServerRtException) ex).getInfo());
+            if (ex instanceof AbstractServerRtException abstractServerRtException) {
+                response.setErrorCode(abstractServerRtException.getError().getKey());
+                response.setInfo(abstractServerRtException.getInfo());
             }
             return response;
         }
@@ -305,10 +309,7 @@ public class RestConfiguration {
         private final String[] excludeAntPaths;
         private final AntPathMatcher antMatcher = new AntPathMatcher();
 
-        /**
-         * @param excludeAntPaths
-         */
-        public ExcludePathAwareShallowETagFilter(final String... excludeAntPaths) {
+         public ExcludePathAwareShallowETagFilter(final String... excludeAntPaths) {
             this.excludeAntPaths = excludeAntPaths;
         }
 
