@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.Collection;
 import java.util.List;
 
 import jakarta.persistence.Query;
@@ -32,11 +33,11 @@ public class Jpa {
 
     public static final char NATIVE_QUERY_PARAMETER_PREFIX =  ':';
 
-    public static <T> String formatNativeQueryInClause(final String name, final List<T> list) {
+    public static <T> String formatNativeQueryInClause(final String name, final Collection<T> collection) {
         return ":" + name;
     }
 
-    public static <T> void setNativeQueryInParameter(final Query deleteQuery, final String name, final List<T> list) {
-        deleteQuery.setParameter(name, list);
+    public static <T> void setNativeQueryInParameter(final Query query, final String name, final Collection<T> collection) {
+        query.setParameter(name, collection);
     }
 }
