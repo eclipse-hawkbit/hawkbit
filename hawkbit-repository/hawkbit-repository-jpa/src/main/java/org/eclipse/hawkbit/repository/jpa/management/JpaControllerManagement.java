@@ -746,9 +746,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
      */
     private void setLastTargetQuery(final String tenant, final long currentTimeMillis, final List<String> chunk) {
         final Query updateQuery = entityManager.createNativeQuery(
-                "UPDATE sp_target SET last_target_query = " + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "last_target_query " +
+                "UPDATE sp_target SET last_target_query = " + Jpa.nativeQueryParamPrefix() + "last_target_query " +
                         "WHERE controller_id IN (" + Jpa.formatNativeQueryInClause("cid", chunk) + ")" +
-                        " AND tenant = " + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "tenant");
+                        " AND tenant = " + Jpa.nativeQueryParamPrefix() + "tenant");
 
         updateQuery.setParameter("last_target_query", currentTimeMillis);
         Jpa.setNativeQueryInParameter(updateQuery, "cid", chunk);

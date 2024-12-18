@@ -124,9 +124,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private static final int ACTION_PAGE_LIMIT = 1000;
     private static final String QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED_DEFAULT =
             "DELETE FROM sp_action " +
-                    "WHERE tenant=" + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "tenant" +
+                    "WHERE tenant=" + Jpa.nativeQueryParamPrefix() + "tenant" +
                     " AND status IN (%s)" +
-                    " AND last_modified_at<" + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "last_modified_at LIMIT " + ACTION_PAGE_LIMIT;
+                    " AND last_modified_at<" + Jpa.nativeQueryParamPrefix() + "last_modified_at LIMIT " + ACTION_PAGE_LIMIT;
     private static final EnumMap<Database, String> QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED;
 
     static {
@@ -134,16 +134,16 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(
                 Database.SQL_SERVER,
                 "DELETE TOP (" + ACTION_PAGE_LIMIT + ") FROM sp_action " +
-                        "WHERE tenant=" + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "tenant" +
+                        "WHERE tenant=" + Jpa.nativeQueryParamPrefix() + "tenant" +
                         " AND status IN (%s)" +
-                        " AND last_modified_at<" + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "last_modified_at ");
+                        " AND last_modified_at<" + Jpa.nativeQueryParamPrefix() + "last_modified_at ");
         QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.put(
                 Database.POSTGRESQL,
                 "DELETE FROM sp_action " +
                         "WHERE id IN (SELECT id FROM sp_action " +
-                        "WHERE tenant=" + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "tenant" +
+                        "WHERE tenant=" + Jpa.nativeQueryParamPrefix() + "tenant" +
                         " AND status IN (%s)" +
-                        " AND last_modified_at<" + Jpa.NATIVE_QUERY_PARAMETER_PREFIX + "last_modified_at LIMIT " + ACTION_PAGE_LIMIT + ")");
+                        " AND last_modified_at<" + Jpa.nativeQueryParamPrefix() + "last_modified_at LIMIT " + ACTION_PAGE_LIMIT + ")");
     }
 
     private final EntityManager entityManager;

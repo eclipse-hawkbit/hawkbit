@@ -28,10 +28,12 @@ public class Jpa {
 
     public static final JpaVendor JPA_VENDOR = JpaVendor.HIBERNATE;
     static {
-        log.info("JPA vendor: {}", JPA_VENDOR);
+        log.info("JPA Vendor: {}", JPA_VENDOR);
     }
 
-    public static final char NATIVE_QUERY_PARAMETER_PREFIX =  ':';
+    public static char nativeQueryParamPrefix() {
+        return ':';
+    }
 
     public static <T> String formatNativeQueryInClause(final String name, final Collection<T> collection) {
         return ":" + name;
