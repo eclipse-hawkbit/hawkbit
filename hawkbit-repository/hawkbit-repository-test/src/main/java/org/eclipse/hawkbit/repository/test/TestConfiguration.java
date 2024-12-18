@@ -43,6 +43,8 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.TenantAware.DefaultTenantResolver;
+import org.eclipse.hawkbit.tenancy.TenantAware.TenantResolver;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
@@ -165,9 +167,16 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    ContextAware contextAware(final UserAuthoritiesResolver authoritiesResolver, final SecurityContextSerializer securityContextSerializer) {
+    TenantResolver tenantResolver() {
+        return new DefaultTenantResolver();
+    }
+
+    @Bean
+    ContextAware contextAware(
+            final UserAuthoritiesResolver authoritiesResolver, final SecurityContextSerializer securityContextSerializer,
+            final TenantResolver tenantResolver) {
         // allow spying the security context
-        return org.mockito.Mockito.spy(new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer));
+        return org.mockito.Mockito.spy(new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer, tenantResolver));
     }
 
     @Bean

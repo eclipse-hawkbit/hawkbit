@@ -31,8 +31,9 @@
             <id>eclipselink</id>
             <activation>
                 <property>
-                    <!-- default, if not set - eclipse link -->
-                    <name>!jpa.vendor</name>
+                    <!-- default, if not set (or not hibernate) - eclipse link -->
+                    <name>jpa.vendor</name>
+                    <value>!hibernate</value>
                 </property>
             </activation>
 
