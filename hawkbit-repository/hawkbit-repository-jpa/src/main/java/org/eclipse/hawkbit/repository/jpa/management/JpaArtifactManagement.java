@@ -317,7 +317,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         }
         artifact.setMd5Hash(result.getHashes().getMd5());
         artifact.setSha256Hash(result.getHashes().getSha256());
-        artifact.setSize(result.getSize());
+        artifact.setFileSize(result.getSize());
 
         log.debug("storing new artifact into repository {}", artifact);
         return localArtifactRepository.save(AccessController.Operation.CREATE, artifact);

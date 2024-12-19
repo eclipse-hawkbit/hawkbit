@@ -996,8 +996,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 deploymentManagement.assignDistributionSets(Collections.singletonList(valideRequest1)).get(0)).getId();
         final Long valideActionId2 = getFirstAssignedAction(
                 deploymentManagement.assignDistributionSets(Collections.singletonList(valideRequest2)).get(0)).getId();
-        assertThat(actionRepository.findWithDetailsById(valideActionId1).get().getWeight()).get().isEqualTo(Action.WEIGHT_MAX);
-        assertThat(actionRepository.findWithDetailsById(valideActionId2).get().getWeight()).get().isEqualTo(Action.WEIGHT_MIN);
+        assertThat(actionRepository.findById(valideActionId1).get().getWeight()).get().isEqualTo(Action.WEIGHT_MAX);
+        assertThat(actionRepository.findById(valideActionId2).get().getWeight()).get().isEqualTo(Action.WEIGHT_MIN);
     }
 
     /**
