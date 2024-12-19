@@ -75,7 +75,7 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     private String sha256Hash;
 
     @Column(name = "file_size", updatable = false)
-    private long size;
+    private long fileSize;
 
     /**
      * Constructs artifact.
@@ -89,5 +89,10 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
         this.filename = filename;
         this.softwareModule = (JpaSoftwareModule) softwareModule;
         this.softwareModule.addArtifact(this);
+    }
+
+    @Override
+    public long getSize() {
+        return getFileSize();
     }
 }
