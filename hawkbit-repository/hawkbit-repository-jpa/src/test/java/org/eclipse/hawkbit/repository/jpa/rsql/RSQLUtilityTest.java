@@ -63,10 +63,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.vendor.Database;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
@@ -74,20 +74,21 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @Story("RSQL search utility")
 // TODO: fully document tests -> @Description for long text and reasonable
 // method name as short text
-public class RSQLUtilityTest {
+class RSQLUtilityTest {
 
-    private static final TenantConfigurationValue<String> TEST_POLLING_TIME_INTERVAL = TenantConfigurationValue
-            .<String> builder().value("00:05:00").build();
-    private static final TenantConfigurationValue<String> TEST_POLLING_OVERDUE_TIME_INTERVAL = TenantConfigurationValue
-            .<String> builder().value("00:07:37").build();
+    private static final TenantConfigurationValue<String> TEST_POLLING_TIME_INTERVAL =
+            TenantConfigurationValue.<String> builder().value("00:05:00").build();
+    private static final TenantConfigurationValue<String> TEST_POLLING_OVERDUE_TIME_INTERVAL =
+            TenantConfigurationValue.<String> builder().value("00:07:37").build();
+
     @Spy
     private final VirtualPropertyResolver macroResolver = new VirtualPropertyResolver();
     private final Database testDb = Database.H2;
-    @MockBean
+    @MockitoBean
     private TenantConfigurationManagement confMgmt;
-    @MockBean
+    @MockitoBean
     private SystemSecurityContext securityContext;
-    @MockBean
+    @MockitoBean
     private RsqlVisitorFactory rsqlVisitorFactory;
     @Mock
     private Root<Object> baseSoftwareModuleRootMock;
@@ -103,14 +104,14 @@ public class RSQLUtilityTest {
     private Attribute attribute;
 
     @BeforeEach
-    public void beforeEach() {
+    void beforeEach() {
         setupRoot(baseSoftwareModuleRootMock);
         setupRoot(subqueryRootMock);
     }
 
     @Test
     @Description("Testing throwing exception in case of not allowed RSQL key")
-    public void rsqlUnsupportedFieldExceptionTest() {
+    void rsqlUnsupportedFieldExceptionTest() {
         final String rsql1 = "wrongfield == abcd";
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
                 .isThrownBy(() -> validateRsqlForTestFields(rsql1));
@@ -122,7 +123,7 @@ public class RSQLUtilityTest {
 
     @Test
     @Description("Testing exception in case of not allowed subkey")
-    public void rsqlUnsupportedSubkeyThrowException() {
+    void rsqlUnsupportedSubkeyThrowException() {
         final String rsql1 = "TESTFIELD_WITH_SUB_ENTITIES.unsupported == abcd and TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123";
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
                 .isThrownBy(() -> validateRsqlForTestFields(rsql1));
@@ -138,7 +139,7 @@ public class RSQLUtilityTest {
 
     @Test
     @Description("Testing valid RSQL keys based on TestFieldEnum.class")
-    public void rsqlFieldValidation() {
+    void rsqlFieldValidation() {
 
         final String rsql1 = "TESTFIELD_WITH_SUB_ENTITIES.subentity11 == abcd and TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123";
         final String rsql2 = "TESTFIELD_WITH_SUB_ENTITIES.subentity11 == abcd or TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123";
@@ -151,14 +152,14 @@ public class RSQLUtilityTest {
 
     @Test
     @Description("Verify that RSQL expressions are validated case insensitive")
-    public void mixedCaseRsqlFieldValidation() {
+    void mixedCaseRsqlFieldValidation() {
         when(rsqlVisitorFactory.validationRsqlVisitor(eq(TargetFields.class))).thenReturn(new FieldValidationRsqlVisitor<>(TargetFields.class));
         final String rsqlWithMixedCase = "name==b And name==c aND Name==d OR NAME=iN=y oR nAme=IN=z";
         RSQLUtility.validateRsqlFor(rsqlWithMixedCase, TargetFields.class);
     }
 
     @Test
-    public void wrongRsqlSyntaxThrowSyntaxException() {
+    void wrongRsqlSyntaxThrowSyntaxException() {
         final String wrongRSQL = "name==abc;d";
         try {
             RSQLUtility.buildRsqlSpecification(wrongRSQL, SoftwareModuleFields.class, null, testDb)
@@ -169,7 +170,7 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void wrongFieldThrowUnsupportedFieldException() {
+    void wrongFieldThrowUnsupportedFieldException() {
         final String wrongRSQL = "unknownField==abc";
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) SoftwareModule.class);
         try {
@@ -182,7 +183,7 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void wrongRsqlMapSyntaxThrowSyntaxException() {
+    void wrongRsqlMapSyntaxThrowSyntaxException() {
         String wrongRSQL = TargetFields.ATTRIBUTE + "==abc";
         try {
             RSQLUtility.buildRsqlSpecification(wrongRSQL, TargetFields.class, null, testDb)
@@ -218,7 +219,7 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void wrongRsqlSubEntitySyntaxThrowSyntaxException() {
+    void wrongRsqlSubEntitySyntaxThrowSyntaxException() {
         String wrongRSQL = TargetFields.ASSIGNEDDS + "==abc";
         try {
             RSQLUtility.buildRsqlSpecification(wrongRSQL, TargetFields.class, null, testDb)
@@ -245,7 +246,7 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public <T> void correctRsqlBuildsPredicate() {
+    <T> void correctRsqlBuildsPredicate() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name==abc;version==1.2";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
@@ -266,7 +267,7 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void correctRsqlBuildsSimpleNotEqualPredicate() {
+    void correctRsqlBuildsSimpleNotEqualPredicate() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name!=abc";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
@@ -289,7 +290,7 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void correctRsqlBuildsSimpleNotLikePredicate() {
+    void correctRsqlBuildsSimpleNotLikePredicate() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name!=abc*";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
@@ -313,7 +314,7 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void correctRsqlBuildsNotSimpleNotLikePredicate() {
+    void correctRsqlBuildsNotSimpleNotLikePredicate() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         // with this query a subquery has to be made, so it is no simple query
         final String correctRsql = "type!=abc";
@@ -341,7 +342,7 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void correctRsqlBuildsEqualPredicateWithPercentage() {
+    void correctRsqlBuildsEqualPredicateWithPercentage() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name==a%";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
@@ -362,7 +363,7 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void correctRsqlBuildsLikePredicateWithPercentage() {
+    void correctRsqlBuildsLikePredicateWithPercentage() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name==a%*";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
@@ -383,7 +384,7 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void correctRsqlBuildsLikePredicateWithPercentageSQLServer() {
+    void correctRsqlBuildsLikePredicateWithPercentageSQLServer() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name==a%*";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
@@ -405,7 +406,7 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void correctRsqlBuildsLessThanPredicate() {
+    void correctRsqlBuildsLessThanPredicate() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "name=lt=abc";
         when(baseSoftwareModuleRootMock.get("name")).thenReturn(baseSoftwareModuleRootMock);
@@ -423,7 +424,7 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void correctRsqlWithEnumValue() {
+    void correctRsqlWithEnumValue() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "testfield==bumlux";
         when(baseSoftwareModuleRootMock.get("testfield")).thenReturn(baseSoftwareModuleRootMock);
@@ -440,7 +441,7 @@ public class RSQLUtilityTest {
     }
 
     @Test
-    public void wrongRsqlWithWrongEnumValue() {
+    void wrongRsqlWithWrongEnumValue() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String correctRsql = "testfield==unknownValue";
         when(baseSoftwareModuleRootMock.get("testfield")).thenReturn(baseSoftwareModuleRootMock);
@@ -459,7 +460,7 @@ public class RSQLUtilityTest {
 
     @Test
     @Description("Tests the resolution of overdue_ts placeholder in context of a RSQL expression.")
-    public void correctRsqlWithOverdueMacro() {
+    void correctRsqlWithOverdueMacro() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String overdueProp = "overdue_ts";
         final String overduePropPlaceholder = "${" + overdueProp + "}";
@@ -487,7 +488,7 @@ public class RSQLUtilityTest {
 
     @Test
     @Description("Tests RSQL expression with an unknown placeholder.")
-    public void correctRsqlWithUnknownMacro() {
+    void correctRsqlWithUnknownMacro() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String overdueProp = "unknown";
         final String overduePropPlaceholder = "${" + overdueProp + "}";
@@ -510,7 +511,7 @@ public class RSQLUtilityTest {
                 eq(overduePropPlaceholder));
     }
 
-    public VirtualPropertyReplacer setupMacroLookup() {
+    VirtualPropertyReplacer setupMacroLookup() {
         when(securityContext.runAsSystem(Mockito.any())).thenAnswer(a -> ((Callable<?>) a.getArgument(0)).call());
 
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class))

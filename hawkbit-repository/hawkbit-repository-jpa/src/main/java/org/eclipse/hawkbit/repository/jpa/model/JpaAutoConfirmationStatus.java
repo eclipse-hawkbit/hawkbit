@@ -15,7 +15,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 
@@ -33,7 +33,8 @@ import org.springframework.util.StringUtils;
 @Table(name = "sp_target_conf_status")
 public class JpaAutoConfirmationStatus extends AbstractJpaTenantAwareBaseEntity implements AutoConfirmationStatus {
 
-    @OneToOne(optional = false, fetch = FetchType.LAZY)
+    // actually it is OneToOne - but lazy loading is not supported for OneToOne (at least for hibernate 6.6.2)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "target_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_auto_conf"))
     private JpaTarget target;
 

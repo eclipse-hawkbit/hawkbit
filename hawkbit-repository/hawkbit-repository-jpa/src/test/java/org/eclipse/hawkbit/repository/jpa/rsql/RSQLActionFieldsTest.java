@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -91,7 +90,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(ActionFields.EXTERNALREF.name() + "==extRef*", 10);
     }
 
-    private @NotNull JpaAction newJpaAction(final DistributionSet dsA, final boolean active, final String extRef) {
+    private JpaAction newJpaAction(final DistributionSet dsA, final boolean active, final String extRef) {
         final JpaAction newAction = new JpaAction();
         newAction.setActionType(ActionType.SOFT);
         newAction.setDistributionSet(dsA);

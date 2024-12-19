@@ -32,30 +32,31 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @Feature("Unit Tests - Repository")
 @Story("Placeholder resolution for virtual properties")
-public class VirtualPropertyResolverTest {
+class VirtualPropertyResolverTest {
 
-    private static final TenantConfigurationValue<String> TEST_POLLING_TIME_INTERVAL = TenantConfigurationValue
-            .<String> builder().value("00:05:00").build();
-    private static final TenantConfigurationValue<String> TEST_POLLING_OVERDUE_TIME_INTERVAL = TenantConfigurationValue
-            .<String> builder().value("00:07:37").build();
+    private static final TenantConfigurationValue<String> TEST_POLLING_TIME_INTERVAL =
+            TenantConfigurationValue.<String> builder().value("00:05:00").build();
+    private static final TenantConfigurationValue<String> TEST_POLLING_OVERDUE_TIME_INTERVAL =
+            TenantConfigurationValue.<String> builder().value("00:07:37").build();
+
     @Spy
     private final VirtualPropertyResolver resolverUnderTest = new VirtualPropertyResolver();
-    @MockBean
+    @MockitoBean
     private TenantConfigurationManagement confMgmt;
-    @MockBean
+    @MockitoBean
     private SystemSecurityContext securityContext;
     private StrSubstitutor substitutor;
 
     @BeforeEach
-    public void before() {
+    void before() {
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class))
                 .thenReturn(TEST_POLLING_TIME_INTERVAL);
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class))
@@ -67,7 +68,7 @@ public class VirtualPropertyResolverTest {
 
     @Test
     @Description("Tests VirtualPropertyResolver with a placeholder unknown to VirtualPropertyResolver.")
-    public void handleUnknownPlaceholder() {
+    void handleUnknownPlaceholder() {
         final String placeholder = "${unknown}";
         final String testString = "lhs=lt=" + placeholder;
 
@@ -77,7 +78,7 @@ public class VirtualPropertyResolverTest {
 
     @Test
     @Description("Tests escape mechanism for placeholders (syntax is $${SOME_PLACEHOLDER}).")
-    public void handleEscapedPlaceholder() {
+    void handleEscapedPlaceholder() {
         final String placeholder = "${OVERDUE_TS}";
         final String escaptedPlaceholder = StrSubstitutor.DEFAULT_ESCAPE + placeholder;
         final String testString = "lhs=lt=" + escaptedPlaceholder;

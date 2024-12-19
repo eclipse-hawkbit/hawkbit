@@ -35,7 +35,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -65,6 +64,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.springframework.util.ObjectUtils;
 
 /**
  * JPA implementation of {@link Target}.
@@ -140,11 +140,10 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     // set default request controller attributes to true, because we want to request them the first time
     private boolean requestControllerAttributes = true;
 
-    @Setter
-    @Getter
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "target", cascade = { CascadeType.ALL }, orphanRemoval = true)
+    // actually it is OneToOne - but lazy loading is not supported for OneToOne (at least for hibernate 6.6.2)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "target", cascade = { CascadeType.ALL }, orphanRemoval = true)
     @PrimaryKeyJoinColumn
-    private JpaAutoConfirmationStatus autoConfirmationStatus;
+    private List<JpaAutoConfirmationStatus> autoConfirmationStatus;
 
     @Setter
     @Getter
@@ -240,6 +239,19 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         return TenantConfigurationManagementHolder.getInstance().getTenantConfigurationManagement()
                 .pollStatusResolver()
                 .apply(this);
+    }
+
+    public JpaAutoConfirmationStatus getAutoConfirmationStatus() {
+        return ObjectUtils.isEmpty(autoConfirmationStatus) ? null : autoConfirmationStatus.get(0);
+    }
+
+    public void setAutoConfirmationStatus(final JpaAutoConfirmationStatus autoConfirmationStatus) {
+        if (this.autoConfirmationStatus == null) {
+            this.autoConfirmationStatus = new ArrayList<>();
+        } else {
+            this.autoConfirmationStatus.clear();
+        }
+        this.autoConfirmationStatus.add(autoConfirmationStatus);
     }
 
     public void addTag(final TargetTag tag) {

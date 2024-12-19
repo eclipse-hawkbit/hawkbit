@@ -41,28 +41,21 @@ public class JpaEntityFactory implements EntityFactory {
 
     @Autowired
     private DistributionSetBuilder distributionSetBuilder;
-
     @Autowired
     private TargetBuilder targetBuilder;
-
     @Autowired
     private DistributionSetTypeBuilder distributionSetTypeBuilder;
-
     @Autowired
     private SoftwareModuleBuilder softwareModuleBuilder;
-
     @Autowired
     private RolloutBuilder rolloutBuilder;
-
     @Autowired
     private TargetFilterQueryBuilder targetFilterQueryBuilder;
-
     @Autowired
     private SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder;
-
     @Autowired
     private TargetTypeBuilder targetTypeBuilder;
-
+    
     @Override
     public ActionStatusBuilder actionStatus() {
         return new JpaActionStatusBuilder();
@@ -132,5 +125,4 @@ public class JpaEntityFactory implements EntityFactory {
     public TargetFilterQueryBuilder targetFilterQuery() {
         return targetFilterQueryBuilder;
     }
-
 }
