@@ -11,13 +11,11 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 
 import static org.eclipse.hawkbit.ddi.rest.resource.AbstractDDiApiIntegrationTest.HTTP_PORT;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 public class RequestOnHawkbitDefaultPortPostProcessor implements RequestPostProcessor {
 
-    @NotNull
     @Override
     public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
         request.setRemotePort(HTTP_PORT);

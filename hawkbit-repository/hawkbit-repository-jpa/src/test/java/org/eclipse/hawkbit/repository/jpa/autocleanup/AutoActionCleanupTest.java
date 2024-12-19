@@ -114,7 +114,7 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         autoActionCleanup.run();
 
         assertThat(actionRepository.count()).isEqualTo(1);
-        assertThat(actionRepository.findWithDetailsById(action3)).isPresent();
+        assertThat(actionRepository.findById(action3)).isPresent();
     }
 
     @Test
@@ -145,8 +145,8 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         autoActionCleanup.run();
 
         assertThat(actionRepository.count()).isEqualTo(2);
-        assertThat(actionRepository.findWithDetailsById(action2)).isPresent();
-        assertThat(actionRepository.findWithDetailsById(action3)).isPresent();
+        assertThat(actionRepository.findById(action2)).isPresent();
+        assertThat(actionRepository.findById(action3)).isPresent();
     }
 
     @Test
@@ -184,7 +184,7 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         autoActionCleanup.run();
 
         assertThat(actionRepository.count()).isEqualTo(1);
-        assertThat(actionRepository.findWithDetailsById(action3)).isPresent();
+        assertThat(actionRepository.findById(action3)).isPresent();
     }
 
     private void setActionToCanceled(final Long id) {

@@ -15,6 +15,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Base64;
+
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
@@ -46,7 +48,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.Base64Utils;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -105,7 +106,7 @@ public class MgmtBasicAuthResourceTest {
     }
 
     private String getBasicAuth(final String username, final String password) {
-        return "Basic " + Base64Utils.encodeToString((username + ":" + password).getBytes());
+        return "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
     }
 
     private MockMvc withSecurityMock() throws Exception {

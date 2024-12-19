@@ -31,7 +31,7 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
      *
      * @return sum of artifacts size in bytes
      */
-    @Query("SELECT SUM(la.size) FROM JpaArtifact la WHERE la.softwareModule.deleted = false")
+    @Query("SELECT SUM(a.fileSize) FROM JpaArtifact a WHERE a.softwareModule.deleted = false")
     Optional<Long> sumOfNonDeletedArtifactSize();
 
     /**
