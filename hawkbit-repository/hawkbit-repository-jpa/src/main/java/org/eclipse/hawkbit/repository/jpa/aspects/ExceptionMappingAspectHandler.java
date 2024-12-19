@@ -71,9 +71,15 @@ public class ExceptionMappingAspectHandler implements Ordered {
     // It is a AspectJ proxy which deals with exceptions.
     @SuppressWarnings({ "squid:S00112", "squid:S1162" })
     public void catchAndWrapJpaExceptionsService(final Exception ex) throws Throwable {
+        if (log.isTraceEnabled()) {
+            log.trace("Handling exception {}", ex.getClass().getName(), ex);
+        } else {
+            log.debug("Handling exception {}", ex.getClass().getName());
+        }
+
         // Workaround for EclipseLink merge where it does not throw ConstraintViolationException directly in case of existing entity update
-        if (ex instanceof TransactionSystemException) {
-            throw replaceWithCauseIfConstraintViolationException((TransactionSystemException) ex);
+        if (ex instanceof TransactionSystemException transactionSystemException) {
+            throw replaceWithCauseIfConstraintViolationException(transactionSystemException);
         }
 
         for (final Class<?> mappedEx : MAPPED_EXCEPTION_ORDER) {

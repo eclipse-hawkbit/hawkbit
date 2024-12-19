@@ -279,7 +279,7 @@ public class RestConfiguration {
 
         private void logRequest(final HttpServletRequest request, final Exception ex) {
             if (log.isTraceEnabled()) {
-                log.debug("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL(), ex);
+                log.trace("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL(), ex);
             } else {
                 log.debug("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL());
             }
@@ -334,5 +334,4 @@ public class RestConfiguration {
             return false;
         }
     }
-
 }
