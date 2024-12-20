@@ -321,7 +321,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     void addDistributionSetTypeToTargetType() throws Exception {
         String typeName = "TestTypeAddDs";
         TargetType testType = createTestTargetTypeInDB(typeName);
-        assertThat(testType.getOptLockRevision()).isEqualTo(version(1));
+        assertThat(testType.getOptLockRevision()).isEqualTo(1);
 
         mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId())
                         .content("[{\"id\":" + standardDsType.getId() + "}]").contentType(MediaType.APPLICATION_JSON))
@@ -330,7 +330,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
         testType = targetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
-        assertThat(testType.getOptLockRevision()).isEqualTo(version(2));
+        assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getCompatibleDistributionSetTypes()).containsExactly(standardDsType);
     }
 
@@ -380,7 +380,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
         testType = targetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
-        assertThat(testType.getOptLockRevision()).isEqualTo(version(2));
+        assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getCompatibleDistributionSetTypes()).isEmpty();
     }
 
@@ -398,7 +398,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
         testType = targetTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
-        assertThat(testType.getOptLockRevision()).isEqualTo(version(2));
+        assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getCompatibleDistributionSetTypes()).isEmpty();
         assertThat(distributionSetTypeManagement.getByKey(standardDsType.getKey())).isEmpty();
     }
@@ -641,7 +641,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     @Step
     private TargetType createTestTargetTypeInDB(String name, List<DistributionSetType> dsTypes) {
         TargetType targetType = testdataFactory.createTargetType(name, dsTypes);
-        assertThat(targetType.getOptLockRevision()).isEqualTo(version(1));
+        assertThat(targetType.getOptLockRevision()).isEqualTo(1);
         return targetType;
     }
 

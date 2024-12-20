@@ -215,7 +215,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
                 .isEqualTo("test123");
         assertThat(targetTagRepository.findById(savedAssigned.getId()).get().getOptLockRevision())
                 .as("wrong target tag is saved")
-                .isEqualTo(version(2));
+                .isEqualTo(2);
     }
 
     @Test
