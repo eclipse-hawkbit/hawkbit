@@ -132,8 +132,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
                     targetRepository.byIdsSpec(targetIdsChunk)) != targetIdsChunk.size()) {
                 throw new InsufficientPermissionException("No update access to all targets!");
             }
-            targetRepository.setAssignedDistributionSetAndUpdateStatus(TargetUpdateStatus.PENDING,
-                    set, now, currentUser, targetIdsChunk);
+            targetRepository.setAssignedDistributionSetAndUpdateStatus(set, now, currentUser, TargetUpdateStatus.PENDING, targetIdsChunk);
             // TODO AC - current problem with this approach is that the caller detach the targets and seems doesn't save them
 //            targetRepository.saveAll(
 //                targetRepository

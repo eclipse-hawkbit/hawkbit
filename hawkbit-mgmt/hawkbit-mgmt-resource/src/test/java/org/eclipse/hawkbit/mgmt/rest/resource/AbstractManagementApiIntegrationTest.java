@@ -13,6 +13,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+import lombok.SneakyThrows;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.repository.jpa.Jpa;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
@@ -184,6 +185,7 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         return mvcResult -> jsonPath("_links.self.href", equalTo(link)).match(mvcResult);
     }
 
+    @SneakyThrows
     protected static JSONObject getAssignmentObject(final Object id, final MgmtActionType type) {
         final JSONObject obj = new JSONObject();
         obj.put("id", id);
@@ -191,6 +193,7 @@ public abstract class AbstractManagementApiIntegrationTest extends AbstractRestI
         return obj;
     }
 
+    @SneakyThrows
     protected static JSONObject getAssignmentObject(final Object id, final MgmtActionType type, final int weight) {
         return getAssignmentObject(id, type).put("weight", weight);
     }

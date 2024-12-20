@@ -113,5 +113,4 @@ public interface EntityFactory {
      * @return {@link TargetFilterQueryBuilder} object
      */
     TargetFilterQueryBuilder targetFilterQuery();
-
 }

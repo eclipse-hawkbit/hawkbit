@@ -44,7 +44,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * @return the found {@link Action}
      */
     @EntityGraph(value = "Action.all", type = EntityGraphType.LOAD)
-    Optional<Action> findWithDetailsById(Long actionId);
+    Optional<Action> findWithDetailsById(@Param("id") Long actionId);
 
     /**
      * Retrieves the latest finished {@link Action} for given target and {@link DistributionSet}.
