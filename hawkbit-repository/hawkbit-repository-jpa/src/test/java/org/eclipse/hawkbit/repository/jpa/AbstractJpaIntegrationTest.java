@@ -244,14 +244,6 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
         return rolloutGroupRepository.findById(group.getId()).get();
     }
 
-    // version is 1, 2 ... based
-    protected int version(final int version) {
-        return switch (Jpa.JPA_VENDOR) {
-            case ECLIPSELINK -> version;
-            case HIBERNATE -> version - 1;
-        };
-    }
-
     private JpaRollout refresh(final Rollout rollout) {
         return rolloutRepository.findById(rollout.getId()).get();
     }

@@ -840,14 +840,14 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         // create a target
         final Target target = testdataFactory.createTarget("target1");
         // initial opt lock revision must be zero
-        assertThat(target.getOptLockRevision()).isEqualTo(version(1));
+        assertThat(target.getOptLockRevision()).isEqualTo(1);
 
         // create target meta data entry
         insertTargetMetadata(knownKey, knownValue, target);
 
         Target changedLockRevisionTarget = targetManagement.get(target.getId())
                 .orElseThrow(NoSuchElementException::new);
-        assertThat(changedLockRevisionTarget.getOptLockRevision()).isEqualTo(version(2));
+        assertThat(changedLockRevisionTarget.getOptLockRevision()).isEqualTo(2);
 
         // Unsure if needed maybe to wait for a db flush?
         // Thread.sleep(100);
@@ -858,7 +858,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         // we are updating the target meta data so also modifying the base
         // software module so opt lock revision must be three
         changedLockRevisionTarget = targetManagement.get(target.getId()).orElseThrow(NoSuchElementException::new);
-        assertThat(changedLockRevisionTarget.getOptLockRevision()).isEqualTo(version(3));
+        assertThat(changedLockRevisionTarget.getOptLockRevision()).isEqualTo(3);
         assertThat(changedLockRevisionTarget.getLastModifiedAt()).isPositive();
 
         // verify updated meta data contains the updated value
@@ -881,7 +881,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         // initial opt lock revision must be one
         final Optional<JpaTarget> targetFound = targetRepository.findById(target.getId());
         assertThat(targetFound).isPresent();
-        assertThat(targetFound.get().getOptLockRevision()).isEqualTo(version(1));
+        assertThat(targetFound.get().getOptLockRevision()).isEqualTo(1);
         assertThat(targetFound.get().getTargetType().getId()).isEqualTo(targetTypes.get(0).getId());
 
         // update the target type
@@ -892,7 +892,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         // opt lock revision must be changed
         final Optional<JpaTarget> targetFound1 = targetRepository.findById(target.getId());
         assertThat(targetFound1).isPresent();
-        assertThat(targetFound1.get().getOptLockRevision()).isEqualTo(version(2));
+        assertThat(targetFound1.get().getOptLockRevision()).isEqualTo(2);
         assertThat(targetFound1.get().getTargetType().getId()).isEqualTo(targetTypes.get(1).getId());
 
         // unassign the target type
@@ -901,7 +901,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         // opt lock revision must be changed
         final Optional<JpaTarget> targetFound2 = targetRepository.findById(target.getId());
         assertThat(targetFound2).isPresent();
-        assertThat(targetFound2.get().getOptLockRevision()).isEqualTo(version(3));
+        assertThat(targetFound2.get().getOptLockRevision()).isEqualTo(3);
         assertThat(targetFound2.get().getTargetType()).isNull();
     }
 
@@ -914,7 +914,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         // initial opt lock revision must be one
         final Optional<JpaTarget> targetFound = targetRepository.findById(target.getId());
         assertThat(targetFound).isPresent();
-        assertThat(targetFound.get().getOptLockRevision()).isEqualTo(version(1));
+        assertThat(targetFound.get().getOptLockRevision()).isEqualTo(1);
         assertThat(targetFound.get().getTargetType()).isNull();
 
         // create a target type
@@ -927,7 +927,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         // opt lock revision must be changed
         final Optional<JpaTarget> targetFound1 = targetRepository.findById(target.getId());
         assertThat(targetFound1).isPresent();
-        assertThat(targetFound1.get().getOptLockRevision()).isEqualTo(version(2));
+        assertThat(targetFound1.get().getOptLockRevision()).isEqualTo(2);
         assertThat(targetFound1.get().getTargetType().getId()).isEqualTo(targetType.getId());
     }
 
@@ -1003,7 +1003,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         // initial opt lock revision must be one
         final Optional<JpaTarget> targetFound = targetRepository.findById(target.getId());
         assertThat(targetFound).isPresent();
-        assertThat(targetFound.get().getOptLockRevision()).isEqualTo(version(1));
+        assertThat(targetFound.get().getOptLockRevision()).isEqualTo(1);
         assertThat(targetFound.get().getTargetType()).isNull();
 
         // assign target type to target
@@ -1017,7 +1017,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         // opt lock revision is not changed
         final Optional<JpaTarget> targetFound1 = targetRepository.findById(target.getId());
         assertThat(targetFound1).isPresent();
-        assertThat(targetFound1.get().getOptLockRevision()).isEqualTo(version(1));
+        assertThat(targetFound1.get().getOptLockRevision()).isEqualTo(1);
     }
 
     @Test
@@ -1032,7 +1032,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         // initial opt lock revision must be one
         final Optional<JpaTarget> targetFound = targetRepository.findById(target.getId());
         assertThat(targetFound).isPresent();
-        assertThat(targetFound.get().getOptLockRevision()).isEqualTo(version(1));
+        assertThat(targetFound.get().getOptLockRevision()).isEqualTo(1);
         assertThat(targetFound.get().getTargetType().getName()).isEqualTo(targetType.getName());
 
         // un-assign target type from target
@@ -1041,7 +1041,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         // opt lock revision must be changed
         final Optional<JpaTarget> targetFound1 = targetRepository.findById(target.getId());
         assertThat(targetFound1).isPresent();
-        assertThat(targetFound1.get().getOptLockRevision()).isEqualTo(version(2));
+        assertThat(targetFound1.get().getOptLockRevision()).isEqualTo(2);
         assertThat(targetFound1.get().getTargetType()).isNull();
     }
 

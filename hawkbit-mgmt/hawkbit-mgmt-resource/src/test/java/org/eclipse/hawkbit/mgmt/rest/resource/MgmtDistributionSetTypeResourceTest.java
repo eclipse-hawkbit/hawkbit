@@ -214,7 +214,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
 
         final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
                 .create().key("testType").name("testType").description("testType").colour("col12"));
-        assertThat(testType.getOptLockRevision()).isEqualTo(version(1));
+        assertThat(testType.getOptLockRevision()).isEqualTo(1);
 
         for (int i = 0; i < moduleTypeIds.size() - 1; ++i) {
             mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/optionalmoduletypes", testType.getId())
@@ -235,7 +235,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
 
         final DistributionSetType testType2 = distributionSetTypeManagement.create(entityFactory.distributionSetType()
                 .create().key("testType2").name("testType2").description("testType2").colour("col12"));
-        assertThat(testType2.getOptLockRevision()).isEqualTo(version(1));
+        assertThat(testType2.getOptLockRevision()).isEqualTo(1);
 
         for (int i = 0; i < moduleTypeIds.size() - 1; ++i) {
             mvc.perform(post("/rest/v1/distributionsettypes/{dstID}/mandatorymoduletypes", testType2.getId())
@@ -741,7 +741,7 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
         final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
                 .create().key("test123").name("TestName123").description("Desc123").colour("col")
                 .mandatory(Collections.singletonList(osType.getId())).optional(Collections.singletonList(appType.getId())));
-        assertThat(testType.getOptLockRevision()).isEqualTo(version(1));
+        assertThat(testType.getOptLockRevision()).isEqualTo(1);
         assertThat(testType.getOptionalModuleTypes()).containsExactly(appType);
         assertThat(testType.getMandatoryModuleTypes()).containsExactly(osType);
         return testType;

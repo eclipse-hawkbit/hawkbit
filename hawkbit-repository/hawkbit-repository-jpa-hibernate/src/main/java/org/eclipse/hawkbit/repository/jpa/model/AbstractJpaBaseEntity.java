@@ -54,7 +54,7 @@ public abstract class AbstractJpaBaseEntity extends AbstractBaseEntity {
     @Getter
     @Version
     @Column(name = "optlock_revision")
-    private int optLockRevision;
+    private int optLockRevision = 1;
 
     // Audit fields. use property access to ensure that setters will be called and checked for modification
     // (touch implementation depends on setLastModifiedAt(1).
