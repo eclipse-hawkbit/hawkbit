@@ -21,7 +21,7 @@ import org.junit.jupiter.api.extension.Extension;
 @Slf4j
 public class MySqlTestDatabase extends AbstractSqlTestDatabase {
 
-    protected static final String MYSQL_URI_PATTERN = "jdbc:mariadb://{host}:{port}/{db}*";
+    protected static final String MYSQL_URI_PATTERN = "{proto}://{host}:{port}/{db}*";
 
     public MySqlTestDatabase(final DatasourceContext context) {
         super(context);
@@ -51,7 +51,9 @@ public class MySqlTestDatabase extends AbstractSqlTestDatabase {
         final String uri = context.getDatasourceUrl();
         final Map<String, String> databaseProperties = MATCHER.extractUriTemplateVariables(MYSQL_URI_PATTERN, uri);
 
-        return MYSQL_URI_PATTERN.replace("{host}", databaseProperties.get("host"))
+        return MYSQL_URI_PATTERN
+                .replace("{proto}", databaseProperties.get("proto"))
+                .replace("{host}", databaseProperties.get("host"))
                 .replace("{port}", databaseProperties.get("port"))
                 .replace("{db}*", context.getRandomSchemaName());
     }
