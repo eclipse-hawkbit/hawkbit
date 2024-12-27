@@ -43,12 +43,23 @@ public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator<Roll
 
     @Override
     public void exec(final Rollout rollout, final RolloutGroup rolloutG) {
+
+        /*
+            refresh latest rollout state in order to escape cases when
+            previous group have matched error condition and paused the rollout
+            and this one tries to pause the rollout too but throws an exception
+            and rollbacks rollout processing transaction
+         */
+        Rollout refreshedRollout = rolloutManagement.get(rollout.getId()).orElseThrow();
         final JpaRolloutGroup rolloutGroup = (JpaRolloutGroup) rolloutG;
 
         systemSecurityContext.runAsSystem(() -> {
             rolloutGroup.setStatus(RolloutGroupStatus.ERROR);
             rolloutGroupRepository.save(rolloutGroup);
-            rolloutManagement.pauseRollout(rollout.getId());
+            if (Rollout.RolloutStatus.PAUSED != refreshedRollout.getStatus()) {
+                // if only the latest state is != paused then pause
+                rolloutManagement.pauseRollout(rollout.getId());
+            }
             return null;
         });
     }
