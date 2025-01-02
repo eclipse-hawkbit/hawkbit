@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
@@ -87,7 +86,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
@@ -153,7 +151,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public List<DistributionSet> create(final Collection<DistributionSetCreate> creates) {
         final List<JpaDistributionSet> toCreate = creates.stream().map(JpaDistributionSetCreate.class::cast)
                 .map(this::setDefaultTypeIfMissing).map(JpaDistributionSetCreate::build).toList();
@@ -165,7 +162,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public DistributionSet create(final DistributionSetCreate c) {
         final JpaDistributionSetCreate create = (JpaDistributionSetCreate) c;
         setDefaultTypeIfMissing(create);
@@ -177,7 +173,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSet update(final DistributionSetUpdate u) {
         final GenericDistributionSetUpdate update = (GenericDistributionSetUpdate) u;
 
@@ -209,7 +204,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public long count() {
         return distributionSetRepository.count(DistributionSetSpecification.isNotDeleted());
     }
@@ -218,7 +212,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void delete(final long id) {
         delete(List.of(id));
     }
@@ -227,7 +220,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void delete(final Collection<Long> distributionSetIDs) {
         getDistributionSets(distributionSetIDs); // throws EntityNotFoundException if any of these do not exists
         final List<JpaDistributionSet> setsFound = distributionSetRepository.findAll(
@@ -268,32 +260,27 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public List<DistributionSet> get(final Collection<Long> ids) {
         return Collections.unmodifiableList(getDistributionSets(ids));
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public boolean exists(final long id) {
         return distributionSetRepository.existsById(id);
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Optional<DistributionSet> get(final long id) {
         return distributionSetRepository.findById(id).map(DistributionSet.class::cast);
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Slice<DistributionSet> findAll(final Pageable pageable) {
         return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, pageable, List.of(
                 DistributionSetSpecification.isNotDeleted()));
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<DistributionSet> findByRsql(final Pageable pageable, final String rsqlParam) {
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, pageable, List.of(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class, virtualPropertyReplacer,

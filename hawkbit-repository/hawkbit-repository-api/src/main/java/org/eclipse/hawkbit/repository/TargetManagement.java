@@ -254,6 +254,7 @@ public interface TargetManagement {
      *         withs
      * @return a page of the found {@link Target}s
      */
+    //TODO READ_TARGET Permission ?
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     Slice<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatibleAndUpdatable(@NotNull Pageable pageRequest,
             @NotEmpty Collection<Long> groups, @NotNull String targetFilterQuery,
@@ -526,9 +527,7 @@ public interface TargetManagement {
      * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    default List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId) {
-        return assignTag(controllerIds, targetTagId, null);
-    }
+    List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long targetTagId);
 
     /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}s.
@@ -551,9 +550,7 @@ public interface TargetManagement {
      * @throws EntityNotFoundException if given targetTagId or at least one of the targets do not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    default List<Target> unassignTag(@NotEmpty Collection<String> controllerIds, long targetTagId) {
-        return unassignTag(controllerIds, targetTagId, null);
-    }
+    List<Target> unassignTag(@NotEmpty Collection<String> controllerIds, long targetTagId);
 
     /**
      * Un-assign a {@link TargetType} assignment to given {@link Target}.

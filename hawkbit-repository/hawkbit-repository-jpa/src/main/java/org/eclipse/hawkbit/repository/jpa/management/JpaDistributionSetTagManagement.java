@@ -44,7 +44,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -74,7 +73,6 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public List<DistributionSetTag> create(final Collection<TagCreate> dst) {
         final List<JpaDistributionSetTag> toCreate = dst.stream().map(JpaTagCreate.class::cast)
                 .map(JpaTagCreate::buildDistributionSetTag).toList();
@@ -86,7 +84,6 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public DistributionSetTag create(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
         return distributionSetTagRepository.save(AccessController.Operation.CREATE, create.buildDistributionSetTag());
@@ -96,7 +93,6 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSetTag update(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
 
@@ -111,7 +107,6 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public long count() {
         return distributionSetTagRepository.count();
     }
@@ -120,7 +115,6 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void delete(final long id) {
         distributionSetTagRepository.deleteById(id);
     }
@@ -129,7 +123,6 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void delete(final Collection<Long> ids) {
         final List<JpaDistributionSetTag> setsFound = distributionSetTagRepository.findAllById(ids);
 
@@ -142,31 +135,26 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public List<DistributionSetTag> get(final Collection<Long> ids) {
         return Collections.unmodifiableList(distributionSetTagRepository.findAllById(ids));
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public boolean exists(final long id) {
         return distributionSetTagRepository.existsById(id);
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Optional<DistributionSetTag> get(final long id) {
         return distributionSetTagRepository.findById(id).map(DistributionSetTag.class::cast);
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Slice<DistributionSetTag> findAll(final Pageable pageable) {
         return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetTagRepository, pageable, null);
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<DistributionSetTag> findByRsql(final Pageable pageable, final String rsqlParam) {
         final Specification<JpaDistributionSetTag> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTagFields.class,
                 virtualPropertyReplacer, database);

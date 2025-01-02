@@ -28,6 +28,7 @@ public interface DistributionSetInvalidationManagement {
      * @param distributionSetInvalidation defines the {@link DistributionSet} and options what should be
      *         canceled
      */
+    //TODO no PreAuthorize because it works with DistributionSetManagement (and its indirect PreAuthorize ?)
     void invalidateDistributionSet(final DistributionSetInvalidation distributionSetInvalidation);
 
     /**
@@ -40,6 +41,7 @@ public interface DistributionSetInvalidationManagement {
      *         information about the count of affected rollouts,
      *         auto-assignments and actions
      */
+    //TODO no PreAuthorize because it works with DistributionSetManagement (and its indirect PreAuthorize ?)
     DistributionSetInvalidationCount countEntitiesForInvalidation(
             final DistributionSetInvalidation distributionSetInvalidation);
 

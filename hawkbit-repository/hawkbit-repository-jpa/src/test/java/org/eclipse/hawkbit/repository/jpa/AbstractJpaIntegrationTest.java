@@ -15,15 +15,18 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
@@ -69,6 +72,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @ContextConfiguration(classes = {
         RepositoryApplicationConfiguration.class, TestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
@@ -229,6 +233,43 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected void assertScheduled(final Rollout rollout, final int count) {
         final Page<JpaAction> running = actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.SCHEDULED);
         assertThat(running.getTotalElements()).as("Action count").isEqualTo(count);
+    }
+
+    /**
+     * Asserts that the given callable throws an InsufficientPermissionException.
+     * If callable succeeds without any exception or exception other than InsufficientPermissionException, it will be considered as an assert failure.
+     *
+     * @param callable the callable to call
+     */
+    protected void assertInsufficientPermission(final Callable<?> callable) {
+        try {
+            callable.call();
+            throw new AssertionError(
+                    "Expected Exception 'InsufficientPermissionException' to be thrown, but request passed with no exception.");
+        } catch (Exception ex) {
+            assertThat(ex).isInstanceOf(InsufficientPermissionException.class);
+        }
+    }
+
+    /**
+     * Asserts that the given callable succeeds.
+     *
+     * Note: This method will assume that EntityNotFoundException is OK, as security tests use dummy (non-existing) IDs.
+     * It matters to either callable succeeds without any exception or at most EntityNotFoundException.
+     * All other cases will be considered as an error.
+     *
+     * @param callable the callable to call
+     */
+    protected void assertPermissionWorks(final Callable<?> callable) {
+        try {
+            callable.call();
+        } catch (Throwable th) {
+            if (th instanceof EntityNotFoundException) {
+                log.info("Expected (at most) EntityNotFoundException catch: {}", th.getMessage());
+            } else {
+                throw new AssertionError("Expected no Exception (other then EntityNotFound) to be thrown, but got: " + th.getMessage(), th);
+            }
+        }
     }
 
     protected void finishAction(final Action action) {

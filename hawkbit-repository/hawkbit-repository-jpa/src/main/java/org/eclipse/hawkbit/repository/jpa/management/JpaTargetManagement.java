@@ -530,6 +530,19 @@ public class JpaTargetManagement implements TargetManagement {
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<Target> assignTag(final Collection<String> controllerIds, final long targetTagId,
             final Consumer<Collection<String>> notFoundHandler) {
+        return assignTag0(controllerIds, targetTagId, notFoundHandler);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public List<Target> assignTag(final Collection<String> controllerIds, final long targetTagId) {
+        return assignTag0(controllerIds, targetTagId, null);
+    }
+
+    private List<Target> assignTag0(final Collection<String> controllerIds, final long targetTagId,
+            final Consumer<Collection<String>> notFoundHandler) {
         return updateTag(controllerIds, targetTagId, notFoundHandler, (tag, target) -> {
             if (target.getTags().contains(tag)) {
                 return target;
@@ -545,6 +558,19 @@ public class JpaTargetManagement implements TargetManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<Target> unassignTag(final Collection<String> controllerIds, final long targetTagId,
+            final Consumer<Collection<String>> notFoundHandler) {
+        return unassignTag0(controllerIds, targetTagId, notFoundHandler);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public List<Target> unassignTag(final Collection<String> controllerIds, final long targetTagId) {
+        return unassignTag0(controllerIds, targetTagId, null);
+    }
+
+    private List<Target> unassignTag0(final Collection<String> controllerIds, final long targetTagId,
             final Consumer<Collection<String>> notFoundHandler) {
         return updateTag(controllerIds, targetTagId, notFoundHandler, (tag, target) -> {
             if (target.getTags().contains(tag)) {

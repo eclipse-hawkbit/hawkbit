@@ -126,25 +126,7 @@ public interface TenantConfigurationManagement {
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION_READ)
     <T> T getGlobalConfigurationValue(String configurationKeyName, Class<T> propertyType);
 
-    // PreAuthorize for TENANT_CONFIGURATION_READ won't be applied but actually we want just read target
+    // PreAuthorize for TENANT_CONFIGURATION_READ won't be applied, but actually we want just read target
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    default Function<Target, PollStatus> pollStatusResolver() {
-        final Duration pollTime = DurationHelper.formattedStringToDuration(
-                getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
-        final Duration overdueTime = DurationHelper.formattedStringToDuration(
-                getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class)
-                        .getValue());
-        return target -> {
-            final Long lastTargetQuery = target.getLastTargetQuery();
-            if (lastTargetQuery == null) {
-                return null;
-            }
-            final LocalDateTime currentDate = LocalDateTime.now();
-            final LocalDateTime lastPollDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastTargetQuery),
-                    ZoneId.systemDefault());
-            final LocalDateTime nextPollDate = lastPollDate.plus(pollTime);
-            final LocalDateTime overdueDate = nextPollDate.plus(overdueTime);
-            return new PollStatus(lastPollDate, nextPollDate, overdueDate, currentDate);
-        };
-    }
+    Function<Target, PollStatus> pollStatusResolver();
 }
