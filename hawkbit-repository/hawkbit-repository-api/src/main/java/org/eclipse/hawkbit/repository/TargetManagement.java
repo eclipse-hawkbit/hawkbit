@@ -59,8 +59,7 @@ public interface TargetManagement {
      * @return number of found {@link Target}s.
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     long countByAssignedDistributionSet(long distributionSetId);
 
     /**
@@ -81,8 +80,7 @@ public interface TargetManagement {
      * @return number of found {@link Target}s.
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     long countByInstalledDistributionSet(long distributionSetId);
 
     /**
@@ -93,8 +91,7 @@ public interface TargetManagement {
      * @return <code>true</code> if a {@link Target} exists.
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-            + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     boolean existsByInstalledOrAssignedDistributionSet(long distributionSetId);
 
     /**
@@ -225,7 +222,7 @@ public interface TargetManagement {
      * @return a page of the found {@link Target}s
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(@NotNull Pageable pageRequest,
             long distributionSetId, @NotNull String rsqlParam);
 
@@ -239,7 +236,7 @@ public interface TargetManagement {
      * @return the count of found {@link Target}s
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
     long countByRsqlAndNonDSAndCompatibleAndUpdatable(long distributionSetId, @NotNull String rsqlParam);
 
     /**
@@ -254,18 +251,17 @@ public interface TargetManagement {
      *         withs
      * @return a page of the found {@link Target}s
      */
-    //TODO READ_TARGET Permission ?
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     Slice<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatibleAndUpdatable(@NotNull Pageable pageRequest,
             @NotEmpty Collection<Long> groups, @NotNull String targetFilterQuery,
             @NotNull DistributionSetType distributionSetType);
 
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     Slice<Target> findByNotInGEGroupAndNotInActiveActionGEWeightOrInRolloutAndTargetFilterQueryAndCompatibleAndUpdatable(
             @NotNull Pageable pageRequest, final long rolloutId, final int weight, final long firstGroupId, @NotNull String targetFilterQuery,
             @NotNull DistributionSetType distributionSetType);
 
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     long countByActionsInRolloutGroup(final long rolloutGroupId);
 
     /**
@@ -278,7 +274,7 @@ public interface TargetManagement {
      * @param rolloutId rolloutId of the rollout to be retried.
      * @return a page of the found {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     Slice<Target> findByFailedRolloutAndNotInRolloutGroups(@NotNull Pageable pageRequest,
             @NotEmpty Collection<Long> groups, @NotNull String rolloutId);
 
@@ -293,7 +289,7 @@ public interface TargetManagement {
      *         with
      * @return count of the found {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(@NotEmpty Collection<Long> groups,
             @NotNull String rsqlParam, @NotNull DistributionSetType distributionSetType);
 
@@ -306,7 +302,7 @@ public interface TargetManagement {
      * @param rolloutId rolloutId of the rollout to be retried.
      * @return count of the found {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     long countByFailedRolloutAndNotInRolloutGroups(@NotEmpty Collection<Long> groups, @NotNull String rolloutId);
 
     /**
