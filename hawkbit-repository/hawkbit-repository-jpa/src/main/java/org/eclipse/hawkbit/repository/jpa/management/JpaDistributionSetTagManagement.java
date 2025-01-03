@@ -44,6 +44,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -84,6 +85,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public DistributionSetTag create(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
         return distributionSetTagRepository.save(AccessController.Operation.CREATE, create.buildDistributionSetTag());
@@ -93,6 +95,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSetTag update(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
 

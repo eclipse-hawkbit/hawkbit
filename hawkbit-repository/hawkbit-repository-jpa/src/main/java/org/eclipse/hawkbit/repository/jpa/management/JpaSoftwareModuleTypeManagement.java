@@ -40,6 +40,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -93,6 +94,7 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public SoftwareModuleType create(final SoftwareModuleTypeCreate c) {
         final JpaSoftwareModuleTypeCreate create = (JpaSoftwareModuleTypeCreate) c;
 
@@ -103,6 +105,7 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public SoftwareModuleType update(final SoftwareModuleTypeUpdate u) {
         final GenericSoftwareModuleTypeUpdate update = (GenericSoftwareModuleTypeUpdate) u;
 

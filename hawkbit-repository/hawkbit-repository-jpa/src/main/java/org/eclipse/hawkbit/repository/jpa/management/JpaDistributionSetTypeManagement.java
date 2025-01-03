@@ -53,6 +53,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
@@ -140,6 +141,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public DistributionSetType create(final DistributionSetTypeCreate c) {
         final JpaDistributionSetType distributionSetType = ((JpaDistributionSetTypeCreate) c).build();
         return distributionSetTypeRepository.save(AccessController.Operation.CREATE, distributionSetType);
@@ -149,6 +151,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSetType update(final DistributionSetTypeUpdate u) {
         final GenericDistributionSetTypeUpdate update = (GenericDistributionSetTypeUpdate) u;
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(update.getId());
