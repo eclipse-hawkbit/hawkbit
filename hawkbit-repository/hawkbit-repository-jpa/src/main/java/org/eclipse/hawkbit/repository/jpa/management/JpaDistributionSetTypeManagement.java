@@ -129,7 +129,6 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public List<DistributionSetType> create(final Collection<DistributionSetTypeCreate> types) {
         final List<JpaDistributionSetType> typesToCreate = types.stream()
                 .map(JpaDistributionSetTypeCreate.class::cast)
@@ -186,7 +185,6 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public long count() {
         return distributionSetTypeRepository.count(DistributionSetTypeSpecification.isNotDeleted());
     }
@@ -195,7 +193,6 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void delete(final long id) {
         final JpaDistributionSetType toDelete = distributionSetTypeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, id));
@@ -214,38 +211,32 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void delete(final Collection<Long> ids) {
         distributionSetTypeRepository.deleteAllById(ids);
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public List<DistributionSetType> get(final Collection<Long> ids) {
         return Collections.unmodifiableList(distributionSetTypeRepository.findAllById(ids));
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public boolean exists(final long id) {
         return distributionSetTypeRepository.existsById(id);
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Optional<DistributionSetType> get(final long id) {
         return distributionSetTypeRepository.findById(id).map(DistributionSetType.class::cast);
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Slice<DistributionSetType> findAll(final Pageable pageable) {
         return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetTypeRepository, pageable, List.of(
                 DistributionSetTypeSpecification.isNotDeleted()));
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<DistributionSetType> findByRsql(final Pageable pageable, final String rsqlParam) {
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetTypeRepository, pageable, List.of(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTypeFields.class, virtualPropertyReplacer, database),
