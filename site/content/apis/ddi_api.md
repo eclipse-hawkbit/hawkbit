@@ -38,6 +38,7 @@ The _DDI_ API allows the device to provide the following feedback messages:
  SCHEDULED                   | This can be used by the target to inform that it scheduled on the action.                                                                                                                                                                 | RUNNING                                               
  RESUMED                     | This can be used by the target to inform that it continued to work on the action.                                                                                                                                                         | RUNNING                                               
 
+See this [issue](https://github.com/eclipse/hawkbit/issues/952) for additional information, concerning the cancellation of updates. To finally accept a cancellation, you must send a "closed" status.exection type. 
 ## DDI APIs
 
 <iframe style="padding-top: 20px;" width="100%" height="900px" frameborder="0" src="../../rest-api/ddi.html"></iframe>
