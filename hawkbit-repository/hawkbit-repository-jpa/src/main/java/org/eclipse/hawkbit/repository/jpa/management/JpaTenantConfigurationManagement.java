@@ -14,10 +14,15 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
 
 import java.io.Serializable;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +35,13 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
 import org.eclipse.hawkbit.repository.jpa.repository.TenantConfigurationRepository;
+import org.eclipse.hawkbit.repository.model.PollStatus;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,6 +152,27 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         }
 
         return CONVERSION_SERVICE.convert(key.getDefaultValue(), propertyType);
+    }
+
+    @Override
+    public Function<Target, PollStatus> pollStatusResolver() {
+        final Duration pollTime = DurationHelper.formattedStringToDuration(
+                getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class).getValue());
+        final Duration overdueTime = DurationHelper.formattedStringToDuration(
+                getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class)
+                        .getValue());
+        return target -> {
+            final Long lastTargetQuery = target.getLastTargetQuery();
+            if (lastTargetQuery == null) {
+                return null;
+            }
+            final LocalDateTime currentDate = LocalDateTime.now();
+            final LocalDateTime lastPollDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastTargetQuery),
+                    ZoneId.systemDefault());
+            final LocalDateTime nextPollDate = lastPollDate.plus(pollTime);
+            final LocalDateTime overdueDate = nextPollDate.plus(overdueTime);
+            return new PollStatus(lastPollDate, nextPollDate, overdueDate, currentDate);
+        };
     }
 
     /**

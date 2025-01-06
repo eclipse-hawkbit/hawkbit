@@ -403,6 +403,7 @@ public interface DeploymentManagement {
      * @return assigned {@link DistributionSet}
      * @throws EntityNotFoundException if target with given ID does not exist
      */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<DistributionSet> getAssignedDistributionSet(@NotEmpty String controllerId);
 
     /**
@@ -413,6 +414,7 @@ public interface DeploymentManagement {
      * @return installed {@link DistributionSet}
      * @throws EntityNotFoundException if target with given ID does not exist
      */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<DistributionSet> getInstalledDistributionSet(@NotEmpty String controllerId);
 
     /**
