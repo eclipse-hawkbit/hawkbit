@@ -42,7 +42,7 @@ hawkbit:
     image: "hawkbit/hawkbit-update-server:latest"
     environment:
       SPRING_APPLICATION_JSON: '{
-        "spring.datasource.url": "jdbc:mariadb://mysql:3306/hawkbit",
+        "spring.datasource.url": "jdbc:mysql://mysql:3306/hawkbit",
         "spring.rabbitmq.host": "rabbitmq",
         "spring.rabbitmq.username": "guest",
         "spring.rabbitmq.password": "guest",

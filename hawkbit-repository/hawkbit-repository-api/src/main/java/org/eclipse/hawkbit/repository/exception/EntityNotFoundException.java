@@ -117,7 +117,7 @@ public class EntityNotFoundException extends AbstractServerRtException {
         super(type.getSimpleName() + "s with given identifiers {" + toEntityString(expected.stream().filter(id -> !found.contains(id))
                         .map(String::valueOf).collect(Collectors.joining(","))) + "} do not exist.",
                 THIS_ERROR,
-                Map.of(TYPE, type.getSimpleName(), ENTITY_ID, expected.stream().filter(id -> !found.contains(id)).map(String::valueOf)));
+                Map.of(TYPE, type.getSimpleName(), ENTITY_ID, expected.stream().filter(id -> !found.contains(id)).map(String::valueOf).toList()));
     }
 
     private static String toEntityString(final Object obj) {

@@ -19,7 +19,7 @@ and no artifact storage.
 This guide describes a target architecture that is more like one that you will expect in a production system.
 
 - hawkBit [Update Server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-monolith/hawkbit-update-server).
-- [MariaDB](https://mariadb.org) for the repository.
+- [MySQL](https://www.mysql.com/) for the repository.
 - [RabbitMQ](https://www.rabbitmq.com) for DMF communication.
 - For testing and demonstration purposes we will also use:
 - [hawkBit Device Simulator](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-device-simulator).
@@ -35,23 +35,18 @@ This guide describes a target architecture that is more like one that you will e
 As mentioned you can create your own application with hawkBit inside or adapt the existing example app. The second
 option will be shown here.
 
-### Configure MariaDB/MySQL connection settings.
+### Configure MySQL connection settings.
 
 For this you can either edit the existing _application.properties_ or create
 a [new profile](http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-external-config-profile-specific-properties).
 
 ```properties
 spring.jpa.database=MYSQL
-spring.datasource.url=jdbc:mariadb://localhost:3306/YOUR_SCHEMA
+spring.datasource.url=jdbc:mysql://localhost:3306/YOUR_SCHEMA
 spring.datasource.username=YOUR_USER
 spring.datasource.password=YOUR_PWD
-spring.datasource.driverClassName=org.mariadb.jdbc.Driver
+spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
 ```
-
-Note: On Ubuntu 18.04 with MariaDB 10.1 installed from the default repository via apt install _COLLATE option_ of
-database have to be changed manually to "latin1".
-For recent versions of MariaDB running on Ubuntu this is not required (
-cf. [system variables](https://mariadb.com/kb/en/differences-in-mariadb-in-debian-and-ubuntu), [issue](https://github.com/eclipse-hawkbit/hawkbit/issues/963))
 
 ### Configure RabbitMQ connection settings for update server and device simulator (optional).
 
