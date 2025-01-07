@@ -83,7 +83,6 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public List<SoftwareModuleType> create(final Collection<SoftwareModuleTypeCreate> c) {
         final List<JpaSoftwareModuleType> creates = c.stream().map(JpaSoftwareModuleTypeCreate.class::cast)
                 .map(JpaSoftwareModuleTypeCreate::build).toList();
@@ -120,7 +119,6 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public long count() {
         return softwareModuleTypeRepository.count(SoftwareModuleTypeSpecification.isNotDeleted());
     }
@@ -129,7 +127,6 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void delete(final long id) {
         final JpaSoftwareModuleType toDelete = softwareModuleTypeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, id));
@@ -141,7 +138,6 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     public void delete(final Collection<Long> ids) {
         softwareModuleTypeRepository
                 .findAll(AccessController.Operation.DELETE, softwareModuleTypeRepository.byIdsSpec(ids))
@@ -149,32 +145,27 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public List<SoftwareModuleType> get(final Collection<Long> ids) {
         return Collections.unmodifiableList(softwareModuleTypeRepository.findAllById(ids));
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public boolean exists(final long id) {
         return softwareModuleTypeRepository.existsById(id);
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Optional<SoftwareModuleType> get(final long id) {
         return softwareModuleTypeRepository.findById(id).map(SoftwareModuleType.class::cast);
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Slice<SoftwareModuleType> findAll(final Pageable pageable) {
         return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleTypeRepository, pageable,
                 List.of(SoftwareModuleTypeSpecification.isNotDeleted()));
     }
 
     @Override
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public Page<SoftwareModuleType> findByRsql(final Pageable pageable, final String rsqlParam) {
         return JpaManagementHelper.findAllWithCountBySpec(softwareModuleTypeRepository, pageable,
                 List.of(

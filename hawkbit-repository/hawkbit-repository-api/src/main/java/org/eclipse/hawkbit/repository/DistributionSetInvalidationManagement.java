@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * A DistributionSetInvalidationManagement service provides operations to
@@ -24,6 +25,8 @@ public interface DistributionSetInvalidationManagement {
      * cancels all auto assignments referring this {@link DistributionSet} and
      * can not be undone. Optionally, all rollouts and actions referring this
      * {@link DistributionSet} can be canceled.
+     * <p>
+     * {@link PreAuthorize} missing intentionally as it relies on the permission set defined in the management api methods that it calls internally.
      *
      * @param distributionSetInvalidation defines the {@link DistributionSet} and options what should be
      *         canceled
@@ -33,6 +36,8 @@ public interface DistributionSetInvalidationManagement {
     /**
      * Counts all entities for a list of {@link DistributionSet}s that will be
      * canceled when invalidation is called for those {@link DistributionSet}s.
+     * <p>
+     * {@link PreAuthorize} missing intentionally as it relies on the permission set defined in the management api methods that it calls internally.
      *
      * @param distributionSetInvalidation defines the {@link DistributionSet} and options what should be
      *         canceled
