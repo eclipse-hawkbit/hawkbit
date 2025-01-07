@@ -87,7 +87,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected static final String NOT_EXIST_ID = "12345678990";
     protected static final long NOT_EXIST_IDL = Long.parseLong(NOT_EXIST_ID);
 
-    protected static final List<String> REPOSITORY_AND_TARGET_PERMISSIONS = List.of(SpPermission.READ_REPOSITORY, SpPermission.CREATE_REPOSITORY, SpPermission.UPDATE_REPOSITORY, SpPermission.DELETE_REPOSITORY, SpPermission.READ_TARGET, SpPermission.CREATE_TARGET, SpPermission.UPDATE_TARGET, SpPermission.DELETE_TARGET);
+    private static final List<String> REPOSITORY_AND_TARGET_PERMISSIONS = List.of(SpPermission.READ_REPOSITORY, SpPermission.CREATE_REPOSITORY, SpPermission.UPDATE_REPOSITORY, SpPermission.DELETE_REPOSITORY, SpPermission.READ_TARGET, SpPermission.CREATE_TARGET, SpPermission.UPDATE_TARGET, SpPermission.DELETE_TARGET);
 
     @PersistenceContext
     protected EntityManager entityManager;
@@ -247,9 +247,22 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
      *
      * @param callable the callable to call
      */
-    @SneakyThrows
     protected void assertPermissions(final Callable<?> callable, List<String> requiredPermissions) {
-        final List<String> insufficiantPermissions = REPOSITORY_AND_TARGET_PERMISSIONS.stream()
+        assertPermissions(callable, requiredPermissions, null);
+    }
+
+    /**
+     * Asserts that the given callable throws an InsufficientPermissionException.
+     * @param callable the callable to call
+     * @param requiredPermissions required permissions for the callable
+     * @param insufficientPermissions can be null, if null, it will be resolved automatically. But in some cases (e.g. @PreAuthorized Permissions with OR, it is safer to pass directly the insufficient permissions)
+     */
+    @SneakyThrows
+    protected void assertPermissions(final Callable<?> callable, final List<String> requiredPermissions, final List<String> insufficientPermissions) {
+        // if READ_PERMISSION is required and required permissions are multiple, give only READ_PERMISSION to eliminate internal read_permission check failure that would confuse the actual test
+        final List<String> resolvedInsufficientPermissions = insufficientPermissions != null ? insufficientPermissions :
+                requiredPermissions.contains(SpPermission.READ_REPOSITORY) && requiredPermissions.size() > 1 ?
+                List.of(SpPermission.READ_REPOSITORY) : REPOSITORY_AND_TARGET_PERMISSIONS.stream()
                 .filter(p -> !requiredPermissions.contains(p)).toList();
         // check if the user has the correct permissions
         SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("user_with_permissions", requiredPermissions.toArray(new String[0])), () -> {
@@ -259,12 +272,13 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
         });
 
         // check if the user has the insufficient permissions
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("user_without_permissions", insufficiantPermissions.toArray(new String[0])), () -> {
+        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("user_without_permissions", resolvedInsufficientPermissions.toArray(new String[0])), () -> {
             assertInsufficientPermission(callable);
             log.info("assertInsufficientPermission Passed");
             return null;
         });
     }
+
 
     /**
      * Asserts that the given callable throws an InsufficientPermissionException.

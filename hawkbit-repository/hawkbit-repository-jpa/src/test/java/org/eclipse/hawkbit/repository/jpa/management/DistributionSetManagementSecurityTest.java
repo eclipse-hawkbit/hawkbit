@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.List;
+import java.util.Random;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -244,6 +245,7 @@ class DistributionSetManagementSecurityTest
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void invalidatePermissionsCheck() {
+        distributionSetTypeManagement.create(entityFactory.distributionSetType().create().key("type").name("name"));
         assertPermissions(() -> {
             distributionSetManagement.invalidate(entityFactory.distributionSet().create().name("name").version("1.0").type("type").build());
             return null;

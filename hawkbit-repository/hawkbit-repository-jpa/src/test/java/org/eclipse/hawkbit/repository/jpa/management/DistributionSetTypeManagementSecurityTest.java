@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.List;
+import java.util.Random;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -34,7 +35,7 @@ public class DistributionSetTypeManagementSecurityTest
 
     @Override
     protected DistributionSetTypeCreate getCreateObject() {
-        return entityFactory.distributionSetType().create().key("key").name("name");
+        return entityFactory.distributionSetType().create().key(String.format("key-%d", new Random().nextInt())).name(String.format("name-%d", new Random().nextInt()));
     }
 
     @Override
