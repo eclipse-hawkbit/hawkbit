@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.List;
+import java.util.Random;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -35,7 +36,7 @@ public class DistributionSetTagManagementSecurityTest
 
     @Override
     protected TagCreate getCreateObject() {
-        return entityFactory.tag().create().name("tag");
+        return entityFactory.tag().create().name(String.format("tag-%d", new Random().nextInt()));
     }
 
     @Override

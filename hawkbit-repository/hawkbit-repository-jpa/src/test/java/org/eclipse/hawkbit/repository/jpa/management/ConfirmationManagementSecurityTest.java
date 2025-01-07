@@ -38,7 +38,9 @@ class ConfirmationManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ConfirmationManagement#getStatus() method")
     void getStatusPermissionsCheck() {
-        assertPermissions(() -> confirmationManagement.getStatus("controllerId"), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> confirmationManagement.getStatus("controllerId"), List.of(SpPermission.READ_TARGET),
+                List.of(SpPermission.CREATE_TARGET));
+        assertPermissions(() -> confirmationManagement.getStatus("controllerId"), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_TARGET));
     }
 
     @Test

@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.List;
+import java.util.Random;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -34,7 +35,7 @@ public class SoftwareModuleTypeManagementSecurityTest
 
     @Override
     protected SoftwareModuleTypeCreate getCreateObject() {
-        return entityFactory.softwareModuleType().create().key("key").name("name");
+        return entityFactory.softwareModuleType().create().key(String.format("key-%d", new Random().nextInt())).name(String.format("name-%d", new Random().nextInt()));
     }
 
     @Override

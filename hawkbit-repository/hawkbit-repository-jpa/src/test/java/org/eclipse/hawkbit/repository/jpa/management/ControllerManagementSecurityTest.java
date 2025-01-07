@@ -159,12 +159,15 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     void getByControllerIdPermissionsCheck() {
         assertPermissions(() -> controllerManagement.getByControllerId("controllerId"),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
+        assertPermissions(() -> controllerManagement.getByControllerId("controllerId"),
+                List.of(SpPermission.SpringEvalExpressions.SYSTEM_ROLE));
     }
 
     @Test
     @Description("Tests ControllerManagement#get() method")
     void getPermissionsCheck() {
         assertPermissions(() -> controllerManagement.get(1L), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
+        assertPermissions(() -> controllerManagement.get(1L), List.of(SpPermission.SpringEvalExpressions.SYSTEM_ROLE));
     }
 
     @Test
