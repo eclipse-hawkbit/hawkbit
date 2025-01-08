@@ -1165,7 +1165,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("errorCode", equalTo("hawkbit.server.error.rollout.illegalstate")));
+                .andExpect(jsonPath("errorCode", equalTo(SpServerError.SP_ROLLOUT_ILLEGAL_STATE.getKey())));
     }
 
     @Test
@@ -1183,7 +1183,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/resume", rollout.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("errorCode", equalTo("hawkbit.server.error.rollout.illegalstate")));
+                .andExpect(jsonPath("errorCode", equalTo(SpServerError.SP_ROLLOUT_ILLEGAL_STATE.getKey())));
     }
 
     @Test
