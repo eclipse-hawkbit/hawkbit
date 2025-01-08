@@ -507,12 +507,14 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // initial opt lock revision must be zero
         assertThat(ds.getOptLockRevision()).isEqualTo(1);
 
+        waitNextMillis();
         // create an DS meta data entry
         createDistributionSetMetadata(ds.getId(), new JpaDistributionSetMetadata(knownKey, ds, knownValue));
 
         final DistributionSet changedLockRevisionDS = getOrThrow(distributionSetManagement.get(ds.getId()));
         assertThat(changedLockRevisionDS.getOptLockRevision()).isEqualTo(2);
 
+        waitNextMillis();
         // update the DS metadata
         final JpaDistributionSetMetadata updated = (JpaDistributionSetMetadata) distributionSetManagement
                 .updateMetaData(ds.getId(), entityFactory.generateDsMetadata(knownKey, knownUpdateValue));

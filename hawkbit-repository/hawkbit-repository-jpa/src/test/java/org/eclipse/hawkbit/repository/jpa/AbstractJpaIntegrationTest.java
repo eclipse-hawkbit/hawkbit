@@ -22,7 +22,6 @@ import java.util.stream.StreamSupport;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import io.qameta.allure.Step;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
