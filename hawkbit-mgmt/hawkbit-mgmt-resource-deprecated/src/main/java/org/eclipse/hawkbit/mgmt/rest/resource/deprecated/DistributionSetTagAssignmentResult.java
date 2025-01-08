@@ -7,13 +7,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.model;
+package org.eclipse.hawkbit.mgmt.rest.resource.deprecated;
 
 import java.util.List;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import org.eclipse.hawkbit.repository.model.AbstractAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 
 /**
  * Result object for {@link DistributionSetTag} assignments.
@@ -28,14 +31,6 @@ public class DistributionSetTagAssignmentResult extends AbstractAssignmentResult
 
     private final DistributionSetTag distributionSetTag;
 
-    /**
-     * Constructor.
-     *
-     * @param alreadyAssigned number of already assigned/ignored elements
-     * @param assigned newly assigned elements
-     * @param unassigned unassigned elements
-     * @param distributionSetTag the assigned or unassigned tag
-     */
     public DistributionSetTagAssignmentResult(final int alreadyAssigned,
             final List<DistributionSet> assigned, final List<DistributionSet> unassigned,
             final DistributionSetTag distributionSetTag) {

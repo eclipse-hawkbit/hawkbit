@@ -7,13 +7,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.model;
+package org.eclipse.hawkbit.mgmt.rest.resource.deprecated;
 
 import java.util.List;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import org.eclipse.hawkbit.repository.model.AbstractAssignmentResult;
+import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetTag;
 
 /**
  * Result object for {@link TargetTag} assignments.
@@ -28,16 +31,9 @@ public class TargetTagAssignmentResult extends AbstractAssignmentResult<Target> 
 
     private final TargetTag targetTag;
 
-    /**
-     * Constructor.
-     *
-     * @param alreadyAssigned count of already assigned (ignored) elements
-     * @param assigned {@link List} of assigned {@link Target}s.
-     * @param unassigned {@link List} of unassigned {@link Target}s.
-     * @param targetTag the assigned or unassigned tag
-     */
-    public TargetTagAssignmentResult(final int alreadyAssigned, final List<? extends Target> assigned,
-            final List<? extends Target> unassigned, final TargetTag targetTag) {
+    public TargetTagAssignmentResult(
+            final int alreadyAssigned, final List<? extends Target> assigned, final List<? extends Target> unassigned,
+            final TargetTag targetTag) {
         super(alreadyAssigned, assigned, unassigned);
         this.targetTag = targetTag;
     }

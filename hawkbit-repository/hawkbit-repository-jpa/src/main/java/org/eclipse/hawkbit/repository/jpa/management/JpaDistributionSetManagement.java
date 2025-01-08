@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
@@ -72,7 +71,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -625,62 +623,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return distributionSetRepository.countAutoAssignmentsForDistributionSet(id);
     }
 
-    @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetTagAssignmentResult toggleTagAssignment(final Collection<Long> ids, final String tagName) {
-        return updateTag(
-                ids,
-                () -> distributionSetTagManagement
-                        .findByName(tagName)
-                        .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName)),
-                (allDs, distributionSetTag) -> {
-                    final List<JpaDistributionSet> toBeChangedDSs = allDs.stream().filter(set -> set.addTag(distributionSetTag))
-                            .collect(Collectors.toList());
-
-                    final DistributionSetTagAssignmentResult result;
-                    // un-assignment case
-                    if (toBeChangedDSs.isEmpty()) {
-                        for (final JpaDistributionSet set : allDs) {
-                            if (set.removeTag(distributionSetTag)) {
-                                toBeChangedDSs.add(set);
-                            }
-                        }
-                        result = new DistributionSetTagAssignmentResult(ids.size() - toBeChangedDSs.size(),
-                                Collections.emptyList(),
-                                Collections.unmodifiableList(
-                                        toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
-                                distributionSetTag);
-                    } else {
-                        result = new DistributionSetTagAssignmentResult(ids.size() - toBeChangedDSs.size(),
-                                Collections.unmodifiableList(
-                                        toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
-                                Collections.emptyList(), distributionSetTag);
-                    }
-                    return result;
-                });
-    }
-
-    @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSet unassignTag(final long id, final long dsTagId) {
-        final JpaDistributionSet set = (JpaDistributionSet) getWithDetails(id)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, id));
-
-        final DistributionSetTag distributionSetTag = distributionSetTagManagement.get(dsTagId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));
-        set.removeTag(distributionSetTag);
-
-        final JpaDistributionSet result = distributionSetRepository.save(set);
-
-        // No reason to save the tag
-        entityManager.detach(distributionSetTag);
-        return result;
-    }
-
     // check if shall implicitly lock a distribution set
     boolean isImplicitLockApplicable(final DistributionSet distributionSet) {
         final JpaDistributionSet jpaDistributionSet = (JpaDistributionSet) distributionSet;
@@ -874,25 +816,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private void assertDsTagExists(final Long tagId) {
         if (!distributionSetTagRepository.existsById(tagId)) {
             throw new EntityNotFoundException(DistributionSetTag.class, tagId);
-        }
-    }
-
-    private <T> T updateTag(
-            final Collection<Long> dsIds, final Supplier<DistributionSetTag> tagSupplier,
-            final BiFunction<List<JpaDistributionSet>, DistributionSetTag, T> updater) {
-        final List<JpaDistributionSet> allDs = dsIds.size() == 1 ?
-                distributionSetRepository.findById(dsIds.iterator().next()).map(List::of).orElseGet(Collections::emptyList) :
-                distributionSetRepository.findAll(DistributionSetSpecification.byIdsFetch(dsIds));
-        if (allDs.size() < dsIds.size()) {
-            throw new EntityNotFoundException(DistributionSet.class, dsIds, allDs.stream().map(DistributionSet::getId).toList());
-        }
-
-        final DistributionSetTag distributionSetTag = tagSupplier.get();
-        try {
-            return updater.apply(allDs, distributionSetTag);
-        } finally {
-            // No reason to save the tag
-            entityManager.detach(distributionSetTag);
         }
     }
 }

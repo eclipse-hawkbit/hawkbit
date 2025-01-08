@@ -33,12 +33,10 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -756,33 +754,4 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     TargetMetadata updateMetadata(@NotEmpty String controllerId, @NotNull MetaData metadata);
-
-    /**
-     * Toggles {@link TargetTag} assignment to given {@link Target}s by means that
-     * if some (or all) of the targets in the list have the {@link Tag} not yet
-     * assigned, they will be. Only if all of them have the tag already assigned
-     * they will be removed instead.
-     *
-     * @param controllerIds to toggle for
-     * @param tagName to toggle
-     * @return TagAssigmentResult with all metadata of the assignment outcome.
-     * @throws EntityNotFoundException if tag with given name does not exist
-     * @deprecated since 0.6.0 - not very usable with very unclear logic
-     */
-    @Deprecated(forRemoval = true, since = "0.6.0")
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
-
-    /**
-     * Un-assign a {@link TargetTag} assignment to given {@link Target}.
-     *
-     * @param controllerId to un-assign for
-     * @param targetTagId to un-assign
-     * @return the unassigned target or <null> if no target is unassigned
-     * @throws EntityNotFoundException if TAG with given ID does not exist
-     * @deprecated since 0.6.0 - use {@link #unassignTag(Collection, long)} (List, long)} instead
-     */
-    @Deprecated(forRemoval = true, since = "0.6.0")
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Target unassignTag(@NotEmpty String controllerId, long targetTagId);
 }

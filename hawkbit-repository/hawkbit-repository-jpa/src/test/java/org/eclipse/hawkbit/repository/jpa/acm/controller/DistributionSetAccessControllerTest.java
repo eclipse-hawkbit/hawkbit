@@ -249,7 +249,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
 
         // assignment is denied for hiddenTarget since it's hidden
         assertThatThrownBy(() -> {
-            distributionSetManagement.unassignTag(hidden.getId(), dsTag.getId());
+            distributionSetManagement.unassignTag(List.of(hidden.getId()), dsTag.getId());
         }).as("Missing update permissions for target to toggle tag assignment.")
                 .isInstanceOf(EntityNotFoundException.class);
     }

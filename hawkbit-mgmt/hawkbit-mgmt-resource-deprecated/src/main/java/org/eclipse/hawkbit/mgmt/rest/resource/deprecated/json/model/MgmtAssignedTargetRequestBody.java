@@ -7,9 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.json.model.tag;
-
-import java.util.List;
+package org.eclipse.hawkbit.mgmt.rest.resource.deprecated.json.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -19,12 +17,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 
 /**
- * A json annotated rest model for TargetTagAssigmentResult to RESTful API representation.
- *
- * @deprecated since 0.6.0 with deprecation of toggle assignments
+ * Request Body for PUT.
  */
 @Data
 @Accessors(chain = true)
@@ -32,13 +27,9 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Deprecated(forRemoval = true, since = "0.6.0")
-public class MgmtTargetTagAssigmentResult {
+public class MgmtAssignedTargetRequestBody {
 
-    @JsonProperty
-    @Schema(description = "Assigned targets")
-    private List<MgmtTarget> assignedTargets;
-
-    @JsonProperty
-    @Schema(description = "Unassigned targets")
-    private List<MgmtTarget> unassignedTargets;
+    @JsonProperty(required = true)
+    @Schema(example = "Target1")
+    private String controllerId;
 }

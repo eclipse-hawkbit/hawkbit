@@ -7,7 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.json.model.tag;
+package org.eclipse.hawkbit.mgmt.rest.resource.deprecated.json.model;
+
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -17,11 +19,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 
 /**
- * Request Body for PUT.
+ * A json annotated rest model for DSAssigmentResult to RESTful API representation.
  *
- * @deprecated since 0.6.0 with toggle assigment deprecation
+ * @deprecated since 0.6.0 with deprecation of toggle assignments
  */
 @Data
 @Accessors(chain = true)
@@ -29,9 +32,13 @@ import lombok.experimental.Accessors;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Deprecated(forRemoval = true, since = "0.6.0")
-public class MgmtAssignedDistributionSetRequestBody {
+public class MgmtDistributionSetTagAssigmentResult {
 
-    @JsonProperty(value = "id", required = true)
-    @Schema(example = "24")
-    private Long distributionSetId;
+    @JsonProperty
+    @Schema(description = "Assigned distribution sets")
+    private List<MgmtDistributionSet> assignedDistributionSets;
+
+    @JsonProperty
+    @Schema(description = "Unassigned distribution sets")
+    private List<MgmtDistributionSet> unassignedDistributionSets;
 }

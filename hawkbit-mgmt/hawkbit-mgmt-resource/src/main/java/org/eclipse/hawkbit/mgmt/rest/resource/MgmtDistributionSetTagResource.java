@@ -10,13 +10,10 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
-import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtAssignedDistributionSetRequestBody;
-import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtDistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTagRestApi;
@@ -28,7 +25,6 @@ import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -180,45 +176,6 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         final List<DistributionSet> assignedDs = this.distributionSetManagement.unassignTag(distributionsetIds, distributionsetTagId);
         log.debug("Unassigned DistributionSet {}", assignedDs.size());
         return ResponseEntity.ok().build();
-    }
-
-    @Override
-    public ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignment(
-            final Long distributionsetTagId,
-            final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
-        log.debug("Toggle distribution set assignment {} for ds tag {}", assignedDSRequestBodies.size(), distributionsetTagId);
-
-        final DistributionSetTag tag = findDistributionTagById(distributionsetTagId);
-
-        final DistributionSetTagAssignmentResult assigmentResult = this.distributionSetManagement
-                .toggleTagAssignment(findDistributionSetIds(assignedDSRequestBodies), tag.getName());
-
-        final MgmtDistributionSetTagAssigmentResult tagAssigmentResultRest = new MgmtDistributionSetTagAssigmentResult();
-        tagAssigmentResultRest.setAssignedDistributionSets(
-                MgmtDistributionSetMapper.toResponseDistributionSets(assigmentResult.getAssignedEntity()));
-        tagAssigmentResultRest.setUnassignedDistributionSets(
-                MgmtDistributionSetMapper.toResponseDistributionSets(assigmentResult.getUnassignedEntity()));
-
-        log.debug("Toggled assignedDS {} and unassignedDS{}", assigmentResult.getAssigned(), assigmentResult.getUnassigned());
-
-        return ResponseEntity.ok(tagAssigmentResultRest);
-    }
-
-    @Override
-    public ResponseEntity<List<MgmtDistributionSet>> assignDistributionSetsByRequestBody(
-            final Long distributionsetTagId,
-            final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
-        log.debug("Assign DistributionSet {} for ds tag {}", assignedDSRequestBodies.size(), distributionsetTagId);
-        final List<DistributionSet> assignedDs = this.distributionSetManagement
-                .assignTag(findDistributionSetIds(assignedDSRequestBodies), distributionsetTagId);
-        log.debug("Assigned DistributionSet {}", assignedDs.size());
-        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDistributionSets(assignedDs));
-    }
-
-    private static List<Long> findDistributionSetIds(
-            final List<MgmtAssignedDistributionSetRequestBody> assignedDistributionSetRequestBodies) {
-        return assignedDistributionSetRequestBodies.stream()
-                .map(MgmtAssignedDistributionSetRequestBody::getDistributionSetId).collect(Collectors.toList());
     }
 
     private DistributionSetTag findDistributionTagById(final Long distributionsetTagId) {

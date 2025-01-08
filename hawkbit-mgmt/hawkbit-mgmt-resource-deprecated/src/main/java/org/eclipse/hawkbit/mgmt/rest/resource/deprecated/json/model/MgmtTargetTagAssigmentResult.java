@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.json.model.tag;
+package org.eclipse.hawkbit.mgmt.rest.resource.deprecated.json.model;
 
 import java.util.List;
 
@@ -19,10 +19,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 
 /**
- * A json annotated rest model for DSAssigmentResult to RESTful API representation.
+ * A json annotated rest model for TargetTagAssigmentResult to RESTful API representation.
  *
  * @deprecated since 0.6.0 with deprecation of toggle assignments
  */
@@ -32,13 +32,13 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Deprecated(forRemoval = true, since = "0.6.0")
-public class MgmtDistributionSetTagAssigmentResult {
+public class MgmtTargetTagAssigmentResult {
 
     @JsonProperty
-    @Schema(description = "Assigned distribution sets")
-    private List<MgmtDistributionSet> assignedDistributionSets;
+    @Schema(description = "Assigned targets")
+    private List<MgmtTarget> assignedTargets;
 
     @JsonProperty
-    @Schema(description = "Unassigned distribution sets")
-    private List<MgmtDistributionSet> unassignedDistributionSets;
+    @Schema(description = "Unassigned targets")
+    private List<MgmtTarget> unassignedTargets;
 }
