@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.exception;
 import lombok.Getter;
 
 /**
- * Define the Error code for Error handling
+ * Define the Error codes for Error handling
  */
 @Getter
 public enum SpServerError {
@@ -21,7 +21,7 @@ public enum SpServerError {
             "hawkbit.server.error.repo.genericError",
             "unknown error occurred"),
     SP_REPO_ENTITY_ALREADY_EXISTS(
-            "hawkbit.server.error.repo.entitiyAlreayExists",
+            "hawkbit.server.error.repo.entityAlreadyExists",
             "The given entity already exists in database"),
     SP_REPO_AUTO_CONFIRMATION_ALREADY_ACTIVE(
             "hawkbit.server.error.repo.autoConfAlreadyActive",
@@ -84,7 +84,7 @@ public enum SpServerError {
             "hawkbit.server.error.distributionset.creationFailed.missingModule",
             "Creation if Distribution Set failed as module is missing that is configured as mandatory."),
     SP_INSUFFICIENT_PERMISSION(
-            "hawkbit.server.error.insufficientpermission",
+            "hawkbit.server.error.insufficientPermission",
             "Insufficient Permission"),
     SP_ARTIFACT_DELETE_FAILED(
             "hawkbit.server.error.artifact.deleteFailed",
@@ -105,10 +105,10 @@ public enum SpServerError {
             "hawkbit.server.error.quota.storageExceeded",
             "Storage quota will be exceeded if file is uploaded."),
     SP_ACTION_NOT_CANCELABLE(
-            "hawkbit.server.error.action.notcancelable",
+            "hawkbit.server.error.action.notCancelable",
             "Only active actions which are in status pending are cancelable."),
     SP_ACTION_NOT_FORCE_QUITABLE(
-            "hawkbit.server.error.action.notforcequitable",
+            "hawkbit.server.error.action.notForceQuitable",
             "Only active actions which are in status pending can be force quit."),
     SP_DS_INCOMPLETE(
             "hawkbit.server.error.distributionset.incomplete",
@@ -132,10 +132,10 @@ public enum SpServerError {
             "hawkbit.server.error.repo.tenantNotExists",
             "The entity cannot be inserted due the tenant does not exists"),
     SP_ENTITY_LOCKED(
-            "hawkbit.server.error.entitiylocked",
+            "hawkbit.server.error.entityLocked",
             "The given entity is locked by the server."),
     SP_REPO_ENTITY_READ_ONLY(
-            "hawkbit.server.error.entityreadonly",
+            "hawkbit.server.error.entityReadOnly",
             "The given entity is read only and the change cannot be completed."),
     SP_CONFIGURATION_VALUE_INVALID(
             "hawkbit.server.error.configValueInvalid",
@@ -144,7 +144,7 @@ public enum SpServerError {
             "hawkbit.server.error.configKeyInvalid",
             "The given configuration key is invalid."),
     SP_ROLLOUT_ILLEGAL_STATE(
-            "hawkbit.server.error.rollout.illegalstate",
+            "hawkbit.server.error.rollout.illegalState",
             "The rollout is in the wrong state for the requested operation"),
     SP_ROLLOUT_VERIFICATION_FAILED(
             "hawkbit.server.error.rollout.verificationFailed",
@@ -162,7 +162,7 @@ public enum SpServerError {
             "hawkbit.server.error.repo.tenantConfigurationValueChangeNotAllowed",
             "The requested tenant configuration value modification is not allowed."),
     SP_MULTIASSIGNMENT_NOT_ENABLED(
-            "hawkbit.server.error.multiassignmentNotEnabled",
+            "hawkbit.server.error.multiAssignmentNotEnabled",
             "The requested operation requires multi assignments to be enabled."),
     SP_NO_WEIGHT_PROVIDED_IN_MULTIASSIGNMENT_MODE(
             "hawkbit.server.error.noWeightProvidedInMultiAssignmentMode",

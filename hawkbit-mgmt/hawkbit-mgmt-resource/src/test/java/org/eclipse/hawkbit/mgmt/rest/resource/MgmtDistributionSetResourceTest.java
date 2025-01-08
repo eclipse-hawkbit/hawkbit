@@ -154,7 +154,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                         + smIDs.get(0)).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.entityreadonly")));
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_REPO_ENTITY_READ_ONLY.getKey())));
     }
 
     @Test
@@ -197,7 +197,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                         .contentType(MediaType.APPLICATION_JSON).content(smList2.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.entityreadonly")));
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_REPO_ENTITY_READ_ONLY.getKey())));
     }
 
     @Test
