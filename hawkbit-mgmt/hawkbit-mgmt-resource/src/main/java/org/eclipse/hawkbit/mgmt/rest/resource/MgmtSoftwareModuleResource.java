@@ -165,7 +165,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         final Slice<SoftwareModule> findModulesAll;
         final long countModulesAll;
         if (rsqlParam != null) {
-            findModulesAll = softwareModuleManagement.findByRsql(pageable, rsqlParam);
+            findModulesAll = softwareModuleManagement.findByRsql(rsqlParam, pageable);
             countModulesAll = ((Page<SoftwareModule>) findModulesAll).getTotalElements();
         } else {
             findModulesAll = softwareModuleManagement.findAll(pageable);
@@ -191,7 +191,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         log.debug("creating {} softwareModules", softwareModules.size());
 
         for (final MgmtSoftwareModuleRequestBodyPost sm : softwareModules) {
-            final Optional<SoftwareModuleType> opt = softwareModuleTypeManagement.getByKey(sm.getType());
+            final Optional<SoftwareModuleType> opt = softwareModuleTypeManagement.findByKey(sm.getType());
             opt.ifPresent(smType -> {
                 if (smType.isDeleted()) {
                     final String text = "Cannot create Software Module from type with key {0}. Software Module Type already deleted!";
@@ -245,7 +245,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         final Page<SoftwareModuleMetadata> metaDataPage;
 
         if (rsqlParam != null) {
-            metaDataPage = softwareModuleManagement.findMetaDataByRsql(pageable, softwareModuleId, rsqlParam);
+            metaDataPage = softwareModuleManagement.findMetaDataByRsql(softwareModuleId, rsqlParam, pageable);
         } else {
             metaDataPage = softwareModuleManagement.findMetaDataBySoftwareModuleId(pageable, softwareModuleId);
         }
@@ -257,7 +257,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     @Override
     public ResponseEntity<MgmtSoftwareModuleMetadata> getMetadataValue(final Long softwareModuleId, final String metadataKey) {
         final SoftwareModuleMetadata findOne = softwareModuleManagement
-                .getMetaDataBySoftwareModuleId(softwareModuleId, metadataKey).orElseThrow(
+                .findMetaDataBySoftwareModuleId(softwareModuleId, metadataKey).orElseThrow(
                         () -> new EntityNotFoundException(SoftwareModuleMetadata.class, softwareModuleId, metadataKey));
 
         return ResponseEntity.ok(MgmtSoftwareModuleMapper.toResponseSwMetadata(findOne));
@@ -282,7 +282,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     @Override
     public ResponseEntity<List<MgmtSoftwareModuleMetadata>> createMetadata(
             final Long softwareModuleId, final List<MgmtSoftwareModuleMetadata> metadataRest) {
-        final List<SoftwareModuleMetadata> created = softwareModuleManagement.createMetaData(
+        final List<SoftwareModuleMetadata> created = softwareModuleManagement.putMetaData(
                 MgmtSoftwareModuleMapper.fromRequestSwMetadata(entityFactory, softwareModuleId, metadataRest));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(MgmtSoftwareModuleMapper.toResponseSwMetadata(created));

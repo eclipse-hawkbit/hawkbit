@@ -119,7 +119,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Slice<DistributionSet> findDsPage;
         final long countModulesAll;
         if (rsqlParam != null) {
-            findDsPage = distributionSetManagement.findByRsql(pageable, rsqlParam);
+            findDsPage = distributionSetManagement.findByRsql(rsqlParam, pageable);
             countModulesAll = ((Page<DistributionSet>) findDsPage).getTotalElements();
         } else {
             findDsPage = distributionSetManagement.findAll(pageable);
@@ -150,7 +150,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
         //check if there is already deleted DS Type
         for (MgmtDistributionSetRequestBodyPost ds : sets) {
-            final Optional<DistributionSetType> opt = distributionSetTypeManagement.getByKey(ds.getType());
+            final Optional<DistributionSetType> opt = distributionSetTypeManagement.findByKey(ds.getType());
             opt.ifPresent(dsType -> {
                 if (dsType.isDeleted()) {
                     final String text = "Cannot create Distribution Set from type with key {0}. Distribution Set Type already deleted!";
@@ -288,10 +288,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Page<DistributionSetMetadata> metaDataPage;
 
         if (rsqlParam != null) {
-            metaDataPage = distributionSetManagement.findMetaDataByDistributionSetIdAndRsql(pageable, distributionSetId,
-                    rsqlParam);
+            metaDataPage = distributionSetManagement.findMetaDataByDistributionSetIdAndRsql(distributionSetId, rsqlParam, pageable
+            );
         } else {
-            metaDataPage = distributionSetManagement.findMetaDataByDistributionSetId(pageable, distributionSetId);
+            metaDataPage = distributionSetManagement.findMetaDataByDistributionSetId(distributionSetId, pageable);
         }
 
         return ResponseEntity
@@ -302,7 +302,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<MgmtMetadata> getMetadataValue(final Long distributionSetId, final String metadataKey) {
         // check if distribution set exists otherwise throw exception immediately
         final DistributionSetMetadata findOne = distributionSetManagement
-                .getMetaDataByDistributionSetId(distributionSetId, metadataKey)
+                .findMetaDataByDistributionSetId(distributionSetId, metadataKey)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetMetadata.class, distributionSetId, metadataKey));
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDsMetadata(findOne));
     }
@@ -326,7 +326,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     @Override
     public ResponseEntity<List<MgmtMetadata>> createMetadata(final Long distributionSetId, final List<MgmtMetadata> metadataRest) {
         // check if distribution set exists otherwise throw exception immediately
-        final List<DistributionSetMetadata> created = distributionSetManagement.createMetaData(distributionSetId,
+        final List<DistributionSetMetadata> created = distributionSetManagement.putMetaData(distributionSetId,
                 MgmtDistributionSetMapper.fromRequestDsMetadata(metadataRest, entityFactory));
         return new ResponseEntity<>(MgmtDistributionSetMapper.toResponseDsMetadata(created), HttpStatus.CREATED);
 
@@ -357,7 +357,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeSoftwareModuleSortParam(sortParam);
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Page<SoftwareModule> softwaremodules = softwareModuleManagement.findByAssignedTo(pageable, distributionSetId);
+        final Page<SoftwareModule> softwaremodules = softwareModuleManagement.findByAssignedTo(distributionSetId, pageable);
         return ResponseEntity.ok(new PagedList<>(MgmtSoftwareModuleMapper.toResponse(
                 softwaremodules.getContent()), softwaremodules.getTotalElements()));
     }

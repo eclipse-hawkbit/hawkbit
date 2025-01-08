@@ -58,8 +58,8 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 0) })
     public void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(distributionSetTypeManagement.get(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(distributionSetTypeManagement.getByKey(NOT_EXIST_ID)).isNotPresent();
-        assertThat(distributionSetTypeManagement.getByName(NOT_EXIST_ID)).isNotPresent();
+        assertThat(distributionSetTypeManagement.findByKey(NOT_EXIST_ID)).isNotPresent();
+        assertThat(distributionSetTypeManagement.findByName(NOT_EXIST_ID)).isNotPresent();
     }
 
     @Test
@@ -111,23 +111,23 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     public void updateUnassignedDistributionSetTypeModules() {
         final DistributionSetType updatableType = distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
-        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
+        assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
 
         // add OS
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
                 Set.of(osType.getId()));
-        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes())
+        assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes())
                 .containsOnly(osType);
 
         // add JVM
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(updatableType.getId(),
                 Set.of(runtimeType.getId()));
-        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes())
+        assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes())
                 .containsOnly(osType, runtimeType);
 
         // remove OS
         distributionSetTypeManagement.unassignSoftwareModuleType(updatableType.getId(), osType.getId());
-        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes())
+        assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes())
                 .containsOnly(runtimeType);
     }
 
@@ -186,9 +186,9 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         distributionSetTypeManagement.update(
                 entityFactory.distributionSetType().update(nonUpdatableType.getId()).description("a new description"));
 
-        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getDescription())
+        assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getDescription())
                 .isEqualTo("a new description");
-        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getColour()).isEqualTo("test123");
+        assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getColour()).isEqualTo("test123");
     }
 
     @Test
@@ -206,7 +206,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     public void removeModuleToAssignedDistributionSetTypeFails() {
         DistributionSetType nonUpdatableType = distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
-        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
+        assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
 
         nonUpdatableType = distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(nonUpdatableType.getId(),
                 Set.of(osType.getId()));
@@ -242,11 +242,11 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
                 entityFactory.distributionSet().create().name("softdeleted").version("1").type(toBeDeleted.getKey()));
 
         distributionSetTypeManagement.delete(toBeDeleted.getId());
-        final Optional<DistributionSetType> softdeleted = distributionSetTypeManagement.getByKey("softdeleted");
+        final Optional<DistributionSetType> softdeleted = distributionSetTypeManagement.findByKey("softdeleted");
         assertThat(softdeleted).isPresent();
         assertThat(softdeleted.get().isDeleted()).isTrue();
         assertThat(distributionSetTypeManagement.findAll(PAGE)).hasSize(existing);
-        assertThat(distributionSetTypeManagement.findByRsql(PAGE, "name==*")).hasSize(existing);
+        assertThat(distributionSetTypeManagement.findByRsql("name==*", PAGE)).hasSize(existing);
         assertThat(distributionSetTypeManagement.count()).isEqualTo(existing);
     }
 
@@ -358,7 +358,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     private DistributionSetType createDistributionSetTypeUsedByDs() {
         final DistributionSetType nonUpdatableType = distributionSetTypeManagement.create(entityFactory
                 .distributionSetType().create().key("updatableType").name("to be deleted").colour("test123"));
-        assertThat(distributionSetTypeManagement.getByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
+        assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
         distributionSetManagement.create(entityFactory.distributionSet().create().name("newtypesoft").version("1")
                 .type(nonUpdatableType.getKey()));
         return nonUpdatableType;

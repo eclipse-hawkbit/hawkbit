@@ -675,9 +675,9 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
 
     @Step
     private void verifyCreatedDistributionSetTypes(final MvcResult mvcResult) throws UnsupportedEncodingException {
-        final DistributionSetType created1 = distributionSetTypeManagement.getByKey("testKey1").get();
-        final DistributionSetType created2 = distributionSetTypeManagement.getByKey("testKey2").get();
-        final DistributionSetType created3 = distributionSetTypeManagement.getByKey("testKey3").get();
+        final DistributionSetType created1 = distributionSetTypeManagement.findByKey("testKey1").get();
+        final DistributionSetType created2 = distributionSetTypeManagement.findByKey("testKey2").get();
+        final DistributionSetType created3 = distributionSetTypeManagement.findByKey("testKey3").get();
 
         assertThat(created1.getMandatoryModuleTypes()).containsOnly(osType);
         assertThat(created1.getOptionalModuleTypes()).containsOnly(runtimeType);

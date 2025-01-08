@@ -44,7 +44,7 @@ public final class JpaManagementHelper {
     }
 
     public static <T, J extends T> Page<T> findAllWithCountBySpec(final JpaSpecificationExecutor<J> repository,
-            final Pageable pageable, final List<Specification<J>> specList) {
+            final List<Specification<J>> specList, final Pageable pageable) {
         if (CollectionUtils.isEmpty(specList)) {
             return convertPage(repository.findAll(Specification.where(null), pageable), pageable);
         }

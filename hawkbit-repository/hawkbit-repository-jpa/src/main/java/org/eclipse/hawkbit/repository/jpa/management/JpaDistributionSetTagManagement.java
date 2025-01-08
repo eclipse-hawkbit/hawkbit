@@ -75,10 +75,11 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSetTag> create(final Collection<TagCreate> dst) {
-        final List<JpaDistributionSetTag> toCreate = dst.stream().map(JpaTagCreate.class::cast)
-                .map(JpaTagCreate::buildDistributionSetTag).toList();
-        return Collections
-                .unmodifiableList(distributionSetTagRepository.saveAll(AccessController.Operation.CREATE, toCreate));
+        final List<JpaDistributionSetTag> toCreate = dst.stream()
+                .map(JpaTagCreate.class::cast)
+                .map(JpaTagCreate::buildDistributionSetTag)
+                .toList();
+        return Collections.unmodifiableList(distributionSetTagRepository.saveAll(AccessController.Operation.CREATE, toCreate));
     }
 
     @Override
@@ -87,8 +88,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_CREATE_REPOSITORY)
     public DistributionSetTag create(final TagCreate c) {
-        final JpaTagCreate create = (JpaTagCreate) c;
-        return distributionSetTagRepository.save(AccessController.Operation.CREATE, create.buildDistributionSetTag());
+        return distributionSetTagRepository.save(AccessController.Operation.CREATE, ((JpaTagCreate) c).buildDistributionSetTag());
     }
 
     @Override
@@ -98,7 +98,6 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     public DistributionSetTag update(final TagUpdate u) {
         final GenericTagUpdate update = (GenericTagUpdate) u;
-
         final JpaDistributionSetTag tag = distributionSetTagRepository.findById(update.getId())
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, update.getId()));
 
@@ -107,11 +106,6 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
         update.getColour().ifPresent(tag::setColour);
 
         return distributionSetTagRepository.save(tag);
-    }
-
-    @Override
-    public long count() {
-        return distributionSetTagRepository.count();
     }
 
     @Override
@@ -138,6 +132,11 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     }
 
     @Override
+    public Optional<DistributionSetTag> get(final long id) {
+        return distributionSetTagRepository.findById(id).map(DistributionSetTag.class::cast);
+    }
+
+    @Override
     public List<DistributionSetTag> get(final Collection<Long> ids) {
         return Collections.unmodifiableList(distributionSetTagRepository.findAllById(ids));
     }
@@ -148,9 +147,10 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     }
 
     @Override
-    public Optional<DistributionSetTag> get(final long id) {
-        return distributionSetTagRepository.findById(id).map(DistributionSetTag.class::cast);
+    public long count() {
+        return distributionSetTagRepository.count();
     }
+
 
     @Override
     public Slice<DistributionSetTag> findAll(final Pageable pageable) {
@@ -158,12 +158,26 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     }
 
     @Override
-    public Page<DistributionSetTag> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaDistributionSetTag> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTagFields.class,
-                virtualPropertyReplacer, database);
+    public Page<DistributionSetTag> findByRsql(final String rsqlParam, final Pageable pageable) {
+        final Specification<JpaDistributionSetTag> spec = RSQLUtility.buildRsqlSpecification(
+                rsqlParam, DistributionSetTagFields.class, virtualPropertyReplacer, database);
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, Collections.singletonList(spec), pageable);
+    }
 
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, pageable,
-                Collections.singletonList(spec));
+    @Override
+    public Optional<DistributionSetTag> findByName(final String name) {
+        return distributionSetTagRepository.findByNameEquals(name);
+    }
+
+    @Override
+    public Page<DistributionSetTag> findByDistributionSet(final Pageable pageable, final long distributionSetId) {
+        if (!distributionSetRepository.existsById(distributionSetId)) {
+            throw new EntityNotFoundException(DistributionSet.class, distributionSetId);
+        }
+
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository,
+                Collections.singletonList(TagSpecification.ofDistributionSet(distributionSetId)), pageable
+        );
     }
 
     @Override
@@ -174,22 +188,6 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
         final JpaDistributionSetTag dsTag = distributionSetTagRepository
                 .findOne(DistributionSetTagSpecifications.byName(tagName))
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName));
-
         distributionSetTagRepository.delete(dsTag);
-    }
-
-    @Override
-    public Optional<DistributionSetTag> getByName(final String name) {
-        return distributionSetTagRepository.findByNameEquals(name);
-    }
-
-    @Override
-    public Page<DistributionSetTag> findByDistributionSet(final Pageable pageable, final long distributionSetId) {
-        if (!distributionSetRepository.existsById(distributionSetId)) {
-            throw new EntityNotFoundException(DistributionSet.class, distributionSetId);
-        }
-
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, pageable,
-                Collections.singletonList(TagSpecification.ofDistributionSet(distributionSetId)));
     }
 }

@@ -117,7 +117,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         softwareModuleTypeManagement.delete(sm.getType().getId());
 
         //check if it is marked as deleted
-        final Optional<SoftwareModuleType> opt = softwareModuleTypeManagement.getByKey(SM_TYPE);
+        final Optional<SoftwareModuleType> opt = softwareModuleTypeManagement.findByKey(SM_TYPE);
         if (opt.isEmpty()) {
             throw new AssertionError("The Optional object of software module type should not be empty!");
         }
@@ -164,7 +164,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final SoftwareModule module = testdataFactory.createDistributionSet("one").findFirstModuleByType(osType).get();
 
         for (int index = 0; index < totalMetadata; index++) {
-            softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
+            softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
                     .key(knownKeyPrefix + index).value(knownValuePrefix + index));
         }
 
@@ -184,7 +184,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final SoftwareModule module = testdataFactory.createDistributionSet("one").findFirstModuleByType(osType).get();
 
         for (int index = 0; index < totalMetadata; index++) {
-            softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
+            softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
                     .key(knownKeyPrefix + index).value(knownValuePrefix + index));
         }
 
@@ -204,7 +204,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
         final SoftwareModule module = testdataFactory.createDistributionSet("one").findFirstModuleByType(osType).get();
-        softwareModuleManagement.createMetaData(
+        softwareModuleManagement.updateMetaData(
                 entityFactory.softwareModuleMetadata().create(module.getId()).key(knownKey).value(knownValue));
 
         mvc.perform(
@@ -1265,9 +1265,9 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("[1].createdAt", not(equalTo(0))))
                 .andReturn();
 
-        final SoftwareModule osCreated = softwareModuleManagement.getByNameAndVersionAndType("name1", "version1",
+        final SoftwareModule osCreated = softwareModuleManagement.findByNameAndVersionAndType("name1", "version1",
                 osType.getId()).get();
-        final SoftwareModule appCreated = softwareModuleManagement.getByNameAndVersionAndType("name3", "version3",
+        final SoftwareModule appCreated = softwareModuleManagement.findByNameAndVersionAndType("name3", "version3",
                 appType.getId()).get();
 
         assertThat(JsonPath.compile("[0]._links.self.href")
@@ -1281,13 +1281,13 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .isEqualTo("http://localhost/rest/v1/softwaremodules/" + appCreated.getId());
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("Wrong softwaremodule size").hasSize(2);
-        assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0).getName()).as(
+        assertThat(softwareModuleManagement.findByType(osType.getId(), PAGE).getContent().get(0).getName()).as(
                 "Softwaremoudle name is wrong").isEqualTo(os.getName());
-        assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0).getCreatedBy()).as(
+        assertThat(softwareModuleManagement.findByType(osType.getId(), PAGE).getContent().get(0).getCreatedBy()).as(
                 "Softwaremoudle created by is wrong").isEqualTo("uploadTester");
-        assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0).getCreatedAt()).as(
+        assertThat(softwareModuleManagement.findByType(osType.getId(), PAGE).getContent().get(0).getCreatedAt()).as(
                 "Softwaremoudle created at is wrong").isGreaterThanOrEqualTo(current);
-        assertThat(softwareModuleManagement.findByType(PAGE, appType.getId()).getContent().get(0).getName()).as(
+        assertThat(softwareModuleManagement.findByType(appType.getId(), PAGE).getContent().get(0).getName()).as(
                 "Softwaremoudle name is wrong").isEqualTo(ah.getName());
     }
 
@@ -1376,9 +1376,9 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("[1].value", equalTo(knownValue2)))
                 .andExpect(jsonPath("[1].targetVisible", equalTo(true)));
 
-        assertThat(softwareModuleManagement.getMetaDataBySoftwareModuleId(sm.getId(), knownKey1))
+        assertThat(softwareModuleManagement.findMetaDataBySoftwareModuleId(sm.getId(), knownKey1))
                 .as("Metadata key is wrong").get().extracting(SoftwareModuleMetadata::getValue).isEqualTo(knownValue1);
-        assertThat(softwareModuleManagement.getMetaDataBySoftwareModuleId(sm.getId(), knownKey2))
+        assertThat(softwareModuleManagement.findMetaDataBySoftwareModuleId(sm.getId(), knownKey2))
                 .as("Metadata key is wrong").get().extracting(SoftwareModuleMetadata::getValue).isEqualTo(knownValue2);
 
         // verify quota enforcement
@@ -1411,7 +1411,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final String updateValue = "valueForUpdate";
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        softwareModuleManagement.createMetaData(
+        softwareModuleManagement.updateMetaData(
                 entityFactory.softwareModuleMetadata().create(sm.getId()).key(knownKey).value(knownValue));
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey)
@@ -1426,7 +1426,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("key", equalTo(knownKey)))
                 .andExpect(jsonPath("value", equalTo(updateValue)));
 
-        final SoftwareModuleMetadata assertDS = softwareModuleManagement.getMetaDataBySoftwareModuleId(sm.getId(),
+        final SoftwareModuleMetadata assertDS = softwareModuleManagement.findMetaDataBySoftwareModuleId(sm.getId(),
                 knownKey).get();
         assertThat(assertDS.getValue()).as("Metadata is wrong").isEqualTo(updateValue);
         assertThat(assertDS.isTargetVisible()).as("target visible is wrong").isTrue();
@@ -1440,14 +1440,14 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final String knownValue = "knownValue";
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        softwareModuleManagement.createMetaData(
+        softwareModuleManagement.updateMetaData(
                 entityFactory.softwareModuleMetadata().create(sm.getId()).key(knownKey).value(knownValue));
 
         mvc.perform(delete("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(softwareModuleManagement.getMetaDataBySoftwareModuleId(sm.getId(), knownKey)).isNotPresent();
+        assertThat(softwareModuleManagement.findMetaDataBySoftwareModuleId(sm.getId(), knownKey)).isNotPresent();
     }
 
     @Test
@@ -1458,7 +1458,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final String knownValue = "knownValue";
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        softwareModuleManagement.createMetaData(
+        softwareModuleManagement.updateMetaData(
                 entityFactory.softwareModuleMetadata().create(sm.getId()).key(knownKey).value(knownValue));
 
         mvc.perform(delete("/rest/v1/softwaremodules/{swId}/metadata/XXX", sm.getId(), knownKey))
@@ -1469,7 +1469,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
-        assertThat(softwareModuleManagement.getMetaDataBySoftwareModuleId(sm.getId(), knownKey)).isPresent();
+        assertThat(softwareModuleManagement.findMetaDataBySoftwareModuleId(sm.getId(), knownKey)).isPresent();
     }
 
     @Test
@@ -1489,7 +1489,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         for (int index = 0; index < totalMetadata; index++) {
-            softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata()
+            softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata()
                     .create(sm.getId())
                     .key(knownKeyPrefix + index)
                     .value(knownValuePrefix + index));

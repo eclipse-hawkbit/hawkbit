@@ -210,9 +210,9 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .andExpect(jsonPath("[2].maxAssignments", equalTo(3)))
                 .andReturn();
 
-        final SoftwareModuleType created1 = softwareModuleTypeManagement.getByKey("test1").get();
-        final SoftwareModuleType created2 = softwareModuleTypeManagement.getByKey("test2").get();
-        final SoftwareModuleType created3 = softwareModuleTypeManagement.getByKey("test3").get();
+        final SoftwareModuleType created1 = softwareModuleTypeManagement.findByKey("test1").get();
+        final SoftwareModuleType created2 = softwareModuleTypeManagement.findByKey("test2").get();
+        final SoftwareModuleType created3 = softwareModuleTypeManagement.findByKey("test3").get();
 
         assertThat(
                 JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())

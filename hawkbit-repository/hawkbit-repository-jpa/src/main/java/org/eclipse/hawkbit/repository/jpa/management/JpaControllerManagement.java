@@ -582,7 +582,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     public boolean updateOfflineAssignedVersion(@NotEmpty final String controllerId, final String distributionName, final String version) {
         List<DistributionSetAssignmentResult> distributionSetAssignmentResults =
                 systemSecurityContext.runAsSystem(() ->
-                        distributionSetManagement.getByNameAndVersion(distributionName, version).map(
+                        distributionSetManagement.findByNameAndVersion(distributionName, version).map(
                                         distributionSet -> deploymentManagement.offlineAssignedDistributionSets(
                                                 List.of(Map.entry(controllerId, distributionSet.getId())), controllerId))
                                 .orElseThrow(() ->

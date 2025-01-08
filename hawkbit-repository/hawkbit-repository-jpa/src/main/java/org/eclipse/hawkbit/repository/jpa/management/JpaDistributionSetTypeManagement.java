@@ -89,43 +89,6 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     }
 
     @Override
-    public Optional<DistributionSetType> getByKey(final String key) {
-        return distributionSetTypeRepository.findOne(DistributionSetTypeSpecification.byKey(key)).map(DistributionSetType.class::cast);
-    }
-
-    @Override
-    public Optional<DistributionSetType> getByName(final String name) {
-        return distributionSetTypeRepository.findOne(DistributionSetTypeSpecification.byName(name)).map(DistributionSetType.class::cast);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetType assignOptionalSoftwareModuleTypes(final long id, final Collection<Long> softwareModulesTypeIds) {
-        return assignSoftwareModuleTypes(id, softwareModulesTypeIds, false);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetType assignMandatorySoftwareModuleTypes(final long id, final Collection<Long> softwareModuleTypeIds) {
-        return assignSoftwareModuleTypes(id, softwareModuleTypeIds, true);
-    }
-
-    @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetType unassignSoftwareModuleType(final long id, final long softwareModuleTypeId) {
-        final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(id);
-        checkDistributionSetTypeNotAssigned(id);
-        type.removeModuleType(softwareModuleTypeId);
-        return distributionSetTypeRepository.save(type);
-    }
-
-    @Override
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
@@ -185,11 +148,6 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     }
 
     @Override
-    public long count() {
-        return distributionSetTypeRepository.count(DistributionSetTypeSpecification.isNotDeleted());
-    }
-
-    @Override
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
@@ -216,6 +174,11 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     }
 
     @Override
+    public Optional<DistributionSetType> get(final long id) {
+        return distributionSetTypeRepository.findById(id).map(DistributionSetType.class::cast);
+    }
+
+    @Override
     public List<DistributionSetType> get(final Collection<Long> ids) {
         return Collections.unmodifiableList(distributionSetTypeRepository.findAllById(ids));
     }
@@ -226,8 +189,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     }
 
     @Override
-    public Optional<DistributionSetType> get(final long id) {
-        return distributionSetTypeRepository.findById(id).map(DistributionSetType.class::cast);
+    public long count() {
+        return distributionSetTypeRepository.count(DistributionSetTypeSpecification.isNotDeleted());
     }
 
     @Override
@@ -237,10 +200,47 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     }
 
     @Override
-    public Page<DistributionSetType> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTypeRepository, pageable, List.of(
+    public Page<DistributionSetType> findByRsql(final String rsqlParam, final Pageable pageable) {
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTypeRepository, List.of(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTypeFields.class, virtualPropertyReplacer, database),
-                DistributionSetTypeSpecification.isNotDeleted()));
+                DistributionSetTypeSpecification.isNotDeleted()), pageable);
+    }
+
+    @Override
+    public Optional<DistributionSetType> findByKey(final String key) {
+        return distributionSetTypeRepository.findOne(DistributionSetTypeSpecification.byKey(key)).map(DistributionSetType.class::cast);
+    }
+
+    @Override
+    public Optional<DistributionSetType> findByName(final String name) {
+        return distributionSetTypeRepository.findOne(DistributionSetTypeSpecification.byName(name)).map(DistributionSetType.class::cast);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public DistributionSetType assignOptionalSoftwareModuleTypes(final long id, final Collection<Long> softwareModulesTypeIds) {
+        return assignSoftwareModuleTypes(id, softwareModulesTypeIds, false);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public DistributionSetType assignMandatorySoftwareModuleTypes(final long id, final Collection<Long> softwareModuleTypeIds) {
+        return assignSoftwareModuleTypes(id, softwareModuleTypeIds, true);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public DistributionSetType unassignSoftwareModuleType(final long id, final long softwareModuleTypeId) {
+        final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(id);
+        checkDistributionSetTypeNotAssigned(id);
+        type.removeModuleType(softwareModuleTypeId);
+        return distributionSetTypeRepository.save(type);
     }
 
     private static void removeModuleTypes(

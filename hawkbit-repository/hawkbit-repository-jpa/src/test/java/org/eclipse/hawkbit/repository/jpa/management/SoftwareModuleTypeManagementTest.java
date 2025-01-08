@@ -41,8 +41,8 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
     public void nonExistingEntityAccessReturnsNotPresent() {
 
         assertThat(softwareModuleTypeManagement.get(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(softwareModuleTypeManagement.getByKey(NOT_EXIST_ID)).isNotPresent();
-        assertThat(softwareModuleTypeManagement.getByName(NOT_EXIST_ID)).isNotPresent();
+        assertThat(softwareModuleTypeManagement.findByKey(NOT_EXIST_ID)).isNotPresent();
+        assertThat(softwareModuleTypeManagement.findByName(NOT_EXIST_ID)).isNotPresent();
     }
 
     @Test
@@ -129,7 +129,7 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
         // delete assigned
         softwareModuleTypeManagement.delete(type.getId());
         assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType, runtimeType, appType);
-        assertThat(softwareModuleTypeManagement.findByRsql(PAGE, "name==*")).hasSize(3).contains(osType, runtimeType,
+        assertThat(softwareModuleTypeManagement.findByRsql("name==*", PAGE)).hasSize(3).contains(osType, runtimeType,
                 appType);
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(3);
 
@@ -147,7 +147,7 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
         softwareModuleTypeManagement
                 .create(entityFactory.softwareModuleType().create().key("thetype2").name("anothername"));
 
-        assertThat(softwareModuleTypeManagement.getByName("thename").get()).as("Type with given name").isEqualTo(found);
+        assertThat(softwareModuleTypeManagement.findByName("thename").get()).as("Type with given name").isEqualTo(found);
     }
 
     @Test

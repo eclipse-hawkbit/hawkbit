@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.List;
-import java.util.Random;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -69,7 +68,7 @@ class DistributionSetManagementSecurityTest
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void createMetaDataPermissionsCheck() {
         assertPermissions(
-                () -> distributionSetManagement.createMetaData(1L, List.of(entityFactory.generateTargetMetadata("key", "value"))),
+                () -> distributionSetManagement.putMetaData(1L, List.of(entityFactory.generateTargetMetadata("key", "value"))),
                 List.of(SpPermission.UPDATE_REPOSITORY));
     }
 
@@ -103,7 +102,7 @@ class DistributionSetManagementSecurityTest
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void getByActionPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.getByAction(1L), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> distributionSetManagement.findByAction(1L), List.of(SpPermission.READ_REPOSITORY));
     }
 
     @Test
@@ -115,7 +114,7 @@ class DistributionSetManagementSecurityTest
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void getByNameAndVersionPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.getByNameAndVersion("name", "version"), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> distributionSetManagement.findByNameAndVersion("name", "version"), List.of(SpPermission.READ_REPOSITORY));
     }
 
     @Test
@@ -139,7 +138,7 @@ class DistributionSetManagementSecurityTest
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findMetaDataByDistributionSetIdPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.findMetaDataByDistributionSetId(PAGE, 1L), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> distributionSetManagement.findMetaDataByDistributionSetId(1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
     }
 
     @Test
@@ -151,7 +150,7 @@ class DistributionSetManagementSecurityTest
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findMetaDataByDistributionSetIdAndRsqlPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.findMetaDataByDistributionSetIdAndRsql(PAGE, 1L, "rsql"),
+        assertPermissions(() -> distributionSetManagement.findMetaDataByDistributionSetIdAndRsql(1L, "rsql", PAGE),
                 List.of(SpPermission.READ_REPOSITORY));
     }
 
@@ -170,7 +169,7 @@ class DistributionSetManagementSecurityTest
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByDistributionSetFilterPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.findByDistributionSetFilter(PAGE, DistributionSetFilter.builder().build()),
+        assertPermissions(() -> distributionSetManagement.findByDistributionSetFilter(DistributionSetFilter.builder().build(), PAGE),
                 List.of(SpPermission.READ_REPOSITORY));
     }
 
@@ -184,19 +183,19 @@ class DistributionSetManagementSecurityTest
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByTagPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.findByTag(PAGE, 1L), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> distributionSetManagement.findByTag(1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByRsqlAndTagPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.findByRsqlAndTag(PAGE, "rsql", 1L), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> distributionSetManagement.findByRsqlAndTag("rsql", 1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void getMetaDataByDistributionSetIdPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.getMetaDataByDistributionSetId(1L, "key"), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> distributionSetManagement.findMetaDataByDistributionSetId(1L, "key"), List.of(SpPermission.READ_REPOSITORY));
     }
 
     @Test

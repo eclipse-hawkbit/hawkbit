@@ -56,7 +56,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
         final Slice<SoftwareModuleType> findModuleTypessAll;
         final long countModulesAll;
         if (rsqlParam != null) {
-            findModuleTypessAll = softwareModuleTypeManagement.findByRsql(pageable, rsqlParam);
+            findModuleTypessAll = softwareModuleTypeManagement.findByRsql(rsqlParam, pageable);
             countModulesAll = ((Page<SoftwareModuleType>) findModuleTypessAll).getTotalElements();
         } else {
             findModuleTypessAll = softwareModuleTypeManagement.findAll(pageable);

@@ -32,10 +32,10 @@ public interface DistributionSetTypeManagement
         extends RepositoryManagement<DistributionSetType, DistributionSetTypeCreate, DistributionSetTypeUpdate> {
 
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<DistributionSetType> getByKey(@NotEmpty String key);
+    Optional<DistributionSetType> findByKey(@NotEmpty String key);
 
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<DistributionSetType> getByName(@NotEmpty String name);
+    Optional<DistributionSetType> findByName(@NotEmpty String name);
 
     /**
      * Assigns {@link DistributionSetType#getMandatoryModuleTypes()}.

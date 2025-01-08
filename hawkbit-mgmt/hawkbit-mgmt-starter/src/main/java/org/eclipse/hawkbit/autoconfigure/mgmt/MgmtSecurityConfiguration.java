@@ -80,8 +80,7 @@ public class MgmtSecurityConfiguration {
             @Qualifier("hawkbitOAuth2ResourceServerCustomizer") final Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> oauth2ResourceServerCustomizer,
             // called just before build of the SecurityFilterChain.
             // could be used for instance to set authentication provider
-            // Note: implementation of the customizer shall always take in account what is the already set by the
-            //       hawkBit
+            // Note: implementation of the customizer shall always take in account what is the already set by the hawkBit
             @Autowired(required = false)
             @Qualifier("hawkbitHttpSecurityCustomizer") final Customizer<HttpSecurity> httpSecurityCustomizer,
             final SystemManagement systemManagement,

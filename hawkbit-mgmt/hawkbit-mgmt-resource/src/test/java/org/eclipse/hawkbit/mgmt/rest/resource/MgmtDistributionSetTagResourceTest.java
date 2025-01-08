@@ -194,11 +194,11 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
 
-        final Tag createdOne = distributionSetTagManagement.findByRsql(PAGE, "name==thetest1").getContent().get(0);
+        final Tag createdOne = distributionSetTagManagement.findByRsql("name==thetest1", PAGE).getContent().get(0);
         assertThat(createdOne.getName()).isEqualTo(tagOne.getName());
         assertThat(createdOne.getDescription()).isEqualTo(tagOne.getDescription());
         assertThat(createdOne.getColour()).isEqualTo(tagOne.getColour());
-        final Tag createdTwo = distributionSetTagManagement.findByRsql(PAGE, "name==thetest2").getContent().get(0);
+        final Tag createdTwo = distributionSetTagManagement.findByRsql("name==thetest2", PAGE).getContent().get(0);
         assertThat(createdTwo.getName()).isEqualTo(tagTwo.getName());
         assertThat(createdTwo.getDescription()).isEqualTo(tagTwo.getDescription());
         assertThat(createdTwo.getColour()).isEqualTo(tagTwo.getColour());
@@ -227,7 +227,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
 
-        final Tag updated = distributionSetTagManagement.findByRsql(PAGE, "name==updatedName").getContent().get(0);
+        final Tag updated = distributionSetTagManagement.findByRsql("name==updatedName", PAGE).getContent().get(0);
         assertThat(updated.getName()).isEqualTo(update.getName());
         assertThat(updated.getDescription()).isEqualTo(update.getDescription());
         assertThat(updated.getColour()).isEqualTo(update.getColour());
@@ -333,7 +333,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         // 2 DistributionSetUpdateEvent
         ResultActions result = toggle(tag, sets);
 
-        List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
+        List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
 
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
                 .containsAll(sets.stream().map(DistributionSet::getId).collect(Collectors.toList()));
@@ -349,7 +349,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         result.andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(0), "unassignedDistributionSets"))
                 .andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(1), "unassignedDistributionSets"));
 
-        assertThat(distributionSetManagement.findByTag(PAGE, tag.getId())).isEmpty();
+        assertThat(distributionSetManagement.findByTag(tag.getId(), PAGE)).isEmpty();
     }
 
     @Test
@@ -367,7 +367,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
+        final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
                 .containsOnly(set.getId());
     }
@@ -389,7 +389,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
+        final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
                 .containsAll(sets.stream().map(DistributionSet::getId).collect(Collectors.toList()));
     }
@@ -414,7 +414,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
+        final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
                 .containsOnly(assigned.getId());
     }
@@ -440,7 +440,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
+        final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
                 .containsOnly(assigned.getId());
     }
@@ -505,7 +505,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
 
-        final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
+        final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
 
         assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
                 .containsAll(sets.stream().map(DistributionSet::getId).collect(Collectors.toList()));

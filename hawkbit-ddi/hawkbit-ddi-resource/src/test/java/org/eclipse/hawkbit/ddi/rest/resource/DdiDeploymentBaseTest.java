@@ -181,7 +181,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(countActionStatusAll()).isEqualTo(2);
 
-        final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
+        final DistributionSet findDistributionSetByAction = distributionSetManagement.findByAction(action.getId()).get();
         getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact,
                 artifactSignature, action.getId(),
                 findDistributionSetByAction.findFirstModuleByType(osType).get().getId(), "forced", "forced");
@@ -244,9 +244,9 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Artifact artifactSignature = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
                 getOsModule(ds), "test1.signature", ARTIFACT_SIZE);
 
-        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
+        softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
                 .key(visibleMetadataOsKey).value(visibleMetadataOsValue).targetVisible(true));
-        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
+        softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
                 .key("metaDataNotVisible").value("withValue").targetVisible(false));
 
         final Target savedTarget = createTargetAndAssertNoActiveActions();
@@ -279,7 +279,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(countActionStatusAll()).isEqualTo(2);
 
-        final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
+        final DistributionSet findDistributionSetByAction = distributionSetManagement.findByAction(action.getId()).get();
 
         getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, visibleMetadataOsKey,
                 visibleMetadataOsValue, artifact, artifactSignature, action.getId(), "attempt", "attempt",
@@ -334,7 +334,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(countActionStatusAll()).isEqualTo(2);
 
-        final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
+        final DistributionSet findDistributionSetByAction = distributionSetManagement.findByAction(action.getId()).get();
         getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact,
                 artifactSignature, action.getId(),
                 findDistributionSetByAction.findFirstModuleByType(osType).get().getId(), "forced", "forced");
@@ -361,9 +361,9 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Artifact artifactSignature = testdataFactory.createArtifact(
                 nextBytes(ARTIFACT_SIZE), getOsModule(ds), "test1.signature", ARTIFACT_SIZE);
 
-        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
+        softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
                 .key("metaDataVisible").value("withValue").targetVisible(true));
-        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
+        softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
                 .key("metaDataNotVisible").value("withValue").targetVisible(false));
 
         final Target savedTarget = createTargetAndAssertNoActiveActions();
@@ -399,7 +399,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(countActionStatusAll()).isEqualTo(2);
 
-        final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
+        final DistributionSet findDistributionSetByAction = distributionSetManagement.findByAction(action.getId()).get();
         getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, "metaDataVisible",
                 "withValue", artifact, artifactSignature, action.getId(), "forced", "skip",
                 getOsModule(findDistributionSetByAction));
@@ -794,7 +794,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     private Page<ActionStatus> findActionStatusAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithCountBySpec(actionStatusRepository, pageable, null);
+        return JpaManagementHelper.findAllWithCountBySpec(actionStatusRepository, null, pageable);
     }
 
     private static class ActionStatusCondition extends Condition<ActionStatus> {

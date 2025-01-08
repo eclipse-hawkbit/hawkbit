@@ -70,7 +70,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
             distributionSetTags = distributionSetTagManagement.findAll(pageable);
             count = distributionSetTagManagement.count();
         } else {
-            final Page<DistributionSetTag> page = distributionSetTagManagement.findByRsql(pageable, rsqlParam);
+            final Page<DistributionSetTag> page = distributionSetTagManagement.findByRsql(rsqlParam, pageable);
             distributionSetTags = page;
             count = page.getTotalElements();
         }
@@ -137,9 +137,9 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         Page<DistributionSet> findDistrAll;
         if (rsqlParam == null) {
-            findDistrAll = distributionSetManagement.findByTag(pageable, distributionsetTagId);
+            findDistrAll = distributionSetManagement.findByTag(distributionsetTagId, pageable);
         } else {
-            findDistrAll = distributionSetManagement.findByRsqlAndTag(pageable, rsqlParam, distributionsetTagId);
+            findDistrAll = distributionSetManagement.findByRsqlAndTag(rsqlParam, distributionsetTagId, pageable);
         }
 
         final List<MgmtDistributionSet> rest = MgmtDistributionSetMapper.toResponseFromDsList(findDistrAll.getContent());
