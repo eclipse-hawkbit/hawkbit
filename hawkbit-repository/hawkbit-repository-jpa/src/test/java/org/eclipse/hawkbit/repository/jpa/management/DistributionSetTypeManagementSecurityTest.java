@@ -46,13 +46,13 @@ public class DistributionSetTypeManagementSecurityTest
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void getByKeyPermissionsCheck() {
-        assertPermissions(() -> distributionSetTypeManagement.getByKey("key"), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> distributionSetTypeManagement.findByKey("key"), List.of(SpPermission.READ_REPOSITORY));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void getByNamePermissionsCheck() {
-        assertPermissions(() -> distributionSetTypeManagement.getByName("name"), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> distributionSetTypeManagement.findByName("name"), List.of(SpPermission.READ_REPOSITORY));
     }
 
     @Test

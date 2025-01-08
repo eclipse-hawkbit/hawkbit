@@ -415,7 +415,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected List<DistributionSetMetadata> createDistributionSetMetadata(final long dsId, final List<MetaData> md) {
-        return distributionSetManagement.createMetaData(dsId, md);
+        return distributionSetManagement.putMetaData(dsId, md);
     }
 
     protected void createTargetMetadata(final String controllerId, final MetaData md) {

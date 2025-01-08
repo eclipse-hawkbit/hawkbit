@@ -73,7 +73,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
                 .containsOnly(permitted.getId());
 
         // verify distributionSetManagement#findByRsql
-        assertThat(distributionSetManagement.findByRsql(Pageable.unpaged(), "name==*").get().map(Identifiable::getId)
+        assertThat(distributionSetManagement.findByRsql("name==*", Pageable.unpaged()).get().map(Identifiable::getId)
                 .toList()).containsOnly(permitted.getId());
 
         // verify distributionSetManagement#findByCompleted
@@ -82,8 +82,8 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
 
         // verify distributionSetManagement#findByDistributionSetFilter
         assertThat(distributionSetManagement
-                .findByDistributionSetFilter(Pageable.unpaged(),
-                        DistributionSetFilter.builder().isDeleted(false).build())
+                .findByDistributionSetFilter(DistributionSetFilter.builder().isDeleted(false).build(), Pageable.unpaged()
+                )
                 .get().map(Identifiable::getId).toList()).containsOnly(permitted.getId());
 
         // verify distributionSetManagement#get
@@ -106,14 +106,14 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         }).as("Fail if request hidden.").isInstanceOf(EntityNotFoundException.class);
 
         // verify distributionSetManagement#getByNameAndVersion
-        assertThat(distributionSetManagement.getByNameAndVersion(permitted.getName(), permitted.getVersion()))
+        assertThat(distributionSetManagement.findByNameAndVersion(permitted.getName(), permitted.getVersion()))
                 .isPresent();
-        assertThat(distributionSetManagement.getByNameAndVersion(hidden.getName(), hidden.getVersion())).isEmpty();
+        assertThat(distributionSetManagement.findByNameAndVersion(hidden.getName(), hidden.getVersion())).isEmpty();
 
         // verify distributionSetManagement#getByAction
-        assertThat(distributionSetManagement.getByAction(permittedAction.getId())).isPresent();
+        assertThat(distributionSetManagement.findByAction(permittedAction.getId())).isPresent();
         assertThatThrownBy(() -> {
-            distributionSetManagement.getByAction(hiddenAction.getId());
+            distributionSetManagement.findByAction(hiddenAction.getId());
         }).as("Action is hidden.").isInstanceOf(InsufficientPermissionException.class);
     }
 
@@ -152,11 +152,11 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         final JpaDistributionSetMetadata metadata = new JpaDistributionSetMetadata("test", "test");
 
         // verify distributionSetManagement#createMetaData
-        distributionSetManagement.createMetaData(permitted.getId(), Collections.singletonList(metadata));
-        assertThatThrownBy(() -> distributionSetManagement.createMetaData(readOnly.getId(), Collections.singletonList(metadata)))
+        distributionSetManagement.putMetaData(permitted.getId(), Collections.singletonList(metadata));
+        assertThatThrownBy(() -> distributionSetManagement.putMetaData(readOnly.getId(), Collections.singletonList(metadata)))
                 .as("Distribution set not allowed to me modified.")
                 .isInstanceOf(EntityNotFoundException.class);
-        assertThatThrownBy(() -> distributionSetManagement.createMetaData(hidden.getId(), Collections.singletonList(metadata)))
+        assertThatThrownBy(() -> distributionSetManagement.putMetaData(hidden.getId(), Collections.singletonList(metadata)))
                 .as("Distribution set should not be visible.")
                 .isInstanceOf(EntityNotFoundException.class);
 
@@ -204,10 +204,10 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         // allow updating the permitted distributionSet
         defineAccess(AccessController.Operation.UPDATE, permitted);
 
-        assertThat(distributionSetManagement.findByTag(Pageable.unpaged(), dsTag.getId()).get().map(Identifiable::getId)
+        assertThat(distributionSetManagement.findByTag(dsTag.getId(), Pageable.unpaged()).get().map(Identifiable::getId)
                 .toList()).containsOnly(permitted.getId(), readOnly.getId());
 
-        assertThat(distributionSetManagement.findByRsqlAndTag(Pageable.unpaged(), "name==*", dsTag.getId()).get()
+        assertThat(distributionSetManagement.findByRsqlAndTag("name==*", dsTag.getId(), Pageable.unpaged()).get()
                 .map(Identifiable::getId).toList()).containsOnly(permitted.getId(), readOnly.getId());
 
         // verify distributionSetManagement#unassignTag on permitted target

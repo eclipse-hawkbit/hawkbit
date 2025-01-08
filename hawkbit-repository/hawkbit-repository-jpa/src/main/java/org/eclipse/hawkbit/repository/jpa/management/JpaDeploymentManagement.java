@@ -316,7 +316,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database),
                 ActionSpecifications.byTargetControllerId(controllerId));
 
-        return JpaManagementHelper.findAllWithCountBySpec(actionRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithCountBySpec(actionRepository, specList, pageable);
     }
 
     @Override

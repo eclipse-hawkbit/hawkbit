@@ -357,7 +357,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         distributionSetTypeManagement.delete(type.getId());
 
         // check if the ds type is marked as deleted
-        final Optional<DistributionSetType> opt = distributionSetTypeManagement.getByKey(type.getKey());
+        final Optional<DistributionSetType> opt = distributionSetTypeManagement.findByKey(type.getKey());
         if (opt.isEmpty()) {
             throw new AssertionError("The Optional object of distribution set type should not be empty!");
         }
@@ -883,13 +883,13 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final MvcResult mvcResult = executeMgmtTargetPost(one, two, three);
 
         one = distributionSetManagement
-                .getWithDetails(distributionSetManagement.findByRsql(PAGE, "name==one").getContent().get(0).getId())
+                .getWithDetails(distributionSetManagement.findByRsql("name==one", PAGE).getContent().get(0).getId())
                 .get();
         two = distributionSetManagement
-                .getWithDetails(distributionSetManagement.findByRsql(PAGE, "name==two").getContent().get(0).getId())
+                .getWithDetails(distributionSetManagement.findByRsql("name==two", PAGE).getContent().get(0).getId())
                 .get();
         three = distributionSetManagement
-                .getWithDetails(distributionSetManagement.findByRsql(PAGE, "name==three").getContent().get(0).getId())
+                .getWithDetails(distributionSetManagement.findByRsql("name==three", PAGE).getContent().get(0).getId())
                 .get();
 
         assertThat(
@@ -1122,9 +1122,9 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("[1]value", equalTo(knownValue2)));
 
         final DistributionSetMetadata metaKey1 = distributionSetManagement
-                .getMetaDataByDistributionSetId(testDS.getId(), knownKey1).get();
+                .findMetaDataByDistributionSetId(testDS.getId(), knownKey1).get();
         final DistributionSetMetadata metaKey2 = distributionSetManagement
-                .getMetaDataByDistributionSetId(testDS.getId(), knownKey2).get();
+                .findMetaDataByDistributionSetId(testDS.getId(), knownKey2).get();
 
         assertThat(metaKey1.getValue()).isEqualTo(knownValue1);
         assertThat(metaKey2.getValue()).isEqualTo(knownValue2);
@@ -1145,7 +1145,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         // verify that the number of meta data entries has not changed
         // (we cannot use the PAGE constant here as it tries to sort by ID)
         assertThat(distributionSetManagement
-                .findMetaDataByDistributionSetId(PageRequest.of(0, Integer.MAX_VALUE), testDS.getId())
+                .findMetaDataByDistributionSetId(testDS.getId(), PageRequest.of(0, Integer.MAX_VALUE))
                 .getTotalElements()).isEqualTo(metaData1.length());
 
     }
@@ -1173,7 +1173,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("value", equalTo(updateValue)));
 
         final DistributionSetMetadata assertDS = distributionSetManagement
-                .getMetaDataByDistributionSetId(testDS.getId(), knownKey).get();
+                .findMetaDataByDistributionSetId(testDS.getId(), knownKey).get();
         assertThat(assertDS.getValue()).isEqualTo(updateValue);
 
     }
@@ -1192,7 +1192,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(distributionSetManagement.getMetaDataByDistributionSetId(testDS.getId(), knownKey)).isNotPresent();
+        assertThat(distributionSetManagement.findMetaDataByDistributionSetId(testDS.getId(), knownKey)).isNotPresent();
     }
 
     @Test
@@ -1213,7 +1213,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
-        assertThat(distributionSetManagement.getMetaDataByDistributionSetId(testDS.getId(), knownKey)).isPresent();
+        assertThat(distributionSetManagement.findMetaDataByDistributionSetId(testDS.getId(), knownKey)).isPresent();
     }
 
     @Test
@@ -1240,7 +1240,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final String knownValuePrefix = "knownValue";
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         for (int index = 0; index < totalMetadata; index++) {
-            distributionSetManagement.createMetaData(testDS.getId(),
+            distributionSetManagement.putMetaData(testDS.getId(),
                     List.of(entityFactory.generateDsMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
         }
 

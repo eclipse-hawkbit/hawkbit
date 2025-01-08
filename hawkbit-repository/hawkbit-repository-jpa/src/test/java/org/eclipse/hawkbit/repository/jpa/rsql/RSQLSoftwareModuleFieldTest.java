@@ -51,11 +51,11 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
 
         final SoftwareModuleMetadataCreate softwareModuleMetadata = entityFactory.softwareModuleMetadata()
                 .create(ah.getId()).key("metaKey").value("metaValue");
-        softwareModuleManagement.createMetaData(softwareModuleMetadata);
+        softwareModuleManagement.updateMetaData(softwareModuleMetadata);
 
         final SoftwareModuleMetadataCreate softwareModuleMetadata2 = entityFactory.softwareModuleMetadata()
                 .create(ah2.getId()).key("metaKey").value("value");
-        softwareModuleManagement.createMetaData(softwareModuleMetadata2);
+        softwareModuleManagement.updateMetaData(softwareModuleMetadata2);
     }
 
     @Test
@@ -150,7 +150,7 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expectedEntity) {
-        final Page<SoftwareModule> find = softwareModuleManagement.findByRsql(PageRequest.of(0, 100), rsqlParam);
+        final Page<SoftwareModule> find = softwareModuleManagement.findByRsql(rsqlParam, PageRequest.of(0, 100));
         final long countAll = find.getTotalElements();
         assertThat(find).isNotNull();
         assertThat(countAll).isEqualTo(expectedEntity);

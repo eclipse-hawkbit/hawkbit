@@ -390,7 +390,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     void deletingDsTypeRemovesAssignmentFromTargetType() throws Exception {
         TargetType testType = createTestTargetTypeInDB("TestTypeRemoveDs", Collections.singletonList(standardDsType));
         assertThat(testType.getCompatibleDistributionSetTypes()).hasSize(1);
-        assertThat(distributionSetTypeManagement.getByKey(standardDsType.getKey())).isNotEmpty();
+        assertThat(distributionSetTypeManagement.findByKey(standardDsType.getKey())).isNotEmpty();
 
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/" + standardDsType.getId()))
                 .andDo(MockMvcResultPrinter.print())
@@ -400,7 +400,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(testType.getLastModifiedBy()).isEqualTo(TEST_USER);
         assertThat(testType.getOptLockRevision()).isEqualTo(2);
         assertThat(testType.getCompatibleDistributionSetTypes()).isEmpty();
-        assertThat(distributionSetTypeManagement.getByKey(standardDsType.getKey())).isEmpty();
+        assertThat(distributionSetTypeManagement.findByKey(standardDsType.getKey())).isEmpty();
     }
 
     @Test

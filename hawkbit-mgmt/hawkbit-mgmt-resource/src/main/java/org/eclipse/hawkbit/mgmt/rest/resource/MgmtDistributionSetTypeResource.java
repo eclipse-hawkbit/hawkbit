@@ -65,7 +65,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
         final Slice<DistributionSetType> findModuleTypessAll;
         long countModulesAll;
         if (rsqlParam != null) {
-            findModuleTypessAll = distributionSetTypeManagement.findByRsql(pageable, rsqlParam);
+            findModuleTypessAll = distributionSetTypeManagement.findByRsql(rsqlParam, pageable);
             countModulesAll = ((Page<DistributionSetType>) findModuleTypessAll).getTotalElements();
         } else {
             findModuleTypessAll = distributionSetTypeManagement.findAll(pageable);

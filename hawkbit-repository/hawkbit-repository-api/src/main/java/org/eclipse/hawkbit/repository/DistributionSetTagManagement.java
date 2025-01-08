@@ -32,23 +32,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface DistributionSetTagManagement extends RepositoryManagement<DistributionSetTag, TagCreate, TagUpdate> {
 
     /**
-     * Deletes {@link DistributionSetTag} by given
-     * {@link DistributionSetTag#getName()}.
-     *
-     * @param tagName to be deleted
-     * @throws EntityNotFoundException if tag with given name does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    void delete(@NotEmpty String tagName);
-
-    /**
      * Find {@link DistributionSet} based on given name.
      *
      * @param name to look for.
      * @return {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<DistributionSetTag> getByName(@NotEmpty String name);
+    Optional<DistributionSetTag> findByName(@NotEmpty String name);
 
     /**
      * Finds all {@link TargetTag} assigned to given {@link Target}.
@@ -60,4 +50,14 @@ public interface DistributionSetTagManagement extends RepositoryManagement<Distr
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSetTag> findByDistributionSet(@NotNull Pageable pageable, long distributionSetId);
+
+    /**
+     * Deletes {@link DistributionSetTag} by given
+     * {@link DistributionSetTag#getName()}.
+     *
+     * @param tagName to be deleted
+     * @throws EntityNotFoundException if tag with given name does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
+    void delete(@NotEmpty String tagName);
 }

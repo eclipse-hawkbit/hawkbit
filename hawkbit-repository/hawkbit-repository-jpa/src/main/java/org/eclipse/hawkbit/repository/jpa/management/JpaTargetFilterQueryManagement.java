@@ -192,7 +192,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
                 TargetFilterQueryFields.class, virtualPropertyReplacer, database))
                 : Collections.emptyList();
 
-        return JpaManagementHelper.findAllWithCountBySpec(targetFilterQueryRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithCountBySpec(targetFilterQueryRepository, specList, pageable);
     }
 
     @Override
@@ -225,7 +225,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
                     virtualPropertyReplacer, database));
         }
 
-        return JpaManagementHelper.findAllWithCountBySpec(targetFilterQueryRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithCountBySpec(targetFilterQueryRepository, specList, pageable);
     }
 
     @Override

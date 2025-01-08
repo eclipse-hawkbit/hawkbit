@@ -56,7 +56,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that management get access reacts as specified on calls for non existing entities by means of Optional not present.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
-        assertThat(distributionSetTagManagement.getByName(NOT_EXIST_ID)).isNotPresent();
+        assertThat(distributionSetTagManagement.findByName(NOT_EXIST_ID)).isNotPresent();
         assertThat(distributionSetTagManagement.get(NOT_EXIST_IDL)).isNotPresent();
     }
 
@@ -95,18 +95,18 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         assignTag(dsBs, tagB);
         assignTag(dsCs, tagC);
 
-        assignTag(dsABs, distributionSetTagManagement.getByName(tagA.getName()).get());
-        assignTag(dsABs, distributionSetTagManagement.getByName(tagB.getName()).get());
+        assignTag(dsABs, distributionSetTagManagement.findByName(tagA.getName()).get());
+        assignTag(dsABs, distributionSetTagManagement.findByName(tagB.getName()).get());
 
-        assignTag(dsACs, distributionSetTagManagement.getByName(tagA.getName()).get());
-        assignTag(dsACs, distributionSetTagManagement.getByName(tagC.getName()).get());
+        assignTag(dsACs, distributionSetTagManagement.findByName(tagA.getName()).get());
+        assignTag(dsACs, distributionSetTagManagement.findByName(tagC.getName()).get());
 
-        assignTag(dsBCs, distributionSetTagManagement.getByName(tagB.getName()).get());
-        assignTag(dsBCs, distributionSetTagManagement.getByName(tagC.getName()).get());
+        assignTag(dsBCs, distributionSetTagManagement.findByName(tagB.getName()).get());
+        assignTag(dsBCs, distributionSetTagManagement.findByName(tagC.getName()).get());
 
-        assignTag(dsABCs, distributionSetTagManagement.getByName(tagA.getName()).get());
-        assignTag(dsABCs, distributionSetTagManagement.getByName(tagB.getName()).get());
-        assignTag(dsABCs, distributionSetTagManagement.getByName(tagC.getName()).get());
+        assignTag(dsABCs, distributionSetTagManagement.findByName(tagA.getName()).get());
+        assignTag(dsABCs, distributionSetTagManagement.findByName(tagB.getName()).get());
+        assignTag(dsABCs, distributionSetTagManagement.findByName(tagC.getName()).get());
 
         // search for not deleted
         final DistributionSetFilter.DistributionSetFilterBuilder distributionSetFilterBuilder = getDistributionSetFilterBuilder()
@@ -150,7 +150,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result).size().isEqualTo(20);
         assertThat(result).containsAll(distributionSetManagement.get(groupA.stream().map(DistributionSet::getId).toList()));
         assertThat(
-                distributionSetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent().stream()
+                distributionSetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream()
                         .map(DistributionSet::getId)
                         .sorted()
                         .toList())
@@ -163,7 +163,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThat(result).containsAll(distributionSetManagement
                 .get(groupAB.stream().map(DistributionSet::getId).toList()));
         assertThat(
-                distributionSetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent().stream().map(DistributionSet::getId).sorted()
+                distributionSetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream().map(DistributionSet::getId).sorted()
                         .toList())
                 .isEqualTo(groupAB.stream().map(DistributionSet::getId).sorted().toList());
 
@@ -171,7 +171,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         result = unassignTag(concat(groupA, groupB), tag);
         assertThat(result).size().isEqualTo(40);
         assertThat(result).containsAll(distributionSetManagement.get(concat(groupB, groupA).stream().map(DistributionSet::getId).toList()));
-        assertThat(distributionSetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent()).isEmpty();
+        assertThat(distributionSetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent()).isEmpty();
     }
 
     @Test
@@ -210,7 +210,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(distributionSetTagRepository.findByNameEquals("kai1").get().getDescription()).as("wrong tag found")
                 .isEqualTo("kai2");
-        assertThat(distributionSetTagManagement.getByName("kai1").get().getColour()).as("wrong tag found")
+        assertThat(distributionSetTagManagement.findByName("kai1").get().getColour()).as("wrong tag found")
                 .isEqualTo("colour");
         assertThat(distributionSetTagManagement.get(tag.getId()).get().getColour()).as("wrong tag found")
                 .isEqualTo("colour");
@@ -302,7 +302,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     private void verifyExpectedFilteredDistributionSets(final DistributionSetFilter.DistributionSetFilterBuilder distributionSetFilterBuilder,
             final Stream<Collection<DistributionSet>> expectedFilteredDistributionSets) {
         final Collection<Long> retrievedFilteredDsIds = distributionSetManagement
-                .findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build()).stream()
+                .findByDistributionSetFilter(distributionSetFilterBuilder.build(), PAGE).stream()
                 .map(DistributionSet::getId).toList();
         final Collection<Long> expectedFilteredDsIds = expectedFilteredDistributionSets.flatMap(Collection::stream)
                 .map(DistributionSet::getId).toList();

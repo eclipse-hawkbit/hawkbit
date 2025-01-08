@@ -662,7 +662,7 @@ public class TestdataFactory {
      * @return persisted {@link DistributionSetType}
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName) {
-        return distributionSetTypeManagement.getByKey(dsTypeKey)
+        return distributionSetTypeManagement.findByKey(dsTypeKey)
                 .orElseGet(() -> distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
                         .key(dsTypeKey).name(dsTypeName).description(randomDescriptionShort()).colour("black")));
     }
@@ -679,7 +679,7 @@ public class TestdataFactory {
      */
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName,
             final Collection<SoftwareModuleType> mandatory, final Collection<SoftwareModuleType> optional) {
-        return distributionSetTypeManagement.getByKey(dsTypeKey)
+        return distributionSetTypeManagement.findByKey(dsTypeKey)
                 .orElseGet(() -> distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
                         .key(dsTypeKey).name(dsTypeName).description(randomDescriptionShort()).colour("black")
                         .optional(optional.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))
@@ -707,7 +707,7 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModuleType}
      */
     public SoftwareModuleType findOrCreateSoftwareModuleType(final String key, final int maxAssignments) {
-        return softwareModuleTypeManagement.getByKey(key)
+        return softwareModuleTypeManagement.findByKey(key)
                 .orElseGet(() -> softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create()
                         .key(key).name(key).description(randomDescriptionShort()).colour("#ffffff")
                         .maxAssignments(maxAssignments)));
@@ -1268,9 +1268,9 @@ public class TestdataFactory {
     }
 
     private void addTestModuleMetadata(final SoftwareModule module) {
-        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
+        softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
                 .key(VISIBLE_SM_MD_KEY).value(VISIBLE_SM_MD_VALUE).targetVisible(true));
-        softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
+        softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
                 .key(INVISIBLE_SM_MD_KEY).value(INVISIBLE_SM_MD_VALUE).targetVisible(false));
 
     }

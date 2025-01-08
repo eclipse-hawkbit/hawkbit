@@ -122,7 +122,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
                 .isLessThanOrEqualTo(System.currentTimeMillis());
         assertThat(actionStatusRepository.count()).isEqualTo(2);
 
-        final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
+        final DistributionSet findDistributionSetByAction = distributionSetManagement.findByAction(action.getId()).get();
 
         getAndVerifyConfirmationBasePayload(
                 DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact,

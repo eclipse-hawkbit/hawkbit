@@ -47,7 +47,7 @@ public class DistributionSetTagManagementSecurityTest
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void getByNameWitPermissionWorks() {
-        assertPermissions(() -> distributionSetTagManagement.getByName("tagName"), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> distributionSetTagManagement.findByName("tagName"), List.of(SpPermission.READ_REPOSITORY));
     }
 
     @Test

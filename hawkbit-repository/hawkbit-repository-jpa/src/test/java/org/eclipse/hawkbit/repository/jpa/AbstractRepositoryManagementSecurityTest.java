@@ -14,7 +14,6 @@ import java.util.List;
 import io.qameta.allure.Description;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.RepositoryManagement;
-import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 
@@ -105,7 +104,7 @@ public abstract class AbstractRepositoryManagementSecurityTest<T, C, U> extends 
     @Test
     @Description("Tests RepositoryManagement PreAuthorized method with correct and insufficient permissions.")
     public void findByRsqlPermissionCheck() {
-        assertPermissions(() -> getRepositoryManagement().findByRsql(Pageable.ofSize(1), "(name==*)"), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> getRepositoryManagement().findByRsql("(name==*)", Pageable.ofSize(1)), List.of(SpPermission.READ_REPOSITORY));
     }
 
 }

@@ -40,169 +40,53 @@ import org.springframework.security.access.prepost.PreAuthorize;
 /**
  * Service for managing {@link SoftwareModule}s.
  */
-public interface SoftwareModuleManagement
-        extends RepositoryManagement<SoftwareModule, SoftwareModuleCreate, SoftwareModuleUpdate> {
+public interface SoftwareModuleManagement extends RepositoryManagement<SoftwareModule, SoftwareModuleCreate, SoftwareModuleUpdate> {
 
     /**
-     * Creates a list of software module meta data entries.
+     * Creates a list of software module meta-data entries.
      *
-     * @param metadata the meta data entries to create
-     * @return the updated or created software module meta data entries
-     * @throws EntityAlreadyExistsException in case one of the meta data entry already exists for the
-     *         specific key
+     * @param metadata the meta-data entries to create
+     * @return the updated or created software module meta-data entries
+     * @throws EntityAlreadyExistsException in case one of the meta-data entry already exists for the specific key
+     * @throws EntityNotFoundException if software module with given ID does not exist
+     * @throws AssignmentQuotaExceededException if the maximum number of {@link SoftwareModuleMetadata} entries is exceeded for the addressed
+     *         {@link SoftwareModule}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    List<SoftwareModuleMetadata> putMetaData(@NotNull @Valid Collection<SoftwareModuleMetadataCreate> metadata);
+
+    /**
+     * Creates or updates a single software module meta-data entry.
+     *
+     * @param metadata the meta-data entry to create
+     * @return the updated or created software module meta-data entry
+     * @throws EntityAlreadyExistsException in case the meta-data entry already exists for the specific key
      * @throws EntityNotFoundException if software module with given ID does not exist
      * @throws AssignmentQuotaExceededException if the maximum number of {@link SoftwareModuleMetadata}
      *         entries is exceeded for the addressed {@link SoftwareModule}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    List<SoftwareModuleMetadata> createMetaData(@NotNull @Valid Collection<SoftwareModuleMetadataCreate> metadata);
+    SoftwareModuleMetadata updateMetaData(@NotNull @Valid SoftwareModuleMetadataCreate metadata);
 
     /**
-     * Creates or updates a single software module meta data entry.
+     * Updates a distribution set meta-data value if corresponding entry exists.
      *
-     * @param metadata the meta data entry to create
-     * @return the updated or created software module meta data entry
-     * @throws EntityAlreadyExistsException in case the meta data entry already exists for the specific
-     *         key
-     * @throws EntityNotFoundException if software module with given ID does not exist
-     * @throws AssignmentQuotaExceededException if the maximum number of {@link SoftwareModuleMetadata}
-     *         entries is exceeded for the addressed {@link SoftwareModule}
+     * @param update the meta-data entry to be updated
+     * @return the updated meta-data entry
+     * @throws EntityNotFoundException in case the meta-data entry does not exist and cannot be updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleMetadata createMetaData(@NotNull @Valid SoftwareModuleMetadataCreate metadata);
+    SoftwareModuleMetadata updateMetaData(@NotNull @Valid SoftwareModuleMetadataUpdate update);
 
     /**
-     * Deletes a software module meta data entry.
+     * Deletes a software module meta-data entry.
      *
-     * @param id where meta data has to be deleted
-     * @param key of the metda data element
+     * @param id where meta-data has to be deleted
+     * @param key of the meta-data element
      * @throws EntityNotFoundException of module or metadata entry does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     void deleteMetaData(long id, @NotEmpty String key);
-
-    /**
-     * Returns all modules assigned to given {@link DistributionSet}.
-     *
-     * @param pageable the page request to page the result set
-     * @param distributionSetId to search for
-     * @return all {@link SoftwareModule}s that are assigned to given
-     *         {@link DistributionSet}.
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModule> findByAssignedTo(@NotNull Pageable pageable, long distributionSetId);
-
-    /**
-     * Returns count of all modules assigned to given {@link DistributionSet}.
-     *
-     * @param distributionSetId to search for
-     * @return count of {@link SoftwareModule}s that are assigned to given
-     *         {@link DistributionSet}.
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    long countByAssignedTo(long distributionSetId);
-
-    /**
-     * Filter {@link SoftwareModule}s with given
-     * {@link SoftwareModule#getName()} or {@link SoftwareModule#getVersion()}
-     * and {@link SoftwareModule#getType()} that are not marked as deleted.
-     *
-     * @param pageable page parameter
-     * @param searchText to be filtered as "like" on {@link SoftwareModule#getName()}
-     * @param typeId to be filtered as "like" on {@link SoftwareModule#getType()}
-     * @return the page of found {@link SoftwareModule}
-     * @throws EntityNotFoundException if given software module type does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Slice<SoftwareModule> findByTextAndType(@NotNull Pageable pageable, String searchText, Long typeId);
-
-    /**
-     * Retrieves {@link SoftwareModule} by their name AND version AND type..
-     *
-     * @param name of the {@link SoftwareModule}
-     * @param version of the {@link SoftwareModule}
-     * @param typeId of the {@link SoftwareModule}
-     * @return the found {@link SoftwareModule}
-     * @throws EntityNotFoundException if software module type with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<SoftwareModule> getByNameAndVersionAndType(@NotEmpty String name, @NotEmpty String version, long typeId);
-
-    /**
-     * Finds a single software module meta data by its id.
-     *
-     * @param id where meta data has to be found
-     * @param key of the meta data element
-     * @return the found SoftwareModuleMetadata or {@code null} if not exits
-     * @throws EntityNotFoundException is module with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<SoftwareModuleMetadata> getMetaDataBySoftwareModuleId(long id, @NotEmpty String key);
-
-    /**
-     * Finds all meta data by the given software module id.
-     *
-     * @param pageable the page request to page the result
-     * @param id the software module id to retrieve the meta data from
-     * @return a paged result of all meta data entries for a given software
-     *         module id
-     * @throws EntityNotFoundException if software module with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(@NotNull Pageable pageable, long id);
-
-    /**
-     * Counts all meta data by the given software module id.
-     *
-     * @param id the software module id to retrieve the meta data count from
-     * @return count of all meta data entries for a given software module id
-     * @throws EntityNotFoundException if software module with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    long countMetaDataBySoftwareModuleId(long id);
-
-    /**
-     * Finds all meta data by the given software module id where
-     * {@link SoftwareModuleMetadata#isTargetVisible()}.
-     *
-     * @param pageable the page request to page the result
-     * @param id the software module id to retrieve the meta data from
-     * @return a paged result of all meta data entries for a given software
-     *         module id
-     * @throws EntityNotFoundException if software module with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleIdAndTargetVisible(@NotNull Pageable pageable, long id);
-
-    /**
-     * Finds all meta data by the given software module id.
-     *
-     * @param pageable the page request to page the result
-     * @param id the software module id to retrieve the meta data from
-     * @param rsqlParam filter definition in RSQL syntax
-     * @return a paged result of all meta data entries for a given software
-     *         module id
-     * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
-     *         given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
-     * @throws EntityNotFoundException if software module with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleMetadata> findMetaDataByRsql(@NotNull Pageable pageable, long id, @NotNull String rsqlParam);
-
-    /**
-     * Retrieves the {@link SoftwareModule}s by their {@link SoftwareModuleType}
-     * .
-     *
-     * @param pageable page parameters
-     * @param typeId to be filtered on
-     * @return the found {@link SoftwareModule}s
-     * @throws EntityNotFoundException if software module type with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Slice<SoftwareModule> findByType(@NotNull Pageable pageable, long typeId);
 
     /**
      * Locks a software module.
@@ -225,16 +109,120 @@ public interface SoftwareModuleManagement
     void unlock(long id);
 
     /**
-     * Updates a distribution set meta data value if corresponding entry exists.
+     * Returns all modules assigned to given {@link DistributionSet}.
      *
-     * @param update the meta data entry to be updated
-     * @return the updated meta data entry
-     * @throws EntityNotFoundException in case the meta data entry does not exists and cannot be
-     *         updated
+     * @param distributionSetId to search for
+     * @param pageable the page request to page the result set
+     * @return all {@link SoftwareModule}s that are assigned to given {@link DistributionSet}.
+     * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    SoftwareModuleMetadata updateMetaData(@NotNull @Valid SoftwareModuleMetadataUpdate update);
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<SoftwareModule> findByAssignedTo(long distributionSetId, @NotNull Pageable pageable);
+
+    /**
+     * Filter {@link SoftwareModule}s with given {@link SoftwareModule#getName()} or {@link SoftwareModule#getVersion()}
+     * and {@link SoftwareModule#getType()} that are not marked as deleted.
+     *
+     * @param searchText to be filtered as "like" on {@link SoftwareModule#getName()}
+     * @param typeId to be filtered as "like" on {@link SoftwareModule#getType()}
+     * @param pageable page parameter
+     * @return the page of found {@link SoftwareModule}
+     * @throws EntityNotFoundException if given software module type does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Slice<SoftwareModule> findByTextAndType(String searchText, Long typeId, @NotNull Pageable pageable);
+
+    /**
+     * Retrieves {@link SoftwareModule} by their name AND version AND type.
+     *
+     * @param name of the {@link SoftwareModule}
+     * @param version of the {@link SoftwareModule}
+     * @param typeId of the {@link SoftwareModule}
+     * @return the found {@link SoftwareModule}
+     * @throws EntityNotFoundException if software module type with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Optional<SoftwareModule> findByNameAndVersionAndType(@NotEmpty String name, @NotEmpty String version, long typeId);
+
+    /**
+     * Finds a single software module meta-data by its id.
+     *
+     * @param id where meta-data has to be found
+     * @param key of the meta-data element
+     * @return the found SoftwareModuleMetadata or {@code null} if not exits
+     * @throws EntityNotFoundException is module with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Optional<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(long id, @NotEmpty String key);
+
+    /**
+     * Finds all meta-data by the given software module id.
+     *
+     * @param pageable the page request to page the result
+     * @param id the software module id to retrieve the meta-data from
+     * @return a paged result of all meta-data entries for a given software module id
+     * @throws EntityNotFoundException if software module with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(@NotNull Pageable pageable, long id);
+
+    /**
+     * Finds all meta-data by the given software module id where {@link SoftwareModuleMetadata#isTargetVisible()}.
+     *
+     * @param pageable the page request to page the result
+     * @param id the software module id to retrieve the meta-data from
+     * @return a paged result of all meta-data entries for a given software module id
+     * @throws EntityNotFoundException if software module with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleIdAndTargetVisible(@NotNull Pageable pageable, long id);
+
+    /**
+     * Finds all meta-data by the given software module id.
+     *
+     * @param id the software module id to retrieve the meta-data from
+     * @param rsqlParam filter definition in RSQL syntax
+     * @param pageable the page request to page the result
+     * @return a paged result of all meta-data entries for a given software module id
+     * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the given
+     *         {@code fieldNameProvider}
+     * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
+     * @throws EntityNotFoundException if software module with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Page<SoftwareModuleMetadata> findMetaDataByRsql(long id, @NotNull String rsqlParam, @NotNull Pageable pageable);
+
+    /**
+     * Retrieves the {@link SoftwareModule}s by their {@link SoftwareModuleType}
+     *
+     * @param typeId to be filtered on
+     * @param pageable page parameters
+     * @return the found {@link SoftwareModule}s
+     * @throws EntityNotFoundException if software module type with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Slice<SoftwareModule> findByType(long typeId, @NotNull Pageable pageable);
 
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Map<Long, List<SoftwareModuleMetadata>> findMetaDataBySoftwareModuleIdsAndTargetVisible(Collection<Long> moduleIds);
+
+    /**
+     * Returns count of all modules assigned to given {@link DistributionSet}.
+     *
+     * @param distributionSetId to search for
+     * @return count of {@link SoftwareModule}s that are assigned to given {@link DistributionSet}.
+     * @throws EntityNotFoundException if distribution set with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countByAssignedTo(long distributionSetId);
+
+    /**
+     * Counts all meta-data by the given software module id.
+     *
+     * @param id the software module id to retrieve the meta-data count from
+     * @return count of all meta-data entries for a given software module id
+     * @throws EntityNotFoundException if software module with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countMetaDataBySoftwareModuleId(long id);
 }

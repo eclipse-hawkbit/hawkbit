@@ -345,7 +345,7 @@ public class JpaTargetManagement implements TargetManagement {
                 TargetSpecifications.failedActionsForRollout(rolloutId),
                 TargetSpecifications.isNotInRolloutGroups(groups));
 
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageRequest, specList);
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageRequest);
     }
 
     @Override
@@ -382,8 +382,9 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findByAssignedDistributionSet(final Pageable pageReq, final long distributionSetId) {
         final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
 
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageReq,
-                List.of(TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId())));
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository,
+                List.of(TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId())), pageReq
+        );
     }
 
     @Override
@@ -395,7 +396,7 @@ public class JpaTargetManagement implements TargetManagement {
                 RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId()));
 
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageReq, specList);
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageReq);
     }
 
     @Override
@@ -419,8 +420,9 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findByInstalledDistributionSet(final Pageable pageReq, final long distributionSetId) {
         final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
 
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageReq,
-                List.of(TargetSpecifications.hasInstalledDistributionSet(validDistSet.getId())));
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository,
+                List.of(TargetSpecifications.hasInstalledDistributionSet(validDistSet.getId())), pageReq
+        );
     }
 
     @Override
@@ -432,13 +434,14 @@ public class JpaTargetManagement implements TargetManagement {
                 RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.hasInstalledDistributionSet(validDistSet.getId()));
 
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
     }
 
     @Override
     public Page<Target> findByUpdateStatus(final Pageable pageable, final TargetUpdateStatus status) {
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageable,
-                List.of(TargetSpecifications.hasTargetUpdateStatus(status)));
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.hasTargetUpdateStatus(status)),
+                pageable
+        );
     }
 
     @Override
@@ -466,8 +469,8 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findByTag(final Pageable pageable, final long tagId) {
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
 
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageable,
-                List.of(TargetSpecifications.hasTag(tagId)));
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.hasTag(tagId)), pageable
+        );
     }
 
     @Override
@@ -478,7 +481,7 @@ public class JpaTargetManagement implements TargetManagement {
                 RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.hasTag(tagId));
 
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
     }
 
     @Override
@@ -685,8 +688,9 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Page<Target> findByControllerAttributesRequested(final Pageable pageReq) {
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageReq,
-                List.of(TargetSpecifications.hasRequestControllerAttributesTrue()));
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.hasRequestControllerAttributesTrue()),
+                pageReq
+        );
     }
 
     @Override
@@ -770,8 +774,9 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<TargetMetadata> findMetaDataByControllerId(final Pageable pageable, final String controllerId) {
         final Long id = getByControllerIdAndThrowIfNotFound(controllerId).getId();
 
-        return JpaManagementHelper.findAllWithCountBySpec(targetMetadataRepository, pageable,
-                Collections.singletonList(metadataByTargetIdSpec(id)));
+        return JpaManagementHelper.findAllWithCountBySpec(targetMetadataRepository, Collections.singletonList(metadataByTargetIdSpec(id)),
+                pageable
+        );
     }
 
     @Override
@@ -791,7 +796,7 @@ public class JpaTargetManagement implements TargetManagement {
                         .buildRsqlSpecification(rsqlParam, TargetMetadataFields.class, virtualPropertyReplacer, database),
                 metadataByTargetIdSpec(targetId));
 
-        return JpaManagementHelper.findAllWithCountBySpec(targetMetadataRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithCountBySpec(targetMetadataRepository, specList, pageable);
     }
 
     @Override

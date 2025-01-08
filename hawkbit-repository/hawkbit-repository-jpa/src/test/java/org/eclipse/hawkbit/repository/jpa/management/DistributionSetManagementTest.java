@@ -96,8 +96,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet set = testdataFactory.createDistributionSet();
         assertThat(distributionSetManagement.get(NOT_EXIST_IDL)).isNotPresent();
         assertThat(distributionSetManagement.getWithDetails(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(distributionSetManagement.getByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID)).isNotPresent();
-        assertThat(distributionSetManagement.getMetaDataByDistributionSetId(set.getId(), NOT_EXIST_ID)).isNotPresent();
+        assertThat(distributionSetManagement.findByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID)).isNotPresent();
+        assertThat(distributionSetManagement.findMetaDataByDistributionSetId(set.getId(), NOT_EXIST_ID)).isNotPresent();
     }
 
     @Test
@@ -125,8 +125,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> distributionSetManagement.assignTag(singletonList(set.getId()), NOT_EXIST_IDL), "DistributionSetTag");
         verifyThrownExceptionBy(() -> distributionSetManagement.assignTag(singletonList(NOT_EXIST_IDL), dsTag.getId()), "DistributionSet");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.findByTag(PAGE, NOT_EXIST_IDL), "DistributionSetTag");
-        verifyThrownExceptionBy(() -> distributionSetManagement.findByRsqlAndTag(PAGE, "name==*", NOT_EXIST_IDL), "DistributionSetTag");
+        verifyThrownExceptionBy(() -> distributionSetManagement.findByTag(NOT_EXIST_IDL, PAGE), "DistributionSetTag");
+        verifyThrownExceptionBy(() -> distributionSetManagement.findByRsqlAndTag("name==*", NOT_EXIST_IDL, PAGE), "DistributionSetTag");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.assignTag(singletonList(NOT_EXIST_IDL), dsTag.getId()), "DistributionSet");
         verifyThrownExceptionBy(() ->
@@ -139,7 +139,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> distributionSetManagement.create(
                 entityFactory.distributionSet().create().name("xxx").type(NOT_EXIST_ID)), "DistributionSetType");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.createMetaData(
+        verifyThrownExceptionBy(() -> distributionSetManagement.putMetaData(
                 NOT_EXIST_IDL, singletonList(entityFactory.generateDsMetadata("123", "123"))), "DistributionSet");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.delete(singletonList(NOT_EXIST_IDL)), "DistributionSet");
@@ -149,16 +149,16 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> distributionSetManagement.deleteMetaData(set.getId(), NOT_EXIST_ID),
                 "DistributionSetMetadata");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.getByAction(NOT_EXIST_IDL), "Action");
+        verifyThrownExceptionBy(() -> distributionSetManagement.findByAction(NOT_EXIST_IDL), "Action");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.getMetaDataByDistributionSetId(NOT_EXIST_IDL, "xxx"),
+        verifyThrownExceptionBy(() -> distributionSetManagement.findMetaDataByDistributionSetId(NOT_EXIST_IDL, "xxx"),
                 "DistributionSet");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.findMetaDataByDistributionSetId(PAGE, NOT_EXIST_IDL),
+        verifyThrownExceptionBy(() -> distributionSetManagement.findMetaDataByDistributionSetId(NOT_EXIST_IDL, PAGE),
                 "DistributionSet");
 
         verifyThrownExceptionBy(
-                () -> distributionSetManagement.findMetaDataByDistributionSetIdAndRsql(PAGE, NOT_EXIST_IDL, "name==*"),
+                () -> distributionSetManagement.findMetaDataByDistributionSetIdAndRsql(NOT_EXIST_IDL, "name==*", PAGE),
                 "DistributionSet");
 
         assertThatThrownBy(() -> distributionSetManagement.isInUse(NOT_EXIST_IDL))
@@ -325,22 +325,22 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .as("ds has wrong tag size")
                 .isEqualTo(1));
 
-        final DistributionSetTag findDistributionSetTag = getOrThrow(distributionSetTagManagement.getByName(TAG1_NAME));
+        final DistributionSetTag findDistributionSetTag = getOrThrow(distributionSetTagManagement.findByName(TAG1_NAME));
 
         assertThat(assignedDS.size()).as("assigned ds has wrong size")
-                .isEqualTo(distributionSetManagement.findByTag(PAGE, tag.getId()).getNumberOfElements());
+                .isEqualTo(distributionSetManagement.findByTag(tag.getId(), PAGE).getNumberOfElements());
 
         final JpaDistributionSet unAssignDS = (JpaDistributionSet) distributionSetManagement
                 .unassignTag(assignDS.get(0), findDistributionSetTag.getId());
         assertThat(unAssignDS.getId()).as("unassigned ds is wrong").isEqualTo(assignDS.get(0));
         assertThat(unAssignDS.getTags().size()).as("unassigned ds has wrong tag size").isZero();
-        assertThat(distributionSetTagManagement.getByName(TAG1_NAME)).isPresent();
-        assertThat(distributionSetManagement.findByTag(PAGE, tag.getId()).getNumberOfElements())
+        assertThat(distributionSetTagManagement.findByName(TAG1_NAME)).isPresent();
+        assertThat(distributionSetManagement.findByTag(tag.getId(), PAGE).getNumberOfElements())
                 .as("ds tag ds has wrong ds size").isEqualTo(3);
 
-        assertThat(distributionSetManagement.findByRsqlAndTag(PAGE, "name==" + unAssignDS.getName(), tag.getId())
+        assertThat(distributionSetManagement.findByRsqlAndTag("name==" + unAssignDS.getName(), tag.getId(), PAGE)
                 .getNumberOfElements()).as("ds tag ds has wrong ds size").isZero();
-        assertThat(distributionSetManagement.findByRsqlAndTag(PAGE, "name!=" + unAssignDS.getName(), tag.getId())
+        assertThat(distributionSetManagement.findByRsqlAndTag("name!=" + unAssignDS.getName(), tag.getId(), PAGE)
                 .getNumberOfElements()).as("ds tag ds has wrong ds size").isEqualTo(3);
     }
 
@@ -791,10 +791,10 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         }
 
         final Page<DistributionSetMetadata> metadataOfDs1 = distributionSetManagement
-                .findMetaDataByDistributionSetId(PageRequest.of(0, 100), ds1.getId());
+                .findMetaDataByDistributionSetId(ds1.getId(), PageRequest.of(0, 100));
 
         final Page<DistributionSetMetadata> metadataOfDs2 = distributionSetManagement
-                .findMetaDataByDistributionSetId(PageRequest.of(0, 100), ds2.getId());
+                .findMetaDataByDistributionSetId(ds2.getId(), PageRequest.of(0, 100));
 
         assertThat(metadataOfDs1.getNumberOfElements())
                 .isEqualTo(quotaManagement.getMaxMetaDataEntriesPerDistributionSet());
@@ -831,7 +831,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetRepository.findAll()).hasSize(4);
         assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(2);
         assertThat(distributionSetManagement.findAll(PAGE)).hasSize(2);
-        assertThat(distributionSetManagement.findByRsql(PAGE, "name==*")).hasSize(2);
+        assertThat(distributionSetManagement.findByRsql("name==*", PAGE)).hasSize(2);
         assertThat(distributionSetManagement.count()).isEqualTo(2);
     }
 
@@ -889,7 +889,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final String knownUpdateValue = "knownUpdateValue";
 
         final DistributionSet ds = testdataFactory.createDistributionSet();
-        distributionSetManagement.createMetaData(ds.getId(),
+        distributionSetManagement.putMetaData(ds.getId(),
                 singletonList(entityFactory.generateDsMetadata(knownKey1, knownValue)));
 
         distributionSetInvalidationManagement.invalidateDistributionSet(
@@ -898,7 +898,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // assert that no new metadata can be created
         assertThatExceptionOfType(InvalidDistributionSetException.class)
                 .as("Invalid distributionSet should throw an exception")
-                .isThrownBy(() -> distributionSetManagement.createMetaData(ds.getId(),
+                .isThrownBy(() -> distributionSetManagement.putMetaData(ds.getId(),
                         singletonList(entityFactory.generateDsMetadata(knownKey2, knownValue))));
 
         // assert that an existing metadata can not be updated
@@ -1251,18 +1251,18 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     private void assertThatFilterContainsOnlyGivenDistributionSets(final DistributionSetFilterBuilder filterBuilder,
             final List<DistributionSet> distributionSets) {
         final int expectedDsSize = distributionSets.size();
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, filterBuilder.build()).getContent())
+        assertThat(distributionSetManagement.findByDistributionSetFilter(filterBuilder.build(), PAGE).getContent())
                 .hasSize(expectedDsSize).containsOnly(distributionSets.toArray(new DistributionSet[expectedDsSize]));
     }
 
     private void assertThatFilterDoesNotContainAnyDistributionSet(final DistributionSetFilterBuilder filterBuilder) {
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, filterBuilder.build()).getContent())
+        assertThat(distributionSetManagement.findByDistributionSetFilter(filterBuilder.build(), PAGE).getContent())
                 .isEmpty();
     }
 
     private void assertThatFilterHasSizeAndDoesNotContainDistributionSet(
             final DistributionSetFilterBuilder filterBuilder, final int size, final DistributionSet ds) {
-        assertThat(distributionSetManagement.findByDistributionSetFilter(PAGE, filterBuilder.build()).getContent())
+        assertThat(distributionSetManagement.findByDistributionSetFilter(filterBuilder.build(), PAGE).getContent())
                 .hasSize(size).doesNotContain(ds);
     }
 

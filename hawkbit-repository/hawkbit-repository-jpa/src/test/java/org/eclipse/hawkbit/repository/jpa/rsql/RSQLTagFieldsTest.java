@@ -119,8 +119,8 @@ public class RSQLTagFieldsTest extends AbstractJpaIntegrationTest {
 
     private void assertRSQLQueryDistributionSet(final String rsqlParam, final long expectedEntities) {
 
-        final Page<DistributionSetTag> findEnitity = distributionSetTagManagement.findByRsql(PageRequest.of(0, 100),
-                rsqlParam);
+        final Page<DistributionSetTag> findEnitity = distributionSetTagManagement.findByRsql(rsqlParam, PageRequest.of(0, 100)
+        );
         final long countAllEntities = findEnitity.getTotalElements();
         assertThat(findEnitity).isNotNull();
         assertThat(countAllEntities).isEqualTo(expectedEntities);

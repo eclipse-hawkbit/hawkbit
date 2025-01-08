@@ -179,11 +179,6 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
-    public long count() {
-        return softwareModuleRepository.count(SoftwareModuleSpecification.isNotDeleted());
-    }
-
-    @Override
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
@@ -239,6 +234,11 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
+    public Optional<SoftwareModule> get(final long id) {
+        return softwareModuleRepository.findById(id).map(SoftwareModule.class::cast);
+    }
+
+    @Override
     public List<SoftwareModule> get(final Collection<Long> ids) {
         return Collections.unmodifiableList(softwareModuleRepository.findAllById(ids));
     }
@@ -249,8 +249,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
-    public Optional<SoftwareModule> get(final long id) {
-        return softwareModuleRepository.findById(id).map(SoftwareModule.class::cast);
+    public long count() {
+        return softwareModuleRepository.count(SoftwareModuleSpecification.isNotDeleted());
     }
 
     @Override
@@ -261,18 +261,18 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
-    public Page<SoftwareModule> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository, pageable, List.of(
+    public Page<SoftwareModule> findByRsql(final String rsqlParam, final Pageable pageable) {
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository, List.of(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleFields.class, virtualPropertyReplacer,
                         database),
-                SoftwareModuleSpecification.isNotDeleted()));
+                SoftwareModuleSpecification.isNotDeleted()), pageable);
     }
 
     @Override
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<SoftwareModuleMetadata> createMetaData(final Collection<SoftwareModuleMetadataCreate> create) {
+    public List<SoftwareModuleMetadata> putMetaData(final Collection<SoftwareModuleMetadataCreate> create) {
         if (!create.isEmpty()) {
             // check if all metadata entries refer to the same software module
             final Long id = ((JpaSoftwareModuleMetadataCreate) create.iterator().next()).getSoftwareModuleId();
@@ -309,7 +309,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public SoftwareModuleMetadata createMetaData(final SoftwareModuleMetadataCreate c) {
+    public SoftwareModuleMetadata updateMetaData(final SoftwareModuleMetadataCreate c) {
         final JpaSoftwareModuleMetadataCreate create = (JpaSoftwareModuleMetadataCreate) c;
         final Long id = create.getSoftwareModuleId();
 
@@ -326,118 +326,32 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public SoftwareModuleMetadata updateMetaData(final SoftwareModuleMetadataUpdate u) {
+        final GenericSoftwareModuleMetadataUpdate update = (GenericSoftwareModuleMetadataUpdate) u;
+
+        // check if exists otherwise throw entity not found exception
+        final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) findMetaDataBySoftwareModuleId(
+                update.getSoftwareModuleId(), update.getKey())
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, update.getSoftwareModuleId(), update.getKey()));
+
+        update.getValue().ifPresent(metadata::setValue);
+        update.isTargetVisible().ifPresent(metadata::setTargetVisible);
+
+        JpaManagementHelper.touch(entityManager, softwareModuleRepository, metadata.getSoftwareModule());
+        return softwareModuleMetadataRepository.save(metadata);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteMetaData(final long id, final String key) {
-        final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) getMetaDataBySoftwareModuleId(id,
+        final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) findMetaDataBySoftwareModuleId(id,
                 key).orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, id, key));
 
         JpaManagementHelper.touch(entityManager, softwareModuleRepository,
                 (JpaSoftwareModule) metadata.getSoftwareModule());
         softwareModuleMetadataRepository.deleteById(metadata.getId());
-    }
-
-    @Override
-    public Page<SoftwareModule> findByAssignedTo(final Pageable pageable, final long distributionSetId) {
-        assertDistributionSetExists(distributionSetId);
-
-        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository, pageable,
-                Collections.singletonList(SoftwareModuleSpecification.byAssignedToDs(distributionSetId)));
-    }
-
-    @Override
-    public long countByAssignedTo(final long distributionSetId) {
-        assertDistributionSetExists(distributionSetId);
-
-        return softwareModuleRepository.count(SoftwareModuleSpecification.byAssignedToDs(distributionSetId));
-    }
-
-    @Override
-    public Slice<SoftwareModule> findByTextAndType(final Pageable pageable, final String searchText,
-            final Long typeId) {
-        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(3);
-        specList.add(SoftwareModuleSpecification.isNotDeleted());
-
-        if (!ObjectUtils.isEmpty(searchText)) {
-            specList.add(buildSmSearchQuerySpec(searchText));
-        }
-
-        if (null != typeId) {
-            assertSoftwareModuleTypeExists(typeId);
-            specList.add(SoftwareModuleSpecification.equalType(typeId));
-        }
-
-        specList.add(SoftwareModuleSpecification.fetchType());
-
-        return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleRepository, pageable, specList);
-    }
-
-    @Override
-    public Optional<SoftwareModule> getByNameAndVersionAndType(final String name, final String version,
-            final long typeId) {
-        assertSoftwareModuleTypeExists(typeId);
-
-        // TODO AC - Access is restricted. This could have problem with UI when access control is enabled.
-        // Vaadin UI use this for validation. May need to be called via elevated access
-        return JpaManagementHelper
-                .findOneBySpec(softwareModuleRepository, List.of(
-                        SoftwareModuleSpecification.likeNameAndVersion(name, version),
-                        SoftwareModuleSpecification.equalType(typeId),
-                        SoftwareModuleSpecification.fetchType()))
-                .map(SoftwareModule.class::cast);
-    }
-
-    @Override
-    public Optional<SoftwareModuleMetadata> getMetaDataBySoftwareModuleId(final long id, final String key) {
-        assertSoftwareModuleExists(id);
-
-        return softwareModuleMetadataRepository.findById(new SwMetadataCompositeKey(id, key))
-                .map(SoftwareModuleMetadata.class::cast);
-    }
-
-    @Override
-    public Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(final Pageable pageable, final long id) {
-        assertSoftwareModuleExists(id);
-
-        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleMetadataRepository, pageable,
-                Collections.singletonList(metadataBySoftwareModuleIdSpec(id)));
-    }
-
-    @Override
-    public long countMetaDataBySoftwareModuleId(final long id) {
-        assertSoftwareModuleExists(id);
-
-        return softwareModuleMetadataRepository.countBySoftwareModuleId(id);
-    }
-
-    @Override
-    public Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleIdAndTargetVisible(final Pageable pageable,
-            final long id) {
-        assertSoftwareModuleExists(id);
-
-        return JpaManagementHelper.convertPage(softwareModuleMetadataRepository.findBySoftwareModuleIdAndTargetVisible(
-                id, true, PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT)), pageable);
-    }
-
-    @Override
-    public Page<SoftwareModuleMetadata> findMetaDataByRsql(final Pageable pageable, final long id,
-            final String rsqlParam) {
-        assertSoftwareModuleExists(id);
-
-        final List<Specification<JpaSoftwareModuleMetadata>> specList = Arrays
-                .asList(RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleMetadataFields.class,
-                        virtualPropertyReplacer, database), metadataBySoftwareModuleIdSpec(id));
-        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleMetadataRepository, pageable, specList);
-    }
-
-    @Override
-    public Slice<SoftwareModule> findByType(final Pageable pageable, final long typeId) {
-        assertSoftwareModuleTypeExists(typeId);
-
-        return JpaManagementHelper.findAllWithoutCountBySpec(
-                softwareModuleRepository,
-                pageable,
-                List.of(
-                        SoftwareModuleSpecification.equalType(typeId),
-                        SoftwareModuleSpecification.isNotDeleted()));
     }
 
     @Override
@@ -469,22 +383,94 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public SoftwareModuleMetadata updateMetaData(final SoftwareModuleMetadataUpdate u) {
-        final GenericSoftwareModuleMetadataUpdate update = (GenericSoftwareModuleMetadataUpdate) u;
+    public Page<SoftwareModule> findByAssignedTo(final long distributionSetId, final Pageable pageable) {
+        assertDistributionSetExists(distributionSetId);
 
-        // check if exists otherwise throw entity not found exception
-        final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) getMetaDataBySoftwareModuleId(
-                update.getSoftwareModuleId(), update.getKey())
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, update.getSoftwareModuleId(), update.getKey()));
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository,
+                Collections.singletonList(SoftwareModuleSpecification.byAssignedToDs(distributionSetId)), pageable
+        );
+    }
 
-        update.getValue().ifPresent(metadata::setValue);
-        update.isTargetVisible().ifPresent(metadata::setTargetVisible);
+    @Override
+    public Slice<SoftwareModule> findByTextAndType(final String searchText, final Long typeId, final Pageable pageable) {
+        final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(3);
+        specList.add(SoftwareModuleSpecification.isNotDeleted());
 
-        JpaManagementHelper.touch(entityManager, softwareModuleRepository, metadata.getSoftwareModule());
-        return softwareModuleMetadataRepository.save(metadata);
+        if (!ObjectUtils.isEmpty(searchText)) {
+            specList.add(buildSmSearchQuerySpec(searchText));
+        }
+
+        if (null != typeId) {
+            assertSoftwareModuleTypeExists(typeId);
+            specList.add(SoftwareModuleSpecification.equalType(typeId));
+        }
+
+        specList.add(SoftwareModuleSpecification.fetchType());
+
+        return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleRepository, pageable, specList);
+    }
+
+    @Override
+    public Optional<SoftwareModule> findByNameAndVersionAndType(final String name, final String version,
+            final long typeId) {
+        assertSoftwareModuleTypeExists(typeId);
+
+        // TODO AC - Access is restricted. This could have problem with UI when access control is enabled.
+        // Vaadin UI use this for validation. May need to be called via elevated access
+        return JpaManagementHelper
+                .findOneBySpec(softwareModuleRepository, List.of(
+                        SoftwareModuleSpecification.likeNameAndVersion(name, version),
+                        SoftwareModuleSpecification.equalType(typeId),
+                        SoftwareModuleSpecification.fetchType()))
+                .map(SoftwareModule.class::cast);
+    }
+
+    @Override
+    public Optional<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(final long id, final String key) {
+        assertSoftwareModuleExists(id);
+
+        return softwareModuleMetadataRepository.findById(new SwMetadataCompositeKey(id, key))
+                .map(SoftwareModuleMetadata.class::cast);
+    }
+
+    @Override
+    public Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(final Pageable pageable, final long id) {
+        assertSoftwareModuleExists(id);
+
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleMetadataRepository,
+                Collections.singletonList(metadataBySoftwareModuleIdSpec(id)), pageable
+        );
+    }
+
+    @Override
+    public Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleIdAndTargetVisible(final Pageable pageable,
+            final long id) {
+        assertSoftwareModuleExists(id);
+
+        return JpaManagementHelper.convertPage(softwareModuleMetadataRepository.findBySoftwareModuleIdAndTargetVisible(
+                id, true, PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT)), pageable);
+    }
+
+    @Override
+    public Page<SoftwareModuleMetadata> findMetaDataByRsql(final long id, final String rsqlParam, final Pageable pageable) {
+        assertSoftwareModuleExists(id);
+
+        final List<Specification<JpaSoftwareModuleMetadata>> specList = Arrays
+                .asList(RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleMetadataFields.class,
+                        virtualPropertyReplacer, database), metadataBySoftwareModuleIdSpec(id));
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleMetadataRepository, specList, pageable);
+    }
+
+    @Override
+    public Slice<SoftwareModule> findByType(final long typeId, final Pageable pageable) {
+        assertSoftwareModuleTypeExists(typeId);
+
+        return JpaManagementHelper.findAllWithoutCountBySpec(
+                softwareModuleRepository,
+                pageable,
+                List.of(
+                        SoftwareModuleSpecification.equalType(typeId),
+                        SoftwareModuleSpecification.isNotDeleted()));
     }
 
     @Override
@@ -493,6 +479,20 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
                 .findBySoftwareModuleIdInAndTargetVisible(moduleIds, true, PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT))
                 .getContent().stream()
                 .collect(Collectors.groupingBy(o -> (Long) o[0], Collectors.mapping(o -> (SoftwareModuleMetadata) o[1], Collectors.toList())));
+    }
+
+    @Override
+    public long countByAssignedTo(final long distributionSetId) {
+        assertDistributionSetExists(distributionSetId);
+
+        return softwareModuleRepository.count(SoftwareModuleSpecification.byAssignedToDs(distributionSetId));
+    }
+
+    @Override
+    public long countMetaDataBySoftwareModuleId(final long id) {
+        assertSoftwareModuleExists(id);
+
+        return softwareModuleMetadataRepository.countBySoftwareModuleId(id);
     }
 
     private static Stream<JpaSoftwareModuleMetadataCreate> createJpaMetadataCreateStream(
