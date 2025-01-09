@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.mgmt.rest.resource.deprecated;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.extensions.Extension;
+import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,6 +26,7 @@ import org.eclipse.hawkbit.mgmt.rest.resource.deprecated.json.model.MgmtAssigned
 import org.eclipse.hawkbit.mgmt.rest.resource.deprecated.json.model.MgmtAssignedTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.resource.deprecated.json.model.MgmtDistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.mgmt.rest.resource.deprecated.json.model.MgmtTargetTagAssigmentResult;
+import org.eclipse.hawkbit.rest.OpenApiConfiguration;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -37,7 +40,8 @@ import org.springframework.web.bind.annotation.RequestBody;
  */
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
 @Deprecated(forRemoval = true)
-@Tag(name = "Deprecated Management API", description = "Deprecated REST operations.")
+@Tag(name = "Deprecated operations", description = "Deprecated REST operations.",
+        extensions = @Extension(name = OpenApiConfiguration.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = "2147483647")))
 public interface DeprecatedMgmtRestApi {
 
     /**
