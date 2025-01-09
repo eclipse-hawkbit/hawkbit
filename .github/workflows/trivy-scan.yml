@@ -6,6 +6,9 @@ on:
     - cron: '0 4 * * *'
   # enable running the workflow manually
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/trivy-scan.yml'
 
 jobs:
   scan:
@@ -57,3 +60,4 @@ jobs:
         with:
           sarif_file: 'scans/eclipse-hawkbit/hawkbit/hawkbit-update-server:latest.sarif'
           category: "Container Images"
+          debug: true
