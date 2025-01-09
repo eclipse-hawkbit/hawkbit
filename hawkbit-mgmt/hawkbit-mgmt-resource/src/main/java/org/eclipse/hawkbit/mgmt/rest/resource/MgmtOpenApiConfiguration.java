@@ -57,7 +57,8 @@ public class MgmtOpenApiConfiguration {
                                                                 .type(SecurityScheme.Type.HTTP)
                                                                 .in(SecurityScheme.In.HEADER)
                                                                 .bearerFormat("JWT")
-                                                                .scheme("bearer"))))
+                                                                .scheme("bearer")))
+                                .tags(OpenApiConfiguration.sort(openApi.getTags())))
                 .build();
     }
 }
