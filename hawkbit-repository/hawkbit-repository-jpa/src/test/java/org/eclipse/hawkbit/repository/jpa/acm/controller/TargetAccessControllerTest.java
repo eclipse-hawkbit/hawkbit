@@ -195,7 +195,7 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
                 .isInstanceOf(InsufficientPermissionException.class);
 
         // assignment is denied for hiddenTarget since it's hidden
-        assertThatThrownBy(() -> targetManagement.unassignTag(hiddenTarget.getControllerId(), myTag.getId()))
+        assertThatThrownBy(() -> targetManagement.unassignTag(List.of(hiddenTarget.getControllerId()), myTag.getId()))
                 .as("Missing update permissions for target to toggle tag assignment.")
                 .isInstanceOf(InsufficientPermissionException.class);
     }

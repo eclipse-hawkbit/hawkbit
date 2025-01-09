@@ -129,7 +129,8 @@ public final class MgmtDistributionSetMapper {
         return result;
     }
 
-    static List<MgmtDistributionSet> toResponseDistributionSets(final Collection<DistributionSet> sets) {
+    // TODO - to be made package visible when hawkbit-mgmt-rest-deprecated is removed
+    public static List<MgmtDistributionSet> toResponseDistributionSets(final Collection<DistributionSet> sets) {
         if (sets == null) {
             return Collections.emptyList();
         }

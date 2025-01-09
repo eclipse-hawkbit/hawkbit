@@ -19,8 +19,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
-import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtAssignedDistributionSetRequestBody;
-import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtDistributionSetTagAssigmentResult;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
@@ -457,90 +455,4 @@ public interface MgmtDistributionSetTagRestApi {
     ResponseEntity<Void> unassignDistributionSets(
             @PathVariable("distributionsetTagId") Long distributionsetTagId,
             @RequestBody List<Long> distributionsetIds);
-
-    /**
-     * Handles the POST request to toggle the assignment of distribution sets by
-     * the given tag id.
-     *
-     * @param distributionsetTagId the ID of the distribution set tag to retrieve
-     * @param assignedDSRequestBodies list of distribution set ids to be toggled
-     * @return the list of assigned distribution sets and unassigned distribution sets.
-     * @deprecated since 0.6.0 with toggle assignment deprecation
-     */
-    @Operation(summary = "[DEPRECATED] Toggle the assignment of distribution sets by the given tag id",
-            description = "Handles the POST request of toggle distribution assignment. The request body must " +
-                    "always be a list of distribution set ids.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                    "user in another request at the same time. You may retry your modification request.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                    "supported by the server for this resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING +
-            MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING + "/toggleTagAssignment")
-    @Deprecated(forRemoval = true, since = "0.6.0")
-    ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignment(
-            @PathVariable("distributionsetTagId") Long distributionsetTagId,
-            @RequestBody List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies);
-
-    /**
-     * Handles the POST request to assign distribution sets to the given tag id.
-     *
-     * @param distributionsetTagId the ID of the distribution set tag to retrieve
-     * @param assignedDSRequestBodies list of distribution sets ids to be assigned
-     * @return the list of assigned distribution set.
-     * @deprecated since 0.6.0 in favor or assign by ds ids
-     */
-    @Operation(summary = "[DEPRECATED] Assign distribution sets to the given tag id",
-            description = "Handles the POST request of distribution assignment. Already assigned distribution will " +
-                    "be ignored.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                    "user in another request at the same time. You may retry your modification request.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                    "supported by the server for this resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING,
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    @Deprecated(forRemoval = true, since = "0.6.0")
-    ResponseEntity<List<MgmtDistributionSet>> assignDistributionSetsByRequestBody(
-            @PathVariable("distributionsetTagId") Long distributionsetTagId,
-            @RequestBody List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies);
 }

@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Statistic;
@@ -384,33 +383,4 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Long countAutoAssignmentsForDistributionSet(@NotNull Long id);
-
-    /**
-     * Toggles {@link DistributionSetTag} assignment to given
-     * {@link DistributionSet}s by means that if some (or all) of the targets in
-     * the list have the {@link org.eclipse.hawkbit.repository.model.Tag} not yet assigned, they will be. Only if all
-     * of theme have the tag already assigned they will be removed instead.
-     *
-     * @param ids to toggle for
-     * @param tagName to toggle
-     * @return {@link DistributionSetTagAssignmentResult} with all meta data of the assignment outcome.
-     * @throws EntityNotFoundException if given tag does not exist or (at least one) module
-     * @deprecated since 0.6.0 in favor of assign/unassign
-     */
-    @Deprecated(forRemoval = true)
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<Long> ids, @NotNull String tagName);
-
-    /**
-     * Unassign a {@link DistributionSetTag} assignment to given {@link DistributionSet}.
-     *
-     * @param id to unassign for
-     * @param tagId to unassign
-     * @return the unassigned ds or <null> if no ds is unassigned
-     * @throws EntityNotFoundException if set or tag with given ID does not exist
-     * @deprecated since 0.6.0 in favor of unassignTag(List<Long>, long)
-     */
-    @Deprecated(forRemoval = true)
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSet unassignTag(long id, long tagId);
 }

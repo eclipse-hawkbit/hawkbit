@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssi
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtDistributionSetRequestBodyPost extends MgmtDistributionSetRequestBodyPut {
 
-    // deprecated format from the time where os, application and runtime where statically defined
+    // deprecated format from the times where os, application and runtime where statically defined
     @JsonProperty
     @Schema(hidden = true)
     private MgmtSoftwareModuleAssignment os;
@@ -45,8 +45,8 @@ public class MgmtDistributionSetRequestBodyPost extends MgmtDistributionSetReque
     @JsonProperty
     @Schema(hidden = true)
     private MgmtSoftwareModuleAssignment application;
-
     // deprecated format - END
+
     @JsonProperty
     private List<MgmtSoftwareModuleAssignment> modules;
 

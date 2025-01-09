@@ -320,39 +320,6 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     }
 
     @Test
-    @Description("Verifies that tag assignments done through toggle API command are correctly assigned or unassigned.")
-    @ExpectEvents({
-            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 4) })
-    public void toggleTagAssignment() throws Exception {
-        final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
-        final int setsAssigned = 2;
-        final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
-
-        // 2 DistributionSetUpdateEvent
-        ResultActions result = toggle(tag, sets);
-
-        List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
-
-        assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
-                .containsAll(sets.stream().map(DistributionSet::getId).collect(Collectors.toList()));
-
-        result.andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(0), "assignedDistributionSets"))
-                .andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(1), "assignedDistributionSets"));
-
-        // 2 DistributionSetUpdateEvent
-        result = toggle(tag, sets);
-
-        updated = distributionSetManagement.findAll(PAGE).getContent();
-
-        result.andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(0), "unassignedDistributionSets"))
-                .andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(1), "unassignedDistributionSets"));
-
-        assertThat(distributionSetManagement.findByTag(tag.getId(), PAGE)).isEmpty();
-    }
-
-    @Test
     @Description("Verifies that tag assignments done through tag API command are correctly stored in the repository.")
     @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
@@ -482,48 +449,5 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                     Collections.sort(notFound);
                     assertThat(notFound).isEqualTo(missing);
                 });
-    }
-
-    @Test
-    @Description("Verifies that tag assignments done through tag API command are correctly stored in the repository.")
-    @ExpectEvents({
-            @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 2) })
-    public void assignDistributionSetsWithRequestBody() throws Exception {
-        final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
-        final int setsAssigned = 2;
-        final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
-
-        final ResultActions result = mvc
-                .perform(
-                        post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
-                                .content(JsonBuilder
-                                        .ids(sets.stream().map(DistributionSet::getId).collect(Collectors.toList())))
-                                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
-
-        final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
-
-        assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
-                .containsAll(sets.stream().map(DistributionSet::getId).collect(Collectors.toList()));
-
-        result.andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(0)))
-                .andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(1)));
-    }
-
-    // DEPRECATED flows
-
-    private ResultActions toggle(final DistributionSetTag tag, final List<DistributionSet> sets) throws Exception {
-        return mvc
-                .perform(post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId()
-                        + "/assigned/toggleTagAssignment").content(
-                                JsonBuilder.ids(sets.stream().map(DistributionSet::getId).collect(Collectors.toList())))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
     }
 }

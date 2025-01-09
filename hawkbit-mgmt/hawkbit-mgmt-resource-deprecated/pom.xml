@@ -9,7 +9,8 @@
     SPDX-License-Identifier: EPL-2.0
 
 -->
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -18,26 +19,10 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>hawkbit-mgmt-starter</artifactId>
-    <name>hawkBit :: Management :: Spring Boot Starter</name>
+    <artifactId>hawkbit-mgmt-resource-deprecated</artifactId>
+    <name>hawkBit :: Management :: REST Resources (DEPRECATED)</name>
 
     <dependencies>
-        <!-- hawkBit - START -->
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-security-controller</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-artifact-repository-filesystem</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-repository-jpa-flyway</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-repository-jpa</artifactId>
@@ -48,37 +33,47 @@
             <artifactId>hawkbit-mgmt-resource</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Test -->
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-autoconfigure</artifactId>
+            <artifactId>hawkbit-repository-test</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
-
-        <!-- deprecated -->
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-mgmt-resource-deprecated</artifactId>
+            <artifactId>hawkbit-rest-core</artifactId>
             <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
         </dependency>
-        <!-- hawkBit - END -->
-
-        <!-- Spring - START -->
+        <dependency>
+            <groupId>org.eclipse.hawkbit</groupId>
+            <artifactId>hawkbit-mgmt-resource</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
+            <artifactId>spring-boot-starter-json</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-aspects</artifactId>
+            <scope>test</scope>
         </dependency>
-        <!-- Spring - END -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

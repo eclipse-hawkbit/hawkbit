@@ -204,7 +204,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected List<DistributionSet> unassignTag(final Collection<DistributionSet> sets,
             final DistributionSetTag tag) {
         return distributionSetManagement.unassignTag(
-                sets.stream().map(DistributionSet::getId).collect(Collectors.toList()), tag.getId());
+                sets.stream().map(DistributionSet::getId).toList(), tag.getId());
     }
 
     protected TargetTypeAssignmentResult initiateTypeAssignment(final Collection<Target> targets, final TargetType type) {

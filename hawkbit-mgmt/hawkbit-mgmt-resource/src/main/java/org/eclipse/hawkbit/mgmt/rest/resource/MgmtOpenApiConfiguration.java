@@ -36,7 +36,7 @@ public class MgmtOpenApiConfiguration {
         return GroupedOpenApi
                 .builder()
                 .group("Management API")
-                .pathsToMatch("/rest/v1/**")
+                .pathsToMatch("/rest/v*/**")
                 .addOpenApiCustomizer(openApi ->
                         openApi
                                 .addSecurityItem(new SecurityRequirement()

@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.json.model.tag;
+package org.eclipse.hawkbit.mgmt.rest.resource.deprecated.json.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -20,6 +20,8 @@ import lombok.experimental.Accessors;
 
 /**
  * Request Body for PUT.
+ *
+ * @deprecated since 0.6.0 with toggle assigment deprecation
  */
 @Data
 @Accessors(chain = true)
@@ -27,9 +29,9 @@ import lombok.experimental.Accessors;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Deprecated(forRemoval = true, since = "0.6.0")
-public class MgmtAssignedTargetRequestBody {
+public class MgmtAssignedDistributionSetRequestBody {
 
-    @JsonProperty(required = true)
-    @Schema(example = "Target1")
-    private String controllerId;
+    @JsonProperty(value = "id", required = true)
+    @Schema(example = "24")
+    private Long distributionSetId;
 }

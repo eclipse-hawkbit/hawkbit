@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.repository.model;
 import java.util.Collections;
 import java.util.List;
 
+import lombok.Getter;
+
 /**
  * Generic assignment result bean.
  *
@@ -19,71 +21,35 @@ import java.util.List;
  */
 public abstract class AbstractAssignmentResult<T extends BaseEntity> {
 
+    @Getter
     private final int alreadyAssigned;
     private final List<? extends T> assignedEntity;
     private final List<? extends T> unassignedEntity;
 
-    /**
-     * Constructor.
-     *
-     * @param alreadyAssigned count of already assigned entities
-     * @param assignedEntity {@link List} of assigned entity.
-     * @param unassignedEntity {@link List} of unassigned entity.
-     */
-    protected AbstractAssignmentResult(final int alreadyAssigned, final List<? extends T> assignedEntity,
-            final List<? extends T> unassignedEntity) {
+    protected AbstractAssignmentResult(
+            final int alreadyAssigned, final List<? extends T> assignedEntity, final List<? extends T> unassignedEntity) {
         this.alreadyAssigned = alreadyAssigned;
         this.assignedEntity = assignedEntity;
         this.unassignedEntity = unassignedEntity;
     }
 
-    /**
-     * @return number of newly assigned elements.
-     */
     public int getAssigned() {
         return getAssignedEntity().size();
     }
 
-    /**
-     * @return total number (assigned and already assigned).
-     */
     public int getTotal() {
         return getAssigned() + alreadyAssigned;
     }
 
-    /**
-     * @return number of already assigned/ignored elements.
-     */
-    public int getAlreadyAssigned() {
-        return alreadyAssigned;
-    }
-
-    /**
-     * @return number of unsassigned elements
-     */
     public int getUnassigned() {
         return getUnassignedEntity().size();
     }
 
-    /**
-     * @return {@link List} of assigned entity.
-     */
     public List<T> getAssignedEntity() {
-        if (assignedEntity == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(assignedEntity);
+        return assignedEntity == null ? Collections.emptyList() : Collections.unmodifiableList(assignedEntity);
     }
 
-    /**
-     * @return {@link List} of unassigned entity.
-     */
     public List<T> getUnassignedEntity() {
-        if (unassignedEntity == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(unassignedEntity);
+        return unassignedEntity == null ? Collections.emptyList() : Collections.unmodifiableList(unassignedEntity);
     }
 }

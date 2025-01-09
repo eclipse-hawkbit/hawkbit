@@ -132,9 +132,9 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() ->
                 distributionSetManagement.assignTag(singletonList(set.getId()), Long.parseLong(NOT_EXIST_ID)), "DistributionSetTag");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.unassignTag(set.getId(), NOT_EXIST_IDL), "DistributionSetTag");
+        verifyThrownExceptionBy(() -> distributionSetManagement.unassignTag(singletonList(set.getId()), NOT_EXIST_IDL), "DistributionSetTag");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.unassignTag(NOT_EXIST_IDL, dsTag.getId()), "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.unassignTag(singletonList(NOT_EXIST_IDL), dsTag.getId()), "DistributionSet");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.create(
                 entityFactory.distributionSet().create().name("xxx").type(NOT_EXIST_ID)), "DistributionSetType");
@@ -331,7 +331,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 .isEqualTo(distributionSetManagement.findByTag(tag.getId(), PAGE).getNumberOfElements());
 
         final JpaDistributionSet unAssignDS = (JpaDistributionSet) distributionSetManagement
-                .unassignTag(assignDS.get(0), findDistributionSetTag.getId());
+                .unassignTag(List.of(assignDS.get(0)), findDistributionSetTag.getId()).get(0);
         assertThat(unAssignDS.getId()).as("unassigned ds is wrong").isEqualTo(assignDS.get(0));
         assertThat(unAssignDS.getTags().size()).as("unassigned ds has wrong tag size").isZero();
         assertThat(distributionSetTagManagement.findByName(TAG1_NAME)).isPresent();
