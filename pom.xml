@@ -393,8 +393,7 @@
                                 <header>licenses/LICENSE_HEADER_TEMPLATE.txt</header>
                                 <validHeaders>
                                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_CONTRIBUTORS_23.txt</validHeader>
-                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
-                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_CONTRIBUTORS_24.txt</validHeader>
                                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_15.txt</validHeader>
                                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
                                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_19.txt</validHeader>
@@ -404,6 +403,8 @@
                                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_23.txt</validHeader>
                                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
                                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_20.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
+                                    <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
                                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_19.txt</validHeader>
                                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_20.txt</validHeader>
                                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_KIWIGRID_19.txt</validHeader>
