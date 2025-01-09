@@ -15,7 +15,7 @@ jobs:
       contents: read
       packages: read
       # seems needed for github/codeql-action/upload-sarif
-      actions: read
+      actions: write
 
     steps:
       - name: Checkout code
