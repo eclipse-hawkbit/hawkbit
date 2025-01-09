@@ -11,6 +11,12 @@ jobs:
   scan:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      packages: read
+      # seems needed for github/codeql-action/upload-sarif
+      actions: read
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -57,5 +63,3 @@ jobs:
         with:
           sarif_file: 'scans/eclipse-hawkbit/hawkbit'
           category: "Container Images"
-          # seems needed for github/codeql-action/upload-sarif
-          permissions: write
