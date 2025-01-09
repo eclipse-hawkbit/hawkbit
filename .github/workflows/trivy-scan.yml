@@ -11,6 +11,10 @@ jobs:
   scan:
     runs-on: ubuntu-latest
 
+    # seems needed for github/codeql-action/upload-sarif
+    permissions:
+      actions: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
