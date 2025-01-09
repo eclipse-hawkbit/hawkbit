@@ -13,7 +13,7 @@ jobs:
 
     permissions:
       contents: read
-      packages: read
+      # needed for trivy scans upload
       security-events: write
 
     steps:
@@ -57,8 +57,29 @@ jobs:
             ./trivy image "${IMAGE}" --ignore-unfixed --ignorefile .github/workflows/.trivyignore --severity HIGH,CRITICAL --vuln-type library --output "scans/eclipse-hawkbit/$IMAGE.sarif" --format sarif
           done
 
+      - name: Upload Docker image scan results to GitHub Security tab hawkbit-ddi-server
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'scans/eclipse-hawkbit/hawkbit/hawkbit-ddi-server:latest.sarif'
+          category: "Container Images (hawkbit-ddi-server)"
+      - name: Upload Docker image scan results to GitHub Security tab hawkbit-dmf-server
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'scans/eclipse-hawkbit/hawkbit/hawkbit-dmf-server:latest.sarif'
+          category: "Container Images (hawkbit-dmf-server)"
+      - name: Upload Docker image scan results to GitHub Security tab hawkbit-mgmt-server
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'scans/eclipse-hawkbit/hawkbit/hawkbit-mgmt-server:latest.sarif'
+          category: "Container Images (hawkbit-mgmt-server)"
+      - name: Upload Docker image scan results to GitHub Security tab hawkbit-simple-ui
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'scans/eclipse-hawkbit/hawkbit/hawkbit-simple-ui:latest.sarif'
+          category: "Container Images (hawkbit-simple-ui)"
+
       - name: Upload Docker image scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'scans/eclipse-hawkbit/hawkbit/hawkbit-update-server:latest.sarif'
-          category: "Container Images"
+          category: "Container Images (hawkbit-update-server)"
