@@ -11,10 +11,6 @@ jobs:
   scan:
     runs-on: ubuntu-latest
 
-    # seems needed for github/codeql-action/upload-sarif
-    permissions:
-      actions: write
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -57,7 +53,9 @@ jobs:
           done
 
       - name: Upload Docker image scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'scans/eclipse-hawkbit/hawkbit'
           category: "Container Images"
+          # seems needed for github/codeql-action/upload-sarif
+          permissions: write
