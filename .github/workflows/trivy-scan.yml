@@ -46,14 +46,14 @@ jobs:
 
       - name: Scan Docker images
         run: |
-          mkdir -p scans/eclipse/hawkbit
+          mkdir -p scans/eclipse-hawkbit/hawkbit
           for IMAGE in $(docker image ls --format "{{.Repository}}:{{.Tag}}" "hawkbit/hawkbit-*:latest"); do
             echo "Scanning image ${IMAGE} ..."
             ./trivy image "${IMAGE}" --ignore-unfixed --ignorefile .github/workflows/.trivyignore --severity HIGH,CRITICAL --vuln-type library --output "scans/eclipse-hawkbit/$IMAGE.sarif" --format sarif
           done
 
       - name: Upload Docker image scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'scans/eclipse-hawkbit/hawkbit'
           category: "Container Images"
