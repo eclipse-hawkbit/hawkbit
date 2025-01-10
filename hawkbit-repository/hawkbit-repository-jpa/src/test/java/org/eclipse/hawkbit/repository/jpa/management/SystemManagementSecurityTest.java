@@ -71,6 +71,15 @@ public class SystemManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
+    void getTenantMetadataWithoutDetailsPermissionsCheck() {
+        assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpPermission.READ_REPOSITORY), List.of(SpPermission.CREATE_REPOSITORY));
+        assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpPermission.READ_TARGET), List.of(SpPermission.CREATE_REPOSITORY));
+        assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpPermission.READ_TENANT_CONFIGURATION), List.of(SpPermission.CREATE_REPOSITORY));
+        assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_REPOSITORY));
+    }
+
+    @Test
+    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void getTenantMetadataByTenantPermissionsCheck() {
         assertPermissions(() -> systemManagement.getTenantMetadata(1L), List.of(SpPermission.SpringEvalExpressions.SYSTEM_ROLE));
     }

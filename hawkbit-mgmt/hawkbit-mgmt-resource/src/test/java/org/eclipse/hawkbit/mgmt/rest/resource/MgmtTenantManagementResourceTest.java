@@ -361,5 +361,4 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     private Long getActualDefaultDsType() {
         return systemManagement.getTenantMetadata().getDefaultDsType().getId();
     }
-
 }

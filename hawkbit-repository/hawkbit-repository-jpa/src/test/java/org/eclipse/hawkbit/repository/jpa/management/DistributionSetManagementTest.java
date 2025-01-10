@@ -212,7 +212,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet set = distributionSetManagement
                 .create(entityFactory.distributionSet().create().name("newtypesoft").version("1"));
 
-        assertThat(set.getType()).as("Type should be equal to default type of tenant")
+        assertThat(set.getType())
+                .as("Type should be equal to default type of tenant")
                 .isEqualTo(systemManagement.getTenantMetadata().getDefaultDsType());
 
     }
@@ -705,13 +706,12 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test implicit locks for a DS and skip tags.")
     void isImplicitLockApplicableForDistributionSet() {
-        final JpaDistributionSetManagement distributionSetManagement =
-                (JpaDistributionSetManagement) this.distributionSetManagement;
+        final JpaDistributionSetManagement distributionSetManagement = (JpaDistributionSetManagement) this.distributionSetManagement;
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-non-skip");
         // assert that implicit lock is applicable for non skip tags
         assertThat(distributionSetManagement.isImplicitLockApplicable(distributionSet)).isTrue();
 
-        assertThat(repositoryProperties.getSkipImplicitLockForTags().size()).isNotEqualTo(0);
+        assertThat(repositoryProperties.getSkipImplicitLockForTags().size()).isNotZero();
         final List<DistributionSetTag> skipTags = distributionSetTagManagement.create(
                 repositoryProperties.getSkipImplicitLockForTags().stream()
                         .map(String::toLowerCase)
@@ -733,13 +733,12 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Locks an incomplete DS. Expected behaviour is to throw an exception and to do not lock it.")
     void lockIncompleteDistributionSetFails() {
-        final DistributionSet incompleteDistributionSet = testdataFactory.createIncompleteDistributionSet();
+        final long incompleteDistributionSetId = testdataFactory.createIncompleteDistributionSet().getId();
         assertThatExceptionOfType(IncompleteDistributionSetException.class)
                 .as("Locking an incomplete distribution set should throw an exception")
-                .isThrownBy(() -> distributionSetManagement.lock(incompleteDistributionSet.getId()));
+                .isThrownBy(() -> distributionSetManagement.lock(incompleteDistributionSetId));
         assertThat(
-                distributionSetManagement.get(incompleteDistributionSet.getId()).map(DistributionSet::isLocked)
-                        .orElse(true))
+                distributionSetManagement.get(incompleteDistributionSetId).map(DistributionSet::isLocked).orElse(true))
                 .isFalse();
     }
 

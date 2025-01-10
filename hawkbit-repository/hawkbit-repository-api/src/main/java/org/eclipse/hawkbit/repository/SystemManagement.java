@@ -83,6 +83,15 @@ public interface SystemManagement {
     TenantMetaData getTenantMetadata();
 
     /**
+     * @return {@link TenantMetaData} of {@link TenantAware#getCurrentTenant()} without details ({@link TenantMetaData#getDefaultDsType()})
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION_READ + SpringEvalExpressions.HAS_AUTH_OR
+            + SpringEvalExpressions.IS_CONTROLLER)
+    TenantMetaData getTenantMetadataWithoutDetails();
+
+    /**
      * Returns {@link TenantMetaData} of given and current tenant. Creates for
      * new tenants also two {@link SoftwareModuleType} (os and app) and
      * {@link RepositoryConstants#DEFAULT_DS_TYPES_IN_TENANT}

@@ -60,6 +60,7 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
 
     @OneToMany(
             mappedBy = "dsType", targetEntity = DistributionSetTypeElement.class,
+            fetch = FetchType.EAGER,
             cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, orphanRemoval = true)
     private Set<DistributionSetTypeElement> elements = new HashSet<>();
 
@@ -116,10 +117,6 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
                 .findAny()
                 .ifPresent(elements::remove);
         return this;
-    }
-
-    public Set<DistributionSetTypeElement> getElements() {
-        return Collections.unmodifiableSet(elements);
     }
 
     @Override

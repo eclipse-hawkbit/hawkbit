@@ -19,6 +19,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -45,6 +47,7 @@ import org.eclipse.hawkbit.repository.model.TenantMetaData;
 @Table(name = "sp_tenant", indexes = {
         @Index(name = "sp_idx_tenant_prim", columnList = "tenant,id") }, uniqueConstraints = {
         @UniqueConstraint(columnNames = { "tenant" }, name = "uk_tenantmd_tenant") })
+@NamedEntityGraph(name = "TenantMetaData.withDetails", attributeNodes = { @NamedAttributeNode("defaultDsType") })
 @Entity
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
