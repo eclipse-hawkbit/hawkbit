@@ -60,16 +60,13 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
 
     @OneToMany(
             mappedBy = "dsType", targetEntity = DistributionSetTypeElement.class,
-            fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, orphanRemoval = true)
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, orphanRemoval = true)
     private Set<DistributionSetTypeElement> elements = new HashSet<>();
 
     @Setter
     @Getter
     @Column(name = "deleted")
     private boolean deleted;
-
-    @ManyToMany(mappedBy = "distributionSetTypes", targetEntity = JpaTargetType.class, fetch = FetchType.LAZY)
-    private List<TargetType> compatibleToTargetTypes;
 
     public JpaDistributionSetType(final String key, final String name, final String description) {
         this(key, name, description, null);
@@ -93,21 +90,6 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
                 .filter(element -> !element.isMandatory())
                 .map(DistributionSetTypeElement::getSmType)
                 .collect(Collectors.toSet());
-    }
-
-    @Override
-    public boolean areModuleEntriesIdentical(final DistributionSetType dsType) {
-        if (dsType instanceof JpaDistributionSetType jpaDsType) {
-            if (isOneModuleListEmpty(jpaDsType)) {
-                return false;
-            } else if (areBothModuleListsEmpty(jpaDsType)) {
-                return true;
-            } else {
-                return new HashSet<>(jpaDsType.elements).equals(elements);
-            }
-        } else {
-            return false;
-        }
     }
 
     @Override
@@ -161,15 +143,6 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
     public void fireDeleteEvent() {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionSetTypeDeletedEvent(
                 getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
-    }
-
-    private boolean isOneModuleListEmpty(final JpaDistributionSetType dsType) {
-        return (!CollectionUtils.isEmpty(dsType.elements) && CollectionUtils.isEmpty(elements)) ||
-                (CollectionUtils.isEmpty(dsType.elements) && !CollectionUtils.isEmpty(elements));
-    }
-
-    private boolean areBothModuleListsEmpty(final JpaDistributionSetType dsType) {
-        return CollectionUtils.isEmpty(dsType.elements) && CollectionUtils.isEmpty(elements);
     }
 
     private JpaDistributionSetType setModuleType(final SoftwareModuleType smType, final boolean mandatory) {
