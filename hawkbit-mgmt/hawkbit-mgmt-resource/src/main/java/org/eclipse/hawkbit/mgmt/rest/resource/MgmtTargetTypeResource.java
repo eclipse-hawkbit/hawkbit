@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -119,7 +118,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     public ResponseEntity<Void> addCompatibleDistributionSets(
             final Long targetTypeId, final List<MgmtDistributionSetTypeAssignment> distributionSetTypeIds) {
         targetTypeManagement.assignCompatibleDistributionSetTypes(
-                targetTypeId, distributionSetTypeIds.stream().map(MgmtDistributionSetTypeAssignment::getId).collect(Collectors.toList()));
+                targetTypeId, distributionSetTypeIds.stream().map(MgmtDistributionSetTypeAssignment::getId).toList());
         return ResponseEntity.ok().build();
     }
 

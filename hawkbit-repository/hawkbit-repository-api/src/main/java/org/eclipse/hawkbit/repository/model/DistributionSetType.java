@@ -100,15 +100,6 @@ public interface DistributionSetType extends Type {
     }
 
     /**
-     * Compares the modules of this {@link DistributionSetType} and the given
-     * one.
-     *
-     * @param dsType to compare with
-     * @return <code>true</code> if the lists are identical.
-     */
-    boolean areModuleEntriesIdentical(DistributionSetType dsType);
-
-    /**
      * @param distributionSet to check for completeness
      * @return <code>true</code> if the all mandatory software module types are
      *         in the system.

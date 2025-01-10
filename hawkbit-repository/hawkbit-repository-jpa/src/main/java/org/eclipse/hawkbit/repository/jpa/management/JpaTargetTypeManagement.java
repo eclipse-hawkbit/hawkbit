@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.ToLongFunction;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetTypeFields;
@@ -197,7 +198,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
         }
 
         final JpaTargetType type = getByIdAndThrowIfNotFound(id);
-        assertDistributionSetTypeQuota(id, distributionSetTypeIds.size());
+        assertDistributionSetTypeQuota(id, distributionSetTypeIds.size(), typeId -> type.getCompatibleDistributionSetTypes().size());
         dsTypes.forEach(type::addCompatibleDistributionSetType);
 
         return targetTypeRepository.save(type);
@@ -224,7 +225,8 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     private JpaTargetType getByIdAndThrowIfNotFound(final Long id) {
         return targetTypeRepository
-                .findById(id).orElseThrow(() -> new EntityNotFoundException(TargetType.class, id));
+                .findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(TargetType.class, id));
     }
 
     /**
@@ -235,8 +237,9 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
      * @param requested number of distribution set types to check
      * @throws AssignmentQuotaExceededException if the software module type quota is exceeded
      */
-    private void assertDistributionSetTypeQuota(final long id, final int requested) {
-        QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxDistributionSetTypesPerTargetType(),
-                DistributionSetType.class, TargetType.class, targetTypeRepository::countDsSetTypesById);
+    private void assertDistributionSetTypeQuota(final long id, final int requested, final ToLongFunction<Long> countFct) {
+        QuotaHelper.assertAssignmentQuota(
+                id, requested, quotaManagement.getMaxDistributionSetTypesPerTargetType(),
+                DistributionSetType.class, TargetType.class, countFct);
     }
 }
