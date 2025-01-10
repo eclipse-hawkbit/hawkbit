@@ -144,8 +144,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<List<MgmtDistributionSet>> createDistributionSets(final List<MgmtDistributionSetRequestBodyPost> sets) {
         log.debug("creating {} distribution sets", sets.size());
         // set default Ds type if ds type is null
-        final String defaultDsKey = systemSecurityContext
-                .runAsSystem(systemManagement.getTenantMetadata().getDefaultDsType()::getKey);
+        final String defaultDsKey = systemSecurityContext.runAsSystem(systemManagement.getTenantMetadata().getDefaultDsType()::getKey);
         sets.stream().filter(ds -> ds.getType() == null).forEach(ds -> ds.setType(defaultDsKey));
 
         //check if there is already deleted DS Type

@@ -623,7 +623,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return distributionSetRepository.countAutoAssignmentsForDistributionSet(id);
     }
 
-    // check if shall implicitly lock a distribution set
+    // check if it shall implicitly lock a distribution set
     boolean isImplicitLockApplicable(final DistributionSet distributionSet) {
         final JpaDistributionSet jpaDistributionSet = (JpaDistributionSet) distributionSet;
         if (jpaDistributionSet.isLocked()) {
@@ -631,7 +631,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             return false;
         }
 
-        if (!tenantConfigHelper.getConfigValue(IMPLICIT_LOCK_ENABLED, Boolean.class)) {
+        if (Boolean.FALSE.equals(tenantConfigHelper.getConfigValue(IMPLICIT_LOCK_ENABLED, Boolean.class))) {
             // implicit lock disabled
             return false;
         }

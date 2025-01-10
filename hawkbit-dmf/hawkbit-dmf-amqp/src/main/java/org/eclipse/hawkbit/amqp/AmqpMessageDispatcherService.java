@@ -585,12 +585,13 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private DmfArtifact convertArtifact(final Target target, final Artifact localArtifact) {
         final DmfArtifact artifact = new DmfArtifact();
 
-        final TenantMetaData metaData = systemManagement.getTenantMetadata();
+        final TenantMetaData tenantMetadata = systemManagement.getTenantMetadataWithoutDetails();
         artifact.setUrls(artifactUrlHandler
-                .getUrls(new URLPlaceholder(metaData.getTenant(),
-                                metaData.getId(), target.getControllerId(), target.getId(),
-                                new SoftwareData(localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(),
-                                        localArtifact.getId(), localArtifact.getSha1Hash())),
+                .getUrls(new URLPlaceholder(
+                                tenantMetadata.getTenant(), tenantMetadata.getId(), target.getControllerId(), target.getId(),
+                                new SoftwareData(
+                                        localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(), localArtifact.getId(),
+                                        localArtifact.getSha1Hash())),
                         ApiType.DMF)
                 .stream()
                 .collect(Collectors.toMap(ArtifactUrl::getProtocol, ArtifactUrl::getRef)));

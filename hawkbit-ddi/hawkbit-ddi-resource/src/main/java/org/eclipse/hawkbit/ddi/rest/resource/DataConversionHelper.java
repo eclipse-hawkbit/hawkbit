@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.hateoas.Link;
@@ -179,10 +180,12 @@ public final class DataConversionHelper {
         file.setFilename(artifact.getFilename());
         file.setSize(artifact.getSize());
 
+        final TenantMetaData tenantMetadata = systemManagement.getTenantMetadataWithoutDetails();
         artifactUrlHandler
-                .getUrls(new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),
-                                systemManagement.getTenantMetadata().getId(), target.getControllerId(), target.getId(),
-                                new SoftwareData(artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getId(),
+                .getUrls(new URLPlaceholder(
+                                tenantMetadata.getTenant(), tenantMetadata.getId(), target.getControllerId(), target.getId(),
+                                new SoftwareData(
+                                        artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getId(),
                                         artifact.getSha1Hash())),
                         ApiType.DDI, request.getURI())
                 .forEach(entry -> file.add(Link.of(entry.getRef()).withRel(entry.getRel()).expand()));

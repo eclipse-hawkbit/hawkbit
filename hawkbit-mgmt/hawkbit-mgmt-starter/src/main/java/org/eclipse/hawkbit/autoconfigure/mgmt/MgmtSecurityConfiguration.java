@@ -103,7 +103,7 @@ public class MgmtSecurityConfiguration {
                         (request, response, chain) -> {
                             final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                             if (authentication != null && authentication.isAuthenticated()) {
-                                systemSecurityContext.runAsSystem(systemManagement::getTenantMetadata);
+                                systemSecurityContext.runAsSystem(systemManagement::getTenantMetadataWithoutDetails);
                             }
                             chain.doFilter(request, response);
                         },

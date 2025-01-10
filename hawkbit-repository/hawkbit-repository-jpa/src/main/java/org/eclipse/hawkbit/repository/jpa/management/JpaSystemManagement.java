@@ -173,8 +173,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    // Exception squid:S2229 - calling findTenants without transaction is
-    // intended in this case
+    // Exception squid:S2229 - calling findTenants without transaction is intended in this case
     @SuppressWarnings("squid:S2229")
     public void forEachTenant(final Consumer<String> consumer) {
         Page<String> tenants;
@@ -207,7 +206,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     public SystemUsageReport getSystemUsageStatistics() {
-
         final Number count = (Number) entityManager.createNativeQuery(countSoftwareModulesQuery).getSingleResult();
 
         long sumOfArtifacts = 0;
@@ -232,22 +230,12 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     public TenantMetaData getTenantMetadata() {
-        final String tenant = tenantAware.getCurrentTenant();
-        if (tenant == null) {
-            throw new IllegalStateException("Tenant not set");
-        }
+        return getTenantMetadata0(true);
+    }
 
-        final TenantMetaData metaData = tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
-        if (metaData == null) {
-            if (repositoryProperties.isImplicitTenantCreateAllowed()) {
-                log.info("Tenant {} doesn't exist create metadata", tenant, new Exception("Thread dump"));
-                return createTenantMetadata0(tenant);
-            } else {
-                throw new EntityNotFoundException(TenantMetaData.class, tenant);
-            }
-        } else {
-            return metaData;
-        }
+    @Override
+    public TenantMetaData getTenantMetadataWithoutDetails() {
+        return getTenantMetadata0(false);
     }
 
     @Override
@@ -265,11 +253,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TenantMetaData updateTenantMetadata(final long defaultDsType) {
-        final JpaTenantMetaData data = (JpaTenantMetaData) getTenantMetadata();
-
+        final JpaTenantMetaData data = (JpaTenantMetaData) getTenantMetadataWithoutDetails();
         data.setDefaultDsType(distributionSetTypeRepository.findById(defaultDsType)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, defaultDsType)));
-
         return tenantMetaDataRepository.save(data);
     }
 
@@ -281,6 +267,28 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     private static boolean isPostgreSql(final JpaProperties properties) {
         return Database.POSTGRESQL == properties.getDatabase();
+    }
+
+    private TenantMetaData getTenantMetadata0(final boolean withDetails) {
+        final String tenant = tenantAware.getCurrentTenant();
+        if (tenant == null) {
+            throw new IllegalStateException("Tenant not set");
+        }
+
+        final TenantMetaData metaData =
+                withDetails ?
+                        tenantMetaDataRepository.findWitDetailsByTenantIgnoreCase(tenant) :
+                        tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
+        if (metaData == null) {
+            if (repositoryProperties.isImplicitTenantCreateAllowed()) {
+                log.info("Tenant {} doesn't exist create metadata", tenant, new Exception("Thread dump"));
+                return createTenantMetadata0(tenant);
+            } else {
+                throw new EntityNotFoundException(TenantMetaData.class, tenant);
+            }
+        } else {
+            return metaData;
+        }
     }
 
     private void usageStatsPerTenant(final SystemUsageReportWithTenants report) {

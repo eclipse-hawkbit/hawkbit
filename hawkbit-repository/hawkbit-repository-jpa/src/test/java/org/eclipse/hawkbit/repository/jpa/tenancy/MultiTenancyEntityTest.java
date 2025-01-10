@@ -112,11 +112,10 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
 
         assertThat(distributionSetTypeManagement.findAll(PAGE)).isNotEmpty();
 
-        // check that the cache is not getting in the way, i.e. "bumlux" results
-        // in bumlux and not
-        // mytenant
-        assertThat(SecurityContextSwitch.runAs(SecurityContextSwitch.withUserAndTenantAllSpPermissions("user", "bumlux"),
-                () -> systemManagement.getTenantMetadata().getTenant().toUpperCase()))
+        // check that the cache is not getting in the way, i.e. "bumlux" results in bumlux and not mytenant
+        assertThat(SecurityContextSwitch.runAs(
+                SecurityContextSwitch.withUserAndTenantAllSpPermissions("user", "bumlux"),
+                () -> systemManagement.getTenantMetadataWithoutDetails().getTenant().toUpperCase()))
                 .isEqualTo("bumlux".toUpperCase());
     }
 
