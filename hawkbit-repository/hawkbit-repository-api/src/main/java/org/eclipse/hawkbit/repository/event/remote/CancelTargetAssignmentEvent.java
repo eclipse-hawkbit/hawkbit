@@ -12,14 +12,13 @@ package org.eclipse.hawkbit.repository.event.remote;
 import java.io.Serial;
 import java.util.List;
 
-import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.Action;
 
 /**
  * Event that gets sent when the assignment of a distribution set to a target gets canceled.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
+@NoArgsConstructor // for serialization libs like jackson
 public class CancelTargetAssignmentEvent extends AbstractAssignmentEvent {
 
     @Serial

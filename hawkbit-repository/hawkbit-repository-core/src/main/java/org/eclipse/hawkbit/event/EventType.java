@@ -12,9 +12,7 @@ package org.eclipse.hawkbit.event;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 
-import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -76,7 +74,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpd
  * encoded value in the byte-payload.
  */
 // for marshalling and unmarshalling.
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
+@NoArgsConstructor
 @Getter
 @EqualsAndHashCode
 @ToString

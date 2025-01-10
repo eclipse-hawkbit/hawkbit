@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import java.io.Serial;
 
-import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 
@@ -19,7 +18,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
  * TenantAwareEvent that contains an updated download progress for a given
  * ActionStatus that was written for a download request.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
+@NoArgsConstructor // for serialization libs like jackson
 public class DownloadProgressEvent extends RemoteTenantAwareEvent {
 
     @Serial

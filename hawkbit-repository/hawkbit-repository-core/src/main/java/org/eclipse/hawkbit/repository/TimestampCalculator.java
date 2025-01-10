@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository;
 
 import java.time.Duration;
-import java.time.Instant;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

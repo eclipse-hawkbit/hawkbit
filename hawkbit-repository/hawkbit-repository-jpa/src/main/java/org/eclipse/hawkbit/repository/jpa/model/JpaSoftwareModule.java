@@ -50,7 +50,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 /**
  * Base Software Module that is supported by OS level provisioning mechanism on the edge controller, e.g. OS, JVM, AgentHub.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@NoArgsConstructor // Default constructor for JPA
 @Setter
 @Getter
 @ToString(callSuper = true)

@@ -25,7 +25,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,7 +35,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 /**
  * JPA implementation of {@link Artifact}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor needed for JPA entities.
+@NoArgsConstructor // Default constructor needed for JPA entities.
 @Setter
 @Getter
 @Table(name = "sp_artifact",

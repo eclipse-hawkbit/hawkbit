@@ -18,7 +18,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Min;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,7 +30,8 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 /**
  * Type of software modules.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@NoArgsConstructor // Default constructor for JPA
+@Getter
 @Entity
 @Table(name = "sp_software_module_type", indexes = {
         @Index(name = "sp_idx_software_module_type_01", columnList = "tenant,deleted"),
@@ -45,13 +45,11 @@ public class JpaSoftwareModuleType extends AbstractJpaTypeEntity implements Soft
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Getter
     @Column(name = "max_ds_assignments", nullable = false)
     @Min(1)
     private int maxAssignments;
 
     @Setter
-    @Getter
     @Column(name = "deleted")
     private boolean deleted;
 

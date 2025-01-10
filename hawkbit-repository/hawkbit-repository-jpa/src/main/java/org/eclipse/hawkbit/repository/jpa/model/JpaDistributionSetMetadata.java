@@ -21,7 +21,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -30,7 +29,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 /**
  * Meta data for {@link DistributionSet}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor needed for JPA entities.
+@NoArgsConstructor // Default constructor needed for JPA entities.
 @Getter
 @IdClass(DsMetadataCompositeKey.class)
 @Entity

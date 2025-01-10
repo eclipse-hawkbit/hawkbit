@@ -21,7 +21,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,7 +30,7 @@ import org.eclipse.hawkbit.repository.model.TargetMetadata;
 /**
  * Meta data for {@link Target}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@NoArgsConstructor // Default constructor for JPA
 @Setter
 @Getter
 @IdClass(TargetMetadataCompositeKey.class)

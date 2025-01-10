@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository.event.remote;
 import java.io.Serial;
 import java.util.Collection;
 
-import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -23,7 +22,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
  * Event that is published when a rollout is stopped due to invalidation of a
  * {@link DistributionSet}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
+@NoArgsConstructor // for serialization libs like jackson
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

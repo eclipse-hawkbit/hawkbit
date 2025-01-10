@@ -12,14 +12,13 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import java.io.Serial;
 import java.io.Serializable;
 
-import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
  * The Software Module meta-data composite key which contains the meta-data key and the ID of the software module itself.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@NoArgsConstructor // Default constructor for JPA
 @Data
 public final class SwMetadataCompositeKey implements Serializable {
 

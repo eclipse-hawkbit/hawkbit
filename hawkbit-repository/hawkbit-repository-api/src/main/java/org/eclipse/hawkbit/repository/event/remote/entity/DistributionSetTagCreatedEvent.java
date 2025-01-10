@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import java.io.Serial;
 
-import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -20,7 +19,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
  * Defines the {@link RemoteEntityEvent} for creation of a new
  * {@link DistributionSetTag}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
+@NoArgsConstructor // for serialization libs like jackson
 public class DistributionSetTagCreatedEvent extends RemoteEntityEvent<DistributionSetTag> implements EntityCreatedEvent {
 
     @Serial

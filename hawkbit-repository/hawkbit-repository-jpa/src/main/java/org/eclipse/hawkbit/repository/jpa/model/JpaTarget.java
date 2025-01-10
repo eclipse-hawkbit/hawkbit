@@ -42,7 +42,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -69,7 +68,7 @@ import org.springframework.util.ObjectUtils;
 /**
  * JPA implementation of {@link Target}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@NoArgsConstructor // Default constructor for JPA
 @Entity
 @Table(name = "sp_target",
         indexes = {

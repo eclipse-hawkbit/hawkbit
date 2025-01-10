@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import java.io.Serial;
 
-import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -19,7 +18,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 /**
  * Defines the remote event of updated a {@link RolloutGroup}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
+@NoArgsConstructor // for serialization libs like jackson
 public class RolloutGroupUpdatedEvent extends AbstractRolloutGroupEvent implements EntityUpdatedEvent {
 
     @Serial

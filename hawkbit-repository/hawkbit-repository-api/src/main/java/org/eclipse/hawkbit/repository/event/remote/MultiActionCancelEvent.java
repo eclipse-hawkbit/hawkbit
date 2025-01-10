@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository.event.remote;
 import java.io.Serial;
 import java.util.List;
 
-import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.Action;
 
@@ -23,7 +22,7 @@ import org.eclipse.hawkbit.repository.model.Action;
  * actionIds containing the identifiers of the affected actions
  * as payload. This event is only published in case of an cancellation.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
+@NoArgsConstructor // for serialization libs like jackson
 public class MultiActionCancelEvent extends MultiActionEvent {
 
     @Serial

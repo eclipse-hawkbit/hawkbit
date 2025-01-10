@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import java.io.Serial;
 
-import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -19,7 +18,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 /**
  * Defines the remote event of creating a new {@link SoftwareModuleType}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
+@NoArgsConstructor // for serialization libs like jackson
 public class SoftwareModuleTypeCreatedEvent extends RemoteEntityEvent<SoftwareModuleType> implements EntityCreatedEvent {
 
     @Serial

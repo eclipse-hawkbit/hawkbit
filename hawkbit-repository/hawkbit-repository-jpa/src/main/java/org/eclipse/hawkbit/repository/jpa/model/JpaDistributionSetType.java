@@ -27,7 +27,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -45,7 +44,7 @@ import org.springframework.util.CollectionUtils;
 /**
  * A distribution set type defines which software module types can or have to be {@link DistributionSet}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor needed for JPA entities.
+@NoArgsConstructor // Default constructor needed for JPA entities.
 @Entity
 @Table(name = "sp_distribution_set_type", indexes = {
         @Index(name = "sp_idx_distribution_set_type_01", columnList = "tenant,deleted"),
@@ -59,10 +58,9 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @OneToMany(mappedBy = "dsType",
-            targetEntity = DistributionSetTypeElement.class,
-            fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE },
-            orphanRemoval = true)
+    @OneToMany(
+            mappedBy = "dsType", targetEntity = DistributionSetTypeElement.class,
+            fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }, orphanRemoval = true)
     private Set<DistributionSetTypeElement> elements = new HashSet<>();
 
     @Setter
@@ -83,25 +81,33 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
 
     @Override
     public Set<SoftwareModuleType> getMandatoryModuleTypes() {
-        return elements.stream().filter(DistributionSetTypeElement::isMandatory)
-                .map(DistributionSetTypeElement::getSmType).collect(Collectors.toSet());
+        return elements.stream()
+                .filter(DistributionSetTypeElement::isMandatory)
+                .map(DistributionSetTypeElement::getSmType)
+                .collect(Collectors.toSet());
     }
 
     @Override
     public Set<SoftwareModuleType> getOptionalModuleTypes() {
-        return elements.stream().filter(element -> !element.isMandatory())
-                .map(DistributionSetTypeElement::getSmType).collect(Collectors.toSet());
+        return elements.stream()
+                .filter(element -> !element.isMandatory())
+                .map(DistributionSetTypeElement::getSmType)
+                .collect(Collectors.toSet());
     }
 
     @Override
     public boolean areModuleEntriesIdentical(final DistributionSetType dsType) {
-        if (!(dsType instanceof JpaDistributionSetType) || isOneModuleListEmpty(dsType)) {
+        if (dsType instanceof JpaDistributionSetType jpaDsType) {
+            if (isOneModuleListEmpty(jpaDsType)) {
+                return false;
+            } else if (areBothModuleListsEmpty(jpaDsType)) {
+                return true;
+            } else {
+                return new HashSet<>(jpaDsType.elements).equals(elements);
+            }
+        } else {
             return false;
-        } else if (areBothModuleListsEmpty(dsType)) {
-            return true;
         }
-
-        return new HashSet<>(((JpaDistributionSetType) dsType).elements).equals(elements);
     }
 
     @Override
@@ -123,7 +129,8 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
 
     public JpaDistributionSetType removeModuleType(final Long smTypeId) {
         // we search by id (standard equals compares also revision)
-        elements.stream().filter(element -> element.getSmType().getId().equals(smTypeId))
+        elements.stream()
+                .filter(element -> element.getSmType().getId().equals(smTypeId))
                 .findAny()
                 .ifPresent(elements::remove);
         return this;
@@ -156,13 +163,13 @@ public class JpaDistributionSetType extends AbstractJpaTypeEntity implements Dis
                 getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 
-    private boolean isOneModuleListEmpty(final DistributionSetType dsType) {
-        return (!CollectionUtils.isEmpty(((JpaDistributionSetType) dsType).elements) && CollectionUtils.isEmpty(elements)) ||
-                (CollectionUtils.isEmpty(((JpaDistributionSetType) dsType).elements) && !CollectionUtils.isEmpty(elements));
+    private boolean isOneModuleListEmpty(final JpaDistributionSetType dsType) {
+        return (!CollectionUtils.isEmpty(dsType.elements) && CollectionUtils.isEmpty(elements)) ||
+                (CollectionUtils.isEmpty(dsType.elements) && !CollectionUtils.isEmpty(elements));
     }
 
-    private boolean areBothModuleListsEmpty(final DistributionSetType dsType) {
-        return CollectionUtils.isEmpty(((JpaDistributionSetType) dsType).elements) && CollectionUtils.isEmpty(elements);
+    private boolean areBothModuleListsEmpty(final JpaDistributionSetType dsType) {
+        return CollectionUtils.isEmpty(dsType.elements) && CollectionUtils.isEmpty(elements);
     }
 
     private JpaDistributionSetType setModuleType(final SoftwareModuleType smType, final boolean mandatory) {

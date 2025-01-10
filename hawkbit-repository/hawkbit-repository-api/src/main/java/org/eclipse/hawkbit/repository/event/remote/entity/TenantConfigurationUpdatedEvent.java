@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import java.io.Serial;
 
-import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
@@ -19,7 +18,7 @@ import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 /**
  * Defines the remote event of updating a {@link TenantConfiguration}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
+@NoArgsConstructor // for serialization libs like jackson
 public class TenantConfigurationUpdatedEvent extends RemoteEntityEvent<TenantConfiguration> implements EntityUpdatedEvent {
 
     @Serial

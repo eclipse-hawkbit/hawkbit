@@ -23,6 +23,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -31,6 +34,8 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
  * Relation element between a {@link DistributionSetType} and its
  * {@link SoftwareModuleType} elements.
  */
+@NoArgsConstructor // Default constructor for JPA
+@Getter
 @Entity
 @Table(name = "sp_ds_type_element")
 public class DistributionSetTypeElement implements Serializable {
@@ -40,9 +45,6 @@ public class DistributionSetTypeElement implements Serializable {
 
     @EmbeddedId
     private DistributionSetTypeElementCompositeKey key;
-
-    @Column(name = "mandatory")
-    private boolean mandatory;
 
     @MapsId("dsType")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -54,52 +56,34 @@ public class DistributionSetTypeElement implements Serializable {
     @JoinColumn(name = "software_module_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_smtype"))
     private JpaSoftwareModuleType smType;
 
-    public DistributionSetTypeElement() {
-        // Default constructor for JPA
-    }
+    @Setter
+    @Column(name = "mandatory")
+    private boolean mandatory;
 
     /**
      * Standard constructor.
      *
      * @param dsType of the element
      * @param smType of the element
-     * @param mandatory to <code>true</code> if the {@link SoftwareModuleType} if
-     *         mandatory element in the {@link DistributionSet}.
+     * @param mandatory to <code>true</code> if the {@link SoftwareModuleType} if mandatory element in the {@link DistributionSet}.
      */
-    DistributionSetTypeElement(final JpaDistributionSetType dsType, final JpaSoftwareModuleType smType,
-            final boolean mandatory) {
+    DistributionSetTypeElement(final JpaDistributionSetType dsType, final JpaSoftwareModuleType smType, final boolean mandatory) {
         key = new DistributionSetTypeElementCompositeKey(dsType, smType);
         this.dsType = dsType;
         this.smType = smType;
         this.mandatory = mandatory;
     }
 
-    public boolean isMandatory() {
-        return mandatory;
-    }
-
-    DistributionSetTypeElement setMandatory(final boolean mandatory) {
-        this.mandatory = mandatory;
-        return this;
-    }
-
-    public DistributionSetType getDsType() {
-        return dsType;
-    }
-
-    public SoftwareModuleType getSmType() {
-        return smType;
-    }
-
-    public DistributionSetTypeElementCompositeKey getKey() {
-        return key;
+    @Override
+    public String toString() {
+        return "DistributionSetTypeElement [mandatory=" + mandatory + ", dsType=" + dsType + ", smType=" + smType + "]";
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        result = prime * result + (key == null ? 0 : key.hashCode());
         return result;
     }
 
@@ -116,18 +100,9 @@ public class DistributionSetTypeElement implements Serializable {
         }
         final DistributionSetTypeElement other = (DistributionSetTypeElement) obj;
         if (key == null) {
-            if (other.key != null) {
-                return false;
-            }
-        } else if (!key.equals(other.key)) {
-            return false;
+            return other.key == null;
+        } else {
+            return key.equals(other.key);
         }
-        return true;
     }
-
-    @Override
-    public String toString() {
-        return "DistributionSetTypeElement [mandatory=" + mandatory + ", dsType=" + dsType + ", smType=" + smType + "]";
-    }
-
 }
