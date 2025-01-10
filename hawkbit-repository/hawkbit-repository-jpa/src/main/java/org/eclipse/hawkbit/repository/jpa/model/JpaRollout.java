@@ -38,7 +38,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -58,7 +57,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 /**
  * JPA implementation of a {@link Rollout}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor needed for JPA entities.
+@NoArgsConstructor // Default constructor needed for JPA entities.
 @Entity
 @Table(name = "sp_rollout", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_rollout"))
 @NamedEntityGraphs({ @NamedEntityGraph(name = "Rollout.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }) })

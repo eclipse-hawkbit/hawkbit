@@ -30,7 +30,6 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -45,7 +44,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 /**
  * JPA entity definition of persisting a group of an rollout.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor needed for JPA entities.
+@NoArgsConstructor // Default constructor needed for JPA entities.
 @Entity
 @Table(name = "sp_rolloutgroup", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "rollout", "tenant" }, name = "uk_rolloutgroup"))
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities

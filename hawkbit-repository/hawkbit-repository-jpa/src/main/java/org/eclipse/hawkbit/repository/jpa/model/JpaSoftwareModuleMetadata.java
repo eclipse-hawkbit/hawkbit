@@ -22,7 +22,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -33,7 +32,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 /**
  * Metadata for {@link SoftwareModule}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@NoArgsConstructor // Default constructor for JPA
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

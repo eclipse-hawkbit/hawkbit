@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import java.io.Serial;
 
-import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.event.entity.EntityDeletedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -20,7 +19,7 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 /**
  * Defines the the remote event of delete a {@link DistributionSetTag}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // for serialization libs like jackson
+@NoArgsConstructor // for serialization libs like jackson
 public class DistributionSetTagDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
 
     @Serial

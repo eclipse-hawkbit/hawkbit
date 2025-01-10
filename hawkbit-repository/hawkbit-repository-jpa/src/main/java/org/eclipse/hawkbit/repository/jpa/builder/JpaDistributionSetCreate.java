@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -33,19 +34,20 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
 
     private final DistributionSetTypeManagement distributionSetTypeManagement;
     private final SoftwareModuleManagement softwareModuleManagement;
+
     @Getter
     @ValidString
     private String type;
 
-    JpaDistributionSetCreate(final DistributionSetTypeManagement distributionSetTypeManagement,
-            final SoftwareModuleManagement softwareManagement) {
+    JpaDistributionSetCreate(
+            final DistributionSetTypeManagement distributionSetTypeManagement, final SoftwareModuleManagement softwareManagement) {
         this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.softwareModuleManagement = softwareManagement;
     }
 
     @Override
     public DistributionSetCreate type(final String type) {
-        this.type = StringUtils.trimWhitespace(type);
+        this.type = ObjectUtils.isEmpty(type) ? type : type.strip();
         return this;
     }
 
@@ -63,17 +65,16 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, distributionSetTypekey));
     }
 
-    private Collection<SoftwareModule> findSoftwareModuleWithExceptionIfNotFound(
-            final Collection<Long> softwareModuleId) {
-        if (CollectionUtils.isEmpty(softwareModuleId)) {
+    private Collection<SoftwareModule> findSoftwareModuleWithExceptionIfNotFound(final Collection<Long> softwareModuleIds) {
+        if (CollectionUtils.isEmpty(softwareModuleIds)) {
             return Collections.emptyList();
         }
 
-        final Collection<SoftwareModule> module = softwareModuleManagement.get(softwareModuleId);
-        if (module.size() < softwareModuleId.size()) {
-            throw new EntityNotFoundException(SoftwareModule.class, softwareModuleId);
+        final Collection<SoftwareModule> modules = softwareModuleManagement.get(softwareModuleIds);
+        if (modules.size() < softwareModuleIds.size()) {
+            throw new EntityNotFoundException(SoftwareModule.class, softwareModuleIds);
         }
 
-        return module;
+        return modules;
     }
 }

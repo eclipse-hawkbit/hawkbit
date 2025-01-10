@@ -31,7 +31,6 @@ import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -42,7 +41,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 /**
  * Entity to store the status for a specific action.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // JPA default constructor
+@NoArgsConstructor // JPA default constructor
 @Table(name = "sp_action_status", indexes = {
         @Index(name = "sp_idx_action_status_02", columnList = "tenant,action,status"),
         @Index(name = "sp_idx_action_status_prim", columnList = "tenant,id")

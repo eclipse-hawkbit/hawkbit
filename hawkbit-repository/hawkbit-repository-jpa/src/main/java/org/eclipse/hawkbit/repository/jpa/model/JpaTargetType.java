@@ -24,7 +24,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.remote.TargetTypeDeletedEvent;
@@ -38,7 +37,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 /**
  * A target type defines which distribution set types can or have to be {@link Target}.
  */
-@NoArgsConstructor(access = AccessLevel.PUBLIC) // Default constructor for JPA
+@NoArgsConstructor // Default constructor for JPA
 @ToString(callSuper = true)
 @Entity
 @Table(name = "sp_target_type", indexes = {
