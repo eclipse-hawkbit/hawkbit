@@ -76,11 +76,6 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     }
 
     @Override
-    public List<Action> findActiveActionsWaitingConfirmation(final String controllerId) {
-        return Collections.unmodifiableList(findActiveActionsHavingStatus(controllerId, Status.WAIT_FOR_CONFIRMATION));
-    }
-
-    @Override
     @Transactional
     public AutoConfirmationStatus activateAutoConfirmation(final String controllerId, final String initiator, final String remark) {
         log.trace(
@@ -106,24 +101,6 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         }
         giveConfirmationForActiveActions(autoConfStatus);
         return autoConfStatus;
-    }
-
-    @Override
-    public Optional<AutoConfirmationStatus> getStatus(final String controllerId) {
-        return Optional.of(targetRepository.getWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_AUTO_CONFIRMATION_STATUS))
-                .map(JpaTarget::getAutoConfirmationStatus);
-    }
-
-    @Override
-    @Transactional
-    public List<Action> autoConfirmActiveActions(final String controllerId) {
-        final JpaTarget target = targetRepository.getWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_AUTO_CONFIRMATION_STATUS);
-        if (target.getAutoConfirmationStatus() == null) {
-            // auto-confirmation is not active
-            return Collections.emptyList();
-        } else {
-            return giveConfirmationForActiveActions(target.getAutoConfirmationStatus());
-        }
     }
 
     @Override
@@ -172,6 +149,17 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         // since the status is not part of the JpaTarget table (just ref) it might be needed to touch the entity to have updated lastModifiedAt
         JpaManagementHelper.touch(entityManager, targetRepository, target);
         targetRepository.save(target);
+    }
+
+    @Override
+    public Optional<AutoConfirmationStatus> getStatus(final String controllerId) {
+        return Optional.of(targetRepository.getWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_AUTO_CONFIRMATION_STATUS))
+                .map(JpaTarget::getAutoConfirmationStatus);
+    }
+
+    @Override
+    public List<Action> findActiveActionsWaitingConfirmation(final String controllerId) {
+        return Collections.unmodifiableList(findActiveActionsHavingStatus(controllerId, Status.WAIT_FOR_CONFIRMATION));
     }
 
     @Override

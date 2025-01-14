@@ -44,13 +44,6 @@ class ConfirmationManagementSecurityTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Tests ConfirmationManagement#autoConfirmActiveActions() method")
-    void autoConfirmActiveActionsPermissionsCheck() {
-        assertPermissions(() -> confirmationManagement.autoConfirmActiveActions("controllerId"),
-                List.of(SpPermission.READ_REPOSITORY, SpPermission.UPDATE_TARGET));
-    }
-
-    @Test
     @Description("Tests ConfirmationManagement#confirmAction() method")
     void confirmActionPermissionsCheck() {
         assertPermissions(() -> confirmationManagement.confirmAction(1L, null, null),
