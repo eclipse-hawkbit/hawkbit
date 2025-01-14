@@ -994,9 +994,9 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
         registerAndAssertTargetWithExistingTenant(controllerId);
 
-        assertThat(targetManagement.getByControllerID(controllerId).map(Target::getAutoConfirmationStatus)).isEmpty();
+        assertThat(targetManagement.getWithAutoConfigurationStatus(controllerId).getAutoConfirmationStatus()).isNull();
         confirmationManagement.activateAutoConfirmation(controllerId, null, null);
-        assertThat(targetManagement.getByControllerID(controllerId).map(Target::getAutoConfirmationStatus)).isPresent();
+        assertThat(targetManagement.getWithAutoConfigurationStatus(controllerId).getAutoConfirmationStatus()).isNotNull();
 
         final DistributionSetAssignmentResult assignmentResult = prepareDistributionSetAndAssign(controllerId);
         final Long actionId = getFirstAssignedActionId(assignmentResult);

@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
@@ -84,7 +85,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     public AutoConfirmationStatus activateAutoConfirmation(final String controllerId, final String initiator, final String remark) {
         log.trace(
                 "'activateAutoConfirmation' was called with values: controllerId={}; initiator={}; remark={}", controllerId, initiator, remark);
-        final JpaTarget target = targetRepository.getByControllerId(controllerId);
+        final JpaTarget target = targetRepository.getWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_AUTO_CONFIRMATION_STATUS);
         if (target.getAutoConfirmationStatus() != null) {
             log.debug("'activateAutoConfirmation' was called for an controller id {} with active auto confirmation.", controllerId);
             throw new AutoConfirmationAlreadyActiveException(controllerId);
@@ -109,18 +110,20 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
 
     @Override
     public Optional<AutoConfirmationStatus> getStatus(final String controllerId) {
-        return Optional.of(targetRepository.getByControllerId(controllerId)).map(JpaTarget::getAutoConfirmationStatus);
+        return Optional.of(targetRepository.getWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_AUTO_CONFIRMATION_STATUS))
+                .map(JpaTarget::getAutoConfirmationStatus);
     }
 
     @Override
     @Transactional
     public List<Action> autoConfirmActiveActions(final String controllerId) {
-        final JpaTarget target = targetRepository.getByControllerId(controllerId);
+        final JpaTarget target = targetRepository.getWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_AUTO_CONFIRMATION_STATUS);
         if (target.getAutoConfirmationStatus() == null) {
             // auto-confirmation is not active
             return Collections.emptyList();
+        } else {
+            return giveConfirmationForActiveActions(target.getAutoConfirmationStatus());
         }
-        return giveConfirmationForActiveActions(target.getAutoConfirmationStatus());
     }
 
     @Override

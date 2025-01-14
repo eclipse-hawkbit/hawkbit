@@ -306,7 +306,7 @@ public final class MgmtTargetMapper {
             return Collections.emptyList();
         }
 
-        return actions.stream().map(action -> toResponse(targetId, action)).collect(Collectors.toList());
+        return actions.stream().map(action -> toResponse(targetId, action)).toList();
     }
 
     static MgmtMetadata toResponseTargetMetadata(final TargetMetadata metadata) {

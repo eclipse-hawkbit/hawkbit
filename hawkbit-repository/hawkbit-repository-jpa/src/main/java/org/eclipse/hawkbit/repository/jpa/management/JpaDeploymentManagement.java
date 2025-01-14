@@ -62,6 +62,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
@@ -494,12 +495,12 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Optional<DistributionSet> getAssignedDistributionSet(final String controllerId) {
-        return targetRepository.findByControllerId(controllerId).map(JpaTarget::getAssignedDistributionSet);
+        return targetRepository.findWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_ASSIGNED_DISTRIBUTION_SET).map(JpaTarget::getAssignedDistributionSet);
     }
 
     @Override
     public Optional<DistributionSet> getInstalledDistributionSet(final String controllerId) {
-        return targetRepository.findByControllerId(controllerId).map(JpaTarget::getInstalledDistributionSet);
+        return targetRepository.findWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_INSTALLED_DISTRIBUTION_SET).map(JpaTarget::getInstalledDistributionSet);
     }
 
     @Override

@@ -51,6 +51,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
@@ -430,24 +431,23 @@ public abstract class AbstractIntegrationTest {
         return prepareFinishedUpdate(TestdataFactory.DEFAULT_CONTROLLER_ID, "", false);
     }
 
-    protected Action prepareFinishedUpdate(final String controllerId, final String distributionSet,
-            final boolean isRequiredMigrationStep) {
+    protected Action prepareFinishedUpdate(final String controllerId, final String distributionSet, final boolean isRequiredMigrationStep) {
         final DistributionSet ds = testdataFactory.createDistributionSet(distributionSet, isRequiredMigrationStep);
         Target savedTarget = testdataFactory.createTarget(controllerId);
-        savedTarget = getFirstAssignedTarget(
-                assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.FORCED));
-        Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
-                .getContent().get(0);
+        savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.FORCED));
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
 
         if (savedAction.getStatus() == Action.Status.WAIT_FOR_CONFIRMATION) {
             confirmationManagement.confirmAction(savedAction.getId(), null, null);
         }
 
-        savedAction = controllerManagement.addUpdateActionStatus(
+        controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));
-
-        return controllerManagement.addUpdateActionStatus(
+        controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
+
+        return controllerManagement.findActionWithDetails(savedAction.getId())
+                .orElseThrow(() -> new EntityNotFoundException(Action.class, savedAction.getId()));
     }
 
     protected void enableBatchAssignments() {

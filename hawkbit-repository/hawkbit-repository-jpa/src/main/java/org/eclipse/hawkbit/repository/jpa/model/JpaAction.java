@@ -65,13 +65,13 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
                 @Index(name = "sp_idx_action_prim", columnList = "tenant,id")
         })
 @NamedEntityGraphs({
-        @NamedEntityGraph(name = "Action.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }),
         @NamedEntityGraph(name = "Action.all", attributeNodes = {
                 @NamedAttributeNode(value = "target", subgraph = "target.ds"),
                 @NamedAttributeNode("distributionSet") },
                 subgraphs = @NamedSubgraph(
                         name = "target.ds",
-                        attributeNodes = @NamedAttributeNode("assignedDistributionSet")))
+                        attributeNodes = @NamedAttributeNode("assignedDistributionSet"))),
+        @NamedEntityGraph(name = "Action.ds", attributeNodes = { @NamedAttributeNode("distributionSet") })
 })
 @Entity
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities

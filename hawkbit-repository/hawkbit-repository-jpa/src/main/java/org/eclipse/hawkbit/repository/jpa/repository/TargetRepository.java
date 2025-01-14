@@ -35,10 +35,14 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
     default Optional<JpaTarget> findByControllerId(final String controllerId) {
         return findOne(TargetSpecifications.hasControllerId(controllerId));
     }
-
+    default Optional<JpaTarget> findWithDetailsByControllerId(final String controllerId, final String entityGraph) {
+        return findOne(TargetSpecifications.hasControllerId(controllerId), entityGraph);
+    }
     default JpaTarget getByControllerId(final String controllerId) {
-        return findOne(TargetSpecifications.hasControllerId(controllerId))
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        return findByControllerId(controllerId).orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+    }
+    default JpaTarget getWithDetailsByControllerId(final String controllerId, final String entityGraph) {
+        return findWithDetailsByControllerId(controllerId, entityGraph).orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
     }
 
     // TODO AC - remove it and use specification

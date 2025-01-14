@@ -192,15 +192,12 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                 return null;
             }));
         } while ((query = tenants.nextPageable()) != Pageable.unpaged());
-
     }
 
     @Override
     public SystemUsageReportWithTenants getSystemUsageStatisticsWithTenants() {
         final SystemUsageReportWithTenants result = (SystemUsageReportWithTenants) getSystemUsageStatistics();
-
         usageStatsPerTenant(result);
-
         return result;
     }
 
@@ -213,19 +210,11 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
             sumOfArtifacts = count.longValue();
         }
 
-        // we use native queries to punch through the tenant boundaries. This
-        // has to be used with care!
-        final long targets = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_target")
-                .getSingleResult()).longValue();
-
-        final long artifacts = ((Number) entityManager.createNativeQuery(countArtifactQuery).getSingleResult())
-                .longValue();
-
-        final long actions = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_action")
-                .getSingleResult()).longValue();
-
-        return new SystemUsageReportWithTenants(targets, artifacts, actions, sumOfArtifacts,
-                tenantMetaDataRepository.count());
+        // we use native queries to punch through the tenant boundaries. This has to be used with care!
+        final long targets = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_target").getSingleResult()).longValue();
+        final long artifacts = ((Number) entityManager.createNativeQuery(countArtifactQuery).getSingleResult()).longValue();
+        final long actions = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_action").getSingleResult()).longValue();
+        return new SystemUsageReportWithTenants(targets, artifacts, actions, sumOfArtifacts, tenantMetaDataRepository.count());
     }
 
     @Override
