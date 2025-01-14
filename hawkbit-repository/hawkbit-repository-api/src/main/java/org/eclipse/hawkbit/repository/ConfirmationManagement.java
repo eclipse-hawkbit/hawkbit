@@ -27,18 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface ConfirmationManagement {
 
     /**
-     * Find active actions in the {@link Action.Status#WAIT_FOR_CONFIRMATION} state
-     * for a specific target with a specified controllerId.
-     *
-     * @param controllerId of the target to check
-     * @return a list of {@link Action}
-     */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Action> findActiveActionsWaitingConfirmation(@NotEmpty String controllerId);
-
-    /**
-     * Activate auto confirmation for a given controller ID. In case auto
-     * confirmation is active already, this method will fail with an exception.
+     * Activate auto confirmation for a given controller ID. In case auto confirmation is active already, this method will fail with an exception.
      *
      * @param controllerId to activate the feature for
      * @param initiator who initiated this operation. If 'null' we will take the current user from {@link TenantAware#getCurrentUsername()}
@@ -49,29 +38,7 @@ public interface ConfirmationManagement {
     AutoConfirmationStatus activateAutoConfirmation(@NotEmpty String controllerId, final String initiator, final String remark);
 
     /**
-     * Get the current state of auto-confirmation for a given controllerId
-     *
-     * @param controllerId to check the state for
-     * @return instance of {@link AutoConfirmationStatus} wrapped in an {@link Optional}. Present if active and empty if disabled.
-     */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER + SpPermission.SpringEvalExpressions.HAS_AUTH_OR +
-            SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Optional<AutoConfirmationStatus> getStatus(@NotEmpty String controllerId);
-
-    /**
-     * Auto confirm active actions for a specific controller ID having the
-     * {@link Action.Status#WAIT_FOR_CONFIRMATION} status.
-     *
-     * @param controllerId to confirm actions for
-     * @return a list of confirmed actions
-     */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<Action> autoConfirmActiveActions(@NotEmpty String controllerId);
-
-    /**
-     * Confirm a given action to put it from
-     * {@link Action.Status#WAIT_FOR_CONFIRMATION} to {@link Action.Status#RUNNING}
-     * state.
+     * Confirm a given action to put it from {@link Action.Status#WAIT_FOR_CONFIRMATION} to {@link Action.Status#RUNNING} state.
      *
      * @param actionId mandatory to know which action to confirm
      * @param code optional value to specify a code for the created action status
@@ -81,8 +48,7 @@ public interface ConfirmationManagement {
     Action confirmAction(long actionId, Integer code, Collection<String> messages);
 
     /**
-     * Deny a given action and leave it in
-     * {@link Action.Status#WAIT_FOR_CONFIRMATION} state.
+     * Deny a given action and leave it in {@link Action.Status#WAIT_FOR_CONFIRMATION} state.
      *
      * @param actionId mandatory to know which action to deny
      * @param code optional value to specify a code for the created action status
@@ -99,4 +65,22 @@ public interface ConfirmationManagement {
     @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     void deactivateAutoConfirmation(@NotEmpty String controllerId);
 
+    /**
+     * Get the current state of auto-confirmation for a given controllerId
+     *
+     * @param controllerId to check the state for
+     * @return instance of {@link AutoConfirmationStatus} wrapped in an {@link Optional}. Present if active and empty if disabled.
+     */
+    @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER + SpPermission.SpringEvalExpressions.HAS_AUTH_OR +
+            SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Optional<AutoConfirmationStatus> getStatus(@NotEmpty String controllerId);
+
+    /**
+     * Find active actions in the {@link Action.Status#WAIT_FOR_CONFIRMATION} state for a specific target with a specified controllerId.
+     *
+     * @param controllerId of the target to check
+     * @return a list of {@link Action}
+     */
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    List<Action> findActiveActionsWaitingConfirmation(@NotEmpty String controllerId);
 }
