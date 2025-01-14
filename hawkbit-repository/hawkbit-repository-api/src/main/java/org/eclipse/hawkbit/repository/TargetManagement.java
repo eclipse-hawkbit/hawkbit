@@ -366,7 +366,6 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<Target> getByControllerID(@NotEmpty String controllerId);
 
-
     /**
      * Gets a {@link Target} based a given controller id and includes the details specified by the details key.
      *

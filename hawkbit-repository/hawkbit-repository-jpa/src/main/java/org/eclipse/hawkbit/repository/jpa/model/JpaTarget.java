@@ -89,10 +89,7 @@ import org.springframework.util.ObjectUtils;
                 @NamedAttributeNode("installedDistributionSet"),
                 @NamedAttributeNode("assignedDistributionSet") }),
         @NamedEntityGraph(name = "Target.targetType", attributeNodes = { @NamedAttributeNode("targetType") }),
-        @NamedEntityGraph(name = "Target.installedDistributionSet", attributeNodes = { @NamedAttributeNode("installedDistributionSet") },
-                subgraphs = { @NamedSubgraph(
-                        name = "installedDistributionSet.optLockRevision",
-                        attributeNodes = @NamedAttributeNode("optLockRevision")) }),
+        @NamedEntityGraph(name = "Target.installedDistributionSet", attributeNodes = { @NamedAttributeNode("installedDistributionSet") }),
         @NamedEntityGraph(name = "Target.assignedDistributionSet", attributeNodes = { @NamedAttributeNode("assignedDistributionSet") }),
         @NamedEntityGraph(name = "Target.autoConfirmationStatus", attributeNodes = { @NamedAttributeNode("autoConfirmationStatus") }),
         @NamedEntityGraph(name = "Target.tags", attributeNodes = { @NamedAttributeNode("tags") }),
