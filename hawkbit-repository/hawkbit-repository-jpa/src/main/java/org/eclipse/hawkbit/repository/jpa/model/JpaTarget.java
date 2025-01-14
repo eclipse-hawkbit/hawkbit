@@ -34,6 +34,10 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapKeyColumn;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedEntityGraphs;
+import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
@@ -69,6 +73,7 @@ import org.springframework.util.ObjectUtils;
  * JPA implementation of {@link Target}.
  */
 @NoArgsConstructor // Default constructor for JPA
+@Slf4j
 @Entity
 @Table(name = "sp_target",
         indexes = {
@@ -78,9 +83,23 @@ import org.springframework.util.ObjectUtils;
                 @Index(name = "sp_idx_target_05", columnList = "tenant,last_modified_at"),
                 @Index(name = "sp_idx_target_prim", columnList = "tenant,id") },
         uniqueConstraints = @UniqueConstraint(columnNames = { "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
+@NamedEntityGraphs({
+        @NamedEntityGraph(name = "Target.details", attributeNodes = {
+                @NamedAttributeNode("targetType"),
+                @NamedAttributeNode("installedDistributionSet"),
+                @NamedAttributeNode("assignedDistributionSet") }),
+        @NamedEntityGraph(name = "Target.targetType", attributeNodes = { @NamedAttributeNode("targetType") }),
+        @NamedEntityGraph(name = "Target.installedDistributionSet", attributeNodes = { @NamedAttributeNode("installedDistributionSet") },
+                subgraphs = { @NamedSubgraph(
+                        name = "installedDistributionSet.optLockRevision",
+                        attributeNodes = @NamedAttributeNode("optLockRevision")) }),
+        @NamedEntityGraph(name = "Target.assignedDistributionSet", attributeNodes = { @NamedAttributeNode("assignedDistributionSet") }),
+        @NamedEntityGraph(name = "Target.autoConfirmationStatus", attributeNodes = { @NamedAttributeNode("autoConfirmationStatus") }),
+        @NamedEntityGraph(name = "Target.tags", attributeNodes = { @NamedAttributeNode("tags") }),
+        @NamedEntityGraph(name = "Target.actions", attributeNodes = { @NamedAttributeNode("actions") }),
+})
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
-@Slf4j
 public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAwareEntity {
 
     @Serial
@@ -279,10 +298,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             actions = new ArrayList<>();
         }
         actions.add((JpaAction) action);
-    }
-
-    public List<Action> getActions() {
-        return actions == null ? Collections.emptyList() : Collections.unmodifiableList(actions);
     }
 
     @Override

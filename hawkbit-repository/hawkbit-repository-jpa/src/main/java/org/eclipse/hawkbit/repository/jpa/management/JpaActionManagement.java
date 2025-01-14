@@ -77,14 +77,14 @@ public class JpaActionManagement {
             return handleAddUpdateActionStatus(actionStatus, action);
         }
 
-        log.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
+        log.debug(
+                "Update of actionStatus {} for action {} not possible since action not active anymore.",
                 actionStatus.getStatus(), action.getId());
         return action;
     }
 
     protected JpaAction getActionAndThrowExceptionIfNotFound(final Long actionId) {
-        return actionRepository.findById(actionId)
-                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+        return actionRepository.findById(actionId).orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
     }
 
     protected void onActionStatusUpdate(final JpaActionStatus newActionStatus, final JpaAction action) {

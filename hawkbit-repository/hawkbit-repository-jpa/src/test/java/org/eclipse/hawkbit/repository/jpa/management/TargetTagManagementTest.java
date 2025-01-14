@@ -176,14 +176,12 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that a deleted tag is removed from the repository as defined.")
     void deleteTargetTags() {
-
         // create test data
         final Iterable<JpaTargetTag> tags = createTargetsWithTags();
         final TargetTag toDelete = tags.iterator().next();
 
         for (final Target target : targetRepository.findAll()) {
-            assertThat(getTargetTags(target.getControllerId()))
-                    .contains(toDelete);
+            assertThat(getTargetTags(target.getControllerId())).contains(toDelete);
         }
 
         // delete

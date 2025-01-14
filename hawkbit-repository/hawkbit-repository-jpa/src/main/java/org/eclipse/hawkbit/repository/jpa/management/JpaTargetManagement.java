@@ -410,6 +410,11 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
+    public Target getWithDetails(final String controllerId, final String detailsKey) {
+        return targetRepository.getWithDetailsByControllerId(controllerId, "Target." + detailsKey);
+    }
+
+    @Override
     public Slice<Target> findByFilters(final Pageable pageable, final FilterParams filterParams) {
         final List<Specification<JpaTarget>> specList = buildSpecificationList(filterParams);
         return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, pageable, specList);
@@ -719,8 +724,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Set<TargetTag> getTagsByControllerId(@NotEmpty String controllerId) {
         // the method has PreAuthorized by itself
-        return getByControllerID(controllerId).map(JpaTarget.class::cast).map(JpaTarget::getTags)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        return ((JpaTarget)getWithTags(controllerId)).getTags();
     }
 
     @Override

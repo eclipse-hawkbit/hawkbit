@@ -10,20 +10,19 @@
 package org.eclipse.hawkbit.repository.jpa.repository;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
-import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 
 import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -46,15 +45,18 @@ public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpa
         implements JpaSpecificationEntityGraphExecutor<T>, NoCountSliceRepository<T>, ACMRepository<T> {
 
     private final EntityManager entityManager;
+    private final Logger log;
 
     public HawkbitBaseRepository(final Class<T> domainClass, final EntityManager entityManager) {
         super(domainClass, entityManager);
         this.entityManager = entityManager;
+        log = LoggerFactory.getLogger(getDomainClass());
     }
 
     public HawkbitBaseRepository(final JpaEntityInformation<T, ?> entityInformation, final EntityManager entityManager) {
         super(entityInformation, entityManager);
         this.entityManager = entityManager;
+        log = LoggerFactory.getLogger(getDomainClass());
     }
 
     @Override
@@ -149,8 +151,17 @@ public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpa
     }
 
     private TypedQuery<T> withEntityGraph(final TypedQuery<T> query, final String entityGraph) {
-        final EntityGraph<?> graph = ObjectUtils.isEmpty(entityGraph) ? null : entityManager.createEntityGraph(entityGraph);
-        return graph == null ? query : query.setHint("jakarta.persistence.loadgraph", graph);
+        if (ObjectUtils.isEmpty(entityGraph)) {
+            return query;
+        } else {
+            final EntityGraph<?> graph = entityManager.createEntityGraph(entityGraph);
+            if (graph == null) {
+                log.warn("Entity graph {} not found", entityGraph);
+                return query;
+            } else {
+                return query.setHint("jakarta.persistence.loadgraph", graph);
+            }
+        }
     }
 
     private <S extends T> Page<S> readPageWithoutCount(final TypedQuery<S> query, final Pageable pageable) {

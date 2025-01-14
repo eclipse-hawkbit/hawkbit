@@ -50,6 +50,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 public interface TargetManagement {
 
+    String DETAILS_BASE = "base";
+    String DETAILS_AUTO_CONFIRMATION_STATUS = "autoConfirmationStatus";
+    String DETAILS_TAGS = "tags";
+    String DETAILS_ACTIONS = "actions";
+
     /**
      * Counts number of targets with the given distribution set assigned.
      *
@@ -221,8 +226,8 @@ public interface TargetManagement {
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(@NotNull Pageable pageRequest,
-            long distributionSetId, @NotNull String rsqlParam);
+    Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(
+            @NotNull Pageable pageRequest, long distributionSetId, @NotNull String rsqlParam);
 
     /**
      * Counts all targets for all the given parameter {@link TargetFilterQuery} and
@@ -360,6 +365,37 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<Target> getByControllerID(@NotEmpty String controllerId);
+
+
+    /**
+     * Gets a {@link Target} based a given controller id and includes the details specified by the details key.
+     *
+     * @param controllerId to look for.
+     * @param detailsKey the key of the details to include, e.g. {@link #DETAILS_AUTO_CONFIRMATION_STATUS}
+     * @return {@link Target}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Target getWithDetails(@NotEmpty String controllerId, String detailsKey);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    default Target getWithDetails(@NotEmpty String controllerId) {
+        return getWithDetails(controllerId, DETAILS_BASE);
+    }
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    default Target getWithAutoConfigurationStatus(@NotEmpty String controllerId) {
+        return getWithDetails(controllerId, DETAILS_AUTO_CONFIRMATION_STATUS);
+    }
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    default Target getWithTags(@NotEmpty String controllerId) {
+        return getWithDetails(controllerId, DETAILS_TAGS);
+    }
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    default Target getWithActions(@NotEmpty String controllerId) {
+        return getWithDetails(controllerId, DETAILS_ACTIONS);
+    }
 
     /**
      * Filter {@link Target}s for all the given parameters. If all parameters except

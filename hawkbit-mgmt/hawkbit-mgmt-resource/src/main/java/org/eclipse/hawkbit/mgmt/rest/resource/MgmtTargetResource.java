@@ -416,7 +416,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtTargetAutoConfirm> getAutoConfirmStatus(final String targetId) {
-        final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
+        final Target findTarget = targetManagement.getWithAutoConfigurationStatus(targetId);
         final MgmtTargetAutoConfirm state = MgmtTargetMapper.getTargetAutoConfirmResponse(findTarget);
         return ResponseEntity.ok(state);
     }
