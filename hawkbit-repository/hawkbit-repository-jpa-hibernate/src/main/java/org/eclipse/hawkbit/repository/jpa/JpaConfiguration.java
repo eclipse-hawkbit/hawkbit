@@ -29,6 +29,7 @@ import org.hibernate.integrator.spi.Integrator;
 import org.hibernate.jpa.boot.spi.IntegratorProvider;
 import org.hibernate.service.spi.SessionFactoryServiceRegistry;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.context.annotation.Bean;
@@ -45,13 +46,16 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 public class JpaConfiguration extends JpaBaseConfiguration {
 
     private final TenantIdentifier tenantIdentifier;
+    private final boolean enableLazyLoadNoTrans;
 
     protected JpaConfiguration(
             final DataSource dataSource, final JpaProperties properties,
             final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider,
-            final TenantAware.TenantResolver tenantResolver) {
+            final TenantAware.TenantResolver tenantResolver,
+            @Value("${hibernate.enable_lazy_load_no_trans:true}") final boolean enableLazyLoadNoTrans) {
         super(dataSource, properties, jtaTransactionManagerProvider);
         tenantIdentifier = new TenantIdentifier(tenantResolver);
+        this.enableLazyLoadNoTrans = enableLazyLoadNoTrans;
     }
 
     @Bean
@@ -81,7 +85,7 @@ public class JpaConfiguration extends JpaBaseConfiguration {
         // LAZY_LOAD - Enable lazy loading of lazy fields when session is closed - N + 1 problem occur.
         // So it would be good if in future hawkBit run without that
         // Otherwise, if false, call for the lazy field will throw LazyInitializationException
-        properties.put("hibernate.enable_lazy_load_no_trans", "true");
+        properties.put("hibernate.enable_lazy_load_no_trans", enableLazyLoadNoTrans);
         properties.put("hibernate.integrator_provider", (IntegratorProvider) () -> Collections.singletonList(new Integrator() {
 
             @Override
