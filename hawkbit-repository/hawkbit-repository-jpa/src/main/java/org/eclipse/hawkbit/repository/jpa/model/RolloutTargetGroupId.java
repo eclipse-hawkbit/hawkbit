@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import java.io.Serial;
 import java.io.Serializable;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -22,6 +23,7 @@ import org.eclipse.hawkbit.repository.model.Target;
  */
 @NoArgsConstructor // Default constructor for JPA
 @Getter
+@EqualsAndHashCode
 public class RolloutTargetGroupId implements Serializable {
 
     @Serial
