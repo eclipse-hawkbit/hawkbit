@@ -23,6 +23,8 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import jakarta.validation.constraints.NotNull;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
@@ -215,7 +217,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
     // Exception squid:MethodCyclomaticComplexity - false positive, is a simple mapping
     @SuppressWarnings("squid:MethodCyclomaticComplexity")
-    private static Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus, final Action action) {
+    private static @NotNull Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus, final Action action) {
         Status status = null;
         switch (actionUpdateStatus.getActionStatus()) {
             case DOWNLOAD: {
@@ -226,8 +228,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 status = Status.RETRIEVED;
                 break;
             }
-            case RUNNING:
-            case CONFIRMED: {
+            case RUNNING, CONFIRMED: {
                 status = Status.RUNNING;
                 break;
             }
@@ -373,7 +374,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private Map<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModulesWithMetadata(final DistributionSet distributionSet) {
-        final List<Long> smIds = distributionSet.getModules().stream().map(SoftwareModule::getId).collect(Collectors.toList());
+        final List<Long> smIds = distributionSet.getModules().stream().map(SoftwareModule::getId).toList();
         final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement.findTargetVisibleMetaDataBySoftwareModuleId(smIds);
         return distributionSet.getModules().stream().collect(Collectors.toMap(
                 Function.identity(), sm -> metadata.getOrDefault(sm.getId(), Collections.emptyList())));

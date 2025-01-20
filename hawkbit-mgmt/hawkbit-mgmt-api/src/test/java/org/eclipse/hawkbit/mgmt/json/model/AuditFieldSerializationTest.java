@@ -20,10 +20,10 @@ import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Management API")
 @Story("Serialization")
-public class AuditFieldSerializationTest {
+class AuditFieldSerializationTest {
 
     @Test
-    public void assertAuditingFields() throws JsonProcessingException {
+    void assertAuditingFields() throws JsonProcessingException {
         final MgmtTarget mgmtTarget = new MgmtTarget();
         mgmtTarget.setCreatedBy("user");
         mgmtTarget.setCreatedAt(System.currentTimeMillis() - 1_000_000);

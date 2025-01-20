@@ -382,9 +382,9 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
 
         createConditionFactory().untilAsserted(() -> {
             try {
-                final Map<String, String> controllerAttributes = SecurityContextSwitch
-                        .runAsPrivileged(() -> targetManagement.getControllerAttributes(controllerId));
-                assertThat(controllerAttributes.size()).isEqualTo(attributes.size());
+                final Map<String, String> controllerAttributes = SecurityContextSwitch.runAsPrivileged(
+                        () -> targetManagement.getControllerAttributes(controllerId));
+                assertThat(controllerAttributes).hasSameSizeAs(attributes);
                 assertThat(controllerAttributes).containsAllEntriesOf(attributes);
             } catch (final Exception e) {
                 throw new RuntimeException(e);

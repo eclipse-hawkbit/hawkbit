@@ -85,8 +85,6 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected static final String NOT_EXIST_ID = "12345678990";
     protected static final long NOT_EXIST_IDL = Long.parseLong(NOT_EXIST_ID);
 
-    protected static final RandomStringUtils RANDOM_STRING_UTILS = RandomStringUtils.insecure();
-
     private static final List<String> REPOSITORY_AND_TARGET_PERMISSIONS = List.of(SpPermission.READ_REPOSITORY, SpPermission.CREATE_REPOSITORY, SpPermission.UPDATE_REPOSITORY, SpPermission.DELETE_REPOSITORY, SpPermission.READ_TARGET, SpPermission.CREATE_TARGET, SpPermission.UPDATE_TARGET, SpPermission.DELETE_TARGET);
 
     @PersistenceContext
@@ -175,14 +173,6 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     // just increase the opt lock revision if the instance in order to match it against locked db instance - not really locking
     protected static void implicitLock(final SoftwareModule module) {
         ((JpaSoftwareModule) module).setOptLockRevision(module.getOptLockRevision() + 1);
-    }
-
-    protected static String randomString(final int len) {
-        return RANDOM_STRING_UTILS.next(len, true, false);
-    }
-
-    protected static byte[] randomBytes(final int len) {
-        return randomString(len).getBytes();
     }
 
     protected Database getDatabase() {

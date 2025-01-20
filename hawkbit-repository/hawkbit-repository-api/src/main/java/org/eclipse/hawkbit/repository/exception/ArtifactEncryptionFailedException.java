@@ -11,18 +11,21 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * Exception being thrown in case of error while generating encryption secrets,
- * encrypting or decrypting artifacts.
+ * Exception being thrown in case of error while generating encryption secrets, encrypting or decrypting artifacts.
  */
+@EqualsAndHashCode(callSuper = true)
 public final class ArtifactEncryptionFailedException extends AbstractServerRtException {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @Getter
     private final EncryptionOperation encryptionOperation;
 
     public ArtifactEncryptionFailedException(final EncryptionOperation encryptionOperation) {
@@ -33,14 +36,9 @@ public final class ArtifactEncryptionFailedException extends AbstractServerRtExc
         this(encryptionOperation, message, null);
     }
 
-    public ArtifactEncryptionFailedException(final EncryptionOperation encryptionOperation, final String message,
-            final Throwable cause) {
+    public ArtifactEncryptionFailedException(final EncryptionOperation encryptionOperation, final String message, final Throwable cause) {
         super(message, SpServerError.SP_ARTIFACT_ENCRYPTION_FAILED, cause);
         this.encryptionOperation = encryptionOperation;
-    }
-
-    public EncryptionOperation getEncryptionOperation() {
-        return encryptionOperation;
     }
 
     /**
@@ -49,5 +47,4 @@ public final class ArtifactEncryptionFailedException extends AbstractServerRtExc
     public enum EncryptionOperation {
         GENERATE_SECRETS, ENCRYPT, DECRYPT;
     }
-
 }

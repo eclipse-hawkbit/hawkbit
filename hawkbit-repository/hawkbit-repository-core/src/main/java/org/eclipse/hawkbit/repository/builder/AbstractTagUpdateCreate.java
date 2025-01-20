@@ -25,7 +25,7 @@ public class AbstractTagUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
     protected String colour;
 
     public T colour(final String colour) {
-        this.colour = StringUtils.trimWhitespace(colour);
+        this.colour = AbstractBaseEntityBuilder.strip(colour);
         return (T) this;
     }
 
