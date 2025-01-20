@@ -25,23 +25,23 @@ import org.springframework.test.context.TestPropertySource;
 })
 @Feature("Integration Test - Security")
 @Story("Allowed Host Names")
-public class AllowedHostNamesTest extends AbstractSecurityTest {
+class AllowedHostNamesTest extends AbstractSecurityTest {
 
     @Test
     @Description("Tests whether a RequestRejectedException is thrown when not allowed host is used")
-    public void allowedHostNameWithNotAllowedHost() throws Exception {
+    void allowedHostNameWithNotAllowedHost() throws Exception {
         mvc.perform(get("/").header(HttpHeaders.HOST, "www.google.com")).andExpect(status().isBadRequest());
     }
 
     @Test
     @Description("Tests whether request is redirected when allowed host is used")
-    public void allowedHostNameWithAllowedHost() throws Exception {
+    void allowedHostNameWithAllowedHost() throws Exception {
         mvc.perform(get("/").header(HttpHeaders.HOST, "localhost")).andExpect(status().is3xxRedirection());
     }
 
     @Test
     @Description("Tests whether request without allowed host name and with ignored path end up with a client error")
-    public void notAllowedHostnameWithIgnoredPath() throws Exception {
+    void notAllowedHostnameWithIgnoredPath() throws Exception {
         mvc.perform(get("/index.html").header(HttpHeaders.HOST, "www.google.com"))
                 .andExpect(status().is4xxClientError());
     }

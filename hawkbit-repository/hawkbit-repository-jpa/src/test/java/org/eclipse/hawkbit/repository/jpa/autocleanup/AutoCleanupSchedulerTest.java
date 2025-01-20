@@ -28,7 +28,7 @@ import org.springframework.integration.support.locks.LockRegistry;
  */
 @Feature("Component Tests - Repository")
 @Story("Auto cleanup scheduler")
-public class AutoCleanupSchedulerTest extends AbstractJpaIntegrationTest {
+class AutoCleanupSchedulerTest extends AbstractJpaIntegrationTest {
 
     private final AtomicInteger counter = new AtomicInteger();
 
@@ -36,13 +36,13 @@ public class AutoCleanupSchedulerTest extends AbstractJpaIntegrationTest {
     private LockRegistry lockRegistry;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         counter.set(0);
     }
 
     @Test
     @Description("Verifies that all cleanup handlers are executed regardless if one of them throws an error")
-    public void executeHandlerChain() {
+    void executeHandlerChain() {
 
         new AutoCleanupScheduler(systemManagement, systemSecurityContext, lockRegistry, Arrays.asList(
                 new SuccessfulCleanup(), new SuccessfulCleanup(), new FailingCleanup(), new SuccessfulCleanup())).run();

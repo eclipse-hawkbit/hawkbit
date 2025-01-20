@@ -37,7 +37,7 @@ import org.springframework.util.MimeTypeUtils;
 /**
  * Test the remote entity events.
  */
-public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest {
+ public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private BusProtoStuffMessageConverter busProtoStuffMessageConverter;
@@ -83,8 +83,7 @@ public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest
         headers.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON);
         try {
             final String json = new ObjectMapper().writeValueAsString(event);
-            final Message<String> message = MessageBuilder.withPayload(json).copyHeaders(headers).build();
-            return message;
+            return MessageBuilder.withPayload(json).copyHeaders(headers).build();
         } catch (final JsonProcessingException e) {
             fail(e.getMessage());
         }
