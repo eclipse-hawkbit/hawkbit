@@ -26,11 +26,12 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * (Experimental) Utility class to get some statistics.
+ * It's main purpose is to be used for debugging / testing (performance) purposes.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class StatisticsUtils {
 
-    private static final ThreadLocal<Map<String, Double>> LAST_COUNTERS = ThreadLocal.withInitial(HashMap::new);
+    private static final ThreadLocal<Map<String, Double>> LAST_COUNTERS = ThreadLocal.withInitial(MapUFToString::new);
 
     // for test purposes we may want to flush the statistics and to get diff from the last get int THIS thread
     public static Map<String, Double> diff() {
@@ -60,7 +61,7 @@ public class StatisticsUtils {
 
         Statistics.flush();
 
-        final Map<String, Double> counters = new HashMap<>();
+        final Map<String, Double> counters = new MapUFToString();
         meterRegistry.forEachMeter(m -> {
             final Meter.Id id = m.getId();
             if (id.getName().startsWith(Statistics.METER_PREFIX)) {
@@ -78,7 +79,7 @@ public class StatisticsUtils {
                 if (!ObjectUtils.isEmpty(tags)) {
                     key.append(" [");
                     tags.forEach(tag -> key.append(tag.getKey()).append('=').append(tag.getValue()).append(", "));
-                    key.setLength(key.length() - 2);
+                    key.setLength(key.length() - 2); // remove the last ", "
                     key.append(']');
                 }
                 counters.put(key.toString(), value);
@@ -87,5 +88,25 @@ public class StatisticsUtils {
 
         LAST_COUNTERS.set(counters);
         return counters;
+    }
+
+    // Map with user-friendly toString, sorted and without the last ", "
+    private static class MapUFToString extends HashMap<String, Double> {
+
+        @Override
+        public String toString() {
+            if (isEmpty()) {
+                return "{}";
+            }
+
+            final StringBuilder sb = new StringBuilder("{");
+            entrySet().stream()
+                    .sorted()
+                    .forEach(e -> sb.append(e.getKey()).append(": ").append(e.getValue()).append(", "));
+            sb.setLength(sb.length() - 2); // remove the last ", "
+            sb.append("}");
+
+            return sb.toString();
+        }
     }
 }
