@@ -869,8 +869,7 @@ public class RepositoryApplicationConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    // don't active the auto assign scheduler in test, otherwise it is hard to
-    // test
+    // don't active the auto assign scheduler in test, otherwise it is hard to test
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.autoassign.scheduler", name = "enabled", matchIfMissing = true)
     AutoAssignScheduler autoAssignScheduler(final SystemManagement systemManagement,
