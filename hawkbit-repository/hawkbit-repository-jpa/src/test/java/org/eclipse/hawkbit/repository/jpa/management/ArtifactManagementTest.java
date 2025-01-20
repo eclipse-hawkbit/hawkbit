@@ -441,7 +441,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     void createArtifactWithNoneMatchingHashes() throws IOException, NoSuchAlgorithmException {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte[] testData = RandomStringUtils.randomAlphanumeric(100).getBytes();
+        final byte[] testData = randomBytes(100);
         final DbArtifactHash artifactHashes = calcHashes(testData);
 
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
@@ -474,7 +474,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     void createArtifactWithMatchingHashes() throws IOException, NoSuchAlgorithmException {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte[] testData = RandomStringUtils.randomAlphanumeric(100).getBytes();
+        final byte[] testData = randomBytes(100);
         final DbArtifactHash artifactHashes = calcHashes(testData);
 
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
@@ -497,7 +497,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule smOs = testdataFactory.createSoftwareModuleOs();
         final SoftwareModule smApp = testdataFactory.createSoftwareModuleApp();
 
-        final byte[] testData = RandomStringUtils.randomAlphanumeric(100).getBytes();
+        final byte[] testData = randomBytes(100);
         final DbArtifactHash artifactHashes = calcHashes(testData);
 
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
@@ -521,10 +521,6 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    private static byte[] randomBytes(final int len) {
-        return RandomStringUtils.randomAlphanumeric(len).getBytes();
-    }
-
     private DbArtifactHash calcHashes(final byte[] input) throws NoSuchAlgorithmException {
         final String sha1Hash = toBase16Hash("SHA1", input);
         final String md5Hash = toBase16Hash("MD5", input);
@@ -539,8 +535,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         return HexFormat.of().withLowerCase().formatHex(messageDigest.digest());
     }
 
-    private Artifact createArtifactForSoftwareModule(final String filename, final long moduleId, final int artifactSize)
-            throws IOException {
+    private Artifact createArtifactForSoftwareModule(final String filename, final long moduleId, final int artifactSize) throws IOException {
         final byte[] randomBytes = randomBytes(artifactSize);
         try (final InputStream inputStream = new ByteArrayInputStream(randomBytes)) {
             return createArtifactForSoftwareModule(filename, moduleId, artifactSize, inputStream);

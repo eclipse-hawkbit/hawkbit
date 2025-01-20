@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
-import java.util.stream.Collectors;
 
 import jakarta.persistence.criteria.JoinType;
 
@@ -163,7 +162,7 @@ public abstract class AbstractDsAssignmentStrategy {
             actionRepository.save(action);
 
             return action.getTarget().getId();
-        }).collect(Collectors.toList());
+        }).toList();
 
         if (!activeActions.isEmpty()) {
             cancelAssignDistributionSetEvent(Collections.unmodifiableList(activeActions));
@@ -202,7 +201,7 @@ public abstract class AbstractDsAssignmentStrategy {
             actionRepository.save(action);
 
             return action.getTarget().getId();
-        }).collect(Collectors.toList());
+        }).toList();
 
     }
 

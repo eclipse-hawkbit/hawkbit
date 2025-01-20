@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import jakarta.persistence.EntityManager;
@@ -24,6 +23,7 @@ import jakarta.persistence.PersistenceContext;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
@@ -76,8 +76,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
-@ContextConfiguration(classes = {
-        RepositoryApplicationConfiguration.class, TestConfiguration.class })
+@ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
 @TestPropertySource(locations = "classpath:/jpa-test.properties")
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
@@ -85,6 +84,8 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected static final String INVALID_TEXT_HTML = "</noscript><br><script>";
     protected static final String NOT_EXIST_ID = "12345678990";
     protected static final long NOT_EXIST_IDL = Long.parseLong(NOT_EXIST_ID);
+
+    protected static final RandomStringUtils RANDOM_STRING_UTILS = RandomStringUtils.insecure();
 
     private static final List<String> REPOSITORY_AND_TARGET_PERMISSIONS = List.of(SpPermission.READ_REPOSITORY, SpPermission.CREATE_REPOSITORY, SpPermission.UPDATE_REPOSITORY, SpPermission.DELETE_REPOSITORY, SpPermission.READ_TARGET, SpPermission.CREATE_TARGET, SpPermission.UPDATE_TARGET, SpPermission.DELETE_TARGET);
 
@@ -176,6 +177,14 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
         ((JpaSoftwareModule) module).setOptLockRevision(module.getOptLockRevision() + 1);
     }
 
+    protected static String randomString(final int len) {
+        return RANDOM_STRING_UTILS.next(len, true, false);
+    }
+
+    protected static byte[] randomBytes(final int len) {
+        return randomString(len).getBytes();
+    }
+
     protected Database getDatabase() {
         return jpaProperties.getDatabase();
     }
@@ -187,18 +196,18 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     protected List<Target> assignTag(final Collection<Target> targets, final TargetTag tag) {
         return targetManagement.assignTag(
-                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
+                targets.stream().map(Target::getControllerId).toList(), tag.getId());
     }
 
     protected List<Target> unassignTag(final Collection<Target> targets, final TargetTag tag) {
         return targetManagement.unassignTag(
-                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
+                targets.stream().map(Target::getControllerId).toList(), tag.getId());
     }
 
     protected List<DistributionSet> assignTag(final Collection<DistributionSet> sets,
             final DistributionSetTag tag) {
         return distributionSetManagement.assignTag(
-                sets.stream().map(DistributionSet::getId).collect(Collectors.toList()), tag.getId());
+                sets.stream().map(DistributionSet::getId).toList(), tag.getId());
     }
 
     protected List<DistributionSet> unassignTag(final Collection<DistributionSet> sets,
@@ -209,7 +218,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     protected TargetTypeAssignmentResult initiateTypeAssignment(final Collection<Target> targets, final TargetType type) {
         return targetManagement.assignType(
-                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), type.getId());
+                targets.stream().map(Target::getControllerId).toList(), type.getId());
     }
 
     protected void assertRollout(final Rollout rollout, final boolean dynamic, final Rollout.RolloutStatus status, final int groupCreated,

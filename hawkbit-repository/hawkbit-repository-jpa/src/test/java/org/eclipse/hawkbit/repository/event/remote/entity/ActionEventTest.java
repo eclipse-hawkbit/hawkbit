@@ -27,17 +27,17 @@ import org.junit.jupiter.api.Test;
  */
 @Feature("Component Tests - Repository")
 @Story("Test ActionCreatedEvent and ActionUpdatedEvent")
-public class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
+class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
 
     @Test
     @Description("Verifies that the action entity reloading by remote created works")
-    public void testActionCreatedEvent() {
+    void testActionCreatedEvent() {
         assertAndCreateRemoteEvent(ActionCreatedEvent.class);
     }
 
     @Test
     @Description("Verifies that the action entity reloading by remote updated works")
-    public void testActionUpdatedEvent() {
+    void testActionUpdatedEvent() {
         assertAndCreateRemoteEvent(ActionUpdatedEvent.class);
     }
 
