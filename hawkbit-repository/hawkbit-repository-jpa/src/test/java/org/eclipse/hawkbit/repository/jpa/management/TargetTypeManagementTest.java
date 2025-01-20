@@ -22,7 +22,6 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -78,8 +77,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too long description should not be created")
                 .isThrownBy(() -> targetTypeManagement.create(
-                        entityFactory.targetType().create().name("a").description(
-                                RandomStringUtils.randomAlphanumeric(TargetType.DESCRIPTION_MAX_SIZE + 1))));
+                        entityFactory.targetType().create().name("a").description(randomString(TargetType.DESCRIPTION_MAX_SIZE + 1))));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid description should not be created").isThrownBy(() -> targetTypeManagement
@@ -88,8 +86,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too long description should not be updated")
                 .isThrownBy(() -> targetTypeManagement.update(
-                        entityFactory.targetType().update(targetType.getId()).description(
-                                RandomStringUtils.randomAlphanumeric(TargetType.DESCRIPTION_MAX_SIZE + 1))));
+                        entityFactory.targetType().update(targetType.getId()).description(randomString(TargetType.DESCRIPTION_MAX_SIZE + 1))));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid description should not be updated")
@@ -213,8 +210,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too long colour should not be created")
                 .isThrownBy(() -> targetTypeManagement.create(
-                        entityFactory.targetType().create().name("a")
-                                .colour(RandomStringUtils.randomAlphanumeric(Type.COLOUR_MAX_SIZE + 1))));
+                        entityFactory.targetType().create().name("a").colour(randomString(Type.COLOUR_MAX_SIZE + 1))));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid colour should not be created").isThrownBy(() -> targetTypeManagement
@@ -223,8 +219,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too long colour should not be updated")
                 .isThrownBy(() -> targetTypeManagement.update(
-                        entityFactory.targetType().update(targetType.getId())
-                                .colour(RandomStringUtils.randomAlphanumeric(Type.COLOUR_MAX_SIZE + 1))));
+                        entityFactory.targetType().update(targetType.getId()).colour(randomString(Type.COLOUR_MAX_SIZE + 1))));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid colour should not be updated").isThrownBy(() -> targetTypeManagement
@@ -235,9 +230,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     private void createTargetTypeWithInvalidKey() {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too long key should not be created")
-                .isThrownBy(() -> targetTypeManagement
-                        .create(entityFactory.targetType().create().name(RandomStringUtils.randomAlphanumeric(
-                                Type.KEY_MAX_SIZE + 1))));
+                .isThrownBy(() -> targetTypeManagement.create(entityFactory.targetType().create().name(randomString(Type.KEY_MAX_SIZE + 1))));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid key should not be created").isThrownBy(
@@ -249,8 +242,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too long name should not be created")
                 .isThrownBy(() -> targetTypeManagement
-                        .create(entityFactory.targetType().create().name(RandomStringUtils.randomAlphanumeric(
-                                NamedEntity.NAME_MAX_SIZE + 1))));
+                        .create(entityFactory.targetType().create().name(randomString(NamedEntity.NAME_MAX_SIZE + 1))));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid name should not be created").isThrownBy(
@@ -259,8 +251,7 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with too long name should not be updated")
                 .isThrownBy(() -> targetTypeManagement
-                        .update(entityFactory.targetType().update(targetType.getId()).name(RandomStringUtils.randomAlphanumeric(
-                                NamedEntity.NAME_MAX_SIZE + 1))));
+                        .update(entityFactory.targetType().update(targetType.getId()).name(randomString(NamedEntity.NAME_MAX_SIZE + 1))));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("targetType with invalid name should not be updated").isThrownBy(() -> targetTypeManagement

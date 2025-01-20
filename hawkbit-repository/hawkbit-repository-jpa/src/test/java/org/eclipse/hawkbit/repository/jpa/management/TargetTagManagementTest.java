@@ -27,7 +27,6 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
@@ -239,7 +238,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("tag with too long description should not be created")
                 .isThrownBy(() -> targetTagManagement.create(
-                        entityFactory.tag().create().name("a").description(RandomStringUtils.randomAlphanumeric(513))));
+                        entityFactory.tag().create().name("a").description(randomString(513))));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("tag with invalid description should not be created").isThrownBy(() -> targetTagManagement
                         .create(entityFactory.tag().create().name("a").description(INVALID_TEXT_HTML)));
@@ -247,7 +246,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
                 .as("tag with too long description should not be updated")
                 .isThrownBy(() -> targetTagManagement.update(
                         entityFactory.tag().update(tag.getId())
-                                .description(RandomStringUtils.randomAlphanumeric(513))));
+                                .description(randomString(513))));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("tag with invalid description should not be updated")
                 .isThrownBy(() -> targetTagManagement
@@ -259,14 +258,14 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("tag with too long colour should not be created")
                 .isThrownBy(() -> targetTagManagement.create(
-                        entityFactory.tag().create().name("a").colour(RandomStringUtils.randomAlphanumeric(17))));
+                        entityFactory.tag().create().name("a").colour(randomString(17))));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("tag with invalid colour should not be created").isThrownBy(() -> targetTagManagement
                         .create(entityFactory.tag().create().name("a").colour(INVALID_TEXT_HTML)));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("tag with too long colour should not be updated")
                 .isThrownBy(() -> targetTagManagement.update(
-                        entityFactory.tag().update(tag.getId()).colour(RandomStringUtils.randomAlphanumeric(17))));
+                        entityFactory.tag().update(tag.getId()).colour(randomString(17))));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("tag with invalid colour should not be updated").isThrownBy(() -> targetTagManagement
                         .update(entityFactory.tag().update(tag.getId()).colour(INVALID_TEXT_HTML)));
@@ -277,16 +276,14 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("tag with too long name should not be created")
                 .isThrownBy(() -> targetTagManagement
-                        .create(entityFactory.tag().create().name(RandomStringUtils.randomAlphanumeric(
-                                NamedEntity.NAME_MAX_SIZE + 1))));
+                        .create(entityFactory.tag().create().name(randomString(NamedEntity.NAME_MAX_SIZE + 1))));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("tag with invalidname should not be created")
                 .isThrownBy(() -> targetTagManagement.create(entityFactory.tag().create().name(INVALID_TEXT_HTML)));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("tag with too long name should not be updated")
                 .isThrownBy(() -> targetTagManagement
-                        .update(entityFactory.tag().update(tag.getId()).name(RandomStringUtils.randomAlphanumeric(
-                                NamedEntity.NAME_MAX_SIZE + 1))));
+                        .update(entityFactory.tag().update(tag.getId()).name(randomString(NamedEntity.NAME_MAX_SIZE + 1))));
         assertThatExceptionOfType(ConstraintViolationException.class).as("tag with invalid name should not be updated")
                 .isThrownBy(() -> targetTagManagement
                         .update(entityFactory.tag().update(tag.getId()).name(INVALID_TEXT_HTML)));

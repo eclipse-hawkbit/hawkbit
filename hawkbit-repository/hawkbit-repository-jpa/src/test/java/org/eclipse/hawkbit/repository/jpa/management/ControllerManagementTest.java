@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import jakarta.validation.ConstraintViolationException;
@@ -40,7 +39,6 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
@@ -805,7 +803,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("register target with too long controllerId should fail")
                 .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist(
-                        RandomStringUtils.randomAlphabetic(Target.CONTROLLER_ID_MAX_SIZE + 1), LOCALHOST));
+                        randomString(Target.CONTROLLER_ID_MAX_SIZE + 1), LOCALHOST));
     }
 
     @Test

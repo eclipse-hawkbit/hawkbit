@@ -14,9 +14,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.RandomStringUtils;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -35,18 +36,19 @@ import org.springframework.util.CollectionUtils;
 /**
  * Builder class for building certain json strings.
  */
-public abstract class JsonBuilder {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Slf4j
+public class JsonBuilder {
 
     public static String ids(final Collection<Long> ids) throws JSONException {
         final JSONArray list = new JSONArray();
         for (final Long smID : ids) {
             list.put(new JSONObject().put("id", smID));
         }
-
         return list.toString();
     }
 
-    public static <T> String toArray(final Collection<T> ids) throws JSONException {
+    public static <T> String toArray(final Collection<T> ids) {
         final JSONArray list = new JSONArray();
         for (final T smID : ids) {
             list.put(smID);
@@ -66,20 +68,15 @@ public abstract class JsonBuilder {
                 builder.append(",");
             }
         }
-
         builder.append("]");
 
         return builder.toString();
-
     }
 
     public static String tag(final Tag tag) throws JSONException {
         final StringBuilder builder = new StringBuilder();
-
         createTagLine(builder, tag);
-
         return builder.toString();
-
     }
 
     public static String softwareModules(final List<SoftwareModule> modules) throws JSONException {
@@ -98,42 +95,9 @@ public abstract class JsonBuilder {
                 builder.append(",");
             }
         }
-
         builder.append("]");
 
         return builder.toString();
-
-    }
-
-    public static String softwareModulesCreatableFieldsOnly(final List<SoftwareModule> modules) throws JSONException {
-        final StringBuilder builder = new StringBuilder();
-
-        builder.append("[");
-        int i = 0;
-        for (final SoftwareModule module : modules) {
-            builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
-                    .put("type", module.getType().getKey()).put("vendor", module.getVendor())
-                    .put("version", module.getVersion()).toString());
-
-            if (++i < modules.size()) {
-                builder.append(",");
-            }
-        }
-
-        builder.append("]");
-
-        return builder.toString();
-
-    }
-
-    public static String softwareModuleUpdatableFieldsOnly(final SoftwareModule module) throws JSONException {
-        final StringBuilder builder = new StringBuilder();
-
-        builder.append(new JSONObject().put("description", module.getDescription()).put("vendor", module.getVendor())
-                .toString());
-
-        return builder.toString();
-
     }
 
     public static String softwareModuleTypes(final List<SoftwareModuleType> types) throws JSONException {
@@ -151,81 +115,21 @@ public abstract class JsonBuilder {
                 builder.append(",");
             }
         }
-
         builder.append("]");
 
         return builder.toString();
-
-    }
-
-    public static String softwareModuleTypesCreatableFieldsOnly(final List<SoftwareModuleType> types)
-            throws JSONException {
-        final StringBuilder builder = new StringBuilder();
-
-        builder.append("[");
-        int i = 0;
-        for (final SoftwareModuleType module : types) {
-            builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
-                    .put("colour", module.getColour()).put("key", module.getKey())
-                    .put("maxAssignments", module.getMaxAssignments()).toString());
-
-            if (++i < types.size()) {
-                builder.append(",");
-            }
-        }
-
-        builder.append("]");
-
-        return builder.toString();
-
-    }
-
-    /**
-     * Build an invalid request body with missing result for feedback message.
-     *
-     * @param id id of the action
-     * @param execution the execution
-     * @param message the message
-     * @return a invalid request body
-     * @throws JSONException
-     */
-    public static String missingResultInFeedback(final String id, final String execution, final String message)
-            throws JSONException {
-        return new JSONObject().put("id", id).put("time", "20140511T121314")
-                .put("status",
-                        new JSONObject().put("execution", execution).put("details", new JSONArray().put(message)))
-                .toString();
-    }
-
-    /**
-     * Build an invalid request body with missing finished result for feedback
-     * message.
-     *
-     * @param id id of the action
-     * @param execution the execution
-     * @param message the message
-     * @return a invalid request body
-     * @throws JSONException
-     */
-    public static String missingFinishedResultInFeedback(final String id, final String execution, final String message)
-            throws JSONException {
-        return new JSONObject().put("id", id).put("time", "20140511T121314")
-                .put("status", new JSONObject().put("execution", execution).put("result", new JSONObject())
-                        .put("details", new JSONArray().put(message)))
-                .toString();
     }
 
     public static String distributionSetTypes(final List<DistributionSetType> types) throws JSONException {
         final JSONArray result = new JSONArray();
 
         for (final DistributionSetType type : types) {
-
             final JSONArray osmTypes = new JSONArray();
             type.getOptionalModuleTypes().forEach(smt -> {
                 try {
                     osmTypes.put(new JSONObject().put("id", smt.getId()));
                 } catch (final JSONException e1) {
-                    e1.printStackTrace();
+                    log.error("JSONException (skip)", e1);
                 }
             });
 
@@ -234,7 +138,7 @@ public abstract class JsonBuilder {
                 try {
                     msmTypes.put(new JSONObject().put("id", smt.getId()));
                 } catch (final JSONException e) {
-                    e.printStackTrace();
+                    log.error("JSONException (skip)", e);
                 }
             });
 
@@ -249,47 +153,14 @@ public abstract class JsonBuilder {
         return result.toString();
     }
 
-    public static String distributionSetTypesCreateValidFieldsOnly(final List<DistributionSetType> types) {
-        final JSONArray result = new JSONArray();
-        for (final DistributionSetType module : types) {
-            try {
-                final JSONArray osmTypes = new JSONArray();
-                module.getOptionalModuleTypes().forEach(smt -> {
-                    try {
-                        osmTypes.put(new JSONObject().put("id", smt.getId()));
-                    } catch (final JSONException e) {
-                        e.printStackTrace();
-                    }
-                });
-
-                final JSONArray msmTypes = new JSONArray();
-                module.getMandatoryModuleTypes().forEach(smt -> {
-                    try {
-                        msmTypes.put(new JSONObject().put("id", smt.getId()));
-                    } catch (final JSONException e) {
-                        e.printStackTrace();
-                    }
-                });
-
-                result.put(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
-                        .put("colour", module.getColour()).put("key", module.getKey()).put("optionalmodules", osmTypes)
-                        .put("mandatorymodules", msmTypes));
-            } catch (final JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return result.toString();
-    }
-
-    public static String distributionSets(final List<DistributionSet> sets) throws JSONException {
+    public static String distributionSets(final List<DistributionSet> sets) {
         final JSONArray setsJson = new JSONArray();
 
         sets.forEach(set -> {
             try {
                 setsJson.put(distributionSet(set));
             } catch (final JSONException e) {
-                e.printStackTrace();
+                log.error("JSONException (skip)", e);
             }
         });
 
@@ -297,62 +168,15 @@ public abstract class JsonBuilder {
 
     }
 
-    public static String distributionSetsCreateValidFieldsOnly(final List<DistributionSet> sets) throws JSONException {
-        final JSONArray result = new JSONArray();
-
-        for (final DistributionSet set : sets) {
-            result.put(distributionSetCreateValidFieldsOnly(set));
-
-        }
-
-        return result.toString();
-
-    }
-
-    public static JSONObject distributionSetCreateValidFieldsOnly(final DistributionSet set) throws JSONException {
-
-        final List<JSONObject> modules = set.getModules().stream().map(module -> {
-            try {
-                return new JSONObject().put("id", module.getId());
-            } catch (final JSONException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }).collect(Collectors.toList());
-
-        return new JSONObject().put("name", set.getName()).put("description", set.getDescription())
-                .put("type", set.getType() == null ? null : set.getType().getKey()).put("version", set.getVersion())
-                .put("requiredMigrationStep", set.isRequiredMigrationStep()).put("modules", new JSONArray(modules));
-
-    }
-
-    public static String distributionSetUpdateValidFieldsOnly(final DistributionSet set) throws JSONException {
-
-        set.getModules().stream().map(module -> {
-            try {
-                return new JSONObject().put("id", module.getId());
-            } catch (final JSONException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }).collect(Collectors.toList());
-
-        return new JSONObject().put("name", set.getName()).put("description", set.getDescription())
-                .put("version", set.getVersion()).put("requiredMigrationStep", set.isRequiredMigrationStep())
-                .toString();
-
-    }
-
     public static JSONObject distributionSet(final DistributionSet set) throws JSONException {
-
         final List<JSONObject> modules = set.getModules().stream().map(module -> {
             try {
                 return new JSONObject().put("id", module.getId());
             } catch (final JSONException e) {
-                e.printStackTrace();
+                log.error("JSONException (skip)", e);
                 return null;
             }
-        }).collect(Collectors.toList());
+        }).toList();
 
         return new JSONObject().put("name", set.getName()).put("description", set.getDescription())
                 .put("type", set.getType() == null ? null : set.getType().getKey()).put("id", Long.MAX_VALUE)
@@ -387,15 +211,13 @@ public abstract class JsonBuilder {
         return builder.toString();
     }
 
-    public static String targets(final List<Target> targets, final boolean withToken, final long targetTypeId)
-            throws JSONException {
+    public static String targets(final List<Target> targets, final boolean withToken, final long targetTypeId) throws JSONException {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("[");
         int i = 0;
         for (final Target target : targets) {
             final String address = target.getAddress() != null ? target.getAddress().toString() : null;
-            final String type = target.getTargetType() != null ? target.getTargetType().getId().toString() : null;
             final String token = withToken ? target.getSecurityToken() : null;
 
             builder.append(new JSONObject().put("controllerId", target.getControllerId())
@@ -423,7 +245,7 @@ public abstract class JsonBuilder {
                 try {
                     dsTypes.put(new JSONObject().put("id", dsType.getId()));
                 } catch (final JSONException e1) {
-                    e1.printStackTrace();
+                    log.error("JSONException (skip)", e1);
                 }
             });
 
@@ -437,44 +259,10 @@ public abstract class JsonBuilder {
         return result.toString();
     }
 
-    public static String targetTypesCreatableFieldsOnly(final List<TargetType> types) throws JSONException {
-        final JSONArray result = new JSONArray();
-
-        for (final TargetType type : types) {
-
-            final JSONArray dsTypes = new JSONArray();
-            type.getCompatibleDistributionSetTypes().forEach(dsType -> {
-                try {
-                    dsTypes.put(new JSONObject().put("id", dsType.getId()));
-                } catch (final JSONException e1) {
-                    e1.printStackTrace();
-                }
-            });
-
-            final JSONObject json = new JSONObject().put("name", type.getName())
-                    .put("description", type.getDescription()).put("colour", type.getColour());
-
-            if (dsTypes.length() != 0) {
-                json.put("compatibledistributionsettypes", dsTypes);
-            }
-
-            result.put(json);
-        }
-
-        return result.toString();
-    }
-
     public static String rollout(final String name, final String description, final int groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions) {
         return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, null, null,
                 null, null, null);
-    }
-
-    public static String rollout(final String name, final String description, final Integer groupSize,
-            final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
-            final String type) {
-        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, type,
-                null, null, null, null);
     }
 
     public static String rolloutWithGroups(final String name, final String description, final Integer groupSize,
@@ -488,9 +276,9 @@ public abstract class JsonBuilder {
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
             final List<RolloutGroup> groups, final String type, final Integer weight,
             final Boolean confirmationRequired) {
-        final List<String> rolloutGroupsJson = groups.stream().map(JsonBuilder::rolloutGroup)
-                .collect(Collectors.toList());
-        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions,
+        final List<String> rolloutGroupsJson = groups.stream().map(JsonBuilder::rolloutGroup).toList();
+        return rollout(
+                name, description, groupSize, distributionSetId, targetFilterQuery, conditions,
                 rolloutGroupsJson, type, weight, System.currentTimeMillis(), null, confirmationRequired);
     }
 
@@ -578,7 +366,7 @@ public abstract class JsonBuilder {
             }
 
         } catch (final JSONException e) {
-            e.printStackTrace();
+            log.error("JSONException (skip)", e);
         }
 
         return json.toString();
@@ -635,34 +423,11 @@ public abstract class JsonBuilder {
             }
 
         } catch (final JSONException e) {
-            e.printStackTrace();
+            log.error("JSONException (skip)", e);
             fail("Cannot parse JSON for rollout group.");
         }
 
         return jsonGroup.toString();
-    }
-
-    public static String cancelActionFeedback(final String id, final String execution) throws JSONException {
-        return cancelActionFeedback(id, execution, null, RandomStringUtils.randomAlphanumeric(1000));
-
-    }
-
-    public static String cancelActionFeedback(final String id, final String execution, final String message)
-            throws JSONException {
-        return cancelActionFeedback(id, execution, null, message);
-    }
-
-    public static String cancelActionFeedback(final String id, final String execution, final Integer code,
-            final String message) throws JSONException {
-        final JSONObject statusJson = new JSONObject().put("execution", execution)
-                .put("result", new JSONObject().put("finished", "success"))
-                .put("details", new JSONArray().put(message));
-
-        if (code != null) {
-            statusJson.put("code", code);
-        }
-
-        return new JSONObject().put("id", id).put("status", statusJson).toString();
     }
 
     public static JSONObject configData(final Map<String, String> attributes) throws JSONException {
@@ -670,13 +435,12 @@ public abstract class JsonBuilder {
     }
 
     public static JSONObject configData(final Map<String, String> attributes, final String mode) throws JSONException {
-
         final JSONObject data = new JSONObject();
-        attributes.entrySet().forEach(entry -> {
+        attributes.forEach((key, value) -> {
             try {
-                data.put(entry.getKey(), entry.getValue());
+                data.put(key, value);
             } catch (final JSONException e) {
-                e.printStackTrace();
+                log.error("JSONException (skip)", e);
             }
         });
 

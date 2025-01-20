@@ -107,7 +107,8 @@ import org.springframework.test.context.TestPropertySource;
 // Cleaning repository will fire "delete" events. We won't count them to the
 // test execution. So, the order execution between EventVerifier and Cleanup is
 // important!
-@TestExecutionListeners(listeners = { EventVerifier.class, CleanupTestExecutionListener.class },
+@TestExecutionListeners(
+        listeners = { EventVerifier.class, CleanupTestExecutionListener.class },
         mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
 public abstract class AbstractIntegrationTest {
