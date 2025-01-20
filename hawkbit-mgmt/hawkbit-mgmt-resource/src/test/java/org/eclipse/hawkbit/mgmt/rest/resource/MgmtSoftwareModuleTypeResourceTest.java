@@ -31,7 +31,6 @@ import com.jayway.jsonpath.JsonPath;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -413,8 +412,10 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final SoftwareModuleType toLongName = entityFactory.softwareModuleType().create().key("test123")
-                .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1)).build();
+        final SoftwareModuleType toLongName = entityFactory.softwareModuleType().create()
+                .key("test123")
+                .name(randomString(NamedEntity.NAME_MAX_SIZE + 1))
+                .build();
         mvc.perform(
                         post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypes(Collections.singletonList(toLongName)))
                                 .contentType(MediaType.APPLICATION_JSON))

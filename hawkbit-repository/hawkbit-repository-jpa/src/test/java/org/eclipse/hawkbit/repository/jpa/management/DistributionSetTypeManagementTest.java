@@ -25,7 +25,6 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
@@ -50,13 +49,13 @@ import org.junit.jupiter.api.Test;
  */
 @Feature("Component Tests - Repository")
 @Story("DistributionSet Management")
-public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
+class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
             + "of Optional not present.")
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 0) })
-    public void nonExistingEntityAccessReturnsNotPresent() {
+    void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(distributionSetTypeManagement.get(NOT_EXIST_IDL)).isNotPresent();
         assertThat(distributionSetTypeManagement.findByKey(NOT_EXIST_ID)).isNotPresent();
         assertThat(distributionSetTypeManagement.findByName(NOT_EXIST_ID)).isNotPresent();
@@ -68,7 +67,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     @ExpectEvents({
             @Expect(type = DistributionSetCreatedEvent.class, count = 0),
             @Expect(type = DistributionSetTypeCreatedEvent.class, count = 1) })
-    public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
+    void entityQueriesReferringToNotExistingEntitiesThrowsException() {
 
         final List<Long> softwareModuleTypes = Collections.singletonList(osType.getId());
 
@@ -98,7 +97,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 0) })
-    public void createAndUpdateDistributionSetWithInvalidFields() {
+    void createAndUpdateDistributionSetWithInvalidFields() {
         final DistributionSet set = testdataFactory.createDistributionSet();
 
         createAndUpdateDistributionSetWithInvalidDescription(set);
@@ -108,7 +107,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
     @Test
     @Description("Tests the successful module update of unused distribution set type which is in fact allowed.")
-    public void updateUnassignedDistributionSetTypeModules() {
+    void updateUnassignedDistributionSetTypeModules() {
         final DistributionSetType updatableType = distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
         assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
@@ -133,7 +132,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
     @Test
     @Description("Verifies that the quota for software module types per distribution set type is enforced as expected.")
-    public void quotaMaxSoftwareModuleTypes() {
+    void quotaMaxSoftwareModuleTypes() {
         final int quota = quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType();
         // create software module types
         final List<Long> moduleTypeIds = new ArrayList<>();
@@ -180,7 +179,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
     @Test
     @Description("Tests the successfull update of used distribution set type meta data which is in fact allowed.")
-    public void updateAssignedDistributionSetTypeMetaData() {
+    void updateAssignedDistributionSetTypeMetaData() {
         final DistributionSetType nonUpdatableType = createDistributionSetTypeUsedByDs();
 
         distributionSetTypeManagement.update(
@@ -193,7 +192,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
     @Test
     @Description("Tests the unsuccessfull update of used distribution set type (module addition).")
-    public void addModuleToAssignedDistributionSetTypeFails() {
+    void addModuleToAssignedDistributionSetTypeFails() {
         final DistributionSetType nonUpdatableType = createDistributionSetTypeUsedByDs();
 
         assertThatThrownBy(() -> distributionSetTypeManagement
@@ -203,7 +202,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
     @Test
     @Description("Tests the unsuccessfull update of used distribution set type (module removal).")
-    public void removeModuleToAssignedDistributionSetTypeFails() {
+    void removeModuleToAssignedDistributionSetTypeFails() {
         DistributionSetType nonUpdatableType = distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
         assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
@@ -220,7 +219,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
     @Test
     @Description("Tests the successfull deletion of unused (hard delete) distribution set types.")
-    public void deleteUnassignedDistributionSetType() {
+    void deleteUnassignedDistributionSetType() {
         final JpaDistributionSetType hardDelete = (JpaDistributionSetType) distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("delete").name("to be deleted"));
 
@@ -232,7 +231,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
     @Test
     @Description("Tests the successfull deletion of used (soft delete) distribution set types.")
-    public void deleteAssignedDistributionSetType() {
+    void deleteAssignedDistributionSetType() {
         final int existing = (int) distributionSetTypeManagement.count();
         final JpaDistributionSetType toBeDeleted = (JpaDistributionSetType) distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("softdeleted").name("to be deleted"));
@@ -252,7 +251,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
     @Test
     @Description("Verifies that when no SoftwareModules are assigned to a Distribution then the DistributionSet is not complete.")
-    public void shouldFailWhenDistributionSetHasNoSoftwareModulesAssigned() {
+    void shouldFailWhenDistributionSetHasNoSoftwareModulesAssigned() {
 
         final JpaDistributionSetType jpaDistributionSetType = (JpaDistributionSetType) distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("newType").name("new Type"));
@@ -271,7 +270,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set with too long description should not be created")
                 .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a")
-                        .version("a").description(RandomStringUtils.randomAlphanumeric(513))));
+                        .version("a").description(randomString(513))));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set invalid description text should not be created")
@@ -281,7 +280,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set with too long description should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
-                        .description(RandomStringUtils.randomAlphanumeric(513))));
+                        .description(randomString(513))));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set with invalid description should not be updated").isThrownBy(() -> distributionSetManagement
@@ -294,7 +293,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
         assertThatExceptionOfType(ConstraintViolationException.class).as("set with too long name should not be created")
                 .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().version("a")
-                        .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1))));
+                        .name(randomString(NamedEntity.NAME_MAX_SIZE + 1))));
 
         assertThatExceptionOfType(ConstraintViolationException.class).as("set with invalid name should not be created")
                 .isThrownBy(() -> distributionSetManagement
@@ -310,7 +309,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
         assertThatExceptionOfType(ConstraintViolationException.class).as("set with too long name should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
-                        .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1))));
+                        .name(randomString(NamedEntity.NAME_MAX_SIZE + 1))));
 
         assertThatExceptionOfType(ConstraintViolationException.class).as("set with invalid name should not be updated")
                 .isThrownBy(() -> distributionSetManagement
@@ -327,7 +326,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set with too long version should not be created")
                 .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a")
-                        .version(RandomStringUtils.randomAlphanumeric(NamedVersionedEntity.VERSION_MAX_SIZE + 1))));
+                        .version(randomString(NamedVersionedEntity.VERSION_MAX_SIZE + 1))));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set with invalid version should not be created").isThrownBy(() -> distributionSetManagement
@@ -344,7 +343,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set with too long version should not be updated")
                 .isThrownBy(() -> distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
-                        .version(RandomStringUtils.randomAlphanumeric(NamedVersionedEntity.VERSION_MAX_SIZE + 1))));
+                        .version(randomString(NamedVersionedEntity.VERSION_MAX_SIZE + 1))));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set with invalid version should not be updated").isThrownBy(() -> distributionSetManagement

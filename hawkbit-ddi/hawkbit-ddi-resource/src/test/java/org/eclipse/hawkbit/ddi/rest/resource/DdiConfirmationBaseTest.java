@@ -28,7 +28,6 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.ddi.json.model.DdiActivateAutoConfirmation;
 import org.eclipse.hawkbit.ddi.json.model.DdiConfirmationFeedback;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
@@ -507,7 +506,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
             final Target target, final Action action,
             final DdiConfirmationFeedback.Confirmation confirmation, Integer code, String message) throws Exception {
         if (message == null) {
-            message = RandomStringUtils.randomAlphanumeric(1000);
+            message = randomString(1000);
         }
 
         final String feedback = getJsonConfirmationFeedback(confirmation, code, Collections.singletonList(message));

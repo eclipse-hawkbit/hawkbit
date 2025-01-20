@@ -41,7 +41,6 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -1068,8 +1067,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
-        final DistributionSet toLongName = testdataFactory
-                .generateDistributionSet(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1));
+        final DistributionSet toLongName = testdataFactory.generateDistributionSet(randomString(NamedEntity.NAME_MAX_SIZE + 1));
         mvc.perform(post("/rest/v1/distributionsets").content(JsonBuilder.distributionSets(Collections.singletonList(toLongName)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
