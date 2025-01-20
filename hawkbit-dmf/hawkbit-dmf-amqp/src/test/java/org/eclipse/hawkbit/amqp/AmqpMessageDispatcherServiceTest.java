@@ -83,7 +83,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     private Target testTarget;
 
     @BeforeEach
-    public void beforeEach() throws Exception {
+    public void beforeEach() {
         testTarget = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID)
                 .securityToken(TEST_TOKEN).address(AMQP_URI.toString()));
 
@@ -135,8 +135,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
         for (final org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule softwareModule : downloadAndUpdateRequest
                 .getSoftwareModules()) {
-            assertThat(softwareModule.getArtifacts().isEmpty()).as("Artifact list for softwaremodule should be empty")
-                    .isTrue();
+            assertThat(softwareModule.getArtifacts()).as("Artifact list for softwaremodule should be empty").isEmpty();
 
             assertThat(softwareModule.getMetadata()).allSatisfy(metadata -> {
                 assertThat(metadata.getKey()).isEqualTo(TestdataFactory.VISIBLE_SM_MD_KEY);
@@ -202,7 +201,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 assertThat(found.get().getSize()).isEqualTo(dbArtifact.getSize());
                 assertThat(found.get().getHashes().getMd5()).isEqualTo(dbArtifact.getMd5Hash());
                 assertThat(found.get().getHashes().getSha1()).isEqualTo(dbArtifact.getSha1Hash());
-                assertThat(found.get().getLastModified()).isGreaterThan(0L);
+                assertThat(found.get().getLastModified()).isPositive();
             });
         }
     }

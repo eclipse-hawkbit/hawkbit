@@ -18,12 +18,14 @@ import java.util.Objects;
 
 import jakarta.validation.constraints.NotNull;
 
+import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 
 /**
  * {@link AbstractDbArtifact} implementation which dynamically creates a {@link FileInputStream} on calling {@link #getFileInputStream()}.
  */
+@EqualsAndHashCode(callSuper = true)
 public class ArtifactFilesystem extends AbstractDbArtifact {
 
     private final File file;

@@ -49,6 +49,6 @@ class ArtifactFilesystemTest {
         final ArtifactFilesystem underTest = new ArtifactFilesystem(
                 createTempFile, ArtifactFilesystemTest.class.getSimpleName(), new DbArtifactHash("1", "2", "3"), 0L, null);
         final byte[] buffer = new byte[1024];
-        assertThat(IOUtils.read(underTest.getFileInputStream(), buffer)).isEqualTo(0);
+        assertThat(IOUtils.read(underTest.getFileInputStream(), buffer)).isZero();
     }
 }

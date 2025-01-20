@@ -78,7 +78,7 @@ import org.springframework.amqp.support.converter.MessageConverter;
 @ExtendWith(MockitoExtension.class)
 @Feature("Component Tests - Device Management Federation API")
 @Story("AmqpMessage Handler Service Test")
-public class AmqpMessageHandlerServiceTest {
+class AmqpMessageHandlerServiceTest {
 
     private static final String FAIL_MESSAGE_AMQP_REJECT_REASON = AmqpRejectAndDontRequeueException.class
             .getSimpleName() + " was expected, ";
@@ -128,7 +128,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @BeforeEach
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void before() {
+    void before() {
         messageConverter = new Jackson2JsonMessageConverter();
         lenient().when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
         final TenantConfigurationValue multiAssignmentConfig = TenantConfigurationValue.builder().value(Boolean.FALSE)
@@ -146,19 +146,20 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests not allowed content-type in message")
-    public void wrongContentType() {
+    void wrongContentType() {
         final MessageProperties messageProperties = new MessageProperties();
         messageProperties.setContentType("xml");
         final Message message = new Message(new byte[0], messageProperties);
+        final String type = MessageType.THING_CREATED.name();
         assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
                 .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "due to wrong content type")
-                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT,
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, type, TENANT,
                         VIRTUAL_HOST));
     }
 
     @Test
     @Description("Tests the creation of a target/thing by calling the same method that incoming RabbitMQ messages would access.")
-    public void createThing() {
+    void createThing() {
         final String knownThingId = "1";
 
         processThingCreatedMessage(knownThingId, null);
@@ -169,7 +170,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests the creation of a target/thing with specified name by calling the same method that incoming RabbitMQ messages would access.")
-    public void createThingWithName() {
+    void createThingWithName() {
         final String knownThingId = "2";
         final String knownThingName = "NonDefaultTargetName";
 
@@ -185,7 +186,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests the creation of a target/thing with specified type name by calling the same method that incoming RabbitMQ messages would access.")
-    public void createThingWithType() {
+    void createThingWithType() {
         final String knownThingId = "2";
         final String knownThingTypeName = "TargetTypeName";
 
@@ -201,19 +202,17 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests not allowed body in message")
-    public void createThingWithWrongBody() {
-        final String knownThingId = "3";
-
+    void createThingWithWrongBody() {
+        final Message message = createMessage("Not allowed Body".getBytes(), getThingCreatedMessageProperties("3"));
+        final String type = MessageType.THING_CREATED.name();
         assertThatExceptionOfType(MessageConversionException.class)
                 .as("MessageConversionException was excepeted due to wrong body")
-                .isThrownBy(() -> amqpMessageHandlerService.onMessage(
-                        createMessage("Not allowed Body".getBytes(), getThingCreatedMessageProperties(knownThingId)),
-                        MessageType.THING_CREATED.name(), TENANT, VIRTUAL_HOST));
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, type, TENANT, VIRTUAL_HOST));
     }
 
     @Test
     @Description("Tests the creation of a target/thing with specified attributes by calling the same method that incoming RabbitMQ messages would access.")
-    public void createThingWithAttributes() {
+    void createThingWithAttributes() {
         final String knownThingId = "4";
 
         final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
@@ -232,7 +231,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests the creation of a target/thing with specified name and attributes by calling the same method that incoming RabbitMQ messages would access.")
-    public void createThingWithNameAndAttributes() {
+    void createThingWithNameAndAttributes() {
         final String knownThingId = "5";
         final String knownThingName = "NonDefaultTargetName";
 
@@ -255,7 +254,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests the target attribute update by calling the same method that incoming RabbitMQ messages would access.")
-    public void updateAttributes() {
+    void updateAttributes() {
         final String knownThingId = "1";
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
@@ -277,7 +276,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Verifies that the update mode is retrieved from the UPDATE_ATTRIBUTES message and passed to the controller management.")
-    public void attributeUpdateModes() {
+    void attributeUpdateModes() {
         final String knownThingId = "1";
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
@@ -320,32 +319,30 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests the creation of a thing without a 'reply to' header in message.")
-    public void createThingWithoutReplyTo() {
+    void createThingWithoutReplyTo() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED, null);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, "1");
         final Message message = createMessage("", messageProperties);
-
+        final String type = MessageType.THING_CREATED.name();
         assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
                 .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since no replyTo header was set")
-                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT,
-                        VIRTUAL_HOST));
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, type, TENANT, VIRTUAL_HOST));
     }
 
     @Test
     @Description("Tests the creation of a target/thing without a thingID by calling the same method that incoming RabbitMQ messages would access.")
-    public void createThingWithoutID() {
+    void createThingWithoutID() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
         final Message message = createMessage(new byte[0], messageProperties);
-
+        final String type = MessageType.THING_CREATED.name();
         assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
                 .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since no thingId was set")
-                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.THING_CREATED.name(), TENANT,
-                        VIRTUAL_HOST));
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, type, TENANT, VIRTUAL_HOST));
     }
 
     @Test
     @Description("Tests the call of the same method that incoming RabbitMQ messages would access with an unknown message type.")
-    public void unknownMessageType() {
+    void unknownMessageType() {
         final String type = "bumlux";
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, "");
@@ -358,7 +355,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests a invalid message without event topic")
-    public void invalidEventTopic() {
+    void invalidEventTopic() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         final Message message = new Message(new byte[0], messageProperties);
 
@@ -366,52 +363,51 @@ public class AmqpMessageHandlerServiceTest {
                 .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "due to unknown message type").isThrownBy(
                         () -> amqpMessageHandlerService.onMessage(message, "unknownMessageType", TENANT, VIRTUAL_HOST));
 
+        final String type = MessageType.EVENT.name();
         messageProperties.setHeader(MessageHeaderKey.TOPIC, "wrongTopic");
         assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
-                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "due to unknown topic").isThrownBy(() -> amqpMessageHandlerService
-                        .onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST));
+                .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "due to unknown topic")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, type, TENANT, VIRTUAL_HOST));
 
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.CANCEL_DOWNLOAD.name());
         assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
                 .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "because there was no event topic")
-                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT,
-                        VIRTUAL_HOST));
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, type, TENANT, VIRTUAL_HOST));
     }
 
     @Test
     @Description("Tests the update of an action of a target without a exist action id")
-    public void updateActionStatusWithoutActionId() {
+    void updateActionStatusWithoutActionId() {
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.empty());
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(1L, DmfActionStatus.DOWNLOAD);
         final Message message = createMessage(actionUpdateStatus, messageProperties);
-
+        final String type = MessageType.EVENT.name();
         assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
                 .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since no action id was set")
-                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT,
-                        VIRTUAL_HOST));
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, type, TENANT, VIRTUAL_HOST));
     }
 
     @Test
     @Description("Tests the update of an action of a target without a exist action id")
-    public void updateActionStatusWithoutExistActionId() {
+    void updateActionStatusWithoutExistActionId() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.empty());
 
         final DmfActionUpdateStatus actionUpdateStatus = createActionUpdateStatus(DmfActionStatus.DOWNLOAD);
         final Message message = createMessage(actionUpdateStatus, messageProperties);
-
+        final String type = MessageType.EVENT.name();
         assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
                 .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since no action id was set")
-                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT,
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, type, TENANT,
                         VIRTUAL_HOST));
     }
 
     @Test
     @Description("Tests that messages which cause quota violations are not re-added to message queue so they would block other communication.")
-    public void quotaExceeded() {
+    void quotaExceeded() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
 
@@ -429,14 +425,14 @@ public class AmqpMessageHandlerServiceTest {
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
         when(controllerManagementMock.addUpdateActionStatus(any())).thenThrow(new AssignmentQuotaExceededException());
 
+        final String type = MessageType.EVENT.name();
         assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
-                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT,
-                        VIRTUAL_HOST));
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, type, TENANT, VIRTUAL_HOST));
     }
 
     @Test
     @Description("Test next update is provided on finished action")
-    public void lookupNextUpdateActionAfterFinished() throws IllegalAccessException {
+    void lookupNextUpdateActionAfterFinished() throws IllegalAccessException {
 
         // Mock
         final Action action = createActionWithTarget(22L);
@@ -473,7 +469,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Test feedback code is persisted in messages when provided with DmfActionUpdateStatus")
-    public void feedBackCodeIsPersistedInMessages() throws IllegalAccessException {
+    void feedBackCodeIsPersistedInMessages() throws IllegalAccessException {
 
         // Mock
         final Action action = createActionWithTarget(22L);
@@ -509,7 +505,7 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests the deletion of a target/thing, requested by the target itself.")
-    public void deleteThing() {
+    void deleteThing() {
         // prepare valid message
         final String knownThingId = "1";
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_REMOVED);
@@ -525,15 +521,15 @@ public class AmqpMessageHandlerServiceTest {
 
     @Test
     @Description("Tests the deletion of a target/thing with missing thingId")
-    public void deleteThingWithoutThingId() {
+    void deleteThingWithoutThingId() {
         // prepare invalid message
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_REMOVED);
         final Message message = createMessage(new byte[0], messageProperties);
 
+        final String type = MessageType.THING_REMOVED.name();
         assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
                 .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since no thingId was set")
-                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.THING_REMOVED.name(), TENANT,
-                        VIRTUAL_HOST));
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, type, TENANT, VIRTUAL_HOST));
     }
 
     @Test

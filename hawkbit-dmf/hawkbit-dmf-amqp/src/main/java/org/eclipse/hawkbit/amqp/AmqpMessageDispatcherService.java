@@ -370,7 +370,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             // Handling remote request in parallel streams
             return StreamSupport.stream(partitions.spliterator(), true) //
                     .flatMap(partition -> withSecurityContext(() -> loadingFunction.apply(partition), context).stream())
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return loadingFunction.apply(controllerIds);
     }
@@ -436,7 +436,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                                 return false;
                             }
                             return true;
-                        }).collect(Collectors.toList()));
+                        }).toList());
     }
 
     private void sendUpdateMessageToTargets(
@@ -570,7 +570,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     private List<DmfMetadata> convertMetadata(final List<SoftwareModuleMetadata> metadata) {
-        return metadata.stream().map(md -> new DmfMetadata(md.getKey(), md.getValue())).collect(Collectors.toList());
+        return metadata.stream().map(md -> new DmfMetadata(md.getKey(), md.getValue())).toList();
     }
 
     private List<DmfArtifact> convertArtifacts(final Target target, final List<Artifact> localArtifacts) {
@@ -579,7 +579,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         }
 
         return localArtifacts.stream().map(localArtifact -> convertArtifact(target, localArtifact))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private DmfArtifact convertArtifact(final Target target, final Artifact localArtifact) {
@@ -619,7 +619,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         final List<DmfTarget> dmfTargets = targets.stream()
                 .filter(target -> IpUtil.isAmqpUri(target.getAddress()))
                 .map(t -> convertToDmfTarget(t, actions.get(t.getControllerId()).getId()))
-                .collect(Collectors.toList());
+                .toList();
 
         final DmfBatchDownloadAndUpdateRequest batchRequest = new DmfBatchDownloadAndUpdateRequest();
         batchRequest.setTimestamp(System.currentTimeMillis());

@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -32,7 +31,6 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.amqp.AmqpMessageHandlerService;
 import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -199,7 +197,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @Description("Tests register invalid target with too long controller id")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class) })
     void registerInvalidTargetWithTooLongControllerId() {
-        createAndSendThingCreated(RandomStringUtils.randomAlphabetic(Target.CONTROLLER_ID_MAX_SIZE + 1));
+        createAndSendThingCreated(randomString(Target.CONTROLLER_ID_MAX_SIZE + 1));
         assertAllTargetsCount(0);
         verifyOneDeadLetterMessage();
     }
@@ -1171,13 +1169,13 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
                             .filter(Objects::nonNull)
                             .filter(message -> message
                                     .startsWith(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message"))
-                            .collect(Collectors.toList());
+                            .toList();
 
                     assertThat(messagesFromServer).hasSize(messages)
                             .allMatch(message -> message.endsWith(CORRELATION_ID));
 
                     final List<Status> status = actionStatusList.stream().map(ActionStatus::getStatus)
-                            .collect(Collectors.toList());
+                            .toList();
                     assertThat(status).containsOnly(expectedActionStates);
 
                     return null;
@@ -1204,7 +1202,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
                     assertThat(actionStatusList).hasSize(statusListCount);
 
                     final List<Status> status = actionStatusList.stream().map(ActionStatus::getStatus)
-                            .collect(Collectors.toList());
+                            .toList();
                     assertThat(status).containsOnly(expectedActionStates);
 
                     return null;

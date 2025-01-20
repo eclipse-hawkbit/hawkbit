@@ -20,7 +20,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -33,7 +32,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import com.fasterxml.jackson.dataformat.cbor.CBORParser;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiAssignedVersion;
 import org.eclipse.hawkbit.ddi.json.model.DdiConfirmationFeedback;
@@ -288,7 +286,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     protected String getJsonActionFeedback(
             final DdiStatus.ExecutionStatus executionStatus, final DdiResult.FinalResult finalResult) throws JsonProcessingException {
         return getJsonActionFeedback(
-                executionStatus, finalResult, Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                executionStatus, finalResult, Collections.singletonList(randomString(1000)));
     }
 
     protected String getJsonActionFeedback(

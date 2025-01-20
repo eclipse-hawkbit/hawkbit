@@ -58,11 +58,9 @@ public class Amqp {
             }
         }
         connectionFactory.setUsername(
-                dmf == null || ObjectUtils.isEmpty(dmf.getUsername()) ?
-                        rabbitProperties.getUsername() : dmf.getUsername());
+                dmf == null || ObjectUtils.isEmpty(dmf.getUsername()) ? rabbitProperties.getUsername() : dmf.getUsername());
         connectionFactory.setPassword(
-                dmf == null || ObjectUtils.isEmpty(dmf.getPassword()) ?
-                        rabbitProperties.getPassword() : dmf.getPassword());
+                dmf == null || ObjectUtils.isEmpty(dmf.getPassword()) ? rabbitProperties.getPassword() : dmf.getPassword());
         connectionFactory.setVirtualHost(vHost);
         return connectionFactory;
     }

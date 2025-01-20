@@ -32,8 +32,8 @@ public final class AmqpErrorMessageComposer {
      */
     public static String constructErrorMessage(final Throwable throwable) {
         final String mainErrorMsg = throwable.getCause().getMessage();
-        if (throwable instanceof ListenerExecutionFailedException) {
-            Collection<Message> failedMessages = ((ListenerExecutionFailedException) throwable).getFailedMessages();
+        if (throwable instanceof ListenerExecutionFailedException listenerExecutionFailedException) {
+            Collection<Message> failedMessages = listenerExecutionFailedException.getFailedMessages();
             // since the intended message content is always on top of the collection, we only extract the first one
             final Message failedMessage = failedMessages.iterator().next();
             final byte[] amqpFailedMsgBody = failedMessage.getBody();

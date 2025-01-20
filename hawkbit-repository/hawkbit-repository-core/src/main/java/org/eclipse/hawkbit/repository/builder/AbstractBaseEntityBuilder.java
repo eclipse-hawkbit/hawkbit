@@ -19,4 +19,8 @@ public abstract class AbstractBaseEntityBuilder implements Identifiable<Long> {
     public Long getId() {
         return id;
     }
+
+    static String strip(final String value) {
+        return value == null ? null : value.strip();
+    }
 }

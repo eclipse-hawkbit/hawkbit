@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository.builder;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ValidString;
-import org.springframework.util.StringUtils;
 
 public abstract class AbstractNamedEntityBuilder<T> extends AbstractBaseEntityBuilder {
 
@@ -22,12 +21,12 @@ public abstract class AbstractNamedEntityBuilder<T> extends AbstractBaseEntityBu
     protected String description;
 
     public T name(final String name) {
-        this.name = StringUtils.trimWhitespace(name);
+        this.name = AbstractBaseEntityBuilder.strip(name);
         return (T) this;
     }
 
     public T description(final String description) {
-        this.description = StringUtils.trimWhitespace(description);
+        this.description = AbstractBaseEntityBuilder.strip(description);
         return (T) this;
     }
 

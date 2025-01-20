@@ -13,7 +13,6 @@ import java.util.Optional;
 
 import lombok.Getter;
 import org.eclipse.hawkbit.repository.ValidString;
-import org.springframework.util.StringUtils;
 
 /**
  * Create and update builder DTO.
@@ -29,12 +28,12 @@ public abstract class AbstractMetadataUpdateCreate<T> {
     protected String value;
 
     public T key(final String key) {
-        this.key = StringUtils.trimWhitespace(key);
+        this.key = AbstractBaseEntityBuilder.strip(key);
         return (T) this;
     }
 
     public T value(final String value) {
-        this.value = StringUtils.trimWhitespace(value);
+        this.value = AbstractBaseEntityBuilder.strip(value);
         return (T) this;
     }
 

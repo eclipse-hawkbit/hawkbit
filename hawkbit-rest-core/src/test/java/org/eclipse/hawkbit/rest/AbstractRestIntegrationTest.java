@@ -44,7 +44,7 @@ public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTes
     private CharacterEncodingFilter characterEncodingFilter;
 
     @BeforeEach
-    public void before() throws Exception {
+    public void before() {
         mvc = createMvcWebAppContext(webApplicationContext).build();
     }
 

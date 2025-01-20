@@ -12,8 +12,8 @@ package org.eclipse.hawkbit.repository.builder;
 import java.util.Collection;
 import java.util.Optional;
 
+import lombok.Getter;
 import org.eclipse.hawkbit.repository.ValidString;
-import org.springframework.util.StringUtils;
 
 /**
  * Create and update builder DTO.
@@ -25,15 +25,12 @@ public abstract class AbstractDistributionSetUpdateCreate<T> extends AbstractNam
     @ValidString
     protected String version;
     protected Boolean requiredMigrationStep;
+    @Getter
     protected Collection<Long> modules;
 
     public T modules(final Collection<Long> modules) {
         this.modules = modules;
         return (T) this;
-    }
-
-    public Collection<Long> getModules() {
-        return modules;
     }
 
     public T requiredMigrationStep(final Boolean requiredMigrationStep) {
@@ -46,7 +43,7 @@ public abstract class AbstractDistributionSetUpdateCreate<T> extends AbstractNam
     }
 
     public T version(final String version) {
-        this.version = StringUtils.trimWhitespace(version);
+        this.version = strip(version);
         return (T) this;
     }
 

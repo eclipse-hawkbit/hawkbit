@@ -31,7 +31,7 @@ public abstract class AbstractSqlTestDatabase extends AbstractTestExecutionListe
 
     protected final DatasourceContext context;
 
-    public AbstractSqlTestDatabase(final DatasourceContext context) {
+    protected AbstractSqlTestDatabase(final DatasourceContext context) {
         this.context = context;
     }
 

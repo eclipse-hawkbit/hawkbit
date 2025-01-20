@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.repository.ValidString;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.springframework.util.StringUtils;
 
 /**
  * Create and update builder DTO.
@@ -91,7 +90,7 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
      * @return this builder
      */
     public T name(final String name) {
-        this.name = StringUtils.trimWhitespace(name);
+        this.name = AbstractBaseEntityBuilder.strip(name);
         return (T) this;
     }
 
@@ -106,7 +105,7 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
      * @return this builder
      */
     public T query(final String query) {
-        this.query = StringUtils.trimWhitespace(query);
+        this.query = AbstractBaseEntityBuilder.strip(query);
         return (T) this;
     }
 

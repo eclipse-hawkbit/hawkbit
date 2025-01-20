@@ -227,12 +227,12 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         registerAndAssertTargetWithExistingTenant(controllerId);
 
         final Long actionId1 = assignNewDsToTarget(controllerId, 450);
-        final Entry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1, EventTopic.DOWNLOAD_AND_INSTALL);
+        final SimpleEntry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1, EventTopic.DOWNLOAD_AND_INSTALL);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessage(controllerId, Collections.singletonList(action1Install));
 
         final Long actionId2 = assignNewDsToTarget(controllerId, 111);
-        final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
+        final SimpleEntry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install, action2Install));
     }
@@ -315,8 +315,8 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         deploymentManagement.cancelAction(actionId1);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
 
-        final Entry<Long, EventTopic> action1Cancel = new SimpleEntry<>(actionId1, EventTopic.CANCEL_DOWNLOAD);
-        final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
+        final SimpleEntry<Long, EventTopic> action1Cancel = new SimpleEntry<>(actionId1, EventTopic.CANCEL_DOWNLOAD);
+        final SimpleEntry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
 
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Cancel, action2Install));
         updateActionViaDmfClient(controllerId, actionId1, DmfActionStatus.CANCELED);
@@ -349,7 +349,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
 
         final long actionId1 = assignNewDsToTarget(controllerId, 66);
         final long actionId2 = assignNewDsToTarget(controllerId, 767);
-        final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
+        final SimpleEntry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION, EventTopic.MULTI_ACTION);
 
         updateActionViaDmfClient(controllerId, actionId1, DmfActionStatus.FINISHED);
@@ -385,8 +385,8 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
         final Long actionId2 = getFirstAssignedAction(assignDistributionSet(dsId, controllerId, 775)).getId();
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
 
-        final Entry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1, EventTopic.DOWNLOAD_AND_INSTALL);
-        final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
+        final SimpleEntry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1, EventTopic.DOWNLOAD_AND_INSTALL);
+        final SimpleEntry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
         assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install, action2Install));
     }
 
@@ -567,9 +567,10 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
 
         assertThat(message).isNotNull();
         final Map<String, Object> headers = message.getMessageProperties().getHeaders();
-        assertThat(headers).containsEntry("thingId", controllerId);
-        assertThat(headers).containsEntry("type", EVENT.toString());
-        assertThat(headers).containsEntry("topic", DOWNLOAD.toString());
+        assertThat(headers)
+                .containsEntry("thingId", controllerId)
+                .containsEntry("type", EVENT.toString())
+                .containsEntry("topic", DOWNLOAD.toString());
 
         final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
         assertThat(target).isPresent();
@@ -596,11 +597,11 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
             final List<String> controllerIds) {
         assertSoftwareModules(softwareModules, request.getSoftwareModules());
 
-        final List<Object> tokens = controllerIds.stream().map(controllerId -> {
+        final List<String> tokens = controllerIds.stream().map(controllerId -> {
             final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
             assertThat(target).isPresent();
             return target.get().getSecurityToken();
-        }).collect(Collectors.toList());
+        }).toList();
 
         final List<DmfTarget> requestTargets = request.getTargets();
 
@@ -700,7 +701,7 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
     private static List<DmfDownloadAndUpdateRequest> getDownloadAndUpdateRequests(final DmfMultiActionRequest request) {
         return request.getElements().stream()
                 .filter(AmqpMessageDispatcherServiceIntegrationTest::isDownloadAndUpdateRequest)
-                .map(multiAction -> (DmfDownloadAndUpdateRequest) multiAction.getAction()).collect(Collectors.toList());
+                .map(multiAction -> (DmfDownloadAndUpdateRequest) multiAction.getAction()).toList();
     }
 
     private static boolean isDownloadAndUpdateRequest(final DmfMultiActionElement multiActionElement) {
@@ -767,20 +768,20 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
                 .fromMessage(multiactionMessage);
 
         final List<Set<Long>> smIdsOfActionsFound = getDownloadAndUpdateRequests(multiActionRequest).stream()
-                .map(AmqpMessageDispatcherServiceIntegrationTest::getSmIds).collect(Collectors.toList());
+                .map(AmqpMessageDispatcherServiceIntegrationTest::getSmIds).toList();
         assertThat(smIdsOfActionsFound).containsExactlyInAnyOrderElementsOf(smIdsOfActionsExpected);
     }
 
     private void assertLatestMultiActionMessage(final String controllerId,
-            final List<Entry<Long, EventTopic>> actionsExpected) {
-        final List<Entry<Long, EventTopic>> actionsFromMessage = getLatestMultiActionMessageActions(controllerId);
+            final List<SimpleEntry<Long, EventTopic>> actionsExpected) {
+        final List<SimpleEntry<Long, EventTopic>> actionsFromMessage = getLatestMultiActionMessageActions(controllerId);
         assertThat(actionsFromMessage).containsExactlyInAnyOrderElementsOf(actionsExpected);
     }
 
-    private List<Entry<Long, EventTopic>> getLatestMultiActionMessageActions(final String expectedControllerId) {
+    private List<SimpleEntry<Long, EventTopic>> getLatestMultiActionMessageActions(final String expectedControllerId) {
         final List<DmfMultiActionElement> multiActionRequest = getLatestMultiActionMessages(expectedControllerId);
         return multiActionRequest.stream()
                 .map(request -> new SimpleEntry<>(request.getAction().getActionId(), request.getTopic()))
-                .collect(Collectors.toList());
+                .toList();
     }
 }

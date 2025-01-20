@@ -25,6 +25,7 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
@@ -248,15 +249,13 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         final String targetDsAIdPref = "targA";
         final String targetDsFIdPref = "targB";
 
-        // target filter query that matches first bunch of targets, that should
-        // fail
-        assertThatExceptionOfType(IncompleteDistributionSetException.class).isThrownBy(() -> {
-            final Long filterId = targetFilterQueryManagement.create(
-                            entityFactory.targetFilterQuery().create().name("filterA").query("id==" + targetDsFIdPref + "*"))
-                    .getId();
-            targetFilterQueryManagement
-                    .updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(setF.getId()));
-        });
+        final Long filterId = targetFilterQueryManagement.create(
+                        entityFactory.targetFilterQuery().create().name("filterA").query("id==" + targetDsFIdPref + "*"))
+                .getId();
+        final AutoAssignDistributionSetUpdate targetFilterQuery = entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(setF.getId());
+        // target filter query that matches first bunch of targets, that should fail
+        assertThatExceptionOfType(IncompleteDistributionSetException.class).isThrownBy(
+                () -> targetFilterQueryManagement.updateAutoAssignDS(targetFilterQuery));
         // target filter query that matches failed bunch of targets
         targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("filterB")
                 .query("id==" + targetDsAIdPref + "*").autoAssignDistributionSet(setA.getId()));

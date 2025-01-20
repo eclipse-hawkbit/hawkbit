@@ -43,7 +43,6 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
@@ -142,14 +141,13 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     public void getArtifactsWithParameters() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte[] random = RandomStringUtils.random(5).getBytes();
+        final byte[] random = randomBytes(5);
 
         artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
 
-        mvc.perform(
-                        get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts", sm.getId())
-                                .param("representation", MgmtRepresentationMode.FULL.toString())
-                                .param("useartifacturlhandler", Boolean.TRUE.toString()))
+        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts", sm.getId())
+                        .param("representation", MgmtRepresentationMode.FULL.toString())
+                        .param("useartifacturlhandler", Boolean.TRUE.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON));
@@ -933,7 +931,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final int artifactSize = 5 * 1024;
-        final byte[] random = RandomStringUtils.random(artifactSize).getBytes();
+        final byte[] random = randomBytes(artifactSize);
 
         // Create 2 artifacts
         final Artifact artifact = artifactManagement.create(
@@ -994,7 +992,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(status().isBadRequest());
 
         final SoftwareModule toLongName = entityFactory.softwareModule().create().type(osType)
-                .name(RandomStringUtils.randomAlphanumeric(80)).build();
+                .name(randomString(80)).build();
         mvc.perform(post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Collections.singletonList(toLongName)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -1298,7 +1296,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final int artifactSize = 5 * 1024;
-        final byte[] random = RandomStringUtils.random(artifactSize).getBytes();
+        final byte[] random = randomBytes(artifactSize);
 
         artifactManagement.create(
                 new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
@@ -1321,7 +1319,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final DistributionSet ds1 = testdataFactory.createDistributionSet("a");
 
         final int artifactSize = 5 * 1024;
-        final byte[] random = RandomStringUtils.random(artifactSize).getBytes();
+        final byte[] random = randomBytes(artifactSize);
 
         final Long appTypeSmId = ds1.findFirstModuleByType(appType).get().getId();
 
@@ -1504,10 +1502,6 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("total", equalTo(1)))
                 .andExpect(jsonPath("content[0].key", equalTo("knownKey1")))
                 .andExpect(jsonPath("content[0].value", equalTo("knownValue1")));
-    }
-
-    private static byte[] randomBytes(final int len) {
-        return RandomStringUtils.randomAlphanumeric(len).getBytes();
     }
 
     private void assertArtifact(final SoftwareModule sm, final byte[] random) throws IOException {
