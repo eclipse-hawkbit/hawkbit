@@ -31,7 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @Feature("Unit Tests - Artifact URL Handler")
 @Story("Test to generate the artifact download URL")
 @ExtendWith(MockitoExtension.class)
-public class PropertyBasedArtifactUrlHandlerTest {
+class PropertyBasedArtifactUrlHandlerTest {
 
     private static final String TEST_PROTO = "coap";
     private static final String TEST_REL = "download-udp";
@@ -56,14 +56,14 @@ public class PropertyBasedArtifactUrlHandlerTest {
     private ArtifactUrlHandlerProperties properties;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         properties = new ArtifactUrlHandlerProperties();
         urlHandlerUnderTest = new PropertyBasedArtifactUrlHandler(properties, "");
     }
 
     @Test
     @Description("Tests the generation of http download url.")
-    public void urlGenerationWithDefaultConfiguration() {
+    void urlGenerationWithDefaultConfiguration() {
         properties.getProtocols().put("download-http", new UrlProtocol());
 
         final List<ArtifactUrl> ddiUrls = urlHandlerUnderTest.getUrls(placeHolder, ApiType.DDI);
@@ -78,7 +78,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
 
     @Test
     @Description("Tests the generation of custom download url with a CoAP example that supports DMF only.")
-    public void urlGenerationWithCustomConfiguration() {
+    void urlGenerationWithCustomConfiguration() {
         final UrlProtocol proto = new UrlProtocol();
         proto.setIp("127.0.0.1");
         proto.setPort(5683);
@@ -97,7 +97,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
 
     @Test
     @Description("Tests the generation of custom download url using Base62 references with a CoAP example that supports DMF only.")
-    public void urlGenerationWithCustomShortConfiguration() {
+    void urlGenerationWithCustomShortConfiguration() {
         final UrlProtocol proto = new UrlProtocol();
         proto.setIp("127.0.0.1");
         proto.setPort(5683);
@@ -116,7 +116,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
 
     @Test
     @Description("Verifies that the full qualified host of the statically defined hostname is replaced with the host of the request.")
-    public void urlGenerationWithHostFromRequest() throws URISyntaxException {
+    void urlGenerationWithHostFromRequest() throws URISyntaxException {
         final String testHost = "ddi.host.com";
 
         final UrlProtocol proto = new UrlProtocol();
@@ -136,7 +136,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
 
     @Test
     @Description("Verifies that the protocol of the statically defined hostname is replaced with the protocol of the request.")
-    public void urlGenerationWithProtocolFromRequest() throws URISyntaxException {
+    void urlGenerationWithProtocolFromRequest() throws URISyntaxException {
         final String testHost = "ddi.host.com";
 
         final UrlProtocol proto = new UrlProtocol();
@@ -151,7 +151,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
 
     @Test
     @Description("Verifies that the port of the statically defined hostname is replaced with the port of the request.")
-    public void urlGenerationWithPortFromRequest() throws URISyntaxException {
+    void urlGenerationWithPortFromRequest() throws URISyntaxException {
         final UrlProtocol proto = new UrlProtocol();
         proto.setRef("{protocol}://{hostname}:{portRequest}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}");
 
@@ -172,7 +172,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
 
     @Test
     @Description("Verifies that if default protocol port in request is used then url is returned without port")
-    public void urlGenerationWithPortFromRequestForHttps() throws URISyntaxException {
+    void urlGenerationWithPortFromRequestForHttps() throws URISyntaxException {
         final String protocol = "https";
         final UrlProtocol proto = new UrlProtocol();
         proto.setRef("{protocolRequest}://{hostnameRequest}:{portRequest}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}");
@@ -190,7 +190,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
 
     @Test
     @Description("Verifies that the domain of the statically defined hostname is replaced with the domain of the request.")
-    public void urlGenerationWithDomainFromRequest() throws URISyntaxException {
+    void urlGenerationWithDomainFromRequest() throws URISyntaxException {
         final UrlProtocol proto = new UrlProtocol();
         proto.setHostname("host.bumlux.net");
         proto.setRef("{protocol}://{domainRequest}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}");
