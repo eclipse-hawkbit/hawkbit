@@ -22,11 +22,11 @@ import org.springframework.util.ErrorHandler;
 
 @Feature("Unit Tests - Delegating Conditional Error Handler")
 @Story("Delegating Conditional Error Handler")
-public class DelegatingAmqpErrorHandlerTest {
+class DelegatingAmqpErrorHandlerTest {
 
     @Test
     @Description("Verifies that with a list of conditional error handlers, the error is delegated to specific handler.")
-    public void verifyDelegationHandling() {
+    void verifyDelegationHandling() {
         List<AmqpErrorHandler> handlers = new ArrayList<>();
         handlers.add(new IllegalArgumentExceptionHandler());
         handlers.add(new IndexOutOfBoundsExceptionHandler());
@@ -38,7 +38,7 @@ public class DelegatingAmqpErrorHandlerTest {
 
     @Test
     @Description("Verifies that default handler is used if no handlers are defined for the specific exception.")
-    public void verifyDefaultDelegationHandling() {
+    void verifyDefaultDelegationHandling() {
         List<AmqpErrorHandler> handlers = new ArrayList<>();
         handlers.add(new IllegalArgumentExceptionHandler());
         handlers.add(new IndexOutOfBoundsExceptionHandler());
@@ -49,7 +49,7 @@ public class DelegatingAmqpErrorHandlerTest {
     }
 
     // Test class
-    public class IllegalArgumentExceptionHandler implements AmqpErrorHandler {
+    static class IllegalArgumentExceptionHandler implements AmqpErrorHandler {
 
         @Override
         public void doHandle(final Throwable t, final AmqpErrorHandlerChain chain) {
@@ -62,7 +62,7 @@ public class DelegatingAmqpErrorHandlerTest {
     }
 
     // Test class
-    public class IndexOutOfBoundsExceptionHandler implements AmqpErrorHandler {
+    static class IndexOutOfBoundsExceptionHandler implements AmqpErrorHandler {
 
         @Override
         public void doHandle(final Throwable t, final AmqpErrorHandlerChain chain) {
@@ -75,11 +75,10 @@ public class DelegatingAmqpErrorHandlerTest {
     }
 
     // Test class
-    public class DefaultErrorHandler implements ErrorHandler {
+    static class DefaultErrorHandler implements ErrorHandler {
 
         @Override
-        public void
-        handleError(Throwable t) {
+        public void handleError(final Throwable t) {
             throw new RuntimeException(t);
         }
     }

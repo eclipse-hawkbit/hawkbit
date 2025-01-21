@@ -17,25 +17,25 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * JSON representation of download and update request.
  */
+@EqualsAndHashCode(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfDownloadAndUpdateRequest extends DmfActionRequest {
 
+    @Setter
     @Getter
     @JsonProperty
     private String targetSecurityToken;
 
     @JsonProperty
     private List<DmfSoftwareModule> softwareModules;
-
-    public void setTargetSecurityToken(final String targetSecurityToken) {
-        this.targetSecurityToken = targetSecurityToken;
-    }
 
     public List<DmfSoftwareModule> getSoftwareModules() {
         if (softwareModules == null) {
@@ -45,17 +45,11 @@ public class DmfDownloadAndUpdateRequest extends DmfActionRequest {
         return Collections.unmodifiableList(softwareModules);
     }
 
-    /**
-     * Add a Software module.
-     *
-     * @param createSoftwareModule the module
-     */
     public void addSoftwareModule(final DmfSoftwareModule createSoftwareModule) {
         if (softwareModules == null) {
             softwareModules = new ArrayList<>();
         }
 
         softwareModules.add(createSoftwareModule);
-
     }
 }

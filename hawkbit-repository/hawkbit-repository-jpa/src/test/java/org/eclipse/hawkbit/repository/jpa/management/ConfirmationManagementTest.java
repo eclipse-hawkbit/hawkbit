@@ -195,7 +195,7 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
 
         final List<Action> actions = assignDistributionSets(
                 Arrays.asList(toDeploymentRequest(controllerId, dsId), toDeploymentRequest(controllerId, dsId2)))
-                .stream().flatMap(s -> s.getAssignedEntity().stream()).collect(Collectors.toList());
+                .stream().flatMap(s -> s.getAssignedEntity().stream()).toList();
         assertThat(actions).hasSize(2);
 
         assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(2)

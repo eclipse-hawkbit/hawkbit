@@ -35,7 +35,7 @@ import org.springframework.amqp.support.converter.MessageConversionException;
 @ExtendWith(MockitoExtension.class)
 @Feature("Component Tests - Device Management Federation API")
 @Story("Base Amqp Service Test")
-public class BaseAmqpServiceTest {
+class BaseAmqpServiceTest {
 
     @Mock
     private RabbitTemplate rabbitTemplate;
@@ -43,13 +43,13 @@ public class BaseAmqpServiceTest {
     private BaseAmqpService baseAmqpService;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         baseAmqpService = new BaseAmqpService(rabbitTemplate);
     }
 
     @Test
     @Description("Verify that the message conversion works")
-    public void convertMessageTest() {
+    void convertMessageTest() {
         final DmfActionUpdateStatus actionUpdateStatus = createActionStatus();
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
 
@@ -64,7 +64,7 @@ public class BaseAmqpServiceTest {
     @Test
     @Description("Tests invalid null message content")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
-    public void convertMessageWithNullContent() {
+    void convertMessageWithNullContent() {
         final Message message = createMessage("".getBytes());
         assertThatExceptionOfType(MessageConversionException.class)
                 .as("Expected MessageConversionException for invalid JSON")
@@ -74,7 +74,7 @@ public class BaseAmqpServiceTest {
     @Test
     @Description("Tests invalid empty message content")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
-    public void updateActionStatusWithEmptyContent() {
+    void updateActionStatusWithEmptyContent() {
         final Message message = createMessage("".getBytes());
         assertThatExceptionOfType(MessageConversionException.class)
                 .as("Expected MessageConversionException for invalid JSON")
@@ -84,7 +84,7 @@ public class BaseAmqpServiceTest {
     @Test
     @Description("Tests invalid json message content")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
-    public void updateActionStatusWithInvalidJsonContent() {
+    void updateActionStatusWithInvalidJsonContent() {
         final Message message = createMessage("Invalid Json".getBytes());
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
 

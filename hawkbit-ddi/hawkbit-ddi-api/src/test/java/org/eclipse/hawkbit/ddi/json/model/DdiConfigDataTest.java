@@ -29,13 +29,13 @@ import org.junit.jupiter.api.Test;
  */
 @Feature("Unit Tests - Direct Device Integration API")
 @Story("Serializability of DDI api Models")
-public class DdiConfigDataTest {
+class DdiConfigDataTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
-    public void shouldSerializeAndDeserializeObject() throws IOException {
+    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final Map<String, String> data = new HashMap<>();
         data.put("test", "data");
@@ -50,7 +50,7 @@ public class DdiConfigDataTest {
 
     @Test
     @Description("Verify the correct deserialization of a model with an additional unknown property")
-    public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiConfigData = "{\"data\":{\"test\":\"data\"},\"mode\":\"replace\",\"unknownProperty\":\"test\"}";
 
@@ -61,7 +61,7 @@ public class DdiConfigDataTest {
 
     @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
-    public void shouldFailForObjectWithWrongDataTypes() throws IOException {
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiConfigData = "{\"data\":{\"test\":\"data\"},\"mode\":[\"replace\"],\"unknownProperty\":\"test\"}";
 
@@ -72,7 +72,7 @@ public class DdiConfigDataTest {
 
     @Test
     @Description("Verify the correct deserialization of a model with removed unused status property")
-    public void shouldDeserializeObjectWithStatusProperty() throws IOException {
+    void shouldDeserializeObjectWithStatusProperty() throws IOException {
         // We formerly falsely required a 'status' property object when using the
         // configData endpoint. It was removed as a requirement from code and
         // documentation, as it was unused. This test ensures we still behave correctly

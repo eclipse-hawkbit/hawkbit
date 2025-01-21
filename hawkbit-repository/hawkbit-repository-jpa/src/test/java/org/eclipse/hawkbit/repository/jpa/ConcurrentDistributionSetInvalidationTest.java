@@ -51,11 +51,11 @@ import org.springframework.test.context.TestPropertySource;
 @Story("Concurrent Distribution Set invalidation")
 @ContextConfiguration(classes = ConcurrentDistributionSetInvalidationTest.Config.class)
 @TestPropertySource(properties = { "hawkbit.server.repository.dsInvalidationLockTimeout=1" })
-public class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTest {
+class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verify that a large rollout causes a timeout when trying to invalidate a distribution set")
-    public void verifyInvalidateDistributionSetWithLargeRolloutThrowsException() throws Exception {
+    void verifyInvalidateDistributionSetWithLargeRolloutThrowsException() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final Rollout rollout = createRollout(distributionSet);
         final String tenant = tenantAware.getCurrentTenant();

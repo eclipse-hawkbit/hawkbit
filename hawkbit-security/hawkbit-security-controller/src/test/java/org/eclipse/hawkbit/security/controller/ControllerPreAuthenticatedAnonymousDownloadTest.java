@@ -24,13 +24,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-/**
- *
- */
 @Feature("Unit Tests - Security")
 @Story("Exclude path aware shallow ETag filter")
 @ExtendWith(MockitoExtension.class)
-public class ControllerPreAuthenticatedAnonymousDownloadTest {
+class ControllerPreAuthenticatedAnonymousDownloadTest {
 
     private ControllerPreAuthenticatedAnonymousDownload underTest;
 
@@ -41,19 +38,19 @@ public class ControllerPreAuthenticatedAnonymousDownloadTest {
     private TenantAware tenantAwareMock;
 
     @BeforeEach
-    public void before() {
+    void before() {
         underTest = new ControllerPreAuthenticatedAnonymousDownload(tenantConfigurationManagementMock, tenantAwareMock,
                 new SystemSecurityContext(tenantAwareMock));
     }
 
     @Test
-    public void useCorrectTenantConfiguationKey() {
+    void useCorrectTenantConfiguationKey() {
         assertThat(underTest.getTenantConfigurationKey()).as("Should be using the correct tenant configuration key")
                 .isEqualTo(underTest.getTenantConfigurationKey());
     }
 
     @Test
-    public void successfulAuthenticationAdditionalAuthoritiesForDownload() {
+    void successfulAuthenticationAdditionalAuthoritiesForDownload() {
         assertThat(underTest.getSuccessfulAuthenticationAuthorities())
                 .as("Additional authorities should be containing the download anonymous role")
                 .contains(new SimpleGrantedAuthority(SpringEvalExpressions.CONTROLLER_ROLE));

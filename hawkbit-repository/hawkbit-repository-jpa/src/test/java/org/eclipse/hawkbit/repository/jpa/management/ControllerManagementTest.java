@@ -23,7 +23,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,7 +38,6 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.RandomUtils;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -199,7 +197,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis())
                 .messages(List.of("proceeding message 1")));
 
-        final long createTime = System.currentTimeMillis();
         waitNextMillis();
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
                 .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis())
@@ -307,7 +304,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(actionStatusRepository.count()).isEqualTo(2);
         assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(2);
-        assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isEqualTo(true);
+        assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isTrue();
     }
 
     @Test
@@ -338,7 +335,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 1) })
-    void entityQueriesReferringToNotExistingEntitiesThrowsException() throws URISyntaxException {
+    void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         final Target target = testdataFactory.createTarget();
         final SoftwareModule module = testdataFactory.createSoftwareModuleOs();
 
@@ -622,7 +619,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
     void hasTargetArtifactAssignedIsTrueWithMultipleArtifacts() {
         final int artifactSize = 5 * 1024;
-        final byte[] random = RandomUtils.nextBytes(artifactSize);
+        final byte[] random = randomBytes(artifactSize);
 
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2");
@@ -1164,7 +1161,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(actionStatusRepository.count()).isEqualTo(2);
         assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(2);
-        assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isEqualTo(false);
+        assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isFalse();
     }
 
     @Test
@@ -1191,7 +1188,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(actionStatusRepository.count()).isEqualTo(3);
         assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(3);
-        assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isEqualTo(false);
+        assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isFalse();
     }
 
     @Test
@@ -1219,7 +1216,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(actionStatusRepository.count()).isEqualTo(4);
         assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(4);
-        assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isEqualTo(false);
+        assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isFalse();
     }
 
     @Test
@@ -1564,7 +1561,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         controllerManagement.deleteExistingTarget(target.getControllerId());
 
-        assertThat(targetRepository.count()).as("target should not exist anymore").isEqualTo(0L);
+        assertThat(targetRepository.count()).as("target should not exist anymore").isZero();
     }
 
     @Test
@@ -1574,7 +1571,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(EntityNotFoundException.class)
                 .as("No EntityNotFoundException thrown when deleting a non-existing target")
                 .isThrownBy(() -> controllerManagement.deleteExistingTarget("BB"));
-        assertThat(targetRepository.count()).as("target should not exist").isEqualTo(0L);
+        assertThat(targetRepository.count()).as("target should not exist").isZero();
     }
 
     @Test
@@ -1589,7 +1586,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetRepository.count()).as("target exists and is ready for deletion").isEqualTo(1L);
 
         controllerManagement.deleteExistingTarget(target.getControllerId());
-        assertThat(targetRepository.count()).as("target should not exist anymore").isEqualTo(0L);
+        assertThat(targetRepository.count()).as("target should not exist anymore").isZero();
 
         assertThatExceptionOfType(EntityNotFoundException.class)
                 .as("No EntityNotFoundException thrown when deleting a non-existing target")
@@ -1769,7 +1766,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // verify attribute removal
         final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
-        assertThat(updatedAttributes.size()).isEqualTo(previousSize - 2);
+        assertThat(updatedAttributes).hasSize(previousSize - 2);
         assertThat(updatedAttributes).doesNotContainKeys("k1", "k3");
     }
 
@@ -1786,9 +1783,9 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // verify attribute merge
         final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
-        assertThat(updatedAttributes.size()).isEqualTo(4);
+        assertThat(updatedAttributes).hasSize(4);
         assertThat(updatedAttributes).containsAllEntriesOf(mergeAttributes);
-        assertThat(updatedAttributes.get("k1")).isEqualTo("v1_modified_again");
+        assertThat(updatedAttributes).containsEntry("k1", "v1_modified_again");
         attributes.keySet().forEach(assertThat(updatedAttributes)::containsKey);
     }
 
@@ -1806,9 +1803,9 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // verify attribute replacement
         final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
-        assertThat(updatedAttributes.size()).isEqualTo(replacementAttributes.size());
+        assertThat(updatedAttributes).hasSameSizeAs(replacementAttributes);
         assertThat(updatedAttributes).containsAllEntriesOf(replacementAttributes);
-        assertThat(updatedAttributes.get("k1")).isEqualTo("v1_modified");
+        assertThat(updatedAttributes).containsEntry("k1", "v1_modified");
         attributes.entrySet().forEach(assertThat(updatedAttributes)::doesNotContain);
     }
 
@@ -1822,7 +1819,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // verify initial attributes
         final Map<String, String> updatedAttributes = targetManagement.getControllerAttributes(controllerId);
-        assertThat(updatedAttributes.size()).isEqualTo(attributes.size());
+        assertThat(updatedAttributes).hasSameSizeAs(attributes);
         assertThat(updatedAttributes).containsAllEntriesOf(attributes);
     }
 
@@ -1849,7 +1846,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
 
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(status));
-        assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isEqualTo(false);
+        assertThat(activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isFalse();
     }
 
     @Step
@@ -1883,7 +1880,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertNoActiveActionsExistsForControllerId(final String controllerId) {
-        assertThat(activeActionExistsForControllerId(controllerId)).isEqualTo(false);
+        assertThat(activeActionExistsForControllerId(controllerId)).isFalse();
     }
 
     private boolean activeActionExistsForControllerId(final String controllerId) {

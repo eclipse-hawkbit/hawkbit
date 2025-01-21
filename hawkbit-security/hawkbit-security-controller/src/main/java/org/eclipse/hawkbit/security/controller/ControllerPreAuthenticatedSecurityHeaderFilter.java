@@ -105,8 +105,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
                         : securityToken.getControllerId());
 
         final List<String> knownHashes = splitMultiHashBySemicolon(authorityNameConfigurationValue);
-        return knownHashes.stream().map(hashItem -> new HeaderAuthentication(controllerId, hashItem))
-                .collect(Collectors.toSet());
+        return knownHashes.stream().map(hashItem -> new HeaderAuthentication(controllerId, hashItem)).collect(Collectors.toSet());
     }
 
     @Override
@@ -115,7 +114,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     private static List<String> splitMultiHashBySemicolon(final String knownIssuerHashes) {
-        return Arrays.stream(knownIssuerHashes.split("[;,]")).map(String::toLowerCase).collect(Collectors.toList());
+        return Arrays.stream(knownIssuerHashes.split("[;,]")).map(String::toLowerCase).toList();
     }
 
     /**

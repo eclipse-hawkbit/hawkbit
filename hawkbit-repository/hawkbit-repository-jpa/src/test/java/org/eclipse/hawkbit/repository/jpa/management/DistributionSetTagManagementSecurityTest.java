@@ -26,8 +26,7 @@ import org.springframework.data.domain.Pageable;
 
 @Feature("SecurityTests - DistributionSetTagManagement")
 @Story("SecurityTests DistributionSetTagManagement")
-public class DistributionSetTagManagementSecurityTest
-        extends AbstractRepositoryManagementSecurityTest<DistributionSetTag, TagCreate, TagUpdate> {
+class DistributionSetTagManagementSecurityTest extends AbstractRepositoryManagementSecurityTest<DistributionSetTag, TagCreate, TagUpdate> {
 
     @Override
     protected RepositoryManagement<DistributionSetTag, TagCreate, TagUpdate> getRepositoryManagement() {

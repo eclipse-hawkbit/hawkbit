@@ -156,8 +156,7 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType2.getId(),
                 moduleTypeIds.subList(0, quota));
         assertThat(distributionSetTypeManagement.get(dsType2.getId())).isNotEmpty();
-        assertThat(distributionSetTypeManagement.get(dsType2.getId()).get().getMandatoryModuleTypes().size())
-                .isEqualTo(quota);
+        assertThat(distributionSetTypeManagement.get(dsType2.getId()).get().getMandatoryModuleTypes()).hasSize(quota);
         // assign one more to trigger the quota exceeded error
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(dsType2.getId(),
@@ -168,8 +167,7 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
                 .create(entityFactory.distributionSetType().create().key("dst3").name("dst3"));
         distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3.getId(), moduleTypeIds.subList(0, quota));
         assertThat(distributionSetTypeManagement.get(dsType3.getId())).isNotEmpty();
-        assertThat(distributionSetTypeManagement.get(dsType3.getId()).get().getOptionalModuleTypes().size())
-                .isEqualTo(quota);
+        assertThat(distributionSetTypeManagement.get(dsType3.getId()).get().getOptionalModuleTypes()).hasSize(quota);
         // assign one more to trigger the quota exceeded error
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(dsType3.getId(),

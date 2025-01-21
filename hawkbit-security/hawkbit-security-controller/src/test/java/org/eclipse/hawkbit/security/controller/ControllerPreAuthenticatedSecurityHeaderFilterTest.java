@@ -33,7 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @Feature("Unit Tests - Security")
 @Story("Issuer hash based authentication")
 @ExtendWith(MockitoExtension.class)
-public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
+class ControllerPreAuthenticatedSecurityHeaderFilterTest {
 
     private static final String CA_COMMON_NAME = "ca-cn";
     private static final String CA_COMMON_NAME_VALUE = "box1";
@@ -63,7 +63,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     private SecurityContextSerializer securityContextSerializer;
 
     @BeforeEach
-    public void before() {
+    void before() {
         final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer);
         underTest = new ControllerPreAuthenticatedSecurityHeaderFilter(
                 CA_COMMON_NAME, "X-Ssl-Issuer-Hash-%d",
@@ -72,7 +72,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
 
     @Test
     @Description("Tests the filter for issuer hash based authentication with a single known hash")
-    public void testIssuerHashBasedAuthenticationWithSingleKnownHash() {
+    void testIssuerHashBasedAuthenticationWithSingleKnownHash() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
         // use single known hash
         when(tenantConfigurationManagementMock.getConfigurationValue(
@@ -83,7 +83,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
 
     @Test
     @Description("Tests the filter for issuer hash based authentication with multiple known hashes")
-    public void testIssuerHashBasedAuthenticationWithMultipleKnownHashes() {
+    void testIssuerHashBasedAuthenticationWithMultipleKnownHashes() {
         // use multiple known hashes
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
@@ -95,7 +95,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
 
     @Test
     @Description("Tests the filter for issuer hash based authentication with unknown hash")
-    public void testIssuerHashBasedAuthenticationWithUnknownHash() {
+    void testIssuerHashBasedAuthenticationWithUnknownHash() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(UNKNOWN_HASH);
         // use single known hash
         when(tenantConfigurationManagementMock.getConfigurationValue(
@@ -106,7 +106,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
 
     @Test
     @Description("Tests different values for issuer hash header and inspects the credentials")
-    public void useDifferentValuesForIssuerHashHeader() {
+    void useDifferentValuesForIssuerHashHeader() {
         final ControllerSecurityToken securityToken1 = prepareSecurityToken(SINGLE_HASH);
         final ControllerSecurityToken securityToken2 = prepareSecurityToken(SECOND_HASH);
 

@@ -29,13 +29,13 @@ import org.junit.jupiter.api.Test;
  */
 @Feature("Unit Tests - Direct Device Integration API")
 @Story("Serializability of DDI api Models")
-public class DdiChunkTest {
+class DdiChunkTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
-    public void shouldSerializeAndDeserializeObject() throws IOException {
+    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final String part = "1234";
         final String version = "1.0";
@@ -50,12 +50,12 @@ public class DdiChunkTest {
         assertThat(deserializedDdiChunk.getPart()).isEqualTo(part);
         assertThat(deserializedDdiChunk.getVersion()).isEqualTo(version);
         assertThat(deserializedDdiChunk.getName()).isEqualTo(name);
-        assertThat(deserializedDdiChunk.getArtifacts().size()).isEqualTo(0);
+        assertThat(deserializedDdiChunk.getArtifacts()).isEmpty();
     }
 
     @Test
     @Description("Verify the correct deserialization of a model with a additional unknown property")
-    public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiChunk = "{\"part\":\"1234\",\"version\":\"1.0\",\"name\":\"Dummy-Artifact\",\"artifacts\":[],\"unknownProperty\":\"test\"}";
 
@@ -64,12 +64,12 @@ public class DdiChunkTest {
         assertThat(ddiChunk.getPart()).isEqualTo("1234");
         assertThat(ddiChunk.getVersion()).isEqualTo("1.0");
         assertThat(ddiChunk.getName()).isEqualTo("Dummy-Artifact");
-        assertThat(ddiChunk.getArtifacts().size()).isEqualTo(0);
+        assertThat(ddiChunk.getArtifacts()).isEmpty();
     }
 
     @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
-    public void shouldFailForObjectWithWrongDataTypes() throws IOException {
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiChunk = "{\"part\":[\"1234\"],\"version\":\"1.0\",\"name\":\"Dummy-Artifact\",\"artifacts\":[]}";
 

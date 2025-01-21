@@ -136,14 +136,14 @@ public final class DataConversionHelper {
             final HttpRequest request, final ControllerManagement controllerManagement) {
         final Map<Long, List<SoftwareModuleMetadata>> metadata = controllerManagement
                 .findTargetVisibleMetaDataBySoftwareModuleId(uAction.getDistributionSet().getModules().stream()
-                        .map(SoftwareModule::getId).collect(Collectors.toList()));
+                        .map(SoftwareModule::getId).toList());
 
         return new ResponseList<>(uAction.getDistributionSet().getModules().stream()
                 .map(module -> new DdiChunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
                         module.getName(), module.isEncrypted() ? Boolean.TRUE : null,
                         createArtifacts(target, module, artifactUrlHandler, systemManagement, request),
                         mapMetadata(metadata.get(module.getId()))))
-                .collect(Collectors.toList()));
+                .toList());
 
     }
 
@@ -153,13 +153,13 @@ public final class DataConversionHelper {
 
         return new ResponseList<>(module.getArtifacts().stream()
                 .map(artifact -> createArtifact(target, artifactUrlHandler, artifact, systemManagement, request))
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     private static List<DdiMetadata> mapMetadata(final List<SoftwareModuleMetadata> metadata) {
         return CollectionUtils.isEmpty(metadata)
                 ? null
-                : metadata.stream().map(md -> new DdiMetadata(md.getKey(), md.getValue())).collect(Collectors.toList());
+                : metadata.stream().map(md -> new DdiMetadata(md.getKey(), md.getValue())).toList();
     }
 
     private static String mapChunkLegacyKeys(final String key) {

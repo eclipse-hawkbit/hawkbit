@@ -326,8 +326,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
                         try {
                             // TODO - cache mapping so to speed things
                             final Method delegateMethod =
-                                    BaseEntityRepositoryACM.class.getDeclaredMethod(
-                                            method.getName(), method.getParameterTypes());
+                                    BaseEntityRepositoryACM.class.getDeclaredMethod(method.getName(), method.getParameterTypes());
                             return delegateMethod.invoke(repositoryACM, args);
                         } catch (final NoSuchMethodException e) {
                             // call to repository itself
@@ -369,7 +368,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static <T extends Long> Set<Long> toSetDistinct(final Iterable<T> i) {
+    private static Set<Long> toSetDistinct(final Iterable<? extends Long> i) {
         final Set<Long> set = new HashSet<>();
         i.forEach(set::add);
         return set;

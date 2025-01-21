@@ -78,8 +78,8 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
             return controllerManagement.getByControllerId(securityToken.getControllerId());
         }, securityToken.getTenant());
 
-        return target.map(t -> new HeaderAuthentication(t.getControllerId(),
-                        systemSecurityContext.runAsSystemAsTenant(() -> t.getSecurityToken(), securityToken.getTenant())))
+        return target.map(t -> new HeaderAuthentication(
+                        t.getControllerId(), systemSecurityContext.runAsSystemAsTenant(t::getSecurityToken, securityToken.getTenant())))
                 .orElse(null);
     }
 

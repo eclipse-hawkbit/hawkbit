@@ -33,9 +33,6 @@ public class DatasourceContext {
     private final String password;
     private final String randomSchemaName = RANDOM_DB_PREFIX + TestdataFactory.randomString(10);
 
-    /**
-     * Constructor
-     */
     public DatasourceContext(final String database, final String datasourceUrl, final String username, final String password) {
         this.database = database;
         this.datasourceUrl = datasourceUrl;

@@ -32,13 +32,13 @@ import org.junit.jupiter.api.Test;
  */
 @Feature("Unit Tests - Direct Device Integration API")
 @Story("Serializability of DDI api Models")
-public class DdiDeploymentBaseTest {
+class DdiDeploymentBaseTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
-    public void shouldSerializeAndDeserializeObject() throws IOException {
+    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final String id = "1234";
         final DdiDeployment ddiDeployment = new DdiDeployment(FORCED, ATTEMPT, Collections.emptyList(), AVAILABLE);
@@ -54,12 +54,12 @@ public class DdiDeploymentBaseTest {
         assertThat(deserializedDdiDeploymentBase.getDeployment().getDownload()).isEqualTo(ddiDeployment.getDownload());
         assertThat(deserializedDdiDeploymentBase.getDeployment().getUpdate()).isEqualTo(ddiDeployment.getUpdate());
         assertThat(deserializedDdiDeploymentBase.getDeployment().getMaintenanceWindow()).isEqualTo(ddiDeployment.getMaintenanceWindow());
-        assertThat(deserializedDdiDeploymentBase.getActionHistory().toString()).isEqualTo(ddiActionHistory.toString());
+        assertThat(deserializedDdiDeploymentBase.getActionHistory()).hasToString(ddiActionHistory.toString());
     }
 
     @Test
     @Description("Verify the correct deserialization of a model with a additional unknown property")
-    public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiDeploymentBase = "{\"id\":\"1234\",\"deployment\":{\"download\":\"forced\"," +
                 "\"update\":\"attempt\",\"maintenanceWindow\":\"available\",\"chunks\":[]}," +
@@ -75,7 +75,7 @@ public class DdiDeploymentBaseTest {
 
     @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
-    public void shouldFailForObjectWithWrongDataTypes() throws IOException {
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiDeploymentBase = "{\"id\":[\"1234\"],\"deployment\":{\"download\":\"forced\"," +
                 "\"update\":\"attempt\",\"maintenanceWindow\":\"available\",\"chunks\":[]}," +
