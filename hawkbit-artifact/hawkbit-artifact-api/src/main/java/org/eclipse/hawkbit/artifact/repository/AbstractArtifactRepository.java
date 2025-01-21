@@ -93,7 +93,7 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
     }
 
     protected String storeTempFile(final InputStream content) throws IOException {
-        final File file = createTempFile();
+        final File file = createTempFile(false);
         try (final OutputStream outputstream = new BufferedOutputStream(new FileOutputStream(file))) {
             content.transferTo(outputstream);
             outputstream.flush();
@@ -104,16 +104,23 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
     protected abstract AbstractDbArtifact store(final String tenant, final DbArtifactHash base16Hashes,
             final String contentType, final String tempFile) throws IOException;
 
-    private static File createTempFile() {
+    static File createTempFile(final boolean directory) {
         try {
-            final File file = Files.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX).toFile();
-            if (!file.setReadable(true, true) ||
-                    !file.setWritable(true, true)) {
-                throw new IOException("Can't set proper permissions!");
+            final File file = (directory
+                    ? Files.createTempDirectory(TEMP_FILE_PREFIX)
+                    : Files.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX)).toFile();
+            file.deleteOnExit();
+            if (!file.setReadable(true, true) || !file.setWritable(true, true)) {
+                if (file.delete()) { // try to delete immediately, if failed - on exit
+                    throw new IOException("Can't set proper permissions!");
+                } else {
+                    throw new IOException("Can't set proper permissions (failed to delete the file immediately(!");
+                }
             }
             // try, if not supported - ok
-            file.setExecutable(false);
-            file.deleteOnExit();
+            if (!file.setExecutable(false)) {
+                log.debug("Can't set executable permissions for temp file {}", file);
+            }
             return file;
         } catch (final IOException e) {
             throw new ArtifactStoreException("Cannot create temp file", e);

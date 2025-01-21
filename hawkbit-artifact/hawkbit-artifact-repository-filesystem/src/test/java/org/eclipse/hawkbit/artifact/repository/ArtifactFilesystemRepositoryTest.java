@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Random;
 
 import io.qameta.allure.Description;
@@ -40,9 +39,9 @@ class ArtifactFilesystemRepositoryTest {
     private static ArtifactFilesystemRepository artifactFilesystemRepository;
 
     @BeforeAll
-    static void setup() throws IOException {
+    static void setup() {
         artifactResourceProperties = new ArtifactFilesystemProperties();
-        artifactResourceProperties.setPath(Files.createTempDirectory(null).toString());
+        artifactResourceProperties.setPath(AbstractArtifactRepository.createTempFile(true).toString());
 
         artifactFilesystemRepository = new ArtifactFilesystemRepository(artifactResourceProperties);
     }

@@ -15,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -43,12 +42,9 @@ class ArtifactFilesystemTest {
     @Test
     @Description("Verifies that an InputStream can be opened if file exists")
     void getInputStreamOfExistingFile() throws IOException {
-        final File createTempFile = Files.createTempFile(ArtifactFilesystemTest.class.getSimpleName(), "").toFile();
-        createTempFile.deleteOnExit();
-
         final ArtifactFilesystem underTest = new ArtifactFilesystem(
-                createTempFile, ArtifactFilesystemTest.class.getSimpleName(), new DbArtifactHash("1", "2", "3"), 0L, null);
-        final byte[] buffer = new byte[1024];
-        assertThat(IOUtils.read(underTest.getFileInputStream(), buffer)).isZero();
+                AbstractArtifactRepository.createTempFile(false), ArtifactFilesystemTest.class.getSimpleName(),
+                new DbArtifactHash("1", "2", "3"), 0L, null);
+        assertThat(IOUtils.read(underTest.getFileInputStream(), new byte[16])).isZero();
     }
 }
