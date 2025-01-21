@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
+import org.eclipse.hawkbit.artifact.repository.ArtifactStoreException;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
@@ -191,7 +192,7 @@ public abstract class AbstractIntegrationTest {
     protected ServiceMatcher serviceMatcher;
     @Autowired
     protected ApplicationEventPublisher eventPublisher;
-    private static final String ARTIFACT_DIRECTORY = createTempDir();
+    private static final String ARTIFACT_DIRECTORY = createTempDir().toString();
 
     @BeforeAll
     public static void beforeClass() {
@@ -486,11 +487,25 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
-    private static String createTempDir() {
+    private static File createTempDir() {
         try {
-            return Files.createTempDirectory(null).toString() + "/" + randomString(20);
+            final File file = Files.createTempFile(String.valueOf(System.currentTimeMillis()), "hawkbit_test").toFile();
+            file.deleteOnExit();
+            if (!file.setReadable(true, true) ||
+                    !file.setWritable(true, true)) {
+                if (file.delete()) { // try to delete immediately, if failed - on exit
+                    throw new IOException("Can't set proper permissions!");
+                } else {
+                    throw new IOException("Can't set proper permissions (failed to delete the file immediately(!");
+                }
+            }
+            // try, if not supported - ok
+            if (!file.setExecutable(false)) {
+                log.debug("Can't set executable permissions for temp file {}", file);
+            }
+            return file;
         } catch (final IOException e) {
-            throw new IllegalStateException("Failed to create temp directory");
+            throw new ArtifactStoreException("Cannot create temp file", e);
         }
     }
 
