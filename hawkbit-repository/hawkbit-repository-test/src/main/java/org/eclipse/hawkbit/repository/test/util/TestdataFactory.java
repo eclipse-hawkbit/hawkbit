@@ -138,6 +138,8 @@ public class TestdataFactory {
 
     public static final String DEFAULT_COLOUR = "#000000";
 
+    public static final RandomStringUtils RANDOM_STRING_UTILS = RandomStringUtils.secure();
+
     private static final String SPACE_AND_DESCRIPTION = " description";
 
     @Autowired
@@ -191,8 +193,16 @@ public class TestdataFactory {
     @Autowired
     private QuotaManagement quotaManagement;
 
+    public static String randomString(final int len) {
+        return RANDOM_STRING_UTILS.next(len, true, false);
+    }
+
+    public static byte[] randomBytes(final int len) {
+        return randomString(len).getBytes();
+    }
+
     public Action performAssignment(final DistributionSet distributionSet) {
-        final Target target = createTarget(RandomStringUtils.randomAlphanumeric(5));
+        final Target target = createTarget(randomString(5));
         final DeploymentRequest deploymentRequest = new DeploymentRequest(target.getControllerId(),
                 distributionSet.getId(), ActionType.FORCED, 0, null, null, null, null, false);
         deploymentManagement.assignDistributionSets(Collections.singletonList(deploymentRequest));
@@ -1090,7 +1100,7 @@ public class TestdataFactory {
      * @return created {@link Rollout}
      */
     public Rollout createRollout() {
-        final String prefix = RandomStringUtils.randomAlphanumeric(5);
+        final String prefix = randomString(5);
         createTargets(quotaManagement.getMaxTargetsPerRolloutGroup() * quotaManagement.getMaxRolloutGroupsPerRollout(),
                 prefix);
         return createRolloutByVariables(prefix, prefix + SPACE_AND_DESCRIPTION,
@@ -1158,7 +1168,7 @@ public class TestdataFactory {
     public Rollout createSimpleTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
             final int amountOtherTargets, final int amountOfGroups, final String successCondition,
             final String errorCondition, final ActionType actionType, final Integer weight) {
-        final String suffix = RandomStringUtils.randomAlphanumeric(5);
+        final String suffix = randomString(5);
         final DistributionSet rolloutDS = createDistributionSet("rolloutDS-" + suffix);
         createTargets(amountTargetsForRollout, "rollout-" + suffix + "-", "rollout");
         createTargets(amountOtherTargets, "others-" + suffix + "-", "rollout");
@@ -1256,15 +1266,11 @@ public class TestdataFactory {
     }
 
     private static String randomDescriptionShort() {
-        return randomText(100);
+        return randomString(100);
     }
 
     private static String randomDescriptionLong() {
-        return randomText(200);
-    }
-
-    private static String randomText(final int len) {
-        return RandomStringUtils.randomAlphanumeric(len);
+        return randomString(200);
     }
 
     private void addTestModuleMetadata(final SoftwareModule module) {

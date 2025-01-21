@@ -23,7 +23,6 @@ import jakarta.persistence.PersistenceContext;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.eclipse.hawkbit.im.authentication.SpPermission;

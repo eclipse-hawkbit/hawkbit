@@ -34,7 +34,6 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -510,7 +509,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isBadRequest());
 
         final TargetType tooLongName = entityFactory.targetType().create()
-                .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1)).build();
+                .name(randomString(NamedEntity.NAME_MAX_SIZE + 1)).build();
         mvc.perform(post(TARGETTYPES_ENDPOINT).content(JsonBuilder.targetTypes(Collections.singletonList(tooLongName)))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())

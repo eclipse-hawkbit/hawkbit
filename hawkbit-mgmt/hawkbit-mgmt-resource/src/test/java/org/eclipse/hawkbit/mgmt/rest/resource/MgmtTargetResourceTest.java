@@ -53,7 +53,6 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
@@ -554,7 +553,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     @Description("Ensures that target update request fails is updated value fails against a constraint.")
     void updateTargetDescriptionFailsIfInvalidLength() throws Exception {
         final String knownControllerId = "123";
-        final String knownNewDescription = RandomStringUtils.randomAlphabetic(513);
+        final String knownNewDescription = randomString(513);
         final String knownNameNotModify = "nameNotModify";
         final String body = new JSONObject().put("description", knownNewDescription).toString();
 
@@ -869,7 +868,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     @Description("Ensures that a target creation with empty name and a controllerId that exceeds the name length limitation is successful and the name gets truncated.")
     void createTargetWithEmptyNameAndLongControllerId() throws Exception {
-        final String randomString = RandomStringUtils.randomAlphanumeric(JpaTarget.CONTROLLER_ID_MAX_SIZE);
+        final String randomString = randomString(JpaTarget.CONTROLLER_ID_MAX_SIZE);
 
         final Target target = entityFactory.target().create().controllerId(randomString).build();
 
@@ -950,7 +949,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     @Description("Verifies that a  properties of new targets are validated as in allowed size range.")
     void createTargetWithInvalidPropertyBadRequest() throws Exception {
         final Target test1 = entityFactory.target().create().controllerId("id1")
-                .name(RandomStringUtils.randomAlphanumeric(NamedEntity.NAME_MAX_SIZE + 1)).build();
+                .name(randomString(NamedEntity.NAME_MAX_SIZE + 1)).build();
 
         final MvcResult mvcResult = mvc
                 .perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
