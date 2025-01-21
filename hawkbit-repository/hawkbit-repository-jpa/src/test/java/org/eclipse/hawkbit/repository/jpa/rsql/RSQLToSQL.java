@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 
 import jakarta.persistence.EntityManager;
@@ -25,7 +23,7 @@ import cz.jirutka.rsql.parser.ast.Node;
 import cz.jirutka.rsql.parser.ast.RSQLOperators;
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
-import org.eclipse.hawkbit.repository.jpa.Jpa;
+import org.eclipse.hawkbit.repository.jpa.Utils;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.orm.jpa.vendor.Database;
@@ -44,25 +42,7 @@ public class RSQLToSQL {
             final Class<T> domainClass, final Class<A> fieldsClass, final String rsql, final boolean legacyRsqlVisitor) {
         final CriteriaQuery<T> query = createQuery(domainClass, fieldsClass, rsql, legacyRsqlVisitor);
         final TypedQuery<?> typedQuery = entityManager.createQuery(query);
-        // executes the query - otherwise the SQL string is not generated
-        if (Jpa.JPA_VENDOR.equals(Jpa.JpaVendor.ECLIPSELINK)) {
-            typedQuery.setParameter("eclipselink.tenant-id", "DEFAULT");
-            typedQuery.getResultList();
-            try {
-                final Class<?> jpaQueryClass = Class.forName("org.eclipse.persistence.jpa.JpaQuery");
-                final Method getDatabaseQueryMethod = jpaQueryClass.getMethod("getDatabaseQuery");
-                final Method getSQLString = getDatabaseQueryMethod.getReturnType().getMethod("getSQLString");
-                return (String)getSQLString.invoke(getDatabaseQueryMethod.invoke(typedQuery.unwrap(jpaQueryClass)));
-            } catch (final RuntimeException e) {
-                throw e;
-            } catch (final ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
-                throw new UnsupportedOperationException("EclipseLink is not supported", e);
-            } catch (final InvocationTargetException e) {
-                throw e.getCause() instanceof RuntimeException ? (RuntimeException)e.getCause() : new RuntimeException(e.getCause());
-            }
-        } else { // hibernate
-            throw new UnsupportedOperationException("Hibernate is not supported");
-        }
+        return Utils.toSql(typedQuery);
     }
 
     private <T, A extends Enum<A> & RsqlQueryField> CriteriaQuery<T> createQuery(

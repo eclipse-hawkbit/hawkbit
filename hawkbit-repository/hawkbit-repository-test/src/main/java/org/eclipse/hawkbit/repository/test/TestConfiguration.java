@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
 import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
-import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -75,9 +74,9 @@ import org.springframework.security.concurrent.DelegatingSecurityContextSchedule
  * Spring context configuration required for Dev.Environment.
  */
 @Configuration
-@EnableConfigurationProperties({ DdiSecurityProperties.class,
-        ArtifactUrlHandlerProperties.class, ArtifactFilesystemProperties.class, HawkbitSecurityProperties.class,
-        ControllerPollProperties.class, TenantConfigurationProperties.class })
+@EnableConfigurationProperties({
+        DdiSecurityProperties.class, ArtifactUrlHandlerProperties.class, ArtifactFilesystemProperties.class,
+        HawkbitSecurityProperties.class, ControllerPollProperties.class, TenantConfigurationProperties.class })
 @Profile("test")
 @EnableAutoConfiguration
 @PropertySource("classpath:/hawkbit-test-defaults.properties")
@@ -99,9 +98,7 @@ public class TestConfiguration implements AsyncConfigurer {
         return new DelegatingSecurityContextScheduledExecutorService(
                 Executors.newScheduledThreadPool(1, runnable -> {
                     final Thread thread = Executors.defaultThreadFactory().newThread(runnable);
-                    thread.setName(
-                            String.format(
-                                    Locale.ROOT, "central-scheduled-executor-pool-%d", count.getAndIncrement()));
+                    thread.setName(String.format(Locale.ROOT, "central-scheduled-executor-pool-%d", count.getAndIncrement()));
                     return thread;
                 }));
     }
@@ -135,9 +132,8 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     /**
-     * @return the {@link org.eclipse.hawkbit.repository.test.util.SystemManagementHolder} singleton bean which holds the
-     *         current {@link SystemManagement} service and make it accessible in
-     *         beans which cannot access the service directly, e.g. JPA entities.
+     * @return the {@link org.eclipse.hawkbit.repository.test.util.SystemManagementHolder} singleton bean which holds the current
+     *         {@link SystemManagement} service and make it accessible in beans which cannot access the service directly, e.g. JPA entities.
      */
     @Bean
     SystemManagementHolder systemManagementHolder() {
@@ -150,8 +146,7 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    PropertyBasedArtifactUrlHandler testPropertyBasedArtifactUrlHandler(
-            final ArtifactUrlHandlerProperties urlHandlerProperties) {
+    PropertyBasedArtifactUrlHandler testPropertyBasedArtifactUrlHandler(final ArtifactUrlHandlerProperties urlHandlerProperties) {
         return new PropertyBasedArtifactUrlHandler(urlHandlerProperties, "");
     }
 
@@ -185,8 +180,8 @@ public class TestConfiguration implements AsyncConfigurer {
 
     @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)
     SimpleApplicationEventMulticaster applicationEventMulticaster(final ApplicationEventFilter applicationEventFilter) {
-        final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster = new FilterEnabledApplicationEventPublisher(
-                applicationEventFilter);
+        final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster =
+                new FilterEnabledApplicationEventPublisher(applicationEventFilter);
         simpleApplicationEventMulticaster.setTaskExecutor(asyncExecutor());
         return simpleApplicationEventMulticaster;
     }
