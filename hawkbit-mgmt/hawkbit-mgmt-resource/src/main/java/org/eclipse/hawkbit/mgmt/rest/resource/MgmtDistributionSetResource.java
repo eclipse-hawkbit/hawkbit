@@ -268,10 +268,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                     : dsAssignment.getConfirmationRequired();
             return MgmtDeploymentRequestMapper.createAssignmentRequestBuilder(dsAssignment, distributionSetId)
                     .setConfirmationRequired(isConfirmationRequired).build();
-        }).collect(Collectors.toList());
+        }).toList();
 
-        final List<DistributionSetAssignmentResult> assignmentResults = deployManagement
-                .assignDistributionSets(deploymentRequests);
+        final List<DistributionSetAssignmentResult> assignmentResults = deployManagement.assignDistributionSets(deploymentRequests);
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(assignmentResults));
     }
 
@@ -338,7 +337,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                 distributionSetId,
                 softwareModuleIDs.stream()
                         .map(MgmtSoftwareModuleAssignment::getId)
-                        .collect(Collectors.toList()));
+                        .toList());
         return ResponseEntity.ok().build();
     }
 

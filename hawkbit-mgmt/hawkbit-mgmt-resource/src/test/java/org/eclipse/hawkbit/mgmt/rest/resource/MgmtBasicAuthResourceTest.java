@@ -74,7 +74,7 @@ import org.springframework.web.context.WebApplicationContext;
 @Import(TestChannelBinderConfiguration.class)
 @Feature("Component Tests - Management API")
 @Story("Basic auth Userinfo Resource")
-public class MgmtBasicAuthResourceTest {
+class MgmtBasicAuthResourceTest {
 
     @Autowired
     protected WebApplicationContext webApplicationContext;
@@ -86,7 +86,7 @@ public class MgmtBasicAuthResourceTest {
     @Test
     @Description("Test of userinfo api with basic auth validation")
     @WithUser(principal = TEST_USER)
-    public void validateBasicAuthWithUserDetails() throws Exception {
+    void validateBasicAuthWithUserDetails() throws Exception {
         withSecurityMock().perform(get(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING))
                 .andDo(MockMvcResultPrinter.print())
                 .andDo(MockMvcResultPrinter.print())
@@ -98,7 +98,7 @@ public class MgmtBasicAuthResourceTest {
 
     @Test
     @Description("Test of userinfo api with invalid basic auth fails")
-    public void validateBasicAuthFailsWithInvalidCredentials() throws Exception {
+    void validateBasicAuthFailsWithInvalidCredentials() throws Exception {
         defaultMock.perform(get(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING)
                         .header(HttpHeaders.AUTHORIZATION, getBasicAuth("wrongUser", "wrongSecret")))
                 .andDo(MockMvcResultPrinter.print())

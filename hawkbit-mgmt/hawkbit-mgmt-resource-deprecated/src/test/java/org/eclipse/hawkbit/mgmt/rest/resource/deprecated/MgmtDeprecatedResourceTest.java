@@ -46,7 +46,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 @Feature("Component Tests - Management API")
 @Story("Distribution Set Tag Resource")
-public class MgmtDeprecatedResourceTest extends AbstractManagementApiIntegrationTest {
+class MgmtDeprecatedResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Verifies that tag assignments done through toggle API command are correctly assigned or unassigned.")
@@ -54,7 +54,7 @@ public class MgmtDeprecatedResourceTest extends AbstractManagementApiIntegration
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 4) })
-    public void toggleDistributionSetTagAssignment() throws Exception {
+    void toggleDistributionSetTagAssignment() throws Exception {
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final int setsAssigned = 2;
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
@@ -64,8 +64,8 @@ public class MgmtDeprecatedResourceTest extends AbstractManagementApiIntegration
 
         List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
 
-        assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
-                .containsAll(sets.stream().map(DistributionSet::getId).collect(Collectors.toList()));
+        assertThat(updated.stream().map(DistributionSet::getId).toList())
+                .containsAll(sets.stream().map(DistributionSet::getId).toList());
 
         result.andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(0), "assignedDistributionSets"))
                 .andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(1), "assignedDistributionSets"));
@@ -87,7 +87,7 @@ public class MgmtDeprecatedResourceTest extends AbstractManagementApiIntegration
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2) })
-    public void assignDistributionSetsWithRequestBody() throws Exception {
+    void assignDistributionSetsWithRequestBody() throws Exception {
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final int setsAssigned = 2;
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
@@ -104,8 +104,8 @@ public class MgmtDeprecatedResourceTest extends AbstractManagementApiIntegration
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
 
-        assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
-                .containsAll(sets.stream().map(DistributionSet::getId).collect(Collectors.toList()));
+        assertThat(updated.stream().map(DistributionSet::getId).toList())
+                .containsAll(sets.stream().map(DistributionSet::getId).toList());
 
         result.andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(0)))
                 .andExpect(applyBaseEntityMatcherOnArrayResult(updated.get(1)));
@@ -117,7 +117,7 @@ public class MgmtDeprecatedResourceTest extends AbstractManagementApiIntegration
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 4) })
-    public void toggleTargetTagAssignment() throws Exception {
+    void toggleTargetTagAssignment() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
         final int targetsAssigned = 2;
         final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
@@ -126,8 +126,8 @@ public class MgmtDeprecatedResourceTest extends AbstractManagementApiIntegration
 
         List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
 
-        assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
-                .containsAll(targets.stream().map(Target::getControllerId).collect(Collectors.toList()));
+        assertThat(updated.stream().map(Target::getControllerId).toList())
+                .containsAll(targets.stream().map(Target::getControllerId).toList());
 
         result.andExpect(applyTargetEntityMatcherOnArrayResult(updated.get(0), "assignedTargets"))
                 .andExpect(applyTargetEntityMatcherOnArrayResult(updated.get(1), "assignedTargets"));
@@ -148,7 +148,7 @@ public class MgmtDeprecatedResourceTest extends AbstractManagementApiIntegration
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 2) })
-    public void assignTargetsByRequestBody() throws Exception {
+    void assignTargetsByRequestBody() throws Exception {
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
         final int targetsAssigned = 2;
         final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
@@ -156,7 +156,7 @@ public class MgmtDeprecatedResourceTest extends AbstractManagementApiIntegration
         final ResultActions result = mvc
                 .perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .content(controllerIdsOld(
-                                targets.stream().map(Target::getControllerId).collect(Collectors.toList())))
+                                targets.stream().map(Target::getControllerId).toList()))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -164,8 +164,8 @@ public class MgmtDeprecatedResourceTest extends AbstractManagementApiIntegration
 
         final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
 
-        assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
-                .containsAll(targets.stream().map(Target::getControllerId).collect(Collectors.toList()));
+        assertThat(updated.stream().map(Target::getControllerId).toList())
+                .containsAll(targets.stream().map(Target::getControllerId).toList());
 
         result.andExpect(applyTargetEntityMatcherOnArrayResult(updated.get(0)))
                 .andExpect(applyTargetEntityMatcherOnArrayResult(updated.get(1)));
@@ -175,7 +175,7 @@ public class MgmtDeprecatedResourceTest extends AbstractManagementApiIntegration
         return mvc
                 .perform(post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId()
                         + "/assigned/toggleTagAssignment").content(
-                                JsonBuilder.ids(sets.stream().map(DistributionSet::getId).collect(Collectors.toList())))
+                                JsonBuilder.ids(sets.stream().map(DistributionSet::getId).toList()))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -196,7 +196,7 @@ public class MgmtDeprecatedResourceTest extends AbstractManagementApiIntegration
                 .perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId()
                         + "/assigned/toggleTagAssignment")
                         .content(controllerIdsOld(
-                                targets.stream().map(Target::getControllerId).collect(Collectors.toList())))
+                                targets.stream().map(Target::getControllerId).toList()))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())

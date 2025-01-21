@@ -59,17 +59,17 @@ public class MgmtApi {
                 hawkbitClient.mgmtService(MgmtTenantManagementRestApi.class, tenant);
         final String gatewayToken = tenant.getGatewayToken();
         if (ObjectUtils.isEmpty(gatewayToken)) {
-            if (!((Boolean) Objects.requireNonNull(mgmtTenantManagementRestApi
+            if (!(Boolean.TRUE.equals(Objects.requireNonNull(mgmtTenantManagementRestApi
                     .getTenantConfigurationValue(AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED)
-                    .getBody()).getValue())) {
+                    .getBody()).getValue()))) {
                 mgmtTenantManagementRestApi.updateTenantConfiguration(
                         Map.of(AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, true)
                 );
             }
         } else {
-            if (!((Boolean) Objects.requireNonNull(mgmtTenantManagementRestApi
+            if (!(Boolean.TRUE.equals(Objects.requireNonNull(mgmtTenantManagementRestApi
                     .getTenantConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED)
-                    .getBody()).getValue())) {
+                    .getBody()).getValue()))) {
                 mgmtTenantManagementRestApi.updateTenantConfiguration(
                         Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, true)
                 );

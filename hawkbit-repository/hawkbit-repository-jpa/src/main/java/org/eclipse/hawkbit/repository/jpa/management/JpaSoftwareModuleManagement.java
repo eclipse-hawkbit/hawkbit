@@ -183,7 +183,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long id) {
-        delete(List.of(id));
+        delete0(List.of(id));
     }
 
     @Override
@@ -191,6 +191,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final Collection<Long> ids) {
+        delete0(ids);
+    }
+    private void delete0(final Collection<Long> ids) {
         final List<JpaSoftwareModule> swModulesToDelete = softwareModuleRepository.findAllById(ids);
         if (swModulesToDelete.size() < ids.size()) {
             throw new EntityNotFoundException(SoftwareModule.class, ids,
@@ -283,7 +286,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
                 // touch to update revision and last modified timestamp
                 JpaManagementHelper.touch(entityManager, softwareModuleRepository, (JpaSoftwareModule) get(id)
                         .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id)));
-                return createJpaMetadataCreateStream(create).map(this::saveMetadata).collect(Collectors.toList());
+                return createJpaMetadataCreateStream(create).map(this::saveMetadata).toList();
             } else {
                 // group by software module id to minimize database access
                 final Map<Long, List<JpaSoftwareModuleMetadataCreate>> groups = createJpaMetadataCreateStream(create)
@@ -298,7 +301,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
                     JpaManagementHelper.touch(entityManager, softwareModuleRepository, (JpaSoftwareModule) get(id)
                             .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id)));
                     return group.stream().map(this::saveMetadata);
-                }).collect(Collectors.toList());
+                }).toList();
             }
         }
 
@@ -346,11 +349,10 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteMetaData(final long id, final String key) {
-        final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) findMetaDataBySoftwareModuleId(id,
-                key).orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, id, key));
+        final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) findMetaDataBySoftwareModuleId0(id, key)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, id, key));
 
-        JpaManagementHelper.touch(entityManager, softwareModuleRepository,
-                (JpaSoftwareModule) metadata.getSoftwareModule());
+        JpaManagementHelper.touch(entityManager, softwareModuleRepository, metadata.getSoftwareModule());
         softwareModuleMetadataRepository.deleteById(metadata.getId());
     }
 
@@ -427,6 +429,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Optional<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(final long id, final String key) {
+        return findMetaDataBySoftwareModuleId0(id, key);
+    }
+    private Optional<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId0(final long id, final String key) {
         assertSoftwareModuleExists(id);
 
         return softwareModuleMetadataRepository.findById(new SwMetadataCompositeKey(id, key))
@@ -510,7 +515,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
                 accessController.assertOperationAllowed(AccessController.Operation.DELETE, swModule));
         final Set<String> sha1Hashes = swModule.getArtifacts().stream().map(Artifact::getSha1Hash).collect(Collectors.toSet());
         AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() ->
-                sha1Hashes.forEach(sha1Hash -> ((JpaArtifactManagement) artifactManagement).clearArtifactBinary(sha1Hash)));
+                sha1Hashes.forEach(((JpaArtifactManagement) artifactManagement)::clearArtifactBinary));
     }
 
     private Specification<JpaSoftwareModule> buildSmSearchQuerySpec(final String searchText) {

@@ -28,11 +28,11 @@ import org.junit.jupiter.api.Test;
  */
 @Feature("Unit Tests - Direct Device Integration API")
 @Story("Serialization of DDI api Models")
-public class JsonIgnorePropertiesAnnotationTest {
+class JsonIgnorePropertiesAnnotationTest {
 
     @Test
     @Description("This test verifies that all model classes within the 'org.eclipse.hawkbit.ddi.json.model' package are annotated with '@JsonIgnoreProperties(ignoreUnknown = true)'")
-    public void shouldCheckAnnotationsForAllModelClasses() {
+    void shouldCheckAnnotationsForAllModelClasses() {
         final String packageName = getClass().getPackage().getName();
         try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {
             final List<? extends Class<?>> matchingClasses = scanResult.getAllClasses()

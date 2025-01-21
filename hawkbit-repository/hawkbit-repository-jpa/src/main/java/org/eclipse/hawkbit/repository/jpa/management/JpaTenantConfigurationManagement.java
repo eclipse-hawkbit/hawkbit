@@ -286,7 +286,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     @SuppressWarnings("squid:S1172")
     private void assertAutoCloseValueChange(final String key, final JpaTenantConfiguration valueChange) {
         if (REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED.equals(key)
-                && getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue()) {
+                && Boolean.TRUE.equals(getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue())) {
             log.debug(
                     "The property '{}' must not be changed because the Multi-Assignments feature is currently enabled.",
                     key);

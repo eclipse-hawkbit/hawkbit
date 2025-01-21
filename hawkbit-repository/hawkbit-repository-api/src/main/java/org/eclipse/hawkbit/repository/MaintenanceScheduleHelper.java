@@ -22,6 +22,7 @@ import com.cronutils.model.definition.CronDefinitionBuilder;
 import com.cronutils.model.time.ExecutionTime;
 import com.cronutils.parser.CronParser;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -170,14 +171,14 @@ public final class MaintenanceScheduleHelper {
     }
 
     private static boolean atLeastOneNotEmpty(final String cronSchedule, final String duration, final String timezone) {
-        return !(StringUtils.isEmpty(cronSchedule) && StringUtils.isEmpty(duration) && StringUtils.isEmpty(timezone));
+        return !(ObjectUtils.isEmpty(cronSchedule) && ObjectUtils.isEmpty(duration) && ObjectUtils.isEmpty(timezone));
     }
 
     private static boolean allNotEmpty(final String cronSchedule, final String duration, final String timezone) {
-        return !StringUtils.isEmpty(cronSchedule) && !StringUtils.isEmpty(duration) && !StringUtils.isEmpty(timezone);
+        return !ObjectUtils.isEmpty(cronSchedule) && !ObjectUtils.isEmpty(duration) && !ObjectUtils.isEmpty(timezone);
     }
 
     private static LocalTime convertDurationToLocalTime(final String timeInterval) {
-        return LocalTime.parse(StringUtils.trimWhitespace(timeInterval));
+        return LocalTime.parse(timeInterval.strip());
     }
 }

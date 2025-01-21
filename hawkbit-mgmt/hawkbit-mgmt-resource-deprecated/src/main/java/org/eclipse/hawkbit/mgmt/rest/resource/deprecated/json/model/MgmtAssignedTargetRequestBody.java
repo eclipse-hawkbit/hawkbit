@@ -20,6 +20,8 @@ import lombok.experimental.Accessors;
 
 /**
  * Request Body for PUT.
+ *
+ * @deprecated Since 0.6.0
  */
 @Data
 @Accessors(chain = true)

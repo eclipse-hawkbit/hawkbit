@@ -33,8 +33,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MdcHandler {
 
-    public static String MDC_KEY_TENANT = "tenant";
-    public static String MDC_KEY_USER = "user";
+    public static final String MDC_KEY_TENANT = "tenant";
+    public static final String MDC_KEY_USER = "user";
 
     private static final MdcHandler SINGLETON = new MdcHandler();
 

@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -41,7 +40,7 @@ public final class MgmtActionMapper {
         }
         return new ResponseList<>(actions.stream()
                 .map(action -> toResponse(action, repMode))
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     static MgmtAction toResponse(final Action action, final MgmtRepresentationMode repMode) {
