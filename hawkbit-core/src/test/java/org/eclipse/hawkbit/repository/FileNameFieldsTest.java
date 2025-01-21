@@ -19,12 +19,12 @@ import io.github.classgraph.ScanResult;
 import io.qameta.allure.Description;
 import org.junit.jupiter.api.Test;
 
-public class FileNameFieldsTest {
+class FileNameFieldsTest {
 
     @Test
     @Description("Verifies that fields classes are correctly implemented")
     @SuppressWarnings("unchecked")
-    public void repositoryManagementMethodsArePreAuthorizedAnnotated() {
+    void repositoryManagementMethodsArePreAuthorizedAnnotated() {
         final String packageName = getClass().getPackage().getName();
         try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {
             final List<? extends Class<? extends RsqlQueryField>> matchingClasses = scanResult.getAllClasses()

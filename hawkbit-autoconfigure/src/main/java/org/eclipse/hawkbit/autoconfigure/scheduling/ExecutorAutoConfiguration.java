@@ -86,7 +86,7 @@ public class ExecutorAutoConfiguration {
 
     private static ThreadFactory threadFactory(final String format) {
         final AtomicLong count = new AtomicLong(0);
-        return (runnable) -> {
+        return runnable -> {
             final Thread thread = Executors.defaultThreadFactory().newThread(runnable);
             thread.setName(String.format(Locale.ROOT, format, count.getAndIncrement()));
             return thread;

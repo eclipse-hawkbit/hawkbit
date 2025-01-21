@@ -40,8 +40,8 @@ import org.springframework.http.ResponseEntity;
 @Story("File streaming")
 class FileStreamingUtilTest {
 
-    private final static String CONTENT = "This is some very long string which is intended to test";
-    private final static byte[] CONTENT_BYTES = CONTENT.getBytes(StandardCharsets.UTF_8);
+    private static final String CONTENT = "This is some very long string which is intended to test";
+    private static final byte[] CONTENT_BYTES = CONTENT.getBytes(StandardCharsets.UTF_8);
 
     private static final DbArtifact TEST_ARTIFACT = new DbArtifact() {
 

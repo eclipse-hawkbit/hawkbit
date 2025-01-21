@@ -11,15 +11,16 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- * This exception is thrown if trying to set a maintenance schedule that is
- * invalid. A maintenance schedule is considered to be valid only if schedule,
- * duration and timezone are all null, or are all valid; in which case there
- * should be at least one valid window after the current time.
+ * This exception is thrown if trying to set a maintenance schedule that is invalid. A maintenance schedule is considered to be valid only if
+ * schedule, duration and timezone are all null, or are all valid; in which case there should be at least one valid window after the current
+ * time.
  */
+@EqualsAndHashCode(callSuper = true)
 public class InvalidMaintenanceScheduleException extends AbstractServerRtException {
 
     @Serial

@@ -21,11 +21,11 @@ import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Management API")
 @Story("Error Handling")
-public class ExceptionInfoTest {
+class ExceptionInfoTest {
 
     @Test
     @Description("Ensures that setters and getters match on teh payload.")
-    public void setterAndGetterOnExceptionInfo() {
+    void setterAndGetterOnExceptionInfo() {
         final String knownExceptionClass = "hawkbit.test.exception.Class";
         final String knownErrorCode = "hawkbit.error.code.Known";
         final String knownMessage = "a known message";

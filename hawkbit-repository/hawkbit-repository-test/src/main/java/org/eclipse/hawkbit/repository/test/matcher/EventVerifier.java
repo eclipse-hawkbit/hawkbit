@@ -144,17 +144,17 @@ public class EventVerifier extends AbstractTestExecutionListener {
                 return;
             }
 
-            if (event instanceof RemoteTenantAwareEvent) {
-                assertThat(((RemoteTenantAwareEvent) event).getTenant()).isNotEmpty();
+            if (event instanceof RemoteTenantAwareEvent remoteTenantAwareEvent) {
+                assertThat(remoteTenantAwareEvent.getTenant()).isNotEmpty();
             }
 
-            if (event instanceof RemoteIdEvent) {
-                assertThat(((RemoteIdEvent) event).getEntityId()).isNotNull();
+            if (event instanceof RemoteIdEvent remoteIdEvent) {
+                assertThat(remoteIdEvent.getEntityId()).isNotNull();
             }
 
-            if (event instanceof TargetAssignDistributionSetEvent) {
-                assertThat(((TargetAssignDistributionSetEvent) event).getActions()).isNotEmpty();
-                assertThat(((TargetAssignDistributionSetEvent) event).getDistributionSetId()).isNotNull();
+            if (event instanceof TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
+                assertThat(targetAssignDistributionSetEvent.getActions()).isNotEmpty();
+                assertThat(targetAssignDistributionSetEvent.getDistributionSetId()).isNotNull();
             }
 
             capturedEvents.compute(event.getClass(), (k, v) -> v == null ? 1 : v + 1);
@@ -177,7 +177,7 @@ public class EventVerifier extends AbstractTestExecutionListener {
         private static final long serialVersionUID = 1L;
 
         private ResetCounterMarkerEvent() {
-            super(new Object(), "resetcounter");
+            super(new Object(), "resetcounter", DEFAULT_DESTINATION_FACTORY.getDestination(null));
         }
     }
 }

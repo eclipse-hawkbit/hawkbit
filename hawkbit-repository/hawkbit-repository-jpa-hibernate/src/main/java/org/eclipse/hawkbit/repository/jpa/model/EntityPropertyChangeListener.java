@@ -57,7 +57,7 @@ public class EntityPropertyChangeListener implements PostUpdateEventListener {
         }
 
         if (hasNonIgnoredChanges || !lastTargetQueryChanged) {
-            AbstractJpaBaseEntity.doNotify(() -> ((EventAwareEntity) event.getEntity()).fireUpdateEvent());
+            AbstractBaseEntity.doNotify(((EventAwareEntity) event.getEntity())::fireUpdateEvent);
         }
     }
 

@@ -31,7 +31,7 @@ public class EntityPropertyChangeListener extends DescriptorEventAdapter {
         final Object object = event.getObject();
         if (((UpdateObjectQuery) event.getQuery()).getObjectChangeSet().getChangedAttributeNames().stream()
                 .anyMatch(field -> !TARGET_UPDATE_EVENT_IGNORE_FIELDS.contains(field))) {
-            AbstractJpaBaseEntity.doNotify(() -> ((EventAwareEntity) object).fireUpdateEvent());
+            AbstractBaseEntity.doNotify(((EventAwareEntity) object)::fireUpdateEvent);
         }
     }
 }

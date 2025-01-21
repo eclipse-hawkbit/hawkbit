@@ -196,7 +196,7 @@ public final class FileStreamingUtil {
 
     private static long sublong(final String value, final int beginIndex, final int endIndex) {
         final String substring = value.substring(beginIndex, endIndex);
-        return substring.length() > 0 ? Long.parseLong(substring) : -1;
+        return substring.isEmpty() ? -1 : Long.parseLong(substring);
     }
 
     private static void checkForShortcut(final HttpServletRequest request, final String etag, final long lastModified,

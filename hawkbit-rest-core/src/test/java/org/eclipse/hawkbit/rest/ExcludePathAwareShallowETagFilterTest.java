@@ -34,7 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @Feature("Unit Tests - Security")
 @Story("Exclude path aware shallow ETag filter")
 @ExtendWith(MockitoExtension.class)
-public class ExcludePathAwareShallowETagFilterTest {
+class ExcludePathAwareShallowETagFilterTest {
 
     @Mock
     private HttpServletRequest servletRequestMock;
@@ -46,7 +46,7 @@ public class ExcludePathAwareShallowETagFilterTest {
     private FilterChain filterChainMock;
 
     @Test
-    public void excludePathDoesNotCalculateETag() throws ServletException, IOException {
+    void excludePathDoesNotCalculateETag() throws ServletException, IOException {
         final String knownContextPath = "/bumlux/test";
         final String knownUri = knownContextPath + "/exclude/download";
         final String antPathExclusion = "/exclude/**";
@@ -68,7 +68,7 @@ public class ExcludePathAwareShallowETagFilterTest {
     }
 
     @Test
-    public void pathNotExcludedETagIsCalculated() throws ServletException, IOException {
+    void pathNotExcludedETagIsCalculated() throws ServletException, IOException {
         final String knownContextPath = "/bumlux/test";
         final String knownUri = knownContextPath + "/include/download";
         final String antPathExclusion = "/exclude/**";

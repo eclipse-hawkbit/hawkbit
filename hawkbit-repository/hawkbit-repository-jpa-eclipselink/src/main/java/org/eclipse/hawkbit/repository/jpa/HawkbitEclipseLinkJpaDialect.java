@@ -91,8 +91,8 @@ class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
         Throwable exception = jpaSystemException;
         do {
             final Throwable cause = exception.getCause();
-            if (cause instanceof SQLException) {
-                return (SQLException) cause;
+            if (cause instanceof SQLException sqlException) {
+                return sqlException;
             }
             exception = cause;
         } while (exception != null);
