@@ -124,8 +124,9 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
         final List<JpaDistributionSetTag> setsFound = distributionSetTagRepository.findAllById(ids);
 
         if (setsFound.size() < ids.size()) {
-            throw new EntityNotFoundException(DistributionSetTag.class, ids,
-                    setsFound.stream().map(DistributionSetTag::getId).collect(Collectors.toList()));
+            throw new EntityNotFoundException(
+                    DistributionSetTag.class, ids,
+                    setsFound.stream().map(DistributionSetTag::getId).toList());
         }
 
         distributionSetTagRepository.deleteAll(setsFound);

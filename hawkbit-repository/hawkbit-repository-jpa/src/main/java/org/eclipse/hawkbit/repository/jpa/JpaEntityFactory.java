@@ -30,7 +30,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -68,12 +67,12 @@ public class JpaEntityFactory implements EntityFactory {
 
     @Override
     public MetaData generateDsMetadata(final String key, final String value) {
-        return new JpaDistributionSetMetadata(key, StringUtils.trimWhitespace(value));
+        return new JpaDistributionSetMetadata(key, value == null ? null : value.strip());
     }
 
     @Override
     public MetaData generateTargetMetadata(final String key, final String value) {
-        return new JpaTargetMetadata(key, StringUtils.trimWhitespace(value));
+        return new JpaTargetMetadata(key, value == null ? null : value.strip());
     }
 
     @Override

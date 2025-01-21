@@ -59,7 +59,7 @@ public class JpaRolloutCreate extends AbstractNamedEntityBuilder<RolloutCreate> 
      * @return this builder
      */
     public RolloutCreate targetFilterQuery(final String targetFilterQuery) {
-        this.targetFilterQuery = StringUtils.trimWhitespace(targetFilterQuery);
+        this.targetFilterQuery = targetFilterQuery == null ? null : targetFilterQuery.strip();
         return this;
     }
 

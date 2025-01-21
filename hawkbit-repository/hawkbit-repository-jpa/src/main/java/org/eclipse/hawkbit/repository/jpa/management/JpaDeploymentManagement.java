@@ -195,12 +195,17 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> assignDistributionSets(final List<DeploymentRequest> deploymentRequests) {
-        return assignDistributionSets(tenantAware.getCurrentUsername(), deploymentRequests, null);
+        return assignDistributionSets0(tenantAware.getCurrentUsername(), deploymentRequests, null);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> assignDistributionSets(
+            final String initiatedBy, final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
+        return assignDistributionSets0(initiatedBy, deploymentRequests, actionMessage);
+    }
+
+    private List<DistributionSetAssignmentResult> assignDistributionSets0(
             final String initiatedBy, final List<DeploymentRequest> deploymentRequests, final String actionMessage) {
         WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(deploymentRequests);
         return assignDistributionSets(initiatedBy, deploymentRequests, actionMessage, onlineDsAssignmentStrategy);
@@ -232,6 +237,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action cancelAction(final long actionId) {
+        return cancelAction0(actionId);
+    }
+
+    private Action cancelAction0(final long actionId) {
         log.debug("cancelAction({})", actionId);
 
         final JpaAction action = actionRepository.findById(actionId)
@@ -393,6 +402,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action forceQuitAction(final long actionId) {
+        return forceQuitAction0(actionId);
+    }
+
+    private Action forceQuitAction0(final long actionId) {
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
@@ -495,12 +508,14 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Optional<DistributionSet> getAssignedDistributionSet(final String controllerId) {
-        return targetRepository.findWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_ASSIGNED_DISTRIBUTION_SET).map(JpaTarget::getAssignedDistributionSet);
+        return targetRepository.findWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_ASSIGNED_DISTRIBUTION_SET)
+                .map(JpaTarget::getAssignedDistributionSet);
     }
 
     @Override
     public Optional<DistributionSet> getInstalledDistributionSet(final String controllerId) {
-        return targetRepository.findWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_INSTALLED_DISTRIBUTION_SET).map(JpaTarget::getInstalledDistributionSet);
+        return targetRepository.findWithDetailsByControllerId(controllerId, JpaTarget_.GRAPH_TARGET_INSTALLED_DISTRIBUTION_SET)
+                .map(JpaTarget::getInstalledDistributionSet);
     }
 
     @Override
@@ -542,7 +557,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .forEach(action -> {
                     try {
                         assertTargetUpdateAllowed(action);
-                        cancelAction(action.getId());
+                        cancelAction0(action.getId());
                         log.debug("Action {} canceled", action.getId());
                     } catch (final InsufficientPermissionException e) {
                         log.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
@@ -555,7 +570,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                     .forEach(action -> {
                         try {
                             assertTargetUpdateAllowed(action);
-                            forceQuitAction(action.getId());
+                            forceQuitAction0(action.getId());
                             log.debug("Action {} force canceled (force)", action.getId());
                         } catch (final InsufficientPermissionException e) {
                             log.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
@@ -588,7 +603,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      * statements
      */
     private static List<List<Long>> getTargetEntitiesAsChunks(final List<JpaTarget> targetEntities) {
-        return ListUtils.partition(targetEntities.stream().map(Target::getId).collect(Collectors.toList()), Constants.MAX_ENTRIES_IN_STATEMENT);
+        return ListUtils.partition(targetEntities.stream().map(Target::getId).toList(), Constants.MAX_ENTRIES_IN_STATEMENT);
     }
 
     private static DistributionSetAssignmentResult buildAssignmentResult(
@@ -855,8 +870,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 quota, Action.class, Target.class, actionRepository::countByTargetControllerId));
     }
 
-    private void closeOrCancelActiveActions(final AbstractDsAssignmentStrategy assignmentStrategy,
-            final List<List<Long>> targetIdsChunks) {
+    private void closeOrCancelActiveActions(final AbstractDsAssignmentStrategy assignmentStrategy, final List<List<Long>> targetIdsChunks) {
         if (isActionsAutocloseEnabled()) {
             assignmentStrategy.closeActiveActions(targetIdsChunks);
         } else {
@@ -864,7 +878,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }
     }
 
-    private void setAssignedDistributionSetAndTargetUpdateStatus(final AbstractDsAssignmentStrategy assignmentStrategy,
+    private void setAssignedDistributionSetAndTargetUpdateStatus(
+            final AbstractDsAssignmentStrategy assignmentStrategy,
             final JpaDistributionSet set, final List<List<Long>> targetIdsChunks) {
         final String currentUser = auditorProvider.getCurrentAuditor().orElse(null);
         assignmentStrategy.setAssignedDistributionSetAndTargetStatus(set, targetIdsChunks, currentUser);
@@ -970,8 +985,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private void closeOrCancelOpenDeviceActions(final List<JpaAction> actions) {
-        final List<Long> targetIds = actions.stream().map(JpaAction::getTarget).map(Target::getId)
-                .collect(Collectors.toList());
+        final List<Long> targetIds = actions.stream().map(JpaAction::getTarget).map(Target::getId).toList();
         if (isActionsAutocloseEnabled()) {
             onlineDsAssignmentStrategy.closeObsoleteUpdateActions(targetIds);
         } else {
@@ -999,7 +1013,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             mergedTarget.setAssignedDistributionSet((JpaDistributionSet) savedAction.getDistributionSet());
             mergedTarget.setUpdateStatus(TargetUpdateStatus.PENDING);
             return mergedTarget;
-        }).collect(Collectors.toList());
+        }).toList();
 
         targetRepository.saveAll(assignedDsTargets);
     }
@@ -1041,12 +1055,12 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private JpaAction assertTargetUpdateAllowed(final JpaAction action) {
-        targetRepository.findOne(TargetSpecifications.hasId(action.getTarget().getId())).ifPresentOrElse(target -> {
-            targetRepository.getAccessController()
-                    .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, target));
-        }, () -> {
-            throw new EntityNotFoundException(Action.class, action);
-        });
+        targetRepository.findOne(TargetSpecifications.hasId(action.getTarget().getId())).ifPresentOrElse(
+                target -> targetRepository.getAccessController()
+                        .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, target)),
+                () -> {
+                    throw new EntityNotFoundException(Action.class, action);
+                });
         return action;
     }
 
