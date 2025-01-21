@@ -200,7 +200,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     private List<Action> giveConfirmationForActiveActions(final AutoConfirmationStatus autoConfirmationStatus) {
         return findActiveActionsHavingStatus(autoConfirmationStatus.getTarget().getControllerId(), Status.WAIT_FOR_CONFIRMATION).stream()
                 .map(action -> autoConfirmAction(action, autoConfirmationStatus))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Action autoConfirmAction(final JpaAction action, final AutoConfirmationStatus autoConfirmationStatus) {

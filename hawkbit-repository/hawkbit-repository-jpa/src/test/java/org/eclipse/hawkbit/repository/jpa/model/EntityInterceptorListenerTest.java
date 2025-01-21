@@ -27,28 +27,28 @@ import org.junit.jupiter.api.Test;
  */
 @Feature("Component Tests - Repository")
 @Story("Entity Listener Interceptor")
-public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
+class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         EntityInterceptorHolder.getInstance().getEntityInterceptors().clear();
     }
 
     @Test
     @Description("Verifies that the pre persist is called after a entity creation.")
-    public void prePersistIsCalledWhenPersistingATarget() {
+    void prePersistIsCalledWhenPersistingATarget() {
         executePersistAndAssertCallbackResult(new PrePersistEntityListener());
     }
 
     @Test
     @Description("Verifies that the post persist is called after a entity creation.")
-    public void postPersistIsCalledWhenPersistingATarget() {
+    void postPersistIsCalledWhenPersistingATarget() {
         executePersistAndAssertCallbackResult(new PostPersistEntityListener());
     }
 
     @Test
     @Description("Verifies that the post load is called after a entity is loaded.")
-    public void postLoadIsCalledWhenLoadATarget() {
+    void postLoadIsCalledWhenLoadATarget() {
         final PostLoadEntityListener postLoadEntityListener = new PostLoadEntityListener();
         EntityInterceptorHolder.getInstance().getEntityInterceptors().add(postLoadEntityListener);
 
@@ -61,25 +61,25 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the pre update is called after a entity update.")
-    public void preUpdateIsCalledWhenUpdateATarget() {
+    void preUpdateIsCalledWhenUpdateATarget() {
         executeUpdateAndAssertCallbackResult(new PreUpdateEntityListener());
     }
 
     @Test
     @Description("Verifies that the post update is called after a entity update.")
-    public void postUpdateIsCalledWhenUpdateATarget() {
+    void postUpdateIsCalledWhenUpdateATarget() {
         executeUpdateAndAssertCallbackResult(new PostUpdateEntityListener());
     }
 
     @Test
     @Description("Verifies that the pre remove is called after a entity deletion.")
-    public void preRemoveIsCalledWhenDeletingATarget() {
+    void preRemoveIsCalledWhenDeletingATarget() {
         executeDeleteAndAssertCallbackResult(new PreRemoveEntityListener());
     }
 
     @Test
     @Description("Verifies that the post remove is called after a entity deletion.")
-    public void postRemoveIsCalledWhenDeletingATarget() {
+    void postRemoveIsCalledWhenDeletingATarget() {
         executeDeleteAndAssertCallbackResult(new PostRemoveEntityListener());
     }
 
@@ -91,10 +91,10 @@ public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     }
 
     private void executeUpdateAndAssertCallbackResult(final AbstractEntityListener entityInterceptor) {
-        Target updateTarget = addListenerAndCreateTarget(entityInterceptor, "targetToBeCreated");
-
-        updateTarget = targetManagement
-                .update(entityFactory.target().update(updateTarget.getControllerId()).name("New"));
+        final Target updateTarget = targetManagement.update(
+                entityFactory.target()
+                        .update(addListenerAndCreateTarget(entityInterceptor, "targetToBeCreated").getControllerId())
+                        .name("New"));
 
         assertThat(entityInterceptor.getEntity()).isNotNull();
         assertThat(entityInterceptor.getEntity()).isEqualTo(updateTarget);

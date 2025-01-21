@@ -14,6 +14,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -375,7 +376,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     public static class StatusConverter extends MapAttributeConverter<Status, Integer> {
 
         public StatusConverter() {
-            super(new HashMap<>() {{
+            super(new EnumMap<>(new HashMap<>() {{
                 put(Status.FINISHED, 0);
                 put(Status.ERROR, 1);
                 put(Status.WARNING, 2);
@@ -388,7 +389,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
                 put(Status.CANCEL_REJECTED, 9);
                 put(Status.DOWNLOADED, 10);
                 put(Status.WAIT_FOR_CONFIRMATION, 11);
-            }}, null);
+            }}), null);
         }
     }
 }

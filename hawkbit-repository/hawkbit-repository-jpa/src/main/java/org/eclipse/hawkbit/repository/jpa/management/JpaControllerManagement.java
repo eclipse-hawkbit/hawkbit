@@ -321,13 +321,16 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(retryFor = ConcurrencyFailureException.class, noRetryFor = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address) {
-        return findOrRegisterTargetIfItDoesNotExist(controllerId, address, null, null);
+        return findOrRegisterTargetIfItDoesNotExist0(controllerId, address, null, null);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(retryFor = ConcurrencyFailureException.class, noRetryFor = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address, final String name, final String type) {
+        return findOrRegisterTargetIfItDoesNotExist0(controllerId, address, name, type);
+    }
+    private Target findOrRegisterTargetIfItDoesNotExist0(final String controllerId, final URI address, final String name, final String type) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
         return targetRepository.findOne(spec).map(target -> updateTarget(target, address, name, type))
                 .orElseGet(() -> createTarget(controllerId, address, name, type));

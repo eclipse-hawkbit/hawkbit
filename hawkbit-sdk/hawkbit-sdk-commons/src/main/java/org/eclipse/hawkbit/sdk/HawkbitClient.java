@@ -32,29 +32,29 @@ public class HawkbitClient {
     private static final String AUTHORIZATION = "Authorization";
     public static final BiFunction<Tenant, Controller, RequestInterceptor> DEFAULT_REQUEST_INTERCEPTOR_FN =
             (tenant, controller) ->
-                    controller == null ?
-                            template -> {
-                                template.header(
-                                        AUTHORIZATION,
+                    controller == null
+                            ? template ->
+                                    template.header(
+                                            AUTHORIZATION,
 
-                                        "Basic " +
-                                                Base64.getEncoder()
-                                                        .encodeToString(
-                                                                (Objects.requireNonNull(tenant.getUsername(), "User is null!") +
-                                                                        ":" +
-                                                                        Objects.requireNonNull(tenant.getPassword(),
-                                                                                "Password is not available!"))
-                                                                        .getBytes(StandardCharsets.ISO_8859_1)));
-                            } :
-                            template -> {
-                                if (ObjectUtils.isEmpty(tenant.getGatewayToken())) {
-                                    if (!ObjectUtils.isEmpty(controller.getSecurityToken())) {
-                                        template.header(AUTHORIZATION, "TargetToken " + controller.getSecurityToken());
-                                    } // else do not sent authentication
-                                } else {
-                                    template.header(AUTHORIZATION, "GatewayToken " + tenant.getGatewayToken());
-                                }
-                            };
+                                            "Basic " +
+                                                    Base64.getEncoder()
+                                                            .encodeToString(
+                                                                    (Objects.requireNonNull(tenant.getUsername(), "User is null!") +
+                                                                            ":" +
+                                                                            Objects.requireNonNull(tenant.getPassword(),
+                                                                                    "Password is not available!"))
+                                                                            .getBytes(StandardCharsets.ISO_8859_1)))
+                            :
+                                    template -> {
+                                        if (ObjectUtils.isEmpty(tenant.getGatewayToken())) {
+                                            if (!ObjectUtils.isEmpty(controller.getSecurityToken())) {
+                                                template.header(AUTHORIZATION, "TargetToken " + controller.getSecurityToken());
+                                            } // else do not sent authentication
+                                        } else {
+                                            template.header(AUTHORIZATION, "GatewayToken " + tenant.getGatewayToken());
+                                        }
+                                    };
     private static final ErrorDecoder DEFAULT_ERROR_DECODER_0 = new ErrorDecoder.Default();
     public static final ErrorDecoder DEFAULT_ERROR_DECODER = (methodKey, response) -> {
         final Exception e = DEFAULT_ERROR_DECODER_0.decode(methodKey, response);

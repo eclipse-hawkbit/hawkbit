@@ -96,7 +96,7 @@ public class Filter extends Div {
                             }
                         })
                         .filter(e -> !(e.getValue() instanceof Collection<?> coll && coll.isEmpty()))
-                        .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         if (normalized.isEmpty()) {
             return null;
         } else if (normalized.size() == 1) {

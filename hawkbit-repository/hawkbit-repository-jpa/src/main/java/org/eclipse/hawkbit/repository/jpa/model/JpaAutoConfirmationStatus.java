@@ -19,15 +19,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 
-import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 @NoArgsConstructor // Default constructor needed for JPA entities.
+@EqualsAndHashCode(callSuper = true)
 @Getter
 @Entity
 @Table(name = "sp_target_conf_status")
@@ -48,8 +50,8 @@ public class JpaAutoConfirmationStatus extends AbstractJpaTenantAwareBaseEntity 
 
     public JpaAutoConfirmationStatus(final String initiator, final String remark, final Target target) {
         this.target = (JpaTarget) target;
-        this.initiator = StringUtils.isEmpty(initiator) ? null : initiator;
-        this.remark = StringUtils.isEmpty(remark) ? null : remark;
+        this.initiator = ObjectUtils.isEmpty(initiator) ? null : initiator;
+        this.remark = ObjectUtils.isEmpty(remark) ? null : remark;
     }
 
     @Override
