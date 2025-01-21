@@ -210,7 +210,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long id) {
-        delete(List.of(id));
+        delete0(List.of(id));
     }
 
     @Override
@@ -218,6 +218,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final Collection<Long> distributionSetIDs) {
+        delete0(distributionSetIDs);
+    }
+    private void delete0(final Collection<Long> distributionSetIDs) {
         getDistributionSets(distributionSetIDs); // throws EntityNotFoundException if any of these do not exists
         final List<JpaDistributionSet> setsFound = distributionSetRepository.findAll(
                 AccessController.Operation.DELETE, distributionSetRepository.byIdsSpec(distributionSetIDs));
@@ -418,8 +421,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         // touch it to update the lock revision because we are modifying the
         // DS indirectly, it will, also check UPDATE access
-        JpaManagementHelper.touch(entityManager, distributionSetRepository,
-                (JpaDistributionSet) metadata.getDistributionSet());
+        JpaManagementHelper.touch(entityManager, distributionSetRepository, metadata.getDistributionSet());
         distributionSetMetadataRepository.deleteById(metadata.getId());
     }
 

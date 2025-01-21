@@ -106,7 +106,7 @@ public final class JpaManagementHelper {
                 : (filterString + "%");
         final String filterVersion = semicolonIndex != -1 ? (filterString.substring(semicolonIndex + 1) + "%") : "%";
 
-        return new String[] { !StringUtils.isEmpty(filterName) ? filterName : "%", filterVersion };
+        return new String[] { ObjectUtils.isEmpty(filterName) ? "%" : filterName, filterVersion };
     }
 
 }

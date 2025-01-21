@@ -99,7 +99,7 @@ public class JpaRolloutHandler implements RolloutHandler {
     private void handleRolloutInNewTransaction(final long rolloutId, final String handlerId) {
         DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId, status -> {
             rolloutManagement.get(rolloutId).ifPresentOrElse(
-                    rollout -> {
+                    rollout ->
                         // auditor is retrieved and set on transaction commit
                         // if not overridden, the system user will be the auditor
                         rollout.getAccessControlContext().ifPresentOrElse(
@@ -113,9 +113,7 @@ public class JpaRolloutHandler implements RolloutHandler {
                                                 rollout.getCreatedBy(), () -> {
                                                     rolloutExecutor.execute(rollout);
                                                     return null;
-                                                })
-                        );
-                    },
+                                                })),
                     () -> log.error("Could not retrieve rollout with id {}. Will not continue with execution.",
                             rolloutId));
             return 0L;

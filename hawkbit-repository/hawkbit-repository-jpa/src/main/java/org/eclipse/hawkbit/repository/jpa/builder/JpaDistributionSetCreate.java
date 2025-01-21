@@ -24,8 +24,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Create/build implementation.
@@ -47,7 +45,7 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
 
     @Override
     public DistributionSetCreate type(final String type) {
-        this.type = ObjectUtils.isEmpty(type) ? type : type.strip();
+        this.type = type == null ? null : type.strip();
         return this;
     }
 

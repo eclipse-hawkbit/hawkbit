@@ -585,7 +585,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
 
     private Predicate in(final Expression<String> expressionToCompare, final List<Object> transformedValues) {
         final List<String> inParams = transformedValues.stream().filter(String.class::isInstance)
-                .map(String.class::cast).map(this::caseWise).collect(Collectors.toList());
+                .map(String.class::cast).map(this::caseWise).toList();
         return inParams.isEmpty() ? expressionToCompare.in(transformedValues) : caseWise(cb, expressionToCompare).in(inParams);
     }
 

@@ -124,8 +124,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    public void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds,
-            final String currentUser) {
+    public void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds, final String currentUser) {
         final long now = System.currentTimeMillis();
         targetIds.forEach(targetIdsChunk -> {
             if (targetRepository.count(AccessController.Operation.UPDATE,
@@ -151,8 +150,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     @Override
     public Set<Long> cancelActiveActions(final List<List<Long>> targetIds) {
-        return targetIds.stream().map(this::overrideObsoleteUpdateActions).flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+        return targetIds.stream().map(this::overrideObsoleteUpdateActions).flatMap(Collection::stream).collect(Collectors.toSet());
     }
 
     @Override

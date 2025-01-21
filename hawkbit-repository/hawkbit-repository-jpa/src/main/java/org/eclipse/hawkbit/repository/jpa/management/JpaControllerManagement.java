@@ -332,7 +332,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
     private Target findOrRegisterTargetIfItDoesNotExist0(final String controllerId, final URI address, final String name, final String type) {
         final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
-        return targetRepository.findOne(spec).map(target -> updateTarget(target, address, name, type))
+        return targetRepository.findOne(spec)
+                .map(target -> updateTarget(target, address, name, type))
                 .orElseGet(() -> createTarget(controllerId, address, name, type));
     }
 

@@ -317,9 +317,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         rollout.setStatus(RolloutStatus.FINISHED);
         rolloutRepository.save(rollout);
 
-        final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId)
-                .collect(Collectors.toList());
-
+        final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId).toList();
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(new RolloutStoppedEvent(
                 tenantAware.getCurrentTenant(), eventPublisherHolder.getApplicationId(), rollout.getId(), groupIds)));
     }

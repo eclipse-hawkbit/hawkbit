@@ -198,11 +198,12 @@ public class RolloutStatusCache {
         cacheManager.evictCaches(tenant);
     }
 
-    private Map<Long, List<TotalTargetCountActionStatus>> retrieveFromCache(final List<Long> ids,
+    private @NotNull Map<Long, List<TotalTargetCountActionStatus>> retrieveFromCache(final List<Long> ids,
             @NotNull final Cache cache) {
-        return ids.stream().map(id -> cache.get(id, CachedTotalTargetCountActionStatus.class)).filter(Objects::nonNull)
-                .collect(Collectors.toMap(CachedTotalTargetCountActionStatus::getId,
-                        CachedTotalTargetCountActionStatus::getStatus));
+        return ids.stream()
+                .map(id -> cache.get(id, CachedTotalTargetCountActionStatus.class))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(CachedTotalTargetCountActionStatus::getId, CachedTotalTargetCountActionStatus::getStatus));
     }
 
     private List<TotalTargetCountActionStatus> retrieveFromCache(final Long id, @NotNull final Cache cache) {

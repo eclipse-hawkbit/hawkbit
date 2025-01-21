@@ -184,6 +184,11 @@ public class JpaRolloutManagement implements RolloutManagement {
     public Rollout create(
             final RolloutCreate rollout, final int amountGroup, final boolean confirmationRequired,
             final RolloutGroupConditions conditions, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
+        return create0(rollout, amountGroup, confirmationRequired, conditions, dynamicRolloutGroupTemplate);
+    }
+    private Rollout create0(
+            final RolloutCreate rollout, final int amountGroup, final boolean confirmationRequired,
+            final RolloutGroupConditions conditions, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
         if (amountGroup < 0) {
             throw new ValidationException("The amount of groups cannot be lower than or equal to zero for static rollouts");
         } else if (amountGroup == 0) {
@@ -208,17 +213,17 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout create(@NotNull @Valid RolloutCreate create, int amountGroup, boolean confirmationRequired,
+    public Rollout create(
+            @NotNull @Valid RolloutCreate create, int amountGroup, boolean confirmationRequired,
             @NotNull RolloutGroupConditions conditions) {
-        return create(create, amountGroup, confirmationRequired, conditions, null);
+        return create0(create, amountGroup, confirmationRequired, conditions, null);
     }
 
     @Override
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout create(final RolloutCreate rollout, final List<RolloutGroupCreate> groups,
-            final RolloutGroupConditions conditions) {
+    public Rollout create(final RolloutCreate rollout, final List<RolloutGroupCreate> groups, final RolloutGroupConditions conditions) {
         if (groups.isEmpty()) {
             throw new ValidationException("The amount of groups cannot be 0");
         }
@@ -353,7 +358,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision) {
-        return this.approveOrDeny(rolloutId, decision, null);
+        return approveOrDeny0(rolloutId, decision, null);
     }
 
     @Override
@@ -361,6 +366,9 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision, final String remark) {
+        return approveOrDeny0(rolloutId, decision, remark);
+    }
+    private Rollout approveOrDeny0(final long rolloutId, final Rollout.ApprovalDecision decision, final String remark) {
         log.debug("approveOrDeny rollout called for rollout {} with decision {}", rolloutId, decision);
         final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.WAITING_FOR_APPROVAL);
@@ -474,10 +482,10 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public void setRolloutStatusDetails(final Slice<Rollout> rollouts) {
-        final List<Long> rolloutIds = rollouts.getContent().stream().map(Rollout::getId).collect(Collectors.toList());
+        final List<Long> rolloutIds = rollouts.getContent().stream().map(Rollout::getId).toList();
         final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(rolloutIds);
 
-        if (allStatesForRollout != null) {
+        if (!allStatesForRollout.isEmpty()) {
             rollouts.forEach(rollout -> {
                 final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
                         allStatesForRollout.get(rollout.getId()), rollout.getTotalTargets(), rollout.getActionType());
@@ -703,9 +711,9 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
     }
 
-    private Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rollouts) {
+    private @NotNull  Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rollouts) {
         if (rollouts.isEmpty()) {
-            return null;
+            return Collections.emptyMap();
         }
 
         final Map<Long, List<TotalTargetCountActionStatus>> fromCache = rolloutStatusCache.getRolloutStatus(rollouts);
