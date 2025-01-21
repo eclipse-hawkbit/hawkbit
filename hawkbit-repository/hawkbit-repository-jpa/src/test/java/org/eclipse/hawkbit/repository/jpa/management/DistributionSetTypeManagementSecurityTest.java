@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 
 @Feature("SecurityTests - DistributionSetTypeManagement")
 @Story("SecurityTests DistributionSetTypeManagement")
-public class DistributionSetTypeManagementSecurityTest
+class DistributionSetTypeManagementSecurityTest
         extends AbstractRepositoryManagementSecurityTest<DistributionSetType, DistributionSetTypeCreate, DistributionSetTypeUpdate> {
 
     @Override

@@ -93,6 +93,8 @@ public class TestdataFactory {
     public static final String INVISIBLE_SM_MD_KEY = "invisibleMetdataKey";
     public static final String INVISIBLE_SM_MD_VALUE = "invisibleMetdataValue";
 
+    public static final RandomStringUtils RANDOM_STRING_UTILS = RandomStringUtils.secure();
+
     /**
      * default {@link Target#getControllerId()}.
      */
@@ -119,26 +121,21 @@ public class TestdataFactory {
     public static final String DS_TYPE_DEFAULT = "test_default_ds_type";
 
     /**
-     * Key of test "os" {@link SoftwareModuleType} : mandatory firmware in
-     * {@link #DS_TYPE_DEFAULT}.
+     * Key of test "os" {@link SoftwareModuleType} : mandatory firmware in {@link #DS_TYPE_DEFAULT}.
      */
     public static final String SM_TYPE_OS = "os";
 
     /**
-     * Key of test "runtime" {@link SoftwareModuleType} : optional firmware in
-     * {@link #DS_TYPE_DEFAULT}.
+     * Key of test "runtime" {@link SoftwareModuleType} : optional firmware in {@link #DS_TYPE_DEFAULT}.
      */
     public static final String SM_TYPE_RT = "runtime";
 
     /**
-     * Key of test "application" {@link SoftwareModuleType} : optional software in
-     * {@link #DS_TYPE_DEFAULT}.
+     * Key of test "application" {@link SoftwareModuleType} : optional software in {@link #DS_TYPE_DEFAULT}.
      */
     public static final String SM_TYPE_APP = "application";
 
     public static final String DEFAULT_COLOUR = "#000000";
-
-    public static final RandomStringUtils RANDOM_STRING_UTILS = RandomStringUtils.secure();
 
     private static final String SPACE_AND_DESCRIPTION = " description";
 

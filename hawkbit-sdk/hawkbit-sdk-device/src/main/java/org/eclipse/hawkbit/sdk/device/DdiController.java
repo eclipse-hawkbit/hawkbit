@@ -189,11 +189,8 @@ public class DdiController {
                                 executor.schedule(this::poll, getPollMillis(controllerBase), TimeUnit.MILLISECONDS);
                             }
                         },
-                        () -> {
-                            // error has occurred or no controller base hasn't been acquired
-                            executor.schedule(this::poll, DEFAULT_POLL_MS, TimeUnit.MILLISECONDS);
-                        }
-                ));
+                        () -> // error has occurred or no controller base hasn't been acquired
+                                executor.schedule(this::poll, DEFAULT_POLL_MS, TimeUnit.MILLISECONDS)));
     }
 
     private Optional<DdiControllerBase> getControllerBase() {

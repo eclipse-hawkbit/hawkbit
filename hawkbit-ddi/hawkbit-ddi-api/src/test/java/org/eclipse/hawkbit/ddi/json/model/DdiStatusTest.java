@@ -34,14 +34,14 @@ import org.junit.jupiter.params.provider.MethodSource;
  */
 @Feature("Unit Tests - Direct Device Integration API")
 @Story("Serializability of DDI api Models")
-public class DdiStatusTest {
+class DdiStatusTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @ParameterizedTest
     @MethodSource("ddiStatusPossibilities")
     @Description("Verify the correct serialization and deserialization of the model")
-    public void shouldSerializeAndDeserializeObject(final DdiResult ddiResult, final DdiStatus ddiStatus) throws IOException {
+    void shouldSerializeAndDeserializeObject(final DdiResult ddiResult, final DdiStatus ddiStatus) throws IOException {
         // Test
         final String serializedDdiStatus = OBJECT_MAPPER.writeValueAsString(ddiStatus);
         final DdiStatus deserializedDdiStatus = OBJECT_MAPPER.readValue(serializedDdiStatus, DdiStatus.class);
@@ -56,7 +56,7 @@ public class DdiStatusTest {
 
     @Test
     @Description("Verify the correct deserialization of a model with a additional unknown property")
-    public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\"," +
                 "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[],\"unknownProperty\":\"test\"}";
@@ -72,7 +72,7 @@ public class DdiStatusTest {
 
     @Test
     @Description("Verify the correct deserialization of a model with a provided code (optional)")
-    public void shouldDeserializeObjectWithOptionalCode() throws IOException {
+    void shouldDeserializeObjectWithOptionalCode() throws IOException {
         // Setup
         final String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\"," +
                 "\"progress\":{\"cnt\":30,\"of\":100}},\"code\": 12,\"details\":[]}";
@@ -88,7 +88,7 @@ public class DdiStatusTest {
 
     @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
-    public void shouldFailForObjectWithWrongDataTypes() throws IOException {
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiStatus = "{\"execution\":[\"proceeding\"],\"result\":{\"finished\":\"none\"," +
                 "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[]}";

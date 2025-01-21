@@ -36,18 +36,18 @@ import org.springframework.test.web.servlet.ResultActions;
                         HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN })
 @Feature("Integration Test - Security")
 @Story("CORS")
-public class CorsTest extends AbstractSecurityTest {
+class CorsTest extends AbstractSecurityTest {
 
-    final static String ALLOWED_ORIGIN_FIRST = "http://test.first.origin";
-    final static String ALLOWED_ORIGIN_SECOND = "http://test.second.origin";
+    static final String ALLOWED_ORIGIN_FIRST = "http://test.first.origin";
+    static final String ALLOWED_ORIGIN_SECOND = "http://test.second.origin";
 
-    private final static String INVALID_ORIGIN = "http://test.invalid.origin";
-    private final static String INVALID_CORS_REQUEST = "Invalid CORS request";
+    private static final String INVALID_ORIGIN = "http://test.invalid.origin";
+    private static final String INVALID_CORS_REQUEST = "Invalid CORS request";
 
     @Test
     @Description("Ensures that Cors is working.")
     @WithUser(authorities = SpRole.TENANT_ADMIN, autoCreateTenant = false)
-    public void validateCorsRequest() throws Exception {
+    void validateCorsRequest() throws Exception {
         performOptionsRequestToRestWithOrigin(ALLOWED_ORIGIN_FIRST).andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGIN_FIRST));
         performOptionsRequestToRestWithOrigin(ALLOWED_ORIGIN_SECOND).andExpect(status().isOk())

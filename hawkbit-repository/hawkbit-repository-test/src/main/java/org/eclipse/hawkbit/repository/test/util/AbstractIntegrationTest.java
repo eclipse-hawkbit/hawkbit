@@ -346,9 +346,8 @@ public abstract class AbstractIntegrationTest {
         return distributionSetAssignmentResults;
     }
 
-    protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet ds,
-            final List<Target> targets) {
-        final List<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toList());
+    protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet ds, final List<Target> targets) {
+        final List<String> targetIds = targets.stream().map(Target::getControllerId).toList();
         return assignDistributionSet(ds.getId(), targetIds, ActionType.FORCED);
     }
 

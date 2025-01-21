@@ -46,7 +46,7 @@ class DistributionSetManagementSecurityTest
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    public void assignSoftwareModulesPermissionsCheck() {
+    void assignSoftwareModulesPermissionsCheck() {
         assertPermissions(() -> distributionSetManagement.assignSoftwareModules(1L, List.of(1L)), List.of(SpPermission.UPDATE_REPOSITORY));
     }
 

@@ -163,7 +163,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     public void downloadArtifactThroughFileName() throws Exception {
         downLoadProgress = 1;
         shippedBytes = 0;
-        assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(0);
+        assertThat(softwareModuleManagement.findAll(PAGE)).isEmpty();
 
         // create target
         final Target target = testdataFactory.createTarget();
@@ -251,7 +251,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         final Artifact artifact = artifactManagement.create(
                 new ArtifactUpload(new ByteArrayInputStream(random), getOsModule(ds), "file1", false, resultLength));
 
-        assertThat(random.length).isEqualTo(resultLength);
+        assertThat(random).hasSize(resultLength);
 
         // now assign and download successful
         assignDistributionSet(ds, targets);

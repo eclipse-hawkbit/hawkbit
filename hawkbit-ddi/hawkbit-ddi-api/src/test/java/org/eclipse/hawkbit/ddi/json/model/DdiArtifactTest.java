@@ -27,13 +27,13 @@ import org.junit.jupiter.api.Test;
  */
 @Feature("Unit Tests - Direct Device Integration API")
 @Story("Serializability of DDI api Models")
-public class DdiArtifactTest {
+class DdiArtifactTest {
 
-    private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
-    public void shouldSerializeAndDeserializeObject() throws IOException {
+    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final String filename = "testfile.txt";
         final DdiArtifactHash hashes = new DdiArtifactHash("123", "456", "789");
@@ -57,7 +57,7 @@ public class DdiArtifactTest {
 
     @Test
     @Description("Verify the correct deserialization of a model with a additional unknown property")
-    public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiArtifact = "{\"filename\":\"test.file\",\"hashes\":{\"sha1\":\"123\",\"md5\":\"456\",\"sha256\":\"789\"},\"size\":111,\"links\":[],\"unknownProperty\": \"test\"}";
 
@@ -72,7 +72,7 @@ public class DdiArtifactTest {
 
     @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
-    public void shouldFailForObjectWithWrongDataTypes() throws IOException {
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiArtifact = "{\"filename\": [\"test.file\"],\"hashes\":{\"sha1\":\"123\",\"md5\":\"456\",\"sha256\":\"789\"},\"size\":111,\"links\":[]}";
 

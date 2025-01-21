@@ -69,7 +69,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
             // if status is pending, the assignment has not been canceled
             assertThat(targetRepository.findById(target.getId()).get().getUpdateStatus())
                     .isEqualTo(TargetUpdateStatus.PENDING);
-            assertThat(findActionsByTarget(target).size()).isEqualTo(1);
+            assertThat(findActionsByTarget(target)).hasSize(1);
             assertThat(findActionsByTarget(target).get(0).getStatus()).isEqualTo(Status.RUNNING);
         }
     }
@@ -101,7 +101,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
             assertThat(
                     targetRepository.findById(invalidationTestData.getTargets().get(0).getId()).get().getUpdateStatus())
                     .isEqualTo(TargetUpdateStatus.PENDING);
-            assertThat(findActionsByTarget(target).size()).isEqualTo(1);
+            assertThat(findActionsByTarget(target)).hasSize(1);
             assertThat(findActionsByTarget(target).get(0).getStatus()).isEqualTo(Status.RUNNING);
         }
     }
@@ -131,7 +131,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         for (final Target target : invalidationTestData.getTargets()) {
             assertThat(targetRepository.findById(target.getId()).get().getUpdateStatus())
                     .isEqualTo(TargetUpdateStatus.IN_SYNC);
-            assertThat(findActionsByTarget(target).size()).isEqualTo(1);
+            assertThat(findActionsByTarget(target)).hasSize(1);
             assertThat(findActionsByTarget(target).get(0).getStatus()).isEqualTo(Status.CANCELED);
         }
     }
@@ -158,7 +158,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         for (final Target target : invalidationTestData.getTargets()) {
             assertThat(targetRepository.findById(target.getId()).get().getUpdateStatus())
                     .isEqualTo(TargetUpdateStatus.PENDING);
-            assertThat(findActionsByTarget(target).size()).isEqualTo(1);
+            assertThat(findActionsByTarget(target)).hasSize(1);
             assertThat(findActionsByTarget(target).get(0).getStatus()).isEqualTo(Status.CANCELING);
         }
     }

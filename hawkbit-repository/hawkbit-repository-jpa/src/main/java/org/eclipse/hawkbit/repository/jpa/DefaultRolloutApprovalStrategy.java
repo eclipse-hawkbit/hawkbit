@@ -23,7 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Default implementation of {@link RolloutApprovalStrategy}. Decides whether
@@ -93,7 +93,7 @@ public class DefaultRolloutApprovalStrategy implements RolloutApprovalStrategy {
         if (RolloutStatus.CREATING == rollout.getStatus()) {
             final String actor = rollout.getLastModifiedBy() != null ? rollout.getLastModifiedBy()
                     : rollout.getCreatedBy();
-            if (!StringUtils.isEmpty(actor)) {
+            if (!ObjectUtils.isEmpty(actor)) {
                 return systemSecurityContext.runAsSystem(
                         () -> userAuthoritiesResolver.getUserAuthorities(rollout.getTenant(), actor));
             }

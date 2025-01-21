@@ -20,17 +20,17 @@ import org.junit.jupiter.api.Test;
  */
 @Feature("Component Tests - Repository")
 @Story("Test DistributionSetTagCreatedEvent and DistributionSetTagUpdateEvent")
-public class DistributionSetTagEventTest extends AbstractRemoteEntityEventTest<DistributionSetTag> {
+class DistributionSetTagEventTest extends AbstractRemoteEntityEventTest<DistributionSetTag> {
 
     @Test
     @Description("Verifies that the distribution set tag entity reloading by remote created event works")
-    public void testDistributionSetTagCreatedEvent() {
+    void testDistributionSetTagCreatedEvent() {
         assertAndCreateRemoteEvent(DistributionSetTagCreatedEvent.class);
     }
 
     @Test
     @Description("Verifies that the distribution set tag entity reloading by remote updated event works")
-    public void testDistributionSetTagUpdateEvent() {
+    void testDistributionSetTagUpdateEvent() {
         assertAndCreateRemoteEvent(DistributionSetTagUpdatedEvent.class);
     }
 

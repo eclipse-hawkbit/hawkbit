@@ -29,13 +29,13 @@ import org.junit.jupiter.api.Test;
  */
 @Feature("Unit Tests - Direct Device Integration API")
 @Story("Serializability of DDI api Models")
-public class DdiActionHistoryTest {
+class DdiActionHistoryTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
-    public void shouldSerializeAndDeserializeObject() throws IOException {
+    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final String actionStatus = "TestAction";
         final List<String> messages = Arrays.asList("Action status message 1", "Action status message 2");
@@ -50,7 +50,7 @@ public class DdiActionHistoryTest {
 
     @Test
     @Description("Verify the correct deserialization of a model with a additional unknown property")
-    public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiActionHistory = """
                 {
@@ -66,7 +66,7 @@ public class DdiActionHistoryTest {
 
     @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
-    public void shouldFailForObjectWithWrongDataTypes() throws IOException {
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiActionFeedback = """
                 {

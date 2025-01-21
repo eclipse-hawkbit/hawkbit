@@ -59,8 +59,8 @@ class DdiConfirmationBaseTest {
         assertThat(deserializedDdiConfigurationBase.getConfirmation().getUpdate()).isEqualTo(ddiDeployment.getUpdate());
         assertThat(deserializedDdiConfigurationBase.getConfirmation().getMaintenanceWindow())
                 .isEqualTo(ddiDeployment.getMaintenanceWindow());
-        assertThat(deserializedDdiConfigurationBase.getActionHistory().toString())
-                .isEqualTo(ddiActionHistory.toString());
+        assertThat(deserializedDdiConfigurationBase.getActionHistory())
+                .hasToString(ddiActionHistory.toString());
     }
 
     @Test
@@ -86,7 +86,7 @@ class DdiConfirmationBaseTest {
 
     @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
-    void shouldFailForObjectWithWrongDataTypes() throws IOException {
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiConfirmationBase = "{" +
                 "\"id\":[\"1234\"],\"confirmation\":{\"download\":\"forced\"," +

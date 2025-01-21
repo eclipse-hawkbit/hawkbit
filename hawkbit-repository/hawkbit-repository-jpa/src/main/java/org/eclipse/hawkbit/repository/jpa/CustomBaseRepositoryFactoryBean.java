@@ -26,15 +26,13 @@ import org.springframework.data.repository.core.support.RepositoryFactorySupport
  * @param <S>
  * @param <ID>
  */
-public class CustomBaseRepositoryFactoryBean<T extends Repository<S, ID>, S, ID>
-        extends JpaRepositoryFactoryBean<T, S, ID> {
+public class CustomBaseRepositoryFactoryBean<T extends Repository<S, ID>, S, ID> extends JpaRepositoryFactoryBean<T, S, ID> {
 
     @Autowired
     BaseRepositoryTypeProvider baseRepoProvider;
 
     /**
-     * Creates a new {@link JpaRepositoryFactoryBean} for the given repository
-     * interface.
+     * Creates a new {@link JpaRepositoryFactoryBean} for the given repository interface.
      *
      * @param repositoryInterface must not be {@literal null}.
      */

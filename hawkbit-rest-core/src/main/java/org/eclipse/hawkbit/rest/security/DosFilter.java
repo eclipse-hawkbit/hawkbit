@@ -133,7 +133,7 @@ public class DosFilter extends OncePerRequestFilter {
     }
 
     private static boolean checkIpFails(final String ip) {
-        return ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip);
+        return ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip);
     }
 
     private static boolean handleMissingIpAddress(final HttpServletResponse response) {

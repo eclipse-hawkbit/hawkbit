@@ -30,7 +30,7 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.converter.MessageConversionException;
 
 @ExtendWith(MockitoExtension.class)
-public class BusProtoStuffMessageConverterTest {
+class BusProtoStuffMessageConverterTest {
 
     private final BusProtoStuffMessageConverter underTest = new BusProtoStuffMessageConverter();
 
@@ -41,13 +41,13 @@ public class BusProtoStuffMessageConverterTest {
     private Message<Object> messageMock;
 
     @BeforeEach
-    public void before() {
+    void before() {
         when(targetMock.getId()).thenReturn(1L);
     }
 
     @Test
     @Description("Verifies that the TargetCreatedEvent can be successfully serialized and deserialized")
-    public void successfullySerializeAndDeserializeEvent() {
+    void successfullySerializeAndDeserializeEvent() {
         final TargetCreatedEvent targetCreatedEvent = new TargetCreatedEvent(targetMock, "1");
         // serialize
         final Object serializedEvent = underTest.convertToInternal(targetCreatedEvent,
@@ -63,7 +63,7 @@ public class BusProtoStuffMessageConverterTest {
 
     @Test
     @Description("Verifies that a MessageConversationException is thrown on missing event-type information encoding")
-    public void missingEventTypeMappingThrowsMessageConversationException() {
+    void missingEventTypeMappingThrowsMessageConversationException() {
         final DummyRemoteEntityEvent dummyEvent = new DummyRemoteEntityEvent(targetMock, "applicationId");
         final MessageHeaders messageHeaders = new MessageHeaders(new HashMap<>());
 

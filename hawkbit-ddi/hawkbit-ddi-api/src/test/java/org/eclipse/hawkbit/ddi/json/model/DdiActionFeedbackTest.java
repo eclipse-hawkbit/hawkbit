@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.Collections;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -68,7 +67,7 @@ class DdiActionFeedbackTest {
 
     @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
-    void shouldFailForObjectWithWrongDataTypes() throws IOException {
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiActionFeedback = """
             {

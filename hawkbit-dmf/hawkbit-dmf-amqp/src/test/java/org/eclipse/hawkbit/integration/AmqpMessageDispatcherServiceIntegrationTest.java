@@ -661,8 +661,9 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
 
         final Message message = replyToListener.getLatestEventMessage(topic);
         final Map<String, Object> headers = message.getMessageProperties().getHeaders();
-        assertThat(headers).containsEntry("type", EVENT.toString());
-        assertThat(headers).containsEntry("topic", topic.toString());
+        assertThat(headers)
+                .containsEntry("type", EVENT.toString())
+                .containsEntry("topic", topic.toString());
 
         final DmfBatchDownloadAndUpdateRequest batchRequest = (DmfBatchDownloadAndUpdateRequest) getDmfClient()
                 .getMessageConverter().fromMessage(message);
@@ -711,10 +712,8 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
 
     private List<DmfMultiActionElement> getLatestMultiActionMessages(final String expectedControllerId) {
         final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
-        assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
-                .isEqualTo(expectedControllerId);
-        return ((DmfMultiActionRequest) getDmfClient().getMessageConverter().fromMessage(multiactionMessage))
-                .getElements();
+        assertThat(multiactionMessage.getMessageProperties().getHeaders()).containsEntry(MessageHeaderKey.THING_ID, expectedControllerId);
+        return ((DmfMultiActionRequest) getDmfClient().getMessageConverter().fromMessage(multiactionMessage)).getElements();
     }
 
     private void updateActionViaDmfClient(final String controllerId, final long actionId,
@@ -762,10 +761,9 @@ class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpServiceInt
     private void assertLatestMultiActionMessageContainsInstallMessages(final String controllerId,
             final List<Set<Long>> smIdsOfActionsExpected) {
         final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
-        assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
-                .isEqualTo(controllerId);
-        final DmfMultiActionRequest multiActionRequest = (DmfMultiActionRequest) getDmfClient().getMessageConverter()
-                .fromMessage(multiactionMessage);
+        assertThat(multiactionMessage.getMessageProperties().getHeaders()).containsEntry(MessageHeaderKey.THING_ID, controllerId);
+        final DmfMultiActionRequest multiActionRequest =
+                (DmfMultiActionRequest) getDmfClient().getMessageConverter().fromMessage(multiactionMessage);
 
         final List<Set<Long>> smIdsOfActionsFound = getDownloadAndUpdateRequests(multiActionRequest).stream()
                 .map(AmqpMessageDispatcherServiceIntegrationTest::getSmIds).toList();

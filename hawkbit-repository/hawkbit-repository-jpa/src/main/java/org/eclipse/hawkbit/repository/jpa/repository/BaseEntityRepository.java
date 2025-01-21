@@ -124,8 +124,8 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
 
     default <T extends AbstractJpaTenantAwareBaseEntity> Specification<T> byIdsSpec(final Iterable<Long> ids) {
         final Collection<Long> collection;
-        if (ids instanceof Collection<Long>) {
-            collection = (Collection<Long>) ids;
+        if (ids instanceof Collection<Long> idCollection) {
+            collection = idCollection;
         } else {
             collection = new LinkedList<>();
             ids.forEach(collection::add);
