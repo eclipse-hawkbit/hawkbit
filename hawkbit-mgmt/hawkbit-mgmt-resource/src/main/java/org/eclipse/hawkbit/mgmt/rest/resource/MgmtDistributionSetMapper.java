@@ -51,7 +51,7 @@ public final class MgmtDistributionSetMapper {
      */
     static List<DistributionSetCreate> dsFromRequest(
             final Collection<MgmtDistributionSetRequestBodyPost> sets, final EntityFactory entityFactory) {
-        return sets.stream().map(dsRest -> fromRequest(dsRest, entityFactory)).collect(Collectors.toList());
+        return sets.stream().map(dsRest -> fromRequest(dsRest, entityFactory)).toList();
     }
 
     static List<MetaData> fromRequestDsMetadata(final List<MgmtMetadata> metadata, final EntityFactory entityFactory) {
@@ -61,7 +61,7 @@ public final class MgmtDistributionSetMapper {
 
         return metadata.stream()
                 .map(metadataRest -> entityFactory.generateDsMetadata(metadataRest.getKey(), metadataRest.getValue()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     static MgmtDistributionSet toResponse(final DistributionSet distributionSet) {
@@ -111,7 +111,7 @@ public final class MgmtDistributionSetMapper {
         final MgmtTargetAssignmentResponseBody result = new MgmtTargetAssignmentResponseBody();
         result.setAlreadyAssigned(dsAssignmentResult.getAlreadyAssigned());
         result.setAssignedActions(dsAssignmentResult.getAssignedEntity().stream()
-                .map(a -> new MgmtActionId(a.getTarget().getControllerId(), a.getId())).collect(Collectors.toList()));
+                .map(a -> new MgmtActionId(a.getTarget().getControllerId(), a.getId())).toList());
         return result;
     }
 
@@ -123,7 +123,7 @@ public final class MgmtDistributionSetMapper {
         final List<MgmtActionId> assignedActions = dsAssignmentResults.stream()
                 .flatMap(assignmentResult -> assignmentResult.getAssignedEntity().stream())
                 .map(action -> new MgmtActionId(action.getTarget().getControllerId(), action.getId()))
-                .collect(Collectors.toList());
+                .toList();
         result.setAlreadyAssigned(alreadyAssigned);
         result.setAssignedActions(assignedActions);
         return result;
@@ -136,7 +136,7 @@ public final class MgmtDistributionSetMapper {
         }
 
         return new ResponseList<>(
-                sets.stream().map(MgmtDistributionSetMapper::toResponse).collect(Collectors.toList()));
+                sets.stream().map(MgmtDistributionSetMapper::toResponse).toList());
     }
 
     static MgmtMetadata toResponseDsMetadata(final DistributionSetMetadata metadata) {
@@ -159,7 +159,7 @@ public final class MgmtDistributionSetMapper {
             return Collections.emptyList();
         }
 
-        return sets.stream().map(MgmtDistributionSetMapper::toResponse).collect(Collectors.toList());
+        return sets.stream().map(MgmtDistributionSetMapper::toResponse).toList();
     }
 
     /**

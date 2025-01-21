@@ -790,7 +790,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that multiple DS requested are listed with expected payload.")
     public void getDistributionSets() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
 
         DistributionSet set = testdataFactory.createDistributionSet("one");
         set = distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
@@ -865,7 +865,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Ensures that multipe DS posted to API are created in the repository.")
     public void createDistributionSets() throws Exception {
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
         final SoftwareModule ah = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
         final SoftwareModule jvm = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_RT);
         final SoftwareModule os = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_OS);
@@ -925,7 +925,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that DS deletion request to API is reflected by the repository.")
     public void deleteUnassignedistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
@@ -953,7 +953,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that assigned DS deletion request to API is reflected by the repository by means of deleted flag set.")
     public void deleteAssignedDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         testdataFactory.createTarget("test");
@@ -976,14 +976,14 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("$.deleted", equalTo(true)));
 
         // check repository content
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
     }
 
     @Test
     @Description("Ensures that DS property update request to API is reflected by the repository.")
     public void updateDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         assertThat(distributionSetManagement.count()).isEqualTo(1);
@@ -1002,10 +1002,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         final DistributionSet setupdated = distributionSetManagement.get(set.getId()).get();
 
-        assertThat(setupdated.isRequiredMigrationStep()).isEqualTo(true);
+        assertThat(setupdated.isRequiredMigrationStep()).isTrue();
         assertThat(setupdated.getVersion()).isEqualTo("anotherVersion");
         assertThat(setupdated.getName()).isEqualTo(set.getName());
-        assertThat(setupdated.isDeleted()).isEqualTo(false);
+        assertThat(setupdated.isDeleted()).isFalse();
     }
 
     @Test
@@ -1013,7 +1013,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     public void updateRequiredMigrationStepFailsIfDistributionSetisInUse() throws Exception {
 
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         assignDistributionSet(set.getId(), testdataFactory.createTarget().getControllerId());
@@ -1028,7 +1028,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         final DistributionSet setupdated = distributionSetManagement.get(set.getId()).get();
 
-        assertThat(setupdated.isRequiredMigrationStep()).isEqualTo(false);
+        assertThat(setupdated.isRequiredMigrationStep()).isFalse();
         assertThat(setupdated.getVersion()).isEqualTo(set.getVersion());
         assertThat(setupdated.getName()).isEqualTo(set.getName());
     }
@@ -1674,7 +1674,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Tests the lock. It is verified that the distribution set can be marked as locked through update operation.")
     void lockDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         assertThat(distributionSetManagement.count()).isEqualTo(1);
@@ -1689,14 +1689,14 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("$.locked", equalTo(true)));
 
         final DistributionSet updatedSet = distributionSetManagement.get(set.getId()).get();
-        assertThat(updatedSet.isLocked()).isEqualTo(true);
+        assertThat(updatedSet.isLocked()).isTrue();
     }
 
     @Test
     @Description("Tests the unlock.")
     void unlockDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         assertThat(distributionSetManagement.count()).isEqualTo(1);
@@ -1715,7 +1715,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("$.locked", equalTo(false)));
 
         final DistributionSet updatedSet = distributionSetManagement.get(set.getId()).get();
-        assertThat(updatedSet.isLocked()).isEqualTo(false);
+        assertThat(updatedSet.isLocked()).isFalse();
     }
 
     private static Stream<Arguments> confirmationOptions() {

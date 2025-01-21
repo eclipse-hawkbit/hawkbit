@@ -176,6 +176,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     // Exception squid:S2229 - calling findTenants without transaction is intended in this case
     @SuppressWarnings("squid:S2229")
     public void forEachTenant(final Consumer<String> consumer) {
+        forEachTenant0(consumer);
+    }
+    private void forEachTenant0(final Consumer<String> consumer) {
         Page<String> tenants;
         Pageable query = PageRequest.of(0, MAX_TENANTS_QUERY);
         do {
@@ -281,7 +284,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     private void usageStatsPerTenant(final SystemUsageReportWithTenants report) {
-        forEachTenant(tenant -> report.addTenantData(systemStatsManagement.getStatsOfTenant()));
+        forEachTenant0(tenant -> report.addTenantData(systemStatsManagement.getStatsOfTenant()));
     }
 
     private DistributionSetType createStandardSoftwareDataSetup() {

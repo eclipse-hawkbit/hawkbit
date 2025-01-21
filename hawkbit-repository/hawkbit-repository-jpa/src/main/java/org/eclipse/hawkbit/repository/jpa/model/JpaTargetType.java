@@ -43,6 +43,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 @Table(name = "sp_target_type", indexes = {
         @Index(name = "sp_idx_target_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
         @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_target_type_name") })
+@SuppressWarnings("java:S2160") // the super class equals/hashcode shall be used
 public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, EventAwareEntity {
 
     @Serial

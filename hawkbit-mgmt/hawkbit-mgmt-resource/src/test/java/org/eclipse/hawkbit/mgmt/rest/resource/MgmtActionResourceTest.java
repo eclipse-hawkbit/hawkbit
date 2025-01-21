@@ -455,8 +455,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     void invalidRequestsOnActionResource() throws Exception {
         final String knownTargetId = "targetId";
 
-        final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
-        final Long actionId = actions.get(0).getId();
+        generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
 
         // not allowed methods
         mvc.perform(post(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING))

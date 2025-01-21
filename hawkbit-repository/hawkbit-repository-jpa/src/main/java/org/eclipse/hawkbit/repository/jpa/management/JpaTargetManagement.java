@@ -606,9 +606,8 @@ public class JpaTargetManagement implements TargetManagement {
     public Target assignType(final String controllerId, final Long targetTypeId) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
 
-        targetRepository.getAccessController().ifPresent(acm -> {
-            acm.assertOperationAllowed(AccessController.Operation.UPDATE, target);
-        });
+        targetRepository.getAccessController().ifPresent(acm ->
+            acm.assertOperationAllowed(AccessController.Operation.UPDATE, target));
 
         final JpaTargetType targetType = getTargetTypeByIdAndThrowIfNotFound(targetTypeId);
         target.setTargetType(targetType);

@@ -36,13 +36,13 @@ import org.springframework.orm.jpa.vendor.Database;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter distribution set")
-public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
+class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     private DistributionSet ds;
     private SoftwareModule sm;
 
     @BeforeEach
-    public void setupBeforeTest() {
+    void setupBeforeTest() {
 
         sm = testdataFactory.createSoftwareModuleApp("SM");
 
@@ -70,7 +70,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter distribution set by id")
-    public void testFilterByParameterId() {
+    void testFilterByParameterId() {
         assertRSQLQuery(DistributionSetFields.ID.name() + "==" + ds.getId(), 1);
         assertRSQLQuery(DistributionSetFields.ID.name() + "!=" + ds.getId(), 4);
         assertRSQLQuery(DistributionSetFields.ID.name() + "==" + -1, 0);
@@ -87,7 +87,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter distribution set by name")
-    public void testFilterByParameterName() {
+    void testFilterByParameterName() {
         assertRSQLQuery(DistributionSetFields.NAME.name() + "==DS", 1);
         assertRSQLQuery(DistributionSetFields.NAME.name() + "!=DS", 4);
         assertRSQLQuery(DistributionSetFields.NAME.name() + "==*DS", 4);
@@ -98,7 +98,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter distribution set by assigned software module")
-    public void testFilterBySoftwareModule() {
+    void testFilterBySoftwareModule() {
         assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.NAME.name() + "==" + sm.getName(), 1);
         assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.ID.name() + "==" + sm.getId(), 1);
         assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.NAME.name() + "==noExist", 0);
@@ -108,7 +108,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter distribution set by description")
-    public void testFilterByParameterDescription() {
+    void testFilterByParameterDescription() {
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==''", 1);
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "!=''", 4);
         assertRSQLQuery(DistributionSetFields.DESCRIPTION.name() + "==DS", 1);
@@ -123,7 +123,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter distribution set by version")
-    public void testFilterByParameterVersion() {
+    void testFilterByParameterVersion() {
         assertRSQLQuery(DistributionSetFields.VERSION.name() + "==" + TestdataFactory.DEFAULT_VERSION, 1);
         assertRSQLQuery(DistributionSetFields.VERSION.name() + "!=" + TestdataFactory.DEFAULT_VERSION, 4);
         assertRSQLQuery(DistributionSetFields.VERSION.name() + "=in=(" + TestdataFactory.DEFAULT_VERSION + ",1.0.0,1.0.1)", 3);
@@ -132,7 +132,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter distribution set by complete property")
-    public void testFilterByAttributeComplete() {
+    void testFilterByAttributeComplete() {
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==true", 3);
         try {
             assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==noExist*", 0);
@@ -145,7 +145,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter distribution set by valid property")
-    public void testFilterByAttributeValid() {
+    void testFilterByAttributeValid() {
         assertRSQLQuery(DistributionSetFields.VALID.name() + "==true", 4);
         assertRSQLQuery(DistributionSetFields.VALID.name() + "==false", 1);
         assertThatExceptionOfType(RSQLParameterSyntaxException.class)
@@ -156,7 +156,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter distribution set by tag name")
-    public void testFilterByTag() {
+    void testFilterByTag() {
         assertRSQLQuery(DistributionSetFields.TAG.name() + "==Tag1", 2);
         assertRSQLQuery(DistributionSetFields.TAG.name() + "!=Tag1", 3);
         assertRSQLQuery(DistributionSetFields.TAG.name() + "==T*", 2);
@@ -167,7 +167,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter distribution set by type key")
-    public void testFilterByType() {
+    void testFilterByType() {
         assertRSQLQuery(DistributionSetFields.TYPE.name() + "==" + TestdataFactory.DS_TYPE_DEFAULT, 4);
         assertRSQLQuery(DistributionSetFields.TYPE.name() + "==noExist*", 0);
         assertRSQLQuery(DistributionSetFields.TYPE.name() + "=in=(" + TestdataFactory.DS_TYPE_DEFAULT + ",ecl)", 4);
@@ -176,7 +176,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter distribution set by metadata")
-    public void testFilterByMetadata() {
+    void testFilterByMetadata() {
         createDistributionSetWithMetadata("key.dot", "value.dot");
 
         assertRSQLQuery(DistributionSetFields.METADATA.name() + ".metaKey==metaValue", 1);

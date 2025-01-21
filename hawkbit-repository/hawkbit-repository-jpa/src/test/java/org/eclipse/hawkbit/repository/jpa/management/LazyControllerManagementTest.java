@@ -32,7 +32,7 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(locations = "classpath:/jpa-test.properties", properties = {
         "hawkbit.server.repository.eagerPollPersistence=false",
         "hawkbit.server.repository.pollPersistenceFlushTime=1000" })
-public class LazyControllerManagementTest extends AbstractJpaIntegrationTest {
+class LazyControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private RepositoryProperties repositoryProperties;
@@ -42,7 +42,7 @@ public class LazyControllerManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
-    public void lazyFindOrRegisterTargetIfItDoesNotExist() throws InterruptedException {
+    void lazyFindOrRegisterTargetIfItDoesNotExist() throws InterruptedException {
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
         assertThat(target).as("target should not be null").isNotNull();
 
