@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -99,14 +98,11 @@ import org.springframework.test.context.TestPropertySource;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ContextConfiguration(classes = { TestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
-// destroy the context after each test class because otherwise we get problem
-// when context is
-// refreshed we e.g. get two instances of CacheManager which leads to very
-// strange test failures.
+// destroy the context after each test class because otherwise we get problem when context is
+// refreshed we e.g. get two instances of CacheManager which leads to very strange test failures.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 // Cleaning repository will fire "delete" events. We won't count them to the
-// test execution. So, the order execution between EventVerifier and Cleanup is
-// important!
+// test execution. So, the order execution between EventVerifier and Cleanup is important!
 @TestExecutionListeners(
         listeners = { EventVerifier.class, CleanupTestExecutionListener.class },
         mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
@@ -189,7 +185,7 @@ public abstract class AbstractIntegrationTest {
     protected ServiceMatcher serviceMatcher;
     @Autowired
     protected ApplicationEventPublisher eventPublisher;
-    private static final String ARTIFACT_DIRECTORY = createTempDir().toString();
+    private static final String ARTIFACT_DIRECTORY = createTempDir().getAbsolutePath() + "/" + randomString(20);
 
     @BeforeAll
     public static void beforeClass() {
@@ -209,7 +205,6 @@ public abstract class AbstractIntegrationTest {
 
     @BeforeEach
     public void beforeAll() throws Exception {
-
         final String description = "Updated description.";
 
         osType = SecurityContextSwitch
@@ -485,7 +480,7 @@ public abstract class AbstractIntegrationTest {
 
     private static File createTempDir() {
         try {
-            final File file = Files.createTempFile(String.valueOf(System.currentTimeMillis()), "hawkbit_test").toFile();
+            final File file = Files.createTempDirectory(System.currentTimeMillis() + "_").toFile();
             file.deleteOnExit();
             if (!file.setReadable(true, true) || !file.setWritable(true, true)) {
                 if (file.delete()) { // try to delete immediately, if failed - on exit
@@ -497,6 +492,9 @@ public abstract class AbstractIntegrationTest {
             // try, if not supported - ok
             if (!file.setExecutable(false)) {
                 log.debug("Can't remove executable permissions for temp file {}", file);
+            }
+            if (!file.setExecutable(true, true)) {
+                log.debug("Can't set executable permissions for temp directory {} for the owner", file);
             }
             return file;
         } catch (final IOException e) {
