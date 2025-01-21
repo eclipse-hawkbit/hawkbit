@@ -119,7 +119,12 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
             }
             // try, if not supported - ok
             if (!file.setExecutable(false)) {
-                log.debug("Can't set executable permissions for temp file {}", file);
+                log.debug("Can't remove executable permissions for temp file {}", file);
+            }
+            if (directory) {
+                if (!file.setExecutable(true, true)) {
+                    log.debug("Can't set executable permissions for temp directory {} for the owner", file);
+                }
             }
             return file;
         } catch (final IOException e) {

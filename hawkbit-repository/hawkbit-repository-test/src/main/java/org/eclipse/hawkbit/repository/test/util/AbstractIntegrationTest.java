@@ -488,8 +488,7 @@ public abstract class AbstractIntegrationTest {
         try {
             final File file = Files.createTempFile(String.valueOf(System.currentTimeMillis()), "hawkbit_test").toFile();
             file.deleteOnExit();
-            if (!file.setReadable(true, true) ||
-                    !file.setWritable(true, true)) {
+            if (!file.setReadable(true, true) || !file.setWritable(true, true)) {
                 if (file.delete()) { // try to delete immediately, if failed - on exit
                     throw new IOException("Can't set proper permissions!");
                 } else {
@@ -498,7 +497,7 @@ public abstract class AbstractIntegrationTest {
             }
             // try, if not supported - ok
             if (!file.setExecutable(false)) {
-                log.debug("Can't set executable permissions for temp file {}", file);
+                log.debug("Can't remove executable permissions for temp file {}", file);
             }
             return file;
         } catch (final IOException e) {
