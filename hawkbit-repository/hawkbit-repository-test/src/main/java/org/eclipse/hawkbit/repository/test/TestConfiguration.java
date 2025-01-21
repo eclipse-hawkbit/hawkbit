@@ -55,7 +55,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -98,7 +97,7 @@ public class TestConfiguration implements AsyncConfigurer {
     public ScheduledExecutorService scheduledExecutorService() {
         final AtomicLong count = new AtomicLong(0);
         return new DelegatingSecurityContextScheduledExecutorService(
-                Executors.newScheduledThreadPool(1, (runnable) -> {
+                Executors.newScheduledThreadPool(1, runnable -> {
                     final Thread thread = Executors.defaultThreadFactory().newThread(runnable);
                     thread.setName(
                             String.format(

@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.tenancy.TenantAwareUser;
@@ -25,6 +27,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SecurityContextSwitch {
 
     public static final String DEFAULT_TENANT = "DEFAULT";

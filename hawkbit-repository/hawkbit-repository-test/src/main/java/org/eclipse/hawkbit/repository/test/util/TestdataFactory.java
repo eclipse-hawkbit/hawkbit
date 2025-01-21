@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -359,9 +359,9 @@ public class TestdataFactory {
             final boolean isRequiredMigrationStep, final Collection<SoftwareModule> modules) {
 
         return distributionSetManagement.create(
-                entityFactory.distributionSet().create().name(prefix != null && prefix.length() > 0 ? prefix : "DS")
+                entityFactory.distributionSet().create().name(prefix != null && !prefix.isEmpty() ? prefix : "DS")
                         .version(version).description(randomDescriptionShort()).type(findOrCreateDefaultTestDsType())
-                        .modules(modules.stream().map(SoftwareModule::getId).collect(Collectors.toList()))
+                        .modules(modules.stream().map(SoftwareModule::getId).toList())
                         .requiredMigrationStep(isRequiredMigrationStep));
     }
 
@@ -481,7 +481,7 @@ public class TestdataFactory {
      * @return {@link Artifact} entity.
      */
     public Artifact createArtifact(final String artifactData, final Long moduleId, final String filename) {
-        final InputStream stubInputStream = IOUtils.toInputStream(artifactData, Charset.forName("UTF-8"));
+        final InputStream stubInputStream = IOUtils.toInputStream(artifactData, StandardCharsets.UTF_8);
         return artifactManagement
                 .create(new ArtifactUpload(stubInputStream, moduleId, filename, false, artifactData.length()));
     }
