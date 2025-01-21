@@ -9,12 +9,13 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 
 /**
  * Holds all database related configuration
  */
+@Getter
 @Slf4j
 public class DatasourceContext {
 
@@ -23,19 +24,19 @@ public class DatasourceContext {
     public static final String SPRING_DATABASE_USERNAME_KEY = "spring.datasource.username";
     public static final String SPRING_DATABASE_PASSWORD_KEY = "spring.datasource.password";
     public static final String DATABASE_PREFIX_KEY = "spring.database.random.prefix";
+
     private static final String RANDOM_DB_PREFIX = System.getProperty(DATABASE_PREFIX_KEY, "HAWKBIT_TEST_");
 
     private final String database;
     private final String datasourceUrl;
     private final String username;
     private final String password;
-    private final String randomSchemaName = RANDOM_DB_PREFIX + RandomStringUtils.randomAlphanumeric(10);
+    private final String randomSchemaName = RANDOM_DB_PREFIX + TestdataFactory.randomString(10);
 
     /**
      * Constructor
      */
-    public DatasourceContext(final String database, final String datasourceUrl, final String username,
-            final String password) {
+    public DatasourceContext(final String database, final String datasourceUrl, final String username, final String password) {
         this.database = database;
         this.datasourceUrl = datasourceUrl;
         this.username = username;
@@ -47,36 +48,14 @@ public class DatasourceContext {
      */
     public DatasourceContext() {
         database = System.getProperty(SPRING_DATABASE_KEY, System.getProperty(upperCaseVariant(SPRING_DATABASE_KEY)));
-        datasourceUrl = System.getProperty(SPRING_DATASOURCE_URL_KEY,
-                System.getProperty(upperCaseVariant(SPRING_DATASOURCE_URL_KEY)));
-        username = System.getProperty(SPRING_DATABASE_USERNAME_KEY,
-                System.getProperty(upperCaseVariant(SPRING_DATABASE_USERNAME_KEY)));
-        password = System.getProperty(SPRING_DATABASE_PASSWORD_KEY,
-                System.getProperty(upperCaseVariant(SPRING_DATABASE_PASSWORD_KEY)));
-    }
-
-    public String getDatabase() {
-        return database;
-    }
-
-    public String getDatasourceUrl() {
-        return datasourceUrl;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getRandomSchemaName() {
-        return randomSchemaName;
+        datasourceUrl = System.getProperty(SPRING_DATASOURCE_URL_KEY, System.getProperty(upperCaseVariant(SPRING_DATASOURCE_URL_KEY)));
+        username = System.getProperty(SPRING_DATABASE_USERNAME_KEY, System.getProperty(upperCaseVariant(SPRING_DATABASE_USERNAME_KEY)));
+        password = System.getProperty(SPRING_DATABASE_PASSWORD_KEY, System.getProperty(upperCaseVariant(SPRING_DATABASE_PASSWORD_KEY)));
     }
 
     public boolean isNotProperlyConfigured() {
-        log.debug("Datasource environment variables: [database: {}, username: {}, password: {}, datasourceUrl: {}]",
+        log.debug(
+                "Datasource environment variables: [database: {}, username: {}, password: {}, datasourceUrl: {}]",
                 database, username, password, datasourceUrl);
 
         return database == null || datasourceUrl == null || username == null || password == null;

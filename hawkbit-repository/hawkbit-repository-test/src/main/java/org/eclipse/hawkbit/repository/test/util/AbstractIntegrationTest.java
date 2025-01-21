@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -116,8 +115,6 @@ public abstract class AbstractIntegrationTest {
     protected static final Pageable PAGE = PageRequest.of(0, 500, Sort.by(Direction.ASC, "id"));
     protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
     protected static final int DEFAULT_TEST_WEIGHT = 500;
-
-    protected static final RandomStringUtils RANDOM_STRING_UTILS = RandomStringUtils.secure();
 
     /**
      * Number of {@link DistributionSetType}s that exist in every test case. One
@@ -296,11 +293,11 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected static String randomString(final int len) {
-        return RANDOM_STRING_UTILS.next(len, true, false);
+        return TestdataFactory.randomString(len);
     }
 
     protected static byte[] randomBytes(final int len) {
-        return randomString(len).getBytes();
+        return TestdataFactory.randomBytes(len);
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId) {

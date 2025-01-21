@@ -33,7 +33,6 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.awaitility.Awaitility;
@@ -1869,7 +1868,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that returned result considers provided sort parameter.")
     void findAllRolloutsConsidersSorting() {
-        final String randomString = RandomStringUtils.randomAlphanumeric(5);
+        final String randomString = randomString(5);
         final DistributionSet testDs = testdataFactory.createDistributionSet(randomString + "-testDs");
         testdataFactory.createTargets(10, randomString + "-testTarget-");
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults().build();
