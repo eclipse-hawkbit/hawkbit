@@ -28,6 +28,7 @@ import org.springframework.integration.support.locks.LockRegistry;
  */
 @Feature("Component Tests - Repository")
 @Story("Auto cleanup scheduler")
+@SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 class AutoCleanupSchedulerTest extends AbstractJpaIntegrationTest {
 
     private final AtomicInteger counter = new AtomicInteger();

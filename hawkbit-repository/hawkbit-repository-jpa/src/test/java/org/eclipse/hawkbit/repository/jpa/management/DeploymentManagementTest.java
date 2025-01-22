@@ -1283,7 +1283,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                         .asList(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))),
                 PAGE).getContent()).as("wrong size of founded ds").hasSize(noOfDistributionSets);
 
-        for (final DistributionSet ds : deploymentResult.getDistributionSets()) {
+        for (final DistributionSet ignored : deploymentResult.getDistributionSets()) {
             testdataFactory.sendUpdateActionStatusToTargets(deploymentResult.getDeployedTargets(), Status.FINISHED,
                     Collections.singletonList("blabla alles gut"));
         }
@@ -1316,7 +1316,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DeploymentResult deploymentResult = prepareComplexRepo(undeployedTargetPrefix, noOfUndeployedTargets,
                 deployedTargetPrefix, noOfDeployedTargets, noOfDistributionSets, "myTestDS");
 
-        for (final DistributionSet ds : deploymentResult.getDistributionSets()) {
+        for (final DistributionSet ignored : deploymentResult.getDistributionSets()) {
             testdataFactory.sendUpdateActionStatusToTargets(deploymentResult.getDeployedTargets(), Status.FINISHED,
                     Collections.singletonList("blabla alles gut"));
         }

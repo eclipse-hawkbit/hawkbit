@@ -107,6 +107,7 @@ import org.springframework.test.context.TestPropertySource;
         listeners = { EventVerifier.class, CleanupTestExecutionListener.class },
         mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
+@SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 public abstract class AbstractIntegrationTest {
 
     protected static final Pageable PAGE = PageRequest.of(0, 500, Sort.by(Direction.ASC, "id"));
@@ -120,6 +121,7 @@ public abstract class AbstractIntegrationTest {
      * {@link SystemManagement#getTenantMetadata()};
      */
     protected static final int DEFAULT_DS_TYPES = RepositoryConstants.DEFAULT_DS_TYPES_IN_TENANT + 1;
+
     @Autowired
     protected EntityFactory entityFactory;
     @Autowired
@@ -478,6 +480,7 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
+    @SuppressWarnings("java:S4042")
     private static File createTempDir() {
         try {
             final File file = Files.createTempDirectory(System.currentTimeMillis() + "_").toFile();

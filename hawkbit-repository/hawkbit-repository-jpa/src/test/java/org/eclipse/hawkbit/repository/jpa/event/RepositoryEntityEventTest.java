@@ -50,6 +50,7 @@ import org.springframework.context.event.EventListener;
 @Feature("Component Tests - Repository")
 @Story("Entity Events")
 @SpringBootTest(classes = { RepositoryTestConfiguration.class }, webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Autowired

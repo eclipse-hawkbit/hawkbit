@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Feature("Component Tests - Repository")
 @Story("Action cleanup handler")
+@SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
 
     @Autowired
