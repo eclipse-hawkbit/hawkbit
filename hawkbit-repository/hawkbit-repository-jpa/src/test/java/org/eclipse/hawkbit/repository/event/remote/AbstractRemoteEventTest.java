@@ -37,6 +37,7 @@ import org.springframework.util.MimeTypeUtils;
 /**
  * Test the remote entity events.
  */
+@SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
  public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest {
 
     @Autowired

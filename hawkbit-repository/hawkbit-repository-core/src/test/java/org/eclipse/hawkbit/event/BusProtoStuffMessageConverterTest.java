@@ -57,8 +57,9 @@ class BusProtoStuffMessageConverterTest {
         // deserialize
         when(messageMock.getPayload()).thenReturn(serializedEvent);
         final Object deserializedEvent = underTest.convertFromInternal(messageMock, RemoteApplicationEvent.class, null);
-        assertThat(deserializedEvent).isInstanceOf(TargetCreatedEvent.class);
-        assertThat(deserializedEvent).isEqualTo(targetCreatedEvent);
+        assertThat(deserializedEvent)
+                .isInstanceOf(TargetCreatedEvent.class)
+                .isEqualTo(targetCreatedEvent);
     }
 
     @Test

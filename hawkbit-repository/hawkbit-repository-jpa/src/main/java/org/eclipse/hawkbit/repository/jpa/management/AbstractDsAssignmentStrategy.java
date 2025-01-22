@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
@@ -60,12 +61,14 @@ public abstract class AbstractDsAssignmentStrategy {
     protected final AfterTransactionCommitExecutor afterCommit;
     protected final EventPublisherHolder eventPublisherHolder;
     protected final ActionRepository actionRepository;
+
     private final ActionStatusRepository actionStatusRepository;
     private final QuotaManagement quotaManagement;
     private final BooleanSupplier multiAssignmentsConfig;
     private final BooleanSupplier confirmationFlowConfig;
     private final RepositoryProperties repositoryProperties;
 
+    @SuppressWarnings("java:S107")
     AbstractDsAssignmentStrategy(
             final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
@@ -149,7 +152,7 @@ public abstract class AbstractDsAssignmentStrategy {
                     cb.equal(root.get(JpaAction_.active), true),
                     cb.equal(root.get(JpaAction_.distributionSet).get(JpaDistributionSet_.requiredMigrationStep), false),
                     cb.notEqual(root.get(JpaAction_.status), Action.Status.CANCELING),
-                    root.get(JpaAction_.target).get(JpaTarget_.id).in(targetsIds)
+                    root.get(JpaAction_.target).get(AbstractJpaBaseEntity_.id).in(targetsIds)
             );
         });
 
@@ -187,7 +190,7 @@ public abstract class AbstractDsAssignmentStrategy {
             return cb.and(
                     cb.equal(root.get(JpaAction_.active), true),
                     cb.equal(root.get(JpaAction_.distributionSet).get(JpaDistributionSet_.requiredMigrationStep), false),
-                    root.get(JpaAction_.target).get(JpaTarget_.id).in(targetsIds)
+                    root.get(JpaAction_.target).get(AbstractJpaBaseEntity_.id).in(targetsIds)
             );
         });
 

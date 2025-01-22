@@ -25,8 +25,25 @@ import org.eclipse.hawkbit.artifact.repository.urlhandler.PropertyBasedArtifactU
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
 import org.eclipse.hawkbit.im.authentication.SpRole;
+import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.ControllerManagement;
+import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
+import org.eclipse.hawkbit.repository.RolloutHandler;
+import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -141,8 +158,22 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    TestdataFactory testdataFactory() {
-        return new TestdataFactory();
+    TestdataFactory testdataFactory(
+            final ControllerManagement controllerManagement, final ArtifactManagement artifactManagement,
+            final SoftwareModuleManagement softwareModuleManagement, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final DistributionSetManagement distributionSetManagement,
+            final DistributionSetInvalidationManagement distributionSetInvalidationManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement,
+            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetTypeManagement targetTypeManagement, final TargetTagManagement targetTagManagement,
+            final DeploymentManagement deploymentManagement, final DistributionSetTagManagement distributionSetTagManagement,
+            final RolloutManagement rolloutManagement, final RolloutHandler rolloutHandler,
+            final QuotaManagement quotaManagement,
+            final EntityFactory entityFactory) {
+        return new TestdataFactory(controllerManagement, artifactManagement, softwareModuleManagement, softwareModuleTypeManagement,
+                distributionSetManagement, distributionSetInvalidationManagement, distributionSetTypeManagement, targetManagement,
+                targetFilterQueryManagement, targetTypeManagement, targetTagManagement, deploymentManagement,
+                distributionSetTagManagement, rolloutManagement, rolloutHandler, quotaManagement, entityFactory);
     }
 
     @Bean

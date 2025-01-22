@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter suggestion")
+@SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 public class RSQLParserValidationOracleTest extends AbstractJpaIntegrationTest {
 
     private static final String[] OP_SUGGESTIONS = new String[] { "==", "!=", "=ge=", "=le=", "=gt=", "=lt=", "=in=",
@@ -35,6 +36,7 @@ public class RSQLParserValidationOracleTest extends AbstractJpaIntegrationTest {
             .map(field -> field.name().toLowerCase()).toArray(String[]::new);
     private static final String[] AND_OR_SUGGESTIONS = new String[] { "and", "or" };
     private static final String[] NAME_VERSION_SUGGESTIONS = new String[] { "name", "version" };
+
     @Autowired
     private RsqlValidationOracle rsqlValidationOracle;
 

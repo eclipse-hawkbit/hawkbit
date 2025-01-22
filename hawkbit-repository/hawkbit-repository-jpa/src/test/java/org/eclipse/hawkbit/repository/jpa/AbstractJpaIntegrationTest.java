@@ -78,6 +78,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
 @TestPropertySource(locations = "classpath:/jpa-test.properties")
+@SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
 
     protected static final String INVALID_TEXT_HTML = "</noscript><br><script>";
@@ -91,58 +92,40 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     @Autowired
     protected TargetRepository targetRepository;
-
     @Autowired
     protected ActionRepository actionRepository;
-
     @Autowired
     protected DistributionSetRepository distributionSetRepository;
-
     @Autowired
     protected SoftwareModuleRepository softwareModuleRepository;
-
     @Autowired
     protected TenantMetaDataRepository tenantMetaDataRepository;
-
     @Autowired
     protected DistributionSetTypeRepository distributionSetTypeRepository;
-
     @Autowired
     protected SoftwareModuleTypeRepository softwareModuleTypeRepository;
-
     @Autowired
     protected TargetTagRepository targetTagRepository;
-
     @Autowired
     protected TargetTypeRepository targetTypeRepository;
-
     @Autowired
     protected DistributionSetTagRepository distributionSetTagRepository;
-
     @Autowired
     protected SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
-
     @Autowired
     protected ActionStatusRepository actionStatusRepository;
-
     @Autowired
     protected LocalArtifactRepository artifactRepository;
-
     @Autowired
     protected RolloutGroupRepository rolloutGroupRepository;
-
     @Autowired
     protected RolloutTargetGroupRepository rolloutTargetGroupRepository;
-
     @Autowired
     protected RolloutRepository rolloutRepository;
-
     @Autowired
     protected TenantConfigurationProperties tenantConfigurationProperties;
-
     @Autowired
     protected RolloutTestApprovalStrategy approvalStrategy;
-
     @Autowired
     private JpaProperties jpaProperties;
 
