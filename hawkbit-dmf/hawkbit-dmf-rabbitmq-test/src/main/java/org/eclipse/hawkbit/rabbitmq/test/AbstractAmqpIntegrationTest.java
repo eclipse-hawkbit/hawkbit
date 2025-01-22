@@ -40,6 +40,7 @@ import org.springframework.test.context.ContextConfiguration;
 @Import(TestChannelBinderConfiguration.class)
 // Dirty context is necessary to create a new vhost and recreate all necessary beans after every test class.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
+@SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTest {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(5);

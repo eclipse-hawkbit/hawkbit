@@ -39,6 +39,7 @@ public class Amqp {
         vHosts.values().forEach(VHost::stop);
     }
 
+    @SuppressWarnings("java:S3358") // java:S3358
     public VHost getVhost(final DMF dmf, final boolean initVHost) {
         final String vHost = dmf == null || ObjectUtils.isEmpty(dmf.getVirtualHost()) ?
                 (rabbitProperties.getVirtualHost() == null ? "/" : rabbitProperties.getVirtualHost()) :

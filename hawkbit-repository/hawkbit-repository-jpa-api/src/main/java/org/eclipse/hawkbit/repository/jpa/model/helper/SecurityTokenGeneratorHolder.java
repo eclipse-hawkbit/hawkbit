@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model.helper;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,25 +18,24 @@ import org.springframework.beans.factory.annotation.Autowired;
  * A singleton bean which holds the {@link SecurityTokenGenerator} and make it
  * accessible to beans which are not managed by spring, e.g. JPA entities.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
 public final class SecurityTokenGeneratorHolder {
 
-    private static final SecurityTokenGeneratorHolder INSTANCE = new SecurityTokenGeneratorHolder();
+    private static final SecurityTokenGeneratorHolder SINGLETON = new SecurityTokenGeneratorHolder();
 
-    @Autowired
     private SecurityTokenGenerator securityTokenGenerator;
-
-    /**
-     * private constructor.
-     */
-    private SecurityTokenGeneratorHolder() {
-
-    }
 
     /**
      * @return a singleton instance of the security token generator holder.
      */
     public static SecurityTokenGeneratorHolder getInstance() {
-        return INSTANCE;
+        return SINGLETON;
+    }
+
+    @Autowired // spring setter injection
+    public void setSecurityTokenGenerator(final SecurityTokenGenerator securityTokenGenerator) {
+        this.securityTokenGenerator = securityTokenGenerator;
     }
 
     /**
@@ -45,5 +46,4 @@ public final class SecurityTokenGeneratorHolder {
     public String generateToken() {
         return securityTokenGenerator.generateToken();
     }
-
 }

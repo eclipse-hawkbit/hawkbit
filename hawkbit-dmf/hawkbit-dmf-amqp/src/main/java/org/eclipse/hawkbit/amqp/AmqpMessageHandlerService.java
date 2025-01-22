@@ -215,8 +215,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         return StringUtils.hasLength(message.getMessageProperties().getCorrelationId());
     }
 
-    // Exception squid:MethodCyclomaticComplexity - false positive, is a simple mapping
-    @SuppressWarnings("squid:MethodCyclomaticComplexity")
+    @SuppressWarnings("java:S2637" ) // java:S2637 - logAndThrowMessageError throws exception, i.e. doesn't return null
     private static @NotNull Status mapStatus(final Message message, final DmfActionUpdateStatus actionUpdateStatus, final Action action) {
         Status status = null;
         switch (actionUpdateStatus.getActionStatus()) {
@@ -261,7 +260,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 break;
             }
             default: {
-                logAndThrowMessageError(message, "Status for action does not exisit.");
+                logAndThrowMessageError(message, "Status for action does not exist.");
             }
         }
 

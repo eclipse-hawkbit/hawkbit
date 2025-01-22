@@ -21,7 +21,9 @@ import jakarta.persistence.EntityManagerFactory;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.eclipse.persistence.sessions.Session;
 import org.eclipse.persistence.tools.profiler.PerformanceMonitor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,11 +50,13 @@ import org.springframework.scheduling.annotation.Scheduled;
  *
  * It encapsulates reporting the Eclipselink {@link PerformanceMonitor} statistics to the {@link MeterRegistry} and the Spring autoconfiguration.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
 public class Statistics {
 
     public static final String METER_PREFIX = "eclipselink.";
 
-    private static final Statistics INSTANCE = new Statistics();
+    private static final Statistics SINGLETON = new Statistics();
 
     private static final Pattern PATTERN = Pattern.compile("(?<type>(Counter|Timer)+):(?<key>[^ -]+)");
     private static final Map<String, Long> REPORTED_TIMER_VALUES = new HashMap<>();
@@ -68,7 +72,7 @@ public class Statistics {
      * @return the singleton {@link Statistics} instance
      */
     public static Statistics getInstance() {
-        return INSTANCE;
+        return SINGLETON;
     }
 
     @Autowired
@@ -80,36 +84,36 @@ public class Statistics {
         getPerformanceMonitor(entityManagerFactory).setDumpTime(dumpPeriod);
     }
 
-    @Autowired
+    @Autowired // spring setter injection
     public void setMeterRegistry(final MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
     }
 
     // flushes the statistics to the meter registry (if needed)
     public static void flush() {
-        final MeterRegistry meterRegistry = INSTANCE.meterRegistry;
+        final MeterRegistry meterRegistry = SINGLETON.meterRegistry;
         if (meterRegistry == null) {
             // not a bean (i.e. no performance monitoring) is enabled or no meter registry available
             return;
         }
 
-        synchronized (INSTANCE) {
-            if (INSTANCE.flushing) {
+        synchronized (SINGLETON) {
+            if (SINGLETON.flushing) {
                 // wait for flushing
                 do {
                     try {
-                        INSTANCE.wait(1000);
+                        SINGLETON.wait(1000);
                     } catch (final InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
-                } while (INSTANCE.flushing);
+                } while (SINGLETON.flushing);
                 // flushed
                 return;
             }
             // flush
-            INSTANCE.flushing = true;
+            SINGLETON.flushing = true;
         }
-        INSTANCE.flush0();
+        SINGLETON.flush0();
     }
 
     @Scheduled(initialDelayString = "${hawkbit.jpa.statistics.flush.fixedDelay:60000}", fixedDelayString = "${hawkbit.jpa.statistics.flush.fixedDelay:60000}")

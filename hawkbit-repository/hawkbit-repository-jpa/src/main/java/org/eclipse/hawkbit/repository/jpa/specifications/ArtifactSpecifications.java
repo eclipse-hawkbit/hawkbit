@@ -9,23 +9,21 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
- * Utility class for {@link JpaArtifact}s {@link Specification}s. The class provides
- * Spring Data JPQL Specifications.
+ * Utility class for {@link JpaArtifact}s {@link Specification}s. The class provides Spring Data JPQL Specifications.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ArtifactSpecifications {
-
-    private ArtifactSpecifications() {
-        // utility class
-    }
 
     public static Specification<JpaArtifact> bySoftwareModuleId(final Long softwareModuleId) {
         return (targetRoot, query, cb) -> cb.equal(
-                targetRoot.get(JpaArtifact_.softwareModule).get(JpaSoftwareModule_.id), softwareModuleId);
+                targetRoot.get(JpaArtifact_.softwareModule).get(AbstractJpaBaseEntity_.id), softwareModuleId);
     }
 }

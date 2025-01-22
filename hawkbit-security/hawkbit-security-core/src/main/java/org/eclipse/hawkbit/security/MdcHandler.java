@@ -31,6 +31,7 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
 public class MdcHandler {
 
     public static final String MDC_KEY_TENANT = "tenant";
@@ -40,7 +41,6 @@ public class MdcHandler {
 
     @Value("${hawkbit.logging.mdchandler.enabled:true}")
     private boolean mdcEnabled;
-    @Autowired(required = false)
     private SpringSecurityAuditorAware springSecurityAuditorAware = new SpringSecurityAuditorAware();
 
     /**
@@ -48,6 +48,11 @@ public class MdcHandler {
      */
     public static MdcHandler getInstance() {
         return SINGLETON;
+    }
+
+    @Autowired(required = false) // spring setter injection
+    public void setSpringSecurityAuditorAware(final SpringSecurityAuditorAware springSecurityAuditorAware) {
+        this.springSecurityAuditorAware = springSecurityAuditorAware;
     }
 
     /**

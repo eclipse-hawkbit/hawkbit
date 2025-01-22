@@ -16,22 +16,27 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A singleton bean which holds {@link SystemSecurityContext} service and makes
- * it accessible to beans which are not managed by spring, e.g. JPA entities.
+ * A singleton bean which holds {@link SystemSecurityContext} service and makes it accessible to beans which are not
+ * managed by spring, e.g. JPA entities.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
 public final class SystemSecurityContextHolder {
 
-    private static final SystemSecurityContextHolder INSTANCE = new SystemSecurityContextHolder();
+    private static final SystemSecurityContextHolder SINGLETON = new SystemSecurityContextHolder();
 
     @Getter
-    @Autowired
     private SystemSecurityContext systemSecurityContext;
 
     /**
      * @return the singleton {@link SystemSecurityContextHolder} instance
      */
     public static SystemSecurityContextHolder getInstance() {
-        return INSTANCE;
+        return SINGLETON;
+    }
+
+    @Autowired // spring setter injection
+    public void setSystemSecurityContext(final SystemSecurityContext systemSecurityContext) {
+        this.systemSecurityContext = systemSecurityContext;
     }
 }

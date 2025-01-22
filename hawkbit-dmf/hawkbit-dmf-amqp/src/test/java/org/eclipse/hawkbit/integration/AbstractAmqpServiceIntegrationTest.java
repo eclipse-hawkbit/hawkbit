@@ -398,15 +398,14 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
     }
 
     @Step
-    protected DistributionSet createTargetAndDistributionSetAndAssign(final String controllerId,
-            final Action.ActionType actionType) {
+    protected DistributionSet createTargetAndDistributionSetAndAssign(final String controllerId, final Action.ActionType actionType) {
         registerAndAssertTargetWithExistingTenant(controllerId);
 
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
-        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+        final DistributionSet distributionSetLocal = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        testdataFactory.addSoftwareModuleMetadata(distributionSetLocal);
 
-        assignDistributionSet(distributionSet.getId(), controllerId, actionType);
-        return distributionSet;
+        assignDistributionSet(distributionSetLocal.getId(), controllerId, actionType);
+        return distributionSetLocal;
     }
 
     protected void assertSoftwareModules(final Set<SoftwareModule> expectedSoftwareModules,

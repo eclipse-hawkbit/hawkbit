@@ -53,12 +53,9 @@ class BaseAmqpServiceTest {
         final DmfActionUpdateStatus actionUpdateStatus = createActionStatus();
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
 
-        final Message message = rabbitTemplate.getMessageConverter().toMessage(actionUpdateStatus,
-                createJsonProperties());
-        final DmfActionUpdateStatus convertedActionUpdateStatus = baseAmqpService.convertMessage(message,
-                DmfActionUpdateStatus.class);
-
-        assertThat(convertedActionUpdateStatus).isEqualToComparingFieldByField(actionUpdateStatus);
+        final Message message = rabbitTemplate.getMessageConverter().toMessage(actionUpdateStatus, createJsonProperties());
+        final DmfActionUpdateStatus convertedActionUpdateStatus = baseAmqpService.convertMessage(message, DmfActionUpdateStatus.class);
+        assertThat(convertedActionUpdateStatus).usingRecursiveComparison().isEqualTo(actionUpdateStatus);
     }
 
     @Test

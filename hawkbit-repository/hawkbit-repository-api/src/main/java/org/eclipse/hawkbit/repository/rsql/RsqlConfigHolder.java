@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
  */
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 @Getter
+@SuppressWarnings("java:S6548") // singleton holder ensures static access to spring resources in some places
 public final class RsqlConfigHolder {
 
     private static final RsqlConfigHolder SINGLETON = new RsqlConfigHolder();

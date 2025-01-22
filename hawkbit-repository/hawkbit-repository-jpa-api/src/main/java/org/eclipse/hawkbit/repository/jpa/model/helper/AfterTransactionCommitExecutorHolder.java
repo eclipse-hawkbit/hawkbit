@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.model.helper;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,12 @@ import org.springframework.beans.factory.annotation.Autowired;
  * entities which cannot be autowired.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
 public final class AfterTransactionCommitExecutorHolder {
 
     private static final AfterTransactionCommitExecutorHolder SINGLETON = new AfterTransactionCommitExecutorHolder();
 
-    @Autowired
+    @Getter
     private AfterTransactionCommitExecutor afterCommit;
 
     /**
@@ -33,17 +35,8 @@ public final class AfterTransactionCommitExecutorHolder {
         return SINGLETON;
     }
 
-    /**
-     * @return the afterCommit
-     */
-    public AfterTransactionCommitExecutor getAfterCommit() {
-        return afterCommit;
-    }
-
-    /**
-     * @param afterCommit the afterCommit to set
-     */
-    public void setAfterCommit(final AfterTransactionCommitExecutor afterCommit) {
+    @Autowired // spring setter injection
+    public void setAfterTransactionCommitExecutor(final AfterTransactionCommitExecutor afterCommit) {
         this.afterCommit = afterCommit;
     }
 }
