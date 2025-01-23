@@ -927,7 +927,7 @@ public class RepositoryApplicationConfiguration {
     @ConditionalOnProperty(prefix = "hawkbit.rollout.scheduler", name = "enabled", matchIfMissing = true)
     RolloutScheduler rolloutScheduler(final SystemManagement systemManagement,
             final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext) {
-        return new RolloutScheduler(systemManagement, rolloutHandler, systemSecurityContext);
+        return new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext);
     }
 
     /**

@@ -626,6 +626,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(status().isNotAcceptable());
     }
 
+    @SuppressWarnings("java:S1144") // java:S1144 - used in MethodSource, sonar my find it incorrectly as unused
     private static Stream<Action.ActionType> actionTypeForDeployment() {
         return Stream.of(Action.ActionType.SOFT, Action.ActionType.FORCED);
     }

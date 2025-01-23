@@ -38,10 +38,10 @@ class DdiArtifactHashTest {
         final String sha1Hash = "11111";
         final String md5Hash = "22222";
         final String sha256Hash = "33333";
-        final DdiArtifactHash DdiArtifact = new DdiArtifactHash(sha1Hash, md5Hash, sha256Hash);
+        final DdiArtifactHash ddiArtifact = new DdiArtifactHash(sha1Hash, md5Hash, sha256Hash);
 
         // Test
-        final String serializedDdiArtifact = OBJECT_MAPPER.writeValueAsString(DdiArtifact);
+        final String serializedDdiArtifact = OBJECT_MAPPER.writeValueAsString(ddiArtifact);
         final DdiArtifactHash deserializedDdiArtifact = OBJECT_MAPPER.readValue(serializedDdiArtifact, DdiArtifactHash.class);
         assertThat(serializedDdiArtifact).contains(sha1Hash, md5Hash, sha256Hash);
         assertThat(deserializedDdiArtifact.getSha1()).isEqualTo(sha1Hash);

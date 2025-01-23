@@ -62,10 +62,9 @@ class BaseAmqpServiceTest {
     @Description("Tests invalid null message content")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void convertMessageWithNullContent() {
-        final Message message = createMessage("".getBytes());
-        assertThatExceptionOfType(MessageConversionException.class)
-                .as("Expected MessageConversionException for invalid JSON")
-                .isThrownBy(() -> baseAmqpService.convertMessage(message, DmfActionUpdateStatus.class));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .as("Expected IllegalArgumentException for invalid (null) JSON")
+                .isThrownBy(() -> createMessage(null));
     }
 
     @Test
@@ -74,7 +73,7 @@ class BaseAmqpServiceTest {
     void updateActionStatusWithEmptyContent() {
         final Message message = createMessage("".getBytes());
         assertThatExceptionOfType(MessageConversionException.class)
-                .as("Expected MessageConversionException for invalid JSON")
+                .as("Expected MessageConversionException for invalid (empty) JSON")
                 .isThrownBy(() -> baseAmqpService.convertMessage(message, DmfActionUpdateStatus.class));
     }
 

@@ -92,7 +92,8 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
 
     @Override
     public void deleteAllById(@NonNull final Iterable<? extends Long> ids) {
-        final Set<Long> idList = toSetDistinct(ids);
+        final Set<Long> idList = new HashSet<>();
+        ids.forEach(idList::add);
         if (count(AccessController.Operation.DELETE, byIdsSpec(idList)) != idList.size()) {
             throw new InsufficientPermissionException("Has at least one id that is not allowed for deletion!");
         }
@@ -342,54 +343,51 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
                 repository.getClass().getInterfaces(),
                 (proxy, method, args) -> {
                     try {
-                        try {
-                            // TODO - cache mapping so to speed things
-                            final Method delegateMethod =
-                                    BaseEntityRepositoryACM.class.getDeclaredMethod(method.getName(), method.getParameterTypes());
-                            return delegateMethod.invoke(repositoryACM, args);
-                        } catch (final NoSuchMethodException e) {
-                            // call to repository itself
-                        }
-                        if (method.getName().startsWith("find") || method.getName().startsWith("get")) {
-                            final Object result = method.invoke(repository, args);
-                            // Iterable, List, Page, Slice
-                            if (Iterable.class.isAssignableFrom(method.getReturnType())) {
-                                for (final Object e : (Iterable<?>) result) {
-                                    if (repository.getDomainClass().isAssignableFrom(e.getClass())) {
-                                        accessController.assertOperationAllowed(AccessController.Operation.READ, (T) e);
-                                    }
-                                }
-                            } else if (Optional.class.isAssignableFrom(method.getReturnType()) && ((Optional<?>) result)
-                                    .filter(value -> repository.getDomainClass().isAssignableFrom(value.getClass()))
-                                    .isPresent()) {
-                                return ((Optional<T>) result).filter(
-                                        t -> {
-                                            // if not accessible - throws exception (as for iterables or single entities)
-                                            accessController.assertOperationAllowed(AccessController.Operation.READ, t);
-                                            return true;
-                                        });
-                            } else if (repository.getDomainClass().isAssignableFrom(method.getReturnType())) {
-                                accessController.assertOperationAllowed(AccessController.Operation.READ, (T) result);
-                            }
-                            return result;
-                        } else if ("toString".equals(method.getName()) && method.getParameterCount() == 0) {
-                            return BaseEntityRepositoryACM.class.getSimpleName() +
-                                    "(repository: " + repository + ", accessController: " + accessController + ")";
-                        } else {
-                            return method.invoke(repository, args);
-                        }
+                        // try to call a BaseEntityRepositoryACM method if declared
+                        // TODO - cache mapping so to speed things
+                        final Method delegateMethod =
+                                BaseEntityRepositoryACM.class.getDeclaredMethod(method.getName(), method.getParameterTypes());
+                        return delegateMethod.invoke(repositoryACM, args);
                     } catch (final InvocationTargetException e) {
                         throw e.getCause() == null ? e : e.getCause();
+                    } catch (final NoSuchMethodException nsme) {
+                        // not found
+                        try {
+                            // call to call a repository method
+                            if (method.getName().startsWith("find") || method.getName().startsWith("get")) {
+                                final Object result = method.invoke(repository, args);
+                                // Iterable, List, Page, Slice
+                                if (Iterable.class.isAssignableFrom(method.getReturnType())) {
+                                    for (final Object e : (Iterable<?>) result) {
+                                        if (repository.getDomainClass().isAssignableFrom(e.getClass())) {
+                                            accessController.assertOperationAllowed(AccessController.Operation.READ, (T) e);
+                                        }
+                                    }
+                                } else if (Optional.class.isAssignableFrom(method.getReturnType()) && ((Optional<?>) result)
+                                        .filter(value -> repository.getDomainClass().isAssignableFrom(value.getClass()))
+                                        .isPresent()) {
+                                    return ((Optional<T>) result).filter(
+                                            t -> {
+                                                // if not accessible - throws exception (as for iterables or single entities)
+                                                accessController.assertOperationAllowed(AccessController.Operation.READ, t);
+                                                return true;
+                                            });
+                                } else if (repository.getDomainClass().isAssignableFrom(method.getReturnType())) {
+                                    accessController.assertOperationAllowed(AccessController.Operation.READ, (T) result);
+                                }
+                                return result;
+                            } else if ("toString".equals(method.getName()) && method.getParameterCount() == 0) {
+                                return BaseEntityRepositoryACM.class.getSimpleName() +
+                                        "(repository: " + repository + ", accessController: " + accessController + ")";
+                            } else {
+                                return method.invoke(repository, args);
+                            }
+                        } catch (final InvocationTargetException ite) {
+                            throw ite.getCause() == null ? ite : ite.getCause();
+                        }
                     }
                 });
         log.info("Proxy created -> {}", acmProxy);
         return acmProxy;
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static Set<Long> toSetDistinct(final Iterable<? extends Long> i) {
-        final Set<Long> set = new HashSet<>();
-        i.forEach(set::add);
-        return set;
     }
 }

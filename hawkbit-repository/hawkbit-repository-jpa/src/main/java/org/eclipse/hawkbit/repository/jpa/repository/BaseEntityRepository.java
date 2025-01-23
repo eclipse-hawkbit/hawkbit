@@ -118,11 +118,11 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
         }
     }
 
-    default <T extends AbstractJpaTenantAwareBaseEntity> Specification<T> byIdSpec(final Long id) {
+    default <S extends AbstractJpaTenantAwareBaseEntity> Specification<S> byIdSpec(final Long id) {
         return (root, query, cb) -> cb.equal(root.get(AbstractJpaBaseEntity_.id), id);
     }
 
-    default <T extends AbstractJpaTenantAwareBaseEntity> Specification<T> byIdsSpec(final Iterable<Long> ids) {
+    default <S extends AbstractJpaTenantAwareBaseEntity> Specification<S> byIdsSpec(final Iterable<Long> ids) {
         final Collection<Long> collection;
         if (ids instanceof Collection<Long> idCollection) {
             collection = idCollection;
