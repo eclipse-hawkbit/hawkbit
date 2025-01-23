@@ -78,7 +78,7 @@ public class JpaActionManagement {
         }
 
         log.debug(
-                "Update of actionStatus {} for action {} not possible since action not active anymore.",
+                "Update of actionStatus {} for action {} not possible since action not active anymore and not allowed as an action terminating.",
                 actionStatus.getStatus(), action.getId());
         return action;
     }
@@ -133,16 +133,17 @@ public class JpaActionManagement {
      * status updates only once.
      */
     private boolean isUpdatingActionStatusAllowed(final JpaAction action, final JpaActionStatus actionStatus) {
+        if (action.isActive()) {
+            return true;
+        }
 
-        final boolean intermediateStatus = isIntermediateStatus(actionStatus);
-
-        final boolean isAllowedByRepositoryConfiguration = intermediateStatus && !repositoryProperties.isRejectActionStatusForClosedAction();
-
-        //in case of download_only action Status#DOWNLOADED is treated as 'final' already, so we accept one final status from device in case it sends
-        final boolean isAllowedForDownloadOnlyActions = isDownloadOnly(
-                action) && action.getStatus() == Action.Status.DOWNLOADED && !intermediateStatus;
-
-        return action.isActive() || isAllowedByRepositoryConfiguration || isAllowedForDownloadOnlyActions;
+        if (isIntermediateStatus(actionStatus)) {
+            return !repositoryProperties.isRejectActionStatusForClosedAction();
+        } else {
+            // in case of download_only action Status#DOWNLOADED is treated as 'final' already,
+            // so we accept one final status from device in case it sends
+            return isDownloadOnly(action) && action.getStatus() == Action.Status.DOWNLOADED;
+        }
     }
 
     /**

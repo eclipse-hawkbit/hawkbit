@@ -132,11 +132,12 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
 
         final List<Action> actions = assignDistributionSet(dsId, controllerId).getAssignedEntity();
         assertThat(actions).hasSize(1).allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
-        final Action newAction = confirmationManagement.confirmAction(actions.get(0).getId(), null, null);
+        final Long actionId = actions.get(0).getId();
+        final Action newAction = confirmationManagement.confirmAction(actionId, null, null);
         // verify action in RUNNING state
         assertThat(newAction.getStatus()).isEqualTo(Status.RUNNING);
 
-        assertThatThrownBy(() -> confirmationManagement.confirmAction(actions.get(0).getId(), null, null))
+        assertThatThrownBy(() -> confirmationManagement.confirmAction(actionId, null, null))
                 .isInstanceOf(InvalidConfirmationFeedbackException.class)
                 .matches(e -> ((InvalidConfirmationFeedbackException) e)
                         .getReason() == InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION);
@@ -146,9 +147,8 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verify confirming a closed action will lead to a specific failure")
     void confirmedActionCannotBeGivenOnFinishedAction() {
         enableConfirmationFlow();
-        final Action action = prepareFinishedUpdate();
-
-        assertThatThrownBy(() -> confirmationManagement.confirmAction(action.getId(), null, null))
+        final Long actionId = prepareFinishedUpdate().getId();
+        assertThatThrownBy(() -> confirmationManagement.confirmAction(actionId, null, null))
                 .isInstanceOf(InvalidConfirmationFeedbackException.class)
                 .matches(e -> ((InvalidConfirmationFeedbackException) e)
                         .getReason() == InvalidConfirmationFeedbackException.Reason.ACTION_CLOSED);

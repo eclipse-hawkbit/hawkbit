@@ -84,7 +84,7 @@ public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpa
     }
 
     @NonNull
-    public Optional<T> findOne(@Nullable AccessController.Operation operation, @Nullable Specification<T> spec) {
+    public Optional<T> findOne(@Nullable AccessController.Operation operation, @NonNull Specification<T> spec) {
         return findOne(spec);
     }
 
