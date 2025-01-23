@@ -1,0 +1,16 @@
+version: 2
+updates:
+  # Enable version updates for maven
+  - package-ecosystem: "maven" 
+    # Look for a pom.xml everywhere
+    directory: "/"
+    # Check daily
+    schedule:
+      interval: "daily"
+  # Enable version updates for docker
+  - package-ecosystem: "docker" 
+    # Look for Dockerfile in the /docker directory only
+    directory: "/docker"
+    # Check daily
+    schedule:
+      interval: "daily"
