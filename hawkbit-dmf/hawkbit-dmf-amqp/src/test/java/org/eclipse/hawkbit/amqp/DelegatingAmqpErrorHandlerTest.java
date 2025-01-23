@@ -24,28 +24,27 @@ import org.springframework.util.ErrorHandler;
 @Story("Delegating Conditional Error Handler")
 class DelegatingAmqpErrorHandlerTest {
 
+    private final DelegatingConditionalErrorHandler delegatingConditionalErrorHandler =
+            new DelegatingConditionalErrorHandler(
+                    List.of(new IllegalArgumentExceptionHandler(), new IndexOutOfBoundsExceptionHandler()),
+                    new DefaultErrorHandler());
+
     @Test
     @Description("Verifies that with a list of conditional error handlers, the error is delegated to specific handler.")
     void verifyDelegationHandling() {
-        List<AmqpErrorHandler> handlers = new ArrayList<>();
-        handlers.add(new IllegalArgumentExceptionHandler());
-        handlers.add(new IndexOutOfBoundsExceptionHandler());
+        final Throwable error = new Throwable(new IllegalArgumentException());
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .as("Expected handled exception to be of type IllegalArgumentException")
-                .isThrownBy(() -> new DelegatingConditionalErrorHandler(handlers, new DefaultErrorHandler())
-                        .handleError(new Throwable(new IllegalArgumentException())));
+                .isThrownBy(() -> delegatingConditionalErrorHandler.handleError(error));
     }
 
     @Test
     @Description("Verifies that default handler is used if no handlers are defined for the specific exception.")
     void verifyDefaultDelegationHandling() {
-        List<AmqpErrorHandler> handlers = new ArrayList<>();
-        handlers.add(new IllegalArgumentExceptionHandler());
-        handlers.add(new IndexOutOfBoundsExceptionHandler());
+        final Throwable error = new Throwable(new NullPointerException());
         assertThatExceptionOfType(RuntimeException.class)
                 .as("Expected handled exception to be of type RuntimeException")
-                .isThrownBy(() -> new DelegatingConditionalErrorHandler(handlers, new DefaultErrorHandler())
-                        .handleError(new Throwable(new NullPointerException())));
+                .isThrownBy(() -> delegatingConditionalErrorHandler.handleError(error));
     }
 
     // Test class

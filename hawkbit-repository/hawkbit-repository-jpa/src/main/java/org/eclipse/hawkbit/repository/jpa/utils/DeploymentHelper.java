@@ -16,8 +16,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
@@ -59,7 +59,7 @@ public final class DeploymentHelper {
 
         final JpaTarget target = (JpaTarget) action.getTarget();
         final List<Action> nextActiveActions = actionRepository
-                .findAll(ActionSpecifications.byTargetIdAndIsActive(target.getId()), Sort.by(Sort.Order.asc(JpaAction_.ID)))
+                .findAll(ActionSpecifications.byTargetIdAndIsActive(target.getId()), Sort.by(Sort.Order.asc(AbstractJpaBaseEntity_.ID)))
                 .stream()
                 .filter(a -> !a.getId().equals(action.getId()))
                 .map(Action.class::cast)

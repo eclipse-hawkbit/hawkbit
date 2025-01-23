@@ -37,16 +37,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * REST Resource handling for DistributionSetTag CRUD operations.
+ *
+ * @deprecated since 0.6.0
  */
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
-@Deprecated(forRemoval = true)
+@Deprecated(forRemoval = true, since = "0.6.0")
 @Tag(name = "Deprecated operations", description = "Deprecated REST operations.",
         extensions = @Extension(name = OpenApiConfiguration.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = "2147483647")))
 public interface DeprecatedMgmtRestApi {
 
     /**
-     * Handles the POST request to toggle the assignment of distribution sets by
-     * the given tag id.</br>
+     * Handles the POST request to toggle the assignment of distribution sets by the given tag id.</br>
      * From {@link org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTagRestApi}
      *
      * @param distributionsetTagId the ID of the distribution set tag to retrieve

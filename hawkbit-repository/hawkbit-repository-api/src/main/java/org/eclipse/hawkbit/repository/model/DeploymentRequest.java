@@ -56,6 +56,7 @@ public class DeploymentRequest {
      *         with CONFIRMATION_FLOW active via tenant configuration)
      * @throws InvalidMaintenanceScheduleException if the parameters do not define a valid maintenance schedule.
      */
+    @SuppressWarnings("java:S107")
     public DeploymentRequest(final String controllerId, final Long distributionSetId, final ActionType actionType,
             final long forceTime, final Integer weight, final String maintenanceSchedule,
             final String maintenanceWindowDuration, final String maintenanceWindowTimeZone,

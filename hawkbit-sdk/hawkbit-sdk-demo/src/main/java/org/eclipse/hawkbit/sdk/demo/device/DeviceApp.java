@@ -69,6 +69,7 @@ public class DeviceApp {
         private final DdiController device;
         private final MgmtApi mgmtApi;
 
+        @SuppressWarnings("java:S3358")
         Shell(final DdiTenant ddiTenant, final MgmtApi mgmtApi, final Optional<UpdateHandler> updateHandler) {
             this.ddiTenant = ddiTenant;
             this.mgmtApi = mgmtApi;

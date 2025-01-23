@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import jakarta.validation.ConstraintViolationException;
@@ -196,18 +197,19 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test verifies that the 'max actions per target' quota is enforced.")
     void assertMaxActionsPerTargetQuotaIsEnforced() {
+        enableMultiAssignments();
+
         final int maxActions = quotaManagement.getMaxActionsPerTarget();
         final Target testTarget = testdataFactory.createTarget();
-        final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
+        final Long ds1Id = testdataFactory.createDistributionSet("ds1").getId();
 
-        enableMultiAssignments();
+        final String controllerId = testTarget.getControllerId();
         for (int i = 0; i < maxActions; i++) {
-            deploymentManagement.offlineAssignedDistributionSets(Collections
-                    .singletonList(new SimpleEntry<>(testTarget.getControllerId(), ds1.getId())));
+            deploymentManagement.offlineAssignedDistributionSets(List.of(new SimpleEntry<>(controllerId, ds1Id)));
         }
 
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> assignDistributionSet(ds1.getId(), testTarget.getControllerId(), 77));
+                .isThrownBy(() -> assignDistributionSet(ds1Id, controllerId, 77));
     }
 
     @Test
@@ -277,10 +279,10 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // not exists
         assignDS.add(100L);
 
-        final DistributionSetTag tag = distributionSetTagManagement.create(entityFactory.tag().create().name("Tag1"));
+        final Long tagId = distributionSetTagManagement.create(entityFactory.tag().create().name("Tag1")).getId();
 
         assertThatExceptionOfType(EntityNotFoundException.class)
-                .isThrownBy(() -> distributionSetManagement.assignTag(assignDS, tag.getId()))
+                .isThrownBy(() -> distributionSetManagement.assignTag(assignDS, tagId))
                 .withMessageContaining("DistributionSet")
                 .withMessageContaining(String.valueOf(100L));
     }
@@ -455,7 +457,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final Target target = action.getTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet("newDS", true);
-        final Action assigningAction = assignSet(target, ds);
+        final Long assigningActionId = assignSet(target, ds).getId();
 
         // verify assignment
         assertThat(actionRepository.findAll()).as("wrong size of action").hasSize(2);
@@ -464,7 +466,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // force quit assignment
         assertThatExceptionOfType(ForceQuitActionNotAllowedException.class)
                 .as("expected ForceQuitActionNotAllowedException")
-                .isThrownBy(() -> deploymentManagement.forceQuitAction(assigningAction.getId()));
+                .isThrownBy(() -> deploymentManagement.forceQuitAction(assigningActionId));
     }
 
     @Test
@@ -706,8 +708,9 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DeploymentRequest targetToDS1 = DeploymentManagement
                 .deploymentRequest(target.getControllerId(), distributionSets.get(1).getId()).setWeight(565).build();
 
+        final List<DeploymentRequest> deploymentRequests = List.of(targetToDS0, targetToDS1);
         Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class)
-                .isThrownBy(() -> deploymentManagement.assignDistributionSets(Arrays.asList(targetToDS0, targetToDS1)));
+                .isThrownBy(() -> deploymentManagement.assignDistributionSets(deploymentRequests));
 
         enableMultiAssignments();
         assertThat(getResultingActionCount(
@@ -981,16 +984,18 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DeploymentRequest weightTooHigh = DeploymentManagement.deploymentRequest(targetId, dsId)
                 .setWeight(Action.WEIGHT_MAX + 1).build();
         enableMultiAssignments();
+        final List<DeploymentRequest> deploymentRequestsTooLow = Collections.singletonList(weightTooLow);
         Assertions.assertThatExceptionOfType(ConstraintViolationException.class)
-                .isThrownBy(() -> deploymentManagement.assignDistributionSets(Collections.singletonList(weightTooLow)));
+                .isThrownBy(() -> deploymentManagement.assignDistributionSets(deploymentRequestsTooLow));
+        final List<DeploymentRequest> deploymentRequestsTooHigh = Collections.singletonList(weightTooHigh);
         Assertions.assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
-                () -> deploymentManagement.assignDistributionSets(Collections.singletonList(weightTooHigh)));
-        final Long valideActionId1 = getFirstAssignedAction(
+                () -> deploymentManagement.assignDistributionSets(deploymentRequestsTooHigh));
+        final Long validActionId1 = getFirstAssignedAction(
                 deploymentManagement.assignDistributionSets(Collections.singletonList(valideRequest1)).get(0)).getId();
-        final Long valideActionId2 = getFirstAssignedAction(
+        final Long validActionId2 = getFirstAssignedAction(
                 deploymentManagement.assignDistributionSets(Collections.singletonList(valideRequest2)).get(0)).getId();
-        assertThat(actionRepository.findById(valideActionId1).get().getWeight()).get().isEqualTo(Action.WEIGHT_MAX);
-        assertThat(actionRepository.findById(valideActionId2).get().getWeight()).get().isEqualTo(Action.WEIGHT_MIN);
+        assertThat(actionRepository.findById(validActionId1).get().getWeight()).get().isEqualTo(Action.WEIGHT_MAX);
+        assertThat(actionRepository.findById(validActionId2).get().getWeight()).get().isEqualTo(Action.WEIGHT_MIN);
     }
 
     /**
@@ -1283,10 +1288,9 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                         .asList(DistributionSetSpecification.isDeleted(true), DistributionSetSpecification.isCompleted(true))),
                 PAGE).getContent()).as("wrong size of founded ds").hasSize(noOfDistributionSets);
 
-        for (final DistributionSet ignored : deploymentResult.getDistributionSets()) {
-            testdataFactory.sendUpdateActionStatusToTargets(deploymentResult.getDeployedTargets(), Status.FINISHED,
-                    Collections.singletonList("blabla alles gut"));
-        }
+        IntStream.range(0, deploymentResult.getDistributionSets().size()).forEach(i -> testdataFactory.sendUpdateActionStatusToTargets(
+                    deploymentResult.getDeployedTargets(), Status.FINISHED, Collections.singletonList("blabla alles gut")));
+
         // try to delete again
         distributionSetManagement.delete(deploymentResult.getDistributionSetIDs());
         // verify that the result is the same, even though distributionSet dsA
@@ -1304,22 +1308,18 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Deletes multiple targets and verifies that all related metadata is also deleted.")
     void deletesTargetsAndVerifyCascadeDeletes() {
-
         final String undeployedTargetPrefix = "undep-T";
         final int noOfUndeployedTargets = 2;
 
         final String deployedTargetPrefix = "dep-T";
         final int noOfDeployedTargets = 4;
-
         final int noOfDistributionSets = 3;
 
         final DeploymentResult deploymentResult = prepareComplexRepo(undeployedTargetPrefix, noOfUndeployedTargets,
                 deployedTargetPrefix, noOfDeployedTargets, noOfDistributionSets, "myTestDS");
 
-        for (final DistributionSet ignored : deploymentResult.getDistributionSets()) {
-            testdataFactory.sendUpdateActionStatusToTargets(deploymentResult.getDeployedTargets(), Status.FINISHED,
-                    Collections.singletonList("blabla alles gut"));
-        }
+        IntStream.range(0, deploymentResult.getDistributionSets().size()).forEach(i -> testdataFactory.sendUpdateActionStatusToTargets(
+                    deploymentResult.getDeployedTargets(), Status.FINISHED, Collections.singletonList("blabla alles gut")));
 
         assertThat(targetManagement.count()).as("size of targets is wrong").isNotZero();
         assertThat(actionStatusRepository.count()).as("size of action status is wrong").isNotZero();
