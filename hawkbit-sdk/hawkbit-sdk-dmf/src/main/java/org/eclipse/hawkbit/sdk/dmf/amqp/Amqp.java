@@ -47,6 +47,7 @@ public class Amqp {
         return vHosts.computeIfAbsent(vHost, vh -> new VHost(getConnectionFactory(dmf, vHost), amqpProperties, initVHost));
     }
 
+    @SuppressWarnings("java:S4449") // java:S4449 - setUsername/Password is called with non-null
     private ConnectionFactory getConnectionFactory(final DMF dmf, final String vHost) {
         final CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
         connectionFactory.setHost(rabbitProperties.getHost());

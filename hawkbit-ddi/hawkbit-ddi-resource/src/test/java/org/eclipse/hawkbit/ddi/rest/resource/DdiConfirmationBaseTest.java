@@ -341,7 +341,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
         final DdiActivateAutoConfirmation body = new DdiActivateAutoConfirmation(initiator, remark);
 
         mvc.perform(post(ACTIVATE_AUTO_CONFIRM, tenantAware.getCurrentTenant(), controllerId)
-                        .content(getMapper().writeValueAsString(body)).contentType(MediaType.APPLICATION_JSON_UTF8))
+                        .content(getMapper().writeValueAsString(body)).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
