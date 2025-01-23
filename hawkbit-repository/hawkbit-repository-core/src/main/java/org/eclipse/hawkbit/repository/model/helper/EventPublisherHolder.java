@@ -18,21 +18,18 @@ import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.context.ApplicationEventPublisher;
 
 /**
- * A singleton bean which holds the event publisher and service origin Id in
- * order to publish remote application events. It can be used in beans not
- * instantiated by spring e.g. JPA entities which cannot be auto-wired.
+ * A singleton bean which holds the event publisher and service origin id in order to publish remote application events.
+ * It can be used in beans not instantiated by spring e.g. JPA entities which cannot be auto-wired.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
 public final class EventPublisherHolder {
 
     private static final EventPublisherHolder SINGLETON = new EventPublisherHolder();
 
     @Getter
-    @Autowired
     private ApplicationEventPublisher eventPublisher;
-    @Autowired(required = false)
     private ServiceMatcher serviceMatcher;
-    @Autowired
     private BusProperties bus;
 
     /**
@@ -42,9 +39,24 @@ public final class EventPublisherHolder {
         return SINGLETON;
     }
 
+    @Autowired // spring setter injection
+    public void setApplicationEventPublisher(final ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
+
+    @Autowired(required = false) // spring setter injection
+    public void setServiceMatcher(final ServiceMatcher serviceMatcher) {
+        this.serviceMatcher = serviceMatcher;
+    }
+
+    @Autowired // spring setter injection
+    public void setBusProperties(final BusProperties bus) {
+        this.bus = bus;
+    }
+
     /**
-     * @return the service origin Id coming either from {@link ServiceMatcher}
-     *         when available or {@link BusProperties} otherwise.
+     * @return the service origin Id coming either from {@link ServiceMatcher} when available or {@link BusProperties}
+     *         otherwise.
      */
     public String getApplicationId() {
         String id = null;

@@ -130,13 +130,13 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
 
     protected ResultActions postDeploymentFeedback(final String controllerId, final Long actionId, final String content,
             final ResultMatcher statusMatcher) throws Exception {
-        return postDeploymentFeedback(MediaType.APPLICATION_JSON_UTF8, controllerId, actionId, content.getBytes(), statusMatcher);
+        return postDeploymentFeedback(MediaType.APPLICATION_JSON, controllerId, actionId, content.getBytes(), statusMatcher);
     }
 
     protected ResultActions putInstalledBase(final String controllerId, final String content, final ResultMatcher statusMatcher)
             throws Exception {
         return mvc.perform(put(INSTALLED_BASE_ROOT, tenantAware.getCurrentTenant(), controllerId)
-                        .content(content.getBytes()).contentType(MediaType.APPLICATION_JSON_UTF8))
+                        .content(content.getBytes()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(statusMatcher);
     }
@@ -154,7 +154,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     protected ResultActions postCancelFeedback(
             final String controllerId, final Long actionId, final String content,
             final ResultMatcher statusMatcher) throws Exception {
-        return postCancelFeedback(MediaType.APPLICATION_JSON_UTF8, controllerId, actionId, content.getBytes(), statusMatcher);
+        return postCancelFeedback(MediaType.APPLICATION_JSON, controllerId, actionId, content.getBytes(), statusMatcher);
     }
 
     protected ResultActions postCancelFeedback(

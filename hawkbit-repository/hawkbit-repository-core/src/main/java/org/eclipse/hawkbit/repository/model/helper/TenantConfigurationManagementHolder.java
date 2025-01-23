@@ -16,23 +16,27 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A singleton bean which holds {@link TenantConfigurationManagement} service
- * and makes it accessible to beans which are not managed by spring, e.g. JPA
- * entities.
+ * A singleton bean which holds {@link TenantConfigurationManagement} service and makes it accessible to beans which are
+ * not managed by spring, e.g. JPA entities.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
 public final class TenantConfigurationManagementHolder {
 
-    private static final TenantConfigurationManagementHolder INSTANCE = new TenantConfigurationManagementHolder();
+    private static final TenantConfigurationManagementHolder SINGLETON = new TenantConfigurationManagementHolder();
 
     @Getter
-    @Autowired
     private TenantConfigurationManagement tenantConfigurationManagement;
 
     /**
      * @return the singleton {@link TenantConfigurationManagementHolder} instance
      */
     public static TenantConfigurationManagementHolder getInstance() {
-        return INSTANCE;
+        return SINGLETON;
+    }
+
+    @Autowired // spring setter injection
+    public void setTenantConfigurationManagement(final TenantConfigurationManagement tenantConfigurationManagement) {
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 }

@@ -31,6 +31,7 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
         this.rsqlQueryFieldType = rsqlQueryFieldType;
     }
 
+    @SuppressWarnings("java:S1066") // java:S1066 - more readable with separate "if" statements
     protected QuertPath getQuertPath(final ComparisonNode node) {
         final int firstSeparatorIndex = node.getSelector().indexOf(RsqlQueryField.SUB_ATTRIBUTE_SEPARATOR);
         final String enumName = (firstSeparatorIndex == -1

@@ -60,14 +60,21 @@ import org.springframework.util.ErrorHandler;
 @PropertySource("classpath:/hawkbit-dmf-defaults.properties")
 public class AmqpConfiguration {
 
-    @Autowired
-    private AmqpProperties amqpProperties;
-    @Autowired
-    private AmqpDeadletterProperties amqpDeadletterProperties;
-    @Autowired
-    private ConnectionFactory rabbitConnectionFactory;
-    @Autowired(required = false)
+    private final AmqpProperties amqpProperties;
+    private final AmqpDeadletterProperties amqpDeadletterProperties;
+    private final ConnectionFactory rabbitConnectionFactory;
     private ServiceMatcher serviceMatcher;
+
+    public AmqpConfiguration(final AmqpProperties amqpProperties, final AmqpDeadletterProperties amqpDeadletterProperties, final ConnectionFactory rabbitConnectionFactory) {
+        this.amqpProperties = amqpProperties;
+        this.amqpDeadletterProperties = amqpDeadletterProperties;
+        this.rabbitConnectionFactory = rabbitConnectionFactory;
+    }
+
+    @Autowired(required = false) // spring setter injection
+    public void setServiceMatcher(final ServiceMatcher serviceMatcher) {
+        this.serviceMatcher = serviceMatcher;
+    }
 
     /**
      * Creates a custom error handler bean.
@@ -262,8 +269,7 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Create RabbitListenerContainerFactory bean if no listenerContainerFactory
-     * bean found
+     * Create RabbitListenerContainerFactory bean if no listenerContainerFactory bean found
      *
      * @return RabbitListenerContainerFactory bean
      */

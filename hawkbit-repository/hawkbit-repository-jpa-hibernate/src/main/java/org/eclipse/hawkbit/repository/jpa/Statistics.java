@@ -10,7 +10,10 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -31,11 +34,13 @@ import org.springframework.context.annotation.Configuration;
  *     <li>(?) When using in test the metrics MAYBE shall be enabled with @AutoConfigureObservability(tracing = false)</li>
  * </ol>
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
 public class Statistics {
 
     public static final String METER_PREFIX = "hibernate.";
 
-    private static final Statistics INSTANCE = new Statistics();
+    private static final Statistics SINGLETON = new Statistics();
 
     // if meter registry is unavailable, the statistics will not send to metrics
     @Getter
@@ -45,17 +50,7 @@ public class Statistics {
      * @return the singleton {@link Statistics} instance
      */
     public static Statistics getInstance() {
-        return INSTANCE;
-    }
-
-    @Autowired
-    public void setMeterRegistry(final MeterRegistry meterRegistry) {
-        this.meterRegistry = meterRegistry;
-    }
-
-    // flushes the statistics to the meter registry (if needed)
-    public static void flush() {
-        // nothing to do for Hibernate
+        return SINGLETON;
     }
 
     // autoconfigure after CompositeMeterRegistryAutoConfiguration, so when the autoconfiguration is being processed the MeterRegistry
@@ -73,5 +68,15 @@ public class Statistics {
             // injects the singleton Statistics, and start scheduler
             return Statistics.getInstance();
         }
+    }
+
+    @Autowired // spring setter injection
+    public void setMeterRegistry(final MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+    }
+
+    // flushes the statistics to the meter registry (if needed)
+    public static void flush() {
+        // nothing to do for Hibernate
     }
 }

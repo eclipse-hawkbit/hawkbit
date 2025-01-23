@@ -104,6 +104,9 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
     protected abstract AbstractDbArtifact store(final String tenant, final DbArtifactHash base16Hashes,
             final String contentType, final String tempFile) throws IOException;
 
+    // java:S1066 - more readable with separate "if" statements
+    // java:S4042 - delete reason is not needed
+    @SuppressWarnings({ "java:S1066", "java:S4042" })
     static File createTempFile(final boolean directory) {
         try {
             final File file = (directory

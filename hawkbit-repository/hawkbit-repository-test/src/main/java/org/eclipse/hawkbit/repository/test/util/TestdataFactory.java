@@ -614,15 +614,14 @@ public class TestdataFactory {
      *         {@link #SM_TYPE_RT} , {@link #SM_TYPE_APP}.
      */
     public DistributionSetType findOrCreateDefaultTestDsType() {
-        final List<SoftwareModuleType> mand = new ArrayList<>();
-        mand.add(findOrCreateSoftwareModuleType(SM_TYPE_OS));
+        final List<SoftwareModuleType> swt = new ArrayList<>();
+        swt.add(findOrCreateSoftwareModuleType(SM_TYPE_OS));
 
         final List<SoftwareModuleType> opt = new ArrayList<>();
         opt.add(findOrCreateSoftwareModuleType(SM_TYPE_APP, Integer.MAX_VALUE));
         opt.add(findOrCreateSoftwareModuleType(SM_TYPE_RT));
 
-        return findOrCreateDistributionSetType(DS_TYPE_DEFAULT, "OS (FW) mandatory, runtime (FW) and app (SW) optional",
-                mand, opt);
+        return findOrCreateDistributionSetType(DS_TYPE_DEFAULT, "OS (FW) mandatory, runtime (FW) and app (SW) optional", swt, opt);
     }
 
     /**
@@ -651,15 +650,18 @@ public class TestdataFactory {
     public DistributionSetType findOrCreateDistributionSetType(final String dsTypeKey, final String dsTypeName,
             final Collection<SoftwareModuleType> mandatory, final Collection<SoftwareModuleType> optional) {
         return distributionSetTypeManagement.findByKey(dsTypeKey)
-                .orElseGet(() -> distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
-                        .key(dsTypeKey).name(dsTypeName).description(randomDescriptionShort()).colour("black")
-                        .optional(optional.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))
-                        .mandatory(mandatory.stream().map(SoftwareModuleType::getId).collect(Collectors.toList()))));
+                .orElseGet(() -> distributionSetTypeManagement.create(
+                        entityFactory.distributionSetType().create()
+                                .key(dsTypeKey)
+                                .name(dsTypeName)
+                                .description(randomDescriptionShort())
+                                .colour("black")
+                                .optional(optional.stream().map(SoftwareModuleType::getId).toList())
+                                .mandatory(mandatory.stream().map(SoftwareModuleType::getId).toList())));
     }
 
     /**
-     * Finds {@link SoftwareModuleType} in repository with given
-     * {@link SoftwareModuleType#getKey()} or creates if it does not exist yet with
+     * Finds {@link SoftwareModuleType} in repository with given {@link SoftwareModuleType#getKey()} or creates if it does not exist yet with
      * {@link SoftwareModuleType#getMaxAssignments()} = 1.
      *
      * @param key {@link SoftwareModuleType#getKey()}
@@ -670,8 +672,7 @@ public class TestdataFactory {
     }
 
     /**
-     * Finds {@link SoftwareModuleType} in repository with given
-     * {@link SoftwareModuleType#getKey()} or creates if it does not exist yet.
+     * Finds {@link SoftwareModuleType} in repository with given {@link SoftwareModuleType#getKey()} or creates if it does not exist yet.
      *
      * @param key {@link SoftwareModuleType#getKey()}
      * @param maxAssignments {@link SoftwareModuleType#getMaxAssignments()}
@@ -680,7 +681,9 @@ public class TestdataFactory {
     public SoftwareModuleType findOrCreateSoftwareModuleType(final String key, final int maxAssignments) {
         return softwareModuleTypeManagement.findByKey(key)
                 .orElseGet(() -> softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create()
-                        .key(key).name(key).description(randomDescriptionShort()).colour("#ffffff")
+                        .key(key)
+                        .name(key)
+                        .description(randomDescriptionShort()).colour("#ffffff")
                         .maxAssignments(maxAssignments)));
     }
 
@@ -693,11 +696,14 @@ public class TestdataFactory {
      * @param modules {@link DistributionSet#getModules()}
      * @return the created {@link DistributionSet}
      */
-    public DistributionSet createDistributionSet(final String name, final String version,
-            final DistributionSetType type, final Collection<SoftwareModule> modules) {
-        return distributionSetManagement.create(entityFactory.distributionSet().create().name(name).version(version)
-                .description(randomDescriptionShort()).type(type)
-                .modules(modules.stream().map(SoftwareModule::getId).collect(Collectors.toList())));
+    public DistributionSet createDistributionSet(
+            final String name, final String version, final DistributionSetType type, final Collection<SoftwareModule> modules) {
+        return distributionSetManagement.create(entityFactory.distributionSet().create()
+                .type(type)
+                .name(name)
+                .version(version)
+                .description(randomDescriptionShort())
+                .modules(modules.stream().map(SoftwareModule::getId).toList()));
     }
 
     /**
@@ -710,13 +716,17 @@ public class TestdataFactory {
      * @param requiredMigrationStep {@link DistributionSet#isRequiredMigrationStep()}
      * @return the created {@link DistributionSet}
      */
-    public DistributionSet generateDistributionSet(final String name, final String version,
-            final DistributionSetType type, final Collection<SoftwareModule> modules,
+    public DistributionSet generateDistributionSet(
+            final String name, final String version, final DistributionSetType type, final Collection<SoftwareModule> modules,
             final boolean requiredMigrationStep) {
-        return entityFactory.distributionSet().create().name(name).version(version)
-                .description(randomDescriptionShort()).type(type)
-                .modules(modules.stream().map(SoftwareModule::getId).collect(Collectors.toList()))
-                .requiredMigrationStep(requiredMigrationStep).build();
+        return entityFactory.distributionSet().create()
+                .type(type)
+                .name(name)
+                .version(version)
+                .description(randomDescriptionShort())
+                .modules(modules.stream().map(SoftwareModule::getId).toList())
+                .requiredMigrationStep(requiredMigrationStep)
+                .build();
     }
 
     /**
@@ -728,8 +738,8 @@ public class TestdataFactory {
      * @param modules {@link DistributionSet#getModules()}
      * @return the created {@link DistributionSet}
      */
-    public DistributionSet generateDistributionSet(final String name, final String version,
-            final DistributionSetType type, final Collection<SoftwareModule> modules) {
+    public DistributionSet generateDistributionSet(
+            final String name, final String version, final DistributionSetType type, final Collection<SoftwareModule> modules) {
         return generateDistributionSet(name, version, type, modules, false);
     }
 
@@ -740,13 +750,11 @@ public class TestdataFactory {
      * @return the generated {@link DistributionSet}
      */
     public DistributionSet generateDistributionSet(final String name) {
-        return generateDistributionSet(name, DEFAULT_VERSION, findOrCreateDefaultTestDsType(), Collections.emptyList(),
-                false);
+        return generateDistributionSet(name, DEFAULT_VERSION, findOrCreateDefaultTestDsType(), Collections.emptyList(), false);
     }
 
     /**
-     * Creates {@link Target}s in repository and with {@link #DEFAULT_CONTROLLER_ID}
-     * as prefix for {@link Target#getControllerId()}.
+     * Creates {@link Target}s in repository and with {@link #DEFAULT_CONTROLLER_ID} as prefix for {@link Target#getControllerId()}.
      *
      * @param number of {@link Target}s to create
      * @return {@link List} of {@link Target} entities
@@ -764,7 +772,6 @@ public class TestdataFactory {
         for (int i = 0; i < number; i++) {
             targets.add(entityFactory.target().create().controllerId(prefix + (offset + i)));
         }
-
         return createTargets(targets);
     }
 
@@ -776,15 +783,11 @@ public class TestdataFactory {
      * @param targetType targetType of targets to create
      * @return {@link List} of {@link Target} entities
      */
-    public List<Target> createTargetsWithType(final int number, final String controllerIdPrefix,
-            final TargetType targetType) {
-
+    public List<Target> createTargetsWithType(final int number, final String controllerIdPrefix, final TargetType targetType) {
         final List<TargetCreate> targets = new ArrayList<>(number);
         for (int i = 0; i < number; i++) {
-            targets.add(entityFactory.target().create().controllerId(controllerIdPrefix + i)
-                    .targetType(targetType.getId()));
+            targets.add(entityFactory.target().create().controllerId(controllerIdPrefix + i).targetType(targetType.getId()));
         }
-
         return createTargets(targets);
     }
 
@@ -795,12 +798,10 @@ public class TestdataFactory {
      * @return {@link List} of {@link Target} entities
      */
     public List<Target> createTargets(final String... targetIds) {
-
         final List<TargetCreate> targets = new ArrayList<>();
         for (final String targetId : targetIds) {
             targets.add(entityFactory.target().create().controllerId(targetId));
         }
-
         return createTargets(targets);
     }
 
@@ -835,14 +836,12 @@ public class TestdataFactory {
      * @param descriptionPrefix prefix used for the description
      * @return set of {@link Target}
      */
-    public List<Target> createTargets(final int numberOfTargets, final String controllerIdPrefix,
-            final String descriptionPrefix) {
-
+    public List<Target> createTargets(final int numberOfTargets, final String controllerIdPrefix, final String descriptionPrefix) {
         final List<TargetCreate> targets = IntStream.range(0, numberOfTargets)
                 .mapToObj(i -> entityFactory.target().create()
                         .controllerId(String.format("%s-%05d", controllerIdPrefix, i))
                         .description(descriptionPrefix + i))
-                .collect(Collectors.toList());
+                .toList();
         return createTargets(targets);
     }
 
@@ -855,14 +854,13 @@ public class TestdataFactory {
      * @param lastTargetQuery last time the target polled
      * @return set of {@link Target}
      */
-    public List<Target> createTargets(final int numberOfTargets, final String controllerIdPrefix,
-            final String descriptionPrefix, final Long lastTargetQuery) {
-
+    public List<Target> createTargets(
+            final int numberOfTargets, final String controllerIdPrefix, final String descriptionPrefix, final Long lastTargetQuery) {
         final List<TargetCreate> targets = IntStream.range(0, numberOfTargets)
                 .mapToObj(i -> entityFactory.target().create()
                         .controllerId(String.format("%s-%05d", controllerIdPrefix, i))
                         .description(descriptionPrefix + i).lastTargetQuery(lastTargetQuery))
-                .collect(Collectors.toList());
+                .toList();
         return createTargets(targets);
     }
 
@@ -875,12 +873,9 @@ public class TestdataFactory {
      */
     public List<TargetTag> createTargetTags(final int number, final String tagPrefix) {
         final List<TagCreate> result = new ArrayList<>(number);
-
         for (int i = 0; i < number; i++) {
-            result.add(entityFactory.tag().create().name(tagPrefix + i).description(tagPrefix + i)
-                    .colour(String.valueOf(i)));
+            result.add(entityFactory.tag().create().name(tagPrefix + i).description(tagPrefix + i).colour(String.valueOf(i)));
         }
-
         return targetTagManagement.create(result);
     }
 
@@ -892,12 +887,9 @@ public class TestdataFactory {
      */
     public List<DistributionSetTag> createDistributionSetTags(final int number) {
         final List<TagCreate> result = new ArrayList<>(number);
-
         for (int i = 0; i < number; i++) {
-            result.add(
-                    entityFactory.tag().create().name("tag" + i).description("tagdesc" + i).colour(String.valueOf(i)));
+            result.add(entityFactory.tag().create().name("tag" + i).description("tagdesc" + i).colour(String.valueOf(i)));
         }
-
         return distributionSetTagManagement.create(result);
     }
 
@@ -909,8 +901,7 @@ public class TestdataFactory {
      * @param message to add
      * @return updated {@link Action}.
      */
-    public List<Action> sendUpdateActionStatusToTargets(final Collection<Target> targets, final Status status,
-            final String message) {
+    public List<Action> sendUpdateActionStatusToTargets(final Collection<Target> targets, final Status status, final String message) {
         return sendUpdateActionStatusToTargets(targets, status, Arrays.asList(message));
     }
 
@@ -922,15 +913,11 @@ public class TestdataFactory {
      * @param msgs to add
      * @return updated {@link Action}.
      */
-    public List<Action> sendUpdateActionStatusToTargets(final Collection<Target> targets, final Status status,
-            final Collection<String> msgs) {
+    public List<Action> sendUpdateActionStatusToTargets(final Collection<Target> targets, final Status status, final Collection<String> msgs) {
         final List<Action> result = new ArrayList<>();
         for (final Target target : targets) {
-            final List<Action> findByTarget = deploymentManagement
-                    .findActionsByTarget(target.getControllerId(), PageRequest.of(0, 400)).getContent();
-            for (final Action action : findByTarget) {
-                result.add(sendUpdateActionStatusToTarget(status, action, msgs));
-            }
+            deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 400)).getContent()
+                    .forEach(action -> result.add(sendUpdateActionStatusToTarget(status, action, msgs)));
         }
         return result;
     }
@@ -939,7 +926,6 @@ public class TestdataFactory {
         createTargets(quotaManagement.getMaxTargetsPerAutoAssignment());
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("testName").query("id==*"));
-
         return targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
                 .updateAutoAssign(targetFilterQuery.getId()).ds(createDistributionSet().getId()));
     }
@@ -998,8 +984,7 @@ public class TestdataFactory {
      * @param errorCondition to switch to next group
      * @param actionType the type of the Rollout
      * @param weight weight of the Rollout
-     * @param confirmationRequired if the confirmation is required (considered with confirmation flow
-     *         active)
+     * @param confirmationRequired if the confirmation is required (considered with confirmation flow active)
      * @param dynamic is dynamic
      * @return created {@link Rollout}
      */
@@ -1039,39 +1024,33 @@ public class TestdataFactory {
     }
 
     /**
-     * Create {@link Rollout} with a new {@link DistributionSet} and
-     * {@link Target}s.
+     * Create {@link Rollout} with a new {@link DistributionSet} and {@link Target}s.
      *
-     * @param prefix for rollouts name, description, {@link Target#getControllerId()}
-     *         filter
+     * @param prefix for rollouts name, description, {@link Target#getControllerId()} filter
      * @return created {@link Rollout}
      */
     public Rollout createRollout(final String prefix) {
-        createTargets(quotaManagement.getMaxTargetsPerRolloutGroup() * quotaManagement.getMaxRolloutGroupsPerRollout(),
-                prefix);
+        createTargets(quotaManagement.getMaxTargetsPerRolloutGroup() * quotaManagement.getMaxRolloutGroupsPerRollout(), prefix);
         return createRolloutByVariables(prefix, prefix + SPACE_AND_DESCRIPTION,
                 quotaManagement.getMaxRolloutGroupsPerRollout(), "controllerId==" + prefix + "*",
                 createDistributionSet(prefix), "50", "5");
     }
 
     /**
-     * Create {@link Rollout} with a new {@link DistributionSet} and
-     * {@link Target}s.
+     * Create {@link Rollout} with a new {@link DistributionSet} and {@link Target}s.
      *
      * @return created {@link Rollout}
      */
     public Rollout createRollout() {
         final String prefix = randomString(5);
-        createTargets(quotaManagement.getMaxTargetsPerRolloutGroup() * quotaManagement.getMaxRolloutGroupsPerRollout(),
-                prefix);
+        createTargets(quotaManagement.getMaxTargetsPerRolloutGroup() * quotaManagement.getMaxRolloutGroupsPerRollout(), prefix);
         return createRolloutByVariables(prefix, prefix + SPACE_AND_DESCRIPTION,
                 quotaManagement.getMaxRolloutGroupsPerRollout(), "controllerId==" + prefix + "*",
                 createDistributionSet(prefix), "50", "5");
     }
 
     /**
-     * Create {@link Rollout} with a new {@link DistributionSet} and
-     * {@link Target}s.
+     * Create {@link Rollout} with a new {@link DistributionSet} and {@link Target}s.
      *
      * @return created {@link Rollout}
      */
@@ -1089,11 +1068,11 @@ public class TestdataFactory {
      * @param errorCondition error condition
      * @return the created {@link Rollout}
      */
-    public Rollout createAndStartRollout(final int amountTargetsForRollout, final int amountOtherTargets,
+    public Rollout createAndStartRollout(
+            final int amountTargetsForRollout, final int amountOtherTargets,
             final int amountGroups, final String successCondition, final String errorCondition) {
-
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(
+                amountTargetsForRollout, amountOtherTargets, amountGroups, successCondition, errorCondition);
         return startAndReloadRollout(createdRollout);
     }
 
@@ -1107,11 +1086,12 @@ public class TestdataFactory {
      * @param errorCondition error condition
      * @return the created {@link Rollout}
      */
-    public Rollout createSimpleTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
+    public Rollout createSimpleTestRolloutWithTargetsAndDistributionSet(
+            final int amountTargetsForRollout,
             final int amountOtherTargets, final int amountOfGroups, final String successCondition,
             final String errorCondition) {
-        return createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                amountOfGroups, successCondition, errorCondition, ActionType.FORCED, null);
+        return createSimpleTestRolloutWithTargetsAndDistributionSet(
+                amountTargetsForRollout, amountOtherTargets, amountOfGroups, successCondition, errorCondition, ActionType.FORCED, null);
     }
 
     /**
@@ -1139,11 +1119,9 @@ public class TestdataFactory {
     }
 
     /**
-     * Create the soft deleted {@link Rollout} with a new {@link DistributionSet}
-     * and {@link Target}s.
+     * Create the soft deleted {@link Rollout} with a new {@link DistributionSet} and {@link Target}s.
      *
-     * @param prefix for rollouts name, description, {@link Target#getControllerId()}
-     *         filter
+     * @param prefix for rollouts name, description, {@link Target#getControllerId()} filter
      * @return created {@link Rollout}
      */
     public Rollout createSoftDeletedRollout(final String prefix) {
@@ -1156,8 +1134,7 @@ public class TestdataFactory {
     }
 
     /**
-     * Finds {@link TargetType} in repository with given
-     * {@link TargetType#getName()} or creates if it does not exist yet. No ds types
+     * Finds {@link TargetType} in repository with given {@link TargetType#getName()} or creates if it does not exist yet. No ds types
      * are assigned on creation.
      *
      * @param targetTypeName {@link TargetType#getName()}
@@ -1171,8 +1148,7 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates {@link TargetType} in repository with given
-     * {@link TargetType#getName()}. Compatible distribution set types are assigned
+     * Creates {@link TargetType} in repository with given {@link TargetType#getName()}. Compatible distribution set types are assigned
      * on creation
      *
      * @param targetTypeName {@link TargetType#getName()}
@@ -1185,8 +1161,7 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates {@link TargetType} in repository with given
-     * {@link TargetType#getName()}. No ds types are assigned on creation.
+     * Creates {@link TargetType} in repository with given {@link TargetType#getName()}. No ds types are assigned on creation.
      *
      * @param targetTypePrefix {@link TargetType#getName()}
      * @return persisted {@link TargetType}
@@ -1202,15 +1177,15 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates a distribution set and directly invalidates it. No actions will be
-     * canceled and no rollouts will be stopped with this invalidation.
+     * Creates a distribution set and directly invalidates it. No actions will be canceled and no rollouts will be stopped with this
+     * invalidation.
      *
      * @return created invalidated {@link DistributionSet}
      */
     public DistributionSet createAndInvalidateDistributionSet() {
         final DistributionSet distributionSet = createDistributionSet();
         distributionSetInvalidationManagement.invalidateDistributionSet(
-                new DistributionSetInvalidation(Arrays.asList(distributionSet.getId()), CancelationType.NONE, false));
+                new DistributionSetInvalidation(List.of(distributionSet.getId()), CancelationType.NONE, false));
         return distributionSet;
     }
 
@@ -1239,7 +1214,6 @@ public class TestdataFactory {
                 .key(VISIBLE_SM_MD_KEY).value(VISIBLE_SM_MD_VALUE).targetVisible(true));
         softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
                 .key(INVISIBLE_SM_MD_KEY).value(INVISIBLE_SM_MD_VALUE).targetVisible(false));
-
     }
 
     private void assertTargetProperlyCreated(final Target target) {
@@ -1252,8 +1226,7 @@ public class TestdataFactory {
     }
 
     /**
-     * Builds {@link Target} objects with given prefix for
-     * {@link Target#getControllerId()} followed by a number suffix.
+     * Builds {@link Target} objects with given prefix for {@link Target#getControllerId()} followed by a number suffix.
      *
      * @param start value for the controllerId suffix
      * @param numberOfTargets of {@link Target}s to generate
@@ -1265,36 +1238,27 @@ public class TestdataFactory {
         for (int i = start; i < start + numberOfTargets; i++) {
             targets.add(entityFactory.target().create().controllerId(controllerIdPrefix + i).build());
         }
-
         return targets;
     }
 
     private List<Target> createTargets(final Collection<TargetCreate> targetCreates) {
-        // init new instance of array list since the TargetManagement#create
-        // will
-        // provide a unmodifiable list
-        final List<Target> createdTargets = targetManagement.create(targetCreates);
-        return new ArrayList<>(createdTargets);
+        // init new instance of array list since the TargetManagement#create will provide a unmodifiable list
+        return new ArrayList<>(targetManagement.create(targetCreates));
     }
 
-    private Action sendUpdateActionStatusToTarget(final Status status, final Action updActA,
-            final Collection<String> msgs) {
-
+    private Action sendUpdateActionStatusToTarget(final Status status, final Action updActA, final Collection<String> msgs) {
         return controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(updActA.getId()).status(status).messages(msgs));
     }
 
     private Rollout startAndReloadRollout(final Rollout rollout) {
         rolloutManagement.start(rollout.getId());
-
         // Run here, because scheduler is disabled during tests
         rolloutHandler.handleAll();
-
         return reloadRollout(rollout);
     }
 
     private Rollout reloadRollout(final Rollout rollout) {
         return rolloutManagement.get(rollout.getId()).orElseThrow(NoSuchElementException::new);
     }
-
 }

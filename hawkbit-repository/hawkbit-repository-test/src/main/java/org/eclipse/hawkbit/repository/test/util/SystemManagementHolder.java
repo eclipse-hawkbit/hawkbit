@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository.test.util;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,13 +20,12 @@ import org.springframework.beans.factory.annotation.Autowired;
  * accessible to beans which are not managed by spring, e.g. JPA entities.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
 public final class SystemManagementHolder {
 
     private static final SystemManagementHolder INSTANCE = new SystemManagementHolder();
 
     @Getter
-    @Setter
-    @Autowired
     private SystemManagement systemManagement;
 
     /**
@@ -35,5 +33,10 @@ public final class SystemManagementHolder {
      */
     public static SystemManagementHolder getInstance() {
         return INSTANCE;
+    }
+
+    @Autowired // spring setter injection
+    public void setSystemManagement(final SystemManagement systemManagement) {
+        this.systemManagement = systemManagement;
     }
 }

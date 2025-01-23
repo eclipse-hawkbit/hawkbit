@@ -15,30 +15,38 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.exception.ArtifactEncryptionUnsupportedException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Service responsible for encryption operations.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("java:S6548") // singleton holder ensures static access to spring resources in some places
 public final class ArtifactEncryptionService {
 
     private static final ArtifactEncryptionService SINGLETON = new ArtifactEncryptionService();
 
-    @Autowired(required = false)
     private ArtifactEncryption artifactEncryption;
-
-    @Autowired(required = false)
     private ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore;
-
-    private ArtifactEncryptionService() {
-    }
 
     /**
      * @return the artifact encryption service singleton instance
      */
     public static ArtifactEncryptionService getInstance() {
         return SINGLETON;
+    }
+
+    @Autowired(required = false) // spring setter injection
+    public void setArtifactEncryption(final ArtifactEncryption artifactEncryption) {
+        this.artifactEncryption = artifactEncryption;
+    }
+
+    @Autowired(required = false) // spring setter injection
+    public void setArtifactEncryptionSecretsStore(final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore) {
+        this.artifactEncryptionSecretsStore = artifactEncryptionSecretsStore;
     }
 
     /**
@@ -51,8 +59,7 @@ public final class ArtifactEncryptionService {
     }
 
     /**
-     * Generates encryption secrets and saves them in secret store by software
-     * module id reference.
+     * Generates encryption secrets and saves them in secret store by software module id reference.
      *
      * @param smId software module id
      */
@@ -116,7 +123,6 @@ public final class ArtifactEncryptionService {
                     requiredSecretsKey);
             requiredSecretsValue.ifPresent(secretValue -> requiredSecrets.put(requiredSecretsKey, secretValue));
         }
-
         return requiredSecrets;
     }
 }

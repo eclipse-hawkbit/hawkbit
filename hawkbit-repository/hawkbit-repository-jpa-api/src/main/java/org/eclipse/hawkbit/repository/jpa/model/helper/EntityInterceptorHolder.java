@@ -12,23 +12,22 @@ package org.eclipse.hawkbit.repository.jpa.model.helper;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.jpa.EntityInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * A singleton bean which holds the {@link EntityInterceptor} to have all
- * interceptors in spring beans.
+ * A singleton bean which holds the {@link EntityInterceptor} to have all interceptors in spring beans.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
 public final class EntityInterceptorHolder {
 
     private static final EntityInterceptorHolder SINGLETON = new EntityInterceptorHolder();
 
     @Autowired(required = false)
     private final List<EntityInterceptor> entityInterceptors = new ArrayList<>();
-
-    private EntityInterceptorHolder() {
-
-    }
 
     /**
      * @return the entity intreceptor holder singleton instance
