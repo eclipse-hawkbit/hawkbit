@@ -168,16 +168,17 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     void verifyInvalidateIncompleteDistributionSetThrowsException() {
         final DistributionSet distributionSet = testdataFactory.createIncompleteDistributionSet();
 
+        final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
+                List.of(distributionSet.getId()), CancelationType.SOFT, true);
         assertThatExceptionOfType(IncompleteDistributionSetException.class)
                 .as("Incomplete distributionSet should throw an exception")
-                .isThrownBy(() -> distributionSetInvalidationManagement.invalidateDistributionSet(
-                        new DistributionSetInvalidation(Collections.singletonList(distributionSet.getId()),
-                                CancelationType.SOFT, true)));
+                .isThrownBy(() -> distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation));
     }
 
     @Test
     @Description("Verify that invalidating an invalidated distribution set don't throws an exception" +
             " -> should be able to cancel actions again (if previous time there was a problem")
+    @SuppressWarnings("java:S2699") // test that no exception is thrown
     void verifyInvalidateInvalidatedDistributionSetDontThrowsException() {
         final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
         distributionSetInvalidationManagement.invalidateDistributionSet(
@@ -207,12 +208,11 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         final InvalidationTestData invalidationTestData = systemSecurityContext.runAsSystem(
                 () -> createInvalidationTestData("verifyInvalidateWithUpdateRepoAndUpdateTargetAuthority"));
 
+        final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
+                List.of(invalidationTestData.getDistributionSet().getId()), CancelationType.SOFT, true);
         assertThatExceptionOfType(InsufficientPermissionException.class)
                 .as("Insufficient permission exception expected")
-                .isThrownBy(() -> distributionSetInvalidationManagement
-                        .invalidateDistributionSet(new DistributionSetInvalidation(
-                                Collections.singletonList(invalidationTestData.getDistributionSet().getId()),
-                                CancelationType.SOFT, true)));
+                .isThrownBy(() -> distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation));
 
         distributionSetInvalidationManagement.invalidateDistributionSet(new DistributionSetInvalidation(
                 Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.NONE,
@@ -245,6 +245,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
 
     private void assertRolloutGroupsAreFinished(final Rollout rollout) {
         assertThat(rolloutGroupRepository.findByRolloutId(rollout.getId(), PAGE))
+                .isNotEmpty()
                 .allMatch(rolloutGroup -> rolloutGroup.getStatus().equals(RolloutGroupStatus.FINISHED));
     }
 
