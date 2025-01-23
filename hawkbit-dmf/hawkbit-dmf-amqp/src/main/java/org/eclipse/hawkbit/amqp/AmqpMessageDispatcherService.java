@@ -114,6 +114,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @param distributionSetManagement to retrieve modules
      * @param tenantConfigurationManagement to access tenant configuration
      */
+    @SuppressWarnings("java:S107")
     protected AmqpMessageDispatcherService(
             final RabbitTemplate rabbitTemplate,
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,

@@ -64,28 +64,34 @@ public class DeprecatedMgmtResource implements DeprecatedMgmtRestApi {
     // logger that logs usage of deprecated API
     private static final Logger DEPRECATED_USAGE_LOGGER = LoggerFactory.getLogger("DEPRECATED_USAGE");
 
-    @Autowired
-    private DistributionSetRepository distributionSetRepository;
-    @Autowired
-    private DistributionSetTagManagement distributionSetTagManagement;
-    @Autowired
-    private DistributionSetManagement distributionSetManagement;
-    @Autowired
-    private TargetRepository targetRepository;
-    @Autowired
-    private TargetTagRepository targetTagRepository;
-    @Autowired
-    private TargetManagement targetManagement;
-    @Autowired
-    private TargetTagManagement targetTagManagement;
-    @Autowired
-    private PlatformTransactionManager txManager;
-    @Autowired
-    private EntityManager entityManager;
-
+    private final DistributionSetRepository distributionSetRepository;
+    private final DistributionSetTagManagement distributionSetTagManagement;
+    private final DistributionSetManagement distributionSetManagement;
+    private final TargetRepository targetRepository;
+    private final TargetTagRepository targetTagRepository;
+    private final TargetManagement targetManagement;
+    private final TargetTagManagement targetTagManagement;
+    private final PlatformTransactionManager txManager;
+    private final EntityManager entityManager;
     private final TenantConfigHelper tenantConfigHelper;
 
-    DeprecatedMgmtResource(final SystemSecurityContext securityContext, final TenantConfigurationManagement configurationManagement) {
+    @SuppressWarnings("squid:S107")
+    DeprecatedMgmtResource(
+            final DistributionSetRepository distributionSetRepository, final DistributionSetTagManagement distributionSetTagManagement,
+            final DistributionSetManagement distributionSetManagement,
+            final TargetRepository targetRepository, final TargetTagRepository targetTagRepository, final TargetManagement targetManagement,
+            final TargetTagManagement targetTagManagement,
+            final PlatformTransactionManager txManager, final EntityManager entityManager,
+            final SystemSecurityContext securityContext, final TenantConfigurationManagement configurationManagement) {
+        this.distributionSetRepository = distributionSetRepository;
+        this.distributionSetTagManagement = distributionSetTagManagement;
+        this.distributionSetManagement = distributionSetManagement;
+        this.targetRepository = targetRepository;
+        this.targetTagRepository = targetTagRepository;
+        this.targetManagement = targetManagement;
+        this.targetTagManagement = targetTagManagement;
+        this.txManager = txManager;
+        this.entityManager = entityManager;
         tenantConfigHelper = TenantConfigHelper.usingContext(securityContext, configurationManagement);
     }
 
@@ -180,12 +186,12 @@ public class DeprecatedMgmtResource implements DeprecatedMgmtRestApi {
                         result = new DistributionSetTagAssignmentResult(ids.size() - toBeChangedDSs.size(),
                                 Collections.emptyList(),
                                 Collections.unmodifiableList(
-                                        toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
+                                        toBeChangedDSs.stream().map(distributionSetRepository::save).toList()),
                                 distributionSetTag);
                     } else {
                         result = new DistributionSetTagAssignmentResult(ids.size() - toBeChangedDSs.size(),
                                 Collections.unmodifiableList(
-                                        toBeChangedDSs.stream().map(distributionSetRepository::save).collect(Collectors.toList())),
+                                        toBeChangedDSs.stream().map(distributionSetRepository::save).toList()),
                                 Collections.emptyList(), distributionSetTag);
                     }
                     return result;
@@ -247,7 +253,7 @@ public class DeprecatedMgmtResource implements DeprecatedMgmtRestApi {
     private static List<Long> findDistributionSetIds(
             final List<MgmtAssignedDistributionSetRequestBody> assignedDistributionSetRequestBodies) {
         return assignedDistributionSetRequestBodies.stream()
-                .map(MgmtAssignedDistributionSetRequestBody::getDistributionSetId).collect(Collectors.toList());
+                .map(MgmtAssignedDistributionSetRequestBody::getDistributionSetId).toList();
     }
 
     private DistributionSetTag findDistributionTagById(final Long distributionsetTagId) {
@@ -257,7 +263,6 @@ public class DeprecatedMgmtResource implements DeprecatedMgmtRestApi {
 
     private List<String> findTargetControllerIds(
             final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
-        return assignedTargetRequestBodies.stream().map(MgmtAssignedTargetRequestBody::getControllerId)
-                .collect(Collectors.toList());
+        return assignedTargetRequestBodies.stream().map(MgmtAssignedTargetRequestBody::getControllerId).toList();
     }
 }

@@ -67,11 +67,11 @@ public class ArtifactUpload {
      * @param filename of the artifact
      * @param providedSha1Sum optional sha1 checksum to check the new file against
      * @param providedMd5Sum optional md5 checksum to check the new file against
-     * @param overrideExisting to <code>true</code> if the artifact binary can be overridden
-     *         if it already exists
+     * @param overrideExisting to <code>true</code> if the artifact binary can be overridden if it already exists
      * @param contentType the contentType of the file
      * @param filesize the size of the file in bytes.
      */
+    @SuppressWarnings("java:S107")
     public ArtifactUpload(final InputStream inputStream, final long moduleId, final String filename,
             final String providedMd5Sum, final String providedSha1Sum, final String providedSha256Sum,
             final boolean overrideExisting, final String contentType, final long filesize) {

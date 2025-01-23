@@ -102,28 +102,42 @@ public class DdiRootController implements DdiRootControllerRestApi {
      * File suffix for MDH hash download (see Linux md5sum).
      */
     private static final String ARTIFACT_MD5_DWNL_SUFFIX = ".MD5SUM";
-    @Autowired
-    private ConfirmationManagement confirmationManagement;
-    @Autowired
-    private ApplicationEventPublisher eventPublisher;
-    @Autowired(required = false)
+
+    private final ControllerManagement controllerManagement;
+    private final ConfirmationManagement confirmationManagement;
+    private final ArtifactManagement artifactManagement;
+    private final ArtifactUrlHandler artifactUrlHandler;
+    private final SystemManagement systemManagement;
+    private final ApplicationEventPublisher eventPublisher;
+    private final BusProperties bus;
+    private final HawkbitSecurityProperties securityProperties;
+    private final TenantAware tenantAware;
+    private final EntityFactory entityFactory;
     private ServiceMatcher serviceMatcher;
-    @Autowired
-    private BusProperties bus;
-    @Autowired
-    private ControllerManagement controllerManagement;
-    @Autowired
-    private ArtifactManagement artifactManagement;
-    @Autowired
-    private HawkbitSecurityProperties securityProperties;
-    @Autowired
-    private TenantAware tenantAware;
-    @Autowired
-    private SystemManagement systemManagement;
-    @Autowired
-    private ArtifactUrlHandler artifactUrlHandler;
-    @Autowired
-    private EntityFactory entityFactory;
+
+    @SuppressWarnings("java:S107")
+    public DdiRootController(
+            final ControllerManagement controllerManagement, final ConfirmationManagement confirmationManagement,
+            final ArtifactManagement artifactManagement, final ArtifactUrlHandler artifactUrlHandler,
+            final SystemManagement systemManagement,
+            final ApplicationEventPublisher eventPublisher, final BusProperties bus,
+            final HawkbitSecurityProperties securityProperties, final TenantAware tenantAware, final EntityFactory entityFactory) {
+        this.controllerManagement = controllerManagement;
+        this.confirmationManagement = confirmationManagement;
+        this.artifactManagement = artifactManagement;
+        this.artifactUrlHandler = artifactUrlHandler;
+        this.systemManagement = systemManagement;
+        this.eventPublisher = eventPublisher;
+        this.bus = bus;
+        this.securityProperties = securityProperties;
+        this.tenantAware = tenantAware;
+        this.entityFactory = entityFactory;
+    }
+
+    @Autowired(required = false)
+    public void setServiceMatcher(final ServiceMatcher serviceMatcher) {
+        this.serviceMatcher = serviceMatcher;
+    }
 
     @Override
     public ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(
