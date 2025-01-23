@@ -19,7 +19,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +37,10 @@ import org.springframework.lang.Nullable;
 
 @Slf4j
 public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity> implements BaseEntityRepository<T> {
+
+    private static final String SPEC_MUST_NOT_BE_NULL = "Specification must not be null";
+    private static final String APPENDED_ACCESS_RULES_SPEC_OF_NON_NULL_SPEC_MUST_NOT_BE_NULL =
+            "Appended access rules specification of non-null specification must not be null";
 
     private final BaseEntityRepository<T> repository;
     private final AccessController<T> accessController;
@@ -147,7 +150,12 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     @Override
     @NonNull
     public Optional<T> findOne(final Specification<T> spec) {
-        return repository.findOne(accessController.appendAccessRules(AccessController.Operation.READ, spec));
+        Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL);
+        return repository.findOne(
+                // spec shall be non-null and the result of appending rules shall be non-null
+                Objects.requireNonNull(
+                        accessController.appendAccessRules(AccessController.Operation.READ, spec),
+                        APPENDED_ACCESS_RULES_SPEC_OF_NON_NULL_SPEC_MUST_NOT_BE_NULL));
     }
 
     @Override
@@ -186,7 +194,13 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
 
     @Override
     public <S extends T, R> R findBy(final Specification<T> spec, final Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
-        return repository.findBy(accessController.appendAccessRules(AccessController.Operation.READ, spec), queryFunction);
+        Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL);
+        return repository.findBy(
+                // spec shall be non-null and the result of appending rules shall be non-null
+                Objects.requireNonNull(
+                        accessController.appendAccessRules(AccessController.Operation.READ, spec),
+                        APPENDED_ACCESS_RULES_SPEC_OF_NON_NULL_SPEC_MUST_NOT_BE_NULL),
+                queryFunction);
     }
 
     @Override
@@ -232,11 +246,16 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     }
 
     @NonNull
-    public Optional<T> findOne(@Nullable AccessController.Operation operation, @Nullable Specification<T> spec) {
+    public Optional<T> findOne(@Nullable AccessController.Operation operation, @NonNull Specification<T> spec) {
+        Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL);
         if (operation == null) {
             return repository.findOne(spec);
         } else {
-            return repository.findOne(accessController.appendAccessRules(operation, spec));
+            return repository.findOne(
+                    // spec shall be non-null and the result of appending rules shall be non-null
+                    Objects.requireNonNull(
+                            accessController.appendAccessRules(operation, spec),
+                            APPENDED_ACCESS_RULES_SPEC_OF_NON_NULL_SPEC_MUST_NOT_BE_NULL));
         }
     }
 

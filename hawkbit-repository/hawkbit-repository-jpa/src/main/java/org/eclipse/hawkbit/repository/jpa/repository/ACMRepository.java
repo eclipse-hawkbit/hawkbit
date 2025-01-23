@@ -58,7 +58,7 @@ public interface ACMRepository<T> {
      * @return matching entity
      */
     @NonNull
-    Optional<T> findOne(@Nullable AccessController.Operation operation, @Nullable Specification<T> spec);
+    Optional<T> findOne(@Nullable AccessController.Operation operation, @NonNull Specification<T> spec);
 
     /**
      * Returns all entries that match specification and the operation is allowed for.

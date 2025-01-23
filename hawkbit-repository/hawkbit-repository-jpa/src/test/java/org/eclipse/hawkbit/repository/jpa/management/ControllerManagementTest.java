@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
 import jakarta.validation.ConstraintViolationException;
@@ -105,8 +106,9 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final int allowedAttributes = quotaManagement.getMaxAttributeEntriesPerTarget();
         testdataFactory.createTarget(controllerId);
 
+        final WithUser withController = SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS);
         assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> SecurityContextSwitch
-                .runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+                .runAs(withController, () -> {
                     writeAttributes(controllerId, allowedAttributes + 1, "key", "value");
                     return null;
                 })).withMessageContaining("" + allowedAttributes);
@@ -116,7 +118,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // Write allowed number of attributes twice with same key should result
         // in update but work
-        SecurityContextSwitch.runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+        SecurityContextSwitch.runAs(withController, () -> {
             writeAttributes(controllerId, allowedAttributes, "key", "value1");
             writeAttributes(controllerId, allowedAttributes, "key", "value2");
             return null;
@@ -125,7 +127,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // Now rite one more
         assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> SecurityContextSwitch
-                .runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+                .runAs(withController, () -> {
                     writeAttributes(controllerId, 1, "additional", "value1");
                     return null;
                 })).withMessageContaining("" + allowedAttributes);
@@ -139,25 +141,28 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final String controllerId = "targetId123";
         testdataFactory.createTarget(controllerId);
 
+        final Map<String, String> attributesLV =
+                Collections.singletonMap(TargetTestData.ATTRIBUTE_KEY_TOO_LONG, TargetTestData.ATTRIBUTE_VALUE_VALID);
         assertThatExceptionOfType(InvalidTargetAttributeException.class)
                 .as("Attribute with key too long should not be created")
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(TargetTestData.ATTRIBUTE_KEY_TOO_LONG, TargetTestData.ATTRIBUTE_VALUE_VALID), null));
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId, attributesLV, null));
 
+        final Map<String, String> attributesLL =
+                Collections.singletonMap(TargetTestData.ATTRIBUTE_KEY_TOO_LONG, TargetTestData.ATTRIBUTE_VALUE_TOO_LONG);
         assertThatExceptionOfType(InvalidTargetAttributeException.class)
                 .as("Attribute with key too long and value too long should not be created")
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(TargetTestData.ATTRIBUTE_KEY_TOO_LONG, TargetTestData.ATTRIBUTE_VALUE_TOO_LONG), null));
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId, attributesLL, null));
 
+        final Map<String, String> attributesVL =
+                Collections.singletonMap(TargetTestData.ATTRIBUTE_KEY_VALID, TargetTestData.ATTRIBUTE_VALUE_TOO_LONG);
         assertThatExceptionOfType(InvalidTargetAttributeException.class)
                 .as("Attribute with value too long should not be created")
-                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId,
-                        Collections.singletonMap(TargetTestData.ATTRIBUTE_KEY_VALID, TargetTestData.ATTRIBUTE_VALUE_TOO_LONG), null));
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId, attributesVL, null));
 
+        final Map<String, String> attributesNV = Collections.singletonMap(null, TargetTestData.ATTRIBUTE_VALUE_VALID);
         assertThatExceptionOfType(InvalidTargetAttributeException.class)
-                .as("Attribute with key NULL should not be created").isThrownBy(() -> controllerManagement
-                        .updateControllerAttributes(controllerId,
-                                Collections.singletonMap(null, TargetTestData.ATTRIBUTE_VALUE_VALID), null));
+                .as("Attribute with key NULL should not be created")
+                .isThrownBy(() -> controllerManagement.updateControllerAttributes(controllerId, attributesNV, null));
     }
 
     @Test
@@ -222,7 +227,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2) })
     void addActionStatusUpdatesUntilQuotaIsExceeded() {
-
         // any distribution set assignment causes 1 status entity to be created
         final int maxStatusEntries = quotaManagement.getMaxStatusEntriesPerAction() - 1;
 
@@ -230,24 +234,23 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId1 = getFirstAssignedActionId(assignDistributionSet(
                 testdataFactory.createDistributionSet("ds1"), testdataFactory.createTargets(1, "t1")));
         assertThat(actionId1).isNotNull();
+        final ActionStatusCreate status = entityFactory.actionStatus().create(actionId1).status(Status.WARNING);
         for (int i = 0; i < maxStatusEntries; ++i) {
-            controllerManagement.addInformationalActionStatus(entityFactory.actionStatus().create(actionId1)
-                    .status(Status.WARNING).message("Msg " + i).occurredAt(System.currentTimeMillis()));
+            controllerManagement.addInformationalActionStatus(status.message("Msg " + i).occurredAt(System.currentTimeMillis()));
         }
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> controllerManagement
-                .addInformationalActionStatus(entityFactory.actionStatus().create(actionId1).status(Status.WARNING)));
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(status));
 
         // test for update status (and mixed case)
         final Long actionId2 = getFirstAssignedActionId(assignDistributionSet(
                 testdataFactory.createDistributionSet("ds2"), testdataFactory.createTargets(1, "t2")));
         assertThat(actionId2).isNotEqualTo(actionId1);
+        final ActionStatusCreate statusWarning = entityFactory.actionStatus().create(actionId2).status(Status.WARNING);
         for (int i = 0; i < maxStatusEntries; ++i) {
-            controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId2)
-                    .status(Status.WARNING).message("Msg " + i).occurredAt(System.currentTimeMillis()));
+            controllerManagement.addUpdateActionStatus(statusWarning.message("Msg " + i).occurredAt(System.currentTimeMillis()));
         }
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> controllerManagement
-                .addInformationalActionStatus(entityFactory.actionStatus().create(actionId2).status(Status.WARNING)));
-
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(statusWarning));
     }
 
     @Test
@@ -262,7 +265,6 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
     void createActionStatusWithTooManyMessages() {
-
         final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
 
         final Long actionId = getFirstAssignedActionId(
@@ -276,10 +278,9 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING))).isNotNull();
 
         messages.add("msg");
+        final ActionStatusCreate statusToManyMessages = entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING);
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(
-                        entityFactory.actionStatus().create(actionId).messages(messages).status(Status.WARNING)));
-
+                .isThrownBy(() -> controllerManagement.addInformationalActionStatus(statusToManyMessages));
     }
 
     @Test
@@ -410,16 +411,17 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         simulateIntermediateStatusOnUpdate(actionId);
 
+        final ActionStatusCreate statusSingleMessage = entityFactory.actionStatus().create(actionId)
+                .status(Status.FINISHED).message(INVALID_TEXT_HTML);
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set invalid description text should not be created")
-                .isThrownBy(() -> controllerManagement.addUpdateActionStatus(entityFactory.actionStatus()
-                        .create(actionId).status(Action.Status.FINISHED).message(INVALID_TEXT_HTML)));
+                .isThrownBy(() -> controllerManagement.addUpdateActionStatus(statusSingleMessage));
 
+        final ActionStatusCreate statusMulipleMessages = entityFactory.actionStatus().create(actionId)
+                .status(Status.FINISHED).messages(Arrays.asList("this is valid.", INVALID_TEXT_HTML));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set invalid description text should not be created")
-                .isThrownBy(() -> controllerManagement.addUpdateActionStatus(
-                        entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED)
-                                .messages(Arrays.asList("this is valid.", INVALID_TEXT_HTML))));
+                .isThrownBy(() -> controllerManagement.addUpdateActionStatus(statusMulipleMessages));
 
         assertThat(actionStatusRepository.count()).isEqualTo(6);
         assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(6);
@@ -467,13 +469,12 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     void cancellationFeedbackRejectedIfActionIsNotInCanceling() {
         final Long actionId = createTargetAndAssignDs();
 
+        final ActionStatusCreate status = entityFactory.actionStatus().create(actionId).status(Status.FINISHED);
         assertThatExceptionOfType(CancelActionNotAllowedException.class)
                 .as("Expected " + CancelActionNotAllowedException.class.getName())
-                .isThrownBy(() -> controllerManagement.addCancelActionStatus(
-                        entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED)));
+                .isThrownBy(() -> controllerManagement.addCancelActionStatus(status));
 
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
-                Action.Status.RUNNING, true);
+        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING, Action.Status.RUNNING, true);
 
         assertThat(actionStatusRepository.count()).isEqualTo(1);
         assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(1);
@@ -797,10 +798,11 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 .as("register target with empty controllerId should fail")
                 .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist(" ", LOCALHOST));
 
+        final String controllerId = randomString(Target.CONTROLLER_ID_MAX_SIZE + 1);
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("register target with too long controllerId should fail")
                 .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist(
-                        randomString(Target.CONTROLLER_ID_MAX_SIZE + 1), LOCALHOST));
+                        controllerId, LOCALHOST));
     }
 
     @Test
@@ -936,9 +938,9 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verify that controller registration does not result in a TargetPollEvent if feature is disabled")
-    @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 0) })
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
+    @SuppressWarnings("java:S2699")
+        // java:S2699 - test tests the fired events, no need for assert
     void targetPollEventNotSendIfDisabled() {
         repositoryProperties.setPublishTargetPollEvent(false);
         controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
@@ -968,16 +970,16 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR, Action.Status.ERROR, Action.Status.ERROR, false);
 
         // try with disabled late feedback
-        repositoryProperties.setRejectActionStatusForClosedAction(true);
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+        withRejectActionStatusForClosedAction(true, () ->
+                controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED)));
 
         // test
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR, Action.Status.ERROR, Action.Status.ERROR, false);
 
         // try with enabled late feedback - should not make a difference as it
         // only allows intermediate feedback and not multiple close
-        repositoryProperties.setRejectActionStatusForClosedAction(false);
-        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+        withRejectActionStatusForClosedAction(false,
+                () -> controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED)));
 
         // test
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.ERROR, Action.Status.ERROR, Action.Status.ERROR, false);
@@ -1002,28 +1004,21 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     void tryToFinishUpdateProcessMoreThanOnce() {
         final Long actionId = prepareFinishedUpdate().getId();
 
-        // try with disabled late feedback
-        repositoryProperties.setRejectActionStatusForClosedAction(true);
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+        withRejectActionStatusForClosedAction(true,
+                () -> controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED)));
 
         // test
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC, Action.Status.FINISHED,
                 Action.Status.FINISHED, false);
 
-        // try with enabled late feedback - should not make a difference as it
-        // only allows intermediate feedback and not multiple close
-        repositoryProperties.setRejectActionStatusForClosedAction(false);
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED));
+        withRejectActionStatusForClosedAction(false,
+                () -> controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.FINISHED)));
 
         // test
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC, Action.Status.FINISHED,
-                Action.Status.FINISHED, false);
-
+        assertActionStatus(
+                actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.IN_SYNC, Action.Status.FINISHED, Action.Status.FINISHED, false);
         assertThat(actionStatusRepository.count()).isEqualTo(3);
         assertThat(controllerManagement.findActionStatusByAction(PAGE, actionId).getNumberOfElements()).isEqualTo(3);
-
     }
 
     @Test
@@ -1041,17 +1036,14 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1) })
     void sendUpdatesForFinishUpdateProcessDroppedIfDisabled() {
-        repositoryProperties.setRejectActionStatusForClosedAction(true);
-
         final Action action = prepareFinishedUpdate();
-
-        controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING));
+        withRejectActionStatusForClosedAction(true,
+                () -> controllerManagement.addUpdateActionStatus(
+                        entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING)));
 
         // nothing changed as "feedback after close" is disabled
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.IN_SYNC);
-
         assertThat(actionRepository.findById(action.getId()))
                 .hasValueSatisfying(a -> assertThat(a.getStatus()).isEqualTo(Status.FINISHED));
         assertThat(actionStatusRepository.count()).isEqualTo(3);
@@ -1074,20 +1066,16 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1) })
     void sendUpdatesForFinishUpdateProcessAcceptedIfEnabled() {
-        repositoryProperties.setRejectActionStatusForClosedAction(false);
-
         Action action = prepareFinishedUpdate();
-        action = controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING));
+        withRejectActionStatusForClosedAction(false,
+                () -> controllerManagement.addUpdateActionStatus(
+                        entityFactory.actionStatus().create(action.getId()).status(Action.Status.RUNNING)));
 
         // nothing changed as "feedback after close" is disabled
-        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
-                .isEqualTo(TargetUpdateStatus.IN_SYNC);
-
+        assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus()).isEqualTo(TargetUpdateStatus.IN_SYNC);
         // however, additional action status has been stored
         assertThat(actionStatusRepository.findAll(PAGE).getNumberOfElements()).isEqualTo(4);
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, action.getId()).getNumberOfElements())
-                .isEqualTo(4);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, action.getId()).getNumberOfElements()).isEqualTo(4);
     }
 
     @Test
@@ -1233,15 +1221,16 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 9),
             @Expect(type = ActionUpdatedEvent.class, count = 1) })
-    void quotaExceptionWhencontrollerReportsTooManyDownloadedMessagesForDownloadOnlyAction() {
+    void quotaExceptionWhenControllerReportsTooManyDownloadedMessagesForDownloadOnlyAction() {
         final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
         testdataFactory.createTarget();
-        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
+        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDsTMD", DEFAULT_CONTROLLER_ID);
         assertThat(actionId).isNotNull();
 
-        Assertions.assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() ->
-                IntStream.range(0, maxMessages).forEach(i -> controllerManagement
-                        .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
+        final IntConsumer op = i -> controllerManagement.addUpdateActionStatus(
+                entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
+        Assertions.assertThatExceptionOfType(AssignmentQuotaExceededException.class)
+                .isThrownBy(() -> forNTimes(maxMessages, op));
     }
 
     @Test
@@ -1260,16 +1249,17 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     void quotaExceededExceptionWhenControllerReportsTooManyUpdateActionStatusMessagesForDownloadOnlyAction() {
         final int maxMessages = quotaManagement.getMaxMessagesPerActionStatus();
         testdataFactory.createTarget();
-        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
+        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDsTMU", DEFAULT_CONTROLLER_ID);
         assertThat(actionId).isNotNull();
 
-        //assert that too many intermediate statuses will throw quota exception
+        // assert that too many intermediate statuses will throw quota exception
+        final IntConsumer op = i -> controllerManagement.addUpdateActionStatus(
+                entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates").isThrownBy(
-                        () -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement.addUpdateActionStatus(
-                                entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
+                .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates")
+                .isThrownBy(() -> forNTimes(maxMessages, op));
 
-        //assert that Final result is accepted even if quota is reached
+        // assert that Final result is accepted even if quota is reached
         assertThatNoException().isThrownBy(() -> {
             Action updatedAction = controllerManagement.addUpdateActionStatus(
                     entityFactory.actionStatus().create(actionId).status(Status.FINISHED));
@@ -1279,7 +1269,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             assertThat(updatedAction.getStatus()).isEqualTo(Status.FINISHED);
         });
 
-        //assert that additional final result is not accepted
+        // assert that additional final result is not accepted
         assertThatNoException().isThrownBy(() -> {
             Action updatedAction = controllerManagement
                     .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR));
@@ -1308,13 +1298,14 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
         assertThat(actionId).isNotNull();
 
-        //assert that too many intermediate statuses will throw quota exception
+        // assert that too many intermediate statuses will throw quota exception
+        final IntConsumer op = i -> controllerManagement.addUpdateActionStatus(
+                entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED));
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates").isThrownBy(
-                        () -> IntStream.range(0, maxMessages).forEach(i -> controllerManagement.addUpdateActionStatus(
-                                entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
+                .as("No QuotaExceededException thrown for too many DOWNLOADED updateActionStatus updates")
+                .isThrownBy(() -> forNTimes(maxMessages, op));
 
-        //assert that Final result is accepted even if quota is reached
+        // assert that Final result is accepted even if quota is reached
         assertThatNoException().isThrownBy(() -> {
             Action updatedAction = controllerManagement
                     .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.FINISHED));
@@ -1324,7 +1315,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             assertThat(updatedAction.getStatus()).isEqualTo(Status.FINISHED);
         });
 
-        //assert that additional final result is not accepted
+        // assert that additional final result is not accepted
         assertThatNoException().isThrownBy(() -> {
             Action updatedAction = controllerManagement
                     .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.ERROR));
@@ -1430,8 +1421,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that a target can report FINISHED/ERROR updates for DOWNLOAD_ONLY assignments regardless of "
-            + "repositoryProperties.rejectActionStatusForClosedAction value.")
+    @Description("Verifies that a target can report FINISHED/ERROR updates for DOWNLOAD_ONLY assignments regardless of " +
+            "repositoryProperties.rejectActionStatusForClosedAction value.")
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 4),
@@ -1444,34 +1435,35 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetAttributesRequestedEvent.class, count = 6),
             @Expect(type = ActionUpdatedEvent.class, count = 8) })
     void targetCanAlwaysReportFinishedOrErrorAfterActionIsClosedForDownloadOnlyAssignments() {
-
         testdataFactory.createTarget();
 
         // allow actionStatusUpdates for closed actions
-        repositoryProperties.setRejectActionStatusForClosedAction(false);
+        withRejectActionStatusForClosedAction(false,
+                () -> {
+                    final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs1", DEFAULT_CONTROLLER_ID);
+                    assertThat(actionId).isNotNull();
+                    finishDownloadOnlyUpdateAndSendUpdateActionStatus(actionId, Status.FINISHED);
 
-        final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs1", DEFAULT_CONTROLLER_ID);
-        assertThat(actionId).isNotNull();
-        finishDownloadOnlyUpdateAndSendUpdateActionStatus(actionId, Status.FINISHED);
-
-        final Long actionId2 = createAndAssignDsAsDownloadOnly("downloadOnlyDs2", DEFAULT_CONTROLLER_ID);
-        assertThat(actionId).isNotNull();
-        finishDownloadOnlyUpdateAndSendUpdateActionStatus(actionId2, Status.ERROR);
+                    final Long actionId2 = createAndAssignDsAsDownloadOnly("downloadOnlyDs2", DEFAULT_CONTROLLER_ID);
+                    assertThat(actionId2).isNotNull();
+                    finishDownloadOnlyUpdateAndSendUpdateActionStatus(actionId2, Status.ERROR);
+                });
 
         // disallow actionStatusUpdates for closed actions
-        repositoryProperties.setRejectActionStatusForClosedAction(true);
+        withRejectActionStatusForClosedAction(true,
+                () -> {
+                    final Long actionId3 = createAndAssignDsAsDownloadOnly("downloadOnlyDs3", DEFAULT_CONTROLLER_ID);
+                    assertThat(actionId3).isNotNull();
+                    finishDownloadOnlyUpdateAndSendUpdateActionStatus(actionId3, Status.FINISHED);
 
-        final Long actionId3 = createAndAssignDsAsDownloadOnly("downloadOnlyDs3", DEFAULT_CONTROLLER_ID);
-        assertThat(actionId).isNotNull();
-        finishDownloadOnlyUpdateAndSendUpdateActionStatus(actionId3, Status.FINISHED);
+                    final Long actionId4 = createAndAssignDsAsDownloadOnly("downloadOnlyDs4", DEFAULT_CONTROLLER_ID);
+                    assertThat(actionId4).isNotNull();
+                    finishDownloadOnlyUpdateAndSendUpdateActionStatus(actionId4, Status.ERROR);
 
-        final Long actionId4 = createAndAssignDsAsDownloadOnly("downloadOnlyDs4", DEFAULT_CONTROLLER_ID);
-        assertThat(actionId).isNotNull();
-        finishDownloadOnlyUpdateAndSendUpdateActionStatus(actionId4, Status.ERROR);
-
-        // actionStatusRepository should have 12 ActionStatusUpdates, 3 from
-        // each action
-        assertThat(actionStatusRepository.count()).isEqualTo(12L);
+                    // actionStatusRepository should have 12 ActionStatusUpdates, 3 from
+                    // each action
+                    assertThat(actionStatusRepository.count()).isEqualTo(12L);
+                });
     }
 
     @Test
@@ -1585,12 +1577,13 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(target).as("target should not be null").isNotNull();
         assertThat(targetRepository.count()).as("target exists and is ready for deletion").isEqualTo(1L);
 
-        controllerManagement.deleteExistingTarget(target.getControllerId());
+        final String controllerId = target.getControllerId();
+        controllerManagement.deleteExistingTarget(controllerId);
         assertThat(targetRepository.count()).as("target should not exist anymore").isZero();
 
         assertThatExceptionOfType(EntityNotFoundException.class)
                 .as("No EntityNotFoundException thrown when deleting a non-existing target")
-                .isThrownBy(() -> controllerManagement.deleteExistingTarget(target.getControllerId()));
+                .isThrownBy(() -> controllerManagement.deleteExistingTarget(controllerId));
     }
 
     @Test
@@ -1606,7 +1599,24 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING, 20);
         assertLastActionStatusCodeInAction(actionId, 20);
+    }
 
+    private static void forNTimes(final int n, final IntConsumer consumer) {
+        IntStream.range(0, n).forEach(consumer);
+    }
+
+    private void withRejectActionStatusForClosedAction(final boolean rejectActionStatusForClosedAction, final Runnable runnable) {
+        final boolean originalValue = repositoryProperties.isRejectActionStatusForClosedAction();
+        if (originalValue == rejectActionStatusForClosedAction) {
+            runnable.run();
+        } else {
+            repositoryProperties.setRejectActionStatusForClosedAction(rejectActionStatusForClosedAction);
+            try {
+                runnable.run();
+            } finally {
+                repositoryProperties.setRejectActionStatusForClosedAction(originalValue);
+            }
+        }
     }
 
     @Step
