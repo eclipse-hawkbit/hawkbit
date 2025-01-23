@@ -45,7 +45,7 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
 
     @Override
     public DistributionSetCreate type(final String type) {
-        this.type = type == null ? null : type.strip();
+        this.type = type.strip();
         return this;
     }
 

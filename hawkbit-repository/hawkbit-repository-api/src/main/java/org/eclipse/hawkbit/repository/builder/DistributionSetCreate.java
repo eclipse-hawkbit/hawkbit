@@ -57,8 +57,8 @@ public interface DistributionSetCreate {
      * @param type for {@link DistributionSet#getType()}
      * @return updated builder instance
      */
-    default DistributionSetCreate type(final DistributionSetType type) {
-        return type(Optional.ofNullable(type).map(DistributionSetType::getKey).orElse(null));
+    default DistributionSetCreate type(@NotNull final DistributionSetType type) {
+        return type(type.getKey());
     }
 
     /**

@@ -831,7 +831,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @WithUser(allSpPermissions = true)
     @Description("Checks that metadata for a target can be updated.")
-    void updateTargetMetadata() throws InterruptedException {
+    void updateTargetMetadata() {
         final String knownKey = "myKnownKey";
         final String knownValue = "myKnownValue";
         final String knownUpdateValue = "myNewUpdatedValue";
@@ -844,17 +844,13 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         // create target meta data entry
         insertTargetMetadata(knownKey, knownValue, target);
 
-        Target changedLockRevisionTarget = targetManagement.get(target.getId())
-                .orElseThrow(NoSuchElementException::new);
+        Target changedLockRevisionTarget = targetManagement.get(target.getId()).orElseThrow(NoSuchElementException::new);
         assertThat(changedLockRevisionTarget.getOptLockRevision()).isEqualTo(2);
 
-        // Unsure if needed maybe to wait for a db flush?
-        // Thread.sleep(100);
-
         // update the target metadata
-        final JpaTargetMetadata updated = (JpaTargetMetadata) targetManagement.updateMetadata(target.getControllerId(),
-                entityFactory.generateTargetMetadata(knownKey, knownUpdateValue));
-        // we are updating the target meta data so also modifying the base
+        final JpaTargetMetadata updated = (JpaTargetMetadata) targetManagement.updateMetadata(
+                target.getControllerId(), entityFactory.generateTargetMetadata(knownKey, knownUpdateValue));
+        // we are updating the target meta-data so also modifying the base
         // software module so opt lock revision must be three
         changedLockRevisionTarget = targetManagement.get(target.getId()).orElseThrow(NoSuchElementException::new);
         assertThat(changedLockRevisionTarget.getOptLockRevision()).isEqualTo(3);
