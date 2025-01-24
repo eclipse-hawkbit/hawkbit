@@ -66,7 +66,7 @@
         <!-- test -->
         <rabbitmq.http-client.version>5.3.0</rabbitmq.http-client.version>
         <classgraph.version>4.8.174</classgraph.version>
-        <allure.version>2.28.1</allure.version>
+        <allure.version>2.29.1</allure.version>
         <awaitility.version>4.2.2</awaitility.version>
         <!-- Misc libraries versions - END -->
 
