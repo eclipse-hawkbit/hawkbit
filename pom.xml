@@ -80,7 +80,7 @@
         <license.maven.plugin.version>4.5</license.maven.plugin.version>
 
         <maven.surefire.plugin.version>3.3.1</maven.surefire.plugin.version>
-        <maven.failsafe.plugin.version>3.3.1</maven.failsafe.plugin.version>
+        <maven.failsafe.plugin.version>3.5.2</maven.failsafe.plugin.version>
         <jacoco.maven.plugin.version>0.8.12</jacoco.maven.plugin.version>
 
         <nexus.staging.maven.plugin.version>1.7.0</nexus.staging.maven.plugin.version>
