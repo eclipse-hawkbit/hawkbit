@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.mgmt.rest.resource.util;
 import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 
@@ -29,9 +28,5 @@ public final class ResourceUtility {
 
     public static MgmtArtifact convertArtifactResponse(final String jsonResponse) throws IOException {
         return OBJECT_MAPPER.readValue(jsonResponse, MgmtArtifact.class);
-    }
-
-    public static <T> PagedList<T> mapResponse(final Class<T> clazz, final String responseBody) throws IOException {
-        return OBJECT_MAPPER.readValue(responseBody, PagedList.class);
     }
 }

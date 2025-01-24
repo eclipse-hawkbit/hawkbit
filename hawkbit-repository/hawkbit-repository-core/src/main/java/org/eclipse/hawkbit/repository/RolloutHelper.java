@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A collection of static helper methods for the {@link RolloutManagement}
@@ -135,10 +135,10 @@ public final class RolloutHelper {
      * @param group the group to add
      * @return list of groups
      */
-    public static List<Long> getGroupsByStatusIncludingGroup(final List<RolloutGroup> groups,
-            final RolloutGroup.RolloutGroupStatus status, final RolloutGroup group) {
+    public static List<Long> getGroupsByStatusIncludingGroup(
+            final List<RolloutGroup> groups, final RolloutGroup.RolloutGroupStatus status, final RolloutGroup group) {
         return groups.stream().filter(innerGroup -> innerGroup.getStatus() == status || innerGroup.equals(group))
-                .map(RolloutGroup::getId).collect(Collectors.toList());
+                .map(RolloutGroup::getId).toList();
     }
 
     /**
@@ -149,7 +149,7 @@ public final class RolloutHelper {
      * @return RSQL string without base filter of the Rollout. Can be an empty string.
      */
     public static String getAllGroupsTargetFilter(final List<RolloutGroup> groups) {
-        if (groups.stream().anyMatch(group -> StringUtils.isEmpty(group.getTargetFilterQuery()))) {
+        if (groups.stream().anyMatch(group -> ObjectUtils.isEmpty(group.getTargetFilterQuery()))) {
             return "";
         }
 
@@ -175,13 +175,13 @@ public final class RolloutHelper {
             return concatAndTargetFilters(baseFilter, groupFilter);
         }
         final String previousGroupFilters = getAllGroupsTargetFilter(groups);
-        if (!StringUtils.isEmpty(previousGroupFilters)) {
-            if (!StringUtils.isEmpty(groupFilter)) {
+        if (!ObjectUtils.isEmpty(previousGroupFilters)) {
+            if (!ObjectUtils.isEmpty(groupFilter)) {
                 return concatAndTargetFilters(baseFilter, groupFilter, previousGroupFilters);
             }
             return concatAndTargetFilters(baseFilter, previousGroupFilters);
         }
-        if (!StringUtils.isEmpty(groupFilter)) {
+        if (!ObjectUtils.isEmpty(groupFilter)) {
             return concatAndTargetFilters(baseFilter, groupFilter);
         }
         return baseFilter;
@@ -193,7 +193,7 @@ public final class RolloutHelper {
      * @return the final target filter query for a rollout group
      */
     public static String getGroupTargetFilter(final String baseFilter, final RolloutGroup group) {
-        if (StringUtils.isEmpty(group.getTargetFilterQuery())) {
+        if (ObjectUtils.isEmpty(group.getTargetFilterQuery())) {
             return baseFilter;
         }
         return concatAndTargetFilters(baseFilter, group.getTargetFilterQuery());
@@ -246,8 +246,8 @@ public final class RolloutHelper {
     }
 
     private static boolean isTargetFilterInGroups(final String groupFilter, final List<RolloutGroup> groups) {
-        return !StringUtils.isEmpty(groupFilter)
-                && groups.stream().anyMatch(prevGroup -> !StringUtils.isEmpty(prevGroup.getTargetFilterQuery())
+        return !ObjectUtils.isEmpty(groupFilter)
+                && groups.stream().anyMatch(prevGroup -> !ObjectUtils.isEmpty(prevGroup.getTargetFilterQuery())
                 && prevGroup.getTargetFilterQuery().equals(groupFilter));
     }
 

@@ -191,7 +191,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         rolloutHandler.handleAll();
         assertThat(rolloutGroupManagement.findByRollout(
                 rollout.getId(), new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id"))
-        ).getContent().size()).isEqualTo(amountGroups + 3);
+        ).getContent()).hasSize(amountGroups + 3);
         executeAllFromGroup(rollout, dynamic1, 1);
         executeAllFromGroup(rollout, dynamic2, 3);
         assertAndGetRunning(rollout, 0);
@@ -453,7 +453,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
                 actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.RUNNING).getContent()
                         .stream().filter(action -> action.getRolloutGroup().getId().equals(group.getId())).toList();
         if (count >= 0) {
-            assertThat(running.size()).as("Action count").isEqualTo(count);
+            assertThat(running).as("Action count").hasSize(count);
         }
         running.forEach(this::finishAction);
     }
@@ -466,7 +466,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
                 actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.RUNNING).getContent()
                         .stream().filter(action -> action.getRolloutGroup().getId().equals(group.getId())).toList();
         if (count >= 0) {
-            assertThat(running.size()).as("Action count").isEqualTo(count);
+            assertThat(running).as("Action count").hasSize(count);
         }
 
         // skip on from the last group only

@@ -59,7 +59,7 @@ public class ResponseList<T> extends RepresentationModel<ResponseList<T>> implem
     }
 
     @Override
-    public <T> T[] toArray(final T[] a) {
+    public <C> C[] toArray(final C[] a) {
         return content.toArray(a);
     }
 

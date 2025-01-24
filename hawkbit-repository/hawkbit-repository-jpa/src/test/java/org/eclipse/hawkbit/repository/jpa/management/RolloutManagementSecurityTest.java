@@ -34,7 +34,7 @@ import org.springframework.data.domain.PageImpl;
 @Slf4j
 @Feature("SecurityTests - RolloutManagement")
 @Story("SecurityTests RolloutManagement")
-public class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
+class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")

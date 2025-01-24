@@ -26,11 +26,11 @@ import org.junit.jupiter.api.Test;
  */
 @Feature("Component Tests - Repository")
 @Story("Test RolloutUpdatedEvent")
-public class RolloutEventTest extends AbstractRemoteEntityEventTest<Rollout> {
+class RolloutEventTest extends AbstractRemoteEntityEventTest<Rollout> {
 
     @Test
     @Description("Verifies that the rollout entity reloading by remote updated event works")
-    public void testRolloutUpdatedEvent() {
+    void testRolloutUpdatedEvent() {
         assertAndCreateRemoteEvent(RolloutUpdatedEvent.class);
     }
 

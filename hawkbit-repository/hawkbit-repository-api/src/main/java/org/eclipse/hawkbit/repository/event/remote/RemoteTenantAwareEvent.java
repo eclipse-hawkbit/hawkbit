@@ -45,7 +45,7 @@ public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements Te
      */
     public RemoteTenantAwareEvent(final Object source, final String tenant, final String applicationId) {
         // due to a bug in Spring Cloud, we cannot pass null for applicationId
-        super(source, applicationId != null ? applicationId : StringUtils.EMPTY);
+        super(source, applicationId != null ? applicationId : StringUtils.EMPTY, DEFAULT_DESTINATION_FACTORY.getDestination(null));
         this.tenant = tenant;
     }
 }

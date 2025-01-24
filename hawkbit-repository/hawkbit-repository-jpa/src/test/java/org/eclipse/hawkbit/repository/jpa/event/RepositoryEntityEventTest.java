@@ -51,19 +51,19 @@ import org.springframework.context.event.EventListener;
 @Story("Entity Events")
 @SpringBootTest(classes = { RepositoryTestConfiguration.class }, webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
-public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
+class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private MyEventListener eventListener;
 
     @BeforeEach
-    public void beforeTest() {
+    void beforeTest() {
         eventListener.queue.clear();
     }
 
     @Test
     @Description("Verifies that the target created event is published when a target has been created")
-    public void targetCreatedEventIsPublished() throws InterruptedException {
+    void targetCreatedEventIsPublished() throws InterruptedException {
         final Target createdTarget = testdataFactory.createTarget("12345");
 
         final TargetCreatedEvent targetCreatedEvent = eventListener.waitForEvent(TargetCreatedEvent.class);
@@ -73,7 +73,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the target update event is published when a target has been updated")
-    public void targetUpdateEventIsPublished() throws InterruptedException {
+    void targetUpdateEventIsPublished() throws InterruptedException {
         final Target createdTarget = testdataFactory.createTarget("12345");
         targetManagement.update(entityFactory.target().update(createdTarget.getControllerId()).name("updateName"));
 
@@ -84,7 +84,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the target deleted event is published when a target has been deleted")
-    public void targetDeletedEventIsPublished() throws InterruptedException {
+    void targetDeletedEventIsPublished() throws InterruptedException {
         final Target createdTarget = testdataFactory.createTarget("12345");
 
         targetManagement.deleteByControllerID("12345");
@@ -96,7 +96,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the target type created event is published when a target type has been created")
-    public void targetTypeCreatedEventIsPublished() throws InterruptedException {
+    void targetTypeCreatedEventIsPublished() throws InterruptedException {
         final TargetType createdTargetType = testdataFactory.findOrCreateTargetType("targettype");
 
         final TargetTypeCreatedEvent targetTypeCreatedEvent = eventListener.waitForEvent(TargetTypeCreatedEvent.class);
@@ -106,7 +106,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the target type updated event is published when a target type has been updated")
-    public void targetTypeUpdatedEventIsPublished() throws InterruptedException {
+    void targetTypeUpdatedEventIsPublished() throws InterruptedException {
         final TargetType createdTargetType = testdataFactory.findOrCreateTargetType("targettype");
         targetTypeManagement
                 .update(entityFactory.targetType().update(createdTargetType.getId()).name("updatedtargettype"));
@@ -118,7 +118,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the target type deleted event is published when a target type has been deleted")
-    public void targetTypeDeletedEventIsPublished() throws InterruptedException {
+    void targetTypeDeletedEventIsPublished() throws InterruptedException {
         final TargetType createdTargetType = testdataFactory.findOrCreateTargetType("targettype");
         targetTypeManagement.delete(createdTargetType.getId());
 
@@ -129,7 +129,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the rollout deleted event is published when a rollout has been deleted")
-    public void rolloutDeletedEventIsPublished() throws InterruptedException {
+    void rolloutDeletedEventIsPublished() throws InterruptedException {
         final int amountTargetsForRollout = 50;
         final int amountGroups = 5;
         final String successCondition = "50";
@@ -152,7 +152,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the distribution set created event is published when a distribution set has been created")
-    public void distributionSetCreatedEventIsPublished() throws InterruptedException {
+    void distributionSetCreatedEventIsPublished() throws InterruptedException {
         final DistributionSet createDistributionSet = testdataFactory.createDistributionSet();
 
         final DistributionSetCreatedEvent dsCreatedEvent = eventListener
@@ -163,7 +163,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the distribution set deleted event is published when a distribution set has been deleted")
-    public void distributionSetDeletedEventIsPublished() throws InterruptedException {
+    void distributionSetDeletedEventIsPublished() throws InterruptedException {
         final DistributionSet createDistributionSet = testdataFactory.createDistributionSet();
 
         distributionSetManagement.delete(createDistributionSet.getId());
@@ -176,7 +176,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the software module created event is published when a software module has been created")
-    public void softwareModuleCreatedEventIsPublished() throws InterruptedException {
+    void softwareModuleCreatedEventIsPublished() throws InterruptedException {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleApp();
 
         final SoftwareModuleCreatedEvent softwareModuleCreatedEvent = eventListener
@@ -187,7 +187,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the software module update event is published when a software module has been updated")
-    public void softwareModuleUpdateEventIsPublished() throws InterruptedException {
+    void softwareModuleUpdateEventIsPublished() throws InterruptedException {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleApp();
         softwareModuleManagement
                 .update(entityFactory.softwareModule().update(softwareModule.getId()).description("New"));
@@ -200,7 +200,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the software module deleted event is published when a software module has been deleted")
-    public void softwareModuleDeletedEventIsPublished() throws InterruptedException {
+    void softwareModuleDeletedEventIsPublished() throws InterruptedException {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleApp();
         softwareModuleManagement.delete(softwareModule.getId());
 
@@ -215,10 +215,10 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         return event.getEntity().get().getId();
     }
 
-    public static class RepositoryTestConfiguration {
+    static class RepositoryTestConfiguration {
 
         @Bean
-        public MyEventListener myEventListenerBean() {
+        MyEventListener myEventListenerBean() {
             return new MyEventListener();
         }
 
@@ -229,11 +229,11 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         private final BlockingQueue<TenantAwareEvent> queue = new LinkedBlockingQueue<>();
 
         @EventListener(classes = TenantAwareEvent.class)
-        public void onEvent(final TenantAwareEvent event) {
+        void onEvent(final TenantAwareEvent event) {
             queue.offer(event);
         }
 
-        public <T> T waitForEvent(final Class<T> eventType) throws InterruptedException {
+        <T> T waitForEvent(final Class<T> eventType) throws InterruptedException {
             TenantAwareEvent event = null;
             while ((event = queue.poll(5, TimeUnit.SECONDS)) != null) {
                 if (event.getClass().isAssignableFrom(eventType)) {
