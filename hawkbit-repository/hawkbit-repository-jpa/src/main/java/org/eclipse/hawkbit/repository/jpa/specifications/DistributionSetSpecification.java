@@ -22,10 +22,11 @@ import jakarta.persistence.criteria.SetJoin;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedEntity_;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedVersionedEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.springframework.data.jpa.domain.Specification;
@@ -84,7 +85,7 @@ public final class DistributionSetSpecification {
      */
     public static Specification<JpaDistributionSet> byIdFetch(final Long distid) {
         return (dsRoot, query, cb) -> {
-            final Predicate predicate = cb.equal(dsRoot.get(JpaDistributionSet_.id), distid);
+            final Predicate predicate = cb.equal(dsRoot.get(AbstractJpaBaseEntity_.id), distid);
             dsRoot.fetch(JpaDistributionSet_.modules, JoinType.LEFT);
             dsRoot.fetch(JpaDistributionSet_.type, JoinType.LEFT);
             query.distinct(true);
@@ -101,7 +102,7 @@ public final class DistributionSetSpecification {
      */
     public static Specification<JpaDistributionSet> byIdsFetch(final Collection<Long> distids) {
         return (dsRoot, query, cb) -> {
-            final Predicate predicate = dsRoot.get(JpaDistributionSet_.id).in(distids);
+            final Predicate predicate = dsRoot.get(AbstractJpaBaseEntity_.id).in(distids);
             dsRoot.fetch(JpaDistributionSet_.modules, JoinType.LEFT);
             dsRoot.fetch(JpaDistributionSet_.tags, JoinType.LEFT);
             dsRoot.fetch(JpaDistributionSet_.type, JoinType.LEFT);
@@ -119,8 +120,8 @@ public final class DistributionSetSpecification {
      */
     public static Specification<JpaDistributionSet> likeNameAndVersion(final String name, final String version) {
         return (dsRoot, query, cb) -> cb.and(
-                cb.like(cb.lower(dsRoot.get(JpaDistributionSet_.name)), name.toLowerCase()),
-                cb.like(cb.lower(dsRoot.get(JpaDistributionSet_.version)), version.toLowerCase()));
+                cb.like(cb.lower(dsRoot.get(AbstractJpaNamedEntity_.name)), name.toLowerCase()),
+                cb.like(cb.lower(dsRoot.get(AbstractJpaNamedVersionedEntity_.version)), version.toLowerCase()));
     }
 
     /**
@@ -147,8 +148,8 @@ public final class DistributionSetSpecification {
      */
     public static Specification<JpaDistributionSet> equalsNameAndVersionIgnoreCase(final String name, final String version) {
         return (dsRoot, query, cb) -> cb.and(
-                cb.equal(cb.lower(dsRoot.get(JpaDistributionSet_.name)), name.toLowerCase()),
-                cb.equal(cb.lower(dsRoot.get(JpaDistributionSet_.version)), version.toLowerCase()));
+                cb.equal(cb.lower(dsRoot.get(AbstractJpaNamedEntity_.name)), name.toLowerCase()),
+                cb.equal(cb.lower(dsRoot.get(AbstractJpaNamedVersionedEntity_.version)), version.toLowerCase()));
     }
 
     /**
@@ -158,7 +159,7 @@ public final class DistributionSetSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSet> byType(final Long typeId) {
-        return (dsRoot, query, cb) -> cb.equal(dsRoot.get(JpaDistributionSet_.type).get(JpaDistributionSetType_.id), typeId);
+        return (dsRoot, query, cb) -> cb.equal(dsRoot.get(JpaDistributionSet_.type).get(AbstractJpaBaseEntity_.id), typeId);
     }
 
     /**
@@ -168,7 +169,7 @@ public final class DistributionSetSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSet> hasType(final Collection<Long> typeIds) {
-        return (dsRoot, query, cb) -> dsRoot.get(JpaDistributionSet_.type).get(JpaDistributionSetType_.id).in(typeIds);
+        return (dsRoot, query, cb) -> dsRoot.get(JpaDistributionSet_.type).get(AbstractJpaBaseEntity_.id).in(typeIds);
     }
 
     /**
@@ -180,7 +181,7 @@ public final class DistributionSetSpecification {
     public static Specification<JpaDistributionSet> hasTag(final Long tagId) {
         return (dsRoot, query, cb) -> {
             final SetJoin<JpaDistributionSet, JpaDistributionSetTag> tags = dsRoot.join(JpaDistributionSet_.tags, JoinType.LEFT);
-            return cb.equal(tags.get(JpaDistributionSetTag_.id), tagId);
+            return cb.equal(tags.get(AbstractJpaBaseEntity_.id), tagId);
         };
     }
 
@@ -188,7 +189,7 @@ public final class DistributionSetSpecification {
             final Root<JpaDistributionSet> dsRoot, final CriteriaBuilder cb,
             final Boolean selectDSWithNoTag, final Collection<String> tagNames) {
         final SetJoin<JpaDistributionSet, JpaDistributionSetTag> tags = dsRoot.join(JpaDistributionSet_.tags, JoinType.LEFT);
-        final Path<String> exp = tags.get(JpaDistributionSetTag_.name);
+        final Path<String> exp = tags.get(AbstractJpaNamedEntity_.name);
 
         final List<Predicate> hasTagsPredicates = new ArrayList<>();
         if (isNoTagActive(selectDSWithNoTag)) {

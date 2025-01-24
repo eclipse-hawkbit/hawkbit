@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@SuppressWarnings("java:S1133") // will be removed at some point
 public class TargetTagAssignmentResult extends AbstractAssignmentResult<Target> {
 
     private final TargetTag targetTag;

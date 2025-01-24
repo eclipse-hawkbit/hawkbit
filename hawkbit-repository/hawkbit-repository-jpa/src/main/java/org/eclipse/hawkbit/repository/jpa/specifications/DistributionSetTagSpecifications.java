@@ -11,21 +11,19 @@ package org.eclipse.hawkbit.repository.jpa.specifications;
 
 import jakarta.validation.constraints.NotEmpty;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag_;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
- * Utility class for {@link JpaDistributionSetTag}s {@link Specification}s. The class provides
- * Spring Data JPQL Specifications.
+ * Utility class for {@link JpaDistributionSetTag}s {@link Specification}s. The class provides Spring Data JPQL Specifications.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DistributionSetTagSpecifications {
 
-    private DistributionSetTagSpecifications() {
-        // utility class
-    }
-
     public static Specification<JpaDistributionSetTag> byName(@NotEmpty final String name) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaDistributionSetTag_.name), name);
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(AbstractJpaNamedEntity_.name), name);
     }
 }
