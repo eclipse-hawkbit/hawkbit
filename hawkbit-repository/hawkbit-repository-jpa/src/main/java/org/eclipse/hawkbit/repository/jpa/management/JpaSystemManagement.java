@@ -54,6 +54,7 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -75,60 +76,74 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     private final String countArtifactQuery;
     private final String countSoftwareModulesQuery;
 
-    @Autowired
-    private EntityManager entityManager;
-    @Autowired
-    private TargetRepository targetRepository;
-    @Autowired
-    private TargetFilterQueryRepository targetFilterQueryRepository;
-    @Autowired
-    private DistributionSetRepository distributionSetRepository;
-    @Autowired
-    private SoftwareModuleRepository softwareModuleRepository;
-    @Autowired
-    private TenantMetaDataRepository tenantMetaDataRepository;
-    @Autowired
-    private DistributionSetTypeRepository distributionSetTypeRepository;
-    @Autowired
-    private SoftwareModuleTypeRepository softwareModuleTypeRepository;
-    @Autowired
-    private TargetTagRepository targetTagRepository;
-    @Autowired
-    private TargetTypeRepository targetTypeRepository;
-    @Autowired
-    private DistributionSetTagRepository distributionSetTagRepository;
-    @Autowired
-    private TenantConfigurationRepository tenantConfigurationRepository;
-    @Autowired
-    private RolloutRepository rolloutRepository;
-    @Autowired
-    private TenantAware tenantAware;
-    @Autowired
-    private TenantStatsManagement systemStatsManagement;
-    @Autowired
-    private TenancyCacheManager cacheManager;
-    @Autowired
-    private SystemManagementCacheKeyGenerator currentTenantCacheKeyGenerator;
-    @Autowired
-    private SystemSecurityContext systemSecurityContext;
-    @Autowired
-    private PlatformTransactionManager txManager;
-    @Autowired
-    private RolloutStatusCache rolloutStatusCache;
-    @Autowired(required = false) // it's not required on dmf/ddi only instances
-    private ArtifactRepository artifactRepository;
-    @Autowired
-    private RepositoryProperties repositoryProperties;
+    private final TargetRepository targetRepository;
+    private final TargetTypeRepository targetTypeRepository;
+    private final TargetTagRepository targetTagRepository;
+    private final TargetFilterQueryRepository targetFilterQueryRepository;
+    private final SoftwareModuleRepository softwareModuleRepository;
+    private final SoftwareModuleTypeRepository softwareModuleTypeRepository;
+    private final DistributionSetRepository distributionSetRepository;
+    private final DistributionSetTypeRepository distributionSetTypeRepository;
+    private final DistributionSetTagRepository distributionSetTagRepository;
+    private final RolloutRepository rolloutRepository;
+    private final TenantConfigurationRepository tenantConfigurationRepository;
+    private final TenantMetaDataRepository tenantMetaDataRepository;
+    private final TenantStatsManagement systemStatsManagement;
+    private final SystemManagementCacheKeyGenerator currentTenantCacheKeyGenerator;
+    private final SystemSecurityContext systemSecurityContext;
+    private final TenantAware tenantAware;
+    private final PlatformTransactionManager txManager;
+    private final TenancyCacheManager cacheManager;
+    private final RolloutStatusCache rolloutStatusCache;
+    private final EntityManager entityManager;
+    private final RepositoryProperties repositoryProperties;
 
-    /**
-     * Constructor.
-     *
-     * @param properties properties to get the underlying database
-     */
-    public JpaSystemManagement(final JpaProperties properties) {
+    @Nullable
+    private ArtifactRepository artifactRepository;
+
+    @SuppressWarnings("squid:S00107")
+    public JpaSystemManagement(
+            final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
+            final TargetTagRepository targetTagRepository, final TargetFilterQueryRepository targetFilterQueryRepository,
+            final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleTypeRepository softwareModuleTypeRepository,
+            final DistributionSetRepository distributionSetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
+            final DistributionSetTagRepository distributionSetTagRepository, final RolloutRepository rolloutRepository,
+            final TenantConfigurationRepository tenantConfigurationRepository, final TenantMetaDataRepository tenantMetaDataRepository,
+            final TenantStatsManagement systemStatsManagement, final SystemManagementCacheKeyGenerator currentTenantCacheKeyGenerator,
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final PlatformTransactionManager txManager,
+            final TenancyCacheManager cacheManager, final RolloutStatusCache rolloutStatusCache,
+            final EntityManager entityManager, final RepositoryProperties repositoryProperties,
+            final JpaProperties properties) {
+        this.targetRepository = targetRepository;
+        this.targetTypeRepository = targetTypeRepository;
+        this.targetTagRepository = targetTagRepository;
+        this.targetFilterQueryRepository = targetFilterQueryRepository;
+        this.softwareModuleRepository = softwareModuleRepository;
+        this.softwareModuleTypeRepository = softwareModuleTypeRepository;
+        this.distributionSetRepository = distributionSetRepository;
+        this.distributionSetTypeRepository = distributionSetTypeRepository;
+        this.distributionSetTagRepository = distributionSetTagRepository;
+        this.rolloutRepository = rolloutRepository;
+        this.tenantConfigurationRepository = tenantConfigurationRepository;
+        this.tenantMetaDataRepository = tenantMetaDataRepository;
+        this.systemStatsManagement = systemStatsManagement;
+        this.currentTenantCacheKeyGenerator = currentTenantCacheKeyGenerator;
+        this.systemSecurityContext = systemSecurityContext;
+        this.tenantAware = tenantAware;
+        this.txManager = txManager;
+        this.cacheManager = cacheManager;
+        this.rolloutStatusCache = rolloutStatusCache;
+        this.entityManager = entityManager;
+        this.repositoryProperties = repositoryProperties;
+
         final String isDeleted = isPostgreSql(properties) ? "false" : "0";
         countArtifactQuery = "SELECT COUNT(a.id) FROM sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = " + isDeleted;
         countSoftwareModulesQuery = "select SUM(file_size) from sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = " + isDeleted;
+    }
+
+    @Autowired(required = false) // it's not required on dmf/ddi only instances
+    public void setArtifactRepository(ArtifactRepository artifactRepository) {
+        this.artifactRepository = artifactRepository;
     }
 
     @Override

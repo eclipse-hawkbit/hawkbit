@@ -587,6 +587,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         return rollout;
     }
 
+    @SuppressWarnings("java:S2259") // java:S2259 - false positive, see the java:S2259 comment in code
     private Rollout createRolloutGroups(
             final int amountOfGroups, final RolloutGroupConditions conditions,
             final JpaRollout rollout, final boolean isConfirmationRequired, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
@@ -651,7 +652,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             publishRolloutGroupCreatedEventAfterCommit(lastGroup, rollout);
         }
 
-        // lastSavedGroup is never null! amountOfGroups > 0 (and has static groups) or dynamicRolloutGroupTemplate is
+        // java:S2259 - lastSavedGroup is never null! amountOfGroups > 0 (and has static groups) or dynamicRolloutGroupTemplate is
         // not null (validated) and (validated) the rollout is dynamic, so has dynamic group
         rollout.setRolloutGroupsCreated(lastGroup.isDynamic() ? amountOfGroups + 1 : amountOfGroups);
         final JpaRollout savedRollout = rolloutRepository.save(rollout);

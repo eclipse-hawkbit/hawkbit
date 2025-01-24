@@ -188,7 +188,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         approvalStrategy.setApproveDecidedBy("testUser");
         final int amountTargets = 2;
         final String remark = "Some remark";
-        final List<Target> targets = testdataFactory.createTargets(amountTargets, "rollout");
+        testdataFactory.createTargets(amountTargets, "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final Rollout rollout = createRollout("rollout1", 3, dsA.getId(), "controllerId==rollout*", false);
 
@@ -1925,10 +1925,6 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     private void retrieveAndCompareRolloutsContent(final DistributionSet dsA, final String urlTemplate,
             final boolean isFullRepresentation) throws Exception {
         retrieveAndCompareRolloutsContent(dsA, urlTemplate, isFullRepresentation, false, null, null);
-    }
-
-    private Rollout getRollout(final long rolloutId) {
-        return rolloutManagement.get(rolloutId).orElseThrow(NoSuchElementException::new);
     }
 
     private void retrieveAndCompareRolloutsContent(final DistributionSet dsA, final String urlTemplate,

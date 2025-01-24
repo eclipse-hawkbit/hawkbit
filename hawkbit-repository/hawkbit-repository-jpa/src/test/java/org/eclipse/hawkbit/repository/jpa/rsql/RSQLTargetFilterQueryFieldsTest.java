@@ -28,13 +28,13 @@ import org.springframework.orm.jpa.vendor.Database;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter target filter query")
-public class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest {
+class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest {
 
     private TargetFilterQuery filter1;
     private TargetFilterQuery filter2;
 
     @BeforeEach
-    public void setupBeforeTest() {
+    void setupBeforeTest() {
         final String filterName1 = "filter_a";
         final String filterName2 = "filter_b";
         final String filterName3 = "filter_c";
@@ -54,7 +54,7 @@ public class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest 
 
     @Test
     @Description("Test filter target filter query by id")
-    public void testFilterByParameterId() {
+    void testFilterByParameterId() {
         assertRSQLQuery(TargetFilterQueryFields.ID.name() + "==" + filter1.getId(), 1);
         assertRSQLQuery(TargetFilterQueryFields.ID.name() + "!=" + filter1.getId(), 2);
         assertRSQLQuery(TargetFilterQueryFields.ID.name() + "==" + -1, 0);
@@ -72,7 +72,7 @@ public class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest 
 
     @Test
     @Description("Test filter target filter query by name")
-    public void testFilterByParameterName() {
+    void testFilterByParameterName() {
         assertRSQLQuery(TargetFilterQueryFields.NAME.name() + "==" + filter1.getName(), 1);
         assertRSQLQuery(TargetFilterQueryFields.NAME.name() + "==" + filter2.getName(), 1);
         assertRSQLQuery(TargetFilterQueryFields.NAME.name() + "==filter_*", 3);
@@ -83,7 +83,7 @@ public class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest 
 
     @Test
     @Description("Test filter target filter query by auto assigned ds name")
-    public void testFilterByAutoAssignedDsName() {
+    void testFilterByAutoAssignedDsName() {
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".name=="
                 + filter1.getAutoAssignDistributionSet().getName(), 1);
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".name=="
@@ -98,7 +98,7 @@ public class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest 
 
     @Test
     @Description("Test filter target filter query by auto assigned ds version")
-    public void testFilterByAutoAssignedDsVersion() {
+    void testFilterByAutoAssignedDsVersion() {
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".version=="
                 + TestdataFactory.DEFAULT_VERSION, 2);
         assertRSQLQuery(TargetFilterQueryFields.AUTOASSIGNDISTRIBUTIONSET.name() + ".version==*1*", 2);

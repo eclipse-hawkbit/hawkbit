@@ -10,7 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -32,13 +32,13 @@ import org.springframework.orm.jpa.vendor.Database;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter actions")
-public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
+class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
 
     private JpaTarget target;
     private JpaAction action;
 
     @BeforeEach
-    public void setupBeforeTest() {
+    void setupBeforeTest() {
         final DistributionSet dsA = testdataFactory.createDistributionSet("daA");
         target = (JpaTarget) targetManagement
                 .create(entityFactory.target().create().controllerId("targetId123").description("targetId123"));
@@ -51,7 +51,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter action by id")
-    public void testFilterByParameterId() {
+    void testFilterByParameterId() {
         assertRSQLQuery(ActionFields.ID.name() + "==" + action.getId(), 1);
         assertRSQLQuery(ActionFields.ID.name() + "!=" + action.getId(), 10);
         assertRSQLQuery(ActionFields.ID.name() + "==" + -1, 0);
@@ -68,23 +68,21 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test action by status")
-    public void testFilterByParameterStatus() {
+    void testFilterByParameterStatus() {
         assertRSQLQuery(ActionFields.STATUS.name() + "==pending", 5);
         assertRSQLQuery(ActionFields.STATUS.name() + "!=pending", 6);
         assertRSQLQuery(ActionFields.STATUS.name() + "=in=(pending)", 5);
         assertRSQLQuery(ActionFields.STATUS.name() + "=out=(pending)", 6);
 
-        try {
-            assertRSQLQuery(ActionFields.STATUS.name() + "==true", 5);
-            fail("Missing expected RSQLParameterUnsupportedFieldException because status cannot be compared with 'true'");
-        } catch (final RSQLParameterUnsupportedFieldException e) {
-        }
-
+        final String rsql = ActionFields.STATUS.name() + "==true";
+        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
+                .as("RSQLParameterUnsupportedFieldException because status cannot be compared with 'true'")
+                .isThrownBy(() -> assertRSQLQuery(rsql, 5));
     }
 
     @Test
     @Description("Test action by status")
-    public void testFilterByParameterExtRef() {
+    void testFilterByParameterExtRef() {
         assertRSQLQuery(ActionFields.EXTERNALREF.name() + "==extRef", 5);
         assertRSQLQuery(ActionFields.EXTERNALREF.name() + "!=extRef", 6);
         assertRSQLQuery(ActionFields.EXTERNALREF.name() + "==extRef*", 10);
@@ -114,7 +112,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
                 PageRequest.of(0, 100));
         final long countAllEntities = deploymentManagement.countActionsByTarget(rsqlParam, target.getControllerId());
         assertThat(findEntity).isNotNull();
-        assertThat(findEntity.getContent().size()).isEqualTo(expectedEntities);
+        assertThat(findEntity.getContent()).hasSize((int)expectedEntities);
         assertThat(countAllEntities).isEqualTo(expectedEntities);
     }
 }

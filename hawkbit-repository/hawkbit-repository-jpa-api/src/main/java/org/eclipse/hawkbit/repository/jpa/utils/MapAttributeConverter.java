@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import jakarta.persistence.AttributeConverter;
 
+@SuppressWarnings("java:S119") // better readability
 public class MapAttributeConverter<JAVA_TYPE extends Enum<JAVA_TYPE>, DB_TYPE> implements AttributeConverter<JAVA_TYPE, DB_TYPE> {
 
     private final Map<JAVA_TYPE, DB_TYPE> javaToDbMap;

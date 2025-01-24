@@ -31,10 +31,13 @@ public class Jpa {
         log.info("JPA Vendor: {}", JPA_VENDOR);
     }
 
+    // intentional, if it is a constant the compiler will inline it, we want to be changed with changing the JPA vendor lib
+    @SuppressWarnings("java:S3400")
     public static char nativeQueryParamPrefix() {
         return ':';
     }
 
+    @SuppressWarnings("java:S1172") // intentionally - it shall follow the common "interface"/signature of the method for all JPA providers
     public static <T> String formatNativeQueryInClause(final String name, final Collection<T> collection) {
         return ":" + name;
     }

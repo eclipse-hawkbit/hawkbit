@@ -36,6 +36,7 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class })
 @Import(TestChannelBinderConfiguration.class)
 @Disabled("For manual run only, while playing around with RSQL to SQL")
+@SuppressWarnings("java:S2699") // java:S2699 - manual test, don't actually does assertions
 class RSQLToSQLTest {
 
     private RSQLToSQL rsqlToSQL;

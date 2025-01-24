@@ -12,8 +12,8 @@ package org.eclipse.hawkbit.repository.jpa.tenancy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import io.qameta.allure.Description;
@@ -75,7 +75,7 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         // find all targets for current tenant "mytenant"
         final Slice<Target> findTargetsAll = targetManagement.findAll(PAGE);
         // no target has been created for "mytenant"
-        assertThat(findTargetsAll).hasSize(0);
+        assertThat(findTargetsAll).isEmpty();
 
         // find all targets for anotherTenant
         final Slice<Target> findTargetsForTenant = findTargetsForTenant(anotherTenant);
@@ -126,11 +126,11 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         // create target for another tenant
         final String anotherTenant = "anotherTenant";
         final String controllerAnotherTenant = "anotherController";
-        final Target createTargetForTenant = createTargetForTenant(controllerAnotherTenant, anotherTenant);
+        final List<Long> createTargetForTenant = List.of(createTargetForTenant(controllerAnotherTenant, anotherTenant).getId());
 
         // ensure target cannot be deleted by 'mytenant'
         try {
-            targetManagement.delete(Arrays.asList(createTargetForTenant.getId()));
+            targetManagement.delete(createTargetForTenant);
             fail("mytenant should not have been able to delete target of anotherTenant");
         } catch (final EntityNotFoundException ex) {
             // ok
@@ -140,9 +140,9 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         assertThat(targetsForAnotherTenant).hasSize(1);
 
         // ensure another tenant can delete the target
-        deleteTargetsForTenant(anotherTenant, Arrays.asList(createTargetForTenant.getId()));
+        deleteTargetsForTenant(anotherTenant, createTargetForTenant);
         targetsForAnotherTenant = findTargetsForTenant(anotherTenant);
-        assertThat(targetsForAnotherTenant).hasSize(0);
+        assertThat(targetsForAnotherTenant).isEmpty();
     }
 
     @Test

@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -124,7 +123,7 @@ public final class MgmtTargetMapper {
 
         final Function<Target, PollStatus> pollStatusResolver = configHelper.pollStatusResolver();
         return new ResponseList<>(
-                targets.stream().map(target -> toResponse(target, configHelper, pollStatusResolver)).collect(Collectors.toList()));
+                targets.stream().map(target -> toResponse(target, configHelper, pollStatusResolver)).toList());
     }
 
     /**
@@ -194,7 +193,7 @@ public final class MgmtTargetMapper {
         }
 
         return targetsRest.stream().map(targetRest -> fromRequest(entityFactory, targetRest))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     static List<MetaData> fromRequestTargetMetadata(final List<MgmtMetadata> metadata,
@@ -205,7 +204,7 @@ public final class MgmtTargetMapper {
 
         return metadata.stream().map(
                         metadataRest -> entityFactory.generateTargetMetadata(metadataRest.getKey(), metadataRest.getValue()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     static List<MgmtActionStatus> toActionStatusRestResponse(final Collection<ActionStatus> actionStatus,
@@ -219,7 +218,7 @@ public final class MgmtTargetMapper {
                         deploymentManagement.findMessagesByActionStatusId(
                                         PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), status.getId())
                                 .getContent()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     static MgmtAction toResponse(final String targetId, final Action action) {
@@ -317,7 +316,7 @@ public final class MgmtTargetMapper {
     }
 
     static List<MgmtMetadata> toResponseTargetMetadata(final List<TargetMetadata> metadata) {
-        return metadata.stream().map(MgmtTargetMapper::toResponseTargetMetadata).collect(Collectors.toList());
+        return metadata.stream().map(MgmtTargetMapper::toResponseTargetMetadata).toList();
     }
 
     private static void addPollStatus(final Target target, final MgmtTarget targetRest, final Function<Target, PollStatus> pollStatusResolver) {

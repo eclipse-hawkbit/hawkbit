@@ -30,12 +30,12 @@ import org.springframework.data.domain.PageRequest;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter target metadata")
-public class RSQLTargetMetadataFieldsTest extends AbstractJpaIntegrationTest {
+class RSQLTargetMetadataFieldsTest extends AbstractJpaIntegrationTest {
 
     private String controllerId;
 
     @BeforeEach
-    public void setupBeforeTest() {
+    void setupBeforeTest() {
         final Target target = testdataFactory.createTarget("target");
         controllerId = target.getControllerId();
 
@@ -52,7 +52,7 @@ public class RSQLTargetMetadataFieldsTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter target metadata by key")
-    public void testFilterByParameterKey() {
+    void testFilterByParameterKey() {
         assertRSQLQuery(TargetMetadataFields.KEY.name() + "==1", 1);
         assertRSQLQuery(TargetMetadataFields.KEY.name() + "!=1", 5);
         assertRSQLQuery(TargetMetadataFields.KEY.name() + "=in=(1,2)", 2);
@@ -61,7 +61,7 @@ public class RSQLTargetMetadataFieldsTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter target metadata by value")
-    public void testFilterByParameterValue() {
+    void testFilterByParameterValue() {
         assertRSQLQuery(TargetMetadataFields.VALUE.name() + "==''", 1);
         assertRSQLQuery(TargetMetadataFields.VALUE.name() + "!=''", 5);
         assertRSQLQuery(TargetMetadataFields.VALUE.name() + "==1", 1);

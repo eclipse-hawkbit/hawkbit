@@ -97,8 +97,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     @Description("Handles the GET request of retrieving all target filter queries within SP.")
     public void getTargetFilterQueries() throws Exception {
         final String filterName = "filter_01";
-        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery(filterName, "name==test_01");
-
+        createSingleTargetFilterQuery(filterName, "name==test_01");
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print());
@@ -393,7 +392,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        assertThat(targetFilterQueryManagement.count()).isEqualTo(0);
+        assertThat(targetFilterQueryManagement.count()).isZero();
 
         // verify response json exception message
         final ExceptionInfo exceptionInfo = ResourceUtility
@@ -414,7 +413,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
-        assertThat(targetFilterQueryManagement.count()).isEqualTo(0);
+        assertThat(targetFilterQueryManagement.count()).isZero();
     }
 
     @Test
@@ -613,7 +612,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
         final List<TargetFilterQuery> filters = targetFilterQueryManagement.findAll(PAGE).getContent();
         assertThat(filters).hasSize(1);
-        assertThat(filters.get(0).getAutoAssignWeight().get()).isEqualTo(45);
+        assertThat(filters.get(0).getAutoAssignWeight()).contains(45);
     }
 
     @ParameterizedTest

@@ -38,7 +38,6 @@ class MultiTenantJpaTransactionManager extends JpaTransactionManager {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Autowired
     private transient TenantAware tenantAware;
 
     private static final Class<?> JPA_TARGET;
@@ -51,6 +50,10 @@ class MultiTenantJpaTransactionManager extends JpaTransactionManager {
         } catch (final Exception e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    MultiTenantJpaTransactionManager(final TenantAware tenantAware) {
+        this.tenantAware = tenantAware;
     }
 
     private static final EntityPropertyChangeListener ENTITY_PROPERTY_CHANGE_LISTENER = new EntityPropertyChangeListener();

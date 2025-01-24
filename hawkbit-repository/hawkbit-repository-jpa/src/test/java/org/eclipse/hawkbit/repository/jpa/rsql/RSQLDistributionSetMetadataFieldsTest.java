@@ -30,12 +30,12 @@ import org.springframework.data.domain.PageRequest;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter distribution set metadata")
-public class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegrationTest {
+class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegrationTest {
 
     private Long distributionSetId;
 
     @BeforeEach
-    public void setupBeforeTest() {
+    void setupBeforeTest() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("DS");
         distributionSetId = distributionSet.getId();
 
@@ -52,7 +52,7 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegratio
 
     @Test
     @Description("Test filter distribution set metadata by key")
-    public void testFilterByParameterKey() {
+    void testFilterByParameterKey() {
         assertRSQLQuery(DistributionSetMetadataFields.KEY.name() + "==1", 1);
         assertRSQLQuery(DistributionSetMetadataFields.KEY.name() + "!=1", 5);
         assertRSQLQuery(DistributionSetMetadataFields.KEY.name() + "=in=(1,2)", 2);
@@ -61,7 +61,7 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegratio
 
     @Test
     @Description("Test filter distribution set metadata by value")
-    public void testFilterByParameterValue() {
+    void testFilterByParameterValue() {
         assertRSQLQuery(DistributionSetMetadataFields.VALUE.name() + "==''", 1);
         assertRSQLQuery(DistributionSetMetadataFields.VALUE.name() + "!=''", 5);
         assertRSQLQuery(DistributionSetMetadataFields.VALUE.name() + "==1", 1);

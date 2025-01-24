@@ -13,7 +13,6 @@ import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Data;
@@ -25,10 +24,8 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Target;
 
 /**
- * Generic deployment event for the Multi-Assignments feature. The event payload
- * holds a list of controller IDs identifying the targets which are affected by
- * a deployment action (e.g. a software assignment (update) or a cancellation of
- * an update).
+ * Generic deployment event for the Multi-Assignments feature. The event payload holds a list of controller IDs identifying the targets which
+ * are affected by a deployment action (e.g. a software assignment (update) or a cancellation of an update).
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -61,11 +58,10 @@ public abstract class MultiActionEvent extends RemoteTenantAwareEvent implements
     }
 
     private static List<String> getControllerIdsFromActions(final List<Action> actions) {
-        return actions.stream().map(Action::getTarget).map(Target::getControllerId).distinct()
-                .collect(Collectors.toList());
+        return actions.stream().map(Action::getTarget).map(Target::getControllerId).distinct().toList();
     }
 
     private static List<Long> getIdsFromActions(final List<Action> actions) {
-        return actions.stream().map(Identifiable::getId).collect(Collectors.toList());
+        return actions.stream().map(Identifiable::getId).toList();
     }
 }

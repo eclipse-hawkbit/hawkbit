@@ -15,7 +15,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -57,7 +56,7 @@ public final class MgmtSoftwareModuleMapper {
                 .map(metadataRest -> entityFactory.softwareModuleMetadata().create(softwareModuleId)
                         .key(metadataRest.getKey()).value(metadataRest.getValue())
                         .targetVisible(metadataRest.isTargetVisible()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     static List<SoftwareModuleCreate> smFromRequest(final EntityFactory entityFactory,
@@ -66,7 +65,7 @@ public final class MgmtSoftwareModuleMapper {
             return Collections.emptyList();
         }
 
-        return smsRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).collect(Collectors.toList());
+        return smsRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).toList();
     }
 
     static List<MgmtSoftwareModule> toResponse(final Collection<SoftwareModule> softwareModules) {
@@ -74,8 +73,7 @@ public final class MgmtSoftwareModuleMapper {
             return Collections.emptyList();
         }
 
-        return new ResponseList<>(
-                softwareModules.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList()));
+        return new ResponseList<>(softwareModules.stream().map(MgmtSoftwareModuleMapper::toResponse).toList());
     }
 
     static List<MgmtSoftwareModuleMetadata> toResponseSwMetadata(final Collection<SoftwareModuleMetadata> metadata) {
@@ -83,7 +81,7 @@ public final class MgmtSoftwareModuleMapper {
             return Collections.emptyList();
         }
 
-        return metadata.stream().map(MgmtSoftwareModuleMapper::toResponseSwMetadata).collect(Collectors.toList());
+        return metadata.stream().map(MgmtSoftwareModuleMapper::toResponseSwMetadata).toList();
     }
 
     static MgmtSoftwareModuleMetadata toResponseSwMetadata(final SoftwareModuleMetadata metadata) {

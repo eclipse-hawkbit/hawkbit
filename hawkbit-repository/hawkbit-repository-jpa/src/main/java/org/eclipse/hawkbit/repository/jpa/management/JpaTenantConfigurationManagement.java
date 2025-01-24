@@ -44,7 +44,6 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
@@ -68,16 +67,23 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
 
     private static final ConfigurableConversionService CONVERSION_SERVICE = new DefaultConversionService();
 
-    @Autowired
-    private TenantConfigurationRepository tenantConfigurationRepository;
-    @Autowired
-    private TenantConfigurationProperties tenantConfigurationProperties;
-    @Autowired
-    private ApplicationContext applicationContext;
-    @Autowired
-    private CacheManager cacheManager;
-    @Autowired
-    private AfterTransactionCommitExecutor afterCommitExecutor;
+    private final TenantConfigurationRepository tenantConfigurationRepository;
+    private final TenantConfigurationProperties tenantConfigurationProperties;
+    private final ApplicationContext applicationContext;
+    private final CacheManager cacheManager;
+    private final AfterTransactionCommitExecutor afterCommitExecutor;
+
+    public JpaTenantConfigurationManagement(
+            final TenantConfigurationRepository tenantConfigurationRepository,
+            final TenantConfigurationProperties tenantConfigurationProperties,
+            final CacheManager cacheManager, final AfterTransactionCommitExecutor afterCommitExecutor,
+            final ApplicationContext applicationContext) {
+        this.tenantConfigurationRepository = tenantConfigurationRepository;
+        this.tenantConfigurationProperties = tenantConfigurationProperties;
+        this.cacheManager = cacheManager;
+        this.afterCommitExecutor = afterCommitExecutor;
+        this.applicationContext = applicationContext;
+    }
 
     @Override
     @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")

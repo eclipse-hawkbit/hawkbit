@@ -891,23 +891,20 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .getWithDetails(distributionSetManagement.findByRsql("name==three", PAGE).getContent().get(0).getId())
                 .get();
 
-        assertThat(
-                JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+        assertThat((Object)JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/distributionsets/" + one.getId());
 
-        assertThat(JsonPath.compile("[0]id").read(mvcResult.getResponse().getContentAsString()).toString())
+        assertThat((Object)JsonPath.compile("[0]id").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString(String.valueOf(one.getId()));
-        assertThat(
-                JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+        assertThat((Object)JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/distributionsets/" + two.getId());
 
-        assertThat(JsonPath.compile("[1]id").read(mvcResult.getResponse().getContentAsString()).toString())
+        assertThat((Object)JsonPath.compile("[1]id").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString(String.valueOf(two.getId()));
-        assertThat(
-                JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+        assertThat((Object)JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/distributionsets/" + three.getId());
 
-        assertThat(JsonPath.compile("[2]id").read(mvcResult.getResponse().getContentAsString()).toString())
+        assertThat((Object)JsonPath.compile("[2]id").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString(String.valueOf(three.getId()));
 
         // check in database

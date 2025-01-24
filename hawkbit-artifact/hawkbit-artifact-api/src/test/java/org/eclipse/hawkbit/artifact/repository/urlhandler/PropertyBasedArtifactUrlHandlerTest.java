@@ -71,9 +71,8 @@ class PropertyBasedArtifactUrlHandlerTest {
                 new ArtifactUrl(
                         "http".toUpperCase(), "download-http",
                         HTTP_LOCALHOST + TENANT + "/controller/v1/" +
-                                CONTROLLER_ID + "/softwaremodules/" + SOFTWARE_MODULE_ID + "/artifacts/" + FILENAME_ENCODE));
-
-        assertThat(ddiUrls).isEqualTo(urlHandlerUnderTest.getUrls(placeHolder, ApiType.DMF));
+                                CONTROLLER_ID + "/softwaremodules/" + SOFTWARE_MODULE_ID + "/artifacts/" + FILENAME_ENCODE))
+                .isEqualTo(urlHandlerUnderTest.getUrls(placeHolder, ApiType.DMF));
     }
 
     @Test

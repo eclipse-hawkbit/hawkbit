@@ -112,7 +112,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
                     .findAll(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, setId));
         }
         return ListUtils.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream().map(mapper)
-                .flatMap(List::stream).collect(Collectors.toList());
+                .flatMap(List::stream).toList();
     }
 
     @Override
@@ -170,8 +170,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     @Override
     public void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults) {
         if (isMultiAssignmentsEnabled()) {
-            sendDeploymentEvent(assignmentResults.stream().flatMap(result -> result.getAssignedEntity().stream())
-                    .collect(Collectors.toList()));
+            sendDeploymentEvent(assignmentResults.stream().flatMap(result -> result.getAssignedEntity().stream()).toList());
         } else {
             assignmentResults.forEach(this::sendDistributionSetAssignedEvent);
         }
@@ -196,7 +195,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         if (actions == null || actions.isEmpty()) {
             return Collections.emptyList();
         }
-        return filterCancellations(actions).collect(Collectors.toList());
+        return filterCancellations(actions).toList();
     }
 
     private void sendMultiActionCancelEvent(final Action action) {
@@ -214,8 +213,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     private DistributionSetAssignmentResult sendDistributionSetAssignedEvent(
             final DistributionSetAssignmentResult assignmentResult) {
-        final List<Action> filteredActions = filterCancellations(assignmentResult.getAssignedEntity())
-                .collect(Collectors.toList());
+        final List<Action> filteredActions = filterCancellations(assignmentResult.getAssignedEntity()).toList();
         final DistributionSet set = assignmentResult.getDistributionSet();
         sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), filteredActions);
         return assignmentResult;

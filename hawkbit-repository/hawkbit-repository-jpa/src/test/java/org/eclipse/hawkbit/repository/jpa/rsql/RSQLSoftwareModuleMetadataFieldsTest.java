@@ -30,12 +30,12 @@ import org.springframework.data.domain.PageRequest;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter software module metadata")
-public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractJpaIntegrationTest {
+class RSQLSoftwareModuleMetadataFieldsTest extends AbstractJpaIntegrationTest {
 
     private Long softwareModuleId;
 
     @BeforeEach
-    public void setupBeforeTest() {
+    void setupBeforeTest() {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
 
         softwareModuleId = softwareModule.getId();
@@ -57,7 +57,7 @@ public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractJpaIntegration
 
     @Test
     @Description("Test filter software module metadata by key")
-    public void testFilterByParameterKey() {
+    void testFilterByParameterKey() {
         assertRSQLQuery(SoftwareModuleMetadataFields.KEY.name() + "==1", 1);
         assertRSQLQuery(SoftwareModuleMetadataFields.KEY.name() + "!=1", 6);
         assertRSQLQuery(SoftwareModuleMetadataFields.KEY.name() + "=in=(1,2)", 2);
@@ -66,7 +66,7 @@ public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractJpaIntegration
 
     @Test
     @Description("Test fitler software module metadata by value")
-    public void testFilterByParameterValue() {
+    void testFilterByParameterValue() {
         assertRSQLQuery(SoftwareModuleMetadataFields.VALUE.name() + "==''", 1);
         assertRSQLQuery(SoftwareModuleMetadataFields.VALUE.name() + "!=''", 6);
         assertRSQLQuery(SoftwareModuleMetadataFields.VALUE.name() + "==1", 1);
@@ -77,7 +77,7 @@ public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractJpaIntegration
 
     @Test
     @Description("Test fitler software module metadata by target visible")
-    public void testFilterByParameterTargetVisible() {
+    void testFilterByParameterTargetVisible() {
         assertRSQLQuery(SoftwareModuleMetadataFields.TARGETVISIBLE.name() + "==true", 2);
         assertRSQLQuery(SoftwareModuleMetadataFields.TARGETVISIBLE.name() + "==false", 5);
         assertRSQLQuery(SoftwareModuleMetadataFields.TARGETVISIBLE.name() + "!=false", 2);

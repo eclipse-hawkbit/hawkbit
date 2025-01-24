@@ -1006,15 +1006,12 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("[2].createdBy", equalTo("bumlux")))
                 .andReturn();
 
-        assertThat(
-                JsonPath.compile("[0]._links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                .isEqualTo("http://localhost/rest/v1/targets/id1");
-        assertThat(
-                JsonPath.compile("[1]._links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                .isEqualTo("http://localhost/rest/v1/targets/id2");
-        assertThat(
-                JsonPath.compile("[2]._links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                .isEqualTo("http://localhost/rest/v1/targets/id3");
+        assertThat((Object) JsonPath.compile("[0]._links.self.href").read(mvcResult.getResponse().getContentAsString()))
+                .hasToString("http://localhost/rest/v1/targets/id1");
+        assertThat((Object)JsonPath.compile("[1]._links.self.href").read(mvcResult.getResponse().getContentAsString()))
+                .hasToString("http://localhost/rest/v1/targets/id2");
+        assertThat((Object)JsonPath.compile("[2]._links.self.href").read(mvcResult.getResponse().getContentAsString()))
+                .hasToString("http://localhost/rest/v1/targets/id3");
 
         final Target t1 = assertTarget("id1", "testname1", "testid1");
         assertThat(t1.getSecurityToken()).isEqualTo("token");
@@ -2275,7 +2272,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         final List<Target> targets = Arrays.asList(test1, test2, test3);
 
-        final MvcResult mvcPostResult = mvc
+        mvc
                 .perform(post("/rest/v1/targets").content(JsonBuilder.targets(targets, true))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())

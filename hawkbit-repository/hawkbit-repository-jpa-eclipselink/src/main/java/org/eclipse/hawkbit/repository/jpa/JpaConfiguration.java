@@ -14,6 +14,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
@@ -33,10 +34,14 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 @Configuration
 public class JpaConfiguration extends JpaBaseConfiguration {
 
+    private final TenantAware tenantAware;
+
     protected JpaConfiguration(
             final DataSource dataSource, final JpaProperties properties,
-            final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider) {
+            final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider,
+            final TenantAware tenantAware) {
         super(dataSource, properties, jtaTransactionManagerProvider);
+        this.tenantAware = tenantAware;
     }
 
     /**
@@ -48,7 +53,7 @@ public class JpaConfiguration extends JpaBaseConfiguration {
     @Override
     @Bean
     public PlatformTransactionManager transactionManager(final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
-        return new MultiTenantJpaTransactionManager();
+        return new MultiTenantJpaTransactionManager(tenantAware);
     }
 
     @Override

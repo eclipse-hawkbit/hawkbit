@@ -18,6 +18,7 @@ import jakarta.validation.Validation;
 
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
+import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
 import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
@@ -130,6 +131,8 @@ import org.eclipse.hawkbit.repository.jpa.repository.TargetMetadataRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TenantConfigurationRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TenantMetaDataRepository;
 import org.eclipse.hawkbit.repository.jpa.rollout.RolloutScheduler;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.PauseRolloutGroupAction;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
@@ -160,6 +163,7 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -170,6 +174,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -476,8 +482,23 @@ public class RepositoryApplicationConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    SystemManagement systemManagement(final JpaProperties properties) {
-        return new JpaSystemManagement(properties);
+    SystemManagement systemManagement(
+            final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
+            final TargetTagRepository targetTagRepository, final TargetFilterQueryRepository targetFilterQueryRepository,
+            final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleTypeRepository softwareModuleTypeRepository,
+            final DistributionSetRepository distributionSetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
+            final DistributionSetTagRepository distributionSetTagRepository, final RolloutRepository rolloutRepository,
+            final TenantConfigurationRepository tenantConfigurationRepository, final TenantMetaDataRepository tenantMetaDataRepository,
+            final TenantStatsManagement systemStatsManagement, final SystemManagementCacheKeyGenerator currentTenantCacheKeyGenerator,
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final PlatformTransactionManager txManager,
+            final TenancyCacheManager cacheManager, final RolloutStatusCache rolloutStatusCache,
+            final EntityManager entityManager, final RepositoryProperties repositoryProperties,
+            final JpaProperties properties) {
+        return new JpaSystemManagement(targetRepository, targetTypeRepository, targetTagRepository,
+                targetFilterQueryRepository, softwareModuleRepository, softwareModuleTypeRepository, distributionSetRepository,
+                distributionSetTypeRepository, distributionSetTagRepository, rolloutRepository, tenantConfigurationRepository,
+                tenantMetaDataRepository, systemStatsManagement, currentTenantCacheKeyGenerator, systemSecurityContext,
+                tenantAware, txManager, cacheManager, rolloutStatusCache, entityManager, repositoryProperties, properties);
     }
 
     /**
@@ -547,8 +568,10 @@ public class RepositoryApplicationConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    TenantStatsManagement tenantStatsManagement() {
-        return new JpaTenantStatsManagement();
+    TenantStatsManagement tenantStatsManagement(
+            final TargetRepository targetRepository, final LocalArtifactRepository artifactRepository, final ActionRepository actionRepository,
+            final TenantAware tenantAware) {
+        return new JpaTenantStatsManagement(targetRepository, artifactRepository, actionRepository, tenantAware);
     }
 
     /**
@@ -558,8 +581,13 @@ public class RepositoryApplicationConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    TenantConfigurationManagement tenantConfigurationManagement() {
-        return new JpaTenantConfigurationManagement();
+    TenantConfigurationManagement tenantConfigurationManagement(
+            final TenantConfigurationRepository tenantConfigurationRepository,
+            final TenantConfigurationProperties tenantConfigurationProperties,
+            final CacheManager cacheManager, final AfterTransactionCommitExecutor afterCommitExecutor,
+            final ApplicationContext applicationContext) {
+        return new JpaTenantConfigurationManagement(tenantConfigurationRepository, tenantConfigurationProperties,
+                cacheManager, afterCommitExecutor, applicationContext);
     }
 
     /**

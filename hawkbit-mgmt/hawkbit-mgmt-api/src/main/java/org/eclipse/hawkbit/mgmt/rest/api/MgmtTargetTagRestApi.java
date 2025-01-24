@@ -387,8 +387,11 @@ public interface MgmtTargetTagRestApi {
             @RequestBody List<String> controllerId);
 
     enum OnNotFoundPolicy {
+        // if it has not found - operation fail
         FAIL, // default
+        // if it has not found - do operation on found operation and fail indicating that not all are found
         ON_WHAT_FOUND_AND_FAIL,
+        // if it has not found - do operation on found operation and success, silently
         ON_WHAT_FOUND_AND_SUCCESS
     }
 }

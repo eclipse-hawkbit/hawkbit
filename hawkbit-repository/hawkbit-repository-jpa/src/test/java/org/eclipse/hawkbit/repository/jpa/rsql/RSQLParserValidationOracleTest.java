@@ -13,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -28,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Feature("Component Tests - Repository")
 @Story("RSQL filter suggestion")
 @SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
-public class RSQLParserValidationOracleTest extends AbstractJpaIntegrationTest {
+class RSQLParserValidationOracleTest extends AbstractJpaIntegrationTest {
 
     private static final String[] OP_SUGGESTIONS = new String[] { "==", "!=", "=ge=", "=le=", "=gt=", "=lt=", "=in=",
             "=out=" };
@@ -42,7 +41,7 @@ public class RSQLParserValidationOracleTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that suggestions contains all possible field names")
-    public void suggestionContainsAllFieldNames() {
+    void suggestionContainsAllFieldNames() {
         final String rsqlQuery = "na";
         final List<String> currentSuggestions = getSuggestions(rsqlQuery);
         assertThat(currentSuggestions).containsOnly(FIELD_SUGGESTIONS);
@@ -50,7 +49,7 @@ public class RSQLParserValidationOracleTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that suggestions only contains the allowed operators")
-    public void suggestionContainsOnlyOperators() {
+    void suggestionContainsOnlyOperators() {
         final String rsqlQuery = "name";
         final List<String> currentSuggestions = getSuggestions(rsqlQuery);
         assertThat(currentSuggestions).containsOnly(OP_SUGGESTIONS);
@@ -58,7 +57,7 @@ public class RSQLParserValidationOracleTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that suggestions only contains operator to combine RSQL filters (and, or)")
-    public void suggestionContainsOnlyAndOrOperator() {
+    void suggestionContainsOnlyAndOrOperator() {
         final String rsqlQuery = "name==a ";
         final List<String> currentSuggestions = getSuggestions(rsqlQuery);
         assertThat(currentSuggestions).containsOnly(AND_OR_SUGGESTIONS);
@@ -66,7 +65,7 @@ public class RSQLParserValidationOracleTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that sub suggestions are shown")
-    public void suggestionContainsSubFieldSuggestions() {
+    void suggestionContainsSubFieldSuggestions() {
         final String rsqlQuery = "assignedds.";
         final List<String> currentSuggestions = getSuggestions(rsqlQuery);
         assertThat(currentSuggestions).containsOnly(NAME_VERSION_SUGGESTIONS);
@@ -76,6 +75,6 @@ public class RSQLParserValidationOracleTest extends AbstractJpaIntegrationTest {
         return rsqlValidationOracle
                 .suggest(rsqlQuery, -1).getSuggestionContext().getSuggestions().stream()
                 .map(SuggestToken::getSuggestion)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

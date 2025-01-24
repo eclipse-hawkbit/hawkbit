@@ -38,12 +38,12 @@ import org.springframework.util.CollectionUtils;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtTargetFilterQueryMapper {
 
-    static List<MgmtTargetFilterQuery> toResponse(final List<TargetFilterQuery> filters,
-            final boolean confirmationFlowEnabled, final boolean isRepresentationFull) {
+    static List<MgmtTargetFilterQuery> toResponse(
+            final List<TargetFilterQuery> filters, final boolean confirmationFlowEnabled, final boolean isRepresentationFull) {
         if (CollectionUtils.isEmpty(filters)) {
             return Collections.emptyList();
         }
-        return filters.stream().map(filter -> toResponse(filter, confirmationFlowEnabled, isRepresentationFull)).collect(Collectors.toList());
+        return filters.stream().map(filter -> toResponse(filter, confirmationFlowEnabled, isRepresentationFull)).toList();
     }
 
     static MgmtTargetFilterQuery toResponse(final TargetFilterQuery filter, final boolean confirmationFlowEnabled,

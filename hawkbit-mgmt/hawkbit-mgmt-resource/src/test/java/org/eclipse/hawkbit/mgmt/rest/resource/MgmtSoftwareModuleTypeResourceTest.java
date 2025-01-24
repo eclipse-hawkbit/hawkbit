@@ -213,15 +213,12 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         final SoftwareModuleType created2 = softwareModuleTypeManagement.findByKey("test2").get();
         final SoftwareModuleType created3 = softwareModuleTypeManagement.findByKey("test3").get();
 
-        assertThat(
-                JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                .isEqualTo("http://localhost/rest/v1/softwaremoduletypes/" + created1.getId());
-        assertThat(
-                JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                .isEqualTo("http://localhost/rest/v1/softwaremoduletypes/" + created2.getId());
-        assertThat(
-                JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                .isEqualTo("http://localhost/rest/v1/softwaremoduletypes/" + created3.getId());
+        assertThat((Object) JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
+                .hasToString("http://localhost/rest/v1/softwaremoduletypes/" + created1.getId());
+        assertThat((Object)JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
+                .hasToString("http://localhost/rest/v1/softwaremoduletypes/" + created2.getId());
+        assertThat((Object)JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
+                .hasToString("http://localhost/rest/v1/softwaremoduletypes/" + created3.getId());
 
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(6);
     }
@@ -334,7 +331,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
 
         testType = softwareModuleTypeManagement.get(testType.getId()).get();
         assertThat(testType.getLastModifiedAt()).isEqualTo(testType.getLastModifiedAt());
-        assertThat(testType.isDeleted()).isEqualTo(false);
+        assertThat(testType.isDeleted()).isFalse();
     }
 
     @Test
@@ -466,15 +463,4 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .update(entityFactory.softwareModuleType().update(testType.getId()).description("Desc1234"));
         return testType;
     }
-
-    private void createSoftwareModulesAlphabetical(final int amount) {
-        char character = 'a';
-        for (int index = 0; index < amount; index++) {
-            final String str = String.valueOf(character);
-            softwareModuleManagement.create(entityFactory.softwareModule().create().type(osType).name(str)
-                    .description(str).vendor(str).version(str));
-            character++;
-        }
-    }
-
 }

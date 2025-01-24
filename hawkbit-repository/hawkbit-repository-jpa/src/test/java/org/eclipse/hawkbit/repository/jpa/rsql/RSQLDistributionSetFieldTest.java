@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -134,11 +133,9 @@ class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter distribution set by complete property")
     void testFilterByAttributeComplete() {
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==true", 3);
-        try {
-            assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==noExist*", 0);
-            fail("Expected RSQLParameterSyntaxException");
-        } catch (final RSQLParameterSyntaxException e) {
-        }
+        final String noExistStar = DistributionSetFields.COMPLETE.name() + "==noExist*";
+        assertThatExceptionOfType(RSQLParameterSyntaxException.class)
+                .isThrownBy(() -> assertRSQLQuery(noExistStar, 0));
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=in=(true)", 3);
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=out=(true)", 2);
     }
@@ -148,8 +145,9 @@ class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     void testFilterByAttributeValid() {
         assertRSQLQuery(DistributionSetFields.VALID.name() + "==true", 4);
         assertRSQLQuery(DistributionSetFields.VALID.name() + "==false", 1);
+        final String rsqlNoExistStar = DistributionSetFields.VALID.name() + "==noExist*";
         assertThatExceptionOfType(RSQLParameterSyntaxException.class)
-                .isThrownBy(() -> assertRSQLQuery(DistributionSetFields.VALID.name() + "==noExist*", 0));
+                .isThrownBy(() -> assertRSQLQuery(rsqlNoExistStar, 0));
         assertRSQLQuery(DistributionSetFields.VALID.name() + "=in=(true)", 4);
         assertRSQLQuery(DistributionSetFields.VALID.name() + "=out=(true)", 1);
     }

@@ -15,7 +15,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -111,7 +110,7 @@ final class MgmtTagMapper {
         return tags.stream()
                 .map(tagRest -> entityFactory.tag().create().name(tagRest.getName())
                         .description(tagRest.getDescription()).colour(tagRest.getColour()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static void mapTag(final MgmtTag response, final Tag tag) {

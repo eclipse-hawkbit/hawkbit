@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -43,14 +42,14 @@ public final class MgmtTargetTypeMapper {
         }
         return targetTypesRest.stream()
                 .map(targetRest -> fromRequest(entityFactory, targetRest))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     static List<MgmtTargetType> toListResponse(final List<TargetType> types) {
         if (types == null) {
             return Collections.emptyList();
         }
-        return new ResponseList<>(types.stream().map(MgmtTargetTypeMapper::toResponse).collect(Collectors.toList()));
+        return new ResponseList<>(types.stream().map(MgmtTargetTypeMapper::toResponse).toList());
     }
 
     static MgmtTargetType toResponse(final TargetType type) {
@@ -78,7 +77,7 @@ public final class MgmtTargetTypeMapper {
 
     private static Collection<Long> getDistributionSets(final MgmtTargetTypeRequestBodyPost targetTypesRest) {
         return Optional.ofNullable(targetTypesRest.getCompatibledistributionsettypes())
-                .map(ds -> ds.stream().map(MgmtDistributionSetTypeAssignment::getId).collect(Collectors.toList()))
+                .map(ds -> ds.stream().map(MgmtDistributionSetTypeAssignment::getId).toList())
                 .orElse(Collections.emptyList());
     }
 }

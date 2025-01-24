@@ -15,7 +15,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -68,7 +67,7 @@ final class MgmtRolloutMapper {
             return Collections.emptyList();
         }
 
-        return rollouts.stream().map(rollout -> toResponseRollout(rollout, withDetails)).collect(Collectors.toList());
+        return rollouts.stream().map(rollout -> toResponseRollout(rollout, withDetails)).toList();
     }
 
     static MgmtRolloutResponseBody toResponseRollout(final Rollout rollout, final boolean withDetails) {
@@ -200,14 +199,13 @@ final class MgmtRolloutMapper {
         return conditions.build();
     }
 
-    static List<MgmtRolloutGroupResponseBody> toResponseRolloutGroup(final List<RolloutGroup> rollouts,
-            final boolean confirmationFlowEnabled, final boolean withDetails) {
+    static List<MgmtRolloutGroupResponseBody> toResponseRolloutGroup(
+            final List<RolloutGroup> rollouts, final boolean confirmationFlowEnabled, final boolean withDetails) {
         if (rollouts == null) {
             return Collections.emptyList();
         }
 
-        return rollouts.stream().map(group -> toResponseRolloutGroup(group, withDetails, confirmationFlowEnabled))
-                .collect(Collectors.toList());
+        return rollouts.stream().map(group -> toResponseRolloutGroup(group, withDetails, confirmationFlowEnabled)).toList();
     }
 
     static MgmtRolloutGroupResponseBody toResponseRolloutGroup(final RolloutGroup rolloutGroup,

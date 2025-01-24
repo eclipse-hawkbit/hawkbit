@@ -32,7 +32,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 @Feature("Unit Tests - Security")
 @Story("PreAuthToken Source TrustAuthentication Provider Test")
 @ExtendWith(MockitoExtension.class)
-public class PreAuthTokenSourceTrustAuthenticationProviderTest {
+class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
     private static final String REQUEST_SOURCE_IP = "127.0.0.1";
 
@@ -46,7 +46,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
     @Test
     @Description("Testing in case the containing controllerId in the URI request path does not accord with the controllerId in the request header.")
-    public void principalAndCredentialsNotTheSameThrowsAuthenticationException() {
+    void principalAndCredentialsNotTheSameThrowsAuthenticationException() {
         final String principal = "controllerIdURL";
         final String credentials = "controllerIdHeader";
         final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
@@ -59,7 +59,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
     @Test
     @Description("Testing that the controllerId within the URI request path is the same with the controllerId within the request header and no source IP check is in place.")
-    public void principalAndCredentialsAreTheSameWithNoSourceIpCheckIsSuccessful() {
+    void principalAndCredentialsAreTheSameWithNoSourceIpCheckIsSuccessful() {
         final String principal = "controllerId";
         final String credentials = "controllerId";
         final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
@@ -72,7 +72,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
     @Test
     @Description("Testing that the controllerId in the URI request match with the controllerId in the request header but the request are not coming from a trustful source.")
-    public void principalAndCredentialsAreTheSameButSourceIpRequestNotMatching2() {
+    void principalAndCredentialsAreTheSameButSourceIpRequestNotMatching2() {
         final String remoteAddress = "192.168.1.1";
         final String principal = "controllerId";
         final String credentials = "controllerId";
@@ -88,7 +88,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
     @Test
     @Description("Testing that the controllerId in the URI request match with the controllerId in the request header and the source IP is matching the allowed remote IP address.")
-    public void principalAndCredentialsAreTheSameAndSourceIpIsTrusted() {
+    void principalAndCredentialsAreTheSameAndSourceIpIsTrusted() {
         final String principal = "controllerId";
         final String credentials = "controllerId";
         final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
@@ -104,7 +104,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
     @Test
     @Description("Testing that the controllerId in the URI request match with the controllerId in the request header and the source IP matches one of the allowed remote IP addresses.")
-    public void principalAndCredentialsAreTheSameAndSourceIpIsWithinList() {
+    void principalAndCredentialsAreTheSameAndSourceIpIsWithinList() {
         final String[] trustedIPAddresses = new String[] { "192.168.1.1", "192.168.1.2", REQUEST_SOURCE_IP,
                 "192.168.1.3" };
         final String principal = "controllerId";
@@ -125,7 +125,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
     @Test
     @Description("Testing that the controllerId in the URI request match with the controllerId in the request header and the source IP does not match any of the allowed remote IP addresses.")
-    public void principalAndCredentialsAreTheSameSourceIpListNotMatches() {
+    void principalAndCredentialsAreTheSameSourceIpListNotMatches() {
         final String[] trustedIPAddresses = new String[] { "192.168.1.1", "192.168.1.2", "192.168.1.3" };
         final String principal = "controllerId";
         final String credentials = "controllerId";
