@@ -64,7 +64,7 @@
         <commons-collections4.version>4.4</commons-collections4.version>
         <io-protostuff.version>1.8.0</io-protostuff.version>
         <!-- test -->
-        <rabbitmq.http-client.version>5.2.0</rabbitmq.http-client.version>
+        <rabbitmq.http-client.version>5.3.0</rabbitmq.http-client.version>
         <classgraph.version>4.8.174</classgraph.version>
         <allure.version>2.28.1</allure.version>
         <awaitility.version>4.2.2</awaitility.version>
