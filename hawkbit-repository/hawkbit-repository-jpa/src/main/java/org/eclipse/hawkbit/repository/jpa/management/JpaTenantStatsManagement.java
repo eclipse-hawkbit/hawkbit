@@ -26,14 +26,19 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class JpaTenantStatsManagement implements TenantStatsManagement {
 
-    @Autowired
-    private TargetRepository targetRepository;
-    @Autowired
-    private LocalArtifactRepository artifactRepository;
-    @Autowired
-    private ActionRepository actionRepository;
-    @Autowired
-    private TenantAware tenantAware;
+    private final TargetRepository targetRepository;
+    private final LocalArtifactRepository artifactRepository;
+    private final ActionRepository actionRepository;
+    private final TenantAware tenantAware;
+
+    public JpaTenantStatsManagement(
+            final TargetRepository targetRepository, final LocalArtifactRepository artifactRepository, final ActionRepository actionRepository,
+            final TenantAware tenantAware) {
+        this.targetRepository = targetRepository;
+        this.artifactRepository = artifactRepository;
+        this.actionRepository = actionRepository;
+        this.tenantAware = tenantAware;
+    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)

@@ -157,11 +157,9 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         } else {
             final AtomicReference<Collection<String>> notFound = new AtomicReference<>();
             this.targetManagement.assignTag(controllerIds, targetTagId, notFound::set);
-            if (notFound.get() != null) {
-                // has not found
-                if (onNotFoundPolicy == OnNotFoundPolicy.ON_WHAT_FOUND_AND_FAIL) {
-                    throw new EntityNotFoundException(Target.class, notFound.get());
-                } // else - success
+            if (notFound.get() != null && onNotFoundPolicy == OnNotFoundPolicy.ON_WHAT_FOUND_AND_FAIL) {
+                // has not found and ON_WHAT_FOUND_AND_FAIL
+                throw new EntityNotFoundException(Target.class, notFound.get());
             }
         }
         return ResponseEntity.ok().build();
@@ -183,11 +181,9 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         } else {
             final AtomicReference<Collection<String>> notFound = new AtomicReference<>();
             this.targetManagement.unassignTag(controllerIds, targetTagId, notFound::set);
-            if (notFound.get() != null) {
-                // has not found
-                if (onNotFoundPolicy == OnNotFoundPolicy.ON_WHAT_FOUND_AND_FAIL) {
-                    throw new EntityNotFoundException(Target.class, notFound.get());
-                } // else - success
+            if (notFound.get() != null && onNotFoundPolicy == OnNotFoundPolicy.ON_WHAT_FOUND_AND_FAIL) {
+                // has not found and ON_WHAT_FOUND_AND_FAIL
+                throw new EntityNotFoundException(Target.class, notFound.get());
             }
         }
         return ResponseEntity.ok().build();

@@ -164,7 +164,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         String typeNameA = "ATestTypeGETsorted";
         String typeNameB = "BTestTypeGETsorted";
         String typeNameC = "CTestTypeGETsorted";
-        TargetType testTypeB = createTestTargetTypeInDB(typeNameB);
+        createTestTargetTypeInDB(typeNameB);
         TargetType testTypeC = createTestTargetTypeInDB(typeNameC);
         TargetType testTypeA = createTestTargetTypeInDB(typeNameA);
 

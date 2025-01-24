@@ -16,8 +16,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.Data;
 
 /**
- * A exception model rest representation with JSON annotations for response
- * bodies in case of RESTful exception occurrence.
+ * An exception model rest representation with JSON annotations for response bodies in case of RESTful exception occurrence.
  */
 @Data
 @JsonInclude(Include.NON_EMPTY)
@@ -26,5 +25,5 @@ public class ExceptionInfo {
     private String exceptionClass;
     private String errorCode;
     private String message;
-    private transient Map<String, Object> info;
+    private Map<String, Object> info;
 }

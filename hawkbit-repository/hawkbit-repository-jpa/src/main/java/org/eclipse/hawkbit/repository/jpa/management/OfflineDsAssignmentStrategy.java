@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -87,7 +86,7 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
                             TargetSpecifications.notEqualToTargetUpdateStatus(TargetUpdateStatus.PENDING))));
         }
         return ListUtils.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream().map(mapper)
-                .flatMap(List::stream).collect(Collectors.toList());
+                .flatMap(List::stream).toList();
     }
 
     @Override

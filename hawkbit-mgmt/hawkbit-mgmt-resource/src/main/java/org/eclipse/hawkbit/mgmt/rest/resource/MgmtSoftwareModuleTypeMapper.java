@@ -15,7 +15,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -39,7 +38,7 @@ final class MgmtSoftwareModuleTypeMapper {
             return Collections.emptyList();
         }
 
-        return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).collect(Collectors.toList());
+        return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).toList();
     }
 
     static List<MgmtSoftwareModuleType> toTypesResponse(final Collection<SoftwareModuleType> types) {
@@ -47,7 +46,7 @@ final class MgmtSoftwareModuleTypeMapper {
             return Collections.emptyList();
         }
 
-        return new ResponseList<>(types.stream().map(MgmtSoftwareModuleTypeMapper::toResponse).collect(Collectors.toList()));
+        return new ResponseList<>(types.stream().map(MgmtSoftwareModuleTypeMapper::toResponse).toList());
     }
 
     static MgmtSoftwareModuleType toResponse(final SoftwareModuleType type) {

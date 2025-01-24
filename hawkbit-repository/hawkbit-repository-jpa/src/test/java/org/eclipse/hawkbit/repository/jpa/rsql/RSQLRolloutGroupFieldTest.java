@@ -29,13 +29,13 @@ import org.springframework.orm.jpa.vendor.Database;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter rollout group")
-public class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
+class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
 
     private Long rolloutGroupId;
     private Rollout rollout;
 
     @BeforeEach
-    public void setupBeforeTest() {
+    void setupBeforeTest() {
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
@@ -47,7 +47,7 @@ public class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter rollout group by  id")
-    public void testFilterByParameterId() {
+    void testFilterByParameterId() {
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==" + rolloutGroupId, 1);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "!=" + rolloutGroupId, 3);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==" + -1, 0);
@@ -64,7 +64,7 @@ public class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter rollout group by name")
-    public void testFilterByParameterName() {
+    void testFilterByParameterName() {
         assertRSQLQuery(RolloutGroupFields.NAME.name() + "==group-1", 1);
         assertRSQLQuery(RolloutGroupFields.NAME.name() + "!=group-1", 3);
         assertRSQLQuery(RolloutGroupFields.NAME.name() + "==*", 4);
@@ -75,7 +75,7 @@ public class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter rollout group by description")
-    public void testFilterByParameterDescription() {
+    void testFilterByParameterDescription() {
         assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "==group-1", 1);
         assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "!=group-1", 3);
         assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "==group*", 4);

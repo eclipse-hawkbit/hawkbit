@@ -22,18 +22,18 @@ import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Management API")
 @Story("Paged List Handling")
-public class PagedListTest {
+class PagedListTest {
 
     @Test
     @Description("Ensures that a null payload entity throws an exception.")
-    public void createListWithNullContentThrowsException() {
+    void createListWithNullContentThrowsException() {
         assertThatThrownBy(() -> new PagedList<>(null, 0))
                 .isInstanceOf(NullPointerException.class);
     }
 
     @Test
     @Description("Create list with payload and verify content.")
-    public void createListWithContent() {
+    void createListWithContent() {
         final long knownTotal = 2;
         final List<String> knownContentList = new ArrayList<>();
         knownContentList.add("content1");
@@ -44,7 +44,7 @@ public class PagedListTest {
 
     @Test
     @Description("Create list with payload and verify size values.")
-    public void createListWithSmallerTotalThanContentSizeIsOk() {
+    void createListWithSmallerTotalThanContentSizeIsOk() {
         final long knownTotal = 0;
         final List<String> knownContentList = new ArrayList<>();
         knownContentList.add("content1");

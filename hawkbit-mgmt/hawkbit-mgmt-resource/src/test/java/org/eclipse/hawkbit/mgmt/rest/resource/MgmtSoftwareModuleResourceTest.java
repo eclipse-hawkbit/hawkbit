@@ -104,7 +104,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     public void createSMFromAlreadyMarkedAsDeletedType() throws Exception {
         final String SM_TYPE = "someSmType";
         final SoftwareModule sm = testdataFactory.createSoftwareModule(SM_TYPE);
-        final DistributionSetType t = testdataFactory.findOrCreateDistributionSetType(
+        testdataFactory.findOrCreateDistributionSetType(
                 "testKey", "testType", Collections.singletonList(sm.getType()),
                 Collections.singletonList(sm.getType()));
         final DistributionSetType type = testdataFactory.findOrCreateDistributionSetType("testKey", "testType");
@@ -295,7 +295,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(sm.getLastModifiedAt())))
                 .andExpect(jsonPath("$.deleted", equalTo(false)));
 
-        final SoftwareModule updatedSm = softwareModuleManagement.get(sm.getId()).get();
+        softwareModuleManagement.get(sm.getId());
         assertThat(sm.getLastModifiedBy()).isEqualTo("smUpdateTester");
         assertThat(sm.getLastModifiedAt()).isEqualTo(sm.getLastModifiedAt());
         assertThat(sm.isDeleted()).isFalse();
@@ -400,15 +400,12 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 mvcResult.getResponse().getContentAsString());
         final Long artId = softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getId();
         assertThat(artResult.getArtifactId()).as("Wrong artifact id").isEqualTo(artId);
-        assertThat(JsonPath.compile("$._links.self.href")
-                .read(mvcResult.getResponse().getContentAsString())
-                .toString()).as("Link contains no self url")
-                .isEqualTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId);
-        assertThat(JsonPath.compile("$._links.download.href")
-                .read(mvcResult.getResponse().getContentAsString())
-                .toString()).as("response contains no download url ")
-                .isEqualTo(
-                        "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId + "/download");
+        assertThat((Object)JsonPath.compile("$._links.self.href").read(mvcResult.getResponse().getContentAsString()))
+                .as("Link contains no self url")
+                .hasToString("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId);
+        assertThat((Object)JsonPath.compile("$._links.download.href").read(mvcResult.getResponse().getContentAsString()))
+                .as("response contains no download url ")
+                .hasToString("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId + "/download");
 
         assertArtifact(sm, random);
     }

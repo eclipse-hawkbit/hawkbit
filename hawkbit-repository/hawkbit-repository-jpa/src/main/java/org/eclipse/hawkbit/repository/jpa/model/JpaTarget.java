@@ -96,7 +96,8 @@ import org.springframework.util.ObjectUtils;
         @NamedEntityGraph(name = "Target.actions", attributeNodes = { @NamedAttributeNode("actions") }),
 })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
-@SuppressWarnings("squid:S2160")
+// java:S1710 - not possible to use without group annotation
+@SuppressWarnings({ "squid:S2160", "java:S1710" })
 public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAwareEntity {
 
     @Serial

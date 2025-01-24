@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtTenantManagementMapper {
 
-    public static String DEFAULT_DISTRIBUTION_SET_TYPE_KEY = "default.ds.type";
+    public static final String DEFAULT_DISTRIBUTION_SET_TYPE_KEY = "default.ds.type";
 
     public static MgmtSystemTenantConfigurationValue toResponseTenantConfigurationValue(
             final String key, final TenantConfigurationValue<?> repoConfValue) {

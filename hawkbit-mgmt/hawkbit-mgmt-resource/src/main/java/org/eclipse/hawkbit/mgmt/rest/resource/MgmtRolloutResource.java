@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import jakarta.validation.ValidationException;
 
@@ -147,7 +146,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
                                 rolloutRequestBody).orElse(confirmationFlowActive);
                         return MgmtRolloutMapper.fromRequest(entityFactory, mgmtRolloutGroup)
                                 .confirmationRequired(confirmationRequired);
-                    }).collect(Collectors.toList());
+                    }).toList();
             rollout = rolloutManagement.create(create, rolloutGroups, rolloutGroupConditions);
         } else if (rolloutRequestBody.getAmountGroups() != null) {
             final boolean confirmationRequired = rolloutRequestBody.getConfirmationRequired() == null

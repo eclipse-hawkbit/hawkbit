@@ -54,8 +54,8 @@ public class EventPublisherConfiguration {
     ApplicationEventMulticaster applicationEventMulticaster(
             @Qualifier("asyncExecutor") final Executor executor,
             final SystemSecurityContext systemSecurityContext, final ApplicationEventFilter applicationEventFilter) {
-        final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster = new TenantAwareApplicationEventPublisher(
-                systemSecurityContext, applicationEventFilter);
+        final SimpleApplicationEventMulticaster simpleApplicationEventMulticaster =
+                new TenantAwareApplicationEventPublisher(systemSecurityContext, applicationEventFilter);
         simpleApplicationEventMulticaster.setTaskExecutor(executor);
         return simpleApplicationEventMulticaster;
     }
@@ -85,13 +85,17 @@ public class EventPublisherConfiguration {
         private final SystemSecurityContext systemSecurityContext;
         private final ApplicationEventFilter applicationEventFilter;
 
-        @Autowired(required = false)
         private ServiceMatcher serviceMatcher;
 
         protected TenantAwareApplicationEventPublisher(
                 final SystemSecurityContext systemSecurityContext, final ApplicationEventFilter applicationEventFilter) {
             this.systemSecurityContext = systemSecurityContext;
             this.applicationEventFilter = applicationEventFilter;
+        }
+
+        @Autowired(required = false)
+        public void setServiceMatcher(final ServiceMatcher serviceMatcher) {
+            this.serviceMatcher = serviceMatcher;
         }
 
         /**

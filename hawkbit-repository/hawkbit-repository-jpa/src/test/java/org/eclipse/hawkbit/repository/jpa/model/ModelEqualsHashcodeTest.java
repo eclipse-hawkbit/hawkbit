@@ -20,12 +20,11 @@ import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Repository")
 @Story("Repository Model")
-public class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
+class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
 
     @Test
-    @Description("Verifies that different objects even with identical primary key, version and tenant "
-            + "return different hash codes.")
-    public void differentEntitiesReturnDifferentHashCodes() {
+    @Description("Verifies that different objects even with identical primary key, version and tenant return different hash codes.")
+    void differentEntitiesReturnDifferentHashCodes() {
         assertThat(new JpaAction().hashCode()).as("action should have different hashcode than action status")
                 .isNotEqualTo(new JpaActionStatus().hashCode());
         assertThat(new JpaDistributionSet().hashCode())
@@ -40,9 +39,8 @@ public class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that different object even with identical primary key, version and tenant "
-            + "are not equal.")
-    public void differentEntitiesAreNotEqual() {
+    @Description("Verifies that different object even with identical primary key, version and tenant are not equal.")
+    void differentEntitiesAreNotEqual() {
         assertThat(new JpaAction().equals(new JpaActionStatus())).as("action equals action status").isFalse();
         assertThat(new JpaDistributionSet().equals(new JpaSoftwareModule()))
                 .as("Distribution set equals software module").isFalse();
@@ -54,7 +52,7 @@ public class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that updated entities are not equal.")
-    public void changedEntitiesAreNotEqual() {
+    void changedEntitiesAreNotEqual() {
         final SoftwareModuleType type = softwareModuleTypeManagement
                 .create(entityFactory.softwareModuleType().create().key("test").name("test"));
         assertThat(type).as("persited entity is not equal to regular object")
@@ -67,7 +65,7 @@ public class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verify that no proxy of the entity manager has an influence on the equals or hashcode result.")
-    public void managedEntityIsEqualToUnamangedObjectWithSameKey() {
+    void managedEntityIsEqualToUnamangedObjectWithSameKey() {
         final SoftwareModuleType type = softwareModuleTypeManagement.create(
                 entityFactory.softwareModuleType().create().key("test").name("test").description("test"));
 
@@ -77,8 +75,9 @@ public class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
         mock.setTenant(type.getTenant());
 
         assertThat(type).as("managed entity is equal to regular object with same content").isEqualTo(mock);
-        assertThat(type.hashCode()).as("managed entity has same hash code as regular object with same content")
-                .isEqualTo(mock.hashCode());
+        assertThat(type)
+                .as("managed entity has same hash code as regular object with same content")
+                .hasSameHashCodeAs(mock.hashCode());
     }
 
 }

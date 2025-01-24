@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +23,7 @@ import org.springframework.context.annotation.Description;
 
 @Story("Retrieve all open action ids")
 @Description("Tests for the MgmtTargetAssignmentResponseBody")
-public class MgmtTargetAssignmentResponseBodyTest {
+class MgmtTargetAssignmentResponseBodyTest {
 
     private static final List<Long> ASSIGNED_ACTIONS = Arrays.asList(4L, 5L, 6L);
     private static final int ALREADY_ASSIGNED_COUNT = 3;
@@ -32,7 +31,7 @@ public class MgmtTargetAssignmentResponseBodyTest {
 
     @Test
     @Description("Tests that the ActionIds are serialized correctly in MgmtTargetAssignmentResponseBody")
-    public void testActionIdsSerialization() throws IOException {
+    void testActionIdsSerialization() throws IOException {
         final MgmtTargetAssignmentResponseBody responseBody = generateResponseBody();
         final ObjectMapper objectMapper = new ObjectMapper();
         final String responseBodyAsString = objectMapper.writeValueAsString(responseBody);
@@ -70,9 +69,8 @@ public class MgmtTargetAssignmentResponseBodyTest {
     }
 
     private static MgmtTargetAssignmentResponseBody generateResponseBody() {
-        MgmtTargetAssignmentResponseBody response = new MgmtTargetAssignmentResponseBody();
-        response.setAssignedActions(
-                ASSIGNED_ACTIONS.stream().map(id -> new MgmtActionId(CONTROLLER_ID, id)).collect(Collectors.toList()));
+        final MgmtTargetAssignmentResponseBody response = new MgmtTargetAssignmentResponseBody();
+        response.setAssignedActions(ASSIGNED_ACTIONS.stream().map(id -> new MgmtActionId(CONTROLLER_ID, id)).toList());
         response.setAlreadyAssigned(ALREADY_ASSIGNED_COUNT);
         return response;
     }

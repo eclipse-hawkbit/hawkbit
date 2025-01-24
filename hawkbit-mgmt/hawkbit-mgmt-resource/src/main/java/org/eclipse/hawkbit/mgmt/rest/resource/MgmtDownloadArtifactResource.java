@@ -37,10 +37,13 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi {
 
-    @Autowired
-    private SoftwareModuleManagement softwareModuleManagement;
-    @Autowired
-    private ArtifactManagement artifactManagement;
+    private final SoftwareModuleManagement softwareModuleManagement;
+    private final ArtifactManagement artifactManagement;
+
+    public MgmtDownloadArtifactResource(final SoftwareModuleManagement softwareModuleManagement, final ArtifactManagement artifactManagement) {
+        this.softwareModuleManagement = softwareModuleManagement;
+        this.artifactManagement = artifactManagement;
+    }
 
     /**
      * Handles the GET request for downloading an artifact.

@@ -31,7 +31,9 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-@SuppressWarnings("java:S6548") // java:S6548 - singleton holder ensures static access to spring resources in some places
+// java:S6548 - singleton holder ensures static access to spring resources in some places
+// java:S112 - it is generic class so a generic exception is fine
+@SuppressWarnings({ "java:S6548", "java:S112" })
 public class MdcHandler {
 
     public static final String MDC_KEY_TENANT = "tenant";

@@ -24,12 +24,12 @@ import org.springframework.test.context.TestPropertySource;
 @Feature("Integration Test - Security")
 @Story("PreAuthorized enabled")
 @TestPropertySource(properties = { "spring.flyway.enabled=true" })
-public class PreAuthorizeEnabledTest extends AbstractSecurityTest {
+class PreAuthorizeEnabledTest extends AbstractSecurityTest {
 
     @Test
     @Description("Tests whether request fail if a role is forbidden for the user")
     @WithUser(authorities = { SpPermission.READ_TARGET }, autoCreateTenant = false)
-    public void failIfNoRole() throws Exception {
+    void failIfNoRole() throws Exception {
         mvc.perform(get("/DEFAULT/controller/v1/controllerId"))
                 .andExpect(result -> assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value()));
     }
@@ -37,7 +37,7 @@ public class PreAuthorizeEnabledTest extends AbstractSecurityTest {
     @Test
     @Description("Tests whether request succeed if a role is granted for the user")
     @WithUser(authorities = { SpPermission.SpringEvalExpressions.CONTROLLER_ROLE }, autoCreateTenant = false)
-    public void successIfHasRole() throws Exception {
+    void successIfHasRole() throws Exception {
         mvc.perform(get("/DEFAULT/controller/v1/controllerId"))
                 .andExpect(result -> assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value()));
     }

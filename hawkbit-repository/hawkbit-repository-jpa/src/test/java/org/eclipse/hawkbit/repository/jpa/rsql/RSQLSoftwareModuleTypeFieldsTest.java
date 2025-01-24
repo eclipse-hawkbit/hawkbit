@@ -25,11 +25,11 @@ import org.springframework.orm.jpa.vendor.Database;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter software module test type")
-public class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest {
+class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter software module test type by id")
-    public void testFilterByParameterId() {
+    void testFilterByParameterId() {
         assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "==" + osType.getId(), 1);
         assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "!=" + osType.getId(), 2);
         assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "==" + -1, 0);
@@ -46,14 +46,14 @@ public class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest
 
     @Test
     @Description("Test filter software module test type by name")
-    public void testFilterByParameterName() {
+    void testFilterByParameterName() {
         assertRSQLQuery(SoftwareModuleTypeFields.NAME.name() + "==" + Constants.SMT_DEFAULT_OS_NAME, 1);
         assertRSQLQuery(SoftwareModuleTypeFields.NAME.name() + "!=" + Constants.SMT_DEFAULT_OS_NAME, 2);
     }
 
     @Test
     @Description("Test filter software module test type by description")
-    public void testFilterByParameterDescription() {
+    void testFilterByParameterDescription() {
         assertRSQLQuery(SoftwareModuleTypeFields.DESCRIPTION.name() + "==''", 0);
         assertRSQLQuery(SoftwareModuleTypeFields.DESCRIPTION.name() + "!=''", 3);
         assertRSQLQuery(SoftwareModuleTypeFields.DESCRIPTION.name() + "==Updated*", 3);
@@ -63,7 +63,7 @@ public class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest
 
     @Test
     @Description("Test filter software module test type by key")
-    public void testFilterByParameterKey() {
+    void testFilterByParameterKey() {
         assertRSQLQuery(SoftwareModuleTypeFields.KEY.name() + "==os", 1);
         assertRSQLQuery(SoftwareModuleTypeFields.KEY.name() + "!=os", 2);
         assertRSQLQuery(SoftwareModuleTypeFields.KEY.name() + "=in=(os)", 1);
@@ -72,7 +72,7 @@ public class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest
 
     @Test
     @Description("Test filter software module test type by max")
-    public void testFilterByMaxAssignment() {
+    void testFilterByMaxAssignment() {
         assertRSQLQuery(SoftwareModuleTypeFields.MAXASSIGNMENTS.name() + "==1", 2);
         assertRSQLQuery(SoftwareModuleTypeFields.MAXASSIGNMENTS.name() + "!=1", 1);
     }

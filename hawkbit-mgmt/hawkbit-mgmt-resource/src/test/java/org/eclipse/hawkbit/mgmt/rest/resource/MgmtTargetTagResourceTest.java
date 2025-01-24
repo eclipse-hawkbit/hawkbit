@@ -91,9 +91,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     @Test
     @Description("Handles the GET request of retrieving all targets tags within SP based by parameter")
     public void getTargetTagsWithParameters() throws Exception {
-        final List<TargetTag> tags = testdataFactory.createTargetTags(2, "");
-        final TargetTag assigned = tags.get(0);
-        final TargetTag unassigned = tags.get(1);
+        testdataFactory.createTargetTags(2, "");
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "?limit=10&sort=name:ASC&offset=0&q=name==targetTag"))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print());
@@ -233,7 +231,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final TargetTag tag = testdataFactory.createTargetTags(1, "").get(0);
         final int targetsAssigned = 5;
         final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
-        targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
+        targetManagement.assignTag(targets.stream().map(Target::getControllerId).toList(), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned"))
                 .andDo(MockMvcResultPrinter.print())
@@ -254,7 +252,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final int targetsAssigned = 5;
         final int limitSize = 1;
         final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
-        targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
+        targetManagement.assignTag(targets.stream().map(Target::getControllerId).toList(), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
@@ -278,7 +276,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final int expectedSize = targetsAssigned - offsetParam;
 
         final List<Target> targets = testdataFactory.createTargets(targetsAssigned);
-        targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
+        targetManagement.assignTag(targets.stream().map(Target::getControllerId).toList(), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
@@ -306,8 +304,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andExpect(status().isOk());
 
         final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
-        assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
-                .containsOnly(assigned.getControllerId());
+        assertThat(updated.stream().map(Target::getControllerId).toList()).containsOnly(assigned.getControllerId());
     }
 
     @Test
@@ -329,7 +326,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andExpect(status().isOk());
 
         final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
-        assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
+        assertThat(updated.stream().map(Target::getControllerId).toList())
                 .containsOnly(assigned0.getControllerId(), assigned1.getControllerId());
     }
 
@@ -459,7 +456,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final Target assigned = targets.get(0);
         final Target unassigned = targets.get(1);
 
-        targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
+        targetManagement.assignTag(targets.stream().map(Target::getControllerId).toList(), tag.getId());
 
         mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
                         unassigned.getControllerId()))
@@ -467,7 +464,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andExpect(status().isOk());
 
         final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
-        assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
+        assertThat(updated.stream().map(Target::getControllerId).toList())
                 .containsOnly(assigned.getControllerId());
     }
 
@@ -484,7 +481,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final Target unassigned0 = targets.get(1);
         final Target unassigned1 = targets.get(2);
 
-        targetManagement.assignTag(targets.stream().map(Target::getControllerId).collect(Collectors.toList()), tag.getId());
+        targetManagement.assignTag(targets.stream().map(Target::getControllerId).toList(), tag.getId());
 
         mvc.perform(delete(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .content(JsonBuilder.toArray(Arrays.asList(unassigned0.getControllerId(), unassigned1.getControllerId())))
@@ -493,7 +490,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andExpect(status().isOk());
 
         final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
-        assertThat(updated.stream().map(Target::getControllerId).collect(Collectors.toList()))
+        assertThat(updated.stream().map(Target::getControllerId).toList())
                 .containsOnly(assigned.getControllerId());
     }
 

@@ -137,7 +137,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<MgmtTarget> updateTarget(final String targetId, final MgmtTargetRequestBody targetRest) {
         if (targetRest.getRequestAttributes() != null) {
-            if (targetRest.getRequestAttributes()) {
+            if (Boolean.TRUE.equals(targetRest.getRequestAttributes())) {
                 targetManagement.requestControllerAttributes(targetId);
             } else {
                 return ResponseEntity.badRequest().build();
@@ -336,7 +336,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                     : dsAssignment.getConfirmationRequired();
             return MgmtDeploymentRequestMapper.createAssignmentRequestBuilder(dsAssignment, targetId)
                     .setConfirmationRequired(isConfirmationRequired).build();
-        }).collect(Collectors.toList());
+        }).toList();
 
         final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
                 .assignDistributionSets(deploymentRequests);

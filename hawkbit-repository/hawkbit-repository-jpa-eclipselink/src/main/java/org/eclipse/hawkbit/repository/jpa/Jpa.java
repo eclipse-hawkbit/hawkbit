@@ -33,6 +33,8 @@ public class Jpa {
         log.info("JPA vendor: {}", JPA_VENDOR);
     }
 
+    // intentional, if it is a constant the compiler will inline it, we want to be changed with changing the JPA vendor lib
+    @SuppressWarnings("java:S3400")
     public static char nativeQueryParamPrefix() {
         return '?';
     }

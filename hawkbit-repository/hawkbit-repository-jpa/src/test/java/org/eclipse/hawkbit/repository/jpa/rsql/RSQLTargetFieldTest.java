@@ -149,12 +149,10 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     void testFilterByParameterUpdateStatus() {
         assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "==pending", 1);
         assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "!=pending", 4);
-        try {
-            assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "==noExist*", 0);
-            fail("RSQLParameterUnsupportedFieldException was expected since update status unknown");
-        } catch (final RSQLParameterUnsupportedFieldException e) {
-            // test ok - exception was excepted
-        }
+        final String rsqlNoExistStar = TargetFields.UPDATESTATUS.name() + "==noExist*";
+        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
+                .as("update status unknown")
+                .isThrownBy(() -> assertRSQLQuery(rsqlNoExistStar, 0));
         assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "=in=(pending,error)", 1);
         assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "=out=(pending,error)", 4);
     }

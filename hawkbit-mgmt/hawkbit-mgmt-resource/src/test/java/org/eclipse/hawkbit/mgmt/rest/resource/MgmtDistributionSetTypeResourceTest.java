@@ -685,14 +685,11 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
         assertThat(created2.getOptionalModuleTypes()).containsOnly(osType, runtimeType, appType);
         assertThat(created3.getMandatoryModuleTypes()).containsOnly(osType, runtimeType);
 
-        assertThat(
-                JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+        assertThat((Object)JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/distributionsettypes/" + created1.getId());
-        assertThat(
-                JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+        assertThat((Object)JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/distributionsettypes/" + created2.getId());
-        assertThat(
-                JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
+        assertThat((Object)JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/distributionsettypes/" + created3.getId());
 
         assertThat(distributionSetTypeManagement.count()).isEqualTo(7);

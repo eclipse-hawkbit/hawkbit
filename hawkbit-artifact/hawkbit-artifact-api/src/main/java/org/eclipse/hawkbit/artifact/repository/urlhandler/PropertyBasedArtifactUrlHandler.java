@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandlerProperties.UrlProtocol;
 import org.springframework.util.ObjectUtils;
@@ -87,7 +86,7 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
                 .filter(urlProtocol -> urlProtocol.getSupports().contains(api) && urlProtocol.isEnabled())
                 .map(urlProtocol -> new ArtifactUrl(urlProtocol.getProtocol().toUpperCase(), urlProtocol.getRel(),
                         generateUrl(urlProtocol, placeholder, requestUri)))
-                .collect(Collectors.toList());
+                .toList();
 
     }
 

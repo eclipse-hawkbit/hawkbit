@@ -145,19 +145,19 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
         // request coming
         // from a trustful source, like the reverse proxy.
         if (authorizedSourceIps != null) {
-            if (!(tokenDetails instanceof TenantAwareWebAuthenticationDetails)) {
+            if (tokenDetails instanceof TenantAwareWebAuthenticationDetails tenantAwareWebAuthenticationDetails) {
+                remoteAddress = tenantAwareWebAuthenticationDetails.getRemoteAddress();
+                if (authorizedSourceIps.contains(remoteAddress)) {
+                    // source ip matches the given pattern -> authenticated
+                    success = true;
+                }
+            } else {
                 // is not of type WebAuthenticationDetails, then we cannot
                 // determine the remote address!
                 log.error(
                         "Cannot determine the controller remote-ip-address based on the given authentication token - {} , token details are not TenantAwareWebAuthenticationDetails! ",
                         tokenDetails);
                 success = false;
-            } else {
-                remoteAddress = ((TenantAwareWebAuthenticationDetails) tokenDetails).getRemoteAddress();
-                if (authorizedSourceIps.contains(remoteAddress)) {
-                    // source ip matches the given pattern -> authenticated
-                    success = true;
-                }
             }
         }
 

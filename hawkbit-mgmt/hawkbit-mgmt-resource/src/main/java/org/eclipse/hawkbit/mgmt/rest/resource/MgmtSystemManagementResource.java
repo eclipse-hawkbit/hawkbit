@@ -70,8 +70,7 @@ public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi
                 .setOverallArtifactVolumeInBytes(report.getOverallArtifactVolumeInBytes())
                 .setOverallTargets(report.getOverallTargets()).setOverallTenants(report.getTenants().size());
 
-        result.setTenantStats(report.getTenants().stream().map(MgmtSystemManagementResource::convertTenant)
-                .collect(Collectors.toList()));
+        result.setTenantStats(report.getTenants().stream().map(MgmtSystemManagementResource::convertTenant).toList());
 
         return ResponseEntity.ok(result);
     }
@@ -89,7 +88,7 @@ public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi
                 .ok(cacheNames.stream().map(cacheManager::getCache)
                         .filter(Objects::nonNull)
                         .map(cache -> new MgmtSystemCache(cache.getName(), Collections.emptyList()))
-                        .collect(Collectors.toList()));
+                        .toList());
     }
 
     /**
