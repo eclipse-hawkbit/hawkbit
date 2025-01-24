@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Objects;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

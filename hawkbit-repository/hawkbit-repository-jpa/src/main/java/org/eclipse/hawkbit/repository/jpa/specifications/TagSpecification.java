@@ -13,10 +13,10 @@ import jakarta.persistence.criteria.Join;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.springframework.data.jpa.domain.Specification;
@@ -42,8 +42,7 @@ public final class TagSpecification {
 
             query.distinct(true);
 
-            return criteriaBuilder.equal(tagJoin.get(JpaDistributionSet_.id), dsId);
+            return criteriaBuilder.equal(tagJoin.get(AbstractJpaBaseEntity_.id), dsId);
         };
-
     }
 }

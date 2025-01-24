@@ -22,6 +22,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
 // id type shall have proper equals and hashCode - i.e. eligible hash set element
+@SuppressWarnings("java:S119") // better readability
 public class SelectionGrid<T, ID> extends Grid<T> {
 
     private volatile String rsqlFilter;
@@ -80,7 +81,7 @@ public class SelectionGrid<T, ID> extends Grid<T> {
         }
     }
 
-    public static abstract class EntityRepresentation<T, ID> {
+    public abstract static class EntityRepresentation<T, ID> {
 
         private final Class<T> beanType;
         private final Function<T, ID> idFn;

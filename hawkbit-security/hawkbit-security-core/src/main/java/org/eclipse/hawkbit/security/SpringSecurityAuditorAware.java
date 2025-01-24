@@ -62,11 +62,11 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
         if (authentication.getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails && tenantAwareDetails.isController()) {
             return "CONTROLLER_PLUG_AND_PLAY";
         }
-        if (authentication.getPrincipal() instanceof UserDetails) {
-            return ((UserDetails) authentication.getPrincipal()).getUsername();
+        if (authentication.getPrincipal() instanceof UserDetails userDetails) {
+            return userDetails.getUsername();
         }
-        if (authentication.getPrincipal() instanceof OidcUser) {
-            return ((OidcUser) authentication.getPrincipal()).getPreferredUsername();
+        if (authentication.getPrincipal() instanceof OidcUser oidcUser) {
+            return oidcUser.getPreferredUsername();
         }
         return authentication.getPrincipal().toString();
     }

@@ -25,7 +25,6 @@ import java.util.Set;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
@@ -358,7 +357,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         // Init artifact binary data, target and DistributionSets
         final int artifactSize = 1024;
-        final byte[] source = RandomUtils.nextBytes(artifactSize);
+        final byte[] source = randomBytes(artifactSize);
 
         // [STEP1]: Create SoftwareModuleX and add a new ArtifactX
         SoftwareModule moduleX = createSoftwareModuleWithArtifacts(osType, "modulex", "v1.0", 0);
@@ -403,7 +402,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     void deleteMultipleSoftwareModulesWhichShareAnArtifact() {
         // Init artifact binary data, target and DistributionSets
         final int artifactSize = 1024;
-        final byte[] source = RandomUtils.nextBytes(artifactSize);
+        final byte[] source = randomBytes(artifactSize);
         final Target target = testdataFactory.createTarget();
 
         // [STEP1]: Create SoftwareModuleX and add a new ArtifactX
@@ -533,9 +532,10 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         }
 
         // quota exceeded
+        final SoftwareModuleMetadataCreate metadata = entityFactory.softwareModuleMetadata().create(module.getId())
+                .key("k" + maxMetaData).value("v" + maxMetaData);
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata()
-                        .create(module.getId()).key("k" + maxMetaData).value("v" + maxMetaData)));
+                .isThrownBy(() -> softwareModuleManagement.updateMetaData(metadata));
 
         // add multiple meta data entries at once
         final SoftwareModule module2 = testdataFactory.createSoftwareModuleApp("m2");
@@ -574,12 +574,12 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final String knownValue1 = "myKnownValue1";
         final SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
 
-        softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(ah.getId()).key(knownKey1)
-                .value(knownValue1).targetVisible(true));
+        final SoftwareModuleMetadataCreate metadata = entityFactory.softwareModuleMetadata()
+                .create(ah.getId()).key(knownKey1).value(knownValue1).targetVisible(true);
+        softwareModuleManagement.updateMetaData(metadata);
 
         assertThatExceptionOfType(EntityAlreadyExistsException.class)
-                .isThrownBy(() -> softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata()
-                        .create(ah.getId()).key(knownKey1).value(knownValue1).targetVisible(true)))
+                .isThrownBy(() -> softwareModuleManagement.updateMetaData(metadata))
                 .withMessageContaining("Metadata").withMessageContaining(knownKey1);
 
         final String knownKey2 = "myKnownKey2";
@@ -587,9 +587,10 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(ah.getId()).key(knownKey2)
                 .value(knownValue1).targetVisible(false));
 
+        final SoftwareModuleMetadataCreate metadata2 = entityFactory.softwareModuleMetadata().create(ah.getId())
+                .key(knownKey2).value(knownValue1).targetVisible(true);
         assertThatExceptionOfType(EntityAlreadyExistsException.class)
-                .isThrownBy(() -> softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata()
-                        .create(ah.getId()).key(knownKey2).value(knownValue1).targetVisible(true)))
+                .isThrownBy(() -> softwareModuleManagement.updateMetaData(metadata2))
                 .withMessageContaining("Metadata").withMessageContaining(knownKey2);
     }
 
@@ -746,36 +747,32 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Artifacts of a locked SM can't be modified. Expected behaviour is to throw an exception and to do not modify them.")
     void lockSoftwareModuleApplied() {
-        final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("sm-1");
+        final Long softwareModuleId = testdataFactory.createSoftwareModule("sm-1").getId();
         artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(new byte[] { 1 }), softwareModule.getId(),
-                        "artifact1", false, 1));
-        final int artifactCount = softwareModuleManagement.get(softwareModule.getId()).get().getArtifacts().size();
-        assertThat(artifactCount).isNotEqualTo(0);
-        softwareModuleManagement.lock(softwareModule.getId());
-        assertThat(
-                softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(false))
+                new ArtifactUpload(new ByteArrayInputStream(new byte[] { 1 }), softwareModuleId, "artifact1", false, 1));
+        final int artifactCount = softwareModuleManagement.get(softwareModuleId).get().getArtifacts().size();
+        assertThat(artifactCount).isNotZero();
+        softwareModuleManagement.lock(softwareModuleId);
+        assertThat(softwareModuleManagement.get(softwareModuleId).map(SoftwareModule::isLocked).orElse(false))
                 .isTrue();
 
         // try add
+        final ArtifactUpload artifactUpload = new ArtifactUpload(new ByteArrayInputStream(new byte[] { 2 }), softwareModuleId, "artifact2", false, 1);
         assertThatExceptionOfType(LockedException.class)
                 .as("Attempt to modify a locked SM artifacts should throw an exception")
-                .isThrownBy(() -> artifactManagement.create(
-                        new ArtifactUpload(new ByteArrayInputStream(new byte[] { 2 }), softwareModule.getId(),
-                                "artifact2", false, 1)));
-        assertThat(softwareModuleManagement.get(softwareModule.getId()).get().getArtifacts().size())
+                .isThrownBy(() -> artifactManagement.create(artifactUpload));
+        assertThat(softwareModuleManagement.get(softwareModuleId).get().getArtifacts())
                 .as("Artifacts shall not be added to a locked SM.")
-                .isEqualTo(artifactCount);
+                .hasSize(artifactCount);
 
         // try remove
-        final long artifactId = softwareModuleManagement.get(softwareModule.getId()).get()
-                .getArtifacts().stream().findFirst().get().getId();
+        final long artifactId = softwareModuleManagement.get(softwareModuleId).get().getArtifacts().stream().findFirst().get().getId();
         assertThatExceptionOfType(LockedException.class)
                 .as("Attempt to modify a locked SM artifacts should throw an exception")
                 .isThrownBy(() -> artifactManagement.delete(artifactId));
-        assertThat(softwareModuleManagement.get(softwareModule.getId()).get().getArtifacts().size())
+        assertThat(softwareModuleManagement.get(softwareModuleId).get().getArtifacts())
                 .as("Artifact shall not be removed from a locked SM.")
-                .isEqualTo(artifactCount);
+                .hasSize(artifactCount);
         assertThat(artifactManagement.get(artifactId))
                 .as("Artifact shall not be removed if belongs to a locked SM.")
                 .isPresent();
@@ -786,7 +783,7 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     void lockedContainingDistributionSetApplied() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
         final List<SoftwareModule> modules = distributionSet.getModules().stream().toList();
-        assertThat(modules.size()).isGreaterThan(1);
+        assertThat(modules).hasSizeGreaterThan(1);
 
         // try delete while DS is not locked
         softwareModuleManagement.delete(modules.get(0).getId());
@@ -797,9 +794,10 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                 .isTrue();
 
         // try delete SM of a locked DS
+        final Long moduleId = modules.get(1).getId();
         assertThatExceptionOfType(LockedException.class)
                 .as("Attempt to delete a software module of a locked DS should throw an exception")
-                .isThrownBy(() -> softwareModuleManagement.delete(modules.get(1).getId()));
+                .isThrownBy(() -> softwareModuleManagement.delete(moduleId));
     }
 
     private Action assignSet(final JpaTarget target, final JpaDistributionSet ds) {
@@ -817,7 +815,6 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                                         cb.equal(root.get(JpaAction_.target).get(JpaTarget_.id), target.getId()),
                                         cb.equal(root.get(JpaAction_.distributionSet).get(JpaDistributionSet_.id), ds.getId())),
                         PAGE).getContent().get(0);
-        ;
         assertThat(action).isNotNull();
         return action;
     }

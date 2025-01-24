@@ -260,13 +260,12 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final TargetTag targetTag = targetTagManagement.create(entityFactory.tag().create().name("Tag1"));
 
         final List<Target> assignedTargets = targetManagement.assignTag(assignTarget, targetTag.getId());
-        assertThat(assignedTargets.size()).as("Assigned targets are wrong").isEqualTo(4);
-        assignedTargets.forEach(target -> assertThat(
-                getTargetTags(target.getControllerId()).size()).isEqualTo(1));
+        assertThat(assignedTargets).as("Assigned targets are wrong").hasSize(4);
+        assignedTargets.forEach(target -> assertThat(getTargetTags(target.getControllerId())).hasSize(1));
 
         final TargetTag findTargetTag = targetTagManagement.getByName("Tag1").orElseThrow(IllegalStateException::new);
-        assertThat(assignedTargets.size()).as("Assigned targets are wrong")
-                .isEqualTo(targetManagement.findByTag(PAGE, targetTag.getId()).getNumberOfElements());
+        assertThat(assignedTargets).as("Assigned targets are wrong")
+                .hasSize(targetManagement.findByTag(PAGE, targetTag.getId()).getNumberOfElements());
 
         final Target unAssignTarget = targetManagement.unassignTag(List.of("targetId123"), findTargetTag.getId()).get(0);
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
@@ -692,7 +691,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .findByFilters(PAGE, new FilterParams(null, null, null, null, Boolean.TRUE, tagNames)).getContent();
 
         assertThat(targetManagement.count()).as("Total targets").isEqualTo(50L);
-        assertThat(targetsListWithNoTag.size()).as("Targets with no tag").isEqualTo(25);
+        assertThat(targetsListWithNoTag).as("Targets with no tag").hasSize(25);
 
     }
 
@@ -1412,7 +1411,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     private void checkTargetsHaveType(final List<Target> targets, final TargetType type) {
         final List<JpaTarget> foundTargets = targetRepository
-                .findAllById(targets.stream().map(Identifiable::getId).collect(Collectors.toList()));
+                .findAllById(targets.stream().map(Identifiable::getId).toList());
         for (final Target target : foundTargets) {
             if (!type.getName().equals(type.getName())) {
                 fail(String.format("Target %s is not of type %s.", target, type));

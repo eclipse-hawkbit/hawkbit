@@ -26,16 +26,12 @@ import jakarta.validation.constraints.NotNull;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
@@ -99,7 +95,7 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasId(final Long id) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.id), id);
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(AbstractJpaBaseEntity_.id), id);
     }
 
     /**
@@ -109,7 +105,7 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasIdIn(final Collection<Long> ids) {
-        return (targetRoot, query, cb) -> targetRoot.get(JpaTarget_.id).in(ids);
+        return (targetRoot, query, cb) -> targetRoot.get(AbstractJpaBaseEntity_.id).in(ids);
     }
 
     /**
@@ -201,7 +197,7 @@ public final class TargetSpecifications {
         return (targetRoot, query, cb) -> {
             final String searchTextToLower = searchText.toLowerCase();
             return cb.or(cb.like(cb.lower(targetRoot.get(JpaTarget_.controllerId)), searchTextToLower),
-                    cb.like(cb.lower(targetRoot.get(JpaTarget_.name)), searchTextToLower));
+                    cb.like(cb.lower(targetRoot.get(AbstractJpaNamedEntity_.name)), searchTextToLower));
         };
     }
 
@@ -227,8 +223,8 @@ public final class TargetSpecifications {
             @NotNull final Long distributionId) {
         return (targetRoot, query, cb) -> cb.and(targetRoot.get(JpaTarget_.controllerId).in(tIDs),
                 cb.or(
-                        cb.notEqual(targetRoot.get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id), distributionId),
-                        cb.isNull(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet))));
+                        cb.notEqual(targetRoot.get(JpaTarget_.assignedDistributionSet).get(AbstractJpaBaseEntity_.id), distributionId),
+                        cb.isNull(targetRoot.get(JpaTarget_.assignedDistributionSet))));
     }
 
     /**
@@ -241,7 +237,7 @@ public final class TargetSpecifications {
     public static Specification<JpaTarget> hasTagName(final String tagName) {
         return (targetRoot, query, cb) -> {
             final SetJoin<JpaTarget, JpaTargetTag> join = targetRoot.join(JpaTarget_.tags);
-            return cb.equal(join.get(JpaTargetTag_.name), tagName);
+            return cb.equal(join.get(AbstractJpaNamedEntity_.name), tagName);
         };
     }
 
@@ -270,7 +266,7 @@ public final class TargetSpecifications {
      */
     public static Specification<JpaTarget> hasAssignedDistributionSet(final Long distributionSetId) {
         return (targetRoot, query, cb) -> cb.equal(
-                targetRoot.get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id), distributionSetId);
+                targetRoot.get(JpaTarget_.assignedDistributionSet).get(AbstractJpaBaseEntity_.id), distributionSetId);
     }
 
     /**
@@ -283,8 +279,8 @@ public final class TargetSpecifications {
     public static Specification<JpaTarget> hasNotDistributionSetInActions(final Long distributionSetId) {
         return (targetRoot, query, cb) -> {
             final ListJoin<JpaTarget, JpaAction> actionsJoin = targetRoot.join(JpaTarget_.actions, JoinType.LEFT);
-            actionsJoin.on(cb.equal(actionsJoin.get(JpaAction_.distributionSet).get(JpaDistributionSet_.id), distributionSetId));
-            return cb.isNull(actionsJoin.get(JpaAction_.id));
+            actionsJoin.on(cb.equal(actionsJoin.get(JpaAction_.distributionSet).get(AbstractJpaBaseEntity_.id), distributionSetId));
+            return cb.isNull(actionsJoin.get(AbstractJpaBaseEntity_.id));
         };
     }
 
@@ -323,9 +319,9 @@ public final class TargetSpecifications {
             final Subquery<Long> compatibilitySubQuery = query.subquery(Long.class);
             final Root<JpaTarget> subQueryTargetRoot = compatibilitySubQuery.from(JpaTarget.class);
 
-            compatibilitySubQuery.select(subQueryTargetRoot.get(JpaTarget_.id))
+            compatibilitySubQuery.select(subQueryTargetRoot.get(AbstractJpaBaseEntity_.id))
                     .where(cb.and(
-                            cb.equal(targetRoot.get(JpaTarget_.id), subQueryTargetRoot.get(JpaTarget_.id)),
+                            cb.equal(targetRoot.get(AbstractJpaBaseEntity_.id), subQueryTargetRoot.get(AbstractJpaBaseEntity_.id)),
                             cb.equal(getDsTypeIdPath(subQueryTargetRoot), distributionSetTypeId)));
 
             return cb.and(targetTypeNotNull, cb.not(cb.exists(compatibilitySubQuery)));
@@ -343,7 +339,7 @@ public final class TargetSpecifications {
         return (targetRoot, query, cb) -> {
             final ListJoin<JpaTarget, RolloutTargetGroup> targetGroupJoin = targetRoot
                     .join(JpaTarget_.rolloutTargetGroup);
-            return cb.equal(targetGroupJoin.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id), group);
+            return cb.equal(targetGroupJoin.get(RolloutTargetGroup_.rolloutGroup).get(AbstractJpaBaseEntity_.id), group);
         };
     }
 
@@ -357,7 +353,7 @@ public final class TargetSpecifications {
     public static Specification<JpaTarget> isInActionRolloutGroup(final Long group) {
         return (targetRoot, query, cb) -> {
             final ListJoin<JpaTarget, JpaAction> targetActionJoin = targetRoot.join(JpaTarget_.actions);
-            return cb.equal(targetActionJoin.get(JpaAction_.rolloutGroup).get(JpaRolloutGroup_.id), group);
+            return cb.equal(targetActionJoin.get(JpaAction_.rolloutGroup).get(AbstractJpaBaseEntity_.id), group);
         };
     }
 
@@ -373,7 +369,7 @@ public final class TargetSpecifications {
             final ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = targetRoot
                     .join(JpaTarget_.rolloutTargetGroup, JoinType.LEFT);
             rolloutTargetJoin.on(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup)
-                    .get(JpaRolloutGroup_.id).in(groups));
+                    .get(AbstractJpaBaseEntity_.id).in(groups));
             return cb.isNull(rolloutTargetJoin.get(RolloutTargetGroup_.target));
         };
     }
@@ -389,7 +385,7 @@ public final class TargetSpecifications {
             final ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = targetRoot
                     .join(JpaTarget_.rolloutTargetGroup, JoinType.LEFT);
             rolloutTargetJoin.on(cb.ge(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup)
-                    .get(JpaRolloutGroup_.id), groupId));
+                    .get(AbstractJpaBaseEntity_.id), groupId));
             return cb.isNull(rolloutTargetJoin.get(RolloutTargetGroup_.target));
         };
     }
@@ -406,12 +402,12 @@ public final class TargetSpecifications {
             final ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = targetRoot
                     .join(JpaTarget_.rolloutTargetGroup, JoinType.INNER);
             rolloutTargetJoin.on(
-                    cb.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id), group));
+                    cb.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup).get(AbstractJpaBaseEntity_.id), group));
 
             final ListJoin<JpaTarget, JpaAction> actionsJoin = targetRoot.join(JpaTarget_.actions, JoinType.LEFT);
-            actionsJoin.on(cb.equal(actionsJoin.get(JpaAction_.rolloutGroup).get(JpaRolloutGroup_.id), group));
+            actionsJoin.on(cb.equal(actionsJoin.get(JpaAction_.rolloutGroup).get(AbstractJpaBaseEntity_.id), group));
 
-            return cb.isNull(actionsJoin.get(JpaAction_.id));
+            return cb.isNull(actionsJoin.get(AbstractJpaBaseEntity_.id));
         };
     }
 
@@ -424,7 +420,7 @@ public final class TargetSpecifications {
      */
     public static Specification<JpaTarget> hasInstalledDistributionSet(final Long distributionSetId) {
         return (targetRoot, query, cb) -> cb.equal(
-                targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id), distributionSetId);
+                targetRoot.get(JpaTarget_.installedDistributionSet).get(AbstractJpaBaseEntity_.id), distributionSetId);
     }
 
     /**
@@ -437,7 +433,7 @@ public final class TargetSpecifications {
 
         return (targetRoot, query, cb) -> {
             final SetJoin<JpaTarget, JpaTargetTag> tags = targetRoot.join(JpaTarget_.tags, JoinType.LEFT);
-            return cb.equal(tags.get(JpaTargetTag_.id), tagId);
+            return cb.equal(tags.get(AbstractJpaBaseEntity_.id), tagId);
         };
     }
 
@@ -448,8 +444,7 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasTargetType(final long typeId) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.targetType).get(JpaTargetType_.id),
-                typeId);
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.targetType).get(AbstractJpaBaseEntity_.id), typeId);
     }
 
     /**
@@ -471,7 +466,7 @@ public final class TargetSpecifications {
      */
     public static Specification<JpaTarget> hasTargetTypeNot(final Long typeId) {
         return (targetRoot, query, cb) -> cb.or(getTargetTypeIsNullPredicate(targetRoot),
-                cb.notEqual(targetRoot.get(JpaTarget_.targetType).get(JpaTargetType_.id), typeId));
+                cb.notEqual(targetRoot.get(JpaTarget_.targetType).get(AbstractJpaBaseEntity_.id), typeId));
     }
 
     public static Specification<JpaTarget> failedActionsForRollout(final String rolloutId) {
@@ -500,28 +495,28 @@ public final class TargetSpecifications {
                             cb.gt(actionsJoin.get(JpaAction_.weight), weight),
                             cb.and(
                                     cb.equal(actionsJoin.get(JpaAction_.weight), weight),
-                                    cb.ge(actionsJoin.get(JpaAction_.ROLLOUT).get(JpaRollout_.ID), rolloutId))));
+                                    cb.ge(actionsJoin.get(JpaAction_.ROLLOUT).get(AbstractJpaBaseEntity_.ID), rolloutId))));
             // another, but probably heavier variant
 //            actionsJoin.on(
 //                    cb.or(
 //                            // in rollout
-//                            cb.equal(actionsJoin.get(JpaAction_.ROLLOUT).get(JpaRollout_.ID), rolloutId),
+//                            cb.equal(actionsJoin.get(JpaAction_.ROLLOUT).get(AbstractJpaBaseEntity_.ID), rolloutId),
 //                            // or, in newer rollout with greater or equal weight
 //                            cb.and(
-//                                    cb.gt(actionsJoin.get(JpaAction_.ROLLOUT).get(JpaRollout_.ID), rolloutId),
+//                                    cb.gt(actionsJoin.get(JpaAction_.ROLLOUT).get(AbstractJpaBaseEntity_.ID), rolloutId),
 //                                    cb.ge(actionsJoin.get(JpaAction_.weight), weight)),
 //                            // or, in older with greater status
 //                            cb.and(
-//                                    cb.lt(actionsJoin.get(JpaAction_.ROLLOUT).get(JpaRollout_.ID), rolloutId),
+//                                    cb.lt(actionsJoin.get(JpaAction_.ROLLOUT).get(AbstractJpaBaseEntity_.ID), rolloutId),
 //                                    cb.gt(actionsJoin.get(JpaAction_.weight), weight))));
-            return cb.isNull(actionsJoin.get(JpaAction_.id));
+            return cb.isNull(actionsJoin.get(AbstractJpaBaseEntity_.id));
         };
     }
 
     private static Predicate getHasTagsPredicate(final Root<JpaTarget> targetRoot, final CriteriaBuilder cb,
             final Boolean selectTargetWithNoTag, final String[] tagNames) {
         final SetJoin<JpaTarget, JpaTargetTag> tags = targetRoot.join(JpaTarget_.tags, JoinType.LEFT);
-        final Path<String> exp = tags.get(JpaTargetTag_.name);
+        final Path<String> exp = tags.get(AbstractJpaNamedEntity_.name);
 
         final List<Predicate> hasTagsPredicates = new ArrayList<>();
         if (isNoTagActive(selectTargetWithNoTag)) {
@@ -549,6 +544,6 @@ public final class TargetSpecifications {
 
     private static Path<Long> getDsTypeIdPath(final Root<JpaTarget> root) {
         final Join<JpaTarget, JpaTargetType> targetTypeJoin = root.join(JpaTarget_.targetType, JoinType.LEFT);
-        return targetTypeJoin.join(JpaTargetType_.distributionSetTypes, JoinType.LEFT).get(JpaDistributionSetType_.id);
+        return targetTypeJoin.join(JpaTargetType_.distributionSetTypes, JoinType.LEFT).get(AbstractJpaBaseEntity_.id);
     }
 }

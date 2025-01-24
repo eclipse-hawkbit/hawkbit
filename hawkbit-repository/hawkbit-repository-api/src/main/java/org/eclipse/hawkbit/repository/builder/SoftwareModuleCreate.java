@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
-import java.util.Optional;
-
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -62,8 +60,8 @@ public interface SoftwareModuleCreate {
      * @param type for {@link SoftwareModule#getType()}
      * @return updated builder instance
      */
-    default SoftwareModuleCreate type(final SoftwareModuleType type) {
-        return type(Optional.ofNullable(type).map(SoftwareModuleType::getKey).orElse(null));
+    default SoftwareModuleCreate type(@NotNull final SoftwareModuleType type) {
+        return type(type.getKey());
     }
 
     /**

@@ -11,10 +11,11 @@ package org.eclipse.hawkbit.repository.jpa.specifications;
 
 import jakarta.persistence.criteria.ListJoin;
 
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedEntity_;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedVersionedEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -38,13 +39,13 @@ public final class SoftwareModuleSpecification {
      * @return the {@link SoftwareModule} {@link Specification}
      */
     public static Specification<JpaSoftwareModule> byId(final Long swModuleId) {
-        return (swRoot, query, cb) -> cb.equal(swRoot.get(JpaSoftwareModule_.id), swModuleId);
+        return (swRoot, query, cb) -> cb.equal(swRoot.get(AbstractJpaBaseEntity_.id), swModuleId);
     }
 
     public static Specification<JpaSoftwareModule> byAssignedToDs(final Long dsId) {
         return (swRoot, query, cb) -> {
             final ListJoin<JpaSoftwareModule, JpaDistributionSet> join = swRoot.join(JpaSoftwareModule_.assignedTo);
-            return cb.equal(join.get(JpaDistributionSet_.ID), dsId);
+            return cb.equal(join.get(AbstractJpaBaseEntity_.ID), dsId);
         };
     }
 
@@ -68,8 +69,8 @@ public final class SoftwareModuleSpecification {
      */
     public static Specification<JpaSoftwareModule> likeNameAndVersion(final String name, final String version) {
         return (smRoot, query, cb) -> cb.and(
-                cb.like(cb.lower(smRoot.get(JpaSoftwareModule_.name)), name.toLowerCase()),
-                cb.like(cb.lower(smRoot.get(JpaSoftwareModule_.version)), version.toLowerCase()));
+                cb.like(cb.lower(smRoot.get(AbstractJpaNamedEntity_.name)), name.toLowerCase()),
+                cb.like(cb.lower(smRoot.get(AbstractJpaNamedVersionedEntity_.version)), version.toLowerCase()));
     }
 
     /**
@@ -81,7 +82,7 @@ public final class SoftwareModuleSpecification {
      */
     public static Specification<JpaSoftwareModule> equalType(final Long type) {
         return (smRoot, query, cb) -> cb.equal(
-                smRoot.get(JpaSoftwareModule_.type).get(JpaSoftwareModuleType_.id), type);
+                smRoot.get(JpaSoftwareModule_.type).get(AbstractJpaBaseEntity_.id), type);
     }
 
     /**

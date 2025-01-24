@@ -26,7 +26,7 @@ import org.springframework.util.ReflectionUtils;
  */
 @Feature("Unit Tests - Security")
 @Story("Permission Test")
-public final class SpPermissionTest {
+final class SpPermissionTest {
 
     @Test
     @Description("Try to double check if all permissions works as expected")
@@ -42,7 +42,8 @@ public final class SpPermissionTest {
             }
         });
         final Collection<String> allAuthorities = SpPermission.getAllAuthorities();
-        assertThat(allAuthorities).hasSize(20);
-        assertThat(allAuthorities).containsAll(expected);
+        assertThat(allAuthorities)
+                .hasSize(20)
+                .containsAll(expected);
     }
 }
