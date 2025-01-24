@@ -181,6 +181,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.lang.NonNull;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -702,16 +703,26 @@ public class RepositoryApplicationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    RolloutManagement rolloutManagement(final TargetManagement targetManagement,
-            final DistributionSetManagement distributionSetManagement, final EventPublisherHolder eventPublisherHolder,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
+    RolloutManagement rolloutManagement(
+            final RolloutRepository rolloutRepository,
+            final RolloutGroupRepository rolloutGroupRepository,
             final RolloutApprovalStrategy rolloutApprovalStrategy,
+            final StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction,
+            final RolloutStatusCache rolloutStatusCache,
+            final ActionRepository actionRepository,
+            final TargetManagement targetManagement,
+            final DistributionSetManagement distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext,
-            final ContextAware contextAware) {
-        return new JpaRolloutManagement(targetManagement, distributionSetManagement, eventPublisherHolder,
-                virtualPropertyReplacer, properties.getDatabase(), rolloutApprovalStrategy,
-                tenantConfigurationManagement, systemSecurityContext, contextAware);
+            final QuotaManagement quotaManagement,
+            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
+            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final JpaProperties properties,
+            final RepositoryProperties repositoryProperties) {
+        return new JpaRolloutManagement(rolloutRepository, rolloutGroupRepository, rolloutApprovalStrategy,
+                startNextRolloutGroupAction, rolloutStatusCache, actionRepository, targetManagement,
+                distributionSetManagement, tenantConfigurationManagement, quotaManagement, afterCommit,
+                eventPublisherHolder, virtualPropertyReplacer, systemSecurityContext, contextAware, properties.getDatabase(),
+                repositoryProperties);
     }
 
     /**
@@ -809,8 +820,14 @@ public class RepositoryApplicationConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    EntityFactory entityFactory() {
-        return new JpaEntityFactory();
+    EntityFactory entityFactory(
+            final TargetBuilder targetBuilder, final TargetTypeBuilder targetTypeBuilder,
+            final TargetFilterQueryBuilder targetFilterQueryBuilder,
+            final SoftwareModuleBuilder softwareModuleBuilder, final SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder,
+            final DistributionSetBuilder distributionSetBuilder, final DistributionSetTypeBuilder distributionSetTypeBuilder,
+            final RolloutBuilder rolloutBuilder) {
+        return new JpaEntityFactory(targetBuilder, targetTypeBuilder, targetFilterQueryBuilder, softwareModuleBuilder,
+                softwareModuleMetadataBuilder, distributionSetBuilder, distributionSetTypeBuilder, rolloutBuilder);
     }
 
     /**

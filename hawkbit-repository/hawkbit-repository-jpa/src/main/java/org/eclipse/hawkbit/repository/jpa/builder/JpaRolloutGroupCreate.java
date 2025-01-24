@@ -33,17 +33,8 @@ public class JpaRolloutGroupCreate extends AbstractRolloutGroupCreate<RolloutGro
 
     /**
      * Set the Success And Error conditions for the rollout group
-     *
-     * @param group The Rollout group
-     * @param successCondition The Rollout group success condition
-     * @param successConditionExp The Rollout group success expression
-     * @param successAction The Rollout group success action
-     * @param successActionExp The Rollout group success action expression
-     * @param errorCondition The Rollout group error condition
-     * @param errorConditionExp The Rollout group error expression
-     * @param errorAction The Rollout group error action
-     * @param errorActionExp The Rollout group error action expression
      */
+    @SuppressWarnings("java:S107")
     public static void addSuccessAndErrorConditionsAndActions(final JpaRolloutGroup group,
             final RolloutGroup.RolloutGroupSuccessCondition successCondition, final String successConditionExp,
             final RolloutGroup.RolloutGroupSuccessAction successAction, final String successActionExp,
