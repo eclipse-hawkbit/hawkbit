@@ -52,6 +52,7 @@ import org.springframework.util.CollectionUtils;
 @Slf4j
 public class RsqlParserValidationOracle implements RsqlValidationOracle {
 
+    @SuppressWarnings("java:S1872") // intentionally don't use class but name - class could be unavailable
     @Override
     public ValidationOracleContext suggest(final String rsqlQuery, final int cursorPosition) {
         final List<SuggestToken> expectedTokens = new ArrayList<>();
@@ -149,7 +150,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
             final int currentQueryLength = rsqlQuery.length() - 1;
             final Collection<String> tokenImages = TokenDescription.getTokenImage(TokenDescription.COMPARATOR);
             return tokenImages.stream().map(tokenImage -> new SuggestToken(currentQueryLength,
-                    currentQueryLength + tokenImage.length(), null, tokenImage)).collect(Collectors.toList());
+                    currentQueryLength + tokenImage.length(), null, tokenImage)).toList();
         }
 
         return Collections.emptyList();
@@ -213,8 +214,8 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
     }
 
     private static ParseException findParseException(final Throwable e) {
-        if (e instanceof ParseException) {
-            return (ParseException) e;
+        if (e instanceof ParseException parseException) {
+            return parseException;
         } else if (e.getCause() != null) {
             return findParseException(e.getCause());
         }
@@ -306,15 +307,15 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
                 final String tokenImageName) {
             return FIELD_NAMES.stream()
                     .map(field -> new SuggestToken(beginToken, endToken, tokenImageName, field.toLowerCase()))
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
         private static List<SuggestToken> toSubSuggestToken(final int beginToken, final int endToken,
                 final String topToken, final String tokenImageName) {
             return Arrays.stream(TargetFields.values()).filter(field -> field.toString().equalsIgnoreCase(topToken))
                     .map(TargetFields::getSubEntityAttributes).flatMap(List::stream)
-                    .map(subentity -> new SuggestToken(beginToken, endToken, tokenImageName, subentity))
-                    .collect(Collectors.toList());
+                    .map(subEntity -> new SuggestToken(beginToken, endToken, tokenImageName, subEntity))
+                    .toList();
         }
 
         private static boolean containsValue(final String imageName) {

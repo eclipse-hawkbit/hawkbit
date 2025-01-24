@@ -28,14 +28,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 @Feature("Unit Tests - Repository")
 @Story("Security Test")
-public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
+class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
 
     // if some methods are to be excluded
     private static final Set<Method> METHOD_SECURITY_EXCLUSION = new HashSet<>();
 
     @Test
     @Description("Verifies that repository methods are @PreAuthorize annotated")
-    public void repositoryManagementMethodsArePreAuthorizedAnnotated() {
+    void repositoryManagementMethodsArePreAuthorizedAnnotated() {
         final String packageName = getClass().getPackage().getName();
         try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {
             final List<? extends Class<?>> matchingClasses = scanResult.getAllClasses()
@@ -59,7 +59,7 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
      * checked. The following methods are excluded due inherited from
      * {@link Object}, like equals() or toString().
      *
-     * @param clazz the class to retrieve the public declared methods
+     * @param clazz the class to retrieve the declared methods
      */
     private static void assertDeclaredMethodsContainsPreAuthorizeAnnotations(final Class<?> clazz) {
         final Method[] declaredMethods = clazz.getDeclaredMethods();
@@ -72,7 +72,7 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
             }
             final PreAuthorize annotation = method.getAnnotation(PreAuthorize.class);
             assertThat(annotation)
-                    .as("The public method " + method.getName() + " in class " + clazz.getName() +
+                    .as("The method " + method.getName() + " in class " + clazz.getName() +
                             " is not annotated with @PreAuthorize, security leak?")
                     .isNotNull();
         }

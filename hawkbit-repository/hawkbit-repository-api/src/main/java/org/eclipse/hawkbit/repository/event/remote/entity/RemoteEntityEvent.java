@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
@@ -26,6 +27,7 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
  * @param <E> the type of the entity
  */
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EqualsAndHashCode(callSuper = true)
 @Slf4j
 public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteIdEvent {
 

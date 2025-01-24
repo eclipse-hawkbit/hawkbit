@@ -203,7 +203,7 @@ public class RolloutStatusCache {
         return ids.stream()
                 .map(id -> cache.get(id, CachedTotalTargetCountActionStatus.class))
                 .filter(Objects::nonNull)
-                .collect(Collectors.toMap(CachedTotalTargetCountActionStatus::getId, CachedTotalTargetCountActionStatus::getStatus));
+                .collect(Collectors.toMap(CachedTotalTargetCountActionStatus::id, CachedTotalTargetCountActionStatus::status));
     }
 
     private List<TotalTargetCountActionStatus> retrieveFromCache(final Long id, @NotNull final Cache cache) {
@@ -213,7 +213,7 @@ public class RolloutStatusCache {
             return Collections.emptyList();
         }
 
-        return cacheItem.getStatus();
+        return cacheItem.status();
     }
 
     private void putIntoCache(final Long id, final List<TotalTargetCountActionStatus> status,
@@ -233,22 +233,5 @@ public class RolloutStatusCache {
         return Objects.requireNonNull(cacheManager.getCache(CACHE_GR_NAME), "Cache '" + CACHE_RO_NAME + "' is null!");
     }
 
-    private static final class CachedTotalTargetCountActionStatus {
-
-        private final long id;
-        private final List<TotalTargetCountActionStatus> status;
-
-        private CachedTotalTargetCountActionStatus(final long id, final List<TotalTargetCountActionStatus> status) {
-            this.id = id;
-            this.status = status;
-        }
-
-        public long getId() {
-            return id;
-        }
-
-        public List<TotalTargetCountActionStatus> getStatus() {
-            return status;
-        }
-    }
+    private record CachedTotalTargetCountActionStatus(long id, List<TotalTargetCountActionStatus> status) {}
 }

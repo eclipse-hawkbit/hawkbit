@@ -11,6 +11,9 @@ package org.eclipse.hawkbit.repository.jpa.specifications;
 
 import jakarta.persistence.criteria.Predicate;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -19,14 +22,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.query.QueryUtils;
 
 /**
- * Specifications class for {@link Rollout}s. The class provides Spring Data
- * JPQL Specifications.
+ * Specifications class for {@link Rollout}s. The class provides Spring Data JPQL Specifications.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class RolloutSpecification {
-
-    private RolloutSpecification() {
-        // utility class
-    }
 
     /**
      * {@link Specification} for retrieving {@link Rollout}s by its <code>deleted</code> attribute.
@@ -54,7 +53,7 @@ public final class RolloutSpecification {
         return (rolloutRoot, query, criteriaBuilder) -> {
             final String searchTextToLower = searchText.toLowerCase();
             return criteriaBuilder.and(
-                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(JpaRollout_.name)), searchTextToLower),
+                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(AbstractJpaNamedEntity_.name)), searchTextToLower),
                     criteriaBuilder.equal(rolloutRoot.get(JpaRollout_.deleted), isDeleted));
         };
     }

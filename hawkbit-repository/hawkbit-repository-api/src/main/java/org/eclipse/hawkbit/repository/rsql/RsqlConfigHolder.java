@@ -40,8 +40,13 @@ public final class RsqlConfigHolder {
      */
     @Value("${hawkbit.rsql.caseInsensitiveDB:false}")
     private boolean caseInsensitiveDB;
-    @Autowired
+
     private RsqlVisitorFactory rsqlVisitorFactory;
+
+    @Autowired
+    public void setRsqlVisitorFactory(final RsqlVisitorFactory rsqlVisitorFactory) {
+        this.rsqlVisitorFactory = rsqlVisitorFactory;
+    }
 
     /**
      * @deprecated in favour of G2 RSQL visitor. since 0.6.0

@@ -30,11 +30,11 @@ import org.junit.jupiter.api.Test;
  */
 @Feature("Component Tests - Repository")
 @Story("Test RolloutGroupCreatedEvent and RolloutGroupUpdatedEvent")
-public class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<RolloutGroup> {
+class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<RolloutGroup> {
 
     @Test
     @Description("Verifies that the rollout group entity reloading by remote created event works")
-    public void testRolloutGroupCreatedEvent() {
+    void testRolloutGroupCreatedEvent() {
         final RolloutGroupCreatedEvent createdEvent = (RolloutGroupCreatedEvent) assertAndCreateRemoteEvent(
                 RolloutGroupCreatedEvent.class);
         assertThat(createdEvent.getRolloutId()).isNotNull();
@@ -42,7 +42,7 @@ public class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<Rollout
 
     @Test
     @Description("Verifies that the rollout group entity reloading by remote updated event works")
-    public void testRolloutGroupUpdatedEvent() {
+    void testRolloutGroupUpdatedEvent() {
         assertAndCreateRemoteEvent(RolloutGroupUpdatedEvent.class);
     }
 
