@@ -52,6 +52,7 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata_;
@@ -104,31 +105,20 @@ import org.springframework.validation.annotation.Validated;
 public class JpaTargetManagement implements TargetManagement {
 
     private final EntityManager entityManager;
-
     private final DistributionSetManagement distributionSetManagement;
-
     private final QuotaManagement quotaManagement;
-
     private final TargetRepository targetRepository;
-
     private final TargetTypeRepository targetTypeRepository;
-
     private final TargetMetadataRepository targetMetadataRepository;
-
     private final RolloutGroupRepository rolloutGroupRepository;
-
     private final TargetFilterQueryRepository targetFilterQueryRepository;
-
     private final TargetTagRepository targetTagRepository;
-
     private final EventPublisherHolder eventPublisherHolder;
-
     private final TenantAware tenantAware;
-
     private final VirtualPropertyReplacer virtualPropertyReplacer;
-
     private final Database database;
 
+    @SuppressWarnings("java:S107")
     public JpaTargetManagement(final EntityManager entityManager,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
@@ -875,7 +865,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private Specification<JpaTargetMetadata> metadataByTargetIdSpec(final Long targetId) {
-        return (root, query, cb) -> cb.equal(root.get(JpaTargetMetadata_.target).get(JpaTarget_.id), targetId);
+        return (root, query, cb) -> cb.equal(root.get(JpaTargetMetadata_.target).get(AbstractJpaBaseEntity_.id), targetId);
     }
 
     private List<Specification<JpaTarget>> buildSpecificationList(final FilterParams filterParams) {

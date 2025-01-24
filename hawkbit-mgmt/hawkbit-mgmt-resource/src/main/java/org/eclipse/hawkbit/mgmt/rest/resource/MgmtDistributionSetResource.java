@@ -87,6 +87,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
     private final TenantConfigHelper tenantConfigHelper;
 
+    @SuppressWarnings("java:S107")
     MgmtDistributionSetResource(
             final SoftwareModuleManagement softwareModuleManagement,
             final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,

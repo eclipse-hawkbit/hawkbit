@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -54,7 +53,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 @Feature("Component Tests - Management API")
 @Story("Distribution Set Tag Resource")
-public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegrationTest {
+class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String DISTRIBUTIONSETTAGS_ROOT = "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/";
     private static final Random RND = new Random();
@@ -62,7 +61,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     @Test
     @Description("Verifies that a paged result list of DS tags reflects the content on the repository side.")
     @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
-    public void getDistributionSetTags() throws Exception {
+    void getDistributionSetTags() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
         final DistributionSetTag assigned = tags.get(0);
         final DistributionSetTag unassigned = tags.get(1);
@@ -82,19 +81,16 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Handles the GET request of retrieving all distribution set tags based by parameter")
-    public void getDistributionSetTagsWithParameters() throws Exception {
-        final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
-        final DistributionSetTag assigned = tags.get(0);
-        final DistributionSetTag unassigned = tags.get(1);
-        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
-                        + "?limit=10&sort=name:ASC&offset=0&q=name==DsTag"))
+    void getDistributionSetTagsWithParameters() throws Exception {
+        testdataFactory.createDistributionSetTags(2);
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "?limit=10&sort=name:ASC&offset=0&q=name==DsTag"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
     }
 
     @Test
     @Description("Verifies that a paged result list of DS tags reflects the content on the repository side when filtered by distribution set id.")
-    public void getDistributionSetTagsByDistributionSetId() throws Exception {
+    void getDistributionSetTagsByDistributionSetId() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
         final DistributionSetTag tag1 = tags.get(0);
         final DistributionSetTag tag2 = tags.get(1);
@@ -133,7 +129,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Verifies that a paged result list of DS tags reflects the content on the repository side when filtered by distribution set id field AND tag field.")
-    public void getDistributionSetTagsByDistributionSetIdAndTagDescription() throws Exception {
+    void getDistributionSetTagsByDistributionSetIdAndTagDescription() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
         final DistributionSetTag tag1 = tags.get(0);
         final DistributionSetTag tag2 = tags.get(1);
@@ -162,7 +158,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     @Test
     @Description("Verifies that a single result of a DS tag reflects the content on the repository side.")
     @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
-    public void getDistributionSetTag() throws Exception {
+    void getDistributionSetTag() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
         final DistributionSetTag assigned = tags.get(0);
 
@@ -180,7 +176,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     @Test
     @Description("Verifies that created DS tags are stored in the repository as send to the API.")
     @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
-    public void createDistributionSetTags() throws Exception {
+    void createDistributionSetTags() throws Exception {
         final Tag tagOne = entityFactory.tag().create().colour("testcol1").description("its a test1").name("thetest1")
                 .build();
         final Tag tagTwo = entityFactory.tag().create().colour("testcol2").description("its a test2").name("thetest2")
@@ -212,7 +208,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetTagUpdatedEvent.class, count = 1) })
-    public void updateDistributionSetTag() throws Exception {
+    void updateDistributionSetTag() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(1);
         final DistributionSetTag original = tags.get(0);
 
@@ -241,7 +237,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetTagDeletedEvent.class, count = 1) })
-    public void deleteDistributionSetTag() throws Exception {
+    void deleteDistributionSetTag() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(1);
         final DistributionSetTag original = tags.get(0);
 
@@ -258,11 +254,11 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 5),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 5) })
-    public void getAssignedDistributionSets() throws Exception {
+    void getAssignedDistributionSets() throws Exception {
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final int setsAssigned = 5;
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
-        distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()), tag.getId());
+        distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).toList(), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned"))
                 .andDo(MockMvcResultPrinter.print())
@@ -278,12 +274,12 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 5),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 5) })
-    public void getAssignedDistributionSetsWithPagingLimitRequestParameter() throws Exception {
+    void getAssignedDistributionSetsWithPagingLimitRequestParameter() throws Exception {
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final int setsAssigned = 5;
         final int limitSize = 1;
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
-        distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()), tag.getId());
+        distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).toList(), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
@@ -300,14 +296,14 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 5),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 5) })
-    public void getAssignedDistributionSetsWithPagingLimitAndOffsetRequestParameter() throws Exception {
+    void getAssignedDistributionSetsWithPagingLimitAndOffsetRequestParameter() throws Exception {
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final int setsAssigned = 5;
         final int offsetParam = 2;
         final int expectedSize = setsAssigned - offsetParam;
 
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
-        distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()), tag.getId());
+        distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).toList(), tag.getId());
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
@@ -325,7 +321,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 1) })
-    public void assignDistributionSet() throws Exception {
+    void assignDistributionSet() throws Exception {
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final DistributionSet set = testdataFactory.createDistributionSetsWithoutModules(1).get(0);
 
@@ -335,8 +331,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .andExpect(status().isOk());
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
-        assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
-                .containsOnly(set.getId());
+        assertThat(updated.stream().map(DistributionSet::getId).toList()).containsOnly(set.getId());
     }
 
     @Test
@@ -345,20 +340,20 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2) })
-    public void assignDistributionSets() throws Exception {
+    void assignDistributionSets() throws Exception {
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(2);
 
         mvc.perform(
                         put(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
-                                .content(JsonBuilder.toArray(sets.stream().map(DistributionSet::getId).collect(Collectors.toList())))
+                                .content(JsonBuilder.toArray(sets.stream().map(DistributionSet::getId).toList()))
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
-        assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
-                .containsAll(sets.stream().map(DistributionSet::getId).collect(Collectors.toList()));
+        assertThat(updated.stream().map(DistributionSet::getId).toList())
+                .containsAll(sets.stream().map(DistributionSet::getId).toList());
     }
 
     @Test
@@ -367,14 +362,14 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 3) })
-    public void unassignDistributionSet() throws Exception {
+    void unassignDistributionSet() throws Exception {
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final int setsAssigned = 2;
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(setsAssigned);
         final DistributionSet assigned = sets.get(0);
         final DistributionSet unassigned = sets.get(1);
 
-        distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).collect(Collectors.toList()), tag.getId());
+        distributionSetManagement.assignTag(sets.stream().map(BaseEntity::getId).toList(), tag.getId());
 
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned/" +
                         unassigned.getId()))
@@ -382,7 +377,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .andExpect(status().isOk());
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
-        assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
+        assertThat(updated.stream().map(DistributionSet::getId).toList())
                 .containsOnly(assigned.getId());
     }
 
@@ -392,14 +387,14 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 5) })
-    public void unassignDistributionSets() throws Exception {
+    void unassignDistributionSets() throws Exception {
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(3);
         final DistributionSet assigned = sets.get(0);
         final DistributionSet unassigned0 = sets.get(1);
         final DistributionSet unassigned1 = sets.get(2);
 
-        distributionSetManagement.assignTag(sets.stream().map(DistributionSet::getId).collect(Collectors.toList()), tag.getId());
+        distributionSetManagement.assignTag(sets.stream().map(DistributionSet::getId).toList(), tag.getId());
 
         mvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .content(JsonBuilder.toArray(List.of(unassigned0.getId(), unassigned1.getId())))
@@ -408,7 +403,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .andExpect(status().isOk());
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(tag.getId(), PAGE).getContent();
-        assertThat(updated.stream().map(DistributionSet::getId).collect(Collectors.toList()))
+        assertThat(updated.stream().map(DistributionSet::getId).toList())
                 .containsOnly(assigned.getId());
     }
 
@@ -417,7 +412,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     @ExpectEvents({
             @Expect(type = DistributionSetTagCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2) })
-    public void assignDistributionSetsNotFound() throws Exception {
+    void assignDistributionSetsNotFound() throws Exception {
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final List<Long> sets = testdataFactory.createDistributionSetsWithoutModules(2).stream().map(DistributionSet::getId).toList();
         final List<Long> missing = new ArrayList<>();

@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Deprecated(forRemoval = true, since = "0.6.0")
+@SuppressWarnings("java:S1133") // will be removed at some point
 public class MgmtDistributionSetTagAssigmentResult {
 
     @JsonProperty
