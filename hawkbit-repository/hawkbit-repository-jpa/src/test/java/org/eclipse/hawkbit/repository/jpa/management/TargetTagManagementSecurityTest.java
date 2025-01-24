@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 @Slf4j
 @Feature("SecurityTests - TargetTagManagement")
 @Story("SecurityTests TargetTagManagement")
-public class TargetTagManagementSecurityTest extends AbstractJpaIntegrationTest {
+class TargetTagManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")

@@ -26,7 +26,7 @@ import org.springframework.data.domain.Sort.Order;
 
 @Feature("Component Tests - Management API")
 @Story("Sorting parameter")
-public class SortUtilityTest {
+class SortUtilityTest {
 
     private static final String SORT_PARAM_1 = "NAME:ASC";
     private static final String SORT_PARAM_2 = "NAME:ASC, DESCRIPTION:DESC";
@@ -38,42 +38,43 @@ public class SortUtilityTest {
 
     @Test
     @Description("Ascending sorting based on name.")
-    public void parseSortParam1() {
+    void parseSortParam1() {
         final List<Order> parse = SortUtility.parse(TargetFields.class, SORT_PARAM_1);
         assertThat(parse).as("Count of parsing parameter").hasSize(1);
     }
 
     @Test
     @Description("Ascending sorting based on name and descending sorting based on description.")
-    public void parseSortParam2() {
+    void parseSortParam2() {
         final List<Order> parse = SortUtility.parse(TargetFields.class, SORT_PARAM_2);
         assertThat(parse).as("Count of parsing parameter").hasSize(2);
     }
 
     @Test
     @Description("Sorting with wrong syntax leads to SortParameterSyntaxErrorException.")
-    public void parseWrongSyntaxParam() {
+    void parseWrongSyntaxParam() {
         assertThrows(SortParameterSyntaxErrorException.class,
                 () -> SortUtility.parse(TargetFields.class, SYNTAX_FAILURE_SORT_PARAM));
     }
 
     @Test
     @Description("Sorting based on name with case sensitive is possible.")
-    public void parsingIsNotCaseSensitive() {
+    @SuppressWarnings("squid:S2699") // assert no error
+    void parsingIsNotCaseSensitive() {
         SortUtility.parse(TargetFields.class, CASE_INSENSITIVE_DIRECTION_PARAM);
         SortUtility.parse(TargetFields.class, CASE_INSENSITIVE_DIRECTION_PARAM_1);
     }
 
     @Test
     @Description("Sorting with unknown direction order leads to SortParameterUnsupportedDirectionException.")
-    public void parseWrongDirectionParam() {
+    void parseWrongDirectionParam() {
         assertThrows(SortParameterUnsupportedDirectionException.class,
                 () -> SortUtility.parse(TargetFields.class, WRONG_DIRECTION_PARAM));
     }
 
     @Test
     @Description("Sorting with unknown field leads to SortParameterUnsupportedFieldException.")
-    public void parseWrongFieldParam() {
+    void parseWrongFieldParam() {
         assertThrows(SortParameterUnsupportedFieldException.class,
                 () -> SortUtility.parse(TargetFields.class, WRONG_FIELD_PARAM));
     }

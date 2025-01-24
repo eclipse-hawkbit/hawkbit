@@ -20,17 +20,17 @@ import org.junit.jupiter.api.Test;
  */
 @Feature("Component Tests - Repository")
 @Story("Test TargetTagCreatedEvent and TargetTagUpdateEvent")
-public class TargetTagEventTest extends AbstractRemoteEntityEventTest<TargetTag> {
+class TargetTagEventTest extends AbstractRemoteEntityEventTest<TargetTag> {
 
     @Test
     @Description("Verifies that the target tag entity reloading by remote created event works")
-    public void testTargetTagCreatedEvent() {
+    void testTargetTagCreatedEvent() {
         assertAndCreateRemoteEvent(TargetTagCreatedEvent.class);
     }
 
     @Test
     @Description("Verifies that the target tag entity reloading by remote updated event works")
-    public void testTargetTagUpdateEventt() {
+    void testTargetTagUpdateEventt() {
         assertAndCreateRemoteEvent(TargetTagUpdatedEvent.class);
     }
 

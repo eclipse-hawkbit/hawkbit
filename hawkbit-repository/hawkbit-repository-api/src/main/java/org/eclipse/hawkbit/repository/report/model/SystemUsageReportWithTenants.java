@@ -13,9 +13,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import lombok.EqualsAndHashCode;
+
 /**
  * Bean for holding the system usage stats including tenant specific data.
  */
+@EqualsAndHashCode(callSuper = true)
 public class SystemUsageReportWithTenants extends SystemUsageReport {
 
     private final List<TenantUsage> tenants = new ArrayList<>();

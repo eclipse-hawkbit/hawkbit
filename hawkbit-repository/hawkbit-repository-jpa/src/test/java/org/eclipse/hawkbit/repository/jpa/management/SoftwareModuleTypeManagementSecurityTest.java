@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 
 @Feature("SecurityTests - SoftwareModuleTypeManagement")
 @Story("SecurityTests SoftwareModuleTypeManagement")
-public class SoftwareModuleTypeManagementSecurityTest
+class SoftwareModuleTypeManagementSecurityTest
         extends AbstractRepositoryManagementSecurityTest<SoftwareModuleType, SoftwareModuleTypeCreate, SoftwareModuleTypeUpdate> {
 
     @Override

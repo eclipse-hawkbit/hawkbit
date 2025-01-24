@@ -128,8 +128,8 @@ public class StaticAuthenticationProvider extends DaoAuthenticationProvider {
         }
 
         private static User clone(final User user) {
-            if (user instanceof TenantAwareUser) {
-                return new TenantAwareUser(user.getUsername(), user.getPassword(), user.getAuthorities(), ((TenantAwareUser) user).getTenant());
+            if (user instanceof TenantAwareUser tenantAwareUser) {
+                return new TenantAwareUser(user.getUsername(), user.getPassword(), user.getAuthorities(), tenantAwareUser.getTenant());
             } else {
                 return new User(user.getUsername(), user.getPassword(), user.getAuthorities());
             }

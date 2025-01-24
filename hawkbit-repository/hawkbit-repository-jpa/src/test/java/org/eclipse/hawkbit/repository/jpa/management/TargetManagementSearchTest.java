@@ -41,7 +41,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that targets with given target type are returned from repository.")
-    public void findTargetByTargetType() {
+    void findTargetByTargetType() {
         final TargetType testType = testdataFactory.createTargetType("testType",
                 Collections.singletonList(standardDsType));
         final List<Target> unassigned = testdataFactory.createTargets(9, "unassigned");
@@ -451,12 +451,12 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 + setA.getName() + ")";
 
         assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent())
-                .as("has number of elements")
-                .hasSize(0)
                 .as("that number is also returned by count query")
                 .hasSize((int) targetManagement.countByFilters(filterParams))
                 .as("and filter query returns the same result")
-                .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size());
+                .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size())
+                .as("has number of elements")
+                .isEmpty();
     }
 
     @Step
@@ -537,11 +537,13 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 targTagX.getName());
         final String query = "(name==*targ-C* or description==*targ-C*) and tag==" + targTagX.getName()
                 + " and (assignedds.name==" + setA.getName() + " or installedds.name==" + setA.getName() + ")";
-        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
-                .hasSize(0).as("that number is also returned by count query")
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent())
+                .as("that number is also returned by count query")
                 .hasSize((int) targetManagement.countByFilters(filterParams))
                 .as("and filter query returns the same result")
-                .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size());
+                .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size())
+                .as("has number of elements")
+                .isEmpty();
     }
 
     @Step
@@ -550,11 +552,12 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 targTagW.getName());
         final String query = "(name==*targ-A* or description==*targ-A*) and tag==" + targTagW.getName()
                 + " and (assignedds.name==" + setA.getName() + " or installedds.name==" + setA.getName() + ")";
-        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
-                .hasSize(0).as("that number is also returned by count query")
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent())
                 .hasSize((int) targetManagement.countByFilters(filterParams))
                 .as("and filter query returns the same result")
-                .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size());
+                .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size())
+                .as("has number of elements")
+                .isEmpty();
     }
 
     @Step

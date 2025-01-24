@@ -17,6 +17,8 @@ import java.io.ObjectOutputStream;
 import java.util.Base64;
 import java.util.Objects;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.context.SecurityContext;
 
 public interface SecurityContextSerializer {
@@ -74,10 +76,9 @@ public interface SecurityContextSerializer {
     /**
      * Implementation based on the java serialization.
      */
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @SuppressWarnings("java:S112") // accepted
     class JavaSerialization implements SecurityContextSerializer {
-
-        private JavaSerialization() {
-        }
 
         @Override
         public String serialize(final SecurityContext securityContext) {

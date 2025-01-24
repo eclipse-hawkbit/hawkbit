@@ -27,8 +27,11 @@ import org.springframework.context.annotation.Bean;
 public class SystemManagementCacheKeyGenerator implements CurrentTenantCacheKeyGenerator {
 
     private final ThreadLocal<String> createInitialTenant = new ThreadLocal<>();
-    @Autowired
-    private TenantAware tenantAware;
+    private final TenantAware tenantAware;
+
+    public SystemManagementCacheKeyGenerator(final TenantAware tenantAware) {
+        this.tenantAware = tenantAware;
+    }
 
     @Override
     @Bean

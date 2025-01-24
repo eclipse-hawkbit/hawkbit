@@ -306,8 +306,8 @@ public class RepositoryApplicationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    SystemManagementCacheKeyGenerator systemManagementCacheKeyGenerator() {
-        return new SystemManagementCacheKeyGenerator();
+    SystemManagementCacheKeyGenerator systemManagementCacheKeyGenerator(final TenantAware tenantAware) {
+        return new SystemManagementCacheKeyGenerator(tenantAware);
     }
 
     @Bean

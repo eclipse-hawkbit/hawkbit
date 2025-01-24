@@ -58,7 +58,7 @@ public final class SpRole {
     public static final String SYSTEM_ADMIN_HIERARCHY =
             SpPermission.SYSTEM_ADMIN + IMPLIES + TENANT_ADMIN + LINE_BREAK;
 
-    public static String DEFAULT_ROLE_HIERARCHY =
+    public static final String DEFAULT_ROLE_HIERARCHY =
             TARGET_ADMIN_HIERARCHY +
             REPOSITORY_ADMIN_HIERARCHY +
             ROLLOUT_ADMIN_HIERARCHY +

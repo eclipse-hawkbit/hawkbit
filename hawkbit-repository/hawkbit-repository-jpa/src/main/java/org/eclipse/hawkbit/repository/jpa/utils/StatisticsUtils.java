@@ -31,6 +31,7 @@ import org.springframework.util.ObjectUtils;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class StatisticsUtils {
 
+    @SuppressWarnings("java:S5164") // intentionally don't call remove. should always keep the last reported
     private static final ThreadLocal<Map<String, Double>> LAST_COUNTERS = ThreadLocal.withInitial(MapUFToString::new);
 
     // for test purposes we may want to flush the statistics and to get diff from the last get int THIS thread

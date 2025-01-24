@@ -19,6 +19,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.Query;
 import org.eclipse.hawkbit.ui.simple.view.Constants;
 
+@SuppressWarnings("java:S119") // better readability
 public class TableView<T, ID> extends Div implements Constants {
 
     protected SelectionGrid<T, ID> selectionGrid;

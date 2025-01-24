@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository.event.remote;
 import java.io.Serial;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -47,8 +46,7 @@ public class TargetAssignDistributionSetEvent extends AbstractAssignmentEvent {
     public TargetAssignDistributionSetEvent(final String tenant, final long distributionSetId, final List<Action> a,
             final String applicationId, final boolean maintenanceWindowAvailable) {
         super(distributionSetId, tenant,
-                a.stream().filter(action -> action.getDistributionSet().getId().longValue() == distributionSetId)
-                        .collect(Collectors.toList()),
+                a.stream().filter(action -> action.getDistributionSet().getId().longValue() == distributionSetId).toList(),
                 applicationId);
         this.distributionSetId = distributionSetId;
         this.maintenanceWindowAvailable = maintenanceWindowAvailable;

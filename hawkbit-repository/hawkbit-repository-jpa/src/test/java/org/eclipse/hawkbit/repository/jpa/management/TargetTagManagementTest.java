@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -58,7 +57,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     void failOnMissingDs() {
         final Collection<String> group = testdataFactory.createTargets(5).stream()
                 .map(Target::getControllerId)
-                .collect(Collectors.toList());
+                .toList();
         final TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
 
         final List<String> missing = new ArrayList<>();
@@ -75,12 +74,10 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         final Collection<String> withMissing = concat(group, missing);
         assertThatThrownBy(() -> targetManagement.assignTag(withMissing, tag.getId()))
                 .matches(e -> {
-                    if (e instanceof EntityNotFoundException enfe) {
-                        if (enfe.getInfo().get(EntityNotFoundException.TYPE).equals(Target.class.getSimpleName())) {
-                            if (enfe.getInfo().get(EntityNotFoundException.ENTITY_ID) instanceof Collection entityId) {
-                                return entityId.stream().sorted().toList().equals(missing);
-                            }
-                        }
+                    if (e instanceof EntityNotFoundException enfe
+                            && enfe.getInfo().get(EntityNotFoundException.TYPE).equals(Target.class.getSimpleName())
+                            && enfe.getInfo().get(EntityNotFoundException.ENTITY_ID) instanceof Collection entityId) {
+                        return entityId.stream().sorted().toList().equals(missing);
                     }
                     return false;
                 });
@@ -99,7 +96,7 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that management queries react as specfied on calls for non existing entities " +
             " by means of throwing EntityNotFoundException.")
     @ExpectEvents({
-            @Expect(type = DistributionSetTagUpdatedEvent.class), 
+            @Expect(type = DistributionSetTagUpdatedEvent.class),
             @Expect(type = TargetTagUpdatedEvent.class) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         verifyThrownExceptionBy(() -> targetTagManagement.delete(NOT_EXIST_ID), "TargetTag");
@@ -126,9 +123,10 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
 
         // toggle A only -> A is now assigned
         List<Target> result = assignTag(groupA, tag);
-        assertThat(result).size().isEqualTo(20);
-        assertThat(result).containsAll(
-                targetManagement.getByControllerID(groupA.stream().map(Target::getControllerId).collect(Collectors.toList())));
+        assertThat(result)
+                .containsAll(
+                        targetManagement.getByControllerID(groupA.stream().map(Target::getControllerId).toList()))
+                .size().isEqualTo(20);
         assertThat(targetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent().stream().map(Target::getControllerId).sorted()
                 .toList())
                 .isEqualTo(groupA.stream().map(Target::getControllerId).sorted().toList());
@@ -136,18 +134,19 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         // toggle A+B -> A is still assigned and B is assigned as well
         final Collection<Target> groupAB = concat(groupA, groupB);
         result = assignTag(groupAB, tag);
-        assertThat(result).size().isEqualTo(40);
-        assertThat(result).containsAll(
-                targetManagement.getByControllerID(groupAB.stream().map(Target::getControllerId).collect(Collectors.toList())));
+        assertThat(result)
+                .containsAll(
+                        targetManagement.getByControllerID(groupAB.stream().map(Target::getControllerId).toList()))
+                .size().isEqualTo(40);
         assertThat(targetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent().stream().map(Target::getControllerId).sorted()
                 .toList())
                 .isEqualTo(groupAB.stream().map(Target::getControllerId).sorted().toList());
 
         // toggle A+B -> both unassigned
         result = unassignTag(groupAB, tag);
-        assertThat(result).size().isEqualTo(40);
-        assertThat(result).containsAll(
-                targetManagement.getByControllerID(groupAB.stream().map(Target::getControllerId).collect(Collectors.toList())));
+        assertThat(result)
+                .containsAll(targetManagement.getByControllerID(groupAB.stream().map(Target::getControllerId).toList()))
+                .size().isEqualTo(40);
         assertThat(targetManagement.findByTag(Pageable.unpaged(), tag.getId()).getContent()).isEmpty();
     }
 

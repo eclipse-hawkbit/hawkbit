@@ -92,6 +92,7 @@ public class SecurityContextSwitch {
     }
 
     // should be used only for test purposes and taking in account 'annotation' non-transient field in a Serializable
+    @SuppressWarnings("java:S1948") // java:S1948 - see comments into the method
     static class WithUserSecurityContext implements SecurityContext {
 
         @Serial

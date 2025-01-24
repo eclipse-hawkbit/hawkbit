@@ -87,7 +87,7 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
 
         // overall data
         assertThat(systemManagement.getSystemUsageStatistics().getOverallTargets()).isEqualTo(200);
-        assertThat(systemManagement.getSystemUsageStatistics().getOverallActions()).isEqualTo(0);
+        assertThat(systemManagement.getSystemUsageStatistics().getOverallActions()).isZero();
 
         // per tenant data
         final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
@@ -123,7 +123,7 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
     private byte[] createTestTenantsForSystemStatistics(final int tenants, final int artifactSize, final int targets,
             final int updates) throws Exception {
         final Random randomgen = new Random();
-        final byte random[] = new byte[artifactSize];
+        final byte[] random = new byte[artifactSize];
         randomgen.nextBytes(random);
 
         for (int i = 0; i < tenants; i++) {
