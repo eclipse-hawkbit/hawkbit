@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaTagBuilder;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -38,23 +37,31 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class JpaEntityFactory implements EntityFactory {
 
-    @Autowired
-    private DistributionSetBuilder distributionSetBuilder;
-    @Autowired
-    private TargetBuilder targetBuilder;
-    @Autowired
-    private DistributionSetTypeBuilder distributionSetTypeBuilder;
-    @Autowired
-    private SoftwareModuleBuilder softwareModuleBuilder;
-    @Autowired
-    private RolloutBuilder rolloutBuilder;
-    @Autowired
-    private TargetFilterQueryBuilder targetFilterQueryBuilder;
-    @Autowired
-    private SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder;
-    @Autowired
-    private TargetTypeBuilder targetTypeBuilder;
-    
+    private final TargetBuilder targetBuilder;
+    private final TargetTypeBuilder targetTypeBuilder;
+    private final TargetFilterQueryBuilder targetFilterQueryBuilder;
+    private final SoftwareModuleBuilder softwareModuleBuilder;
+    private final SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder;
+    private final DistributionSetBuilder distributionSetBuilder;
+    private final DistributionSetTypeBuilder distributionSetTypeBuilder;
+    private final RolloutBuilder rolloutBuilder;
+
+    @SuppressWarnings("java:S107")
+    public JpaEntityFactory(
+            final TargetBuilder targetBuilder, final TargetTypeBuilder targetTypeBuilder,
+            final TargetFilterQueryBuilder targetFilterQueryBuilder,
+            final SoftwareModuleBuilder softwareModuleBuilder, final SoftwareModuleMetadataBuilder softwareModuleMetadataBuilder,
+            final DistributionSetBuilder distributionSetBuilder, final DistributionSetTypeBuilder distributionSetTypeBuilder,
+            final RolloutBuilder rolloutBuilder) {
+        this.targetBuilder = targetBuilder;
+        this.targetTypeBuilder = targetTypeBuilder;
+        this.targetFilterQueryBuilder = targetFilterQueryBuilder;
+        this.softwareModuleBuilder = softwareModuleBuilder;
+        this.softwareModuleMetadataBuilder = softwareModuleMetadataBuilder;
+        this.distributionSetBuilder = distributionSetBuilder;
+        this.distributionSetTypeBuilder = distributionSetTypeBuilder;
+        this.rolloutBuilder = rolloutBuilder;
+    }
     @Override
     public ActionStatusBuilder actionStatus() {
         return new JpaActionStatusBuilder();

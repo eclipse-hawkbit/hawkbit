@@ -288,13 +288,12 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         return fieldPath;
     }
 
-    // if root.get creates a join we call join directly in order to specify LEFT JOIN type,
-    // to include rows for missing in particular table / criteria (root.get creates INNER JOIN)
-    // (see org.eclipse.persistence.internal.jpa.querydef.FromImpl implementation for more details)
-    // otherwise delegate to root.get
+    // if root.get creates a join we call join directly in order to specify LEFT JOIN type, to include rows for missing in particular
+    // table / criteria (root.get creates INNER JOIN) (see org.eclipse.persistence.internal.jpa.querydef.FromImpl implementation
+    // for more details) otherwise delegate to root.get
+    @SuppressWarnings("java:S1066") // java:S1066 - better reading this way
     private Path<?> getPath(final Root<?> root, final String fieldNameSplit) {
-        // see org.eclipse.persistence.internal.jpa.querydef.FromImpl implementation for more details
-        // when root.get creates a join
+        // see org.eclipse.persistence.internal.jpa.querydef.FromImpl implementation for more details when root.get creates a join
         final Attribute<?, ?> attribute = root.getModel().getAttribute(fieldNameSplit);
         if (!attribute.isCollection()) {
             // it is a SingularAttribute and not join if it is of basic persistent type
@@ -393,7 +392,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         }
         return enumField.getSubEntityMapTuple()
                 .map(Entry::getValue)
-                .map(valueFieldName -> fieldPath.<String> get(valueFieldName))
+                .map(fieldPath::<String>get)
                 .orElseThrow(() ->
                         new UnsupportedOperationException(
                                 "For the fields, defined as Map, only Map java type or tuple in the form of SimpleImmutableEntry are allowed." +
@@ -434,6 +433,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         return children;
     }
 
+    @SuppressWarnings("java:S1221") // java:S1221 - intentionally to match the SQL wording
     private Predicate equal(final Path<String> expressionToCompare, final String sqlValue) {
         if (caseWise(expressionToCompare)) {
             return cb.equal(cb.upper(expressionToCompare), sqlValue.toUpperCase());

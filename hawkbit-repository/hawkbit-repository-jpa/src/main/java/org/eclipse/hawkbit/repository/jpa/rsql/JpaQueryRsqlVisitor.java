@@ -567,6 +567,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
         return childs;
     }
 
+    @SuppressWarnings("java:S1221") // java:S1221 - intentionally to match the SQL wording
     private Predicate equal(final Expression<String> expressionToCompare, final String sqlValue) {
         return cb.equal(caseWise(cb, expressionToCompare), caseWise(sqlValue));
     }

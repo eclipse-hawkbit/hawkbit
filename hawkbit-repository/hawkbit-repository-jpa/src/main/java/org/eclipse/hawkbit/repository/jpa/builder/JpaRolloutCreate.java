@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.springframework.util.StringUtils;
 
 public class JpaRolloutCreate extends AbstractNamedEntityBuilder<RolloutCreate> implements RolloutCreate {
 

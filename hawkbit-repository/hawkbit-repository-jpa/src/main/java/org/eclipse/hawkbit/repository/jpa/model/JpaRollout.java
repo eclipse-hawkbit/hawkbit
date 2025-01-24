@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,8 +61,9 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 @Entity
 @Table(name = "sp_rollout", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_rollout"))
 @NamedEntityGraphs({ @NamedEntityGraph(name = "Rollout.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }) })
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
-@SuppressWarnings("squid:S2160")
+// squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
+// java:S1710 - not possible to use without group annotation
+@SuppressWarnings({ "squid:S2160", "java:S1710", "java:S1171", "java:S3599" })
 public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, EventAwareEntity {
 
     @Serial
@@ -226,7 +227,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     public static class RolloutStatusConverter extends MapAttributeConverter<RolloutStatus, Integer> {
 
         public RolloutStatusConverter() {
-            super(new HashMap<>() {{
+            super(new EnumMap<>(RolloutStatus.class) {{
                 put(RolloutStatus.CREATING, 0);
                 put(RolloutStatus.READY, 1);
                 put(RolloutStatus.PAUSED, 2);

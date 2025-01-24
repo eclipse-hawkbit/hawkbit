@@ -52,6 +52,7 @@ import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
@@ -109,48 +110,57 @@ public class JpaRolloutManagement implements RolloutManagement {
             RolloutStatus.CREATING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.STARTING,
             RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.APPROVAL_DENIED);
 
+    private final RolloutRepository rolloutRepository;
+    private final RolloutGroupRepository rolloutGroupRepository;
+    private final RolloutApprovalStrategy rolloutApprovalStrategy;
+    private final StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction;
+    private final RolloutStatusCache rolloutStatusCache;
+    private final ActionRepository actionRepository;
     private final TargetManagement targetManagement;
     private final DistributionSetManagement distributionSetManagement;
-    private final VirtualPropertyReplacer virtualPropertyReplacer;
-    private final RolloutApprovalStrategy rolloutApprovalStrategy;
     private final TenantConfigurationManagement tenantConfigurationManagement;
-    private final SystemSecurityContext systemSecurityContext;
+    private final QuotaManagement quotaManagement;
+    private final AfterTransactionCommitExecutor afterCommit;
     private final EventPublisherHolder eventPublisherHolder;
+    private final VirtualPropertyReplacer virtualPropertyReplacer;
+    private final SystemSecurityContext systemSecurityContext;
     private final ContextAware contextAware;
     private final Database database;
-    @Autowired
-    private RepositoryProperties repositoryProperties;
-    @Autowired
-    private RolloutRepository rolloutRepository;
-    @Autowired
-    private RolloutGroupRepository rolloutGroupRepository;
-    @Autowired
-    private ActionRepository actionRepository;
-    @Autowired
-    private AfterTransactionCommitExecutor afterCommit;
-    @Autowired
-    private QuotaManagement quotaManagement;
-    @Autowired
-    private RolloutStatusCache rolloutStatusCache;
-    @Autowired
-    private StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction;
+    private final RepositoryProperties repositoryProperties;
 
-    public JpaRolloutManagement(final TargetManagement targetManagement,
-            final DistributionSetManagement distributionSetManagement, final EventPublisherHolder eventPublisherHolder,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
+    @SuppressWarnings("java:S107")
+    public JpaRolloutManagement(
+            final RolloutRepository rolloutRepository,
+            final RolloutGroupRepository rolloutGroupRepository,
             final RolloutApprovalStrategy rolloutApprovalStrategy,
+            final StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction,
+            final RolloutStatusCache rolloutStatusCache,
+            final ActionRepository actionRepository,
+            final TargetManagement targetManagement,
+            final DistributionSetManagement distributionSetManagement,
             final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext,
-            final ContextAware contextAware) {
+            final QuotaManagement quotaManagement,
+            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
+            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final Database database,
+            final RepositoryProperties repositoryProperties) {
+        this.rolloutRepository = rolloutRepository;
+        this.rolloutGroupRepository = rolloutGroupRepository;
+        this.rolloutApprovalStrategy = rolloutApprovalStrategy;
+        this.startNextRolloutGroupAction = startNextRolloutGroupAction;
+        this.rolloutStatusCache = rolloutStatusCache;
+        this.actionRepository = actionRepository;
         this.targetManagement = targetManagement;
         this.distributionSetManagement = distributionSetManagement;
-        this.virtualPropertyReplacer = virtualPropertyReplacer;
-        this.database = database;
-        this.rolloutApprovalStrategy = rolloutApprovalStrategy;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
-        this.systemSecurityContext = systemSecurityContext;
+        this.quotaManagement = quotaManagement;
+        this.afterCommit = afterCommit;
         this.eventPublisherHolder = eventPublisherHolder;
+        this.virtualPropertyReplacer = virtualPropertyReplacer;
+        this.systemSecurityContext = systemSecurityContext;
         this.contextAware = contextAware;
+        this.database = database;
+        this.repositoryProperties = repositoryProperties;
     }
 
     public static String createRolloutLockKey(final String tenant) {
@@ -164,7 +174,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public long count() {
-        return rolloutRepository.count(RolloutSpecification.isDeleted(false, Sort.by(Direction.DESC, JpaRollout_.ID)));
+        return rolloutRepository.count(RolloutSpecification.isDeleted(false, Sort.by(Direction.DESC, AbstractJpaBaseEntity_.ID)));
     }
 
     @Override

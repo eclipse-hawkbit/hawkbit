@@ -121,6 +121,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private final RepositoryProperties repositoryProperties;
     private final Map<Long, AtomicLong> lastDynamicGroupFill = new ConcurrentHashMap<>();
 
+    @SuppressWarnings("java:S107")
     public JpaRolloutExecutor(
             final ActionRepository actionRepository, final RolloutGroupRepository rolloutGroupRepository,
             final RolloutTargetGroupRepository rolloutTargetGroupRepository,
