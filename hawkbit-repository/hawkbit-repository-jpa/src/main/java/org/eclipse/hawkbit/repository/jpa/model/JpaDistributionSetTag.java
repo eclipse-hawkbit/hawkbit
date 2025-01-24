@@ -37,6 +37,8 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
                 @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id"),
                 @Index(name = "sp_idx_distribution_set_tag_01", columnList = "tenant,name") },
         uniqueConstraints = @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_ds_tag"))
+// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
+@SuppressWarnings("squid:S2160")
 public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag, EventAwareEntity {
 
     @Serial

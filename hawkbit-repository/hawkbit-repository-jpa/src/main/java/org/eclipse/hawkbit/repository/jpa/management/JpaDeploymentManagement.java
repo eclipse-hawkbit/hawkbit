@@ -57,9 +57,9 @@ import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
@@ -162,6 +162,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final Database database;
     private final RetryTemplate retryTemplate;
 
+    @SuppressWarnings("java:S107")
     public JpaDeploymentManagement(
             final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
@@ -361,7 +362,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         final Root<JpaActionStatus> as = msgQuery.from(JpaActionStatus.class);
         final ListJoin<JpaActionStatus, String> join = as.joinList("messages", JoinType.LEFT);
         final CriteriaQuery<String> selMsgQuery = msgQuery.select(join);
-        selMsgQuery.where(cb.equal(as.get(JpaActionStatus_.id), actionStatusId));
+        selMsgQuery.where(cb.equal(as.get(AbstractJpaBaseEntity_.id), actionStatusId));
 
         final List<String> result = new ArrayList<>(entityManager.createQuery(selMsgQuery)
                 .setFirstResult((int) pageable.getOffset()).setMaxResults(pageable.getPageSize()).getResultList());

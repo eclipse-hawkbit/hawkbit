@@ -69,6 +69,7 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
@@ -128,41 +129,53 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     private final BlockingDeque<TargetPoll> queue;
 
-    @Autowired
-    private EntityManager entityManager;
-    @Autowired
+    // TODO - make it final
     private TargetRepository targetRepository;
-    @Autowired
-    private SoftwareModuleRepository softwareModuleRepository;
-    @Autowired
-    private TenantConfigurationManagement tenantConfigurationManagement;
-    @Autowired
-    private SystemSecurityContext systemSecurityContext;
-    @Autowired
-    private EntityFactory entityFactory;
-    @Autowired
-    private EventPublisherHolder eventPublisherHolder;
-    @Autowired
-    private AfterTransactionCommitExecutor afterCommit;
-    @Autowired
-    private SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
-    @Autowired
-    private PlatformTransactionManager txManager;
-    @Autowired
-    private TenantAware tenantAware;
-    @Autowired
-    private ConfirmationManagement confirmationManagement;
-    @Autowired
-    private TargetTypeManagement targetTypeManagement;
-    @Autowired
-    private DeploymentManagement deploymentManagement;
-    @Autowired
-    private DistributionSetManagement distributionSetManagement;
+    private final TargetTypeManagement targetTypeManagement;
+    private final DeploymentManagement deploymentManagement;
+    private final ConfirmationManagement confirmationManagement;
+    private final SoftwareModuleRepository softwareModuleRepository;
+    private final SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
+    private final DistributionSetManagement distributionSetManagement;
+    private final TenantConfigurationManagement tenantConfigurationManagement;
+    private final PlatformTransactionManager txManager;
+    private final EntityFactory entityFactory;
+    private final EntityManager entityManager;
+    private final AfterTransactionCommitExecutor afterCommit;
+    private final EventPublisherHolder eventPublisherHolder;
+    private final SystemSecurityContext systemSecurityContext;
+    private final TenantAware tenantAware;
 
-    public JpaControllerManagement(final ScheduledExecutorService executorService,
-            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final QuotaManagement quotaManagement, final RepositoryProperties repositoryProperties) {
+    @SuppressWarnings("squid:S00107")
+    public JpaControllerManagement(
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
+            final RepositoryProperties repositoryProperties,
+            final TargetRepository targetRepository, final TargetTypeManagement targetTypeManagement,
+            final DeploymentManagement deploymentManagement, final ConfirmationManagement confirmationManagement,
+            final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
+            final DistributionSetManagement distributionSetManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final PlatformTransactionManager txManager, final EntityFactory entityFactory, final EntityManager entityManager,
+            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
+            final ScheduledExecutorService executorService) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
+
+        this.targetRepository = targetRepository;
+        this.targetTypeManagement = targetTypeManagement;
+        this.deploymentManagement = deploymentManagement;
+        this.confirmationManagement = confirmationManagement;
+        this.softwareModuleRepository = softwareModuleRepository;
+        this.softwareModuleMetadataRepository = softwareModuleMetadataRepository;
+        this.distributionSetManagement = distributionSetManagement;
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.txManager = txManager;
+        this.entityFactory = entityFactory;
+        this.entityManager = entityManager;
+        this.afterCommit = afterCommit;
+        this.eventPublisherHolder = eventPublisherHolder;
+        this.systemSecurityContext = systemSecurityContext;
+        this.tenantAware = tenantAware;
 
         if (!repositoryProperties.isEagerPollPersistence()) {
             executorService.scheduleWithFixedDelay(this::flushUpdateQueue,
@@ -289,11 +302,13 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                         // get the highest action with weight
                         actionRepository.findAll(
                                 ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, false),
-                                PageRequest.of(0, 1, Sort.by(Sort.Order.desc(JpaAction_.WEIGHT), Sort.Order.asc(JpaAction_.ID)))).stream(),
+                                PageRequest.of(
+                                        0, 1,
+                                        Sort.by(Sort.Order.desc(JpaAction_.WEIGHT), Sort.Order.asc(AbstractJpaBaseEntity_.ID)))).stream(),
                         // get the oldest action without weight
                         actionRepository.findAll(
                                 ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, false),
-                                PageRequest.of(0, 1, Sort.by(Sort.Order.asc(JpaAction_.ID)))).stream())
+                                PageRequest.of(0, 1, Sort.by(Sort.Order.asc(AbstractJpaBaseEntity_.ID)))).stream())
                 .min(Comparator.comparingInt(this::getWeightConsideringDefault).reversed().thenComparing(Action::getId))
                 .map(Action.class::cast);
     }
@@ -911,28 +926,22 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
      */
     private Action handleRegisterRetrieved(final Long actionId, final String message) {
         final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
-        // do a manual query with CriteriaBuilder to avoid unnecessary field
-        // queries and an extra
-        // count query made by spring-data when using pageable requests, we
-        // don't need an extra count
-        // query, we just want to check if the last action status is a retrieved
-        // or not.
+        // do a manual query with CriteriaBuilder to avoid unnecessary field queries and an extra
+        // count query made by spring-data when using pageable requests, we don't need an extra count
+        // query, we just want to check if the last action status is a retrieved or not.
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> queryActionStatus = cb.createQuery(Object[].class);
         final Root<JpaActionStatus> actionStatusRoot = queryActionStatus.from(JpaActionStatus.class);
         final CriteriaQuery<Object[]> query = queryActionStatus
-                .multiselect(actionStatusRoot.get(JpaActionStatus_.id), actionStatusRoot.get(JpaActionStatus_.status))
-                .where(cb.equal(actionStatusRoot.get(JpaActionStatus_.action).get(JpaAction_.id), actionId))
-                .orderBy(cb.desc(actionStatusRoot.get(JpaActionStatus_.id)));
+                .multiselect(actionStatusRoot.get(AbstractJpaBaseEntity_.id), actionStatusRoot.get(JpaActionStatus_.status))
+                .where(cb.equal(actionStatusRoot.get(JpaActionStatus_.action).get(AbstractJpaBaseEntity_.id), actionId))
+                .orderBy(cb.desc(actionStatusRoot.get(AbstractJpaBaseEntity_.id)));
         final List<Object[]> resultList = entityManager.createQuery(query).setFirstResult(0).setMaxResults(1)
                 .getResultList();
 
-        // if the latest status is not in retrieve state then we add a retrieved
-        // state again, we want
-        // to document a deployment retrieved status and a cancel retrieved
-        // status, but multiple
-        // retrieves after the other we don't want to store to protect to
-        // overflood action status in
+        // if the latest status is not in retrieve state then we add a retrieved state again, we want
+        // to document a deployment retrieved status and a cancel retrieved status, but multiple
+        // retrieves after the other we don't want to store to protect to overflood action status in
         // case controller retrieves a action multiple times.
         if (resultList.isEmpty() || (Status.RETRIEVED != resultList.get(0)[1])) {
             // document that the status has been retrieved

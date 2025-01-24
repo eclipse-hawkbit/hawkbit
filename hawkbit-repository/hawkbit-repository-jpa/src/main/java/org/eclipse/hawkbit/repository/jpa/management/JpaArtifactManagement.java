@@ -193,6 +193,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         return localArtifactRepository.count(ArtifactSpecifications.bySoftwareModuleId(softwareModuleId));
     }
 
+    @SuppressWarnings("java:S2201") // java:S2201 - the idea is to just check if the artifact exists
     @Override
     public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash, final long softwareModuleId, final boolean isEncrypted) {
         assertArtifactRepositoryAvailable();
