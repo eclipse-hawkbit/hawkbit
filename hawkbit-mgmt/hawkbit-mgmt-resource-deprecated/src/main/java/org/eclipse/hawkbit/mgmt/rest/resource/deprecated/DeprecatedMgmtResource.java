@@ -59,6 +59,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @RestController
+@SuppressWarnings("java:S5738") // will be removed at some point
 public class DeprecatedMgmtResource implements DeprecatedMgmtRestApi {
 
     // logger that logs usage of deprecated API

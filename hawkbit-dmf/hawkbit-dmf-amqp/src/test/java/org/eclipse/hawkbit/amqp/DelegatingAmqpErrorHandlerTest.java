@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.amqp;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.qameta.allure.Description;

@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Deprecated(forRemoval = true, since = "0.6.0")
 @Tag(name = "Deprecated operations", description = "Deprecated REST operations.",
         extensions = @Extension(name = OpenApiConfiguration.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = "2147483647")))
+@SuppressWarnings("java:S1133") // will be removed at some point
 public interface DeprecatedMgmtRestApi {
 
     /**

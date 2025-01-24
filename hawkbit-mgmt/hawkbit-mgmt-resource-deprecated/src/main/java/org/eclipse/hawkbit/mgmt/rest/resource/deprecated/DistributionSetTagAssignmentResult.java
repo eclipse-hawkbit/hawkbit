@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 @Getter
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
+@SuppressWarnings("java:S1133") // will be removed at some point
 public class DistributionSetTagAssignmentResult extends AbstractAssignmentResult<DistributionSet> {
 
     private final DistributionSetTag distributionSetTag;

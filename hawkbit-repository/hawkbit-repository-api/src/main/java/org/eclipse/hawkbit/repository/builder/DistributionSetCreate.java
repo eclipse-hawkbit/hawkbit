@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Collection;
-import java.util.Optional;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

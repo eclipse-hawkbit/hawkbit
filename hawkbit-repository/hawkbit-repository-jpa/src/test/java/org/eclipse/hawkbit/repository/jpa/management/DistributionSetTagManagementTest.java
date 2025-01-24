@@ -147,8 +147,9 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
 
         // toggle A only -> A is now assigned
         List<DistributionSet> result = assignTag(groupA, tag);
-        assertThat(result).size().isEqualTo(20);
-        assertThat(result).containsAll(distributionSetManagement.get(groupA.stream().map(DistributionSet::getId).toList()));
+        assertThat(result)
+                .hasSize(20)
+                .containsAll(distributionSetManagement.get(groupA.stream().map(DistributionSet::getId).toList()));
         assertThat(
                 distributionSetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream()
                         .map(DistributionSet::getId)
@@ -159,18 +160,19 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
         final Collection<DistributionSet> groupAB = concat(groupA, groupB);
         // toggle A+B -> A is still assigned and B is assigned as well
         result = assignTag(groupAB, tag);
-        assertThat(result).size().isEqualTo(40);
-        assertThat(result).containsAll(distributionSetManagement
-                .get(groupAB.stream().map(DistributionSet::getId).toList()));
+        assertThat(result)
+                .hasSize(40)
+                .containsAll(distributionSetManagement.get(groupAB.stream().map(DistributionSet::getId).toList()));
         assertThat(
-                distributionSetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent().stream().map(DistributionSet::getId).sorted()
-                        .toList())
+                distributionSetManagement.findByTag(
+                        tag.getId(), Pageable.unpaged()).getContent().stream().map(DistributionSet::getId).sorted().toList())
                 .isEqualTo(groupAB.stream().map(DistributionSet::getId).sorted().toList());
 
         // toggle A+B -> both unassigned
         result = unassignTag(concat(groupA, groupB), tag);
-        assertThat(result).size().isEqualTo(40);
-        assertThat(result).containsAll(distributionSetManagement.get(concat(groupB, groupA).stream().map(DistributionSet::getId).toList()));
+        assertThat(result)
+                .hasSize(40)
+                .containsAll(distributionSetManagement.get(concat(groupB, groupA).stream().map(DistributionSet::getId).toList()));
         assertThat(distributionSetManagement.findByTag(tag.getId(), Pageable.unpaged()).getContent()).isEmpty();
     }
 
