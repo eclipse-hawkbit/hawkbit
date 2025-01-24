@@ -136,6 +136,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
     }
 
+    @SuppressWarnings({"java:S1171", "java:S3599"})
     private static class RawFilter implements Filter.Rsql {
 
         private final TextField textFilter = new TextField("Raw Filter");

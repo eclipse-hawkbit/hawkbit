@@ -61,6 +61,7 @@ import org.springframework.util.ObjectUtils;
 @Route(value = "rollouts", layout = MainLayout.class)
 @RolesAllowed({ "ROLLOUT_READ" })
 @Uses(Icon.class)
+@SuppressWarnings({"java:S1171", "java:S3599"})
 public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
     public RolloutView(final HawkbitMgmtClient hawkbitClient) {
@@ -98,21 +99,6 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                             rollout -> hawkbitClient.getRolloutRestApi().delete(rollout.getRolloutId()));
                     selectionGrid.refreshGrid(false);
                     return CompletableFuture.completedFuture(null);
-                });
-    }
-
-    private static SelectionGrid<MgmtRolloutGroupResponseBody, Long> createGroupGrid() {
-        return new SelectionGrid<>(
-                new SelectionGrid.EntityRepresentation<>(MgmtRolloutGroupResponseBody.class, MgmtRolloutGroupResponseBody::getRolloutGroupId) {
-
-                    @Override
-                    protected void addColumns(final Grid<MgmtRolloutGroupResponseBody> grid) {
-                        grid.addColumn(MgmtRolloutGroupResponseBody::getRolloutGroupId).setHeader(Constants.ID).setAutoWidth(true);
-                        grid.addColumn(MgmtRolloutGroupResponseBody::getName).setHeader(Constants.NAME).setAutoWidth(true);
-                        grid.addColumn(MgmtRolloutGroupResponseBody::getTotalTargets).setHeader(Constants.TARGET_COUNT).setAutoWidth(true);
-                        grid.addColumn(MgmtRolloutGroupResponseBody::getTotalTargetsPerStatus).setHeader(Constants.STATS).setAutoWidth(true);
-                        grid.addColumn(MgmtRolloutGroupResponseBody::getStatus).setHeader(Constants.STATUS).setAutoWidth(true);
-                    }
                 });
     }
 
@@ -264,6 +250,21 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                     .skip(query.getOffset())
                     .limit(query.getPageSize()));
             groupGrid.setSelectionMode(Grid.SelectionMode.NONE);
+        }
+
+        private static SelectionGrid<MgmtRolloutGroupResponseBody, Long> createGroupGrid() {
+            return new SelectionGrid<>(
+                    new SelectionGrid.EntityRepresentation<>(MgmtRolloutGroupResponseBody.class, MgmtRolloutGroupResponseBody::getRolloutGroupId) {
+
+                        @Override
+                        protected void addColumns(final Grid<MgmtRolloutGroupResponseBody> grid) {
+                            grid.addColumn(MgmtRolloutGroupResponseBody::getRolloutGroupId).setHeader(Constants.ID).setAutoWidth(true);
+                            grid.addColumn(MgmtRolloutGroupResponseBody::getName).setHeader(Constants.NAME).setAutoWidth(true);
+                            grid.addColumn(MgmtRolloutGroupResponseBody::getTotalTargets).setHeader(Constants.TARGET_COUNT).setAutoWidth(true);
+                            grid.addColumn(MgmtRolloutGroupResponseBody::getTotalTargetsPerStatus).setHeader(Constants.STATS).setAutoWidth(true);
+                            grid.addColumn(MgmtRolloutGroupResponseBody::getStatus).setHeader(Constants.STATUS).setAutoWidth(true);
+                        }
+                    });
         }
     }
 

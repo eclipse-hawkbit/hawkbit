@@ -151,14 +151,13 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
             }
             if (message.length() > MESSAGE_ENTRY_LENGTH) {
                 // split
-                for (int off = 0; off < message.length(); ) {
+                for (int off = 0; off < message.length(); off += MESSAGE_ENTRY_LENGTH) {
                     final int end = off + MESSAGE_ENTRY_LENGTH;
                     if (end < message.length()) {
                         messages.add(message.substring(off, end));
                     } else {
                         messages.add(message.substring(off));
                     }
-                    off = end;
                 }
             } else {
                 messages.add(message);

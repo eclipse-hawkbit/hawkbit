@@ -51,6 +51,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     private final LockRegistry lockRegistry;
     private final SystemSecurityContext systemSecurityContext;
 
+    @SuppressWarnings("java:S107")
     public JpaDistributionSetInvalidationManagement(final DistributionSetManagement distributionSetManagement,
             final RolloutManagement rolloutManagement, final DeploymentManagement deploymentManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final ActionRepository actionRepository,

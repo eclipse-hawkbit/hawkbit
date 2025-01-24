@@ -281,6 +281,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
         }
     }
 
+    @SuppressWarnings({"java:S1171", "java:S3599"})
     private static class AddSoftwareModulesDialog extends Utils.BaseDialog<Void> {
 
         private final transient Set<MgmtSoftwareModule> softwareModules = Collections.synchronizedSet(new HashSet<>());

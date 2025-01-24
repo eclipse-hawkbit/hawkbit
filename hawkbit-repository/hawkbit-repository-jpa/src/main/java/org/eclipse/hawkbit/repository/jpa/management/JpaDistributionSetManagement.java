@@ -49,6 +49,7 @@ import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
@@ -115,6 +116,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private final Database database;
     private final RepositoryProperties repositoryProperties;
 
+    @SuppressWarnings("java:S107")
     public JpaDistributionSetManagement(
             final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository,
@@ -175,6 +177,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    @SuppressWarnings("java:S1066") // javaS1066 - better readable that way
     public DistributionSet update(final DistributionSetUpdate u) {
         final GenericDistributionSetUpdate update = (GenericDistributionSetUpdate) u;
 
@@ -767,7 +770,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private Specification<JpaDistributionSetMetadata> byDsIdSpec(final long dsId) {
         return (root, query, cb) -> cb
-                .equal(root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id), dsId);
+                .equal(root.get(JpaDistributionSetMetadata_.distributionSet).get(AbstractJpaBaseEntity_.id), dsId);
     }
 
     private void assertDistributionSetIsNotAssignedToTargets(final Long distributionSet) {

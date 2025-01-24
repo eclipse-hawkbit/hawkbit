@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedEntity_;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTypeEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -44,7 +46,7 @@ public final class DistributionSetTypeSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSetType> byName(final String name) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaDistributionSetType_.name), name);
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(AbstractJpaNamedEntity_.name), name);
     }
 
     /**
@@ -56,6 +58,6 @@ public final class DistributionSetTypeSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSetType> byKey(final String key) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaDistributionSetType_.key), key);
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(AbstractJpaTypeEntity_.key), key);
     }
 }

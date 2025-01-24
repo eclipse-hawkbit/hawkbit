@@ -783,11 +783,23 @@ public class RepositoryApplicationConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    ControllerManagement controllerManagement(final ScheduledExecutorService executorService,
-            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final QuotaManagement quotaManagement, final RepositoryProperties repositoryProperties) {
-        return new JpaControllerManagement(executorService, actionRepository, actionStatusRepository, quotaManagement,
-                repositoryProperties);
+    ControllerManagement controllerManagement(
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository, final QuotaManagement quotaManagement,
+            final RepositoryProperties repositoryProperties,
+            final TargetRepository targetRepository, final TargetTypeManagement targetTypeManagement,
+            final DeploymentManagement deploymentManagement, final ConfirmationManagement confirmationManagement,
+            final SoftwareModuleRepository softwareModuleRepository, final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
+            final DistributionSetManagement distributionSetManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final PlatformTransactionManager txManager, final EntityFactory entityFactory, final EntityManager entityManager,
+            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
+            final ScheduledExecutorService executorService) {
+        return new JpaControllerManagement(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties,
+                targetRepository, targetTypeManagement, deploymentManagement, confirmationManagement, softwareModuleRepository,
+                softwareModuleMetadataRepository, distributionSetManagement, tenantConfigurationManagement, txManager,
+                entityFactory, entityManager, afterCommit, eventPublisherHolder, systemSecurityContext, tenantAware,
+                executorService);
     }
 
     @Bean

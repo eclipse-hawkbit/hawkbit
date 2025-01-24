@@ -14,7 +14,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -74,8 +74,9 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
         @NamedEntityGraph(name = "Action.ds", attributeNodes = { @NamedAttributeNode("distributionSet") })
 })
 @Entity
-// exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
-@SuppressWarnings("squid:S2160")
+// squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
+// java:S1710 - not possible to use without group annotation
+@SuppressWarnings({ "squid:S2160", "java:S1710", "java:S1171", "java:S3599" })
 public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Action, EventAwareEntity {
 
     @Serial
@@ -375,7 +376,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     public static class StatusConverter extends MapAttributeConverter<Status, Integer> {
 
         public StatusConverter() {
-            super(new HashMap<>() {{
+            super(new EnumMap<>(Status.class) {{
                 put(Status.FINISHED, 0);
                 put(Status.ERROR, 1);
                 put(Status.WARNING, 2);

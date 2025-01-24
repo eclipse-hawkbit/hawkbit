@@ -41,6 +41,7 @@ import org.springframework.util.ObjectUtils;
  * @param <T> the domain type the repository manages
  * @param <ID> the type of the id of the entity the repository manages
  */
+@SuppressWarnings("java:S119") // inherited from SimpleJpaRepository
 public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpaRepository<T, ID>
         implements JpaSpecificationEntityGraphExecutor<T>, NoCountSliceRepository<T>, ACMRepository<T> {
 
@@ -73,12 +74,14 @@ public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpa
     @Override
     @Transactional
     @NonNull
+    @SuppressWarnings("java:S6809") // this method already has a transactional annotation witch shall be applied
     public <S extends T> S save(@Nullable AccessController.Operation operation, @NonNull final S entity) {
         return save(entity);
     }
 
     @Override
     @Transactional
+    @SuppressWarnings("java:S6809") // this method already has a transactional annotation witch shall be applied
     public <S extends T> List<S> saveAll(@Nullable AccessController.Operation operation, final Iterable<S> entities) {
         return saveAll(entities);
     }
@@ -90,6 +93,7 @@ public class HawkbitBaseRepository<T, ID extends Serializable> extends SimpleJpa
 
     @Override
     @NonNull
+    @SuppressWarnings("java:S4449") // find all accepts null
     public List<T> findAll(@Nullable final AccessController.Operation operation, @Nullable final Specification<T> spec) {
         return findAll(spec);
     }
