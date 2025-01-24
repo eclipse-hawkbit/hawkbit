@@ -217,6 +217,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
         return targetTypeRepository.save(type);
     }
 
+    @SuppressWarnings("java:S2201") // the idea is just to check for distribution set type existence
     private void assertDistributionSetTypeExists(final Long typeId) {
         distributionSetTypeRepository
                 .findById(typeId)

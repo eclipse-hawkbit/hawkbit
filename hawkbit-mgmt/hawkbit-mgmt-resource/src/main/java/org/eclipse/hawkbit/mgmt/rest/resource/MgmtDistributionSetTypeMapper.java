@@ -39,22 +39,19 @@ final class MgmtDistributionSetTypeMapper {
 
     }
 
-    static List<DistributionSetTypeCreate> smFromRequest(final EntityFactory entityFactory,
-            final Collection<MgmtDistributionSetTypeRequestBodyPost> smTypesRest) {
+    static List<DistributionSetTypeCreate> smFromRequest(final EntityFactory entityFactory, final Collection<MgmtDistributionSetTypeRequestBodyPost> smTypesRest) {
         if (smTypesRest == null) {
             return Collections.emptyList();
         }
 
-        return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).collect(Collectors.toList());
+        return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).toList();
     }
 
     static List<MgmtDistributionSetType> toListResponse(final Collection<DistributionSetType> types) {
         if (types == null) {
             return Collections.emptyList();
         }
-
-        return new ResponseList<>(
-                types.stream().map(MgmtDistributionSetTypeMapper::toResponse).collect(Collectors.toList()));
+        return new ResponseList<>(types.stream().map(MgmtDistributionSetTypeMapper::toResponse).toList());
     }
 
     static MgmtDistributionSetType toResponse(final DistributionSetType type) {
@@ -82,19 +79,18 @@ final class MgmtDistributionSetTypeMapper {
             final MgmtDistributionSetTypeRequestBodyPost smsRest) {
         return entityFactory.distributionSetType().create().key(smsRest.getKey()).name(smsRest.getName())
                 .description(smsRest.getDescription()).colour(smsRest.getColour())
-                .mandatory(getMandatoryModules(smsRest)).optional(getOptionalmodules(smsRest));
+                .mandatory(getMandatoryModules(smsRest)).optional(getOptionalModules(smsRest));
     }
 
     private static Collection<Long> getMandatoryModules(final MgmtDistributionSetTypeRequestBodyPost smsRest) {
-        return Optional.ofNullable(smsRest.getMandatorymodules()).map(
-                        modules -> modules.stream().map(MgmtSoftwareModuleTypeAssignment::getId).collect(Collectors.toList()))
+        return Optional.ofNullable(smsRest.getMandatorymodules())
+                .map(modules -> modules.stream().map(MgmtSoftwareModuleTypeAssignment::getId).toList())
                 .orElse(Collections.emptyList());
     }
 
-    private static Collection<Long> getOptionalmodules(final MgmtDistributionSetTypeRequestBodyPost smsRest) {
-        return Optional.ofNullable(smsRest.getOptionalmodules()).map(
-                        modules -> modules.stream().map(MgmtSoftwareModuleTypeAssignment::getId).collect(Collectors.toList()))
+    private static Collection<Long> getOptionalModules(final MgmtDistributionSetTypeRequestBodyPost smsRest) {
+        return Optional.ofNullable(smsRest.getOptionalmodules())
+                .map(modules -> modules.stream().map(MgmtSoftwareModuleTypeAssignment::getId).toList())
                 .orElse(Collections.emptyList());
     }
-
 }

@@ -36,15 +36,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 /**
- * With Spring Boot 2.2.x the default charset encoding became deprecated. In
- * hawkBit we want to keep the old behavior for now and still return the charset
- * in the response, which is achieved through enabling {@link Encoding} via
- * properties.
+ * With Spring Boot 2.2.x the default charset encoding became deprecated. In hawkBit we want to keep the old behavior for now and still
+ * return the charset in the response, which is achieved through enabling {@link Encoding} via properties.
  */
 @SpringBootTest(properties = { "server.servlet.encoding.charset=UTF-8", "server.servlet.encoding.force=true" })
 @Import(HttpEncodingAutoConfiguration.class)
 @Feature("Component Tests - Management API")
 @Story("Response Content-Type")
+@SuppressWarnings("java:S1874") // TODO for compatibility, to be checked if we really want to do that
 public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
 
     private final String dsName = "DS-ö";

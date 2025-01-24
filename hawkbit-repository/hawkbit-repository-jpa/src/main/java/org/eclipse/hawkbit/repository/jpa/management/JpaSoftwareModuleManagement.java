@@ -44,10 +44,10 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
 import org.eclipse.hawkbit.repository.jpa.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
@@ -96,6 +96,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final Database database;
 
+    @SuppressWarnings("java:S107")
     public JpaSoftwareModuleManagement(final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository,
             final SoftwareModuleRepository softwareModuleRepository,
@@ -506,8 +507,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     private static Specification<JpaSoftwareModuleMetadata> metadataBySoftwareModuleIdSpec(final long id) {
-        return (root, query, cb) -> cb
-                .equal(root.get(JpaSoftwareModuleMetadata_.softwareModule).get(JpaSoftwareModule_.id), id);
+        return (root, query, cb) -> cb.equal(root.get(JpaSoftwareModuleMetadata_.softwareModule).get(AbstractJpaBaseEntity_.id), id);
     }
 
     private void deleteGridFsArtifacts(final JpaSoftwareModule swModule) {

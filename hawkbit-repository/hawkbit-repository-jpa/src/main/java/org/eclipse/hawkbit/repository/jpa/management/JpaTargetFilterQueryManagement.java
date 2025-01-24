@@ -85,6 +85,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private final AuditorAware<String> auditorAware;
     private final Database database;
 
+    @SuppressWarnings("java:S107")
     public JpaTargetFilterQueryManagement(final TargetFilterQueryRepository targetFilterQueryRepository,
             final TargetManagement targetManagement, final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,

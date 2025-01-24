@@ -109,7 +109,7 @@ class MgmtBasicAuthResourceTest {
         return "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
     }
 
-    private MockMvc withSecurityMock() throws Exception {
+    private MockMvc withSecurityMock() {
         return createMvcWebAppContext(webApplicationContext).build();
     }
 

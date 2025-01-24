@@ -687,13 +687,13 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
 
         assertThat(
                 JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                .isEqualTo("http://localhost/rest/v1/distributionsettypes/" + created1.getId());
+                .hasToString("http://localhost/rest/v1/distributionsettypes/" + created1.getId());
         assertThat(
                 JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                .isEqualTo("http://localhost/rest/v1/distributionsettypes/" + created2.getId());
+                .hasToString("http://localhost/rest/v1/distributionsettypes/" + created2.getId());
         assertThat(
                 JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                .isEqualTo("http://localhost/rest/v1/distributionsettypes/" + created3.getId());
+                .hasToString("http://localhost/rest/v1/distributionsettypes/" + created3.getId());
 
         assertThat(distributionSetTypeManagement.count()).isEqualTo(7);
     }

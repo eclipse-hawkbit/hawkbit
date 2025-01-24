@@ -24,8 +24,8 @@ import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag_;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -93,7 +93,7 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     public void delete(final String targetTagName) {
         targetTagRepository.delete(
                 targetTagRepository
-                        .findOne(((root, query, cb) -> cb.equal(root.get(JpaTargetTag_.name), targetTagName)))
+                        .findOne(((root, query, cb) -> cb.equal(root.get(AbstractJpaNamedEntity_.name), targetTagName)))
                         .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagName)));
     }
 
