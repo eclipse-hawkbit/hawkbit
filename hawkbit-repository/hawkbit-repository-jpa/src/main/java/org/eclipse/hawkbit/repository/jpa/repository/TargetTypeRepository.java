@@ -13,7 +13,6 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification;
-import org.eclipse.hawkbit.repository.model.TargetType;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

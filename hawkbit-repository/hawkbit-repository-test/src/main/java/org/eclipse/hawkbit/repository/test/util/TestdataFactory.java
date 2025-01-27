@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.io.IOUtils;
@@ -85,6 +84,7 @@ import org.springframework.util.ObjectUtils;
 /**
  * Data generator utility for tests.
  */
+@SuppressWarnings("java:S107")
 public class TestdataFactory {
 
     public static final String VISIBLE_SM_MD_KEY = "visibleMetdataKey";
@@ -1157,7 +1157,7 @@ public class TestdataFactory {
     public TargetType createTargetType(final String targetTypeName, final List<DistributionSetType> compatibleDsTypes) {
         return targetTypeManagement.create(entityFactory.targetType().create().name(targetTypeName)
                 .description(targetTypeName + SPACE_AND_DESCRIPTION).colour(DEFAULT_COLOUR)
-                .compatible(compatibleDsTypes.stream().map(DistributionSetType::getId).collect(Collectors.toList())));
+                .compatible(compatibleDsTypes.stream().map(DistributionSetType::getId).toList()));
     }
 
     /**

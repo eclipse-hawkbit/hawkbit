@@ -88,7 +88,7 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Create Software Module Types call fails when called for existing entities.")
-    void _for() {
+    void createModuleTypesCallFailsForExistingTypes() {
         final List<SoftwareModuleTypeCreate> created = Arrays.asList(
                 entityFactory.softwareModuleType().create().key("test-key").name("test-name"),
                 entityFactory.softwareModuleType().create().key("test-key2").name("test-name2"));

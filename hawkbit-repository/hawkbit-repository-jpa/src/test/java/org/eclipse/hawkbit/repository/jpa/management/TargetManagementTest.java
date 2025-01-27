@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -36,6 +35,7 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.Identifiable;
+import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -219,16 +219,17 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verify that a target with same controller ID than another device cannot be created.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     void createTargetThatViolatesUniqueConstraintFails() {
-        targetManagement.create(entityFactory.target().create().controllerId("123"));
+        final TargetCreate targetCreate = entityFactory.target().create().controllerId("123");
+        targetManagement.create(targetCreate);
 
         assertThatExceptionOfType(EntityAlreadyExistsException.class)
-                .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId("123")));
+                .isThrownBy(() -> targetManagement.create(targetCreate));
     }
 
     @Test
     @Description("Verify that a target with with invalid properties cannot be created or updated")
     @ExpectEvents({
-            @Expect(type = TargetCreatedEvent.class, count = 1), 
+            @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class) })
     void createAndUpdateTargetWithInvalidFields() {
         final Target target = testdataFactory.createTarget();
@@ -248,14 +249,10 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 5) })
     void assignAndUnassignTargetsToTag() {
         final List<String> assignTarget = new ArrayList<>();
-        assignTarget.add(
-                targetManagement.create(entityFactory.target().create().controllerId("targetId123")).getControllerId());
-        assignTarget.add(targetManagement.create(entityFactory.target().create().controllerId("targetId1234"))
-                .getControllerId());
-        assignTarget.add(targetManagement.create(entityFactory.target().create().controllerId("targetId1235"))
-                .getControllerId());
-        assignTarget.add(targetManagement.create(entityFactory.target().create().controllerId("targetId1236"))
-                .getControllerId());
+        assignTarget.add(targetManagement.create(entityFactory.target().create().controllerId("targetId123")).getControllerId());
+        assignTarget.add(targetManagement.create(entityFactory.target().create().controllerId("targetId1234")).getControllerId());
+        assignTarget.add(targetManagement.create(entityFactory.target().create().controllerId("targetId1235")).getControllerId());
+        assignTarget.add(targetManagement.create(entityFactory.target().create().controllerId("targetId1236")).getControllerId());
 
         final TargetTag targetTag = targetTagManagement.create(entityFactory.tag().create().name("Tag1"));
 
@@ -284,7 +281,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Ensures that targets can deleted e.g. test all cascades")
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 12),
-            @Expect(type = TargetDeletedEvent.class, count = 12), 
+            @Expect(type = TargetDeletedEvent.class, count = 12),
             @Expect(type = TargetUpdatedEvent.class, count = 6) })
     void deleteAndCreateTargets() {
         Target target = targetManagement.create(entityFactory.target().create().controllerId("targetId123"));
@@ -317,9 +314,9 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6), // implicit lock
-            @Expect(type = TargetCreatedEvent.class, count = 1), 
+            @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 5),
-            @Expect(type = ActionCreatedEvent.class, count = 2), 
+            @Expect(type = ActionCreatedEvent.class, count = 2),
             @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
@@ -385,24 +382,20 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 5) })
     void createMultipleTargetsDuplicate() {
         testdataFactory.createTargets(5, "mySimpleTargs", "my simple targets");
-        try {
-            testdataFactory.createTargets(5, "mySimpleTargs", "my simple targets");
-            fail("Targets already exists");
-        } catch (final EntityAlreadyExistsException e) {
-        }
-
+        assertThatExceptionOfType(EntityAlreadyExistsException.class)
+                .as("Targets already exists")
+                .isThrownBy(() -> testdataFactory.createTargets(5, "mySimpleTargs", "my simple targets"));
     }
 
     @Test
     @Description("Checks if the EntityAlreadyExistsException is thrown if a single target with the same controller ID are created twice.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     void createTargetDuplicate() {
-        targetManagement.create(entityFactory.target().create().controllerId("4711"));
-        try {
-            targetManagement.create(entityFactory.target().create().controllerId("4711"));
-            fail("Target already exists");
-        } catch (final EntityAlreadyExistsException e) {
-        }
+        final TargetCreate targetCreate = entityFactory.target().create().controllerId("4711");
+        targetManagement.create(targetCreate);
+        assertThatExceptionOfType(EntityAlreadyExistsException.class)
+                .as("Target already exists")
+                .isThrownBy(() -> targetManagement.create(targetCreate));
     }
 
     @Test
@@ -468,7 +461,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         firstList = firstList.stream()
                 .map(t -> targetManagement.update(
                         entityFactory.target().update(t.getControllerId()).name(t.getName().concat("\tchanged"))))
-                .collect(Collectors.toList());
+                .toList();
 
         // verify that all entries are found
     _founds:
@@ -500,7 +493,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final int numberToDelete = 50;
         final Collection<Target> targetsToDelete = firstList.subList(0, numberToDelete);
         final Target[] deletedTargets = toArray(targetsToDelete, Target.class);
-        final List<Long> targetsIdsToDelete = targetsToDelete.stream().map(Target::getId).collect(Collectors.toList());
+        final List<Long> targetsIdsToDelete = targetsToDelete.stream().map(Target::getId).toList();
 
         targetManagement.delete(targetsIdsToDelete);
 
@@ -720,7 +713,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String rsqlFilter = "tag==Targ-A-Tag,id==target-id-B-00001,id==target-id-B-00008";
         final TargetTag targTagA = targetTagManagement.create(entityFactory.tag().create().name("Targ-A-Tag"));
         final List<String> targAs = testdataFactory.createTargets(25, "target-id-A", "first description").stream()
-                .map(Target::getControllerId).collect(Collectors.toList());
+                .map(Target::getControllerId).toList();
         targetManagement.assignTag(targAs, targTagA.getId());
 
         testdataFactory.createTargets(25, "target-id-B", "first description");
@@ -747,7 +740,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(foundDs).hasSize(3);
 
-        final List<Long> collect = foundDs.stream().map(Target::getId).collect(Collectors.toList());
+        final List<Long> collect = foundDs.stream().map(Target::getId).toList();
         assertThat(collect).containsAll(searchIds);
     }
 
@@ -806,8 +799,9 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
             metaData2.add(new JpaTargetMetadata("k" + i, "v" + i, target2));
         }
         // verify quota is exceeded
+        final String target2ControllerId = target2.getControllerId();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> targetManagement.createMetaData(target2.getControllerId(), metaData2));
+                .isThrownBy(() -> targetManagement.createMetaData(target2ControllerId, metaData2));
 
         // add some meta data entries
         final Target target3 = testdataFactory.createTarget("target3");
@@ -822,8 +816,9 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
             metaData3.add(new JpaTargetMetadata("kk" + i, "vv" + i, target3));
         }
         // verify quota is exceeded
+        final String target3ControllerId = target3.getControllerId();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> targetManagement.createMetaData(target3.getControllerId(), metaData3));
+                .isThrownBy(() -> targetManagement.createMetaData(target3ControllerId, metaData3));
 
     }
 
@@ -931,7 +926,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 20),
             @Expect(type = TargetTypeCreatedEvent.class, count = 2),
-            @Expect(type = TargetUpdatedEvent.class, count = 29), 
+            @Expect(type = TargetUpdatedEvent.class, count = 29),
             @Expect(type = TargetDeletedEvent.class, count = 1) })
     void targetTypeBulkAssignments() {
         final List<Target> typeATargets = testdataFactory.createTargets(10, "typeATargets", "first description");
@@ -1001,12 +996,14 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetFound.get().getTargetType()).isNull();
 
         // assign target type to target
-        assertThatExceptionOfType(ConstraintViolationException.class).as("target type with id=null cannot be assigned")
-                .isThrownBy(() -> targetManagement.assignType(targetFound.get().getControllerId(), null));
+        final String controllerId = targetFound.get().getControllerId();
+        assertThatExceptionOfType(ConstraintViolationException.class)
+                .as("target type with id=null cannot be assigned")
+                .isThrownBy(() -> targetManagement.assignType(controllerId, null));
 
         assertThatExceptionOfType(EntityNotFoundException.class)
                 .as("target type with id that does not exists cannot be assigned")
-                .isThrownBy(() -> targetManagement.assignType(targetFound.get().getControllerId(), 114L));
+                .isThrownBy(() -> targetManagement.assignType(controllerId, 114L));
 
         // opt lock revision is not changed
         final Optional<JpaTarget> targetFound1 = targetRepository.findById(target.getId());
@@ -1221,131 +1218,151 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Step
     private void createAndUpdateTargetWithInvalidDescription(final Target target) {
-
+        final TargetCreate targetCreateTooLong = entityFactory.target().create().controllerId("a")
+                .description(randomString(513));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("target with too long description should not be created")
-                .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId("a")
-                        .description(randomString(513))));
+                .isThrownBy(() -> targetManagement.create(targetCreateTooLong));
 
+        final TargetCreate targetCreateInvalidHtml = entityFactory.target().create().controllerId("a").description(INVALID_TEXT_HTML);
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("target with invalid description should not be created").isThrownBy(() -> targetManagement
-                        .create(entityFactory.target().create().controllerId("a").description(INVALID_TEXT_HTML)));
+                .as("target with invalid description should not be created")
+                .isThrownBy(() -> targetManagement.create(targetCreateInvalidHtml));
 
+        final TargetUpdate targetUpdateTooLong = entityFactory.target().update(target.getControllerId())
+                .description(randomString(513));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("target with too long description should not be updated")
-                .isThrownBy(() -> targetManagement.update(entityFactory.target().update(target.getControllerId())
-                        .description(randomString(513))));
+                .isThrownBy(() -> targetManagement.update(targetUpdateTooLong));
 
+        final TargetUpdate targetUpdateInvalidHtml = entityFactory.target().update(target.getControllerId()).description(INVALID_TEXT_HTML);
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("target with invalid description should not be updated").isThrownBy(() -> targetManagement.update(
-                        entityFactory.target().update(target.getControllerId()).description(INVALID_TEXT_HTML)));
+                .as("target with invalid description should not be updated")
+                .isThrownBy(() -> targetManagement.update(targetUpdateInvalidHtml));
     }
 
     @Step
     private void createAndUpdateTargetWithInvalidName(final Target target) {
-
+        final TargetCreate targetCreateTooLong = entityFactory.target().create().controllerId("a")
+                .name(randomString(NamedEntity.NAME_MAX_SIZE + 1));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("target with too long name should not be created")
-                .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId("a")
-                        .name(randomString(NamedEntity.NAME_MAX_SIZE + 1))));
+                .isThrownBy(() -> targetManagement.create(targetCreateTooLong));
 
+        final TargetCreate targetCreateInvalidHtml = entityFactory.target().create().controllerId("a").name(INVALID_TEXT_HTML);
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("target with invalid name should not be created").isThrownBy(() -> targetManagement
-                        .create(entityFactory.target().create().controllerId("a").name(INVALID_TEXT_HTML)));
+                .as("target with invalid name should not be created")
+                .isThrownBy(() -> targetManagement.create(targetCreateInvalidHtml));
 
+        final TargetUpdate targetUpdateTooLong = entityFactory.target().update(target.getControllerId())
+                .name(randomString(NamedEntity.NAME_MAX_SIZE + 1));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("target with too long name should not be updated")
-                .isThrownBy(() -> targetManagement.update(entityFactory.target().update(target.getControllerId())
-                        .name(randomString(NamedEntity.NAME_MAX_SIZE + 1))));
+                .isThrownBy(() -> targetManagement.update(targetUpdateTooLong));
 
+        final TargetUpdate targetUpdateInvalidHtml = entityFactory.target().update(target.getControllerId()).name(INVALID_TEXT_HTML);
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("target with invalid name should not be updated").isThrownBy(() -> targetManagement
-                        .update(entityFactory.target().update(target.getControllerId()).name(INVALID_TEXT_HTML)));
+                .as("target with invalid name should not be updated")
+                .isThrownBy(() -> targetManagement.update(targetUpdateInvalidHtml));
 
+        final TargetUpdate targetUpdateEmpty = entityFactory.target().update(target.getControllerId()).name("");
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("target with too short name should not be updated").isThrownBy(() -> targetManagement
-                        .update(entityFactory.target().update(target.getControllerId()).name("")));
+                .as("target with too short name should not be updated")
+                .isThrownBy(() -> targetManagement.update(targetUpdateEmpty));
 
     }
 
     @Step
     private void createAndUpdateTargetWithInvalidSecurityToken(final Target target) {
-
+        final TargetCreate targetCreateTooLong = entityFactory.target().create().controllerId("a")
+                .securityToken(randomString(Target.SECURITY_TOKEN_MAX_SIZE + 1));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("target with too long token should not be created")
-                .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId("a")
-                        .securityToken(randomString(Target.SECURITY_TOKEN_MAX_SIZE + 1))));
+                .isThrownBy(() -> targetManagement.create(targetCreateTooLong));
 
+        final TargetCreate targetCreateInvalidTextHtml = entityFactory.target().create().controllerId("a").securityToken(INVALID_TEXT_HTML);
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("target with invalid token should not be created").isThrownBy(() -> targetManagement
-                        .create(entityFactory.target().create().controllerId("a").securityToken(INVALID_TEXT_HTML)));
+                .as("target with invalid token should not be created")
+                .isThrownBy(() -> targetManagement.create(targetCreateInvalidTextHtml));
 
+        final TargetUpdate targetUpdateTooLong = entityFactory.target().update(target.getControllerId())
+                .securityToken(randomString(Target.SECURITY_TOKEN_MAX_SIZE + 1));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("target with too long token should not be updated")
-                .isThrownBy(() -> targetManagement.update(entityFactory.target().update(target.getControllerId())
-                        .securityToken(randomString(Target.SECURITY_TOKEN_MAX_SIZE + 1))));
+                .isThrownBy(() -> targetManagement.update(targetUpdateTooLong));
 
+        final TargetUpdate targetUpdateInvalidHtml = entityFactory.target().update(target.getControllerId()).securityToken(INVALID_TEXT_HTML);
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("target with invalid token should not be updated").isThrownBy(() -> targetManagement.update(
-                        entityFactory.target().update(target.getControllerId()).securityToken(INVALID_TEXT_HTML)));
+                .as("target with invalid token should not be updated")
+                .isThrownBy(() -> targetManagement.update(targetUpdateInvalidHtml));
 
+        final TargetUpdate targetUpdateEmpty = entityFactory.target().update(target.getControllerId()).securityToken("");
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("target with too short token should not be updated").isThrownBy(() -> targetManagement
-                        .update(entityFactory.target().update(target.getControllerId()).securityToken("")));
+                .as("target with too short token should not be updated")
+                .isThrownBy(() -> targetManagement.update(targetUpdateEmpty));
     }
 
     @Step
     private void createAndUpdateTargetWithInvalidAddress(final Target target) {
-
+        final TargetCreate targetCreate = entityFactory.target().create().controllerId("a").address(randomString(513));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("target with too long address should not be created")
-                .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId("a")
-                        .address(randomString(513))));
+                .isThrownBy(() -> targetManagement.create(targetCreate));
 
-        assertThatExceptionOfType(InvalidTargetAddressException.class).as("target with invalid should not be created")
-                .isThrownBy(() -> targetManagement
-                        .create(entityFactory.target().create().controllerId("a").address(INVALID_TEXT_HTML)));
+        final TargetCreate targetCreate2 = entityFactory.target().create().controllerId("a");
+        assertThatExceptionOfType(InvalidTargetAddressException.class)
+                .as("target with invalid should not be created")
+                .isThrownBy(() -> targetCreate2.address(INVALID_TEXT_HTML));
 
+        final TargetUpdate targetUpdate = entityFactory.target().update(target.getControllerId()).address(randomString(513));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("target with too long address should not be updated")
-                .isThrownBy(() -> targetManagement.update(entityFactory.target().update(target.getControllerId())
-                        .address(randomString(513))));
+                .isThrownBy(() -> targetManagement.update(targetUpdate));
 
+        final TargetUpdate targetUpdate2 = entityFactory.target().update(target.getControllerId());
         assertThatExceptionOfType(InvalidTargetAddressException.class)
-                .as("target with invalid address should not be updated").isThrownBy(() -> targetManagement
-                        .update(entityFactory.target().update(target.getControllerId()).address(INVALID_TEXT_HTML)));
+                .as("target with invalid address should not be updated")
+                .isThrownBy(() -> targetUpdate2.address(INVALID_TEXT_HTML));
     }
 
     @Step
     private void createTargetWithInvalidControllerId() {
+        final TargetCreate targetCreateEmpty = entityFactory.target().create().controllerId("");
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("target with empty controller id should not be created")
-                .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId("")));
+                .isThrownBy(() -> targetManagement.create(targetCreateEmpty));
 
+        final TargetCreate targetCreateNull = entityFactory.target().create().controllerId(null);
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("target with null controller id should not be created")
-                .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId(null)));
+                .isThrownBy(() -> targetManagement.create(targetCreateNull));
 
+        final TargetCreate targetCreateTooLongControllerId = entityFactory.target().create()
+                .controllerId(randomString(Target.CONTROLLER_ID_MAX_SIZE + 1));
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("target with too long controller id should not be created")
-                .isThrownBy(() -> targetManagement.create(entityFactory.target().create()
-                        .controllerId(randomString(Target.CONTROLLER_ID_MAX_SIZE + 1))));
+                .isThrownBy(() -> targetManagement.create(targetCreateTooLongControllerId));
 
+        final TargetCreate targetCreateInvaidTextHtml = entityFactory.target().create().controllerId(INVALID_TEXT_HTML);
         assertThatExceptionOfType(ConstraintViolationException.class)
-                .as("target with invalid controller id should not be created").isThrownBy(
-                        () -> targetManagement.create(entityFactory.target().create().controllerId(INVALID_TEXT_HTML)));
+                .as("target with invalid controller id should not be created")
+                .isThrownBy(() -> targetManagement.create(targetCreateInvaidTextHtml));
 
+        final TargetCreate targetCreateEmptyTrim = entityFactory.target().create().controllerId(" ");
         assertThatExceptionOfType(ConstraintViolationException.class).as(WHITESPACE_ERROR)
-                .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId(" ")));
+                .isThrownBy(() -> targetManagement.create(targetCreateEmptyTrim));
 
+        final TargetCreate targetCreateContainingSpace = entityFactory.target().create().controllerId("a b");
         assertThatExceptionOfType(ConstraintViolationException.class).as(WHITESPACE_ERROR)
-                .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId("a b")));
+                .isThrownBy(() -> targetManagement.create(targetCreateContainingSpace));
 
+        final TargetCreate targetCreateEmptyTrim2 = entityFactory.target().create().controllerId("     ");
         assertThatExceptionOfType(ConstraintViolationException.class).as(WHITESPACE_ERROR)
-                .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId("     ")));
+                .isThrownBy(() -> targetManagement.create(targetCreateEmptyTrim2));
 
+        final TargetCreate targetCreateContainingSpaces = entityFactory.target().create().controllerId("aaa   bbb");
         assertThatExceptionOfType(ConstraintViolationException.class).as(WHITESPACE_ERROR)
-                .isThrownBy(() -> targetManagement.create(entityFactory.target().create().controllerId("aaa   bbb")));
+                .isThrownBy(() -> targetManagement.create(targetCreateContainingSpaces));
 
     }
 

@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.model.helper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 

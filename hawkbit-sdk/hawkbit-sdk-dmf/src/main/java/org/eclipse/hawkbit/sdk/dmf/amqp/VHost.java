@@ -135,10 +135,8 @@ public class VHost extends DmfSender implements MessageListener {
     }
 
     protected void handleCancelDownloadAction(final Message message, final String thingId) {
-        final String tenant = getTenant(message);
         final Long actionId = extractActionIdFrom(message);
-
-        processCancelDownloadAction(thingId, tenant, actionId);
+        processCancelDownloadAction(thingId, actionId);
     }
 
     protected void handleUpdateProcess(final Message message, final String controllerId, final EventTopic actionType) {
@@ -193,7 +191,7 @@ public class VHost extends DmfSender implements MessageListener {
         @SuppressWarnings({ "squid:S2259" }) final EventTopic eventTopic = EventTopic.valueOf(eventHeader.toString());
         switch (eventTopic) {
             case CONFIRM:
-                handleConfirmation(message, thingId);
+                handleConfirmation(thingId);
                 break;
             case DOWNLOAD_AND_INSTALL, DOWNLOAD:
                 handleUpdateProcess(message, thingId, eventTopic);
@@ -213,7 +211,7 @@ public class VHost extends DmfSender implements MessageListener {
         }
     }
 
-    private void handleConfirmation(final Message message, final String controllerId) {
+    private void handleConfirmation(final String controllerId) {
         log.warn("Handle confirmed received for {}! Skip it!", controllerId);
     }
 
@@ -241,14 +239,13 @@ public class VHost extends DmfSender implements MessageListener {
         openActions.add(actionId);
 
         switch (eventTopic) {
-            case DOWNLOAD:
-            case DOWNLOAD_AND_INSTALL:
-                if (action instanceof DmfDownloadAndUpdateRequest) {
-                    processUpdate(tenant, controllerId, eventTopic, (DmfDownloadAndUpdateRequest) action);
+            case DOWNLOAD, DOWNLOAD_AND_INSTALL:
+                if (action instanceof DmfDownloadAndUpdateRequest dmfDownloadAndUpdateRequest) {
+                    processUpdate(tenant, controllerId, eventTopic, dmfDownloadAndUpdateRequest);
                 }
                 break;
             case CANCEL_DOWNLOAD:
-                processCancelDownloadAction(controllerId, tenant, action.getActionId());
+                processCancelDownloadAction(controllerId, action.getActionId());
                 break;
             default:
                 openActions.remove(actionId);
@@ -257,7 +254,7 @@ public class VHost extends DmfSender implements MessageListener {
         }
     }
 
-    private void processCancelDownloadAction(final String thingId, final String tenant, final Long actionId) {
+    private void processCancelDownloadAction(final String thingId, final Long actionId) {
         finishUpdateProcess(thingId, actionId, Collections.singletonList("Simulation canceled"));
         openActions.remove(actionId);
     }

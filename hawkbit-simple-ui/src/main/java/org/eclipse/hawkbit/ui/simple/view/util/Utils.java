@@ -74,6 +74,7 @@ public class Utils {
         return numberField;
     }
 
+    @SuppressWarnings("java:S119") // better readability
     public static <T, ID> HorizontalLayout addRemoveControls(
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> addHandler,
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler,

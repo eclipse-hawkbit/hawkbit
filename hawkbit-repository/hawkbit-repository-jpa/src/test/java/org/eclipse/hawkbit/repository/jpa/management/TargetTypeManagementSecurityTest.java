@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 @Slf4j
 @Feature("SecurityTests - TargetTypeManagement")
 @Story("SecurityTests TargetTypeManagement")
-public class TargetTypeManagementSecurityTest extends AbstractJpaIntegrationTest {
+class TargetTypeManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")

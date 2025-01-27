@@ -127,10 +127,8 @@ public interface UpdateHandler {
                     new UpdateStatus(
                             UpdateStatus.Status.DOWNLOAD,
                             modules.stream().flatMap(mod -> mod.getArtifacts().stream())
-                                    .map(art -> "Download start for: " + art.getFilename() +
-                                            " with size " + art.getSize() +
-                                            " and hashes " + art.getHashes() + " ...")
-                                    .collect(Collectors.toList())));
+                                    .map(art -> "Download start for: " + art.getFilename() + " with size " + art.getSize() + " and hashes " + art.getHashes() + " ...")
+                                    .toList()));
 
             log.info(LOG_PREFIX + "Start download", ddiController.getTenantId(), ddiController.getControllerId());
 
