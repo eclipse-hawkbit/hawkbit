@@ -38,7 +38,7 @@ class MultiTenantJpaTransactionManager extends JpaTransactionManager {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private transient TenantAware tenantAware;
+    private transient TenantAware.TenantResolver tenantResolver;
 
     private static final Class<?> JPA_TARGET;
 
@@ -52,8 +52,8 @@ class MultiTenantJpaTransactionManager extends JpaTransactionManager {
         }
     }
 
-    MultiTenantJpaTransactionManager(final TenantAware tenantAware) {
-        this.tenantAware = tenantAware;
+    MultiTenantJpaTransactionManager(final TenantAware.TenantResolver tenantResolver) {
+        this.tenantResolver = tenantResolver;
     }
 
     private static final EntityPropertyChangeListener ENTITY_PROPERTY_CHANGE_LISTENER = new EntityPropertyChangeListener();
@@ -78,7 +78,7 @@ class MultiTenantJpaTransactionManager extends JpaTransactionManager {
             }
         }
 
-        final String currentTenant = tenantAware.getCurrentTenant();
+        final String currentTenant = tenantResolver.resolveTenant();
         if (currentTenant == null) {
             cleanupTenant(em);
         } else {

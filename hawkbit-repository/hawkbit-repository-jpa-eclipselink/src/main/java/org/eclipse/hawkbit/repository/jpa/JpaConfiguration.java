@@ -34,14 +34,14 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 @Configuration
 public class JpaConfiguration extends JpaBaseConfiguration {
 
-    private final TenantAware tenantAware;
+    private final TenantAware.TenantResolver tenantResolver;
 
     protected JpaConfiguration(
             final DataSource dataSource, final JpaProperties properties,
             final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider,
-            final TenantAware tenantAware) {
+            final TenantAware.TenantResolver tenantResolver) {
         super(dataSource, properties, jtaTransactionManagerProvider);
-        this.tenantAware = tenantAware;
+        this.tenantResolver = tenantResolver;
     }
 
     /**
@@ -53,7 +53,7 @@ public class JpaConfiguration extends JpaBaseConfiguration {
     @Override
     @Bean
     public PlatformTransactionManager transactionManager(final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
-        return new MultiTenantJpaTransactionManager(tenantAware);
+        return new MultiTenantJpaTransactionManager(tenantResolver);
     }
 
     @Override
