@@ -187,7 +187,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.lang.NonNull;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -459,8 +458,7 @@ public class RepositoryApplicationConfiguration {
     }
 
     /**
-     * @return the singleton instance of the
-     *         {@link AfterTransactionCommitExecutorHolder}
+     * @return the singleton instance of the {@link AfterTransactionCommitExecutorHolder}
      */
     @Bean
     AfterTransactionCommitExecutorHolder afterTransactionCommitExecutorHolder() {
@@ -473,6 +471,17 @@ public class RepositoryApplicationConfiguration {
     @Bean
     ExceptionMappingAspectHandler createRepositoryExceptionHandlerAdvice() {
         return new ExceptionMappingAspectHandler();
+    }
+
+    /**
+     * Default {@link BaseRepositoryTypeProvider} bean always provides the NoCountBaseRepository
+     *
+     * @return a {@link BaseRepositoryTypeProvider} bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    BaseRepositoryTypeProvider baseRepositoryTypeProvider() {
+        return new HawkbitBaseRepository.RepositoryTypeProvider();
     }
 
     /**
@@ -1025,18 +1034,6 @@ public class RepositoryApplicationConfiguration {
         return new JpaDistributionSetInvalidationManagement(distributionSetManagement, rolloutManagement,
                 deploymentManagement, targetFilterQueryManagement, actionRepository, txManager, repositoryProperties,
                 tenantAware, lockRegistry, systemSecurityContext);
-    }
-
-    /**
-     * Default {@link BaseRepositoryTypeProvider} bean always provides the
-     * NoCountBaseRepository
-     *
-     * @return a {@link BaseRepositoryTypeProvider} bean
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    BaseRepositoryTypeProvider baseRepositoryTypeProvider() {
-        return new HawkbitBaseRepository.RepositoryTypeProvider();
     }
 
     /**

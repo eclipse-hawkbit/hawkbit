@@ -29,7 +29,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
+            <artifactId>commons-text</artifactId>
         </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>

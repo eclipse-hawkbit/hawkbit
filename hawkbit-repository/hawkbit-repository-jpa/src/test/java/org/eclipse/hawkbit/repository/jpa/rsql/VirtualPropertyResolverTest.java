@@ -17,7 +17,7 @@ import java.util.concurrent.Callable;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.commons.text.StringSubstitutor;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
@@ -31,7 +31,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -47,13 +46,12 @@ class VirtualPropertyResolverTest {
     private static final TenantConfigurationValue<String> TEST_POLLING_OVERDUE_TIME_INTERVAL =
             TenantConfigurationValue.<String> builder().value("00:07:37").build();
 
-    @Spy
-    private final VirtualPropertyResolver resolverUnderTest = new VirtualPropertyResolver();
     @MockitoBean
     private TenantConfigurationManagement confMgmt;
     @MockitoBean
     private SystemSecurityContext securityContext;
-    private StrSubstitutor substitutor;
+
+    private final VirtualPropertyResolver substitutor = new VirtualPropertyResolver();
 
     @BeforeEach
     void before() {
@@ -61,9 +59,6 @@ class VirtualPropertyResolverTest {
                 .thenReturn(TEST_POLLING_TIME_INTERVAL);
         when(confMgmt.getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class))
                 .thenReturn(TEST_POLLING_OVERDUE_TIME_INTERVAL);
-
-        substitutor = new StrSubstitutor(resolverUnderTest, StrSubstitutor.DEFAULT_PREFIX,
-                StrSubstitutor.DEFAULT_SUFFIX, StrSubstitutor.DEFAULT_ESCAPE);
     }
 
     @Test
@@ -80,8 +75,8 @@ class VirtualPropertyResolverTest {
     @Description("Tests escape mechanism for placeholders (syntax is $${SOME_PLACEHOLDER}).")
     void handleEscapedPlaceholder() {
         final String placeholder = "${OVERDUE_TS}";
-        final String escaptedPlaceholder = StrSubstitutor.DEFAULT_ESCAPE + placeholder;
-        final String testString = "lhs=lt=" + escaptedPlaceholder;
+        final String escapedPlaceholder = StringSubstitutor.DEFAULT_ESCAPE + placeholder;
+        final String testString = "lhs=lt=" + escapedPlaceholder;
 
         final String resolvedPlaceholders = substitutor.replace(testString);
         assertThat(resolvedPlaceholders).as("Escaped OVERDUE_TS should not be resolved!").contains(placeholder);
@@ -89,14 +84,13 @@ class VirtualPropertyResolverTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "${NOW_TS}", "${OVERDUE_TS}", "${overdue_ts}" })
-    @Description("Tests resolution of NOW_TS by using a StrSubstitutor configured with the VirtualPropertyResolver.")
+    @Description("Tests resolution of NOW_TS by using a StringSubstitutor configured with the VirtualPropertyResolver.")
     void resolveNowTimestampPlaceholder(final String placeholder) {
         when(securityContext.runAsSystem(Mockito.any())).thenAnswer(a -> ((Callable<?>) a.getArgument(0)).call());
         final String testString = "lhs=lt=" + placeholder;
 
         final String resolvedPlaceholders = substitutor.replace(testString);
-        assertThat(resolvedPlaceholders).as("'%s' placeholder was not replaced", placeholder)
-                .doesNotContain(placeholder);
+        assertThat(resolvedPlaceholders).as("'%s' placeholder was not replaced", placeholder).doesNotContain(placeholder);
     }
 
     @Configuration
