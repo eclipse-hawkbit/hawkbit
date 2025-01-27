@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import com.jayway.jsonpath.JsonPath;
 import io.qameta.allure.Description;
@@ -151,7 +150,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final List<Target> targetsAssignedToDs = assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.FORCED)
                 .getAssignedEntity().stream()
                 .map(Action::getTarget)
-                .collect(Collectors.toList());
+                .toList();
         implicitLock(ds);
 
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
@@ -252,7 +251,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Target savedTarget = createTargetAndAssertNoActiveActions();
 
         final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.SOFT)
-                .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
+                .getAssignedEntity().stream().map(Action::getTarget).toList();
         implicitLock(ds);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
@@ -307,7 +306,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Target savedTarget = createTargetAndAssertNoActiveActions();
 
         final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(),
-                ActionType.TIMEFORCED).getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
+                ActionType.TIMEFORCED).getAssignedEntity().stream().map(Action::getTarget).toList();
         implicitLock(ds);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
@@ -371,7 +370,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.DOWNLOAD_ONLY)
                 .getAssignedEntity().stream()
                 .map(Action::getTarget)
-                .collect(Collectors.toList());
+                .toList();
         implicitLock(ds);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 

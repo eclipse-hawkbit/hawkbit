@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.validation.ConstraintViolationException;
@@ -294,7 +293,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final Action action = deploymentManagement.findActionsByTarget(knownTargetId, pageRequest).getContent().get(0);
 
         final ActionStatus status = deploymentManagement.findActionStatusByAction(PAGE, action.getId()).getContent()
-                .stream().sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId())).collect(Collectors.toList()).get(0);
+                .stream().sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId())).toList().get(0);
 
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
                         + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actions.get(0).getId() + "/status")
@@ -445,7 +444,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // find the current active action
         final List<Action> cancelActions = deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE)
-                .getContent().stream().filter(Action::isCancelingOrCanceled).collect(Collectors.toList());
+                .getContent().stream().filter(Action::isCancelingOrCanceled).toList();
         assertThat(cancelActions).hasSize(1);
 
         // test - cancel an cancel action returns forbidden
@@ -467,7 +466,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         // find the current active action
         final List<Action> cancelActions = deploymentManagement.findActionsByTarget(tA.getControllerId(), PAGE)
-                .getContent().stream().filter(Action::isCancelingOrCanceled).collect(Collectors.toList());
+                .getContent().stream().filter(Action::isCancelingOrCanceled).toList();
         assertThat(cancelActions).hasSize(1);
         assertThat(cancelActions.get(0).isCancelingOrCanceled()).isTrue();
 
@@ -1256,7 +1255,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         // retrieve list in default descending order for actionstaus entries
         final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(PAGE, action.getId())
                 .getContent().stream().sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId()))
-                .collect(Collectors.toList());
+                .toList();
 
         // sort is default descending order, latest status first
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
@@ -1284,7 +1283,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
         final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(PAGE, action.getId())
                 .getContent().stream().sorted(Comparator.comparingLong(Identifiable::getId))
-                .collect(Collectors.toList());
+                .toList();
 
         // descending order
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
@@ -1333,7 +1332,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
         final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(PAGE, action.getId())
                 .getContent().stream().sorted((e1, e2) -> Long.compare(e1.getId(), e2.getId()))
-                .collect(Collectors.toList());
+                .toList();
 
         // Page 1
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
@@ -2078,7 +2077,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     void multiassignmentRequestNotAllowedIfDisabled() throws Exception {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final List<Long> dsIds = testdataFactory.createDistributionSets(2).stream().map(DistributionSet::getId)
-                .collect(Collectors.toList());
+                .toList();
 
         final JSONArray body = new JSONArray();
         dsIds.forEach(id -> body.put(getAssignmentObject(id, MgmtActionType.FORCED, 67)));
@@ -2123,7 +2122,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     void multiAssignment() throws Exception {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final List<Long> dsIds = testdataFactory.createDistributionSets(2).stream().map(DistributionSet::getId)
-                .collect(Collectors.toList());
+                .toList();
 
         final JSONArray body = new JSONArray();
         dsIds.forEach(id -> body.put(getAssignmentObject(id, MgmtActionType.FORCED, 76)));
@@ -2157,7 +2156,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).get().collect(Collectors.toList());
+        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).get().toList();
         assertThat(actions).size().isEqualTo(1);
         assertThat(actions.get(0).getWeight()).get().isEqualTo(weight);
     }
@@ -2191,7 +2190,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).get().collect(Collectors.toList());
+        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).get().toList();
         assertThat(actions).size().isEqualTo(1);
         assertThat(actions.get(0).getWeight()).get().isEqualTo(weight);
     }
@@ -2749,7 +2748,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         // Update
         if (schedule == null) {
             final List<Target> updatedTargets = assignDistributionSet(one, Collections.singletonList(target))
-                    .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
+                    .getAssignedEntity().stream().map(Action::getTarget).toList();
             // 2nd update
             // sleep 10ms to ensure that we can sort by reportedAt
             Awaitility.await().atMost(Duration.ofMillis(100)).atLeast(5, TimeUnit.MILLISECONDS)
@@ -2759,7 +2758,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         } else {
             final List<Target> updatedTargets = assignDistributionSetWithMaintenanceWindow(one.getId(),
                     target.getControllerId(), schedule, duration, timezone).getAssignedEntity().stream()
-                    .map(Action::getTarget).collect(Collectors.toList());
+                    .map(Action::getTarget).toList();
             // 2nd update
             // sleep 10ms to ensure that we can sort by reportedAt
             Awaitility.await().atMost(Duration.ofMillis(100)).atLeast(5, TimeUnit.MILLISECONDS)

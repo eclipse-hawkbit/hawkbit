@@ -323,7 +323,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             final String targetId, final MgmtDistributionSetAssignments dsAssignments, final Boolean offline) {
         if (offline != null && offline) {
             final List<Entry<String, Long>> offlineAssignments = dsAssignments.stream()
-                    .map(dsAssignment -> new SimpleEntry<String, Long>(targetId, dsAssignment.getId()))
+                    .map(dsAssignment -> new SimpleEntry<>(targetId, dsAssignment.getId()))
                     .collect(Collectors.toList());
             return ResponseEntity.ok(MgmtDistributionSetMapper
                     .toResponse(deploymentManagement.offlineAssignedDistributionSets(offlineAssignments)));

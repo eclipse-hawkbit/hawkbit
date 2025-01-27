@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -612,7 +611,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         // Update
         if (schedule == null) {
             final List<Target> updatedTargets = assignDistributionSet(one, Collections.singletonList(target))
-                    .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
+                    .getAssignedEntity().stream().map(Action::getTarget).toList();
             // 2nd update
             // sleep 10ms to ensure that we can sort by reportedAt
             Awaitility.await().atMost(Duration.ofMillis(100)).atLeast(5, TimeUnit.MILLISECONDS)
@@ -622,7 +621,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         } else {
             final List<Target> updatedTargets = assignDistributionSetWithMaintenanceWindow(one.getId(),
                     target.getControllerId(), schedule, duration, timezone).getAssignedEntity().stream()
-                    .map(Action::getTarget).collect(Collectors.toList());
+                    .map(Action::getTarget).toList();
             // 2nd update
             // sleep 10ms to ensure that we can sort by reportedAt
             Awaitility.await().atMost(Duration.ofMillis(100)).atLeast(5, TimeUnit.MILLISECONDS)

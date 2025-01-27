@@ -21,7 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.qameta.allure.Description;
@@ -88,7 +87,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
         final List<Target> targetsAssignedToDs = assignDistributionSet(
                 ds.getId(), savedTarget.getControllerId(), Action.ActionType.FORCED).getAssignedEntity().stream()
                 .map(Action::getTarget)
-                .collect(Collectors.toList());
+                .toList();
         implicitLock(ds);
 
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);

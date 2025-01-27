@@ -9,12 +9,12 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource.deprecated;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
 
@@ -49,7 +49,6 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.bind.annotation.RestController;
@@ -173,26 +172,24 @@ public class DeprecatedMgmtResource implements DeprecatedMgmtRestApi {
                         .findByName(tagName)
                         .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName)),
                 (allDs, distributionSetTag) -> {
-                    final List<JpaDistributionSet> toBeChangedDSs = allDs.stream().filter(set -> set.addTag(distributionSetTag))
-                            .collect(Collectors.toList());
+                    final List<JpaDistributionSet> toBeChangedDSs = allDs.stream().filter(set -> set.addTag(distributionSetTag)).toList();
 
                     final DistributionSetTagAssignmentResult result;
                     // un-assignment case
                     if (toBeChangedDSs.isEmpty()) {
+                        final List<JpaDistributionSet> toRemoveSize = new ArrayList<>();
                         for (final JpaDistributionSet set : allDs) {
                             if (set.removeTag(distributionSetTag)) {
-                                toBeChangedDSs.add(set);
+                                toRemoveSize.add(set);
                             }
                         }
-                        result = new DistributionSetTagAssignmentResult(ids.size() - toBeChangedDSs.size(),
+                        result = new DistributionSetTagAssignmentResult(ids.size() - toRemoveSize.size(),
                                 Collections.emptyList(),
-                                Collections.unmodifiableList(
-                                        toBeChangedDSs.stream().map(distributionSetRepository::save).toList()),
+                                toRemoveSize.stream().map(distributionSetRepository::save).map(DistributionSet.class::cast).toList(),
                                 distributionSetTag);
                     } else {
                         result = new DistributionSetTagAssignmentResult(ids.size() - toBeChangedDSs.size(),
-                                Collections.unmodifiableList(
-                                        toBeChangedDSs.stream().map(distributionSetRepository::save).toList()),
+                                toBeChangedDSs.stream().map(distributionSetRepository::save).map(DistributionSet.class::cast).toList(),
                                 Collections.emptyList(), distributionSetTag);
                     }
                     return result;
