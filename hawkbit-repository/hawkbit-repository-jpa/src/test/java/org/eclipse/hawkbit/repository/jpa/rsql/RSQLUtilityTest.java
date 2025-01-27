@@ -437,10 +437,7 @@ class RSQLUtilityTest {
                 .toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
 
         // verification
-        verify(macroResolver).lookup(overdueProp);
-        // the macro is already replaced when passed to #lessThanOrEqualTo ->
-        // the method is never invoked with the
-        // placeholder:
+        // the macro is already replaced when passed to #lessThanOrEqualTo -> the method is never invoked with the placeholder:
         verify(criteriaBuilderMock, never()).lessThanOrEqualTo(pathOfString(baseSoftwareModuleRootMock), overduePropPlaceholder);
     }
 
@@ -462,9 +459,7 @@ class RSQLUtilityTest {
                 .toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
 
         // verification
-        verify(macroResolver).lookup(overdueProp);
-        // the macro is unknown and hence never replaced -> #lessThanOrEqualTo
-        // is invoked with the placeholder:
+        // the macro is unknown and hence never replaced -> #lessThanOrEqualTo is invoked with the placeholder:
         verify(criteriaBuilderMock).lessThanOrEqualTo(pathOfString(baseSoftwareModuleRootMock), overduePropPlaceholder);
     }
 

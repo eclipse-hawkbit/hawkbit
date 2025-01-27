@@ -62,6 +62,7 @@
         <rsql-parser.version>2.1.0</rsql-parser.version>
         <commons-io.version>2.16.1</commons-io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
+        <commons-text.version>1.13.0</commons-text.version>
         <io-protostuff.version>1.8.0</io-protostuff.version>
         <!-- test -->
         <rabbitmq.http-client.version>5.3.0</rabbitmq.http-client.version>
@@ -711,6 +712,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-collections4</artifactId>
                 <version>${commons-collections4.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>${commons-text.version}</version>
             </dependency>
 
             <!-- Test -->
