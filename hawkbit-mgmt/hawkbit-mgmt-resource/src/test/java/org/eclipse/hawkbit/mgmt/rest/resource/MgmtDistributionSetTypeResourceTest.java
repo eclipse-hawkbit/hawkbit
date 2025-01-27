@@ -477,8 +477,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
         mvc
                 .perform(put(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}",
                         testType.getId()).content(body).contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print());
-
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
     }
 
     @Test

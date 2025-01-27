@@ -79,7 +79,6 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -668,7 +667,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         // prepare the groups
         final List<RolloutGroup> srcGroups = groupList.stream()
                 .map(group -> prepareRolloutGroupWithDefaultConditions(group, conditions))
-                .collect(Collectors.toList());
+                .map(RolloutGroup.class::cast)
+                .toList();
         srcGroups.forEach(RolloutHelper::verifyRolloutGroupHasConditions);
 
         RolloutHelper.verifyRemainingTargets(calculateRemainingTargets(

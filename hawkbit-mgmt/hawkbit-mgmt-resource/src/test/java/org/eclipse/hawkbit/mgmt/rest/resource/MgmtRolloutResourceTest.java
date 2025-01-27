@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.qameta.allure.Description;
@@ -1574,7 +1573,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isOk());
 
         final List<RolloutGroupStatus> groupStatus = rolloutGroupManagement.findByRollout(rollout.getId(), PAGE)
-                .getContent().stream().map(RolloutGroup::getStatus).collect(Collectors.toList());
+                .getContent().stream().map(RolloutGroup::getStatus).toList();
         assertThat(groupStatus).containsExactly(RolloutGroupStatus.RUNNING, RolloutGroupStatus.RUNNING,
                 RolloutGroupStatus.SCHEDULED, RolloutGroupStatus.SCHEDULED);
     }

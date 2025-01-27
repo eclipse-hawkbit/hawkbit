@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -105,7 +105,8 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
     }
 
     private List<String> getExpectedFieldList() {
-        final List<String> expectedFieldList = Arrays.stream(rsqlQueryFieldType.getEnumConstants())
+        return Stream.concat(
+                Arrays.stream(rsqlQueryFieldType.getEnumConstants())
                 .filter(enumField -> enumField.getSubEntityAttributes().isEmpty()).map(enumField -> {
                     final String enumFieldName = enumField.name().toLowerCase();
                     if (enumField.isMap()) {
@@ -113,9 +114,8 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
                     } else {
                         return enumFieldName;
                     }
-                }).collect(Collectors.toList());
-
-        final List<String> expectedSubFieldList = Arrays.stream(rsqlQueryFieldType.getEnumConstants())
+                }),
+                Arrays.stream(rsqlQueryFieldType.getEnumConstants())
                 .filter(enumField -> !enumField.getSubEntityAttributes().isEmpty()).flatMap(enumField -> {
                     final List<String> subEntity = enumField
                             .getSubEntityAttributes().stream().map(fieldName -> enumField.name().toLowerCase()
@@ -123,9 +123,8 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
                             .toList();
 
                     return subEntity.stream();
-                }).toList();
-        expectedFieldList.addAll(expectedSubFieldList);
-        return expectedFieldList;
+                }))
+                .toList();
     }
 
     @Value

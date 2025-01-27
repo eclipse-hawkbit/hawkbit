@@ -151,32 +151,7 @@ public class Statistics {
 
             final Matcher matcher = PATTERN.matcher(k);
             if (matcher.matches()) {
-                final String type = matcher.group("type");
-                final StringTokenizer stringTokenizer = new StringTokenizer(matcher.group("key"), ":");
-                final String name = METER_PREFIX + stringTokenizer.nextToken();
-                if (type.equals("Counter")) {
-                    final double quantity = v instanceof Double d ? d : Double.parseDouble(v.toString());
-                    final Counter counter;
-                    if (stringTokenizer.hasMoreTokens()) {
-                        counter = meterRegistry.counter(name, "entity", stringTokenizer.nextToken());
-                    } else {
-                        counter = meterRegistry.counter(name);
-                    }
-                    counter.increment(quantity - counter.count());
-                } else { // Timer
-                    final long quantity = v instanceof Long l ? l : (long) Double.parseDouble(v.toString());
-                    final Timer timer;
-                    if (stringTokenizer.hasMoreTokens()) {
-                        final String entity = stringTokenizer.nextToken();
-                        stringTokenizer.nextToken(); // skip, what is this?
-                        final String subOp = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "n/a";
-                        timer = meterRegistry.timer(name, "entity", entity, "subOp", subOp);
-                    } else {
-                        timer = meterRegistry.timer(name);
-                    }
-                    timer.record(quantity - REPORTED_TIMER_VALUES.getOrDefault(name, 0L), TimeUnit.NANOSECONDS);
-                    REPORTED_TIMER_VALUES.put(name, quantity);
-                }
+                recordMetric(v, matcher);
             }
         });
 
@@ -185,6 +160,35 @@ public class Statistics {
                 flushing = false;
             }
             this.notifyAll();
+        }
+    }
+
+    private void recordMetric(final Object v, final Matcher matcher) {
+        final String type = matcher.group("type");
+        final StringTokenizer stringTokenizer = new StringTokenizer(matcher.group("key"), ":");
+        final String name = METER_PREFIX + stringTokenizer.nextToken();
+        if (type.equals("Counter")) {
+            final double quantity = v instanceof Double d ? d : Double.parseDouble(v.toString());
+            final Counter counter;
+            if (stringTokenizer.hasMoreTokens()) {
+                counter = meterRegistry.counter(name, "entity", stringTokenizer.nextToken());
+            } else {
+                counter = meterRegistry.counter(name);
+            }
+            counter.increment(quantity - counter.count());
+        } else { // Timer
+            final long quantity = v instanceof Long l ? l : (long) Double.parseDouble(v.toString());
+            final Timer timer;
+            if (stringTokenizer.hasMoreTokens()) {
+                final String entity = stringTokenizer.nextToken();
+                stringTokenizer.nextToken(); // skip, what is this?
+                final String subOp = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "n/a";
+                timer = meterRegistry.timer(name, "entity", entity, "subOp", subOp);
+            } else {
+                timer = meterRegistry.timer(name);
+            }
+            timer.record(quantity - REPORTED_TIMER_VALUES.getOrDefault(name, 0L), TimeUnit.NANOSECONDS);
+            REPORTED_TIMER_VALUES.put(name, quantity);
         }
     }
 
