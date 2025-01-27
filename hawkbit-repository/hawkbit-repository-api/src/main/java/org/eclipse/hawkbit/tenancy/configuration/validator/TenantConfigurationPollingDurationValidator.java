@@ -15,7 +15,6 @@ import java.time.format.DateTimeParseException;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValidatorException;
 import org.eclipse.hawkbit.tenancy.configuration.ControllerPollProperties;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This class is used to validate, that the property is a String and that it is in the correct duration format.

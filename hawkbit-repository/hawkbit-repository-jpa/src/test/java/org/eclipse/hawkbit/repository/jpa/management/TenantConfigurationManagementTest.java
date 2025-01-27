@@ -45,15 +45,14 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
     @Test
     @Description("Tests that tenant specific configuration can be persisted and in case the tenant does not have specific configuration the default from environment is used instead.")
     void storeTenantSpecificConfigurationAsString() {
-        final String envPropertyDefault = environment
-                .getProperty("hawkbit.server.ddi.security.authentication.gatewaytoken.key");
+        final String envPropertyDefault = environment.getProperty("hawkbit.server.ddi.security.authentication.gatewaytoken.key");
         assertThat(envPropertyDefault).isNotNull();
 
         // get the configuration from the system management
         final TenantConfigurationValue<String> defaultConfigValue = tenantConfigurationManagement.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class);
 
-        assertThat(defaultConfigValue.isGlobal()).isEqualTo(true);
+        assertThat(defaultConfigValue.isGlobal()).isTrue();
         assertThat(defaultConfigValue.getValue()).isEqualTo(envPropertyDefault);
 
         // update the tenant specific configuration
@@ -66,7 +65,7 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
         final TenantConfigurationValue<String> updatedConfigurationValue = tenantConfigurationManagement
                 .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class);
 
-        assertThat(updatedConfigurationValue.isGlobal()).isEqualTo(false);
+        assertThat(updatedConfigurationValue.isGlobal()).isFalse();
         assertThat(updatedConfigurationValue.getValue()).isEqualTo(newConfigurationValue);
         // assertThat(tenantConfigurationManagement.getTenantConfigurations()).hasSize(1);
     }
@@ -257,9 +256,9 @@ class TenantConfigurationManagementTest extends AbstractJpaIntegrationTest imple
     void verifyThatAllKeysAreDifferent() {
         final Map<String, Void> keyNames = new HashMap<>();
         tenantConfigurationProperties.getConfigurationKeys().forEach(key -> {
-            if (keyNames.containsKey(key.getKeyName())) {
-                throw new IllegalStateException("The key names are not unique");
-            }
+            assertThat(keyNames)
+                    .as("The key names are not unique")
+                    .doesNotContainKey(key.getKeyName());
             keyNames.put(key.getKeyName(), null);
         });
     }

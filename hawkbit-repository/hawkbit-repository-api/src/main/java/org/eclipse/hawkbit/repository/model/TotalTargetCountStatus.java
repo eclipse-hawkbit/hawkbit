@@ -113,12 +113,7 @@ public class TotalTargetCountStatus {
                 return Status.FINISHED;
             case CANCELED:
                 return Status.CANCELLED;
-            case RETRIEVED:
-            case RUNNING:
-            case WARNING:
-            case DOWNLOAD:
-            case WAIT_FOR_CONFIRMATION:
-            case CANCELING:
+            case RETRIEVED, RUNNING, WARNING, DOWNLOAD, WAIT_FOR_CONFIRMATION, CANCELING:
                 return Status.RUNNING;
             case DOWNLOADED:
                 return Action.ActionType.DOWNLOAD_ONLY == rolloutType ? Status.FINISHED : Status.RUNNING;

@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 
 @Feature("Component Tests - TotalTargetCountStatus")
 @Story("TotalTargetCountStatus should correctly present finished DOWNLOAD_ONLY actions")
-public class TotalTargetCountStatusTest {
+class TotalTargetCountStatusTest {
 
     private final List<TotalTargetCountActionStatus> targetCountActionStatuses = Arrays.asList(
             new TotalTargetCountActionStatus(Action.Status.SCHEDULED, 1L),
@@ -39,7 +39,7 @@ public class TotalTargetCountStatusTest {
     @Test
     @Description("Different Action Statuses should be correctly mapped to the corresponding " +
             "TotalTargetCountStatus.Status")
-    public void shouldCorrectlyMapActionStatuses() {
+    void shouldCorrectlyMapActionStatuses() {
         TotalTargetCountStatus status = new TotalTargetCountStatus(targetCountActionStatuses, 55L,
                 Action.ActionType.FORCED);
         assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED)).isEqualTo(1L);
@@ -47,28 +47,28 @@ public class TotalTargetCountStatusTest {
         assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED)).isEqualTo(3L);
         assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED)).isEqualTo(4L);
         assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING)).isEqualTo(45L);
-        assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED)).isEqualTo(0L);
+        assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED)).isZero();
         assertThat(status.getFinishedPercent()).isEqualTo((float) 100 * 3 / 55);
     }
 
     @Test
     @Description("When an empty list is passed to the TotalTargetCountStatus, all actions should be displayed as " +
             "NOTSTARTED")
-    public void shouldCorrectlyMapActionStatusesToNotStarted() {
+    void shouldCorrectlyMapActionStatusesToNotStarted() {
         TotalTargetCountStatus status = new TotalTargetCountStatus(Collections.emptyList(), 55L,
                 Action.ActionType.FORCED);
-        assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED)).isEqualTo(0L);
-        assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.ERROR)).isEqualTo(0L);
-        assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED)).isEqualTo(0L);
-        assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED)).isEqualTo(0L);
-        assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING)).isEqualTo(0L);
+        assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED)).isZero();
+        assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.ERROR)).isZero();
+        assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED)).isZero();
+        assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED)).isZero();
+        assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING)).isZero();
         assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED)).isEqualTo(55L);
-        assertThat(status.getFinishedPercent()).isEqualTo(0);
+        assertThat(status.getFinishedPercent()).isZero();
     }
 
     @Test
     @Description("DownloadOnly actions should be displayed as FINISHED when they have ActionStatus.DOWNLOADED")
-    public void shouldCorrectlyMapActionStatusesInDownloadOnlyCase() {
+    void shouldCorrectlyMapActionStatusesInDownloadOnlyCase() {
         TotalTargetCountStatus status = new TotalTargetCountStatus(targetCountActionStatuses, 55L,
                 Action.ActionType.DOWNLOAD_ONLY);
         assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED)).isEqualTo(1L);
@@ -76,7 +76,7 @@ public class TotalTargetCountStatusTest {
         assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.FINISHED)).isEqualTo(13L);
         assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.CANCELLED)).isEqualTo(4L);
         assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.RUNNING)).isEqualTo(35L);
-        assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED)).isEqualTo(0L);
+        assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.NOTSTARTED)).isZero();
         assertThat(status.getFinishedPercent()).isEqualTo((float) 100 * 13 / 55);
     }
 }

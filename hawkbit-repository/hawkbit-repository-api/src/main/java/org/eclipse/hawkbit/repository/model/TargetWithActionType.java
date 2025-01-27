@@ -79,6 +79,7 @@ public class TargetWithActionType {
      *         cron expression is relative to this time zone.
      * @throws InvalidMaintenanceScheduleException if the parameters do not define a valid maintenance schedule.
      */
+    @SuppressWarnings("java:S107")
     public TargetWithActionType(
             final String controllerId, final ActionType actionType, final long forceTime, final Integer weight,
             final String maintenanceSchedule, final String maintenanceWindowDuration, final String maintenanceWindowTimeZone,

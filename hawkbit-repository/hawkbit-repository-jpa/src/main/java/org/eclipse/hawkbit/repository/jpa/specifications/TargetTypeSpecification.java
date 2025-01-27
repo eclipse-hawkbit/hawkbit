@@ -15,8 +15,10 @@ import jakarta.persistence.criteria.SetJoin;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaNamedEntity_;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTypeEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType_;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -36,7 +38,7 @@ public final class TargetTypeSpecification {
      * @return the {@link TargetType} {@link Specification}
      */
     public static Specification<JpaTargetType> hasIdIn(final Collection<Long> ids) {
-        return (targetRoot, query, cb) -> targetRoot.get(JpaTargetType_.id).in(ids);
+        return (targetRoot, query, cb) -> targetRoot.get(AbstractJpaBaseEntity_.id).in(ids);
     }
 
     /**
@@ -48,32 +50,28 @@ public final class TargetTypeSpecification {
     public static Specification<JpaTargetType> hasDsSetType(final Long dsTypeId) {
         return (targetRoot, query, cb) -> {
             final SetJoin<JpaTargetType, JpaDistributionSetType> join = targetRoot.join(JpaTargetType_.distributionSetTypes);
-            return cb.equal(join.get(JpaDistributionSetType_.id), dsTypeId);
+            return cb.equal(join.get(AbstractJpaBaseEntity_.id), dsTypeId);
         };
     }
 
     /**
-     * {@link Specification} for retrieving {@link TargetType} with
-     * given {@link TargetType#getKey()} including fetching the
-     * elements list.
+     * {@link Specification} for retrieving {@link TargetType} with given {@link TargetType#getKey()} including fetching the elements list.
      *
      * @param key to search
      * @return the {@link TargetType} {@link Specification}
      */
     public static Specification<JpaTargetType> hasKey(final String key) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTargetType_.key), key);
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(AbstractJpaTypeEntity_.key), key);
     }
 
     /**
-     * {@link Specification} for retrieving {@link TargetType} with
-     * given {@link TargetType#getName()} including fetching the
-     * elements list.
+     * {@link Specification} for retrieving {@link TargetType} with given {@link TargetType#getName()} including fetching the elements list.
      *
      * @param name to search
      * @return the {@link TargetType} {@link Specification}
      */
     public static Specification<JpaTargetType> hasName(final String name) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTargetType_.name), name);
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(AbstractJpaNamedEntity_.name), name);
     }
 
     /**
@@ -83,6 +81,6 @@ public final class TargetTypeSpecification {
      * @return the {@link TargetType} {@link Specification}
      */
     public static Specification<JpaTargetType> likeName(final String name) {
-        return (targetRoot, query, cb) -> cb.like(cb.lower(targetRoot.get(JpaTargetType_.name)), name.toLowerCase());
+        return (targetRoot, query, cb) -> cb.like(cb.lower(targetRoot.get(AbstractJpaNamedEntity_.name)), name.toLowerCase());
     }
 }

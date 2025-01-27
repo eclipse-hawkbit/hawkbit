@@ -23,7 +23,6 @@ import java.util.HexFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -133,7 +132,7 @@ public interface UpdateHandler {
                                     .map(art -> "Download start for: " + art.getFilename() +
                                             " with size " + art.getSize() +
                                             " and hashes " + art.getHashes() + " ...")
-                                    .collect(Collectors.toList())));
+                                    .toList()));
 
             log.info(LOG_PREFIX + "Start download", dmfController.getTenantId(), dmfController.getControllerId());
 
