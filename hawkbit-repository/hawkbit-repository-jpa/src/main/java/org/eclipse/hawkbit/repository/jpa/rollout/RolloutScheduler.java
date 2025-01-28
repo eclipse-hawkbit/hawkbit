@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 /**
  * Scheduler to schedule the {@link RolloutHandler#handleAll()}. The
@@ -28,12 +29,15 @@ public class RolloutScheduler {
     private final SystemManagement systemManagement;
     private final RolloutHandler rolloutHandler;
     private final SystemSecurityContext systemSecurityContext;
+    private final ThreadPoolTaskExecutor rolloutTaskExecutor;
 
     public RolloutScheduler(
-            final RolloutHandler rolloutHandler, final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext) {
+        final RolloutHandler rolloutHandler, final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext,
+        final ThreadPoolTaskExecutor rolloutTaskExecutor) {
         this.systemManagement = systemManagement;
         this.rolloutHandler = rolloutHandler;
         this.systemSecurityContext = systemSecurityContext;
+        this.rolloutTaskExecutor = rolloutTaskExecutor;
     }
 
     /**
@@ -44,12 +48,29 @@ public class RolloutScheduler {
     public void runningRolloutScheduler() {
         log.debug("rollout schedule checker has been triggered.");
 
-        // run this code in system code privileged to have the necessary permission to query and create entities.
+        // run this code in system code privileged to have the necessary
+        // permission to query and create entities.
         systemSecurityContext.runAsSystem(() -> {
-            // workaround eclipselink that is currently not possible to execute a query without multi-tenancy if MultiTenant
-            // annotation is used. https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So, iterate through all tenants and execute the rollout
-            // check for each tenant separately.
-            systemManagement.forEachTenant(tenant -> rolloutHandler.handleAll());
+            // workaround eclipselink that is currently not possible to
+            // execute a query without multi-tenancy if MultiTenant
+            // annotation is used.
+            // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
+            // iterate through all tenants and execute the rollout check for
+            // each tenant seperately.
+
+            systemManagement.forEachTenant(tenant ->
+                rolloutTaskExecutor.submit(() ->
+                    systemSecurityContext.runAsSystemAsTenant(() -> {
+                        try {
+                            log.trace("Handling rollout for tenant: {}", tenant);
+                            rolloutHandler.handleAll();
+                        } catch (Exception e) {
+                            log.error("Error processing rollout for tenant {}", tenant, e);
+                        }
+                        return null;
+                    }, tenant)
+                )
+            );
             return null;
         });
     }

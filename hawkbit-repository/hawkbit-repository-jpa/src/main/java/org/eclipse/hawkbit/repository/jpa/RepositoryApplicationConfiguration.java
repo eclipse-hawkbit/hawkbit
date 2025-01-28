@@ -167,6 +167,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -189,6 +190,7 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.lang.NonNull;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
@@ -262,6 +264,20 @@ public class RepositoryApplicationConfiguration {
                 return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
             }
         };
+    }
+
+    @Bean
+    public ThreadPoolTaskExecutor rolloutTaskExecutor(
+        @Value("${hawkbit.rollout.executor.thread-pool.size:2}") int poolSize) {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(poolSize);
+        executor.setMaxPoolSize(poolSize);
+        executor.setQueueCapacity(0); // forces a Synchronous Queue
+        // This policy will block the submitter until a worker thread is free
+        executor.setRejectedExecutionHandler(new BlockWhenFullPolicy());
+        executor.setThreadNamePrefix("rollout-exec-");
+        executor.initialize();
+        return executor;
     }
 
     @Bean
@@ -992,8 +1008,8 @@ public class RepositoryApplicationConfiguration {
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.rollout.scheduler", name = "enabled", matchIfMissing = true)
     RolloutScheduler rolloutScheduler(final SystemManagement systemManagement,
-            final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext) {
-        return new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext);
+                                      final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext, final ThreadPoolTaskExecutor rolloutTaskExecutor) {
+        return new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext, rolloutTaskExecutor);
     }
 
     /**
