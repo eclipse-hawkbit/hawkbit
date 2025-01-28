@@ -75,7 +75,7 @@
         <maven.enforcer.plugin.version>3.5.0</maven.enforcer.plugin.version>
         <flatten.maven.plugin.version>1.6.0</flatten.maven.plugin.version>
         <maven.scm.plugin.version>2.1.0</maven.scm.plugin.version>
-        <maven.site.plugin.version>3.12.1</maven.site.plugin.version>
+        <maven.site.plugin.version>3.21.0</maven.site.plugin.version>
 
         <license.tool.plugin.version>1.1.0</license.tool.plugin.version>
         <license.maven.plugin.version>4.5</license.maven.plugin.version>
