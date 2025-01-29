@@ -25,7 +25,7 @@
 
     <properties>
         <spring-cloud-starter-openfeign.version>4.2.0</spring-cloud-starter-openfeign.version>
-        <openfeign-hc5.version>13.2.1</openfeign-hc5.version>
+        <openfeign-hc5.version>13.5</openfeign-hc5.version>
     </properties>
 
     <modules>
