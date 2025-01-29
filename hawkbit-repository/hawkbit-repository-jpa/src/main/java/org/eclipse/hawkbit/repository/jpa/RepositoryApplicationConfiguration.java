@@ -267,20 +267,6 @@ public class RepositoryApplicationConfiguration {
     }
 
     @Bean
-    public ThreadPoolTaskExecutor rolloutTaskExecutor(
-        @Value("${hawkbit.rollout.executor.thread-pool.size:2}") int poolSize) {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(poolSize);
-        executor.setMaxPoolSize(poolSize);
-        executor.setQueueCapacity(0); // forces a Synchronous Queue
-        // This policy will block the submitter until a worker thread is free
-        executor.setRejectedExecutionHandler(new BlockWhenFullPolicy());
-        executor.setThreadNamePrefix("rollout-exec-");
-        executor.initialize();
-        return executor;
-    }
-
-    @Bean
     @ConditionalOnMissingBean
     PauseRolloutGroupAction pauseRolloutGroupAction(final RolloutManagement rolloutManagement,
             final RolloutGroupRepository rolloutGroupRepository, final SystemSecurityContext systemSecurityContext) {
@@ -1008,8 +994,8 @@ public class RepositoryApplicationConfiguration {
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.rollout.scheduler", name = "enabled", matchIfMissing = true)
     RolloutScheduler rolloutScheduler(final SystemManagement systemManagement,
-                                      final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext, final ThreadPoolTaskExecutor rolloutTaskExecutor) {
-        return new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext, rolloutTaskExecutor);
+                                      final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext, @Value("${hawkbit.rollout.executor.thread-pool.size:1}") int threadPoolSize) {
+        return new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext,  threadPoolSize);
     }
 
     /**

@@ -33,11 +33,12 @@ public class RolloutScheduler {
 
     public RolloutScheduler(
         final RolloutHandler rolloutHandler, final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext,
-        final ThreadPoolTaskExecutor rolloutTaskExecutor) {
+        final int threadPoolSize) {
         this.systemManagement = systemManagement;
         this.rolloutHandler = rolloutHandler;
         this.systemSecurityContext = systemSecurityContext;
-        this.rolloutTaskExecutor = rolloutTaskExecutor;
+        this.rolloutTaskExecutor = threadPoolTaskExecutor(threadPoolSize);
+
     }
 
     /**
@@ -47,7 +48,6 @@ public class RolloutScheduler {
     @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void runningRolloutScheduler() {
         log.debug("rollout schedule checker has been triggered.");
-
         // run this code in system code privileged to have the necessary
         // permission to query and create entities.
         systemSecurityContext.runAsSystem(() -> {
@@ -58,20 +58,46 @@ public class RolloutScheduler {
             // iterate through all tenants and execute the rollout check for
             // each tenant seperately.
 
-            systemManagement.forEachTenant(tenant ->
-                rolloutTaskExecutor.submit(() ->
-                    systemSecurityContext.runAsSystemAsTenant(() -> {
-                        try {
-                            log.trace("Handling rollout for tenant: {}", tenant);
-                            rolloutHandler.handleAll();
-                        } catch (Exception e) {
-                            log.error("Error processing rollout for tenant {}", tenant, e);
-                        }
-                        return null;
-                    }, tenant)
-                )
-            );
+            systemManagement.forEachTenant(this::handle);
             return null;
         });
     }
+
+    private void handle(String tenant) {
+        log.trace("Handling rollout for tenant: {}", tenant);
+        if (rolloutTaskExecutor == null) {
+            rolloutHandler.handleAll();
+        } else {
+            handleParallel(tenant);
+        }
+    }
+
+    private void handleParallel(String tenant) {
+        rolloutTaskExecutor.submit(() -> systemSecurityContext.runAsSystemAsTenant(() -> {
+            try {
+                rolloutHandler.handleAll();
+            } catch (Exception e) {
+                log.error("Error processing rollout for tenant {}", tenant, e);
+            }
+            return null;
+        }, tenant));
+
+    }
+
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor (int threadPoolSize) {
+        if (threadPoolSize <= 1) {
+            return null;
+        }
+
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(threadPoolSize);
+        executor.setMaxPoolSize(threadPoolSize);
+        executor.setQueueCapacity(0); // forces a Synchronous Queue
+        // This policy will block the submitter until a worker thread is free
+        executor.setRejectedExecutionHandler(new BlockWhenFullPolicy());
+        executor.setThreadNamePrefix("rollout-exec-");
+        executor.initialize();
+        return executor;
+    }
+
 }
