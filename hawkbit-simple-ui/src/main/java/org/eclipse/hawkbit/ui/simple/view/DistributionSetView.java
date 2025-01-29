@@ -142,8 +142,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             return Filter.filter(
                     Map.of(
                             "name", name.getOptionalValue(),
-                            "type", type.getSelectedItems().stream().map(MgmtDistributionSetType::getKey)
-                                    .toList(),
+                            "type", type.getSelectedItems().stream().map(MgmtDistributionSetType::getKey).toList(),
                             "tag", tag.getSelectedItems()));
         }
     }

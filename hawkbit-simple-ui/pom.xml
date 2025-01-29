@@ -103,6 +103,10 @@
                         <phase>compile</phase>
                     </execution>
                 </executions>
+                <configuration>
+                    <forceProductionBuild>true</forceProductionBuild>
+                    <frontendHotdeploy>false</frontendHotdeploy>
+                </configuration>
             </plugin>
         </plugins>
     </build>
