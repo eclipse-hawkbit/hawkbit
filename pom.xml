@@ -57,7 +57,7 @@
 
         <!-- Misc libraries versions - START -->
         <cron-utils.version>9.2.1</cron-utils.version>
-        <jsoup.version>1.18.1</jsoup.version>
+        <jsoup.version>1.18.3</jsoup.version>
         <javax.el-api.version>3.0.0</javax.el-api.version>
         <rsql-parser.version>2.1.0</rsql-parser.version>
         <commons-io.version>2.18.0</commons-io.version>
