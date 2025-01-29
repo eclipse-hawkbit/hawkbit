@@ -45,6 +45,7 @@ import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -63,6 +64,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Route(value = "software_modules", layout = MainLayout.class)
 @RolesAllowed({ "SOFTWARE_MODULE_READ" })
 @Uses(Icon.class)
+@Slf4j
 public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
     @Autowired
@@ -307,9 +309,11 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             uploadBtn.setDropAllowed(true);
             uploadBtn.addSucceededListener(e -> {
                 final MgmtArtifact artifact = hawkbitClient.getSoftwareModuleRestApi()
-                        .uploadArtifact(softwareModuleId,
-                                new MultipartFileImpl(fileBuffer, e.getContentLength(), e.getMIMEType()), fileBuffer.getFileName(), null, null,
-                                null).getBody();
+                        .uploadArtifact(
+                                softwareModuleId,
+                                new MultipartFileImpl(fileBuffer, e.getContentLength(), e.getMIMEType()),
+                                fileBuffer.getFileName(), null, null, null)
+                        .getBody();
                 artifacts.add(artifact);
                 artifactGrid.refreshGrid(false);
             });
@@ -367,6 +371,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
             @Override
             public byte[] getBytes() throws IOException {
+                log.warn("Multipart file getBytes() is called. Whole input stream is loaded into the memory!");
                 try (final InputStream is = getInputStream()) {
                     return is.readAllBytes();
                 }

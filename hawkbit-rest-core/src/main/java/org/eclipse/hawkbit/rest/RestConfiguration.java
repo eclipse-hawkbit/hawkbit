@@ -159,6 +159,7 @@ public class RestConfiguration {
         @ExceptionHandler(AbstractServerRtException.class)
         public ResponseEntity<ExceptionInfo> handleSpServerRtExceptions(final HttpServletRequest request, final Exception ex) {
             logRequest(request, ex);
+
             final ExceptionInfo response = createExceptionInfo(ex);
             final HttpStatus responseStatus;
             if (ex instanceof AbstractServerRtException abstractServerRtException) {
@@ -172,8 +173,7 @@ public class RestConfiguration {
         /**
          * Method for handling exception of type {@link FileStreamingFailedException} which is thrown in case the streaming of a file failed
          * due to an internal server error. As the streaming of the file has already begun, no JSON response but only the ResponseStatus 500
-         * is returned.
-         * Called by the Spring-Framework for exception handling.
+         * is returned. Called by the Spring-Framework for exception handling.
          *
          * @param request the Http request
          * @param ex the exception which occurred
@@ -182,6 +182,7 @@ public class RestConfiguration {
         @ExceptionHandler(FileStreamingFailedException.class)
         public ResponseEntity<Object> handleFileStreamingFailedException(final HttpServletRequest request, final Exception ex) {
             logRequest(request, ex);
+
             log.warn("File streaming failed: {}", ex.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -201,22 +202,22 @@ public class RestConfiguration {
                 IllegalArgumentException.class })
         public ResponseEntity<ExceptionInfo> handleExceptionCausedByIncorrectRequestBody(final HttpServletRequest request, final Exception ex) {
             logRequest(request, ex);
+
             final ExceptionInfo response = createExceptionInfo(new MessageNotReadableException());
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
         /**
          * Method for handling exception of type ConstraintViolationException which is thrown in case the request is rejected due to a
-         * constraint violation.
-         * Called by the Spring-Framework for exception handling.
+         * constraint violation. Called by the Spring-Framework for exception handling.
          *
          * @param request the Http request
          * @param ex the exception which occurred
          * @return the entity to be responded containing the exception information as entity.
          */
         @ExceptionHandler(ConstraintViolationException.class)
-        public ResponseEntity<ExceptionInfo> handleConstraintViolationException(final HttpServletRequest request,
-                final ConstraintViolationException ex) {
+        public ResponseEntity<ExceptionInfo> handleConstraintViolationException(
+                final HttpServletRequest request, final ConstraintViolationException ex) {
             logRequest(request, ex);
 
             final ExceptionInfo response = new ExceptionInfo();
@@ -251,8 +252,7 @@ public class RestConfiguration {
 
         /**
          * Method for handling exception of type {@link MultipartException} which is thrown in case the request body is not well-formed and
-         * cannot be deserialized.
-         * Called by the Spring-Framework for exception handling.
+         * cannot be deserialized. Called by the Spring-Framework for exception handling.
          *
          * @param request the Http request
          * @param ex the exception which occurred
@@ -266,8 +266,7 @@ public class RestConfiguration {
             final Throwable responseCause = throwables.get(throwables.size() - 1);
 
             if (ObjectUtils.isEmpty(responseCause.getMessage())) {
-                log.warn("Request {} lead to MultipartException without root cause message:\n{}", request.getRequestURL(),
-                        ex.getStackTrace());
+                log.warn("Request {} lead to MultipartException without root cause message:\n{}", request.getRequestURL(), ex.getStackTrace());
             }
 
             return new ResponseEntity<>(createExceptionInfo(new MultiPartFileUploadException(responseCause)), HttpStatus.BAD_REQUEST);
@@ -277,6 +276,10 @@ public class RestConfiguration {
             return ERROR_TO_HTTP_STATUS.getOrDefault(error, DEFAULT_RESPONSE_STATUS);
         }
 
+        // enable certain level of debug with
+        //  -> logging.level.org.eclipse.hawkbit.rest.RestConfiguration=DEBUG
+        // or for more detailed log
+        //  -> logging.level.org.eclipse.hawkbit.rest.RestConfiguration=TRACE
         private void logRequest(final HttpServletRequest request, final Exception ex) {
             if (log.isTraceEnabled()) {
                 log.trace("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL(), ex);
@@ -295,7 +298,6 @@ public class RestConfiguration {
             }
             return response;
         }
-
     }
 
     /**
@@ -309,7 +311,7 @@ public class RestConfiguration {
         private final String[] excludeAntPaths;
         private final AntPathMatcher antMatcher = new AntPathMatcher();
 
-         public ExcludePathAwareShallowETagFilter(final String... excludeAntPaths) {
+        public ExcludePathAwareShallowETagFilter(final String... excludeAntPaths) {
             this.excludeAntPaths = excludeAntPaths;
         }
 
