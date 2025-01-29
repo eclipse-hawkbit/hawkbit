@@ -58,27 +58,29 @@ public class RolloutScheduler {
             // iterate through all tenants and execute the rollout check for
             // each tenant seperately.
 
-            systemManagement.forEachTenant(this::handle);
+            systemManagement.forEachTenant(tenant -> {
+                if (rolloutTaskExecutor == null) {
+                    handleAll(tenant);
+                } else {
+                    handleAllAsync(tenant);
+                }
+            });
             return null;
         });
     }
 
-    private void handle(String tenant) {
+    private void handleAll(String tenant) {
         log.trace("Handling rollout for tenant: {}", tenant);
-        if (rolloutTaskExecutor == null) {
+        try {
             rolloutHandler.handleAll();
-        } else {
-            handleParallel(tenant);
+        } catch (Exception e) {
+            log.error("Error processing rollout for tenant {}", tenant, e);
         }
     }
 
-    private void handleParallel(String tenant) {
+    private void handleAllAsync(String tenant) {
         rolloutTaskExecutor.submit(() -> systemSecurityContext.runAsSystemAsTenant(() -> {
-            try {
-                rolloutHandler.handleAll();
-            } catch (Exception e) {
-                log.error("Error processing rollout for tenant {}", tenant, e);
-            }
+            handleAll(tenant);
             return null;
         }, tenant));
 
