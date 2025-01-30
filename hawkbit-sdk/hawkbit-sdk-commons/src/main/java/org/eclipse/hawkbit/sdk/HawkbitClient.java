@@ -23,15 +23,19 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Client;
 import feign.Contract;
 import feign.Feign;
+import feign.FeignException;
+import feign.Request;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import feign.codec.Decoder;
@@ -139,6 +143,16 @@ public class HawkbitClient {
         }
     }
 
+    private <T> T service0(final Class<T> serviceType, final Tenant tenant, final Controller controller) {
+        return Feign.builder().client(client)
+                .encoder(encoder)
+                .decoder(decoder)
+                .errorDecoder(errorDecoder)
+                .contract(contract)
+                .requestInterceptor(requestInterceptorFn.apply(tenant, controller))
+                .target(serviceType, controller == null ? hawkBitServer.getMgmtUrl() : hawkBitServer.getDdiUrl());
+    }
+
     @SuppressWarnings("unchecked")
     private <T> T proxy(final Class<T> serviceType, final T service, final Tenant tenant, final Controller controller) {
         final ObjectMapper objectMapper = new ObjectMapper();
@@ -146,7 +160,7 @@ public class HawkbitClient {
             try {
                 final Class<?>[] parameterTypes = method.getParameterTypes();
                 if (method.getDeclaringClass() == serviceType && List.of(parameterTypes).contains(MultipartFile.class)) {
-                    return processMultipartFormData(method, args, tenant, controller, parameterTypes, objectMapper);
+                    return callMultipartFormDataRequest(method, args, tenant, controller, parameterTypes, objectMapper);
                 } else {
                     return method.invoke(service, args);
                 }
@@ -156,9 +170,7 @@ public class HawkbitClient {
         });
     }
 
-    private static final String CRLF = "\r\n";
-
-    private Object processMultipartFormData(
+    private Object callMultipartFormDataRequest(
             final Method method, final Object[] args,
             final Tenant tenant, final Controller controller,
             final Class<?>[] parameterTypes, final ObjectMapper objectMapper) throws IOException {
@@ -207,19 +219,59 @@ public class HawkbitClient {
             }
             out.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
         }
+
+        final int responseCode = conn.getResponseCode();
+        if (responseCode < 200 || responseCode >= 300) {
+            throw toFeignException(responseCode, conn, Request.create(
+                    Request.HttpMethod.POST, conn.getURL().toString(),
+                    conn.getHeaderFields().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)),
+                    (Request.Body)null, null));
+        }
+
         return method.getReturnType() == ResponseEntity.class
                 ? new ResponseEntity<>(
                     deserialize(
                             conn.getInputStream(),
                             (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0],
                             objectMapper),
-                    HttpStatusCode.valueOf(conn.getResponseCode()))
+                    HttpStatusCode.valueOf(responseCode))
                 : deserialize(conn.getInputStream(), method.getReturnType(), objectMapper);
     }
-    private Object deserialize(final InputStream is, final Class<?> type, final ObjectMapper objectMapper) throws IOException {
+
+    private static FeignException toFeignException(final int responseCode, final HttpURLConnection conn, final Request request) throws IOException {
+        if (responseCode >= 500 && responseCode < 600) {
+            // server error
+            return switch (responseCode) {
+                case 500 -> new FeignException.InternalServerError(conn.getResponseMessage(), request, null, null);
+                case 501 -> new FeignException.NotImplemented(conn.getResponseMessage(), request, null, null);
+                case 502 -> new FeignException.BadGateway(conn.getResponseMessage(), request, null, null);
+                case 503 -> new FeignException.ServiceUnavailable(conn.getResponseMessage(), request, null, null);
+                case 504 -> new FeignException.GatewayTimeout(conn.getResponseMessage(), request, null, null);
+                default -> new FeignException.FeignServerException(responseCode, conn.getResponseMessage(), request, null, null);
+            };
+        } else {
+            return switch (responseCode) {
+                case 400 -> new FeignException.BadRequest(conn.getResponseMessage(), request, null, null);
+                case 401 -> new FeignException.Unauthorized(conn.getResponseMessage(), request, null, null);
+                case 403 -> new FeignException.Forbidden(conn.getResponseMessage(), request, null, null);
+                case 404 -> new FeignException.NotFound(conn.getResponseMessage(), request, null, null);
+                case 405 -> new FeignException.MethodNotAllowed(conn.getResponseMessage(), request, null, null);
+                case 406 -> new FeignException.NotAcceptable(conn.getResponseMessage(), request, null, null);
+                case 409 -> new FeignException.Conflict(conn.getResponseMessage(), request, null, null);
+                case 410 -> new FeignException.Gone(conn.getResponseMessage(), request, null, null);
+                case 415 -> new FeignException.UnsupportedMediaType(conn.getResponseMessage(), request, null, null);
+                case 429 -> new FeignException.TooManyRequests(conn.getResponseMessage(), request, null, null);
+                case 422 -> new FeignException.UnprocessableEntity(conn.getResponseMessage(), request, null, null);
+                default -> new FeignException.FeignClientException(responseCode, conn.getResponseMessage(), request, null, null);
+            };
+        }
+    }
+
+    private static Object deserialize(final InputStream is, final Class<?> type, final ObjectMapper objectMapper) throws IOException {
         return type == void.class || type == Void.class ? null : objectMapper.readValue(is, type);
     }
 
+    private static final String CRLF = "\r\n";
     private void writeMultipartFile(
             final MultipartFile multipartFile, final OutputStream out, final String boundary, final Annotation[] parametersAnnotations)
             throws IOException {
@@ -238,7 +290,6 @@ public class HawkbitClient {
             out.write(CRLF.getBytes(StandardCharsets.UTF_8));
         }
     }
-
     private void writeSimpleFormData(
             final Object arg, final OutputStream out, final String boundary, final Annotation[] parameterAnnotations) throws IOException {
         if (arg != null) {
@@ -253,22 +304,12 @@ public class HawkbitClient {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends Annotation> T getAnnotation(final Class<T> annotationClass, final Annotation[] annotations) {
+    private static <T extends Annotation> T getAnnotation(final Class<T> annotationClass, final Annotation[] annotations) {
         for (final Annotation annotation : annotations) {
             if (annotation.annotationType().equals(annotationClass)) {
                 return (T) annotation;
             }
         }
         return null;
-    }
-
-    private <T> T service0(final Class<T> serviceType, final Tenant tenant, final Controller controller) {
-        return Feign.builder().client(client)
-                .encoder(encoder)
-                .decoder(decoder)
-                .errorDecoder(errorDecoder)
-                .contract(contract)
-                .requestInterceptor(requestInterceptorFn.apply(tenant, controller))
-                .target(serviceType, controller == null ? hawkBitServer.getMgmtUrl() : hawkBitServer.getDdiUrl());
     }
 }
