@@ -68,16 +68,15 @@ public class HawkbitClient {
                                                                             Objects.requireNonNull(tenant.getPassword(),
                                                                                     "Password is not available!"))
                                                                             .getBytes(StandardCharsets.ISO_8859_1)))
-                            :
-                                    template -> {
-                                        if (ObjectUtils.isEmpty(tenant.getGatewayToken())) {
+                            : template -> {
+                                    if (ObjectUtils.isEmpty(tenant.getGatewayToken())) {
                                             if (!ObjectUtils.isEmpty(controller.getSecurityToken())) {
                                                 template.header(AUTHORIZATION, "TargetToken " + controller.getSecurityToken());
-                                            } // else do not sent authentication
-                                        } else {
+                                            } // else do not send authentication
+                                    } else {
                                             template.header(AUTHORIZATION, "GatewayToken " + tenant.getGatewayToken());
-                                        }
-                                    };
+                                    }
+                            };
     private static final ErrorDecoder DEFAULT_ERROR_DECODER_0 = new ErrorDecoder.Default();
     public static final ErrorDecoder DEFAULT_ERROR_DECODER = (methodKey, response) -> {
         final Exception e = DEFAULT_ERROR_DECODER_0.decode(methodKey, response);
@@ -209,12 +208,16 @@ public class HawkbitClient {
             out.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
         }
         return method.getReturnType() == ResponseEntity.class
-                ? new ResponseEntity<Object>(
-                    objectMapper.readValue(
+                ? new ResponseEntity<>(
+                    deserialize(
                             conn.getInputStream(),
-                            (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]),
+                            (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0],
+                            objectMapper),
                     HttpStatusCode.valueOf(conn.getResponseCode()))
-                : objectMapper.readValue(conn.getInputStream(), method.getReturnType());
+                : deserialize(conn.getInputStream(), method.getReturnType(), objectMapper);
+    }
+    private Object deserialize(final InputStream is, final Class<?> type, final ObjectMapper objectMapper) throws IOException {
+        return type == void.class || type == Void.class ? null : objectMapper.readValue(is, type);
     }
 
     private void writeMultipartFile(
