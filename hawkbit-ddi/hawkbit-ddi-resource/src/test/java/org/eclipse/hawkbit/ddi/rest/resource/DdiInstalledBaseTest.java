@@ -69,7 +69,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  */
 @Feature("Component Tests - Direct Device Integration API")
 @Story("Installed Base Resource")
-public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
+class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Autowired
     ActionStatusRepository actionStatusRepository;
@@ -78,7 +78,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensure that the installed base resource is available as CBOR")
-    public void installedBaseResourceCbor() throws Exception {
+    void installedBaseResourceCbor() throws Exception {
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
@@ -100,7 +100,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensure that assigned version is self assigned version")
-    public void installedVersion() throws Exception {
+    void installedVersion() throws Exception {
         final Target target = createTargetAndAssertNoActiveActions();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
@@ -115,7 +115,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensure that installedVersion is version self assigned")
-    public void installedVersionNotExist() throws Exception {
+    void installedVersionNotExist() throws Exception {
         final Target target = createTargetAndAssertNoActiveActions();
         final String dsName = "unknown";
         final String dsVersion = "1.0.0";
@@ -128,7 +128,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test several deployments to a controller. Checks that action is represented as installedBase after installation.")
-    public void deploymentSeveralActionsInInstalledBase() throws Exception {
+    void deploymentSeveralActionsInInstalledBase() throws Exception {
         // Prepare test data
         final Target target = createTargetAndAssertNoActiveActions();
 
@@ -196,7 +196,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test several deployments of same ds to a controller. Checks that cancelled action in history is not linked as installedBase.")
-    public void deploymentActionsOfSameDsWithCancelledActionInHistory() throws Exception {
+    void deploymentActionsOfSameDsWithCancelledActionInHistory() throws Exception {
         // Prepare test data
         final Target target = createTargetAndAssertNoActiveActions();
 
@@ -252,7 +252,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test several deployments of same ds to a controller. Checks that latest cancelled action does not override actual installed ds.")
-    public void deploymentActionsOfSameDsWithCancelledAction() throws Exception {
+    void deploymentActionsOfSameDsWithCancelledAction() throws Exception {
         // Prepare test data
         final Target target = createTargetAndAssertNoActiveActions();
 
@@ -309,7 +309,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test several deployments of same ds to a controller. Checks that latest running action does not override actual installed ds.")
-    public void deploymentActionsOfSameDsWithRunningAction() throws Exception {
+    void deploymentActionsOfSameDsWithRunningAction() throws Exception {
         // Prepare test data
         final Target target = createTargetAndAssertNoActiveActions();
 
@@ -362,7 +362,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test open deployment to a controller. Checks that installedBase returns 404 for a pending action.")
-    public void installedBaseReturns404ForPendingAction() throws Exception {
+    void installedBaseReturns404ForPendingAction() throws Exception {
         // Prepare test data
         final Target target = createTargetAndAssertNoActiveActions();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -385,7 +385,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that artifacts are found, after the action was already closed.")
-    public void artifactsOfInstalledActionExist() throws Exception {
+    void artifactsOfInstalledActionExist() throws Exception {
         final Target target = createTargetAndAssertNoActiveActions();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
@@ -419,7 +419,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
-    public void deploymentActionInInstalledBase(final Action.ActionType actionType) throws Exception {
+    void deploymentActionInInstalledBase(final Action.ActionType actionType) throws Exception {
         // Prepare test data
         final Target target = createTargetAndAssertNoActiveActions();
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
@@ -472,7 +472,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
-    public void deploymentDownloadOnlyActionNotInInstalledBase() throws Exception {
+    void deploymentDownloadOnlyActionNotInInstalledBase() throws Exception {
         // Prepare test data
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -501,7 +501,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     @ParameterizedTest
     @MethodSource("org.eclipse.hawkbit.ddi.rest.resource.DdiInstalledBaseTest#actionTypeForDeployment")
     @Description("Test a failed deployment to a controller. Checks that closed action is not represented as installedBase.")
-    public void deploymentActionFailedNotInInstalledBase(final Action.ActionType actionType) throws Exception {
+    void deploymentActionFailedNotInInstalledBase(final Action.ActionType actionType) throws Exception {
         // Prepare test data
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -534,7 +534,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test to verify that only a specific count of messages are returned based on the input actionHistory for getControllerInstalledAction endpoint.")
-    public void testActionHistoryCount() throws Exception {
+    void testActionHistoryCount() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
@@ -585,7 +585,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test various invalid access attempts to the installed resource und the expected behaviour of the server.")
-    public void badInstalledAction() throws Exception {
+    void badInstalledAction() throws Exception {
         final Target target = testdataFactory.createTarget(CONTROLLER_ID);
 
         // not allowed methods

@@ -102,8 +102,7 @@ public final class FileStreamingUtil {
                 return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
             }
 
-            // RFC: if the representation is unchanged, send me the part(s) that
-            // I am requesting in
+            // RFC: if the representation is unchanged, send me the part(s) that I am requesting in
             // Range; otherwise, send me the entire representation.
             checkForShortcut(request, etag, lastModified, full, ranges);
 

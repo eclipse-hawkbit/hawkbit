@@ -800,7 +800,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         private final Action.Status status;
 
-        public ActionStatusCondition(final Action.Status status) {
+        private ActionStatusCondition(final Action.Status status) {
             this.status = status;
         }
 
