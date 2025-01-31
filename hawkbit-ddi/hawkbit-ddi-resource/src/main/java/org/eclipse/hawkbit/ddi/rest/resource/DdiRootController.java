@@ -203,20 +203,18 @@ public class DdiRootController implements DdiRootControllerRestApi {
             if (ifMatch != null && !HttpUtil.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
                 result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
             } else {
+                final ActionStatus actionStatus = RequestResponseContextHolder.getHttpServletRequest().getHeader("Range") == null
+                        ? logDownload(RequestResponseContextHolder.getHttpServletRequest(), target, module.getId())
+                        : null; // range request - could have too many - so doesn't check action, don't log action status, and don't publish events
                 result = FileStreamingUtil.writeFileResponse(file, artifact.getFilename(), artifact.getCreatedAt(),
                         RequestResponseContextHolder.getHttpServletResponse(),
                         RequestResponseContextHolder.getHttpServletRequest(),
                         (length, shippedSinceLastEvent, total) -> {
-                            if (RequestResponseContextHolder.getHttpServletRequest().getHeader("Range") != null) {
-                                // range request - could have too many - so doesn't log action status or push events
-                                return;
+                            if (actionStatus != null) {
+                                eventPublisher.publishEvent(new DownloadProgressEvent(
+                                        tenantAware.getCurrentTenant(), actionStatus.getId(), shippedSinceLastEvent,
+                                        serviceMatcher != null ? serviceMatcher.getBusId() : bus.getId()));
                             }
-
-                            final ActionStatus actionStatus = logDownload(
-                                    RequestResponseContextHolder.getHttpServletRequest(), target, module.getId());
-                            eventPublisher.publishEvent(new DownloadProgressEvent(
-                                    tenantAware.getCurrentTenant(), actionStatus.getId(), shippedSinceLastEvent,
-                                    serviceMatcher != null ? serviceMatcher.getBusId() : bus.getId()));
                         });
             }
         }
@@ -245,8 +243,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, fileName));
 
         try {
-            writeMD5FileResponse(RequestResponseContextHolder.getHttpServletResponse(), artifact.getMd5Hash(), fileName);
             logDownload(RequestResponseContextHolder.getHttpServletRequest(), target, module.getId());
+            writeMD5FileResponse(RequestResponseContextHolder.getHttpServletResponse(), artifact.getMd5Hash(), fileName);
         } catch (final IOException e) {
             log.error("Failed to stream MD5 File", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
