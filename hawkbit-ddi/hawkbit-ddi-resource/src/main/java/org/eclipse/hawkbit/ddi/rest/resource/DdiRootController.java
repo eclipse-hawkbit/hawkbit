@@ -203,15 +203,21 @@ public class DdiRootController implements DdiRootControllerRestApi {
             if (ifMatch != null && !HttpUtil.matchesHttpHeader(ifMatch, artifact.getSha1Hash())) {
                 result = new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
             } else {
-                final ActionStatus action = checkAndLogDownload(RequestResponseContextHolder.getHttpServletRequest(), target, module.getId());
-                final Long statusId = action.getId();
                 result = FileStreamingUtil.writeFileResponse(file, artifact.getFilename(), artifact.getCreatedAt(),
                         RequestResponseContextHolder.getHttpServletResponse(),
                         RequestResponseContextHolder.getHttpServletRequest(),
-                        (length, shippedSinceLastEvent,
-                                total) -> eventPublisher.publishEvent(new DownloadProgressEvent(
-                                tenantAware.getCurrentTenant(), statusId, shippedSinceLastEvent,
-                                serviceMatcher != null ? serviceMatcher.getBusId() : bus.getId())));
+                        (length, shippedSinceLastEvent, total) -> {
+                            if (RequestResponseContextHolder.getHttpServletRequest().getHeader("Range") != null) {
+                                // range request - could have too many - so doesn't log action status or push events
+                                return;
+                            }
+
+                            final ActionStatus actionStatus = logDownload(
+                                    RequestResponseContextHolder.getHttpServletRequest(), target, module.getId());
+                            eventPublisher.publishEvent(new DownloadProgressEvent(
+                                    tenantAware.getCurrentTenant(), actionStatus.getId(), shippedSinceLastEvent,
+                                    serviceMatcher != null ? serviceMatcher.getBusId() : bus.getId()));
+                        });
             }
         }
         return result;
@@ -238,10 +244,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Artifact artifact = module.getArtifactByFilename(fileName)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, fileName));
 
-        checkAndLogDownload(RequestResponseContextHolder.getHttpServletRequest(), target, module.getId());
-
         try {
             writeMD5FileResponse(RequestResponseContextHolder.getHttpServletResponse(), artifact.getMd5Hash(), fileName);
+            logDownload(RequestResponseContextHolder.getHttpServletRequest(), target, module.getId());
         } catch (final IOException e) {
             log.error("Failed to stream MD5 File", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -609,22 +614,15 @@ public class DdiRootController implements DdiRootControllerRestApi {
         response.getOutputStream().write(content);
     }
 
-    private ActionStatus checkAndLogDownload(final HttpServletRequest request, final Target target, final Long module) {
+    private ActionStatus logDownload(final HttpServletRequest request, final Target target, final Long module) {
         final Action action = controllerManagement
                 .getActionForDownloadByTargetAndSoftwareModule(target.getControllerId(), module)
                 .orElseThrow(() -> new SoftwareModuleNotAssignedToTargetException(module, target.getControllerId()));
-        final String range = request.getHeader("Range");
-
-        final String message;
-        if (range != null) {
-            message = RepositoryConstants.SERVER_MESSAGE_PREFIX +
-                    "Target downloads range " + range + " of: " + request.getRequestURI();
-        } else {
-            message = RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI();
-        }
-
         return controllerManagement.addInformationalActionStatus(
-                entityFactory.actionStatus().create(action.getId()).status(Status.DOWNLOAD).message(message));
+                entityFactory.actionStatus()
+                        .create(action.getId())
+                        .status(Status.DOWNLOAD)
+                        .message(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads " + request.getRequestURI()));
     }
 
     private ActionStatusCreate generateUpdateStatus(final DdiActionFeedback feedback, final String controllerId, final Long actionId) {

@@ -57,21 +57,21 @@ import org.springframework.test.web.servlet.MvcResult;
 @Feature("Component Tests - Direct Device Integration API")
 @Story("Artifact Download Resource")
 @SpringBootTest(classes = { DownloadTestConfiguration.class })
-public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
+class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
-    private static volatile int downLoadProgress = 0;
+    private static volatile int downloadProgress = 0;
     private static volatile long shippedBytes = 0;
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
     @Test
     @Description("Tests non allowed requests on the artifact ressource, e.g. invalid URI, wrong if-match, wrong command.")
-    public void invalidRequestsOnArtifactResource() throws Exception {
+    void invalidRequestsOnArtifactResource() throws Exception {
         // create target
         final Target target = testdataFactory.createTarget();
         final List<Target> targets = Collections.singletonList(target);
@@ -160,8 +160,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     @Test
     @WithUser(principal = "4712", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     @Description("Tests valid downloads through the artifact resource by identifying the artifact not by ID but file name.")
-    public void downloadArtifactThroughFileName() throws Exception {
-        downLoadProgress = 1;
+    void downloadArtifactThroughFileName() throws Exception {
+        downloadProgress = 1;
         shippedBytes = 0;
         assertThat(softwareModuleManagement.findAll(PAGE)).isEmpty();
 
@@ -199,13 +199,13 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 "The same file that was uploaded is expected when downloaded");
 
         // download complete
-        assertThat(downLoadProgress).isEqualTo(10);
+        assertThat(downloadProgress).isEqualTo(10);
         assertThat(shippedBytes).isEqualTo(artifactSize);
     }
 
     @Test
     @Description("Tests valid MD5SUm file downloads through the artifact resource by identifying the artifact by ID.")
-    public void downloadMd5sumThroughControllerApi() throws Exception {
+    void downloadMd5sumThroughControllerApi() throws Exception {
         // create target
         final Target target = testdataFactory.createTarget();
 
@@ -236,7 +236,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     @Test
     @WithUser(principal = TestdataFactory.DEFAULT_CONTROLLER_ID, authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     @Description("Test various HTTP range requests for artifact download, e.g. chunk download or download resume.")
-    public void rangeDownloadArtifact() throws Exception {
+    void rangeDownloadArtifact() throws Exception {
         // create target
         final Target target = testdataFactory.createTarget();
         final List<Target> targets = Collections.singletonList(target);
@@ -312,8 +312,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(header().string("Accept-Ranges", "bytes"))
                 .andExpect(header().string("Last-Modified", dateFormat.format(new Date(artifact.getCreatedAt()))))
                 .andExpect(header().longValue("Content-Length", resultLength - 1000))
-                .andExpect(header().string("Content-Range",
-                        "bytes " + 1000 + "-" + (resultLength - 1) + "/" + resultLength))
+                .andExpect(header().string("Content-Range", "bytes " + 1000 + "-" + (resultLength - 1) + "/" + resultLength))
                 .andExpect(header().string("Content-Disposition", "attachment;filename=file1"))
                 .andReturn();
 
@@ -361,10 +360,10 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Configuration
-    public static class DownloadTestConfiguration {
+    static class DownloadTestConfiguration {
 
         @Bean
-        public Listener cancelEventHandlerStubBean() {
+        Listener cancelEventHandlerStubBean() {
             return new Listener();
         }
 
@@ -373,10 +372,9 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     private static class Listener {
 
         @EventListener(classes = DownloadProgressEvent.class)
-        public static void listen(final DownloadProgressEvent event) {
-            downLoadProgress++;
+        void listen(final DownloadProgressEvent event) {
+            downloadProgress++;
             shippedBytes += event.getShippedBytesSinceLast();
-
         }
     }
 }
