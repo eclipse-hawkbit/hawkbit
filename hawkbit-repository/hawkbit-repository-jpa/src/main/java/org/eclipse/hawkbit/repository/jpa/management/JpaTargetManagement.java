@@ -338,8 +338,8 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(final Collection<Long> groups,
-            final String targetFilterQuery, final DistributionSetType dsType) {
+    public long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(final String targetFilterQuery, final Collection<Long> groups,
+            final DistributionSetType dsType) {
         return targetRepository.count(AccessController.Operation.UPDATE,
                 combineWithAnd(List.of(
                         RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
@@ -349,7 +349,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByFailedRolloutAndNotInRolloutGroups(Collection<Long> groups, String rolloutId) {
+    public long countByFailedRolloutAndNotInRolloutGroups(String rolloutId, Collection<Long> groups) {
         final List<Specification<JpaTarget>> specList = Arrays.asList(
                 TargetSpecifications.failedActionsForRollout(rolloutId),
                 TargetSpecifications.isNotInRolloutGroups(groups));

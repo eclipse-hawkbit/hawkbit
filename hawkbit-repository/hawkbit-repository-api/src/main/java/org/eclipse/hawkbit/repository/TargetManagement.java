@@ -286,27 +286,27 @@ public interface TargetManagement {
      * that are not assigned to one of the {@link RolloutGroup}s and are compatible
      * with the passed {@link DistributionSetType}.
      *
-     * @param groups the list of {@link RolloutGroup}s
      * @param rsqlParam filter definition in RSQL syntax
+     * @param groups the list of {@link RolloutGroup}s
      * @param distributionSetType type of the {@link DistributionSet} the targets must be compatible
      *         with
      * @return count of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(@NotEmpty Collection<Long> groups,
-            @NotNull String rsqlParam, @NotNull DistributionSetType distributionSetType);
+    long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(@NotNull String rsqlParam, @NotEmpty Collection<Long> groups,
+            @NotNull DistributionSetType distributionSetType);
 
     /**
      * Counts all targets with failed actions for specific Rollout and that are not
      * assigned to one of the {@link RolloutGroup}s and are compatible with the
      * passed {@link DistributionSetType}.
      *
-     * @param groups the list of {@link RolloutGroup}s
      * @param rolloutId rolloutId of the rollout to be retried.
+     * @param groups the list of {@link RolloutGroup}s
      * @return count of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    long countByFailedRolloutAndNotInRolloutGroups(@NotEmpty Collection<Long> groups, @NotNull String rolloutId);
+    long countByFailedRolloutAndNotInRolloutGroups(@NotNull String rolloutId, @NotEmpty Collection<Long> groups);
 
     /**
      * Finds all targets of the provided {@link RolloutGroup} that have no Action
