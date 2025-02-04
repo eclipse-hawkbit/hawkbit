@@ -336,14 +336,12 @@ public class JpaRolloutManagement implements RolloutManagement {
     public void pauseRollout(final long rolloutId) {
         final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
         if (RolloutStatus.RUNNING != rollout.getStatus()) {
-            throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is "
-                    + rollout.getStatus().name().toLowerCase());
+            throw new RolloutIllegalStateException("Rollout can only be paused in state running but current state is " +
+                    rollout.getStatus().name().toLowerCase());
         }
-        // setting the complete rollout only in paused state. This is sufficient
-        // due the currently running groups will be completed and new groups are
-        // not started until rollout goes back to running state again. The
-        // periodically check for running rollouts will skip rollouts in pause
-        // state.
+        // setting the complete rollout only in paused state. This is sufficient due the currently running groups will be completed and
+        // new groups are not started until rollout goes back to running state again. The periodically check for running rollouts will skip
+        // rollouts in pause state.
         rollout.setStatus(RolloutStatus.PAUSED);
         rolloutRepository.save(rollout);
     }
@@ -355,8 +353,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     public void resumeRollout(final long rolloutId) {
         final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
         if (RolloutStatus.PAUSED != rollout.getStatus()) {
-            throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is "
-                    + rollout.getStatus().name().toLowerCase());
+            throw new RolloutIllegalStateException("Rollout can only be resumed in state paused but current state is " +
+                    rollout.getStatus().name().toLowerCase());
         }
         rollout.setStatus(RolloutStatus.RUNNING);
         rolloutRepository.save(rollout);

@@ -137,7 +137,8 @@ public final class RolloutHelper {
      */
     public static List<Long> getGroupsByStatusIncludingGroup(
             final List<RolloutGroup> groups, final RolloutGroup.RolloutGroupStatus status, final RolloutGroup group) {
-        return groups.stream().filter(innerGroup -> innerGroup.getStatus() == status || innerGroup.equals(group))
+        return groups.stream()
+                .filter(innerGroup -> innerGroup.getStatus() == status || innerGroup.equals(group))
                 .map(RolloutGroup::getId).toList();
     }
 
@@ -215,8 +216,8 @@ public final class RolloutHelper {
 
     public static void checkIfRolloutCanStarted(final Rollout rollout, final Rollout mergedRollout) {
         if (Rollout.RolloutStatus.READY != mergedRollout.getStatus()) {
-            throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is "
-                    + rollout.getStatus().name().toLowerCase());
+            throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is " +
+                    rollout.getStatus().name().toLowerCase());
         }
     }
 
