@@ -993,7 +993,7 @@ public class RepositoryApplicationConfiguration {
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.rollout.scheduler", name = "enabled", matchIfMissing = true)
     RolloutScheduler rolloutScheduler(final SystemManagement systemManagement,
-                                      final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext, @Value("${hawkbit.rollout.executor.thread-pool.size:1}") int threadPoolSize) {
+                                      final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext, @Value("${hawkbit.rollout.executor.thread-pool.size:1}") final int threadPoolSize) {
         return new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext,  threadPoolSize);
     }
 

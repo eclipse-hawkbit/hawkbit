@@ -37,7 +37,7 @@ public class RolloutScheduler {
         this.systemManagement = systemManagement;
         this.rolloutHandler = rolloutHandler;
         this.systemSecurityContext = systemSecurityContext;
-        this.rolloutTaskExecutor = threadPoolTaskExecutor(threadPoolSize);
+        rolloutTaskExecutor = threadPoolTaskExecutor(threadPoolSize);
 
     }
 
@@ -69,7 +69,7 @@ public class RolloutScheduler {
         });
     }
 
-    private void handleAll(String tenant) {
+    private void handleAll(final String tenant) {
         log.trace("Handling rollout for tenant: {}", tenant);
         try {
             rolloutHandler.handleAll();
@@ -78,7 +78,7 @@ public class RolloutScheduler {
         }
     }
 
-    private void handleAllAsync(String tenant) {
+    private void handleAllAsync(final String tenant) {
         rolloutTaskExecutor.submit(() -> systemSecurityContext.runAsSystemAsTenant(() -> {
             handleAll(tenant);
             return null;
@@ -86,7 +86,7 @@ public class RolloutScheduler {
 
     }
 
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor (int threadPoolSize) {
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor (final int threadPoolSize) {
         if (threadPoolSize <= 1) {
             return null;
         }
