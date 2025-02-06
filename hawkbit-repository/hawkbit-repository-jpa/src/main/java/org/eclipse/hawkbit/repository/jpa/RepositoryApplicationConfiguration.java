@@ -167,6 +167,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -992,8 +993,8 @@ public class RepositoryApplicationConfiguration {
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.rollout.scheduler", name = "enabled", matchIfMissing = true)
     RolloutScheduler rolloutScheduler(final SystemManagement systemManagement,
-            final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext) {
-        return new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext);
+                                      final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext, @Value("${hawkbit.rollout.executor.thread-pool.size:1}") final int threadPoolSize) {
+        return new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext,  threadPoolSize);
     }
 
     /**
