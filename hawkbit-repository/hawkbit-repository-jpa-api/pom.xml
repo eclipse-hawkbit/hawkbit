@@ -26,89 +26,16 @@
         <apt.source.dir>${project.build.directory}/generated-sources/apt/</apt.source.dir>
     </properties>
 
-    <profiles>
-        <profile>
-            <id>eclipselink</id>
-            <activation>
-                <property>
-                    <!-- default, if not set (or not hibernate) - eclipse link -->
-                    <name>jpa.vendor</name>
-                    <value>!hibernate</value>
-                </property>
-            </activation>
-
-            <dependencies>
-                <dependency>
-                    <groupId>jakarta.persistence</groupId>
-                    <artifactId>jakarta.persistence-api</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>jakarta.transaction</groupId>
-                    <artifactId>jakarta.transaction-api</artifactId>
-                </dependency>
-            </dependencies>
-
-            <build>
-                <plugins>
-                    <!-- Static weaver for EclipseLink -->
-                    <plugin>
-                        <groupId>com.ethlo.persistence.tools</groupId>
-                        <artifactId>eclipselink-maven-plugin</artifactId>
-                        <version>${eclipselink.maven.plugin.version}</version>
-                        <executions>
-                            <execution>
-                                <id>modelgen</id>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>modelgen</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <phase>process-classes</phase>
-                                <goals>
-                                    <goal>weave</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <basePackage>org.eclipse.hawkbit.repository.jpa.model</basePackage>
-                        </configuration>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.eclipse.persistence</groupId>
-                                <artifactId>org.eclipse.persistence.jpa</artifactId>
-                                <version>${eclipselink.version}</version>
-                            </dependency>
-                        </dependencies>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>hibernate</id>
-            <activation>
-                <property>
-                    <name>jpa.vendor</name>
-                    <value>hibernate</value>
-                </property>
-            </activation>
-
-            <dependencies>
-                <!-- Static class generation -->
-                <dependency>
-                    <groupId>org.hibernate.orm</groupId>
-                    <artifactId>hibernate-jpamodelgen</artifactId>
-                    <optional>true</optional>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
-
     <dependencies>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
             <artifactId>hawkbit-repository-core</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
         </dependency>
 
         <dependency>

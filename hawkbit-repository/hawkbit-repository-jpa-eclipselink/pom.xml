@@ -39,14 +39,17 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Static class generation -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-jpamodelgen</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>org.eclipse.persistence.jpa</artifactId>
             <version>${eclipselink.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
         </dependency>
     </dependencies>
 
@@ -58,13 +61,6 @@
                 <artifactId>eclipselink-maven-plugin</artifactId>
                 <version>${eclipselink.maven.plugin.version}</version>
                 <executions>
-                    <execution>
-                        <id>modelgen</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>modelgen</goal>
-                        </goals>
-                    </execution>
                     <execution>
                         <phase>process-classes</phase>
                         <goals>

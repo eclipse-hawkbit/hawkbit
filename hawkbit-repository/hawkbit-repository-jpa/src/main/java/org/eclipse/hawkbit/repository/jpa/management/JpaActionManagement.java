@@ -108,14 +108,14 @@ public class JpaActionManagement {
                         // get the highest actions with weight
                         actionRepository.findAll(
                                 ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, false),
-                                "Action.ds",
+                                JpaAction_.GRAPH_ACTION_DS,
                                 PageRequest.of(
                                         0, maxActionCount,
                                         Sort.by(Sort.Order.desc(JpaAction_.WEIGHT), Sort.Order.asc(AbstractJpaBaseEntity_.ID)))).stream(),
                         // get the oldest actions without weight
                         actionRepository.findAll(
                                 ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, true),
-                                "Action.ds",
+                                JpaAction_.GRAPH_ACTION_DS,
                                 PageRequest.of(0, maxActionCount, Sort.by(Sort.Order.asc(AbstractJpaBaseEntity_.ID)))).stream())
                 .sorted(Comparator.comparingInt(this::getWeightConsideringDefault).reversed().thenComparing(Action::getId))
                 .limit(maxActionCount)

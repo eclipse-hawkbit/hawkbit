@@ -14,29 +14,39 @@ import java.io.Serial;
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PostPersist;
+import jakarta.persistence.PostRemove;
+import jakarta.persistence.PostUpdate;
 import jakarta.persistence.Version;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Base hawkBit entity class containing the common attributes for EclipseLink.
  */
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // Default constructor needed for JPA entities.
 @MappedSuperclass
+@EntityListeners({ AuditingEntityListener.class, EntityInterceptorListener.class })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
-public abstract class AbstractJpaBaseEntity extends AbstractBaseEntity {
+public abstract class AbstractJpaBaseEntity implements BaseEntity {
 
     protected static final int USERNAME_FIELD_LENGTH = 64;
 
@@ -115,5 +125,87 @@ public abstract class AbstractJpaBaseEntity extends AbstractBaseEntity {
     @Access(AccessType.PROPERTY)
     public long getLastModifiedAt() {
         return lastModifiedAt == 0 ? createdAt : lastModifiedAt;
+    }
+
+    /**
+     * Defined equals/hashcode strategy for the repository in general is that an entity is equal if it has the same {@link #getId()} and
+     * {@link #getOptLockRevision()} and class.
+     */
+    @Override
+    // Exception squid:S864 - generated code
+    @SuppressWarnings({ "squid:S864" })
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (getId() == null ? 0 : getId().hashCode());
+        result = prime * result + getOptLockRevision();
+        result = prime * result + getClass().getName().hashCode();
+        return result;
+    }
+
+    /**
+     * Defined equals/hashcode strategy for the repository in general is that an entity is equal if it has the same {@link #getId()} and
+     * {@link #getOptLockRevision()} and class.
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!getClass().isInstance(obj)) {
+            return false;
+        }
+        final BaseEntity other = (BaseEntity) obj;
+        final Long id = getId();
+        final Long otherId = other.getId();
+        if (id == null) {
+            if (otherId != null) {
+                return false;
+            }
+        } else if (!id.equals(otherId)) {
+            return false;
+        }
+        return getOptLockRevision() == other.getOptLockRevision();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + " [id=" + getId() + "]";
+    }
+
+    @PostPersist
+    public void postInsert() {
+        if (this instanceof EventAwareEntity eventAwareEntity) {
+            doNotify(eventAwareEntity::fireCreateEvent);
+        }
+    }
+
+    @PostUpdate
+    public void postUpdate() {
+        if (this instanceof EventAwareEntity eventAwareEntity) {
+            doNotify(eventAwareEntity::fireUpdateEvent);
+        }
+    }
+
+    @PostRemove
+    public void postDelete() {
+        if (this instanceof EventAwareEntity eventAwareEntity) {
+            doNotify(eventAwareEntity::fireDeleteEvent);
+        }
+    }
+
+    protected static void doNotify(final Runnable runnable) {
+        // fire events onl AFTER transaction commit
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(runnable);
+    }
+
+    protected boolean isController() {
+        return SecurityContextHolder.getContext().getAuthentication() != null
+                && SecurityContextHolder.getContext().getAuthentication()
+                .getDetails() instanceof TenantAwareAuthenticationDetails tenantAwareDetails
+                && tenantAwareDetails.isController();
     }
 }
