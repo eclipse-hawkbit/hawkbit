@@ -54,7 +54,6 @@ import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetMetadataRepository;
@@ -298,7 +297,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public Optional<DistributionSet> getWithDetails(final long id) {
         return distributionSetRepository
-                .findOne(distributionSetRepository.byIdSpec(id), JpaDistributionSet_.GRAPH_DISTRIBUTION_SET_DETAIL)
+                .findOne(distributionSetRepository.byIdSpec(id), "DistributionSet.detail")
                 .map(DistributionSet.class::cast);
     }
 

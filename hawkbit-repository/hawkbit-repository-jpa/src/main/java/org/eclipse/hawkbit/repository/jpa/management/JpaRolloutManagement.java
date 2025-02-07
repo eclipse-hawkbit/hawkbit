@@ -266,7 +266,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     public Slice<Rollout> findAllWithDetailedStatus(final Pageable pageable, final boolean deleted) {
         final Slice<Rollout> rollouts = JpaManagementHelper.convertPage(
-                rolloutRepository.findAll(RolloutSpecification.isDeleted(deleted, pageable.getSort()), JpaRollout_.GRAPH_ROLLOUT_DS, pageable), pageable);
+                rolloutRepository.findAll(RolloutSpecification.isDeleted(deleted, pageable.getSort()), "Rollout.ds", pageable), pageable);
         setRolloutStatusDetails(rollouts);
         return rollouts;
     }
@@ -277,7 +277,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         specList.add(RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
         specList.add(RolloutSpecification.isDeleted(deleted, pageable.getSort()));
         return JpaManagementHelper.convertPage(
-                rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(specList), JpaRollout_.GRAPH_ROLLOUT_DS, pageable), pageable);
+                rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(specList), "Rollout.ds", pageable), pageable);
     }
 
     @Override

@@ -43,7 +43,47 @@
                     <artifactId>hawkbit-repository-jpa-eclipselink</artifactId>
                     <version>${project.version}</version>
                 </dependency>
+                <dependency>
+                    <groupId>jakarta.transaction</groupId>
+                    <artifactId>jakarta.transaction-api</artifactId>
+                </dependency>
             </dependencies>
+
+            <build>
+                <plugins>
+                    <!-- Static weaver for EclipseLink -->
+                    <plugin>
+                        <groupId>com.ethlo.persistence.tools</groupId>
+                        <artifactId>eclipselink-maven-plugin</artifactId>
+                        <version>${eclipselink.maven.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>modelgen</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>modelgen</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>weave</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <basePackage>org.eclipse.hawkbit.repository.jpa.model</basePackage>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.eclipse.persistence</groupId>
+                                <artifactId>org.eclipse.persistence.jpa</artifactId>
+                                <version>${eclipselink.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>hibernate</id>
@@ -60,6 +100,13 @@
                     <artifactId>hawkbit-repository-jpa-hibernate</artifactId>
                     <version>${project.version}</version>
                 </dependency>
+
+                <!-- Static class generation -->
+                <dependency>
+                    <groupId>org.hibernate.orm</groupId>
+                    <artifactId>hibernate-jpamodelgen</artifactId>
+                    <optional>true</optional>
+                </dependency>
             </dependencies>
         </profile>
     </profiles>
@@ -75,13 +122,6 @@
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <!-- Static class generation -->
-        <dependency>
-            <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-jpamodelgen</artifactId>
             <optional>true</optional>
         </dependency>
 

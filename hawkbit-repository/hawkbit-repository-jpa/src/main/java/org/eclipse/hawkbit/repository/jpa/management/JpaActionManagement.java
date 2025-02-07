@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
-import org.eclipse.hawkbit.repository.jpa.model.AbstractBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -109,14 +108,14 @@ public class JpaActionManagement {
                         // get the highest actions with weight
                         actionRepository.findAll(
                                 ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, false),
-                                JpaAction_.GRAPH_ACTION_DS,
+                                "Action.ds",
                                 PageRequest.of(
                                         0, maxActionCount,
                                         Sort.by(Sort.Order.desc(JpaAction_.WEIGHT), Sort.Order.asc(AbstractJpaBaseEntity_.ID)))).stream(),
                         // get the oldest actions without weight
                         actionRepository.findAll(
                                 ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNull(controllerId, true),
-                                JpaAction_.GRAPH_ACTION_DS,
+                                "Action.ds",
                                 PageRequest.of(0, maxActionCount, Sort.by(Sort.Order.asc(AbstractJpaBaseEntity_.ID)))).stream())
                 .sorted(Comparator.comparingInt(this::getWeightConsideringDefault).reversed().thenComparing(Action::getId))
                 .limit(maxActionCount)
