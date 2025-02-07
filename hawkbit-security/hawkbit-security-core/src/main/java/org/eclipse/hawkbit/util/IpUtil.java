@@ -53,11 +53,9 @@ public final class IpUtil {
      * @return the {@link URI} based IP address from the client which sent the
      *         request
      */
-    public static URI getClientIpFromRequest(final HttpServletRequest request,
-            final HawkbitSecurityProperties securityProperties) {
-
-        return getClientIpFromRequest(request, securityProperties.getClients().getRemoteIpHeader(),
-                securityProperties.getClients().isTrackRemoteIp());
+    public static URI getClientIpFromRequest(final HttpServletRequest request, final HawkbitSecurityProperties securityProperties) {
+        return getClientIpFromRequest(
+                request, securityProperties.getClients().getRemoteIpHeader(), securityProperties.getClients().isTrackRemoteIp());
     }
 
     /**
@@ -145,10 +143,8 @@ public final class IpUtil {
         return uri != null && !(AMQP_SCHEME.equals(uri.getScheme()) || HIDDEN_IP.equals(uri.getHost()));
     }
 
-    private static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader,
-            final boolean trackRemoteIp) {
+    private static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader, final boolean trackRemoteIp) {
         String ip;
-
         if (trackRemoteIp) {
             ip = request.getHeader(forwardHeader);
             if (ip == null || (ip = findClientIpAddress(ip)) == null) {

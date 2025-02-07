@@ -161,11 +161,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
     public ResponseEntity<DdiControllerBase> getControllerBase(final String tenant, final String controllerId) {
         log.debug("getControllerBase({})", controllerId);
 
-        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, IpUtil
-                .getClientIpFromRequest(RequestResponseContextHolder.getHttpServletRequest(), securityProperties));
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(
+                controllerId, IpUtil.getClientIpFromRequest(RequestResponseContextHolder.getHttpServletRequest(), securityProperties));
         final Action activeAction = controllerManagement.findActiveActionWithHighestWeight(controllerId).orElse(null);
-
-        final Action installedAction = controllerManagement.getInstalledActionByTarget(controllerId).orElse(null);
+        final Action installedAction = controllerManagement.getInstalledActionByTarget(target).orElse(null);
 
         checkAndCancelExpiredAction(activeAction);
 
@@ -173,7 +172,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         return new ResponseEntity<>(DataConversionHelper.fromTarget(target, installedAction, activeAction,
                 activeAction == null
                         ? controllerManagement.getPollingTime()
-                        : controllerManagement.getPollingTimeForAction(activeAction.getId()), tenantAware),
+                        : controllerManagement.getPollingTimeForAction(activeAction), tenantAware),
                 HttpStatus.OK);
     }
 
@@ -733,7 +732,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private void checkAndCancelExpiredAction(final Action action) {
         if (action != null && action.hasMaintenanceSchedule() && action.isMaintenanceScheduleLapsed()) {
             try {
-                controllerManagement.cancelAction(action.getId());
+                controllerManagement.cancelAction(action);
             } catch (final CancelActionNotAllowedException e) {
                 log.info("Cancel action not allowed: {}", e.getMessage());
             }

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.URI;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -19,6 +20,7 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
+import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -27,10 +29,14 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
+import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 
 /**
@@ -38,7 +44,13 @@ import org.springframework.test.context.TestPropertySource;
  */
 @Feature("Component Tests - Repository")
 @Story("Rollout Management (Flow)")
-@TestPropertySource(properties = { "hawkbit.server.repository.dynamicRolloutsMinInvolvePeriodMS=-1" })
+@TestPropertySource(properties = { "hawkbit.server.repository.dynamicRolloutsMinInvolvePeriodMS=-1",
+        "logging.level.org.eclipse.persistence=DEBUG",
+        "spring.jpa.properties.eclipselink.logging.level=FINE",
+        "spring.jpa.properties.eclipselink.logging.level.sql=FINE",
+        "spring.jpa.properties.eclipselink.logging.parameters=true",
+        "logging.level.org.hibernate.SQL=TRACE",
+        "logging.level.org.hibernate.stat=TRACE"})
 class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
 
     @BeforeEach
@@ -72,6 +84,29 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         for (int i = 0; i < amountGroups; i++) {
             assertGroup(groups.get(i), false, i == 0 ? RolloutGroupStatus.RUNNING : RolloutGroupStatus.SCHEDULED, 3);
         }
+
+        System.out.println("--------------------------");
+        final String controllerId = targetPrefix + 1;
+        final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, URI.create("http://***"));
+        System.out.println("--------------------------1");
+        final Action activeAction = controllerManagement.findActiveActionWithHighestWeight(controllerId).orElse(null);
+        System.out.println("--------------------------2");
+        final Action installedAction = controllerManagement.getInstalledActionByTarget(target).orElse(null);
+        System.out.println("--------------------------3");
+
+        if (activeAction != null && activeAction.hasMaintenanceSchedule() && activeAction.isMaintenanceScheduleLapsed()) {
+            try {
+                controllerManagement.cancelAction(activeAction);
+                System.out.println("--------------------------4");
+            } catch (final CancelActionNotAllowedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        var t = activeAction == null
+                        ? controllerManagement.getPollingTime()
+                        : controllerManagement.getPollingTimeForAction(activeAction);
+        System.out.println("--------------------------");
 
         executeStaticWithoutOneTargetFromTheLastGroupAndHandleAll(groups, rollout, amountGroups);
 

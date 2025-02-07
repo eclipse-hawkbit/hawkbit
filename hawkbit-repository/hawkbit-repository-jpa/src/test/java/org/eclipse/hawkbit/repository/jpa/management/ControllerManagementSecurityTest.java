@@ -17,7 +17,12 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 
@@ -130,7 +135,16 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ControllerManagement#getPollingTimeForAction() method")
     void getPollingTimeForActionPermissionsCheck() {
-        assertPermissions(() -> controllerManagement.getPollingTimeForAction(1L), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
+        final JpaAction action = new JpaAction();
+        action.setId(1L);
+        assertPermissions(() -> {
+            try {
+                controllerManagement.getPollingTimeForAction(action);
+            } catch (final CancelActionNotAllowedException e) {
+                // expected since action is not found
+            }
+            return null;
+        }, List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
 
     @Test
@@ -180,7 +194,16 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ControllerManagement#cancelAction() method")
     void cancelActionPermissionsCheck() {
-        assertPermissions(() -> controllerManagement.cancelAction(1L), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
+        final JpaAction action = new JpaAction();
+        action.setId(1L);
+        assertPermissions(() -> {
+            try {
+                controllerManagement.cancelAction(action);
+            } catch (final CancelActionNotAllowedException e) {
+                // expected since action is not found
+            }
+            return null;
+        }, List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
 
     @Test
@@ -211,14 +234,17 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ControllerManagement#getInstalledActionByTarget() method")
     void getInstalledActionByTargetPermissionsCheck() {
-        assertPermissions(() -> controllerManagement.getInstalledActionByTarget("controllerId"),
+        final Target target = testdataFactory.createTarget();
+        assertPermissions(
+                () -> controllerManagement.getInstalledActionByTarget(target),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
 
     @Test
     @Description("Tests ControllerManagement#activateAutoConfirmation() method")
     void activateAutoConfirmationPermissionsCheck() {
-        assertPermissions(() -> controllerManagement.activateAutoConfirmation("controllerId", "initiator", "remark"),
+        assertPermissions(
+                () -> controllerManagement.activateAutoConfirmation("controllerId", "initiator", "remark"),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
 
