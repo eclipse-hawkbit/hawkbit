@@ -389,8 +389,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     /**
-     * Returns the count to be used for reducing polling interval while calling
-     * {@link ControllerManagement#getPollingTimeForAction(long)}.
+     * Returns the count to be used for reducing polling interval while calling {@link ControllerManagement#getPollingTimeForAction(Action)}.
      *
      * @return configured value of
      *         {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
@@ -402,10 +401,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public String getPollingTimeForAction(final long actionId) {
-
-        final JpaAction action = getActionAndThrowExceptionIfNotFound(actionId);
-
+    public String getPollingTimeForAction(final Action action) {
         if (!action.hasMaintenanceSchedule() || action.isMaintenanceScheduleLapsed()) {
             return getPollingTime();
         }
@@ -505,52 +501,35 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         return messages.getContent();
     }
 
-    /**
-     * Cancels given {@link Action} for this {@link Target}. The method will
-     * immediately add a {@link Status#CANCELED} status to the action. However,
-     * it might be possible that the controller will continue to work on the
-     * cancellation. The controller needs to acknowledge or reject the
-     * cancellation using {@link DdiRootController#postCancelActionFeedback}.
-     *
-     * @param actionId to be canceled
-     * @return canceled {@link Action}
-     * @throws CancelActionNotAllowedException in case the given action is not active or is already canceled
-     * @throws EntityNotFoundException if action with given actionId does not exist.
-     */
     @Override
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Action cancelAction(final long actionId) {
-        log.debug("cancelAction({})", actionId);
-
-        final JpaAction action = actionRepository.findById(actionId)
-                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
-
+    public Action cancelAction(final Action action) {
+        log.debug("cancelAction({})", action.getId());
         if (action.isCancelingOrCanceled()) {
             throw new CancelActionNotAllowedException("Actions in canceling or canceled state cannot be canceled");
         }
 
         if (action.isActive()) {
             log.debug("action ({}) was still active. Change to {}.", action, Status.CANCELING);
-            action.setStatus(Status.CANCELING);
+            final JpaAction jpaAction = (JpaAction)action;
 
+            jpaAction.setStatus(Status.CANCELING);
             // document that the status has been retrieved
-            actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
-                    "manual cancelation requested"));
-            final Action saveAction = actionRepository.save(action);
-            cancelAssignDistributionSetEvent(action);
+            actionStatusRepository.save(
+                    new JpaActionStatus(jpaAction, Status.CANCELING, System.currentTimeMillis(), "manual cancelation requested"));
+            final Action saveAction = actionRepository.save(jpaAction);
 
+            cancelAssignDistributionSetEvent(jpaAction);
             return saveAction;
         } else {
-            throw new CancelActionNotAllowedException(
-                    "Action [id: " + action.getId() + "] is not active and cannot be canceled");
+            throw new CancelActionNotAllowedException("Action [id: " + action.getId() + "] is not active and cannot be canceled");
         }
     }
 
     @Override
     public void updateActionExternalRef(final long actionId, @NotEmpty final String externalRef) {
-        // if access control for target repository is present check that caller has
-        // UPDATE access to the target of the action
+        // if access control for target repository is present check that caller has UPDATE access to the target of the action
         targetRepository.getAccessController().ifPresent(
                 accessController -> accessController.assertOperationAllowed(
                         AccessController.Operation.UPDATE,
@@ -574,20 +553,15 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public Optional<Action> getInstalledActionByTarget(final String controllerId) {
-        final JpaDistributionSet installedDistributionSet = targetRepository.getByControllerId(controllerId).getInstalledDistributionSet();
-        if (installedDistributionSet != null) {
-            final JpaTarget jpaTarget = targetRepository.getByControllerId(controllerId);
-            return actionRepository.findFirstByTargetIdAndDistributionSetIdAndStatusOrderByIdDesc(
-                    jpaTarget.getId(), installedDistributionSet.getId(), FINISHED);
-        } else {
-            return Optional.empty();
-        }
+    public Optional<Action> getInstalledActionByTarget(final Target target) {
+        final JpaTarget jpaTarget = (JpaTarget) target;
+        return Optional.ofNullable(jpaTarget.getInstalledDistributionSet())
+                .flatMap(installedDistributionSet -> actionRepository.findFirstByTargetIdAndDistributionSetIdAndStatusOrderByIdDesc(
+                        jpaTarget.getId(), installedDistributionSet.getId(), FINISHED));
     }
 
     @Override
-    public AutoConfirmationStatus activateAutoConfirmation(final String controllerId, final String initiator,
-            final String remark) {
+    public AutoConfirmationStatus activateAutoConfirmation(final String controllerId, final String initiator, final String remark) {
         return confirmationManagement.activateAutoConfirmation(controllerId, initiator, remark);
     }
 

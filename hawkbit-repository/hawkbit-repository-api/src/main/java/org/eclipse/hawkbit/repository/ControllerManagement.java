@@ -105,7 +105,7 @@ public interface ControllerManagement {
 
     /**
      * Retrieves active {@link Action} with the highest priority that is assigned to a {@link Target}.
-     *
+     * <p/>
      * For performance reasons this method does not throw {@link EntityNotFoundException} in case target with given controllerId
      * does not exist but will return an {@link Optional#empty()} instead.
      *
@@ -202,7 +202,7 @@ public interface ControllerManagement {
     String getMinPollingTime();
 
     /**
-     * Returns the count to be used for reducing polling interval while calling {@link ControllerManagement#getPollingTimeForAction(long)}.
+     * Returns the count to be used for reducing polling interval while calling {@link ControllerManagement#getPollingTimeForAction(Action)}.
      *
      * @return configured value of {@link TenantConfigurationKey#MAINTENANCE_WINDOW_POLL_COUNT}.
      */
@@ -215,11 +215,11 @@ public interface ControllerManagement {
      * Poll time keeps reducing with MinPollingTime as lower limit {@link TenantConfigurationKey#MIN_POLLING_TIME_INTERVAL}. After the start
      * of maintenance window, it resets to default {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
      *
-     * @param actionId id the {@link Action} for which polling time is calculated based on it having maintenance window or not
+     * @param action {@link Action} for which polling time is calculated based on it having maintenance window or not
      * @return current {@link TenantConfigurationKey#POLLING_TIME_INTERVAL}.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    String getPollingTimeForAction(long actionId);
+    String getPollingTimeForAction(Action action);
 
     /**
      * Checks if a given target has currently or has even been assigned to the given artifact through the action history list. This can e.g.
@@ -315,16 +315,17 @@ public interface ControllerManagement {
     List<String> getActionHistoryMessages(long actionId, int messageCount);
 
     /**
-     * Cancels given {@link Action} for this {@link Target}. However, it might be possible that the controller will continue to work on the
-     * cancellation. The controller needs to acknowledge or reject the cancellation using {@link DdiRootController#postCancelActionFeedback}.
+     * Cancels given {@link Action} for this {@link Target}. The method will immediately add a {@link Status#CANCELED}.
+     * However, it might be possible that the controller will continue to work on the cancellation. The controller needs to acknowledge or
+     * reject the cancellation using DdiRootController#postCancelActionFeedback
      *
-     * @param actionId to be canceled
+     * @param action to be canceled
      * @return canceled {@link Action}
      * @throws CancelActionNotAllowedException in case the given action is not active or is already canceled
      * @throws EntityNotFoundException if action with given actionId does not exist.
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Action cancelAction(long actionId);
+    Action cancelAction(Action action);
 
     /**
      * Updates given {@link Action} with its external id.
@@ -355,10 +356,10 @@ public interface ControllerManagement {
     /**
      * Finds an {@link Action} based on the target that it's assigned to
      *
-     * @param controllerId of the target the action is assigned to
+     * @param target the target the action is assigned to
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Action> getInstalledActionByTarget(@NotEmpty String controllerId);
+    Optional<Action> getInstalledActionByTarget(@NotNull Target target);
 
     /**
      * Activate auto confirmation for a given controllerId
