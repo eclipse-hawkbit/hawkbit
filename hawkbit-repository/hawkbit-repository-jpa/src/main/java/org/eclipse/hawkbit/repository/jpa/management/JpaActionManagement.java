@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
-import org.eclipse.hawkbit.repository.jpa.model.AbstractBaseEntity;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
