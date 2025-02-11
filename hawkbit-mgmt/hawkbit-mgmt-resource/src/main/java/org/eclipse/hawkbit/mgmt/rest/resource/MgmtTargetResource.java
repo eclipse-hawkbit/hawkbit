@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
+import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionConfirmationRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
@@ -48,6 +50,7 @@ import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InvalidConfirmationFeedbackException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
@@ -226,14 +229,19 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<MgmtAction> getAction(final String targetId, final Long actionId) {
+        return getValidatedAction(targetId, actionId)
+                .map(action -> ResponseEntity.ok(MgmtTargetMapper.toResponseWithLinks(targetId, action)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    private Optional<Action> getValidatedAction(final String targetId, final Long actionId) {
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         if (!action.getTarget().getControllerId().equals(targetId)) {
             log.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
-            return ResponseEntity.notFound().build();
+            return Optional.empty();
         }
-
-        return ResponseEntity.ok(MgmtTargetMapper.toResponseWithLinks(targetId, action));
+        return Optional.of(action);
     }
 
     @Override
@@ -274,6 +282,46 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         action = deploymentManagement.forceTargetAction(actionId);
 
         return ResponseEntity.ok(MgmtTargetMapper.toResponseWithLinks(targetId, action));
+    }
+
+    @Override
+    public ResponseEntity<Void> updateActionConfirmation(final String targetId, final Long actionId,
+            final MgmtActionConfirmationRequestBodyPut actionConfirmation) {
+        log.debug("updateActionConfirmation with data [targetId={}, actionId={}]: {}", targetId, actionId, actionConfirmation);
+
+        return getValidatedAction(targetId, actionId).map(action -> {
+            try {
+                switch (actionConfirmation.getConfirmation()) {
+                    case CONFIRMED:
+                        log.info("Confirmed the action (actionId: {}, targetId: {}) as we got {} report",
+                                actionId, targetId, actionConfirmation.getConfirmation());
+                        confirmationManagement.confirmAction(actionId, actionConfirmation.getCode(), actionConfirmation.getDetails());
+                        break;
+                    case DENIED:
+                    default:
+                        log.debug("Controller denied the action (actionId: {}, controllerId: {}) as we got {} report.",
+                                actionId, targetId, actionConfirmation.getConfirmation());
+                        confirmationManagement.denyAction(actionId, actionConfirmation.getCode(), actionConfirmation.getDetails());
+                        break;
+                }
+                return new ResponseEntity<Void>(HttpStatus.OK);
+            } catch (final InvalidConfirmationFeedbackException e) {
+                if (e.getReason() == InvalidConfirmationFeedbackException.Reason.ACTION_CLOSED) {
+                    log.warn("Updating action {} with confirmation {} not possible since action not active anymore.",
+                            action.getId(), actionConfirmation.getConfirmation(), e);
+                    return new ResponseEntity<Void>(HttpStatus.GONE);
+                } else if (e.getReason() == InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION) {
+                    log.debug("Action is not waiting for confirmation, deny request.", e);
+                    return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+                } else {
+                    log.debug("Action confirmation failed with unknown reason.", e);
+                    return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+                }
+            }
+        }).orElseGet(() -> {
+            log.warn("Action {} not found for target {}", actionId, targetId);
+            return ResponseEntity.notFound().build();
+        });
     }
 
     @Override
