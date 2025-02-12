@@ -20,7 +20,6 @@ import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
-import feign.Client;
 import feign.Contract;
 import feign.RequestInterceptor;
 import feign.codec.Decoder;
@@ -68,10 +67,9 @@ public class SimpleUIApp implements AppShellConfigurator {
 
     @Bean
     HawkbitClient hawkbitClient(
-            final HawkbitServer hawkBitServer,
-            final Client client, final Encoder encoder, final Decoder decoder, final Contract contract) {
+            final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
         return new HawkbitClient(
-                hawkBitServer, client, encoder, decoder, contract,
+                hawkBitServer, encoder, decoder, contract,
                 ERROR_DECODER,
                 (tenant, controller) ->
                         controller == null ?

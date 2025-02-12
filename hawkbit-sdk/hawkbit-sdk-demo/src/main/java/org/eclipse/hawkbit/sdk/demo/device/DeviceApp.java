@@ -45,9 +45,8 @@ public class DeviceApp {
 
     @Bean
     HawkbitClient hawkbitClient(
-            final HawkbitServer hawkBitServer,
-            final Client client, final Encoder encoder, final Decoder decoder, final Contract contract) {
-        return new HawkbitClient(hawkBitServer, client, encoder, decoder, contract);
+            final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
+        return new HawkbitClient(hawkBitServer, encoder, decoder, contract);
     }
 
     @Bean
@@ -88,7 +87,7 @@ public class DeviceApp {
         @ShellMethod(key = "setup")
         public void setup() {
             mgmtApi.setupTargetAuthentication();
-            mgmtApi.setupTargetToken(device.getControllerId(), device.getTargetSecurityToken());
+            mgmtApi.setupTargetToken(device.getController().getControllerId(), device.getTargetSecurityToken());
         }
 
         @ShellMethod(key = "start")
