@@ -9,8 +9,11 @@
  */
 package org.eclipse.hawkbit.sdk;
 
+import java.security.cert.Certificate;
+
 import lombok.Data;
 import lombok.ToString;
+import org.eclipse.hawkbit.sdk.ca.CA;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -33,6 +36,16 @@ public class Tenant {
     // gateway token
     @Nullable
     private String gatewayToken;
+    // gateway token
+    @Nullable
+    private String[] certificateFingerprints;
+
+    // the tenant DDI server certificate - it shall be trusted by controllers connecting via HTTPS
+    @Nullable
+    private Certificate ddiCertificate;
+    // Certificate Authority for the tenant that is used to sign the target certificates. It shall be trusted by the DDI server
+    @Nullable
+    private CA ddiCA;
 
     // amqp settings (if DMF is used)
     @Nullable

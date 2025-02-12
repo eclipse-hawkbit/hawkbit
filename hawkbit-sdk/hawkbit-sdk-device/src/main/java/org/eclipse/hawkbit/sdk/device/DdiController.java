@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiDeployment;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeploymentBase;
 import org.eclipse.hawkbit.ddi.json.model.DdiUpdateMode;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
+import org.eclipse.hawkbit.sdk.Certificate;
 import org.eclipse.hawkbit.sdk.Controller;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.Tenant;
@@ -64,6 +65,8 @@ public class DdiController {
     private final boolean downloadAuthenticationEnabled;
     private final String gatewayToken;
     private final String targetSecurityToken;
+    private final Certificate certificate;
+
     @Setter
     @Accessors(chain = true)
     private long overridePollMillis = -1; // -1 means disabled
@@ -90,6 +93,7 @@ public class DdiController {
         downloadAuthenticationEnabled = tenant.isDownloadAuthenticationEnabled();
         this.controllerId = controller.getControllerId();
         this.targetSecurityToken = controller.getSecurityToken();
+        this.certificate = controller.getCertificate();
         this.updateHandler = updateHandler == null ? UpdateHandler.SKIP : updateHandler;
         ddiApi = hawkbitClient.ddiService(DdiRootControllerRestApi.class, tenant, controller);
     }

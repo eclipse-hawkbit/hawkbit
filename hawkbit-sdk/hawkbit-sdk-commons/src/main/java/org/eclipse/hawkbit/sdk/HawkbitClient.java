@@ -21,14 +21,27 @@ import java.lang.reflect.Proxy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Client;
@@ -58,29 +71,22 @@ public class HawkbitClient {
 
     private static final String AUTHORIZATION = "Authorization";
     public static final BiFunction<Tenant, Controller, RequestInterceptor> DEFAULT_REQUEST_INTERCEPTOR_FN =
-            (tenant, controller) ->
-                    controller == null
-                            ? template ->
-                                    template.header(
-                                            AUTHORIZATION,
-
-                                            "Basic " +
-                                                    Base64.getEncoder()
-                                                            .encodeToString(
-                                                                    (Objects.requireNonNull(tenant.getUsername(), "User is null!") +
-                                                                            ":" +
-                                                                            Objects.requireNonNull(tenant.getPassword(),
-                                                                                    "Password is not available!"))
-                                                                            .getBytes(StandardCharsets.ISO_8859_1)))
-                            : template -> {
-                                    if (ObjectUtils.isEmpty(tenant.getGatewayToken())) {
-                                            if (!ObjectUtils.isEmpty(controller.getSecurityToken())) {
-                                                template.header(AUTHORIZATION, "TargetToken " + controller.getSecurityToken());
-                                            } // else do not send authentication
-                                    } else {
-                                            template.header(AUTHORIZATION, "GatewayToken " + tenant.getGatewayToken());
-                                    }
-                            };
+            (tenant, controller) -> controller == null
+                    ? template ->
+                            template.header(
+                                    AUTHORIZATION,
+                                    "Basic " + Base64.getEncoder().encodeToString(
+                                            (Objects.requireNonNull(tenant.getUsername(), "User is null!") +
+                                                    ":" +
+                                                    Objects.requireNonNull(tenant.getPassword(),"Password is not available!"))
+                                            .getBytes(StandardCharsets.ISO_8859_1)))
+                    : template -> {
+                        if (!ObjectUtils.isEmpty(tenant.getGatewayToken())) {
+                            template.header(AUTHORIZATION, "GatewayToken " + tenant.getGatewayToken());
+                        } else if (!ObjectUtils.isEmpty(controller.getSecurityToken())) {
+                            template.header(AUTHORIZATION, "TargetToken " + controller.getSecurityToken());
+                        } // else do not send authentication, no auth or certificate based
+                    };
     private static final ErrorDecoder DEFAULT_ERROR_DECODER_0 = new ErrorDecoder.Default();
     public static final ErrorDecoder DEFAULT_ERROR_DECODER = (methodKey, response) -> {
         final Exception e = DEFAULT_ERROR_DECODER_0.decode(methodKey, response);
@@ -144,6 +150,19 @@ public class HawkbitClient {
     }
 
     private <T> T service0(final Class<T> serviceType, final Tenant tenant, final Controller controller) {
+        final Client client;
+        if (controller != null && controller.getCertificate() != null && hawkBitServer.getDdiUrl().startsWith("https://")) {
+            // mTLS could be requested
+            try {
+                client = mTlsClient(controller.getCertificate(), tenant);
+            } catch (final RuntimeException | Error e) {
+                throw e;
+            } catch (final Exception e) {
+                throw new IllegalStateException("Failed to create mTLS client", e);
+            }
+        } else {
+            client = this.client;
+        }
         return Feign.builder().client(client)
                 .encoder(encoder)
                 .decoder(decoder)
@@ -311,5 +330,34 @@ public class HawkbitClient {
             }
         }
         return null;
+    }
+
+    private static final String KEYSTORE_PASSWORD;
+    static {
+        final Random random = new SecureRandom();
+        final byte[] bytes = new byte[16];
+        random.nextBytes(bytes);
+        KEYSTORE_PASSWORD = Base64.getEncoder().encodeToString(bytes);
+    }
+    private static Client mTlsClient(final Certificate certificate, final Tenant tenant)
+            throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, CertificateException, IOException,
+            KeyManagementException {
+        final KeyStore clientKeyStore = certificate.toKeyStore(KEYSTORE_PASSWORD);
+        final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        keyManagerFactory.init(clientKeyStore, KEYSTORE_PASSWORD.toCharArray());
+        // Truststore
+        final TrustManagerFactory trustManagerFactory;
+        if (tenant.getDdiCertificate() == null) {
+            trustManagerFactory = null;
+        } else {
+            final KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStore.load(null, null);
+            trustStore.setEntry("alias", new KeyStore.TrustedCertificateEntry(tenant.getDdiCertificate()), null);
+            trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(trustStore);
+        }
+        final SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory == null ? null : trustManagerFactory.getTrustManagers(), null);
+        return new Client.Default(sslContext.getSocketFactory(), null);
     }
 }

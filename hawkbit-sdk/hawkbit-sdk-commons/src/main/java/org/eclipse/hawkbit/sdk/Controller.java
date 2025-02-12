@@ -24,4 +24,6 @@ public class Controller {
     // (target) security token
     @Nullable
     private String securityToken;
+    @Nullable
+    private Certificate certificate;
 }
