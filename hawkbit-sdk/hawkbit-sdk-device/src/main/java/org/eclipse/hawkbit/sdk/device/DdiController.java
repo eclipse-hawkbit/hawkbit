@@ -56,14 +56,12 @@ public class DdiController {
     private static final String DEPLOYMENT_BASE_LINK = "deploymentBase";
     private static final String CONFIRMATION_BASE_LINK = "confirmationBase";
 
-    private final String tenantId;
-    private final String controllerId;
+    private final Tenant tenant;
+    private final Controller controller;
     private final UpdateHandler updateHandler;
     private final DdiRootControllerRestApi ddiApi;
 
     // configuration
-    private final boolean downloadAuthenticationEnabled;
-    private final String gatewayToken;
     private final String targetSecurityToken;
     private final Certificate certificate;
 
@@ -83,19 +81,23 @@ public class DdiController {
      *
      * @param tenant the tenant of the device belongs to
      * @param controller the controller
-     * @param hawkbitClient a factory for creating to {@link DdiRootControllerRestApi} (and used)
-     *         for communication to hawkBit
+     * @param hawkbitClient a factory for creating to {@link DdiRootControllerRestApi} (and used) for communication to hawkBit
      */
-    public DdiController(final Tenant tenant, final Controller controller,
-            final UpdateHandler updateHandler, final HawkbitClient hawkbitClient) {
-        this.tenantId = tenant.getTenantId();
-        gatewayToken = tenant.getGatewayToken();
-        downloadAuthenticationEnabled = tenant.isDownloadAuthenticationEnabled();
-        this.controllerId = controller.getControllerId();
+    public DdiController(final Tenant tenant, final Controller controller, final UpdateHandler updateHandler, final HawkbitClient hawkbitClient) {
+        this.tenant = tenant;
+        this.controller = controller;
         this.targetSecurityToken = controller.getSecurityToken();
         this.certificate = controller.getCertificate();
         this.updateHandler = updateHandler == null ? UpdateHandler.SKIP : updateHandler;
         ddiApi = hawkbitClient.ddiService(DdiRootControllerRestApi.class, tenant, controller);
+    }
+
+    public String getTenantId() {
+        return tenant.getTenantId();
+    }
+    
+    public String getControllerId() {
+        return controller.getControllerId();
     }
 
     // expects single threaded {@link java.util.concurrent.ScheduledExecutorService}
@@ -146,7 +148,7 @@ public class DdiController {
     }
 
     private void poll() {
-        log.debug(LOG_PREFIX + " Polling ...", tenantId, controllerId);
+        log.debug(LOG_PREFIX + " Polling ...", getTenantId(), getControllerId());
         Optional.ofNullable(executorService).ifPresent(executor ->
                 getControllerBase().ifPresentOrElse(
                         controllerBase -> {
@@ -176,8 +178,7 @@ public class DdiController {
                                                 final List<DdiChunk> modules = deployment.getChunks();
 
                                                 currentActionId = actionId;
-                                                executor.submit(
-                                                        updateHandler.getUpdateProcessor(this, updateType, modules));
+                                                executor.submit(updateHandler.getUpdateProcessor(this, updateType, modules));
                                             } else if (currentActionId != actionId) {
                                                 // TODO - cancel and start new one?
                                                 log.info(LOG_PREFIX + "Action {} is canceled while in process (new {})!", getTenantId(),

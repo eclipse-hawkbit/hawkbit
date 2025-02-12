@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -23,26 +21,17 @@ import java.util.HexFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifactHash;
 import org.eclipse.hawkbit.ddi.json.model.DdiChunk;
 import org.eclipse.hawkbit.ddi.json.model.DdiDeployment;
+import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.spi.ArtifactHandler;
 import org.springframework.hateoas.Link;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Update handler provide plug-in endpoint allowing for customization of the update processing.
@@ -72,7 +61,6 @@ public interface UpdateHandler {
         private static final String DOWNLOAD_LOG_MESSAGE = "Download ";
         private static final String EXPECTED = "(Expected: ";
         private static final String BUT_GOT_LOG_MESSAGE = " but got: ";
-        private static final int MINIMUM_TOKEN_LENGTH_FOR_HINT = 6;
         private final DdiController ddiController;
         private final DdiDeployment.HandlingType updateType;
         private final List<DdiChunk> modules;
@@ -98,12 +86,8 @@ public interface UpdateHandler {
                 try {
                     final UpdateStatus updateStatus = download();
                     ddiController.sendFeedback(updateStatus);
-                    if (updateStatus.status() == UpdateStatus.Status.FAILURE) {
-                        return;
-                    } else {
-                        if (updateType != DdiDeployment.HandlingType.SKIP) {
-                            ddiController.sendFeedback(update());
-                        }
+                    if (updateStatus.status() != UpdateStatus.Status.FAILURE && updateType != DdiDeployment.HandlingType.SKIP) {
+                        ddiController.sendFeedback(update());
                     }
                 } finally {
                     cleanup();
@@ -133,15 +117,7 @@ public interface UpdateHandler {
             log.info(LOG_PREFIX + "Start download", ddiController.getTenantId(), ddiController.getControllerId());
 
             final List<UpdateStatus> updateStatusList = new ArrayList<>();
-            modules.forEach(module -> module.getArtifacts().forEach(artifact -> {
-                if (ddiController.isDownloadAuthenticationEnabled()) {
-                    handleArtifact(
-                            ddiController.getTargetSecurityToken(), ddiController.getGatewayToken(),
-                            updateStatusList, artifact);
-                } else {
-                    handleArtifact(null, null, updateStatusList, artifact);
-                }
-            }));
+            modules.forEach(module -> module.getArtifacts().forEach(artifact -> handleArtifact(updateStatusList, artifact)));
 
             log.info(LOG_PREFIX + "Download complete.", ddiController.getTenantId(), ddiController.getControllerId());
 
@@ -178,39 +154,6 @@ public interface UpdateHandler {
                 }
             });
             log.debug(LOG_PREFIX + "Cleaned up", ddiController.getTenantId(), ddiController.getControllerId());
-        }
-
-        private static String hideTokenDetails(final String targetToken) {
-            if (targetToken == null) {
-                return "<NULL!>";
-            }
-
-            if (targetToken.isEmpty()) {
-                return "<EMPTY!>";
-            }
-
-            if (targetToken.length() <= MINIMUM_TOKEN_LENGTH_FOR_HINT) {
-                return "***";
-            }
-
-            return targetToken.substring(0, 2) + "***" + targetToken.substring(targetToken.length() - 2);
-        }
-
-        private static CloseableHttpClient createHttpClientThatAcceptsAllServerCerts()
-                throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-            return HttpClients
-                    .custom()
-                    .setConnectionManager(
-                            PoolingHttpClientConnectionManagerBuilder.create()
-                                    .setSSLSocketFactory(
-                                            new SSLConnectionSocketFactory(
-                                                    SSLContextBuilder
-                                                            .create()
-                                                            .loadTrustMaterial(null, (chain, authType) -> true)
-                                                            .build()))
-                                    .build()
-                    )
-                    .build();
         }
 
         private static Validator sizeValidator(final long size) {
@@ -288,106 +231,73 @@ public interface UpdateHandler {
             };
         }
 
-        private void handleArtifact(
-                final String targetToken, final String gatewayToken,
-                final List<UpdateStatus> status, final DdiArtifact artifact) {
+        private void handleArtifact(final List<UpdateStatus> status, final DdiArtifact artifact) {
             artifact.getLink("download").ifPresentOrElse(
                     // HTTPS
-                    link -> status.add(downloadUrl(link.getHref(), gatewayToken, targetToken,
-                            artifact.getHashes(), artifact.getSize())),
+                    link -> status.add(downloadUrl(link, artifact.getHashes(), artifact.getSize())),
                     // HTTP
                     () -> status.add(downloadUrl(
                             artifact.getLink("download-http")
-                                    .map(Link::getHref)
                                     .orElseThrow(() -> new IllegalArgumentException("Nor https nor http found!")),
-                            gatewayToken, targetToken,
                             artifact.getHashes(), artifact.getSize()))
             );
         }
 
-        private UpdateStatus downloadUrl(
-                final String url, final String gatewayToken, final String targetToken,
-                final DdiArtifactHash hash, final long size) {
+        private UpdateStatus downloadUrl(final Link link,  final DdiArtifactHash hash, final long size) {
             if (log.isDebugEnabled()) {
-                log.debug(LOG_PREFIX + "Downloading {} with token {}, expected hash {} and size {}",
-                        ddiController.getTenantId(), ddiController.getControllerId(), url,
-                        hideTokenDetails(targetToken), hash, size);
+                log.debug(LOG_PREFIX + "Downloading {}, expected hash {} and size {}",
+                        ddiController.getTenantId(), ddiController.getControllerId(), link.getHref(), hash, size);
             }
 
             try {
-                return readAndCheckDownloadUrl(url, gatewayToken, targetToken, hash, size);
-            } catch (final IOException | KeyManagementException | NoSuchAlgorithmException | KeyStoreException e) {
-                log.error(LOG_PREFIX + "Failed to download {}",
-                        ddiController.getTenantId(), ddiController.getControllerId(), url, e);
+                return readAndCheckDownloadUrl(link, hash, size);
+            } catch (final NoSuchAlgorithmException | IOException e) {
+                log.error(LOG_PREFIX + "Failed to download {}", ddiController.getTenantId(), ddiController.getControllerId(), link.getHref(), e);
                 return new UpdateStatus(
                         UpdateStatus.Status.FAILURE,
-                        List.of("Failed to download " + url + ": " + e.getMessage()));
+                        List.of("Failed to download " + link.getHref() + ": " + e.getMessage()));
             }
         }
 
-        private UpdateStatus readAndCheckDownloadUrl(final String url, final String gatewayToken,
-                final String targetToken, final DdiArtifactHash hash, final long size)
-                throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, IOException {
+        private UpdateStatus readAndCheckDownloadUrl(final Link link, final DdiArtifactHash hash, final long size)
+                throws NoSuchAlgorithmException, IOException {
             final Validator sizeValidator = sizeValidator(size);
             final Validator hashValidator = hashValidator(hash);
-            final ArtifactHandler.DownloadHandler downloadHandler = artifactHandler.getDownloadHandler(url);
-
-            try (final CloseableHttpClient httpclient = createHttpClientThatAcceptsAllServerCerts()) {
-                final HttpGet request = new HttpGet(url);
-                if (StringUtils.hasLength(targetToken)) {
-                    request.addHeader(HttpHeaders.AUTHORIZATION, "TargetToken " + targetToken);
-                } else if (StringUtils.hasLength(gatewayToken)) {
-                    request.addHeader(HttpHeaders.AUTHORIZATION, "GatewayToken " + gatewayToken);
-                }
-
-                return httpclient.execute(request, response -> {
-                    try {
-                        if (response.getCode() != HttpStatus.OK.value()) {
-                            throw new IllegalStateException("Unexpected status code: " + response.getCode());
-                        }
-
-                        if (response.getEntity().getContentLength() != size) {
-                            throw new IllegalArgumentException(
-                                    "Wrong content length " + EXPECTED + size + BUT_GOT_LOG_MESSAGE + response.getEntity()
-                                            .getContentLength() + ")!");
-                        }
-
-                        final byte[] buff = new byte[32 * 1024];
-                        try (final InputStream is = response.getEntity().getContent()) {
-                            for (int read; (read = is.read(buff)) != -1; ) {
-                                sizeValidator.read(buff, read);
-                                hashValidator.read(buff, read);
-                                downloadHandler.read(buff, 0, read);
-                            }
-                        }
-                        sizeValidator.validate();
-                        hashValidator.validate();
-
-                        final String message = "Downloaded " + url + " (" + size + " bytes)";
-                        log.debug(LOG_PREFIX + message, ddiController.getTenantId(), ddiController.getControllerId());
-                        downloadHandler.finished(ArtifactHandler.DownloadHandler.Status.SUCCESS);
-                        downloadHandler.download().ifPresent(path -> downloads.put(url, path));
-                        return new UpdateStatus(UpdateStatus.Status.SUCCESSFUL, List.of(message));
-                    } catch (final Exception e) {
-                        final String message = e.getMessage();
-                        if (log.isTraceEnabled()) {
-                            log.error(LOG_PREFIX + DOWNLOAD_LOG_MESSAGE + url + " failed: " + message,
-                                    ddiController.getTenantId(), ddiController.getControllerId(), e);
-                        } else {
-                            log.error(LOG_PREFIX + DOWNLOAD_LOG_MESSAGE + url + " failed: " + message,
-                                    ddiController.getTenantId(), ddiController.getControllerId());
-                        }
-                        downloadHandler.finished(ArtifactHandler.DownloadHandler.Status.ERROR);
-                        return new UpdateStatus(UpdateStatus.Status.FAILURE, List.of(message));
+            final ArtifactHandler.DownloadHandler downloadHandler = artifactHandler.getDownloadHandler(link.getHref());
+            try (final InputStream is = HawkbitClient.getLink(link, InputStream.class, ddiController.getTenant(), ddiController.getController())) {
+                try {
+                    final byte[] buff = new byte[32 * 1024];
+                    for (int read; (read = is.read(buff)) != -1; ) {
+                        sizeValidator.read(buff, read);
+                        hashValidator.read(buff, read);
+                        downloadHandler.read(buff, 0, read);
                     }
-                });
+                    sizeValidator.validate();
+                    hashValidator.validate();
+
+                    final String message = "Downloaded " + link + " (" + size + " bytes)";
+                    log.debug(LOG_PREFIX + message, ddiController.getTenantId(), ddiController.getControllerId());
+                    downloadHandler.finished(ArtifactHandler.DownloadHandler.Status.SUCCESS);
+                    downloadHandler.download().ifPresent(path -> downloads.put(link.getHref(), path));
+                    return new UpdateStatus(UpdateStatus.Status.SUCCESSFUL, List.of(message));
+                } catch (final Exception e) {
+                    final String message = e.getMessage();
+                    if (log.isTraceEnabled()) {
+                        log.error(LOG_PREFIX + DOWNLOAD_LOG_MESSAGE + link + " failed: " + message,
+                                ddiController.getTenantId(), ddiController.getControllerId(), e);
+                    } else {
+                        log.error(LOG_PREFIX + DOWNLOAD_LOG_MESSAGE + link + " failed: " + message,
+                                ddiController.getTenantId(), ddiController.getControllerId());
+                    }
+                    downloadHandler.finished(ArtifactHandler.DownloadHandler.Status.ERROR);
+                    return new UpdateStatus(UpdateStatus.Status.FAILURE, List.of(message));
+                }
             }
         }
 
         private interface Validator {
 
             void read(final byte[] buff, final int len);
-
             void validate();
         }
     }

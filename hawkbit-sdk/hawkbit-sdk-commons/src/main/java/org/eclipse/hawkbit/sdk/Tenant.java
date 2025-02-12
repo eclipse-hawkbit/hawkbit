@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.sdk;
 
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 
 import lombok.Data;
 import lombok.ToString;
@@ -40,9 +41,9 @@ public class Tenant {
     @Nullable
     private String[] certificateFingerprints;
 
-    // the tenant DDI server certificate - it shall be trusted by controllers connecting via HTTPS
+    // the tenant DDI / Mgmt server certificates CA - it shall be trusted by controllers connecting via HTTPS
     @Nullable
-    private Certificate ddiCertificate;
+    private X509Certificate[] tenantCA;
     // Certificate Authority for the tenant that is used to sign the target certificates. It shall be trusted by the DDI server
     @Nullable
     private CA ddiCA;
@@ -50,8 +51,6 @@ public class Tenant {
     // amqp settings (if DMF is used)
     @Nullable
     private DMF dmf;
-
-    private boolean downloadAuthenticationEnabled = true;
 
     @Data
     @ToString

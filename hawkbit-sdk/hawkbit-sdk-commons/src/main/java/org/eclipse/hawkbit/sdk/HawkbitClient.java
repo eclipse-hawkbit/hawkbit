@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
+import java.lang.ref.Cleaner;
+import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -28,37 +30,50 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.Client;
 import feign.Contract;
 import feign.Feign;
 import feign.FeignException;
 import feign.Request;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
+import feign.Response;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
+import feign.hc5.ApacheHttp5Client;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.client5.http.ssl.TrustAllStrategy;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
+import org.springframework.hateoas.Link;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -95,7 +110,6 @@ public class HawkbitClient {
     };
     private final HawkbitServer hawkBitServer;
 
-    private final Client client;
     private final Encoder encoder;
     private final Decoder decoder;
     private final Contract contract;
@@ -104,21 +118,18 @@ public class HawkbitClient {
     private final BiFunction<Tenant, Controller, RequestInterceptor> requestInterceptorFn;
 
     public HawkbitClient(
-            final HawkbitServer hawkBitServer,
-            final Client client, final Encoder encoder, final Decoder decoder, final Contract contract) {
-        this(hawkBitServer, client, encoder, decoder, contract, null, null);
+            final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
+        this(hawkBitServer, encoder, decoder, contract, null, null);
     }
 
     /**
      * Customizers gets default ones and could
      */
     public HawkbitClient(
-            final HawkbitServer hawkBitServer,
-            final Client client, final Encoder encoder, final Decoder decoder, final Contract contract,
+            final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract,
             final ErrorDecoder errorDecoder,
             final BiFunction<Tenant, Controller, RequestInterceptor> requestInterceptorFn) {
         this.hawkBitServer = hawkBitServer;
-        this.client = client;
         this.encoder = encoder;
         this.decoder = decoder;
         this.contract = contract;
@@ -135,6 +146,43 @@ public class HawkbitClient {
         return service(serviceType, tenantProperties, controller);
     }
 
+    public static <T> T getLink(final Link link, final Class<T> linkType, final Tenant tenant, final Controller controller) throws IOException {
+        final String url = link.getHref();
+        final HttpClientKey key = new HttpClientKey(
+                url.startsWith("https://"), controller == null ? null : controller.getCertificate(), tenant.getTenantCA());
+        final HttpClient httpClient = httpClient(key);
+        try {
+            final HttpGet request = new HttpGet(url);
+            final String gatewayToken = tenant.getGatewayToken();
+            if (StringUtils.hasLength(gatewayToken)) {
+                request.addHeader(HttpHeaders.AUTHORIZATION, "GatewayToken " + gatewayToken);
+            } else {
+                final String targetToken = controller == null ? null : controller.getSecurityToken();
+                if (StringUtils.hasLength(targetToken)) {
+                    request.addHeader(HttpHeaders.AUTHORIZATION, "TargetToken " + targetToken);
+                }
+            } // else not authenticated or certificate based
+
+            return httpClient.execute(request, response -> {
+                if (response.getCode() != HttpStatus.OK.value()) {
+                    throw new IllegalStateException("Unexpected status code: " + response.getCode());
+                }
+
+                if (linkType.isAssignableFrom(response.getClass())) {
+                    return (T)response;
+                } else if (linkType == InputStream.class) {
+                    return (T)response.getEntity().getContent();
+                } else {
+                    return new ObjectMapper().readValue(response.getEntity().getContent(), linkType);
+                }
+            });
+        } finally {
+            synchronized (HTTP_CLIENTS) {
+                HTTP_CLIENTS.get(key).release();
+            }
+        }
+    }
+
     private <T> T service(final Class<T> serviceType, final Tenant tenant, final Controller controller) {
         final T service = service0(serviceType, tenant, controller);
         if (serviceType.isInterface() // proxy only interfaces
@@ -149,27 +197,26 @@ public class HawkbitClient {
         }
     }
 
+    private static final Cleaner CLEANER = Cleaner.create();
     private <T> T service0(final Class<T> serviceType, final Tenant tenant, final Controller controller) {
-        final Client client;
-        if (controller != null && controller.getCertificate() != null && hawkBitServer.getDdiUrl().startsWith("https://")) {
-            // mTLS could be requested
-            try {
-                client = mTlsClient(controller.getCertificate(), tenant);
-            } catch (final RuntimeException | Error e) {
-                throw e;
-            } catch (final Exception e) {
-                throw new IllegalStateException("Failed to create mTLS client", e);
-            }
-        } else {
-            client = this.client;
-        }
-        return Feign.builder().client(client)
+        final String url = controller == null ? hawkBitServer.getMgmtUrl() : hawkBitServer.getDdiUrl();
+        final HttpClientKey key = new HttpClientKey(
+                url.startsWith("https://"), controller == null ? null : controller.getCertificate(), tenant.getTenantCA());
+        final HttpClient httpClient = httpClient(key);
+        final T service = Feign.builder()
+                .client(new ApacheHttp5Client(httpClient))
                 .encoder(encoder)
                 .decoder(decoder)
                 .errorDecoder(errorDecoder)
                 .contract(contract)
                 .requestInterceptor(requestInterceptorFn.apply(tenant, controller))
-                .target(serviceType, controller == null ? hawkBitServer.getMgmtUrl() : hawkBitServer.getDdiUrl());
+                .target(serviceType, url);
+        CLEANER.register(service, () -> {
+            synchronized (HTTP_CLIENTS) {
+                HTTP_CLIENTS.get(key).release();
+            }
+        });
+        return service;
     }
 
     @SuppressWarnings("unchecked")
@@ -339,25 +386,95 @@ public class HawkbitClient {
         random.nextBytes(bytes);
         KEYSTORE_PASSWORD = Base64.getEncoder().encodeToString(bytes);
     }
-    private static Client mTlsClient(final Certificate certificate, final Tenant tenant)
-            throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, CertificateException, IOException,
-            KeyManagementException {
-        final KeyStore clientKeyStore = certificate.toKeyStore(KEYSTORE_PASSWORD);
-        final KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        keyManagerFactory.init(clientKeyStore, KEYSTORE_PASSWORD.toCharArray());
-        // Truststore
-        final TrustManagerFactory trustManagerFactory;
-        if (tenant.getDdiCertificate() == null) {
-            trustManagerFactory = null;
+    private static final Map<HttpClientKey, HttpClientWrapper> HTTP_CLIENTS = new HashMap<>();
+    private static HttpClient httpClient(final HttpClientKey key) {
+        synchronized (HTTP_CLIENTS) {
+            final HttpClientWrapper httpClientWrapper = HTTP_CLIENTS.get(key);
+            HttpClient client = httpClientWrapper == null ? null : httpClientWrapper.get();
+            if (client == null) { // create
+                final CloseableHttpClient newClient;
+                if (key.isHttps()) {
+                    // mTLS could be requested
+                    try {
+                        newClient = tlsClient(key.getClientCertificate(), key.getServerCertificates());
+                    } catch (final RuntimeException e) {
+                        throw e;
+                    } catch (final Exception e) {
+                        throw new IllegalStateException("Failed to create mTLS client", e);
+                    }
+                } else {
+                    newClient = HttpClients.createDefault();
+                }
+                HTTP_CLIENTS.put(key, new HttpClientWrapper(key, newClient));
+                return newClient;
+            } else {
+                return client; // reuse
+            }
+        }
+    }
+    private static CloseableHttpClient tlsClient(final Certificate clientCertificate, final X509Certificate[] serverCertificates)
+            throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyManagementException, CertificateException,
+            IOException {
+        final SSLContextBuilder sslContextBuilder = SSLContextBuilder.create();
+        if (clientCertificate != null) {
+            sslContextBuilder.loadKeyMaterial(clientCertificate.toKeyStore(KEYSTORE_PASSWORD), KEYSTORE_PASSWORD.toCharArray());
+        }
+        if (serverCertificates == null) {
+            // trust all
+            sslContextBuilder.loadTrustMaterial(null, new TrustAllStrategy());
         } else {
             final KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(null, null);
-            trustStore.setEntry("alias", new KeyStore.TrustedCertificateEntry(tenant.getDdiCertificate()), null);
-            trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init(trustStore);
+            for (int i = 0; i < serverCertificates.length; i++) {
+                trustStore.setEntry("alias" + i, new KeyStore.TrustedCertificateEntry(serverCertificates[i]), null);
+            }
+            sslContextBuilder.loadTrustMaterial(trustStore, null);
         }
-        final SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory == null ? null : trustManagerFactory.getTrustManagers(), null);
-        return new Client.Default(sslContext.getSocketFactory(), null);
+        return HttpClients
+                .custom()
+                .setConnectionManager(
+                        PoolingHttpClientConnectionManagerBuilder.create()
+                                .setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContextBuilder.build()))
+                                .build())
+                .build();
+    }
+
+    @AllArgsConstructor
+    @Data
+    private static class HttpClientKey {
+
+        private final boolean https;
+        private final Certificate clientCertificate;
+        private final X509Certificate[] serverCertificates;
+    }
+
+    private static class HttpClientWrapper {
+
+        private final HttpClientKey key;
+        private final CloseableHttpClient closeableHttpClient;
+        private final AtomicLong pointers = new AtomicLong(1); // one use at create
+
+        private HttpClientWrapper(final HttpClientKey key, final CloseableHttpClient closeableHttpClient) {
+            this.key = key;
+            this.closeableHttpClient = closeableHttpClient;
+        }
+
+        private HttpClient get() {
+            pointers.incrementAndGet();
+            return closeableHttpClient;
+        }
+
+        private void release() {
+            if (pointers.decrementAndGet() <= 0) {
+                synchronized (HTTP_CLIENTS) {
+                    HTTP_CLIENTS.remove(key);
+                }
+                try {
+                    closeableHttpClient.close();
+                } catch (final IOException e) {
+                    log.error("Failed to close http client", e);
+                }
+            }
+        }
     }
 }

@@ -45,9 +45,8 @@ public class MultiDeviceApp {
 
     @Bean
     HawkbitClient hawkbitClient(
-            final HawkbitServer hawkBitServer,
-            final Client client, final Encoder encoder, final Decoder decoder, final Contract contract) {
-        return new HawkbitClient(hawkBitServer, client, encoder, decoder, contract);
+            final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
+        return new HawkbitClient(hawkBitServer, encoder, decoder, contract);
     }
 
     @Bean
