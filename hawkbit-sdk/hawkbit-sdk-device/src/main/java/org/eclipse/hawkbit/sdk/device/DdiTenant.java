@@ -50,5 +50,4 @@ public class DdiTenant {
     public Optional<DdiController> getController(final String controllerId) {
         return Optional.ofNullable(controllers.get(controllerId));
     }
-
 }

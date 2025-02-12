@@ -26,6 +26,7 @@
     <properties>
         <spring-cloud-starter-openfeign.version>4.2.0</spring-cloud-starter-openfeign.version>
         <openfeign-hc5.version>13.5</openfeign-hc5.version>
+        <bouncycastle.version>1.78.1</bouncycastle.version>
     </properties>
 
     <modules>

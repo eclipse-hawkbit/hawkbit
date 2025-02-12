@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.sdk.Tenant;
 import org.eclipse.hawkbit.sdk.device.DdiController;
 import org.eclipse.hawkbit.sdk.device.DdiTenant;
 import org.eclipse.hawkbit.sdk.device.UpdateHandler;
-import org.eclipse.hawkbit.sdk.mgmt.MgmtApi;
+import org.eclipse.hawkbit.sdk.mgmt.AuthenticationSetupHelper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -57,8 +57,8 @@ public class DeviceApp {
     }
 
     @Bean
-    MgmtApi mgmtApi(final Tenant tenant, final HawkbitClient hawkbitClient) {
-        return new MgmtApi(tenant, hawkbitClient);
+    AuthenticationSetupHelper mgmtApi(final Tenant tenant, final HawkbitClient hawkbitClient) {
+        return new AuthenticationSetupHelper(tenant, hawkbitClient);
     }
 
     @ShellComponent
@@ -67,10 +67,10 @@ public class DeviceApp {
         private final DdiTenant ddiTenant;
 
         private final DdiController device;
-        private final MgmtApi mgmtApi;
+        private final AuthenticationSetupHelper mgmtApi;
 
         @SuppressWarnings("java:S3358")
-        Shell(final DdiTenant ddiTenant, final MgmtApi mgmtApi, final Optional<UpdateHandler> updateHandler) {
+        Shell(final DdiTenant ddiTenant, final AuthenticationSetupHelper mgmtApi, final Optional<UpdateHandler> updateHandler) {
             this.ddiTenant = ddiTenant;
             this.mgmtApi = mgmtApi;
             String controllerId = System.getProperty("demo.controller.id");
@@ -79,7 +79,7 @@ public class DeviceApp {
             this.device = this.ddiTenant.createController(Controller.builder()
                             .controllerId(controllerId)
                             .securityToken(ObjectUtils.isEmpty(securityToken) ?
-                                    (ObjectUtils.isEmpty(ddiTenant.getTenant().getGatewayToken()) ? MgmtApi.randomToken() : securityToken) :
+                                    (ObjectUtils.isEmpty(ddiTenant.getTenant().getGatewayToken()) ? AuthenticationSetupHelper.randomToken() : securityToken) :
                                     securityToken)
                             .build(),
                     updateHandler.orElse(null)).setOverridePollMillis(10_000);
