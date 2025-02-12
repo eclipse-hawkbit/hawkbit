@@ -55,6 +55,7 @@ import io.qameta.allure.Story;
 import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionConfirmationRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAutoConfirmUpdate;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -63,6 +64,8 @@ import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
@@ -278,6 +281,101 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                         + TARGET_V1_DEACTIVATE_AUTO_CONFIRM, testTarget.getControllerId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    @Description("Test confirmation of single Action with confirm status. Check that Action goes into Running status with appropriate messages and status code")
+    public void updateActionConfirmationWithConfirm() throws Exception {
+        final int expectedStatusCode = 210;
+        final String expectedStatusMessage1 = "some-custom-message1";
+        final String expectedStatusMessage2 = "some-custom-message2";
+        final Status expectedStatusAfterActionConfirmationCall = Status.RUNNING;
+        final long actionId = doAssignmentAndTestConfirmation("targetId");
+        testActionConfirmation("targetId", actionId, MgmtActionConfirmationRequestBodyPut.Confirmation.CONFIRMED, expectedStatusCode, new String[]{expectedStatusMessage1, expectedStatusMessage2}, HttpStatus.OK ,expectedStatusAfterActionConfirmationCall);
+    }
+
+    @Test
+    @Description("Test confirmation of single Action with deny status. Check that Action stays in WAIT_FOR_CONFIRMATION status with appropriate messages and status code")
+    public void updateActionConfirmationWithDeny() throws Exception {
+        final int expectedStatusCode = 410;
+        final String expectedStatusMessage1 = "some-error-custom-message1";
+        final String expectedStatusMessage2 = "some-error-custom-message2";
+        final Status expectedStatusAfterActionConfirmationCall = Status.WAIT_FOR_CONFIRMATION;
+        final long actionId = doAssignmentAndTestConfirmation("targetId");
+        testActionConfirmation("targetId", actionId, MgmtActionConfirmationRequestBodyPut.Confirmation.DENIED, expectedStatusCode, new String[]{expectedStatusMessage1, expectedStatusMessage2}, HttpStatus.OK, expectedStatusAfterActionConfirmationCall);
+    }
+
+    @Test
+    @Description("Test confirmation of single Action with wrong ControllerId - e.g. the given Action is not assigned to the given Target - confirmation call must fail.")
+    public void updateActionConfirmationFailsIfActionNotAssignedToTarget() throws Exception {
+        final int payloadCallCode = 200;
+        final String payloadCallMessage1 = "random1";
+        final String payloadCallMessage2 = "random2";
+        final long controller1Action = doAssignmentAndTestConfirmation("controller1");
+        final long controller2Action = doAssignmentAndTestConfirmation("controller2");
+        // test that target id and action id are checked correctly and only actions assigned to given targets are confirmed/denied
+        // if action is not assigned to the target, confirmation call must fail
+        testActionConfirmation("controller1", controller2Action, MgmtActionConfirmationRequestBodyPut.Confirmation.CONFIRMED,
+                payloadCallCode, new String[]{payloadCallMessage1, payloadCallMessage2}, HttpStatus.NOT_FOUND,
+                Status.WAIT_FOR_CONFIRMATION);
+        testActionConfirmation("controller2", controller1Action, MgmtActionConfirmationRequestBodyPut.Confirmation.CONFIRMED,
+                payloadCallCode, new String[]{payloadCallMessage1, payloadCallMessage2}, HttpStatus.NOT_FOUND,
+                Status.WAIT_FOR_CONFIRMATION);
+    }
+
+    long doAssignmentAndTestConfirmation(final String controllerId) {
+        enableConfirmationFlow();
+
+        final Target testTarget = testdataFactory.createTarget(controllerId);
+        final DistributionSet dsA = testdataFactory.createDistributionSet(controllerId);
+        assignDistributionSet(dsA, Collections.singletonList(testTarget));
+
+        // check initial status after assignment is done with Confirmation Flow enabled
+        // expected Actions to be in WAIT_FOR_CONFIRMATION status
+        List<Action> actionHistory = deploymentManagement.findActionsByTarget(controllerId, PAGE).getContent();
+        assertThat(actionHistory).hasSize(1);
+        Action action = actionHistory.get(0);
+        assertThat(action.getStatus()).isEqualTo(Status.WAIT_FOR_CONFIRMATION);
+        return action.getId();
+    }
+
+    void testActionConfirmation(final String controllerId, final long actionId, final MgmtActionConfirmationRequestBodyPut.Confirmation payloadConfirmation, final int payloadCode, final String[] payloadMessages, final HttpStatus expectedHttpResponseStatus,final Status expectedGeneratedStatus) throws Exception {
+        String url = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + controllerId + "/" + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/confirmation";
+        mvc.perform(put(url)
+                        .content(String.format("{\"confirmation\":\"%s\",\"details\":[\"%s\",\"%s\"],\"code\":%d}",
+                                payloadConfirmation.getName(),
+                                payloadMessages[0],
+                                payloadMessages[1],
+                                payloadCode
+                        ))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().is(expectedHttpResponseStatus.value()));
+
+
+        // check status after confirmation is done (either confirmed or denied)
+        final List<Action> actionHistory = deploymentManagement.findActionsByTarget(controllerId, PAGE).getContent();
+        assertThat(actionHistory).hasSize(1);
+        final JpaAction jpaAction = (JpaAction) actionHistory.get(0);
+        final List<ActionStatus> actionStatuses = new ArrayList<>(jpaAction.getActionStatus());
+
+        // confirmation call was successful, check if Action status ,status code and messages are updated appropriately
+        if (expectedHttpResponseStatus == HttpStatus.OK) {
+            assertThat(jpaAction.getStatus()).isEqualTo(expectedGeneratedStatus);
+            assertThat(jpaAction.getLastActionStatusCode().get()).isEqualTo(payloadCode);
+
+            actionStatuses.sort(Comparator.comparingLong(Identifiable::getId));
+            assertThat(actionStatuses.size()).isEqualTo(2);
+            assertThat((actionStatuses.get(0)).getStatus()).isEqualTo(Status.WAIT_FOR_CONFIRMATION);
+            assertThat((actionStatuses.get(0)).getCode().isEmpty()).isTrue();
+            assertThat((actionStatuses.get(1)).getStatus()).isEqualTo(expectedGeneratedStatus);
+            assertThat((actionStatuses.get(1)).getCode().get()).isEqualTo(payloadCode);
+            assertThat(((JpaActionStatus) actionStatuses.get(1)).getMessages()).contains(payloadMessages[0], payloadMessages[1]);
+        } else { // confirmation call not successful, check if Action status is not updated, no new Action status added as well.
+            assertThat(jpaAction.getStatus()).isEqualTo(Status.WAIT_FOR_CONFIRMATION);
+            assertThat(jpaAction.getLastActionStatusCode().isEmpty()).isTrue();
+            assertThat(jpaAction.getActionStatus()).hasSize(1);
+        }
     }
 
     @Test
