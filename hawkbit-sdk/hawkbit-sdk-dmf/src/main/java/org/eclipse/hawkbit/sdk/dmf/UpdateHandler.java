@@ -89,12 +89,8 @@ public interface UpdateHandler {
                 try {
                     final UpdateStatus updateStatus = download();
                     dmfController.sendFeedback(updateStatus);
-                    if (updateStatus.status() == DmfActionStatus.ERROR) {
-                        return;
-                    } else {
-                        if (eventTopic != EventTopic.DOWNLOAD) {
-                            dmfController.sendFeedback(update());
-                        }
+                    if (updateStatus.status() != DmfActionStatus.ERROR && eventTopic != EventTopic.DOWNLOAD) {
+                        dmfController.sendFeedback(update());
                     }
                 } finally {
                     cleanup();
@@ -267,8 +263,8 @@ public interface UpdateHandler {
                 throws NoSuchAlgorithmException, IOException {
             final Validator sizeValidator = sizeValidator(size);
             final Validator hashValidator = hashValidator(hash);
-            final ArtifactHandler.DownloadHandler downloadHandler = artifactHandler.getDownloadHandler(link.getHref());
-
+            final String href = link.getHref();
+            final ArtifactHandler.DownloadHandler downloadHandler = artifactHandler.getDownloadHandler(href);
             return HawkbitClient.getLink(link, InputStream.class, dmfController.getTenant(), dmfController.getController(), is -> {
                 try {
                     final byte[] buff = new byte[32 * 1024];
@@ -280,19 +276,19 @@ public interface UpdateHandler {
                     sizeValidator.validate();
                     hashValidator.validate();
 
-                    final String message = "Downloaded " + link + " (" + size + " bytes)";
+                    final String message = "Downloaded " + href + " (" + size + " bytes)";
                     log.debug(LOG_PREFIX + message, dmfController.getTenant().getTenantId(), dmfController.getControllerId());
                     downloadHandler.finished(ArtifactHandler.DownloadHandler.Status.SUCCESS);
-                    downloadHandler.download().ifPresent(path -> downloads.put(link.getHref(), path));
+                    downloadHandler.download().ifPresent(path -> downloads.put(href, path));
                     return new UpdateStatus(DmfActionStatus.FINISHED, List.of(message));
                 } catch (final Exception e) {
                     final String message = e.getMessage();
                     if (log.isTraceEnabled()) {
-                        log.error(LOG_PREFIX + DOWNLOAD_LOG_MESSAGE + link + " failed: " + message,
-                                dmfController.getTenant().getTenantId(), dmfController.getControllerId(), e);
+                        log.error(LOG_PREFIX + DOWNLOAD_LOG_MESSAGE + "{} failed: {}",
+                                dmfController.getTenant().getTenantId(), dmfController.getControllerId(), href, message, e);
                     } else {
-                        log.error(LOG_PREFIX + DOWNLOAD_LOG_MESSAGE + link + " failed: " + message,
-                                dmfController.getTenant().getTenantId(), dmfController.getControllerId());
+                        log.error(LOG_PREFIX + DOWNLOAD_LOG_MESSAGE + "{} failed: {}",
+                                dmfController.getTenant().getTenantId(), dmfController.getControllerId(), href, message);
                     }
                     downloadHandler.finished(ArtifactHandler.DownloadHandler.Status.ERROR);
                     return new UpdateStatus(DmfActionStatus.ERROR, List.of(message));
