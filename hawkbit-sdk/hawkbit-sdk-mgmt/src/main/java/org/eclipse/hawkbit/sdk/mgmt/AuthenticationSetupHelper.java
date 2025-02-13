@@ -62,7 +62,7 @@ public class AuthenticationSetupHelper {
         CA ddiCA = tenant.getDdiCA();
         if (ddiCA == null) {
             final CA ddiRootCA = new CA();
-            ddiCA = new CA(ddiRootCA.issue(CA.DEFAULT_INTERMEDIATE_CA_DN, null, null));
+            ddiCA = ddiRootCA.issueCA(CA.DEFAULT_INTERMEDIATE_CA_DN, null, null);
             tenant.setDdiCA(ddiCA);
         }
         if (!Boolean.TRUE.equals(Objects.requireNonNull(mgmtTenantManagementRestApi
@@ -104,18 +104,16 @@ public class AuthenticationSetupHelper {
                 .getBody()).getValue()))) {
             mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, true));
         }
-        if (!gatewayToken.equals(
-                Objects.requireNonNull(mgmtTenantManagementRestApi
-                        .getTenantConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY)
-                        .getBody()).getValue())) {
+        if (!gatewayToken.equals(Objects.requireNonNull(mgmtTenantManagementRestApi
+                .getTenantConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY)
+                .getBody()).getValue())) {
             mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, gatewayToken));
         }
     }
 
-    // if gateway token is configured then the gateway auth is enabled key is set
-    // so all devices use gateway token authentication
-    // otherwise target token authentication is enabled. Then all devices shall be registered
-    // and the target token shall be set to the one from the DDI controller instance
+    // if gateway token is configured then the gateway auth is enabled, so all devices use gateway token authentication.
+    // otherwise, target token authentication is enabled - then all devices shall be registered and the target token shall be set to the one from
+    // the DDI controller instance
     public void setupTargetAuthentication() {
         final String gatewayToken = tenant.getGatewayToken();
         if (ObjectUtils.isEmpty(gatewayToken)) {
