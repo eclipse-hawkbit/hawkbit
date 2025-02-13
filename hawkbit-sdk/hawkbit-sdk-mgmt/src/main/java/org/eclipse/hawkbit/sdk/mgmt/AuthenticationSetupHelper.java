@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.sdk.mgmt;
 
 import java.security.SecureRandom;
+import java.security.cert.CertificateException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -55,100 +56,102 @@ public class AuthenticationSetupHelper {
         return Base64.getEncoder().encodeToString(rnd);
     }
 
-    // if gateway token is configured then the gateway auth is enabled key is set
-    // so all devices use gateway token authentication
-    // otherwise target token authentication is enabled. Then all devices shall be registered
-    // and the target token shall be set to the one from the DDI controller instance
-    public void setupTargetAuthentication() {
+    // sets up a certificate authentication, if DdiCA is null - generate self signed CA
+    public void setupCertificateAuthentication() throws CertificateException {
         final MgmtTenantManagementRestApi mgmtTenantManagementRestApi = hawkbitClient.mgmtService(MgmtTenantManagementRestApi.class, tenant);
-        final String gatewayToken = tenant.getGatewayToken();
-        if (ObjectUtils.isEmpty(gatewayToken)) {
-            if (!(Boolean.TRUE.equals(Objects.requireNonNull(mgmtTenantManagementRestApi
-                    .getTenantConfigurationValue(AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED)
-                    .getBody()).getValue()))) {
-                mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, true));
-            }
-        } else {
-            if (!(Boolean.TRUE.equals(Objects.requireNonNull(mgmtTenantManagementRestApi
-                    .getTenantConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED)
-                    .getBody()).getValue()))) {
-                mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, true));
-            }
-            if (!gatewayToken.equals(
-                    Objects.requireNonNull(mgmtTenantManagementRestApi
-                            .getTenantConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY)
-                            .getBody()).getValue())) {
-                mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, gatewayToken));
-            }
+        CA ddiCA = tenant.getDdiCA();
+        if (ddiCA == null) {
+            final CA ddiRootCA = new CA();
+            ddiCA = new CA(ddiRootCA.issue(CA.DEFAULT_INTERMEDIATE_CA_DN, null, null));
+            tenant.setDdiCA(ddiCA);
+        }
+        if (!Boolean.TRUE.equals(Objects.requireNonNull(mgmtTenantManagementRestApi
+                .getTenantConfigurationValue(AUTHENTICATION_MODE_HEADER_ENABLED)
+                .getBody()).getValue())) {
+            mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_HEADER_ENABLED, true));
+        }
+        final String fingerprint = ddiCA.getFingerprint();
+        if (!fingerprint.equals(
+                Objects.requireNonNull(mgmtTenantManagementRestApi
+                        .getTenantConfigurationValue(AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME)
+                        .getBody()).getValue())) {
+            mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, fingerprint));
+        }
+    }
+
+    // enables secure token authentication
+    public void setupSecureTokenAuthentication() {
+        final MgmtTenantManagementRestApi mgmtTenantManagementRestApi = hawkbitClient.mgmtService(MgmtTenantManagementRestApi.class, tenant);
+        if (!(Boolean.TRUE.equals(Objects.requireNonNull(mgmtTenantManagementRestApi
+                .getTenantConfigurationValue(AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED)
+                .getBody()).getValue()))) {
+            mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, true));
         }
     }
 
     // set gateway token authentication (generate and sets gateway token to tenant, if not set up)
     // return the gateway token
-    public String setupGatewayToken() {
+    public void setupGatewayTokenAuthentication() {
         String gatewayToken = tenant.getGatewayToken();
         if (ObjectUtils.isEmpty(gatewayToken)) {
             gatewayToken = randomToken();
             tenant.setGatewayToken(gatewayToken);
         }
-        setupTargetAuthentication();
-        return gatewayToken;
+
+        final MgmtTenantManagementRestApi mgmtTenantManagementRestApi = hawkbitClient.mgmtService(MgmtTenantManagementRestApi.class, tenant);
+        if (!(Boolean.TRUE.equals(Objects.requireNonNull(mgmtTenantManagementRestApi
+                .getTenantConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED)
+                .getBody()).getValue()))) {
+            mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, true));
+        }
+        if (!gatewayToken.equals(
+                Objects.requireNonNull(mgmtTenantManagementRestApi
+                        .getTenantConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY)
+                        .getBody()).getValue())) {
+            mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, gatewayToken));
+        }
     }
 
-    // sets up a target token and returns it
-    public String setupTargetToken(final String controllerId, String securityTargetToken) {
-        if (ObjectUtils.isEmpty(tenant.getGatewayToken())) {
-            final MgmtTargetRestApi mgmtTargetRestApi = hawkbitClient.mgmtService(MgmtTargetRestApi.class, tenant);
-            try {
-                // test if target exist, if not - throws 404
-                final MgmtTarget target = Objects.requireNonNull(mgmtTargetRestApi.getTarget(controllerId).getBody());
-                if (ObjectUtils.isEmpty(securityTargetToken)) {
-                    if (ObjectUtils.isEmpty(target.getSecurityToken())) {
-                        // generate random to set to tha existing target without configured security token
-                        securityTargetToken = randomToken();
-                        mgmtTargetRestApi.updateTarget(controllerId, new MgmtTargetRequestBody().setSecurityToken(securityTargetToken));
-                    } else {
-                        securityTargetToken = target.getSecurityToken();
-                    }
-                } else if (!securityTargetToken.equals(target.getSecurityToken())) {
-                    // update target's with the security token (since it doesn't match)
-                    mgmtTargetRestApi.updateTarget(controllerId, new MgmtTargetRequestBody().setSecurityToken(securityTargetToken));
-                }
-            } catch (final FeignException.NotFound e) {
-                if (ObjectUtils.isEmpty(securityTargetToken)) {
+    // if gateway token is configured then the gateway auth is enabled key is set
+    // so all devices use gateway token authentication
+    // otherwise target token authentication is enabled. Then all devices shall be registered
+    // and the target token shall be set to the one from the DDI controller instance
+    public void setupTargetAuthentication() {
+        final String gatewayToken = tenant.getGatewayToken();
+        if (ObjectUtils.isEmpty(gatewayToken)) {
+            setupSecureTokenAuthentication();
+        } else {
+            setupGatewayTokenAuthentication();
+        }
+    }
+
+    // sets up a target token and returns it. If target has not already been created - creates it
+    public String setupTargetSecureToken(final String controllerId, String securityTargetToken) {
+        final MgmtTargetRestApi mgmtTargetRestApi = hawkbitClient.mgmtService(MgmtTargetRestApi.class, tenant);
+        try {
+            // test if target exist, if not - throws 404
+            final MgmtTarget target = Objects.requireNonNull(mgmtTargetRestApi.getTarget(controllerId).getBody());
+            if (ObjectUtils.isEmpty(securityTargetToken)) {
+                if (ObjectUtils.isEmpty(target.getSecurityToken())) {
+                    // generate random to set to tha existing target without configured security token
                     securityTargetToken = randomToken();
+                    mgmtTargetRestApi.updateTarget(controllerId, new MgmtTargetRequestBody().setSecurityToken(securityTargetToken));
+                } else {
+                    securityTargetToken = target.getSecurityToken();
                 }
-                // create target with the security token
-                mgmtTargetRestApi.createTargets(List.of(
-                        new MgmtTargetRequestBody().setControllerId(controllerId).setSecurityToken(securityTargetToken)));
+            } else if (!securityTargetToken.equals(target.getSecurityToken())) {
+                // update target's with the security token (since it doesn't match)
+                mgmtTargetRestApi.updateTarget(controllerId, new MgmtTargetRequestBody().setSecurityToken(securityTargetToken));
             }
+        } catch (final FeignException.NotFound e) {
+            if (ObjectUtils.isEmpty(securityTargetToken)) {
+                securityTargetToken = randomToken();
+            }
+            // create target with the security token
+            mgmtTargetRestApi.createTargets(List.of(
+                    new MgmtTargetRequestBody().setControllerId(controllerId).setSecurityToken(securityTargetToken)));
         }
 
         return securityTargetToken;
-    }
-
-    // sets up a target token and returns it
-    public void setupCertificateFingerprint() {
-        final MgmtTenantManagementRestApi mgmtTenantManagementRestApi = hawkbitClient.mgmtService(MgmtTenantManagementRestApi.class, tenant);
-        final CA ddiCA = tenant.getDdiCA();
-        final Object enabled = Objects.requireNonNull(mgmtTenantManagementRestApi
-                .getTenantConfigurationValue(AUTHENTICATION_MODE_HEADER_ENABLED)
-                .getBody()).getValue();
-        if (ddiCA == null) {
-            if (Boolean.TRUE.equals(enabled)) {
-                mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_HEADER_ENABLED, false));
-            }
-        } else {
-            if (!Boolean.TRUE.equals(enabled)) {
-                mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_HEADER_ENABLED, true));
-            }
-            final String fingerprint = ddiCA.getFingerprint();
-            if (!fingerprint.equals(
-                    Objects.requireNonNull(mgmtTenantManagementRestApi
-                            .getTenantConfigurationValue(AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME)
-                            .getBody()).getValue())) {
-                mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, fingerprint));
-            }
-        }
     }
 }
