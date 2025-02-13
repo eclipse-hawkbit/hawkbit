@@ -21,7 +21,6 @@ import java.util.HexFormat;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
@@ -64,7 +63,6 @@ public interface UpdateHandler {
         private static final String DOWNLOAD_LOG_MESSAGE = "Download ";
         private static final String EXPECTED = "(Expected: ";
         private static final String BUT_GOT_LOG_MESSAGE = " but got: ";
-        private static final int MINIMUM_TOKEN_LENGTH_FOR_HINT = 6;
         private final DmfController dmfController;
         private final DmfDownloadAndUpdateRequest updateRequest;
         private final EventTopic eventTopic;
@@ -166,22 +164,6 @@ public interface UpdateHandler {
                 }
             });
             log.debug(LOG_PREFIX + "Cleaned up", dmfController.getTenant().getTenantId(), dmfController.getControllerId());
-        }
-
-        private static String hideTokenDetails(final String targetToken) {
-            if (targetToken == null) {
-                return "<NULL!>";
-            }
-
-            if (targetToken.isEmpty()) {
-                return "<EMPTY!>";
-            }
-
-            if (targetToken.length() <= MINIMUM_TOKEN_LENGTH_FOR_HINT) {
-                return "***";
-            }
-
-            return targetToken.substring(0, 2) + "***" + targetToken.substring(targetToken.length() - 2);
         }
 
         private static Validator sizeValidator(final long size) {
