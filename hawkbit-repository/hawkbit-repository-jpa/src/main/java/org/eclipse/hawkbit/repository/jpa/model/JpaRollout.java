@@ -235,8 +235,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
                 put(RolloutStatus.STOPPED, 4);
                 put(RolloutStatus.RUNNING, 5);
                 put(RolloutStatus.FINISHED, 6);
-                put(RolloutStatus.ERROR_CREATING, 7);
-                put(RolloutStatus.ERROR_STARTING, 8);
                 put(RolloutStatus.DELETING, 9);
                 put(RolloutStatus.DELETED, 10);
                 put(RolloutStatus.WAITING_FOR_APPROVAL, 11);
