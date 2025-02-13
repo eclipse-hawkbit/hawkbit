@@ -289,39 +289,41 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             final MgmtActionConfirmationRequestBodyPut actionConfirmation) {
         log.debug("updateActionConfirmation with data [targetId={}, actionId={}]: {}", targetId, actionId, actionConfirmation);
 
-        return getValidatedAction(targetId, actionId).map(action -> {
-            try {
-                switch (actionConfirmation.getConfirmation()) {
-                    case CONFIRMED:
-                        log.info("Confirmed the action (actionId: {}, targetId: {}) as we got {} report",
-                                actionId, targetId, actionConfirmation.getConfirmation());
-                        confirmationManagement.confirmAction(actionId, actionConfirmation.getCode(), actionConfirmation.getDetails());
-                        break;
-                    case DENIED:
-                    default:
-                        log.debug("Controller denied the action (actionId: {}, controllerId: {}) as we got {} report.",
-                                actionId, targetId, actionConfirmation.getConfirmation());
-                        confirmationManagement.denyAction(actionId, actionConfirmation.getCode(), actionConfirmation.getDetails());
-                        break;
-                }
-                return new ResponseEntity<Void>(HttpStatus.OK);
-            } catch (final InvalidConfirmationFeedbackException e) {
-                if (e.getReason() == InvalidConfirmationFeedbackException.Reason.ACTION_CLOSED) {
-                    log.warn("Updating action {} with confirmation {} not possible since action not active anymore.",
-                            action.getId(), actionConfirmation.getConfirmation(), e);
-                    return new ResponseEntity<Void>(HttpStatus.GONE);
-                } else if (e.getReason() == InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION) {
-                    log.debug("Action is not waiting for confirmation, deny request.", e);
-                    return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
-                } else {
-                    log.debug("Action confirmation failed with unknown reason.", e);
-                    return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
-                }
-            }
-        }).orElseGet(() -> {
-            log.warn("Action {} not found for target {}", actionId, targetId);
-            return ResponseEntity.notFound().build();
-        });
+        return getValidatedAction(targetId, actionId)
+                .map(action -> {
+                    try {
+                        switch (actionConfirmation.getConfirmation()) {
+                            case CONFIRMED:
+                                log.debug("Confirmed the action (actionId: {}, targetId: {}) as we got {} report",
+                                        actionId, targetId, actionConfirmation.getConfirmation());
+                                confirmationManagement.confirmAction(actionId, actionConfirmation.getCode(), actionConfirmation.getDetails());
+                                break;
+                            case DENIED:
+                            default:
+                                log.debug("Controller denied the action (actionId: {}, controllerId: {}) as we got {} report.",
+                                        actionId, targetId, actionConfirmation.getConfirmation());
+                                confirmationManagement.denyAction(actionId, actionConfirmation.getCode(), actionConfirmation.getDetails());
+                                break;
+                        }
+                        return new ResponseEntity<Void>(HttpStatus.OK);
+                    } catch (final InvalidConfirmationFeedbackException e) {
+                        if (e.getReason() == InvalidConfirmationFeedbackException.Reason.ACTION_CLOSED) {
+                            log.warn("Updating action {} with confirmation {} not possible since action not active anymore.",
+                                    action.getId(), actionConfirmation.getConfirmation(), e);
+                            return new ResponseEntity<Void>(HttpStatus.GONE);
+                        } else if (e.getReason() == InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION) {
+                            log.debug("Action is not waiting for confirmation, deny request.", e);
+                            return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+                        } else {
+                            log.debug("Action confirmation failed with unknown reason.", e);
+                            return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+                        }
+                    }
+                })
+                .orElseGet(() -> {
+                    log.warn("Action {} not found for target {}", actionId, targetId);
+                    return ResponseEntity.notFound().build();
+                });
     }
 
     @Override
