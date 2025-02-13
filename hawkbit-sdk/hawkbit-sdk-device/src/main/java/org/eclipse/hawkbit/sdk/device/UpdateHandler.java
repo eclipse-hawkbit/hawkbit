@@ -264,7 +264,7 @@ public interface UpdateHandler {
             final Validator sizeValidator = sizeValidator(size);
             final Validator hashValidator = hashValidator(hash);
             final ArtifactHandler.DownloadHandler downloadHandler = artifactHandler.getDownloadHandler(link.getHref());
-            try (final InputStream is = HawkbitClient.getLink(link, InputStream.class, ddiController.getTenant(), ddiController.getController())) {
+            return HawkbitClient.getLink(link, InputStream.class, ddiController.getTenant(), ddiController.getController(), is -> {
                 try {
                     final byte[] buff = new byte[32 * 1024];
                     for (int read; (read = is.read(buff)) != -1; ) {
@@ -292,7 +292,7 @@ public interface UpdateHandler {
                     downloadHandler.finished(ArtifactHandler.DownloadHandler.Status.ERROR);
                     return new UpdateStatus(UpdateStatus.Status.FAILURE, List.of(message));
                 }
-            }
+            });
         }
 
         private interface Validator {

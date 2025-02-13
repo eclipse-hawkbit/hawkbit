@@ -269,7 +269,7 @@ public interface UpdateHandler {
             final Validator hashValidator = hashValidator(hash);
             final ArtifactHandler.DownloadHandler downloadHandler = artifactHandler.getDownloadHandler(link.getHref());
 
-            try (final InputStream is = HawkbitClient.getLink(link, InputStream.class, dmfController.getTenant(), dmfController.getController())) {
+            return HawkbitClient.getLink(link, InputStream.class, dmfController.getTenant(), dmfController.getController(), is -> {
                 try {
                     final byte[] buff = new byte[32 * 1024];
                     for (int read; (read = is.read(buff)) != -1; ) {
@@ -297,7 +297,7 @@ public interface UpdateHandler {
                     downloadHandler.finished(ArtifactHandler.DownloadHandler.Status.ERROR);
                     return new UpdateStatus(DmfActionStatus.ERROR, List.of(message));
                 }
-            }
+            });
         }
 
         private interface Validator {
