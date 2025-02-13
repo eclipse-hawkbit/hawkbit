@@ -23,6 +23,10 @@ import java.util.Objects;
 import javax.security.auth.x500.X500Principal;
 
 import lombok.Data;
+import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.X509Extension;
+import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
@@ -70,24 +74,14 @@ public class CA {
         return issue(subject, null, null);
     }
 
-    // generate key and issue a certificate
+    // generate key and issue a CA certificate
+    public CA issueCA(final String subject, final Date notBefore, final Date notAfter) throws CertificateException {
+        return new CA(issue(subject, notBefore, notAfter, true));
+    }
+
+    // generate key and issue an end certificate
     public Certificate issue(final String subject, final Date notBefore, final Date notAfter) throws CertificateException {
-        Objects.requireNonNull(subject);
-        try {
-            final KeyPair keyPair = genKey();
-            final X509Certificate[] certificateChain = certificate.getCertificateChain();
-            final ContentSigner signer = new JcaContentSignerBuilder(SHA_256_WITH_RSA_ENCRYPTION).build(certificate.getKeyPair().getPrivate());
-            final X509v3CertificateBuilder caCertBuilder = new JcaX509v3CertificateBuilder(
-                    certificateChain[0].getSubjectX500Principal(),
-                    BigInteger.valueOf(nextSerial++), notBefore(notBefore), notAfter(notAfter), new X500Principal(subject),
-                    keyPair.getPublic());
-            final X509Certificate[] subjectCertificateChain = new X509Certificate[certificateChain.length + 1];
-            certificateChain[0] = new JcaX509CertificateConverter().getCertificate(caCertBuilder.build(signer));
-            System.arraycopy(certificateChain, 0, subjectCertificateChain, 1, certificateChain.length);
-            return new Certificate(keyPair, subjectCertificateChain);
-        } catch (final NoSuchAlgorithmException | OperatorCreationException e) {
-            throw new CertificateException(e);
-        }
+        return issue(subject, notBefore, notAfter, false);
     }
 
     public String getFingerprint() {
@@ -96,6 +90,28 @@ public class CA {
             return toHex(MessageDigest.getInstance("SHA-256").digest(certificateChain[certificateChain.length - 1].getEncoded()));
         } catch (final NoSuchAlgorithmException | CertificateEncodingException e) {
             throw new IllegalArgumentException(e);
+        }
+    }
+
+    private Certificate issue(final String subject, final Date notBefore, final Date notAfter, final boolean ca) throws CertificateException {
+        Objects.requireNonNull(subject);
+        try {
+            final KeyPair keyPair = genKey();
+            final X509Certificate[] certificateChain = certificate.getCertificateChain();
+            final ContentSigner signer = new JcaContentSignerBuilder(SHA_256_WITH_RSA_ENCRYPTION).build(certificate.getKeyPair().getPrivate());
+            final X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
+                    certificateChain[0].getSubjectX500Principal(),
+                    BigInteger.valueOf(nextSerial++), notBefore(notBefore), notAfter(notAfter), new X500Principal(subject),
+                    keyPair.getPublic());
+            if (ca) {
+                certBuilder.addExtension(Extension.basicConstraints, false, new BasicConstraints(true));
+            }
+            final X509Certificate[] subjectCertificateChain = new X509Certificate[certificateChain.length + 1];
+            subjectCertificateChain[0] = new JcaX509CertificateConverter().getCertificate(certBuilder.build(signer));
+            System.arraycopy(certificateChain, 0, subjectCertificateChain, 1, certificateChain.length);
+            return new Certificate(keyPair, subjectCertificateChain);
+        } catch (final NoSuchAlgorithmException | OperatorCreationException | CertIOException e) {
+            throw new CertificateException(e);
         }
     }
 
@@ -115,8 +131,9 @@ public class CA {
             final ContentSigner selfSigner = new JcaContentSignerBuilder(SHA_256_WITH_RSA_ENCRYPTION).build(keyPair.getPrivate());
             final X509v3CertificateBuilder caCertBuilder = new JcaX509v3CertificateBuilder(
                     caPrincipal, BigInteger.valueOf(0L), notBefore(notBefore), notAfter(notAfter), caPrincipal, keyPair.getPublic());
+            caCertBuilder.addExtension(Extension.basicConstraints, false, new BasicConstraints(true));
             return new Certificate(keyPair, new X509Certificate[] { new JcaX509CertificateConverter().getCertificate(caCertBuilder.build(selfSigner)) });
-        } catch (final NoSuchAlgorithmException | OperatorCreationException e) {
+        } catch (final NoSuchAlgorithmException | OperatorCreationException | CertIOException e) {
             throw new CertificateException(e);
         }
     }
