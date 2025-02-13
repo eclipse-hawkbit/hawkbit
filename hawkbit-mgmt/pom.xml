@@ -27,8 +27,5 @@
         <module>hawkbit-mgmt-resource</module>
         <module>hawkbit-mgmt-starter</module>
         <module>hawkbit-mgmt-server</module>
-
-        <!-- Deprecated modules -->
-        <module>hawkbit-mgmt-resource-deprecated</module>
     </modules>
 </project>
