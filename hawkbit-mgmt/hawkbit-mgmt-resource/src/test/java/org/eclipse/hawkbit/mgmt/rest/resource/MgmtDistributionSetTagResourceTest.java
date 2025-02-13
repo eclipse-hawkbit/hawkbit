@@ -344,10 +344,9 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
         final DistributionSetTag tag = testdataFactory.createDistributionSetTags(1).get(0);
         final List<DistributionSet> sets = testdataFactory.createDistributionSetsWithoutModules(2);
 
-        mvc.perform(
-                        put(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
-                                .content(JsonBuilder.toArray(sets.stream().map(DistributionSet::getId).toList()))
-                                .contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                        .content(JsonBuilder.toArray(sets.stream().map(DistributionSet::getId).toList()))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
