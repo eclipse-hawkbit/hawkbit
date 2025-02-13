@@ -182,25 +182,7 @@ public interface Rollout extends NamedEntity {
          * soft-deletion of the rollout which keeps references, in case of an
          * hard-deletion of a rollout the rollout-entry itself is deleted.
          */
-        DELETED,
-
-        /**
-         * Rollout could not be created due to errors, might be a database
-         * problem during asynchronous creating.
-         *
-         * @deprecated legacy status is not used anymore
-         */
-        @Deprecated
-        ERROR_CREATING,
-
-        /**
-         * Rollout could not be started due to errors, might be database problem
-         * during asynchronous starting.
-         *
-         * @deprecated legacy status is not used anymore
-         */
-        @Deprecated
-        ERROR_STARTING
+        DELETED
     }
 
     /**
