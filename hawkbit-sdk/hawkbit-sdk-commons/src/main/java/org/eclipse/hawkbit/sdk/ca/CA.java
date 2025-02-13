@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.sdk.Certificate;
 public class CA {
 
     public static final String DEFAULT_CA_DN = "CN=CA, O=hawkBit, L=Sofia, C=BG";
+    public static final String DEFAULT_INTERMEDIATE_CA_DN = "CN=Intermediate, O=hawkBit, L=Sofia, C=BG";
     public static final long DEFAULT_NOT_BEFORE_DAYS_OFFSET = 1;
     public static final long DEFAULT_NOT_AFTER_DAYS_OFFSET = 30;
 

@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.sdk.demo.multidevice;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 
-import feign.Client;
 import feign.Contract;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
@@ -85,7 +84,7 @@ public class MultiDeviceApp {
         public void startOne(@ShellOption("--id") final String controllerId) {
             final String securityTargetToken;
             if (setup) {
-                securityTargetToken = mgmtApi.setupTargetToken(controllerId, null);
+                securityTargetToken = mgmtApi.setupTargetSecureToken(controllerId, null);
             } else {
                 securityTargetToken = null;
             }

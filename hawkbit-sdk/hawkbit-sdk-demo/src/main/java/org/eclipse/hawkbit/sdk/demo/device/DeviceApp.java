@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.sdk.demo.device;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 
-import feign.Client;
 import feign.Contract;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
@@ -87,7 +86,7 @@ public class DeviceApp {
         @ShellMethod(key = "setup")
         public void setup() {
             mgmtApi.setupTargetAuthentication();
-            mgmtApi.setupTargetToken(device.getController().getControllerId(), device.getTargetSecurityToken());
+            mgmtApi.setupTargetSecureToken(device.getController().getControllerId(), device.getTargetSecurityToken());
         }
 
         @ShellMethod(key = "start")
