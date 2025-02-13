@@ -53,13 +53,6 @@
             <artifactId>hawkbit-autoconfigure</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <!-- deprecated -->
-        <dependency>
-            <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-mgmt-resource-deprecated</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!-- hawkBit - END -->
 
         <!-- Spring - START -->
