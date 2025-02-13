@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.sdk;
 
 import java.io.BufferedOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,6 +39,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -66,6 +68,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.client5.http.ssl.TrustAllStrategy;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpHeaders;
@@ -146,11 +149,17 @@ public class HawkbitClient {
         return service(serviceType, tenantProperties, controller);
     }
 
+    /**
+     * Downloads a link. If the returned type (linkType) is {@link ClassicHttpResponse} or {@link InputStream} then the caller is responsible
+     * to close the response. Otherwise, it is assumed and json object, it is deserialized and returned.
+     */
+    @SuppressWarnings("unchecked")
     public static <T> T getLink(final Link link, final Class<T> linkType, final Tenant tenant, final Controller controller) throws IOException {
         final String url = link.getHref();
         final HttpClientKey key = new HttpClientKey(
                 url.startsWith("https://"), controller == null ? null : controller.getCertificate(), tenant.getTenantCA());
         final HttpClient httpClient = httpClient(key);
+        final AtomicBoolean delegatedRelease = new AtomicBoolean(false);
         try {
             final HttpGet request = new HttpGet(url);
             final String gatewayToken = tenant.getGatewayToken();
@@ -168,17 +177,54 @@ public class HawkbitClient {
                     throw new IllegalStateException("Unexpected status code: " + response.getCode());
                 }
 
-                if (linkType.isAssignableFrom(response.getClass())) {
-                    return (T)response;
+                if (linkType.isAssignableFrom(ClassicHttpResponse.class)) {
+                    delegatedRelease.set(true);
+                    return (T)Proxy.newProxyInstance(
+                            ClassicHttpResponse.class.getClassLoader(), new Class<?>[] { ClassicHttpResponse.class },
+                            (proxy, method, args) -> {
+                                if (ObjectUtils.isEmpty(method.getParameterTypes()) && method.getName().equals("close")) {
+                                    response.close();
+                                    key.release();
+                                    return null;
+                                } else {
+                                    try {
+                                        return method.invoke(response, args);
+                                    } catch (final InvocationTargetException e) {
+                                        throw e.getCause() == null ? e : e.getCause();
+                                    }
+                                }
+                            });
                 } else if (linkType == InputStream.class) {
-                    return (T)response.getEntity().getContent();
+                    final InputStream is = response.getEntity().getContent();
+                    delegatedRelease.set(true);
+                    return (T)new InputStream() {
+
+                        @Override
+                        public int read() throws IOException {
+                            return is.read();
+                        }
+
+                        @Override
+                        public int read(final byte[] b, final int off, final int read) throws IOException {
+                            return is.read(b, off, read);
+                        }
+
+                        @Override
+                        public void close() throws IOException {
+                            try {
+                                is.close();
+                            } finally {
+                                key.release();
+                            }
+                        }
+                    };
                 } else {
                     return new ObjectMapper().readValue(response.getEntity().getContent(), linkType);
                 }
             });
         } finally {
-            synchronized (HTTP_CLIENTS) {
-                HTTP_CLIENTS.get(key).release();
+            if (!delegatedRelease.get()) {
+                key.release();
             }
         }
     }
@@ -211,11 +257,7 @@ public class HawkbitClient {
                 .contract(contract)
                 .requestInterceptor(requestInterceptorFn.apply(tenant, controller))
                 .target(serviceType, url);
-        CLEANER.register(service, () -> {
-            synchronized (HTTP_CLIENTS) {
-                HTTP_CLIENTS.get(key).release();
-            }
-        });
+        CLEANER.register(service, key::release);
         return service;
     }
 
@@ -446,6 +488,12 @@ public class HawkbitClient {
         private final boolean https;
         private final Certificate clientCertificate;
         private final X509Certificate[] serverCertificates;
+
+        private void release() {
+            synchronized (HTTP_CLIENTS) {
+                HTTP_CLIENTS.get(this).release();
+            }
+        }
     }
 
     private static class HttpClientWrapper {
