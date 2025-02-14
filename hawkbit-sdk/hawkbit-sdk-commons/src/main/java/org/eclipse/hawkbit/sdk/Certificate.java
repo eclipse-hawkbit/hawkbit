@@ -76,8 +76,8 @@ public class Certificate {
     private static String toPem(final byte[] ba) {
         final String base64 = Base64.getEncoder().encodeToString(ba);
         final StringBuilder formatted = new StringBuilder();
-        for (int off = 0, end; (end = Math.min(off + 64, base64.length())) >= 0; off = end) {
-            formatted.append(base64, off, end).append("\n");
+        for (int off = 0, len = base64.length(); off < len; off += 64) {
+            formatted.append(base64, off, Math.min(off + 64, len)).append("\n");
         }
         return formatted.toString();
     }

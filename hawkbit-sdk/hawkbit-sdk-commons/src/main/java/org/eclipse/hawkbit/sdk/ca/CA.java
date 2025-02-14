@@ -25,7 +25,6 @@ import javax.security.auth.x500.X500Principal;
 import lombok.Data;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.asn1.x509.X509Extension;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
@@ -46,7 +45,7 @@ public class CA {
     private static final String SHA_256_WITH_RSA_ENCRYPTION = "SHA256WithRSAEncryption";
 
     private final Certificate certificate;
-    private long nextSerial = System.currentTimeMillis();
+    private long nextSerial;
 
     // creates a self-signed CA with defaults
     public CA() throws CertificateException {
@@ -55,12 +54,12 @@ public class CA {
 
     // creates a self-signed CA
     public CA(final String caDN, final Date notBefore, final Date notAfter) throws CertificateException {
-        this(selfSign(caDN, notBefore, notAfter));
+        this(selfSign(caDN, notBefore, notAfter), 1);
     }
 
     // create a CA with a key and certificate chain
     public CA(final Certificate certificate) {
-        this(certificate, 0);
+        this(certificate, System.currentTimeMillis());
     }
 
     // create a CA with a key and certificate chain
