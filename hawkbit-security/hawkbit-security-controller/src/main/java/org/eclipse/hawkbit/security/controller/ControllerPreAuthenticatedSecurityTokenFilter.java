@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.T
  * 5d8fSD54fdsFG98DDsa.}
  */
 @Slf4j
-public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractControllerAuthenticationFilter {
+public class ControllerPreAuthenticatedSecurityTokenFilter extends AbstractControllerAuthenticationFilter {
 
     private static final String TARGET_SECURITY_TOKEN_AUTH_SCHEME = "TargetToken ";
     private static final int OFFSET_TARGET_TOKEN = TARGET_SECURITY_TOKEN_AUTH_SCHEME.length();
@@ -46,7 +46,7 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
      * @param systemSecurityContext the system security context to get access to tenant
      *         configuration
      */
-    public ControllerPreAuthenticateSecurityTokenFilter(
+    public ControllerPreAuthenticatedSecurityTokenFilter(
             final TenantConfigurationManagement tenantConfigurationManagement,
             final ControllerManagement controllerManagement, final TenantAware tenantAware,
             final SystemSecurityContext systemSecurityContext) {
