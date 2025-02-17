@@ -13,12 +13,10 @@ import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.autoconfigure.ddi.security.ControllerTenantAwareAuthenticationDetailsSource;
-import org.eclipse.hawkbit.autoconfigure.ddi.security.HttpControllerPreAuthenticateAnonymousDownloadFilter;
 import org.eclipse.hawkbit.autoconfigure.ddi.security.HttpControllerPreAuthenticateSecurityTokenFilter;
 import org.eclipse.hawkbit.autoconfigure.ddi.security.HttpControllerPreAuthenticatedGatewaySecurityTokenFilter;
 import org.eclipse.hawkbit.autoconfigure.ddi.security.HttpControllerPreAuthenticatedSecurityHeaderFilter;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
-import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.rest.SecurityManagedConfiguration;
@@ -39,9 +37,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
 /**
  * Security configuration for the hawkBit server DDI download interface.
@@ -93,8 +89,7 @@ class ControllerDownloadSecurityConfiguration {
     @Bean
     @Order(300) // higher priority than HawkBit DDI security, so that the DDI DL security is applied first
     protected SecurityFilterChain filterChainDDIDL(final HttpSecurity http) throws Exception {
-        final AuthenticationManager authenticationManager = ControllerSecurityConfiguration.setAuthenticationManager(
-                http, ddiSecurityConfiguration);
+        final AuthenticationManager authenticationManager = ControllerSecurityConfiguration.setAuthenticationManager(http, ddiSecurityConfiguration);
 
         http
                 .securityMatcher(DDI_DL_ANT_MATCHER)
@@ -106,55 +101,35 @@ class ControllerDownloadSecurityConfiguration {
 
         final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
 
-        if (ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled()) {
-            log.warn(
-                    SecurityManagedConfiguration.ANONYMOUS_CONTROLLER_SECURITY_ENABLED_SHOULD_ONLY_BE_USED_FOR_DEVELOPMENT_PURPOSES);
+        final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
+                ddiSecurityConfiguration.getRp().getCnHeader(),
+                ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(), tenantConfigurationManagement,
+                tenantAware, systemSecurityContext);
+        securityHeaderFilter.setAuthenticationManager(authenticationManager);
+        securityHeaderFilter.setCheckForPrincipalChanges(true);
+        securityHeaderFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
-            final AnonymousAuthenticationFilter anonymousFilter = new AnonymousAuthenticationFilter(
-                    "controllerAnonymousFilter", "anonymous",
-                    List.of(new SimpleGrantedAuthority(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE_ANONYMOUS)));
-            anonymousFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
-            http
-                    .securityContext(AbstractHttpConfigurer::disable)
-                    .anonymous(configurer -> configurer.authenticationFilter(anonymousFilter));
-        } else {
-            final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
-                    ddiSecurityConfiguration.getRp().getCnHeader(),
-                    ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(), tenantConfigurationManagement,
-                    tenantAware, systemSecurityContext);
-            securityHeaderFilter.setAuthenticationManager(authenticationManager);
-            securityHeaderFilter.setCheckForPrincipalChanges(true);
-            securityHeaderFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
+        final HttpControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new HttpControllerPreAuthenticateSecurityTokenFilter(
+                tenantConfigurationManagement, tenantAware, controllerManagement, systemSecurityContext);
+        securityTokenFilter.setAuthenticationManager(authenticationManager);
+        securityTokenFilter.setCheckForPrincipalChanges(true);
+        securityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
-            final HttpControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new HttpControllerPreAuthenticateSecurityTokenFilter(
-                    tenantConfigurationManagement, tenantAware, controllerManagement, systemSecurityContext);
-            securityTokenFilter.setAuthenticationManager(authenticationManager);
-            securityTokenFilter.setCheckForPrincipalChanges(true);
-            securityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
+        final HttpControllerPreAuthenticatedGatewaySecurityTokenFilter gatewaySecurityTokenFilter = new HttpControllerPreAuthenticatedGatewaySecurityTokenFilter(
+                tenantConfigurationManagement, tenantAware, systemSecurityContext);
+        gatewaySecurityTokenFilter.setAuthenticationManager(authenticationManager);
+        gatewaySecurityTokenFilter.setCheckForPrincipalChanges(true);
+        gatewaySecurityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
 
-            final HttpControllerPreAuthenticatedGatewaySecurityTokenFilter gatewaySecurityTokenFilter = new HttpControllerPreAuthenticatedGatewaySecurityTokenFilter(
-                    tenantConfigurationManagement, tenantAware, systemSecurityContext);
-            gatewaySecurityTokenFilter.setAuthenticationManager(authenticationManager);
-            gatewaySecurityTokenFilter.setCheckForPrincipalChanges(true);
-            gatewaySecurityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
-
-            final HttpControllerPreAuthenticateAnonymousDownloadFilter controllerAnonymousDownloadFilter = new HttpControllerPreAuthenticateAnonymousDownloadFilter(
-                    tenantConfigurationManagement, tenantAware, systemSecurityContext);
-            controllerAnonymousDownloadFilter.setAuthenticationManager(authenticationManager);
-            controllerAnonymousDownloadFilter.setCheckForPrincipalChanges(true);
-            controllerAnonymousDownloadFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
-
-            http
-                    .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())
-                    .anonymous(AbstractHttpConfigurer::disable)
-                    .addFilter(securityHeaderFilter)
-                    .addFilter(securityTokenFilter)
-                    .addFilter(gatewaySecurityTokenFilter)
-                    .addFilter(controllerAnonymousDownloadFilter)
-                    .exceptionHandling(configurer -> configurer.authenticationEntryPoint(
-                            (request, response, authException) -> response.setStatus(HttpStatus.UNAUTHORIZED.value())))
-                    .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        }
+        http
+                .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())
+                .anonymous(AbstractHttpConfigurer::disable)
+                .addFilter(securityHeaderFilter)
+                .addFilter(securityTokenFilter)
+                .addFilter(gatewaySecurityTokenFilter)
+                .exceptionHandling(configurer -> configurer.authenticationEntryPoint(
+                        (request, response, authException) -> response.setStatus(HttpStatus.UNAUTHORIZED.value())))
+                .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         MdcHandler.Filter.addMdcFilter(http);
 

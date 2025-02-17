@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.security.controller.ControllerPreAuthenticateSecurityTokenFilter;
+import org.eclipse.hawkbit.security.controller.ControllerPreAuthenticatedSecurityTokenFilter;
 import org.eclipse.hawkbit.security.controller.PreAuthenticationFilter;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
@@ -56,7 +56,7 @@ public class HttpControllerPreAuthenticateSecurityTokenFilter extends AbstractHt
 
     @Override
     protected PreAuthenticationFilter createControllerAuthenticationFilter() {
-        return new ControllerPreAuthenticateSecurityTokenFilter(tenantConfigurationManagement, controllerManagement,
+        return new ControllerPreAuthenticatedSecurityTokenFilter(tenantConfigurationManagement, controllerManagement,
                 tenantAware, systemSecurityContext);
     }
 
