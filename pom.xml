@@ -132,10 +132,10 @@
 
     <modules>
         <module>hawkbit-core</module>
-        <module>hawkbit-rest-core</module>
-        <module>hawkbit-security</module>
+        <module>hawkbit-security-core</module>
         <module>hawkbit-artifact</module>
         <module>hawkbit-repository</module>
+        <module>hawkbit-rest-core</module>
         <module>hawkbit-autoconfigure</module>
 
         <module>hawkbit-mgmt</module>
@@ -144,7 +144,6 @@
         <module>hawkbit-monolith</module>
 
         <module>hawkbit-simple-ui</module>
-
         <module>hawkbit-sdk</module>
 
         <module>hawkbit-test-report</module>
