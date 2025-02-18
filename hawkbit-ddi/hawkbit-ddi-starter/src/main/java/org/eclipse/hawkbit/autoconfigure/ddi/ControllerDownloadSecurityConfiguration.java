@@ -12,10 +12,6 @@ package org.eclipse.hawkbit.autoconfigure.ddi;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.autoconfigure.ddi.security.ControllerTenantAwareAuthenticationDetailsSource;
-import org.eclipse.hawkbit.autoconfigure.ddi.security.HttpControllerPreAuthenticateSecurityTokenFilter;
-import org.eclipse.hawkbit.autoconfigure.ddi.security.HttpControllerPreAuthenticatedGatewaySecurityTokenFilter;
-import org.eclipse.hawkbit.autoconfigure.ddi.security.HttpControllerPreAuthenticatedSecurityHeaderFilter;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -25,7 +21,15 @@ import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.MdcHandler;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.security.controller.AuthenticationFilters;
+import org.eclipse.hawkbit.security.controller.Authenticator;
+import org.eclipse.hawkbit.security.controller.ControllerSecurityToken;
+import org.eclipse.hawkbit.security.controller.GatewayTokenAuthenticator;
+import org.eclipse.hawkbit.security.controller.SecurityHeaderAuthenticator;
+import org.eclipse.hawkbit.security.controller.SecurityTokenAuthenticator;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -33,11 +37,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
 /**
  * Security configuration for the hawkBit server DDI download interface.
@@ -89,8 +94,6 @@ class ControllerDownloadSecurityConfiguration {
     @Bean
     @Order(300) // higher priority than HawkBit DDI security, so that the DDI DL security is applied first
     protected SecurityFilterChain filterChainDDIDL(final HttpSecurity http) throws Exception {
-        final AuthenticationManager authenticationManager = ControllerSecurityConfiguration.setAuthenticationManager(http, ddiSecurityConfiguration);
-
         http
                 .securityMatcher(DDI_DL_ANT_MATCHER)
                 .csrf(AbstractHttpConfigurer::disable);
@@ -99,34 +102,27 @@ class ControllerDownloadSecurityConfiguration {
             http.requiresChannel(crmRegistry -> crmRegistry.anyRequest().requiresSecure());
         }
 
-        final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
-
-        final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
-                ddiSecurityConfiguration.getRp().getCnHeader(),
-                ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(), tenantConfigurationManagement,
-                tenantAware, systemSecurityContext);
-        securityHeaderFilter.setAuthenticationManager(authenticationManager);
-        securityHeaderFilter.setCheckForPrincipalChanges(true);
-        securityHeaderFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
-
-        final HttpControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new HttpControllerPreAuthenticateSecurityTokenFilter(
-                tenantConfigurationManagement, tenantAware, controllerManagement, systemSecurityContext);
-        securityTokenFilter.setAuthenticationManager(authenticationManager);
-        securityTokenFilter.setCheckForPrincipalChanges(true);
-        securityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
-
-        final HttpControllerPreAuthenticatedGatewaySecurityTokenFilter gatewaySecurityTokenFilter = new HttpControllerPreAuthenticatedGatewaySecurityTokenFilter(
-                tenantConfigurationManagement, tenantAware, systemSecurityContext);
-        gatewaySecurityTokenFilter.setAuthenticationManager(authenticationManager);
-        gatewaySecurityTokenFilter.setCheckForPrincipalChanges(true);
-        gatewaySecurityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
-
         http
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())
                 .anonymous(AbstractHttpConfigurer::disable)
-                .addFilter(securityHeaderFilter)
-                .addFilter(securityTokenFilter)
-                .addFilter(gatewaySecurityTokenFilter)
+                .addFilterBefore(new AuthenticationFilters.SecurityHeaderAuthenticationFilter(
+                        new SecurityHeaderAuthenticator(
+                                tenantConfigurationManagement, tenantAware, systemSecurityContext,
+                                ddiSecurityConfiguration.getRp().getCnHeader(), ddiSecurityConfiguration.getRp().getSslIssuerHashHeader()),
+                        ddiSecurityConfiguration), AuthorizationFilter.class)
+                .addFilterBefore(new AuthenticationFilters.SecurityTokenAuthenticationFilter(
+                        new SecurityTokenAuthenticator(
+                                tenantConfigurationManagement, tenantAware, systemSecurityContext,
+                                controllerManagement),
+                        ddiSecurityConfiguration), AuthorizationFilter.class)
+                .addFilterBefore(new AuthenticationFilters.GatewayTokenAuthenticationFilter(
+                        new GatewayTokenAuthenticator(
+                                tenantConfigurationManagement, tenantAware, systemSecurityContext),
+                        ddiSecurityConfiguration), AuthorizationFilter.class)
+                .addFilterBefore(new AuthenticationFilters.AbstractAuthenticationFilter(
+                        new AnonymousAuthenticator(
+                                tenantConfigurationManagement, tenantAware, systemSecurityContext),
+                        ddiSecurityConfiguration) {}, AuthorizationFilter.class)
                 .exceptionHandling(configurer -> configurer.authenticationEntryPoint(
                         (request, response, authException) -> response.setStatus(HttpStatus.UNAUTHORIZED.value())))
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -134,5 +130,30 @@ class ControllerDownloadSecurityConfiguration {
         MdcHandler.Filter.addMdcFilter(http);
 
         return http.build();
+    }
+
+    @Slf4j
+    private static class AnonymousAuthenticator extends Authenticator.AbstractAuthenticator {
+
+        protected AnonymousAuthenticator(
+                final TenantConfigurationManagement tenantConfigurationManagement,
+                final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
+            super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
+        }
+
+        @Override
+        public Authentication authenticate(final ControllerSecurityToken controllerSecurityToken) {
+            return isEnabled(controllerSecurityToken) ? authenticatedController(controllerSecurityToken.getTenant(), null) : null;
+        }
+
+        @Override
+        protected String getTenantConfigurationKey() {
+            return TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED;
+        }
+
+        @Override
+        public Logger log() {
+            return log;
+        }
     }
 }

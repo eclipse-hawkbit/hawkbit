@@ -34,7 +34,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
-            <artifactId>hawkbit-security-controller</artifactId>
+            <artifactId>hawkbit-security-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

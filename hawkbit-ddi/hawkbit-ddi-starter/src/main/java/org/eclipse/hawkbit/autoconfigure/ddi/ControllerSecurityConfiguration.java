@@ -12,10 +12,6 @@ package org.eclipse.hawkbit.autoconfigure.ddi;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.hawkbit.autoconfigure.ddi.security.ControllerTenantAwareAuthenticationDetailsSource;
-import org.eclipse.hawkbit.autoconfigure.ddi.security.HttpControllerPreAuthenticateSecurityTokenFilter;
-import org.eclipse.hawkbit.autoconfigure.ddi.security.HttpControllerPreAuthenticatedGatewaySecurityTokenFilter;
-import org.eclipse.hawkbit.autoconfigure.ddi.security.HttpControllerPreAuthenticatedSecurityHeaderFilter;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -25,7 +21,10 @@ import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.MdcHandler;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.security.controller.PreAuthTokenSourceTrustAuthenticationProvider;
+import org.eclipse.hawkbit.security.controller.AuthenticationFilters;
+import org.eclipse.hawkbit.security.controller.GatewayTokenAuthenticator;
+import org.eclipse.hawkbit.security.controller.SecurityHeaderAuthenticator;
+import org.eclipse.hawkbit.security.controller.SecurityTokenAuthenticator;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,13 +33,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
 /**
  * Security configuration for the hawkBit server DDI interface.
@@ -93,8 +91,6 @@ class ControllerSecurityConfiguration {
     @Bean
     @Order(301)
     protected SecurityFilterChain filterChainDDI(final HttpSecurity http) throws Exception {
-        final AuthenticationManager authenticationManager = setAuthenticationManager(http, ddiSecurityConfiguration);
-
         http
                 .securityMatcher(DDI_ANT_MATCHERS)
                 .csrf(AbstractHttpConfigurer::disable);
@@ -103,34 +99,22 @@ class ControllerSecurityConfiguration {
             http.requiresChannel(crmRegistry -> crmRegistry.anyRequest().requiresSecure());
         }
 
-        final ControllerTenantAwareAuthenticationDetailsSource authenticationDetailsSource = new ControllerTenantAwareAuthenticationDetailsSource();
-
-        final HttpControllerPreAuthenticatedSecurityHeaderFilter securityHeaderFilter = new HttpControllerPreAuthenticatedSecurityHeaderFilter(
-                ddiSecurityConfiguration.getRp().getCnHeader(),
-                ddiSecurityConfiguration.getRp().getSslIssuerHashHeader(), tenantConfigurationManagement,
-                tenantAware, systemSecurityContext);
-        securityHeaderFilter.setAuthenticationManager(authenticationManager);
-        securityHeaderFilter.setCheckForPrincipalChanges(true);
-        securityHeaderFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
-
-        final HttpControllerPreAuthenticateSecurityTokenFilter securityTokenFilter = new HttpControllerPreAuthenticateSecurityTokenFilter(
-                tenantConfigurationManagement, tenantAware, controllerManagement, systemSecurityContext);
-        securityTokenFilter.setAuthenticationManager(authenticationManager);
-        securityTokenFilter.setCheckForPrincipalChanges(true);
-        securityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
-
-        final HttpControllerPreAuthenticatedGatewaySecurityTokenFilter gatewaySecurityTokenFilter = new HttpControllerPreAuthenticatedGatewaySecurityTokenFilter(
-                tenantConfigurationManagement, tenantAware, systemSecurityContext);
-        gatewaySecurityTokenFilter.setAuthenticationManager(authenticationManager);
-        gatewaySecurityTokenFilter.setCheckForPrincipalChanges(true);
-        gatewaySecurityTokenFilter.setAuthenticationDetailsSource(authenticationDetailsSource);
-
         http
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())
                 .anonymous(AbstractHttpConfigurer::disable)
-                .addFilter(securityHeaderFilter)
-                .addFilter(securityTokenFilter)
-                .addFilter(gatewaySecurityTokenFilter)
+                .addFilterBefore(new AuthenticationFilters.SecurityHeaderAuthenticationFilter(
+                        new SecurityHeaderAuthenticator(
+                                tenantConfigurationManagement, tenantAware,
+                                systemSecurityContext, ddiSecurityConfiguration.getRp().getCnHeader(), ddiSecurityConfiguration.getRp().getSslIssuerHashHeader()
+                        ), ddiSecurityConfiguration), AuthorizationFilter.class)
+                .addFilterBefore(new AuthenticationFilters.SecurityTokenAuthenticationFilter(
+                        new SecurityTokenAuthenticator(
+                                tenantConfigurationManagement, tenantAware,
+                                systemSecurityContext, controllerManagement), ddiSecurityConfiguration), AuthorizationFilter.class)
+                .addFilterBefore(new AuthenticationFilters.GatewayTokenAuthenticationFilter(
+                        new GatewayTokenAuthenticator(
+                                tenantConfigurationManagement, tenantAware,
+                                systemSecurityContext), ddiSecurityConfiguration), AuthorizationFilter.class)
                 .exceptionHandling(configurer -> configurer.authenticationEntryPoint(
                         (request, response, authException) -> response.setStatus(HttpStatus.UNAUTHORIZED.value())))
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -138,18 +122,5 @@ class ControllerSecurityConfiguration {
         MdcHandler.Filter.addMdcFilter(http);
 
         return http.build();
-    }
-
-    static AuthenticationManager setAuthenticationManager(final HttpSecurity http, final DdiSecurityProperties ddiSecurityConfiguration)
-            throws Exception {
-        // configure authentication manager
-        final AuthenticationManager authenticationManager =
-                http
-                        .getSharedObject(AuthenticationManagerBuilder.class)
-                        .authenticationProvider(
-                                new PreAuthTokenSourceTrustAuthenticationProvider(ddiSecurityConfiguration.getRp().getTrustedIPs()))
-                        .build();
-        http.authenticationManager(authenticationManager);
-        return authenticationManager;
     }
 }
