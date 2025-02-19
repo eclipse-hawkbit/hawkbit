@@ -42,8 +42,6 @@ class SecurityTokenAuthenticatorTest {
     private static final String SECURITY_TOKEN = "test-sec-token";
     private static final String UNKNOWN_TOKEN = "unknown";
 
-    private static final TenantConfigurationValue<String> CONFIG_VALUE_GW_TOKEN = TenantConfigurationValue
-            .<String> builder().value(SECURITY_TOKEN).build();
     private static final TenantConfigurationValue<Boolean> CONFIG_VALUE_ENABLED = TenantConfigurationValue
             .<Boolean> builder().value(true).build();
     private static final TenantConfigurationValue<Boolean> CONFIG_VALUE_DISABLED = TenantConfigurationValue
