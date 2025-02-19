@@ -99,7 +99,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration(Map<String, T> configurations) {
+    public <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration(final Map<String, T> configurations) {
         // Register a callback to be invoked after the transaction is committed - for cache eviction
         afterCommitExecutor.afterCommit(() -> {
             final Cache cache = cacheManager.getCache("tenantConfiguration");
