@@ -105,10 +105,6 @@ public class TenantConfigurationProperties {
          */
         public static final String POLLING_OVERDUE_TIME_INTERVAL = "pollingOverdueTime";
         /**
-         * If anonymous downloads are enabled
-         */
-        public static final String ANONYMOUS_DOWNLOAD_MODE_ENABLED = "anonymous.download.enabled";
-        /**
          * Represents setting if approval for a rollout is needed.
          */
         public static final String ROLLOUT_APPROVAL_ENABLED = "rollout.approval.enabled";

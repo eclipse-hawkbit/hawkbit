@@ -22,14 +22,10 @@ import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.MdcHandler;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.security.controller.AuthenticationFilters;
-import org.eclipse.hawkbit.security.controller.Authenticator;
-import org.eclipse.hawkbit.security.controller.ControllerSecurityToken;
 import org.eclipse.hawkbit.security.controller.GatewayTokenAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityHeaderAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityTokenAuthenticator;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -119,10 +115,6 @@ class ControllerDownloadSecurityConfiguration {
                         new GatewayTokenAuthenticator(
                                 tenantConfigurationManagement, tenantAware, systemSecurityContext),
                         ddiSecurityConfiguration), AuthorizationFilter.class)
-                .addFilterBefore(new AuthenticationFilters.AbstractAuthenticationFilter(
-                        new AnonymousAuthenticator(
-                                tenantConfigurationManagement, tenantAware, systemSecurityContext),
-                        ddiSecurityConfiguration) {}, AuthorizationFilter.class)
                 .exceptionHandling(configurer -> configurer.authenticationEntryPoint(
                         (request, response, authException) -> response.setStatus(HttpStatus.UNAUTHORIZED.value())))
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -130,32 +122,5 @@ class ControllerDownloadSecurityConfiguration {
         MdcHandler.Filter.addMdcFilter(http);
 
         return http.build();
-    }
-
-    @Slf4j
-    private static class AnonymousAuthenticator extends Authenticator.AbstractAuthenticator {
-
-        protected AnonymousAuthenticator(
-                final TenantConfigurationManagement tenantConfigurationManagement,
-                final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
-            super(tenantConfigurationManagement, tenantAware, systemSecurityContext);
-        }
-
-        @Override
-        public Authentication authenticate(final ControllerSecurityToken controllerSecurityToken) {
-            return isEnabled(controllerSecurityToken)
-                    ? authenticatedController(controllerSecurityToken.getTenant(), controllerSecurityToken.getControllerId())
-                    : null;
-        }
-
-        @Override
-        protected String getTenantConfigurationKey() {
-            return TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED;
-        }
-
-        @Override
-        public Logger log() {
-            return log;
-        }
     }
 }
