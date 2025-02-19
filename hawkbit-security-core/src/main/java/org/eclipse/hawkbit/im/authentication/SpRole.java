@@ -55,14 +55,10 @@ public final class SpRole {
             TENANT_ADMIN + IMPLIES + ROLLOUT_ADMIN + LINE_BREAK +
             TENANT_ADMIN + IMPLIES + SpPermission.TENANT_CONFIGURATION + LINE_BREAK;
 
-    public static final String SYSTEM_ADMIN_HIERARCHY =
-            SpPermission.SYSTEM_ADMIN + IMPLIES + TENANT_ADMIN + LINE_BREAK;
-
     public static final String DEFAULT_ROLE_HIERARCHY =
             TARGET_ADMIN_HIERARCHY +
             REPOSITORY_ADMIN_HIERARCHY +
             ROLLOUT_ADMIN_HIERARCHY +
             TENANT_CONFIGURATION_HIERARCHY +
-            TENANT_ADMIN_HIERARCHY +
-            SYSTEM_ADMIN_HIERARCHY;
+            TENANT_ADMIN_HIERARCHY;
 }
