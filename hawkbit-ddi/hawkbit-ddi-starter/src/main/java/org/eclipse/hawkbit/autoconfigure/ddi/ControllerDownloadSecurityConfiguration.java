@@ -143,7 +143,9 @@ class ControllerDownloadSecurityConfiguration {
 
         @Override
         public Authentication authenticate(final ControllerSecurityToken controllerSecurityToken) {
-            return isEnabled(controllerSecurityToken) ? authenticatedController(controllerSecurityToken.getTenant(), null) : null;
+            return isEnabled(controllerSecurityToken)
+                    ? authenticatedController(controllerSecurityToken.getTenant(), controllerSecurityToken.getControllerId())
+                    : null;
         }
 
         @Override

@@ -72,8 +72,6 @@ public class AuthenticationFilters {
          */
         private static final String CONTROLLER_REQUEST_ANT_PATTERN =
                 "/{" + TENANT_PLACE_HOLDER + "}/controller/v1/{" + CONTROLLER_ID_PLACE_HOLDER + "}/**";
-        private static final String CONTROLLER_DL_REQUEST_ANT_PATTERN =
-                "/{" + TENANT_PLACE_HOLDER + "}/controller/artifacts/v1/**";
 
         private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
         private final AntPathMatcher pathExtractor = new AntPathMatcher();
@@ -125,13 +123,6 @@ public class AuthenticationFilters {
                 final String tenant = UrlUtils.decodeUriValue(extractUriTemplateVariables.get(TENANT_PLACE_HOLDER));
                 authenticator.log().trace("Parsed tenant {} and controllerId {} from path request {}", tenant, controllerId, requestURI);
                 return createTenantSecurityTokenVariables(request, tenant, controllerId);
-            } else if (pathExtractor.match(request.getContextPath() + CONTROLLER_DL_REQUEST_ANT_PATTERN, requestURI)) {
-                authenticator.log().debug("retrieving path variables from URI request {}", requestURI);
-                final Map<String, String> extractUriTemplateVariables = pathExtractor.extractUriTemplateVariables(
-                        request.getContextPath() + CONTROLLER_DL_REQUEST_ANT_PATTERN, requestURI);
-                final String tenant = UrlUtils.decodeUriValue(extractUriTemplateVariables.get(TENANT_PLACE_HOLDER));
-                authenticator.log().trace("Parsed tenant {} from path request {}", tenant, requestURI);
-                return createTenantSecurityTokenVariables(request, tenant, "anonymous");
             } else {
                 authenticator.log().trace("request {} does not match the path pattern {}, request gets ignored", requestURI, CONTROLLER_REQUEST_ANT_PATTERN);
                 return null;
