@@ -23,6 +23,10 @@
     <artifactId>hawkbit-ddi-api</artifactId>
     <name>hawkBit :: DDI :: REST API</name>
 
+    <properties>
+        <java.version>${java.client.version}</java.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
