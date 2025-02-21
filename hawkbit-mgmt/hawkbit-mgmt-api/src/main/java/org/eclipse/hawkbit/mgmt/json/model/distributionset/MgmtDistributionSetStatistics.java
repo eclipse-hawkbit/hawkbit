@@ -15,7 +15,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -32,13 +31,12 @@ public class MgmtDistributionSetStatistics {
 
     private static final String TOTAL = "total";
 
-    @JsonProperty("actions")
-    private Map<String, Long> totalActionsPerStatus;
+    // totalActionsPerStatus
+    private Map<String, Long> actions;
 
-    @JsonProperty("rollouts")
-    private Map<String, Long> totalRolloutsPerStatus;
+    // totalRolloutsPerStatus
+    private Map<String, Long> rollouts;
 
-    @JsonProperty
     private Long totalAutoAssignments;
 
     public static class Builder {
@@ -71,8 +69,8 @@ public class MgmtDistributionSetStatistics {
 
         public MgmtDistributionSetStatistics build() {
             MgmtDistributionSetStatistics statistics = new MgmtDistributionSetStatistics();
-            statistics.totalActionsPerStatus = calculateTotalWithStatus(totalActionsPerStatus);
-            statistics.totalRolloutsPerStatus = calculateTotalWithStatus(totalRolloutsPerStatus);
+            statistics.actions = calculateTotalWithStatus(totalActionsPerStatus);
+            statistics.rollouts = calculateTotalWithStatus(totalRolloutsPerStatus);
             statistics.totalAutoAssignments = calculateTotalAutoAssignments();
             return statistics;
         }

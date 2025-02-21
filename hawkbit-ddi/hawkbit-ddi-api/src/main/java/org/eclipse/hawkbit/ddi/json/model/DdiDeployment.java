@@ -14,23 +14,18 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.Data;
 
 /**
  * Detailed update action information.
  */
-@NoArgsConstructor // needed for json create
-@Getter
-@EqualsAndHashCode
-@ToString
+@Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiDeployment {
@@ -38,22 +33,21 @@ public class DdiDeployment {
     @Schema(description = """
             Handling for the download part of the provisioning process ('skip': do not download yet, 'attempt': server asks
             to download, 'forced': server requests immediate download)""")
-    private HandlingType download;
+    private final HandlingType download;
 
     @Schema(description = """
             Handling for the update part of the provisioning process ('skip': do not update yet,
             'attempt': server asks to update, 'forced': server requests immediate update)""")
-    private HandlingType update;
+    private final HandlingType update;
 
-    @JsonProperty("chunks")
     @NotNull
     @Schema(description = "Software chunks of an update. In server mapped by Software Module")
-    private List<DdiChunk> chunks;
+    private final List<DdiChunk> chunks;
 
     @Schema(description = """
             Separation of download and installation by defining a maintenance window for the installation. Status shows if
             currently in a window""")
-    private DdiMaintenanceWindowStatus maintenanceWindow;
+    private final DdiMaintenanceWindowStatus maintenanceWindow;
 
     /**
      * Constructor.
@@ -66,9 +60,12 @@ public class DdiDeployment {
      *         and the update can progress) or 'unavailable' (implying that maintenance window is not available now and update should not
      *         be attempted). If there is no maintenance schedule defined, the parameter is null.
      */
+    @JsonCreator
     public DdiDeployment(
-            final HandlingType download, final HandlingType update, final List<DdiChunk> chunks,
-            final DdiMaintenanceWindowStatus maintenanceWindow) {
+            @JsonProperty("download") final HandlingType download,
+            @JsonProperty("update") final HandlingType update,
+            @JsonProperty(value = "chunks", required = true) final List<DdiChunk> chunks,
+            @JsonProperty("maintenanceWindow") final DdiMaintenanceWindowStatus maintenanceWindow) {
         this.download = download;
         this.update = update;
         this.chunks = chunks;

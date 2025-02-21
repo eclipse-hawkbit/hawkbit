@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -187,14 +188,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     protected DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(
             final Target target, final Long actionId,
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
-        final DmfDownloadAndUpdateRequest request = new DmfDownloadAndUpdateRequest();
-        request.setActionId(actionId);
-        request.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
-
-        if (softwareModules != null) {
-            softwareModules.entrySet().forEach(entry -> request.addSoftwareModule(convertToAmqpSoftwareModule(target, entry)));
-        }
-        return request;
+        return new DmfDownloadAndUpdateRequest(
+                actionId,
+                systemSecurityContext.runAsSystem(target::getSecurityToken),
+                convertToAmqpSoftwareModules(target, softwareModules));
     }
 
     /**
@@ -264,9 +261,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final DmfActionRequest actionRequest = new DmfActionRequest();
-        actionRequest.setActionId(actionId);
-
+        final DmfActionRequest actionRequest = new DmfActionRequest(actionId);
         final Message message = getMessageConverter().toMessage(
                 actionRequest,
                 createConnectorMessagePropertiesEvent(tenant, controllerId, EventTopic.CANCEL_DOWNLOAD));
@@ -275,25 +270,15 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     protected DmfTarget convertToDmfTarget(final Target target, final Long actionId) {
-        final DmfTarget dmfTarget = new DmfTarget();
-        dmfTarget.setActionId(actionId);
-        dmfTarget.setControllerId(target.getControllerId());
-        dmfTarget.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
-        return dmfTarget;
+        return new DmfTarget(actionId, target.getControllerId(), systemSecurityContext.runAsSystem(target::getSecurityToken));
     }
 
     protected DmfConfirmRequest createConfirmRequest(
             final Target target, final Long actionId, final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
-        final DmfConfirmRequest request = new DmfConfirmRequest();
-        request.setActionId(actionId);
-        request.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
-
-        //Software modules can be filtered in the future exposing only the needed.
-        if (softwareModules != null) {
-            softwareModules.entrySet().forEach(entry ->
-                    request.addSoftwareModule(convertToAmqpSoftwareModule(target, entry)));
-        }
-        return request;
+        return new DmfConfirmRequest(
+                actionId,
+                systemSecurityContext.runAsSystem(target::getSecurityToken),
+                convertToAmqpSoftwareModules(target, softwareModules));
     }
 
     void sendMultiActionRequestToTarget(
@@ -304,29 +289,26 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final DmfMultiActionRequest multiActionRequest = new DmfMultiActionRequest();
-        actions.forEach(action -> {
-            final DmfActionRequest actionRequest = createDmfActionRequest(
-                    target, action,
-                    action.getDistributionSet().getModules().stream()
-                            .collect(Collectors.toMap(Function.identity(), module -> {
-                                final List<SoftwareModuleMetadata> softwareModuleMetadata = getSoftwareModuleMetaData.apply(module);
-                                return softwareModuleMetadata == null ? Collections.emptyList() : softwareModuleMetadata;
-                            })));
-            final int weight = deploymentManagement.getWeightConsideringDefault(action);
-            multiActionRequest.addElement(getEventTypeForAction(action), actionRequest, weight);
-        });
+        final DmfMultiActionRequest multiActionRequest = new DmfMultiActionRequest(
+                actions.stream()
+                        .map(action -> {
+                            final DmfActionRequest actionRequest = createDmfActionRequest(
+                                    target, action,
+                                    action.getDistributionSet().getModules().stream()
+                                            .collect(Collectors.toMap(Function.identity(), module -> {
+                                                final List<SoftwareModuleMetadata> softwareModuleMetadata = getSoftwareModuleMetaData.apply(
+                                                        module);
+                                                return softwareModuleMetadata == null ? Collections.emptyList() : softwareModuleMetadata;
+                                            })));
+                            final int weight = deploymentManagement.getWeightConsideringDefault(action);
+                            return new DmfMultiActionRequest.DmfMultiActionElement(getEventTypeForAction(action), actionRequest, weight);
+                        })
+                        .toList());
 
         final Message message = getMessageConverter().toMessage(
                 multiActionRequest,
                 createConnectorMessagePropertiesEvent(target.getTenant(), target.getControllerId(), EventTopic.MULTI_ACTION));
         amqpSenderService.sendMessage(message, targetAddress);
-    }
-
-    private static DmfActionRequest createPlainActionRequest(final Action action) {
-        final DmfActionRequest actionRequest = new DmfActionRequest();
-        actionRequest.setActionId(action.getId());
-        return actionRequest;
     }
 
     /**
@@ -488,7 +470,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final Target target, final Action action,
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
         if (action.isCancelingOrCanceled()) {
-            return createPlainActionRequest(action);
+            return new DmfActionRequest(action.getId());
         } else if (action.isWaitingConfirmation()) {
             return createConfirmRequest(target, action.getId(), softwareModules);
         }
@@ -553,21 +535,24 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         amqpSenderService.sendMessage(message, URI.create(targetAddress));
     }
 
+    private List<DmfSoftwareModule> convertToAmqpSoftwareModules(
+            final Target target, final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
+        return Optional.ofNullable(softwareModules)
+                .map(Map::entrySet)
+                .map(Set::stream)
+                .map(stream -> stream.map(entry -> convertToAmqpSoftwareModule(target, entry)).toList())
+                .orElse(null);
+    }
+
     private DmfSoftwareModule convertToAmqpSoftwareModule(
-            final Target target,
-            final Entry<SoftwareModule, List<SoftwareModuleMetadata>> entry) {
-        final DmfSoftwareModule amqpSoftwareModule = new DmfSoftwareModule();
-        amqpSoftwareModule.setModuleId(entry.getKey().getId());
-        amqpSoftwareModule.setModuleType(entry.getKey().getType().getKey());
-        amqpSoftwareModule.setModuleVersion(entry.getKey().getVersion());
-        amqpSoftwareModule.setEncrypted(entry.getKey().isEncrypted() ? Boolean.TRUE : null);
-        amqpSoftwareModule.setArtifacts(convertArtifacts(target, entry.getKey().getArtifacts()));
-
-        if (!CollectionUtils.isEmpty(entry.getValue())) {
-            amqpSoftwareModule.setMetadata(convertMetadata(entry.getValue()));
-        }
-
-        return amqpSoftwareModule;
+            final Target target, final Entry<SoftwareModule, List<SoftwareModuleMetadata>> entry) {
+        return new DmfSoftwareModule(
+                entry.getKey().getId(),
+                entry.getKey().getType().getKey(),
+                entry.getKey().getVersion(),
+                entry.getKey().isEncrypted() ? Boolean.TRUE : null,
+                convertArtifacts(target, entry.getKey().getArtifacts()),
+                CollectionUtils.isEmpty(entry.getValue()) ? null :convertMetadata(entry.getValue()));
     }
 
     private List<DmfMetadata> convertMetadata(final List<SoftwareModuleMetadata> metadata) {
@@ -584,24 +569,22 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     private DmfArtifact convertArtifact(final Target target, final Artifact localArtifact) {
-        final DmfArtifact artifact = new DmfArtifact();
-
         final TenantMetaData tenantMetadata = systemManagement.getTenantMetadataWithoutDetails();
-        artifact.setUrls(artifactUrlHandler
-                .getUrls(new URLPlaceholder(
-                                tenantMetadata.getTenant(), tenantMetadata.getId(), target.getControllerId(), target.getId(),
-                                new SoftwareData(
-                                        localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(), localArtifact.getId(),
-                                        localArtifact.getSha1Hash())),
-                        ApiType.DMF)
-                .stream()
-                .collect(Collectors.toMap(ArtifactUrl::getProtocol, ArtifactUrl::getRef)));
-
-        artifact.setFilename(localArtifact.getFilename());
-        artifact.setHashes(new DmfArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()));
-        artifact.setSize(localArtifact.getSize());
-        artifact.setLastModified(localArtifact.getLastModifiedAt());
-        return artifact;
+        return new DmfArtifact(
+                localArtifact.getFilename(),
+                new DmfArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()),
+                localArtifact.getSize(),
+                localArtifact.getLastModifiedAt(),
+                artifactUrlHandler
+                        .getUrls(new URLPlaceholder(
+                                        tenantMetadata.getTenant(), tenantMetadata.getId(), target.getControllerId(), target.getId(),
+                                        new SoftwareData(
+                                                localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(), localArtifact.getId(),
+                                                localArtifact.getSha1Hash())),
+                                ApiType.DMF)
+                        .stream()
+                        .collect(Collectors.toMap(ArtifactUrl::getProtocol, ArtifactUrl::getRef))
+        );
     }
 
     private Map<SoftwareModule, List<SoftwareModuleMetadata>> getSoftwareModulesWithMetadata(final DistributionSet distributionSet) {
@@ -622,18 +605,16 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 .map(t -> convertToDmfTarget(t, actions.get(t.getControllerId()).getId()))
                 .toList();
 
-        final DmfBatchDownloadAndUpdateRequest batchRequest = new DmfBatchDownloadAndUpdateRequest();
-        batchRequest.setTimestamp(System.currentTimeMillis());
-        batchRequest.addTargets(dmfTargets);
-
-        // due to the fact that all targets in a batch use the same set of
-        // software modules we don't generate
-        // target-specific urls
+        // due to the fact that all targets in a batch use the same set of software modules we don't generate target-specific urls
         final Target firstTarget = targets.get(0);
-        if (modules != null) {
-            modules.entrySet().forEach(entry ->
-                    batchRequest.addSoftwareModule(convertToAmqpSoftwareModule(firstTarget, entry)));
-        }
+        final DmfBatchDownloadAndUpdateRequest batchRequest = new DmfBatchDownloadAndUpdateRequest(
+                System.currentTimeMillis(),
+                dmfTargets,
+                Optional.ofNullable(modules)
+                        .map(Map::entrySet)
+                        .map(Set::stream)
+                        .map(stream -> stream.map(entry -> convertToAmqpSoftwareModule(firstTarget, entry)).toList())
+                        .orElse(null));
 
         // we use only the first action when constructing message as Tenant and action type are the same
         // since all actions have the same trigger

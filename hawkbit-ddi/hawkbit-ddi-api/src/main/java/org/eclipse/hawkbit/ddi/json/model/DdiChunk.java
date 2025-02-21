@@ -14,54 +14,43 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.Data;
 
 /**
  * Deployment chunks.
  */
-@NoArgsConstructor // needed for json create
-@Getter
-@EqualsAndHashCode
-@ToString
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiChunk {
 
-    @JsonProperty("part")
     @NotNull
     @Schema(description = "Type of the chunk, e.g. firmware, bundle, app. In update server mapped to Software Module Type")
-    private String part;
+    private final String part;
 
-    @JsonProperty("version")
     @NotNull
     @Schema(description = "Software version of the chunk", example = "1.2.0")
-    private String version;
+    private final String version;
 
-    @JsonProperty("name")
     @NotNull
     @Schema(description = "Name of the chunk")
-    private String name;
+    private final String name;
 
-    @JsonProperty("encrypted")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Schema(description = "If encrypted")
-    private Boolean encrypted;
+    private final Boolean encrypted;
 
-    @JsonProperty("artifacts")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Schema(description = "List of artifacts")
-    private List<DdiArtifact> artifacts;
+    private final List<DdiArtifact> artifacts;
 
-    @JsonProperty("metadata")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Schema(description = "Meta data of the respective software module that has been marked with 'target visible'")
-    private List<DdiMetadata> metadata;
+    private final List<DdiMetadata> metadata;
 
     /**
      * Constructor.
@@ -73,9 +62,14 @@ public class DdiChunk {
      * @param artifacts download information
      * @param metadata optional as additional information for the target/device
      */
+    @JsonCreator
     public DdiChunk(
-            final String part, final String version, final String name, final Boolean encrypted,
-            final List<DdiArtifact> artifacts, final List<DdiMetadata> metadata) {
+            @JsonProperty("part") final String part,
+            @JsonProperty("version") final String version,
+            @JsonProperty("name") final String name,
+            @JsonProperty("encrypted") final Boolean encrypted,
+            @JsonProperty("artifacts") final List<DdiArtifact> artifacts,
+            @JsonProperty("metadata") final List<DdiMetadata> metadata) {
         this.part = part;
         this.version = version;
         this.name = name;

@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.distributionsettype;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
@@ -23,11 +22,9 @@ import lombok.experimental.Accessors;
 @ToString
 public class MgmtDistributionSetTypeRequestBodyPut {
 
-    @JsonProperty
     @Schema(description = "The description of the entity", example = "Example description")
     private String description;
 
-    @JsonProperty
     @Schema(description = "The colour of the entity", example = "rgb(86,37,99)")
     private String colour;
 }

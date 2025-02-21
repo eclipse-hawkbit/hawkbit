@@ -75,13 +75,13 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
     public SoftwareModuleView(final boolean isParent, final HawkbitMgmtClient hawkbitClient) {
         super(
                 new SoftwareModuleFilter(hawkbitClient),
-                new SelectionGrid.EntityRepresentation<>(MgmtSoftwareModule.class, MgmtSoftwareModule::getModuleId) {
+                new SelectionGrid.EntityRepresentation<>(MgmtSoftwareModule.class, MgmtSoftwareModule::getId) {
 
                     private final SoftwareModuleDetails details = new SoftwareModuleDetails(hawkbitClient);
 
                     @Override
                     protected void addColumns(final Grid<MgmtSoftwareModule> grid) {
-                        grid.addColumn(MgmtSoftwareModule::getModuleId).setHeader(Constants.ID).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getId).setHeader(Constants.ID).setAutoWidth(true);
                         grid.addColumn(MgmtSoftwareModule::getName).setHeader(Constants.NAME).setAutoWidth(true);
                         grid.addColumn(MgmtSoftwareModule::getVersion).setHeader(Constants.VERSION).setAutoWidth(true);
                         grid.addColumn(MgmtSoftwareModule::getTypeName).setHeader(Constants.TYPE).setAutoWidth(true);
@@ -101,7 +101,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
                 isParent ? v -> new CreateDialog(hawkbitClient).result() : null,
                 isParent ? selectionGrid -> {
                     selectionGrid.getSelectedItems().forEach(
-                            module -> hawkbitClient.getSoftwareModuleRestApi().deleteSoftwareModule(module.getModuleId()));
+                            module -> hawkbitClient.getSoftwareModuleRestApi().deleteSoftwareModule(module.getId()));
                     selectionGrid.refreshGrid(false);
                     return CompletableFuture.completedFuture(null);
                 } : null);
@@ -113,11 +113,11 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
     private static SelectionGrid<MgmtArtifact, Long> createArtifactGrid() {
         return new SelectionGrid<>(
-                new SelectionGrid.EntityRepresentation<>(MgmtArtifact.class, MgmtArtifact::getArtifactId) {
+                new SelectionGrid.EntityRepresentation<>(MgmtArtifact.class, MgmtArtifact::getId) {
 
                     @Override
                     protected void addColumns(final Grid<MgmtArtifact> grid) {
-                        grid.addColumn(MgmtArtifact::getArtifactId).setHeader(Constants.ID).setAutoWidth(true);
+                        grid.addColumn(MgmtArtifact::getId).setHeader(Constants.ID).setAutoWidth(true);
                         grid.addColumn(MgmtArtifact::getProvidedFilename).setHeader(Constants.NAME).setAutoWidth(true);
                         grid.addColumn(MgmtArtifact::getSize).setHeader("Size").setAutoWidth(true);
                     }
@@ -196,7 +196,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             artifactGrid.setItems(query -> Optional.ofNullable(
                             hawkbitClient.getSoftwareModuleRestApi()
                                     .getArtifacts(
-                                            softwareModule.getModuleId(), null, null)
+                                            softwareModule.getId(), null, null)
                                     .getBody())
                     .stream().flatMap(Collection::stream)
                     .skip(query.getOffset())
@@ -280,7 +280,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
                         .stream().flatMap(Collection::stream)
                         .findFirst()
                         .orElseThrow()
-                        .getModuleId();
+                        .getId();
                 new AddArtifactsDialog(softwareModuleId, hawkbitClient).open();
             });
         }

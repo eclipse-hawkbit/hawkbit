@@ -68,13 +68,13 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         super(
                 new RolloutFilter(),
                 new SelectionGrid.EntityRepresentation<>(
-                        MgmtRolloutResponseBody.class, MgmtRolloutResponseBody::getRolloutId) {
+                        MgmtRolloutResponseBody.class, MgmtRolloutResponseBody::getId) {
 
                     private final RolloutDetails details = new RolloutDetails(hawkbitClient);
 
                     @Override
                     protected void addColumns(final Grid<MgmtRolloutResponseBody> grid) {
-                        grid.addColumn(MgmtRolloutResponseBody::getRolloutId).setHeader(Constants.ID).setAutoWidth(true);
+                        grid.addColumn(MgmtRolloutResponseBody::getId).setHeader(Constants.ID).setAutoWidth(true);
                         grid.addColumn(MgmtRolloutResponseBody::getName).setHeader(Constants.NAME).setAutoWidth(true);
                         grid.addColumn(MgmtRolloutResponseBody::getTotalGroups).setHeader(Constants.GROUP_COUNT).setAutoWidth(true);
                         grid.addColumn(MgmtRolloutResponseBody::getTotalTargets).setHeader(Constants.TARGET_COUNT).setAutoWidth(true);
@@ -96,7 +96,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 selectionGrid -> new CreateDialog(hawkbitClient).result(),
                 selectionGrid -> {
                     selectionGrid.getSelectedItems().forEach(
-                            rollout -> hawkbitClient.getRolloutRestApi().delete(rollout.getRolloutId()));
+                            rollout -> hawkbitClient.getRolloutRestApi().delete(rollout.getId()));
                     selectionGrid.refreshGrid(false);
                     return CompletableFuture.completedFuture(null);
                 });
@@ -110,7 +110,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
         private Actions(final MgmtRolloutResponseBody rollout, final Grid<MgmtRolloutResponseBody> grid,
                 final HawkbitMgmtClient hawkbitClient) {
-            this.rolloutId = rollout.getRolloutId();
+            this.rolloutId = rollout.getId();
             this.grid = grid;
             this.hawkbitClient = hawkbitClient;
             init(rollout);
@@ -120,28 +120,28 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             if ("READY".equalsIgnoreCase(rollout.getStatus())) {
                 add(Utils.tooltip(new Button(VaadinIcon.START_COG.create()) {{
                     addClickListener(v -> {
-                        hawkbitClient.getRolloutRestApi().start(rollout.getRolloutId());
+                        hawkbitClient.getRolloutRestApi().start(rollout.getId());
                         refresh();
                     });
                 }}, "Start"));
             } else if ("RUNNING".equalsIgnoreCase(rollout.getStatus())) {
                 add(Utils.tooltip(new Button(VaadinIcon.PAUSE.create()) {{
                     addClickListener(v -> {
-                        hawkbitClient.getRolloutRestApi().pause(rollout.getRolloutId());
+                        hawkbitClient.getRolloutRestApi().pause(rollout.getId());
                         refresh();
                     });
                 }}, "Pause"));
             } else if ("PAUSED".equalsIgnoreCase(rollout.getStatus())) {
                 add(Utils.tooltip(new Button(VaadinIcon.START_COG.create()) {{
                     addClickListener(v -> {
-                        hawkbitClient.getRolloutRestApi().resume(rollout.getRolloutId());
+                        hawkbitClient.getRolloutRestApi().resume(rollout.getId());
                         refresh();
                     });
                 }}, "Resume"));
             }
             add(Utils.tooltip(new Button(VaadinIcon.TRASH.create()) {{
                 addClickListener(v -> {
-                    hawkbitClient.getRolloutRestApi().delete(rollout.getRolloutId());
+                    hawkbitClient.getRolloutRestApi().delete(rollout.getId());
                     grid.getDataProvider().refreshAll();
                 });
             }}, "Cancel and Remove"));
@@ -242,7 +242,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             groupGrid.setItems(query -> Optional.ofNullable(
                             hawkbitClient.getRolloutRestApi()
                                     .getRolloutGroups(
-                                            rollout.getRolloutId(),
+                                            rollout.getId(),
                                             query.getOffset(), query.getPageSize(),
                                             null, null, "full")
                                     .getBody())
@@ -254,11 +254,11 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
         private static SelectionGrid<MgmtRolloutGroupResponseBody, Long> createGroupGrid() {
             return new SelectionGrid<>(
-                    new SelectionGrid.EntityRepresentation<>(MgmtRolloutGroupResponseBody.class, MgmtRolloutGroupResponseBody::getRolloutGroupId) {
+                    new SelectionGrid.EntityRepresentation<>(MgmtRolloutGroupResponseBody.class, MgmtRolloutGroupResponseBody::getId) {
 
                         @Override
                         protected void addColumns(final Grid<MgmtRolloutGroupResponseBody> grid) {
-                            grid.addColumn(MgmtRolloutGroupResponseBody::getRolloutGroupId).setHeader(Constants.ID).setAutoWidth(true);
+                            grid.addColumn(MgmtRolloutGroupResponseBody::getId).setHeader(Constants.ID).setAutoWidth(true);
                             grid.addColumn(MgmtRolloutGroupResponseBody::getName).setHeader(Constants.NAME).setAutoWidth(true);
                             grid.addColumn(MgmtRolloutGroupResponseBody::getTotalTargets).setHeader(Constants.TARGET_COUNT).setAutoWidth(true);
                             grid.addColumn(MgmtRolloutGroupResponseBody::getTotalTargetsPerStatus).setHeader(Constants.STATS).setAutoWidth(true);
@@ -414,7 +414,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 close();
                 final MgmtRolloutRestRequestBodyPost request = new MgmtRolloutRestRequestBodyPost();
                 request.setName(name.getValue());
-                request.setDistributionSetId(distributionSet.getValue().getDsId());
+                request.setDistributionSetId(distributionSet.getValue().getId());
                 request.setTargetFilterQuery(targetFilter.getValue().getQuery());
                 request.setDescription(description.getValue());
 

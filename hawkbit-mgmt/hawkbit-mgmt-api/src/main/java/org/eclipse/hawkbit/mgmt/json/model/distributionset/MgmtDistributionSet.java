@@ -133,47 +133,38 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
          }""")
 public class MgmtDistributionSet extends MgmtNamedEntity {
 
-    @JsonProperty(value = "id", required = true)
+    @JsonProperty(required = true)
     @Schema(description = "The technical identifier of the entity", example = "51")
-    private Long dsId;
+    private Long id;
 
-    @JsonProperty
     @Schema(description = "Package version", example = "1.4.2")
     private String version;
 
-    @JsonProperty
     @Schema(description = "The type of the distribution set", example = "test_default_ds_type")
     private String type;
 
-    @JsonProperty
     @Schema(description = "The type name of the distribution set",
             example = "OS (FW) mandatory, runtime (FW) and app (SW) optional")
     private String typeName;
 
-    @JsonProperty
     @Schema(description = """
             True of the distribution set software module setup is complete as defined by the
             distribution set type""", example = "true")
     private Boolean complete;
 
-    @JsonProperty
     @Schema(description = "If the distribution set is locked", example = "true")
     private boolean locked;
 
-    @JsonProperty
     @Schema(description = "Deleted flag, used for soft deleted entities", example = "false")
     private boolean deleted;
 
-    @JsonProperty
     @Schema(description = "True by default and false after the distribution set is invalidated by the user", example = "true")
     private boolean valid;
 
-    @JsonProperty
     @Schema(description = """
             True if DS is a required migration step for another DS. As a result the DS’s assignment will not be cancelled
             when another DS is assigned (note: updatable only if DS is not yet assigned to a target)""", example = "false")
     private boolean requiredMigrationStep;
 
-    @JsonProperty
     private List<MgmtSoftwareModule> modules = new ArrayList<>();
 }

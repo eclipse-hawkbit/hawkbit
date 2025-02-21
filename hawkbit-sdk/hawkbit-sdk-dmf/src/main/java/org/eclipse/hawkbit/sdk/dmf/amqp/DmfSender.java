@@ -124,9 +124,7 @@ public class DmfSender {
         messagePropertiesForSP.setContentType(MessageProperties.CONTENT_TYPE_JSON);
         messagePropertiesForSP.setReplyTo(amqpProperties.getSenderForSpExchange());
 
-        final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
-        attributeUpdate.setMode(mode);
-        attributeUpdate.getAttributes().putAll(attributes);
+        final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate(attributes, mode);
 
         sendMessage(DMF_EXCHANGE, convertMessage(attributeUpdate, messagePropertiesForSP));
     }
@@ -161,12 +159,12 @@ public class DmfSender {
             final DmfActionStatus actionStatus, final List<String> updateResultMessages) {
         final MessageProperties messageProperties = new MessageProperties();
         final Map<String, Object> headers = messageProperties.getHeaders();
-        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(actionId, actionStatus);
+        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(
+                actionId, actionStatus, null, null, updateResultMessages, null);
         headers.put(MessageHeaderKey.TYPE, MessageType.EVENT.name());
         headers.put(MessageHeaderKey.TENANT, tenant);
         headers.put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         headers.put(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
-        actionUpdateStatus.addMessage(updateResultMessages);
 
         return convertMessage(actionUpdateStatus, messageProperties);
     }

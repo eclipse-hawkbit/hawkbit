@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -23,10 +24,17 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfAutoConfirmation {
 
-    @JsonProperty
-    private boolean enabled;
-    @JsonProperty
-    private String initiator;
-    @JsonProperty
-    private String remark;
+    private final boolean enabled;
+    private final String initiator;
+    private final String remark;
+
+    @JsonCreator
+    public DmfAutoConfirmation(
+            @JsonProperty("enabled") final boolean enabled,
+            @JsonProperty("initiator") final String initiator,
+            @JsonProperty("remark") final String remark) {
+        this.enabled = enabled;
+        this.initiator = initiator;
+        this.remark = remark;
+    }
 }

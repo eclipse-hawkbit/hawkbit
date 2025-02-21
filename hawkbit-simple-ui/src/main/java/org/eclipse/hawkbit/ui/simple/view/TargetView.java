@@ -300,7 +300,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                         .setName(name.getValue())
                         .setDescription(description.getValue());
                 if (!ObjectUtils.isEmpty(type.getValue())) {
-                    request.setTargetType(type.getValue().getTypeId());
+                    request.setTargetType(type.getValue().getId());
                 }
                 hawkbitClient.getTargetRestApi().createTargets(
                                 List.of(request))

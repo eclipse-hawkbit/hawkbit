@@ -29,15 +29,10 @@ public class ControllerSecurityToken {
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
-    @JsonProperty
     private final Long tenantId;
-    @JsonProperty
     private final Long targetId;
-    @JsonProperty
     private final String controllerId;
-    @JsonProperty
     private String tenant;
-    @JsonProperty
     private Map<String, String> headers;
 
     /**

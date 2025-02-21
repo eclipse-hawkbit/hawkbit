@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.dmf.json.model;
 import java.util.Collections;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -26,22 +27,23 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfArtifact {
 
-    @JsonProperty
-    private String filename;
-    @JsonProperty
-    private DmfArtifactHash hashes;
-    @JsonProperty
-    private long size;
-    @JsonProperty
-    private long lastModified;
-    @JsonProperty
-    private Map<String, String> urls;
+    private final String filename;
+    private final DmfArtifactHash hashes;
+    private final long size;
+    private final long lastModified;
+    private final Map<String, String> urls;
 
-    public Map<String, String> getUrls() {
-        if (urls == null) {
-            return Collections.emptyMap();
-        }
-
-        return Collections.unmodifiableMap(urls);
+    @JsonCreator
+    public DmfArtifact(
+            @JsonProperty("filename") final String filename,
+            @JsonProperty("hashes") final DmfArtifactHash hashes,
+            @JsonProperty("size") final long size,
+            @JsonProperty("lastModified") final long lastModified,
+            @JsonProperty("urls") final Map<String, String> urls) {
+        this.filename = filename;
+        this.hashes = hashes;
+        this.size = size;
+        this.lastModified = lastModified;
+        this.urls = urls == null ? Collections.emptyMap() : Collections.unmodifiableMap(urls);
     }
 }

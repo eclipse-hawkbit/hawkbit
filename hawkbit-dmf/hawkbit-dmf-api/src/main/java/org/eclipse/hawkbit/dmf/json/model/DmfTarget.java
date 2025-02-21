@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -24,11 +25,18 @@ import lombok.ToString;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfTarget {
 
-    @JsonProperty
-    private Long actionId;
-    @JsonProperty
-    private String controllerId;
+    private final Long actionId;
+    private final String controllerId;
     @ToString.Exclude
-    @JsonProperty
-    private String targetSecurityToken;
+    private final String targetSecurityToken;
+
+    @JsonCreator
+    public DmfTarget(
+            @JsonProperty("actionId") final Long actionId,
+            @JsonProperty("controllerId") final String controllerId,
+            @JsonProperty("targetSecurityToken") final String targetSecurityToken) {
+        this.actionId = actionId;
+        this.controllerId = controllerId;
+        this.targetSecurityToken = targetSecurityToken;
+    }
 }

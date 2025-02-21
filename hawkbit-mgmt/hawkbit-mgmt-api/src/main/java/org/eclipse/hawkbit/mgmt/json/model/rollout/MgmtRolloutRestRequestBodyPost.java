@@ -14,7 +14,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -79,19 +78,15 @@ public class MgmtRolloutRestRequestBodyPost extends AbstractMgmtRolloutCondition
     @Schema(description = "Start at timestamp of Rollout", example = "1691065780929")
     private Long startAt;
 
-    @JsonProperty
     @Schema(description = "Weight of the resulting Actions", example = "400")
     private Integer weight;
 
-    @JsonProperty
     @Schema(example = "true")
     private boolean dynamic;
 
-    @JsonProperty
     @Schema(description = "Template for dynamic groups (only if dynamic flag is true)")
     private MgmtDynamicRolloutGroupTemplate dynamicGroupTemplate;
 
-    @JsonProperty
     @Schema(description = """
             (Available with user consent flow active) If the confirmation is required for this rollout. Value will be used
             if confirmation options are missing in the rollout group definitions. Confirmation is required per default""",

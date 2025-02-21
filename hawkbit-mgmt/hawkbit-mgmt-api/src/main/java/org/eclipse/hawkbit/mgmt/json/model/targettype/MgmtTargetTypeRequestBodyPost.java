@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.mgmt.json.model.targettype;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -28,11 +27,9 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionS
 @ToString(callSuper = true)
 public class MgmtTargetTypeRequestBodyPost extends MgmtTargetTypeRequestBodyPut {
 
-    @JsonProperty
     @Schema(description = "Target type key", example = "id.t23")
     private String key;
 
-    @JsonProperty
     @Schema(description = "Array of distribution set types that are compatible to that target type")
     private List<MgmtDistributionSetTypeAssignment> compatibledistributionsettypes;
 }

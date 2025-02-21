@@ -14,7 +14,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -46,18 +45,17 @@ import org.springframework.hateoas.RepresentationModel;
         }""")
 public class MgmtActionId extends RepresentationModel<MgmtActionId> {
 
-    @JsonProperty("id")
     @Schema(description = "ID of the action")
-    private long actionId;
+    private long id;
 
     /**
      * Constructor
      *
-     * @param actionId the actionId
      * @param controllerId the controller Id
+     * @param id the actionId
      */
-    public MgmtActionId(final String controllerId, final long actionId) {
-        this.actionId = actionId;
-        add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(controllerId, actionId)).withSelfRel().expand());
+    public MgmtActionId(final String controllerId, final long id) {
+        this.id = id;
+        add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(controllerId, id)).withSelfRel().expand());
     }
 }

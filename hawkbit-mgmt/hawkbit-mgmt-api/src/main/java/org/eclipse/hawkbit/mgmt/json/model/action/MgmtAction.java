@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.mgmt.json.model.action;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -84,52 +83,33 @@ public class MgmtAction extends MgmtBaseEntity {
      */
     public static final String ACTION_PENDING = "pending";
 
-    @JsonProperty("id")
     @Schema(description = "ID of the action", example = "7")
-    private Long actionId;
-
-    @JsonProperty
+    private Long id;
     @Schema(description = "Type of action", example = "update")
     private String type;
-
-    @JsonProperty
     @Schema(description = "Status of action", example = "finished")
     private String status;
 
-    @JsonProperty
     @Schema(description = "Detailed status of action", example = "finished")
     private String detailStatus;
-
-    @JsonProperty
     @Schema(example = "1691065903238")
     private Long forceTime;
+    private MgmtActionType forceType;
 
-    @JsonProperty(value = "forceType")
-    private MgmtActionType actionType;
-
-    @JsonProperty
     @Schema(description = "Weight of the action showing the importance of the update", example = "600")
     private Integer weight;
-
-    @JsonProperty
     @Schema(hidden = true)
     private MgmtMaintenanceWindow maintenanceWindow;
 
-    @JsonProperty
     @Schema(description = "The ID of the rollout this action was created for", example = "1")
     private Long rollout;
-
-    @JsonProperty
     @Schema(description = "The name of the rollout this action was created for", example = "rollout")
     private String rolloutName;
 
-    @JsonProperty
     @Schema(description = "(Optional) Code provided as part of the last status update that was sent by the device.",
             example = "200")
     private Integer lastStatusCode;
 
-    @JsonProperty
     @Schema(description = "If created by external system this field contains the external reference for the action")
     private String externalRef;
-
 }

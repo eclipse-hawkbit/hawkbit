@@ -9,20 +9,15 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Setter;
 
 /**
  * JSON representation of action update status.
@@ -35,31 +30,28 @@ public class DmfActionUpdateStatus {
     private final Long actionId;
     private final DmfActionStatus actionStatus;
     private final long timestamp;
+    private final Long softwareModuleId;
+    private final List<String> message;
+    private final Integer code;
 
-    @JsonProperty
-    private Long softwareModuleId;
-
-    @Setter(AccessLevel.NONE)
-    @JsonProperty
-    private List<String> message;
-
-    @JsonProperty
-    private Integer code;
-
-    public DmfActionUpdateStatus(@JsonProperty(value = "actionId", required = true) final Long actionId,
-            @JsonProperty(value = "actionStatus", required = true) final DmfActionStatus actionStatus, @JsonProperty(value = "timestamp") final Long timestamp) {
+    @JsonCreator
+    public DmfActionUpdateStatus(
+            @JsonProperty(value = "actionId", required = true) final Long actionId,
+            @JsonProperty(value = "actionStatus", required = true) final DmfActionStatus actionStatus,
+            @JsonProperty(value = "timestamp") final Long timestamp,
+            @JsonProperty("softwareModuleId") final Long softwareModuleId,
+            @JsonProperty("message") final List<String> message,
+            @JsonProperty("code") final Integer code) {
         this.actionId = actionId;
         this.actionStatus = actionStatus;
         this.timestamp = timestamp != null ? timestamp : System.currentTimeMillis();
+        this.softwareModuleId = softwareModuleId;
+        this.message = message;
+        this.code = code;
     }
 
     public DmfActionUpdateStatus(final Long actionId, final DmfActionStatus actionStatus) {
-        this(actionId, actionStatus, null);
-    }
-
-    @JsonIgnore
-    public Optional<Integer> getCode() {
-        return Optional.ofNullable(code);
+        this(actionId, actionStatus, null, null, null, 0);
     }
 
     public List<String> getMessage() {
@@ -68,26 +60,5 @@ public class DmfActionUpdateStatus {
         }
 
         return message;
-    }
-
-    public boolean addMessage(final String message) {
-        if (this.message == null) {
-            this.message = new ArrayList<>();
-        }
-
-        return this.message.add(message);
-    }
-
-    public boolean addMessage(final Collection<String> messages) {
-        if (messages == null || messages.isEmpty()) {
-            return false;
-        }
-
-        if (message == null) {
-            message = new ArrayList<>(messages);
-            return true;
-        }
-
-        return message.addAll(messages);
     }
 }

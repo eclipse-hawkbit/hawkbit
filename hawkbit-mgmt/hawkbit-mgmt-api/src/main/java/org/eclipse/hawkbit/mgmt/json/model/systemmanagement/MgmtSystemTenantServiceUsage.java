@@ -14,7 +14,6 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
 import lombok.experimental.Accessors;
@@ -29,21 +28,15 @@ import lombok.experimental.Accessors;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSystemTenantServiceUsage {
 
-    @JsonProperty
     private String tenantName;
 
-    @JsonProperty
     private long targets;
 
-    @JsonProperty
     private long artifacts;
 
-    @JsonProperty
     private long actions;
 
-    @JsonProperty
     private long overallArtifactVolumeInBytes;
 
-    @JsonProperty
     private Map<String, String> usageData;
 }

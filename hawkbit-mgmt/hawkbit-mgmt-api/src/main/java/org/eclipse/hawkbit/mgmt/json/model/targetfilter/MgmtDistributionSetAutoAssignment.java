@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.targetfilter;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -27,12 +26,9 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 @ToString(callSuper = true)
 public class MgmtDistributionSetAutoAssignment extends MgmtId {
 
-    @JsonProperty
     private MgmtActionType type;
 
-    @JsonProperty
     private Integer weight;
 
-    @JsonProperty
     private Boolean confirmationRequired;
 }

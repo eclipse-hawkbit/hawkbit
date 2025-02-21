@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.mgmt.json.model.artifact;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -57,18 +56,14 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtBaseEntity;
         }""")
 public class MgmtArtifact extends MgmtBaseEntity {
 
-    @JsonProperty("id")
     @Schema(description = "Artifact id", example = "3")
-    private Long artifactId;
+    private Long id;
 
-    @JsonProperty
     private MgmtArtifactHash hashes;
 
-    @JsonProperty
     @Schema(example = "file1")
     private String providedFilename;
 
-    @JsonProperty
     @Schema(description = "Size of the artifact", example = "3")
     private Long size;
 }

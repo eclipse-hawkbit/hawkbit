@@ -32,12 +32,9 @@ public class MgmtSoftwareModuleMetadata {
     @Schema(description = "Metadata property key", example = "someKnownKey")
     private String key;
 
-    @JsonProperty
     @Schema(description = "Metadata property value", example = "someKnownValue")
     private String value;
 
-    @JsonProperty
-    @Schema(description = "Metadata property is visible to targets as part of software update action",
-            example = "false")
+    @Schema(description = "Metadata property is visible to targets as part of software update action", example = "false")
     private boolean targetVisible;
 }

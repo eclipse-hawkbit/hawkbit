@@ -53,11 +53,10 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
         }""")
 public class MgmtTag extends MgmtNamedEntity {
 
-    @JsonProperty(value = "id", required = true)
+    @JsonProperty(required = true)
     @Schema(description = "The technical identifier of the entity", example = "2")
-    private Long tagId;
+    private Long id;
 
-    @JsonProperty
     @Schema(description = "The colour of the entity", example = "red")
     private String colour;
 }

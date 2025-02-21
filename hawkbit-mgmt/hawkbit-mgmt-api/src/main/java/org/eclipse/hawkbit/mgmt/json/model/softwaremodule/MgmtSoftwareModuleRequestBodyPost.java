@@ -35,15 +35,12 @@ public class MgmtSoftwareModuleRequestBodyPost {
     @Schema(example = "os")
     private String type;
 
-    @JsonProperty
     @Schema(example = "SM Description")
     private String description;
 
-    @JsonProperty
     @Schema(example = "Vendor Limited, California")
     private String vendor;
 
-    @JsonProperty
     @Schema(example = "false")
     private boolean encrypted;
 }
