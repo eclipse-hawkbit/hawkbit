@@ -115,7 +115,7 @@ final class MgmtTagMapper {
 
     private static void mapTag(final MgmtTag response, final Tag tag) {
         MgmtRestModelMapper.mapNamedToNamed(response, tag);
-        response.setTagId(tag.getId());
+        response.setId(tag.getId());
         response.setColour(tag.getColour());
     }
 }

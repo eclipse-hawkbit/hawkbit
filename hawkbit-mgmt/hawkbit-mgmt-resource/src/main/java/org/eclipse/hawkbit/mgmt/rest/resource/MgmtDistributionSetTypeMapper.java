@@ -57,9 +57,9 @@ final class MgmtDistributionSetTypeMapper {
         final MgmtDistributionSetType result = new MgmtDistributionSetType();
 
         MgmtRestModelMapper.mapTypeToType(result, type);
-        result.setModuleId(type.getId());
+        result.setId(type.getId());
 
-        result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getDistributionSetType(result.getModuleId()))
+        result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getDistributionSetType(result.getId()))
                 .withSelfRel().expand());
 
         return result;
@@ -67,10 +67,10 @@ final class MgmtDistributionSetTypeMapper {
 
     static void addLinks(final MgmtDistributionSetType result) {
 
-        result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getMandatoryModules(result.getModuleId()))
+        result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getMandatoryModules(result.getId()))
                 .withRel(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULES).expand());
 
-        result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getOptionalModules(result.getModuleId()))
+        result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getOptionalModules(result.getId()))
                 .withRel(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULES).expand());
     }
 

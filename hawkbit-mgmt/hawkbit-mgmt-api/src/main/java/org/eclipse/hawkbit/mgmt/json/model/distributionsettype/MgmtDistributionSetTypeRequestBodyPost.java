@@ -36,11 +36,9 @@ public class MgmtDistributionSetTypeRequestBodyPost extends MgmtDistributionSetT
     @Schema(description = "Functional key of the distribution set type", example = "Example key")
     private String key;
 
-    @JsonProperty
     @Schema(description = "Mandatory module type IDs")
     private List<MgmtSoftwareModuleTypeAssignment> mandatorymodules;
 
-    @JsonProperty
     @Schema(description = "Optional module type IDs")
     private List<MgmtSoftwareModuleTypeAssignment> optionalmodules;
 

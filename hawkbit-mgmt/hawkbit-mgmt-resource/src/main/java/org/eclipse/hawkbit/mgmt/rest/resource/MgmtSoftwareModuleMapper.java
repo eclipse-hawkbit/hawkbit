@@ -99,7 +99,7 @@ public final class MgmtSoftwareModuleMapper {
 
         final MgmtSoftwareModule response = new MgmtSoftwareModule();
         MgmtRestModelMapper.mapNamedToNamed(response, softwareModule);
-        response.setModuleId(softwareModule.getId());
+        response.setId(softwareModule.getId());
         response.setVersion(softwareModule.getVersion());
         response.setType(softwareModule.getType().getKey());
         response.setTypeName(softwareModule.getType().getName());
@@ -108,21 +108,21 @@ public final class MgmtSoftwareModuleMapper {
         response.setDeleted(softwareModule.isDeleted());
         response.setEncrypted(softwareModule.isEncrypted());
 
-        response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getSoftwareModule(response.getModuleId()))
+        response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getSoftwareModule(response.getId()))
                 .withSelfRel().expand());
 
         return response;
     }
 
     static void addLinks(final SoftwareModule softwareModule, final MgmtSoftwareModule response) {
-        response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifacts(response.getModuleId(), null, null))
+        response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifacts(response.getId(), null, null))
                 .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_ARTIFACT).expand());
 
         response.add(linkTo(
                 methodOn(MgmtSoftwareModuleTypeRestApi.class).getSoftwareModuleType(softwareModule.getType().getId()))
                 .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_TYPE).expand());
 
-        response.add(linkTo(methodOn(MgmtSoftwareModuleResource.class).getMetadata(response.getModuleId(),
+        response.add(linkTo(methodOn(MgmtSoftwareModuleResource.class).getMetadata(response.getId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata")
                 .expand().expand());
@@ -130,7 +130,7 @@ public final class MgmtSoftwareModuleMapper {
 
     static MgmtArtifact toResponse(final Artifact artifact) {
         final MgmtArtifact artifactRest = new MgmtArtifact();
-        artifactRest.setArtifactId(artifact.getId());
+        artifactRest.setId(artifact.getId());
         artifactRest.setSize(artifact.getSize());
         artifactRest.setHashes(
                 new MgmtArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash(), artifact.getSha256Hash()));

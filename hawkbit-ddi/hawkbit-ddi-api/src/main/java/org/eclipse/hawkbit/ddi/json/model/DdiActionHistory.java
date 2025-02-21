@@ -16,8 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.Data;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 
 /**
@@ -30,31 +29,28 @@ import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
  * </ol>
  * that were sent to server earlier by the controller using {@link DdiActionFeedback}.
  */
-@EqualsAndHashCode
-@ToString
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "status", "messages" })
 public class DdiActionHistory {
 
-    @JsonProperty("status")
     @Schema(description = "Status of the deployment based on previous feedback by the device", example = "RUNNING")
-    private final String actionStatus;
+    private final String status;
 
-    @JsonProperty("messages")
     @Schema(description = "Messages are previously sent to the feedback channel in LIFO order by the device. Note: The first status message is set by the system and describes the trigger of the deployment")
     private final List<String> messages;
 
     /**
      * Parameterized constructor for creating {@link DdiActionHistory}.
      *
-     * @param actionStatus is the current action status at the server
+     * @param status is the current action status at the server
      * @param messages is a list of messages retrieved from action history.
      */
     @JsonCreator
     public DdiActionHistory(
-            @JsonProperty("status") final String actionStatus,
-            @JsonProperty("messages") List<String> messages) {
-        this.actionStatus = actionStatus;
+            @JsonProperty("status") final String status,
+            @JsonProperty("messages") final List<String> messages) {
+        this.status = status;
         this.messages = messages;
     }
 }

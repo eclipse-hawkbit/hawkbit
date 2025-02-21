@@ -50,11 +50,10 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
         }""")
 public class MgmtSoftwareModuleType extends MgmtTypeEntity {
 
-    @JsonProperty(value = "id", required = true)
+    @JsonProperty(required = true)
     @Schema(description = "The technical identifier of the entity", example = "83")
-    private Long moduleId;
+    private Long id;
 
-    @JsonProperty
     @Schema(description = "Software modules of that type can be assigned at this maximum number " +
             "(e.g. operating system only once)", example = "1")
     private int maxAssignments;

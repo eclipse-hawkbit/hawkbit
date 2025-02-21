@@ -33,7 +33,6 @@ public class MgmtSoftwareModuleTypeRequestBodyPost extends MgmtSoftwareModuleTyp
     @Schema(example = "Example key")
     private String key;
 
-    @JsonProperty
     @Schema(example = "1")
     private int maxAssignments;
 

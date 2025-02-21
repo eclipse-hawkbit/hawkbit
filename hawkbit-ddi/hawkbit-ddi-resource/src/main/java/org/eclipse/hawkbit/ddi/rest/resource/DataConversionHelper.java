@@ -174,10 +174,10 @@ public final class DataConversionHelper {
     private static DdiArtifact createArtifact(
             final Target target, final ArtifactUrlHandler artifactUrlHandler,
             final Artifact artifact, final SystemManagement systemManagement, final HttpRequest request) {
-        final DdiArtifact file = new DdiArtifact();
-        file.setHashes(new DdiArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash(), artifact.getSha256Hash()));
-        file.setFilename(artifact.getFilename());
-        file.setSize(artifact.getSize());
+        final DdiArtifact file = new DdiArtifact(
+                artifact.getFilename(),
+                new DdiArtifactHash(artifact.getSha1Hash(), artifact.getMd5Hash(), artifact.getSha256Hash()),
+                artifact.getSize());
 
         final TenantMetaData tenantMetadata = systemManagement.getTenantMetadataWithoutDetails();
         artifactUrlHandler

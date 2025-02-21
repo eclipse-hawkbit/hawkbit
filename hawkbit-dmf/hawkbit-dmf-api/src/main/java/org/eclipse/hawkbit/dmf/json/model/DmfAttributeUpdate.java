@@ -9,9 +9,10 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -26,9 +27,14 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfAttributeUpdate {
 
-    @JsonProperty
-    private final Map<String, String> attributes = new HashMap<>();
+    private final Map<String, String> attributes;
+    private final DmfUpdateMode mode;
 
-    @JsonProperty
-    private DmfUpdateMode mode;
+    @JsonCreator
+    public DmfAttributeUpdate(
+            @JsonProperty("attributes") final Map<String, String> attributes,
+            @JsonProperty("mode") final DmfUpdateMode mode) {
+        this.attributes = attributes == null ? Collections.emptyMap() : attributes;
+        this.mode = mode;
+    }
 }

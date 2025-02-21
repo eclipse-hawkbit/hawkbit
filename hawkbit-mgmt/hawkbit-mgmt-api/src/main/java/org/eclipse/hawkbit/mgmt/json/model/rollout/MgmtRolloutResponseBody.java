@@ -101,15 +101,15 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
         }""")
 public class MgmtRolloutResponseBody extends MgmtNamedEntity {
 
+    @JsonProperty(required = true)
+    @Schema(description = "Rollout id", example = "2")
+    private Long id;
+
     @Schema(description = "Target filter query language expression", example = "controllerId==exampleTarget*")
     private String targetFilterQuery;
 
     @Schema(description = "The ID of distribution set of this rollout", example = "2")
     private Long distributionSetId;
-
-    @JsonProperty(value = "id", required = true)
-    @Schema(description = "Rollout id", example = "2")
-    private Long rolloutId;
 
     @JsonProperty(required = true)
     @Schema(description = "The status of this rollout", example = "ready")
@@ -120,43 +120,33 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
     private Long totalTargets;
 
     @Setter(AccessLevel.NONE)
-    @JsonProperty
     @Schema(description = "The total targets per status")
     private Map<String, Long> totalTargetsPerStatus;
 
-    @JsonProperty
     @Schema(description = "The total number of groups created by this rollout", example = "5")
     private Integer totalGroups;
 
-    @JsonProperty
     @Schema(description = "Start at timestamp of Rollout", example = "1691065753136")
     private Long startAt;
 
-    @JsonProperty
     @Schema(description = "Forcetime in milliseconds", example = "1691065762496")
     private Long forcetime;
 
-    @JsonProperty
     @Schema(description = "Deleted flag, used for soft deleted entities", example = "false")
     private boolean deleted;
 
-    @JsonProperty
     @Schema(description = "The type of this rollout")
     private MgmtActionType type;
 
-    @JsonProperty
     @Schema(description = "Weight of the resulting Actions", example = "400")
     private Integer weight;
 
-    @JsonProperty
     @Schema(description = "If this rollout is dynamic or static", example = "true")
     private boolean dynamic;
 
-    @JsonProperty
     @Schema(example = "Approved remark.")
     private String approvalRemark;
 
-    @JsonProperty
     @Schema(example = "exampleUsername")
     private String approveDecidedBy;
 

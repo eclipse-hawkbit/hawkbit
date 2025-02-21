@@ -60,7 +60,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
         }""")
 public class MgmtDistributionSetType extends MgmtTypeEntity {
 
-    @JsonProperty(value = "id", required = true)
+    @JsonProperty(required = true)
     @Schema(description = "The technical identifier of the entity", example = "99")
-    private Long moduleId;
+    private Long id;
 }

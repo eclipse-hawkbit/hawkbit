@@ -37,5 +37,4 @@ public class ActionUpdatedEvent extends AbstractActionEvent implements EntityUpd
             final Action action, final Long targetId, final Long rolloutId, final Long rolloutGroupId, final String applicationId) {
         super(action, targetId, rolloutId, rolloutGroupId, applicationId);
     }
-
 }

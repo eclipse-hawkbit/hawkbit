@@ -24,12 +24,10 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiMetadata {
 
-    @JsonProperty
     @NotNull
     @Schema(description = "Key of meta data entry")
     private final String key;
 
-    @JsonProperty
     @NotNull
     @Schema(description = "Value of meta data entry")
     private final String value;

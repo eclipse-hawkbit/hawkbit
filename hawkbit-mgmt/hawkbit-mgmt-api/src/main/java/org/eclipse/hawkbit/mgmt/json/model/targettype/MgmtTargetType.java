@@ -53,7 +53,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
         }""")
 public class MgmtTargetType extends MgmtTypeEntity {
 
-    @JsonProperty(value = "id", required = true)
+    @JsonProperty(required = true)
     @Schema(description = "The technical identifier of the entity", example = "26")
-    private Long typeId;
+    private Long id;
 }

@@ -14,7 +14,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -34,23 +33,18 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssi
 public class MgmtDistributionSetRequestBodyPost extends MgmtDistributionSetRequestBodyPut {
 
     // deprecated format from the times where os, application and runtime where statically defined
-    @JsonProperty
     @Schema(hidden = true)
     private MgmtSoftwareModuleAssignment os;
 
-    @JsonProperty
     @Schema(hidden = true)
     private MgmtSoftwareModuleAssignment runtime;
 
-    @JsonProperty
     @Schema(hidden = true)
     private MgmtSoftwareModuleAssignment application;
     // deprecated format - END
 
-    @JsonProperty
     private List<MgmtSoftwareModuleAssignment> modules;
 
-    @JsonProperty
     @Schema(description = "The type of the distribution set", example = "test_default_ds_type")
     private String type;
 }

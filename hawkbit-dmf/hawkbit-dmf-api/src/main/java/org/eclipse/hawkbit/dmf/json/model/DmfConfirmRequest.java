@@ -9,33 +9,41 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.ToString;
 
 /**
  * JSON representation of confirm request.
  */
+@Getter
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfConfirmRequest extends DmfActionRequest {
 
-    @Getter
-    @Setter
-    @JsonProperty
-    private String targetSecurityToken;
+    private final String targetSecurityToken;
+    private final List<DmfSoftwareModule> softwareModules;
 
-    @JsonProperty
-    private List<DmfSoftwareModule> softwareModules;
+    @JsonCreator
+    public DmfConfirmRequest(
+            @JsonProperty("actionId") final Long actionId,
+            @JsonProperty("targetSecurityToken") final String targetSecurityToken,
+            @JsonProperty("softwareModules") final List<DmfSoftwareModule> softwareModules) {
+        super(actionId);
+        this.targetSecurityToken = targetSecurityToken;
+        this.softwareModules = softwareModules;
+    }
 
     public List<DmfSoftwareModule> getSoftwareModules() {
         if (softwareModules == null) {
@@ -43,19 +51,5 @@ public class DmfConfirmRequest extends DmfActionRequest {
         }
 
         return Collections.unmodifiableList(softwareModules);
-    }
-
-    /**
-     * Add a Software module.
-     *
-     * @param createSoftwareModule the module
-     */
-    public void addSoftwareModule(final DmfSoftwareModule createSoftwareModule) {
-        if (softwareModules == null) {
-            softwareModules = new ArrayList<>();
-        }
-
-        softwareModules.add(createSoftwareModule);
-
     }
 }

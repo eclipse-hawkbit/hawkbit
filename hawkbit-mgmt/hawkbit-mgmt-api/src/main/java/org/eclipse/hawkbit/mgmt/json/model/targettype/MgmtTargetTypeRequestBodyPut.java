@@ -27,11 +27,9 @@ public class MgmtTargetTypeRequestBodyPut {
     @Schema(description = "The name of the entity", example = "updatedTypeName")
     private String name;
 
-    @JsonProperty
     @Schema(description = "The description of the entity", example = "an updated description")
     private String description;
 
-    @JsonProperty
     @Schema(description = "The colour of the entity", example = "#aaafff")
     private String colour;
 }

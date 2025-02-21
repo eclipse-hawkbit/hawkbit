@@ -11,22 +11,21 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import jakarta.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.hateoas.RepresentationModel;
 
 /**
  * Update action resource.
  */
-@NoArgsConstructor // needed for json create
-@Getter
+@Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -198,24 +197,21 @@ import org.springframework.hateoas.RepresentationModel;
         }""")
 public class DdiDeploymentBase extends RepresentationModel<DdiDeploymentBase> {
 
-    @JsonProperty("id")
     @NotNull
     @Schema(description = "Id of the action", example = "8")
-    private String id;
+    private final String id;
 
-    @JsonProperty("deployment")
     @NotNull
     @Schema(description = "Detailed deployment operation")
-    private DdiDeployment deployment;
+    private final DdiDeployment deployment;
 
     /**
      * Action history containing current action status and a list of feedback
      * messages received earlier from the controller.
      */
-    @JsonProperty("actionHistory")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Schema(description = "Current deployment state")
-    private DdiActionHistory actionHistory;
+    private final DdiActionHistory actionHistory;
 
     /**
      * Constructor.
@@ -224,7 +220,11 @@ public class DdiDeploymentBase extends RepresentationModel<DdiDeploymentBase> {
      * @param deployment details
      * @param actionHistory containing current action status and a list of feedback messages received earlier from the controller.
      */
-    public DdiDeploymentBase(final String id, final DdiDeployment deployment, final DdiActionHistory actionHistory) {
+    @JsonCreator
+    public DdiDeploymentBase(
+            @JsonProperty(value = "id", required = true) final String id,
+            @JsonProperty(value = "deployment", required = true) final DdiDeployment deployment,
+            @JsonProperty("actionHistory") final DdiActionHistory actionHistory) {
         this.id = id;
         this.deployment = deployment;
         this.actionHistory = actionHistory;

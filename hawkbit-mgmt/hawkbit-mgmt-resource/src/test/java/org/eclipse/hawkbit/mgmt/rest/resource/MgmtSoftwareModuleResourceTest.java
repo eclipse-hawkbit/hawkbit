@@ -195,7 +195,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
-    @Description(" Get a single meta data value for a meta data key.")
+    @Description("Get a single meta data value for a meta data key.")
     public void getMetadataValue() throws Exception {
 
         // prepare and create metadata
@@ -205,8 +205,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         softwareModuleManagement.updateMetaData(
                 entityFactory.softwareModuleMetadata().create(module.getId()).key(knownKey).value(knownValue));
 
-        mvc.perform(
-                        get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata/{metadataKey}",
+        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata/{metadataKey}",
                                 module.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
@@ -399,7 +398,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final MgmtArtifact artResult = ResourceUtility.convertArtifactResponse(
                 mvcResult.getResponse().getContentAsString());
         final Long artId = softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getId();
-        assertThat(artResult.getArtifactId()).as("Wrong artifact id").isEqualTo(artId);
+        assertThat(artResult.getId()).as("Wrong artifact id").isEqualTo(artId);
         assertThat((Object)JsonPath.compile("$._links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .as("Link contains no self url")
                 .hasToString("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId);

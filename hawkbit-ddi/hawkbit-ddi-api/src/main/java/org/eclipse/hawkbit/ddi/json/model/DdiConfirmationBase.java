@@ -11,13 +11,13 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import jakarta.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.hateoas.RepresentationModel;
 
@@ -25,8 +25,7 @@ import org.springframework.hateoas.RepresentationModel;
  * Confirmation base response.
  * Set order to place links at last.
  */
-@NoArgsConstructor // needed for json create
-@Getter
+@Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -54,11 +53,12 @@ import org.springframework.hateoas.RepresentationModel;
                 }""")
 public class DdiConfirmationBase extends RepresentationModel<DdiConfirmationBase> {
 
-    @JsonProperty("autoConfirm")
     @NotNull
-    private DdiAutoConfirmationState autoConfirm;
+    private final DdiAutoConfirmationState autoConfirm;
 
-    public DdiConfirmationBase(final DdiAutoConfirmationState autoConfirmState) {
-        this.autoConfirm = autoConfirmState;
+    @JsonCreator
+    public DdiConfirmationBase(
+            @JsonProperty(value = "autoConfirm", required = true) final DdiAutoConfirmationState autoConfirm) {
+        this.autoConfirm = autoConfirm;
     }
 }

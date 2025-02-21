@@ -13,6 +13,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
@@ -100,12 +102,7 @@ class BaseAmqpServiceTest {
     }
 
     private DmfActionUpdateStatus createActionStatus() {
-        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(1L, DmfActionStatus.RUNNING);
-        actionUpdateStatus.setCode(2);
-        actionUpdateStatus.setSoftwareModuleId(2L);
-        actionUpdateStatus.addMessage("Message 1");
-        actionUpdateStatus.addMessage("Message 2");
-        return actionUpdateStatus;
+        return new DmfActionUpdateStatus(1L, DmfActionStatus.RUNNING, null, 2L, List.of("Message 1", "Message 2"), 2);
     }
 
 }

@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
@@ -23,11 +22,9 @@ import lombok.experimental.Accessors;
 @ToString
 public class MgmtSoftwareModuleTypeRequestBodyPut {
 
-    @JsonProperty
     @Schema(example = "Example description")
     private String description;
 
-    @JsonProperty
     @Schema(example = "rgb(0,0,255")
     private String colour;
 }

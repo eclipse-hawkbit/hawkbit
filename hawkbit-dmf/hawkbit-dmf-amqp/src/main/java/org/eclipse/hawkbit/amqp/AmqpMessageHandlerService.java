@@ -454,17 +454,16 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         final Action updatedAction;
         if (actionUpdateStatus.getActionStatus() == DmfActionStatus.CONFIRMED) {
-            updatedAction = confirmationManagement.confirmAction(action.getId(),
-                    actionUpdateStatus.getCode().orElse(null), messages);
+            updatedAction = confirmationManagement.confirmAction(action.getId(), actionUpdateStatus.getCode(), messages);
         } else if (actionUpdateStatus.getActionStatus() == DmfActionStatus.DENIED) {
-            updatedAction = confirmationManagement.denyAction(action.getId(), actionUpdateStatus.getCode().orElse(null), messages);
+            updatedAction = confirmationManagement.denyAction(action.getId(), actionUpdateStatus.getCode(), messages);
         } else {
             final ActionStatusCreate actionStatus = entityFactory.actionStatus().create(action.getId()).status(status).messages(messages);
-            actionUpdateStatus.getCode().ifPresent(code -> {
+            Optional.ofNullable(actionUpdateStatus.getCode()).ifPresent(code -> {
                 actionStatus.code(code);
                 actionStatus.message("Device reported status code: " + code);
             });
-            updatedAction = ((Status.CANCELED == status) || (Status.CANCEL_REJECTED == status))
+            updatedAction = Status.CANCELED == status || Status.CANCEL_REJECTED == status
                     ? controllerManagement.addCancelActionStatus(actionStatus)
                     : controllerManagement.addUpdateActionStatus(actionStatus);
         }

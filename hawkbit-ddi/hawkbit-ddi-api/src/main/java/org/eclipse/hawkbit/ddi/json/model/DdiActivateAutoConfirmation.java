@@ -19,12 +19,10 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiActivateAutoConfirmation {
 
-    @JsonProperty
     @Schema(description = "Individual value (e.g. username) stored as initiator and automatically used as confirmed" +
             " user in future actions", example = "exampleUser")
     private final String initiator;
 
-    @JsonProperty
     @Schema(description = "Individual value to attach a remark which will be persisted when automatically " +
             "confirming future actions", example = "exampleRemark")
     private final String remark;

@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.mgmt.json.model.tag;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
@@ -28,15 +27,12 @@ import lombok.experimental.Accessors;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtTagRequestBodyPut {
 
-    @JsonProperty
     @Schema(description = "The name of the entity", example = "Example name")
     private String name;
 
-    @JsonProperty
     @Schema(description = "The description of the entity", example = "Example description")
     private String description;
 
-    @JsonProperty
     @Schema(description = "The colour of the entity", example = "rgb(0,255,0)")
     private String colour;
 }

@@ -80,14 +80,13 @@ import lombok.experimental.Accessors;
         }""")
 public class MgmtRolloutGroupResponseBody extends MgmtRolloutGroup {
 
-    @JsonProperty(value = "id", required = true)
+    @JsonProperty(required = true)
     @Schema(description = "Rollouts id", example = "63")
-    private Long rolloutGroupId;
+    private Long id;
 
     @Schema(description = "If the rollout group is dynamic", example = "false")
     private boolean dynamic;
 
-    @JsonProperty(required = true)
     @Schema(description = "The status of this rollout", example = "ready")
     private String status;
 

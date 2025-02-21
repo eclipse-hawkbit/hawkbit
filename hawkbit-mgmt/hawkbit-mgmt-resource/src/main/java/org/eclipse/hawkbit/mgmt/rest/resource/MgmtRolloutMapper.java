@@ -78,7 +78,7 @@ final class MgmtRolloutMapper {
         body.setLastModifiedAt(rollout.getLastModifiedAt());
         body.setLastModifiedBy(rollout.getLastModifiedBy());
         body.setName(rollout.getName());
-        body.setRolloutId(rollout.getId());
+        body.setId(rollout.getId());
         body.setDynamic(rollout.isDynamic());
         body.setTargetFilterQuery(rollout.getTargetFilterQuery());
         body.setDistributionSetId(rollout.getDistributionSet().getId());
@@ -217,7 +217,7 @@ final class MgmtRolloutMapper {
         body.setLastModifiedAt(rolloutGroup.getLastModifiedAt());
         body.setLastModifiedBy(rolloutGroup.getLastModifiedBy());
         body.setName(rolloutGroup.getName());
-        body.setRolloutGroupId(rolloutGroup.getId());
+        body.setId(rolloutGroup.getId());
         body.setStatus(rolloutGroup.getStatus().toString().toLowerCase());
         body.setTargetPercentage(rolloutGroup.getTargetPercentage());
         body.setTargetFilterQuery(rolloutGroup.getTargetFilterQuery());

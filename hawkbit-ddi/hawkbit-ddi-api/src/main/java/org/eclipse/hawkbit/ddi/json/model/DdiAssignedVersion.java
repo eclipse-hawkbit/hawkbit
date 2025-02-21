@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.Getter;
 
 /**
  * Allow a target to declare running distribution set version
@@ -40,10 +41,5 @@ public class DdiAssignedVersion {
             @JsonProperty(value = "version", required = true) final String version) {
         this.name = name;
         this.version = version;
-    }
-
-    @Override
-    public String toString() {
-        return "DdiInstalledVersion{" + "name='" + name + '\'' + ", version='" + version + '\'' + '}';
     }
 }

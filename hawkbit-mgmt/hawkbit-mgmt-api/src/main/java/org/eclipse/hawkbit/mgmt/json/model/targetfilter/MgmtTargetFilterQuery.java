@@ -55,31 +55,25 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
          }""")
 public class MgmtTargetFilterQuery extends MgmtBaseEntity {
 
-    @JsonProperty(value = "id", required = true)
+    @JsonProperty(required = true)
     @Schema(description = "The technical identifier of the entity", example = "2")
-    private Long filterId;
+    private Long id;
 
-    @JsonProperty
     @Schema(description = "The name of the entity", example = "filterName")
     private String name;
 
-    @JsonProperty
     @Schema(description = "Target filter query expression", example = "name==*")
     private String query;
 
-    @JsonProperty
     @Schema(example = "15")
     private Long autoAssignDistributionSet;
 
-    @JsonProperty
     @Schema(description = "Auto assign distribution set id")
     private MgmtActionType autoAssignActionType;
 
-    @JsonProperty
     @Schema(description = "Weight of the resulting Actions", example = "600")
     private Integer autoAssignWeight;
 
-    @JsonProperty
     @Schema(description = "(Available with user consent flow active) Defines, if the confirmation is required for an " +
             "action. Confirmation is required per default.", example = "false")
     private Boolean confirmationRequired;

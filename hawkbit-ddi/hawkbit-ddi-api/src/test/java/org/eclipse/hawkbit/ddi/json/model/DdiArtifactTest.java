@@ -39,10 +39,7 @@ class DdiArtifactTest {
         final DdiArtifactHash hashes = new DdiArtifactHash("123", "456", "789");
         final Long size = 12345L;
 
-        final DdiArtifact ddiArtifact = new DdiArtifact();
-        ddiArtifact.setFilename(filename);
-        ddiArtifact.setHashes(hashes);
-        ddiArtifact.setSize(size);
+        final DdiArtifact ddiArtifact = new DdiArtifact(filename, hashes, size);
 
         // Test
         final String serializedDdiArtifact = OBJECT_MAPPER.writeValueAsString(ddiArtifact);

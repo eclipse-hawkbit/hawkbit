@@ -14,7 +14,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -28,26 +27,20 @@ import lombok.experimental.Accessors;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtActionStatus {
 
-    @JsonProperty("id")
     @Schema(example = "21")
-    private Long statusId;
+    private Long id;
 
-    @JsonProperty
     @Schema(example = "running")
     private String type;
 
-    @JsonProperty
     private List<String> messages;
 
-    @JsonProperty
     @Schema(example = "1691065929524")
     private Long reportedAt;
 
-    @JsonProperty
     @Schema(example = "1691065929524")
     private Long timestamp;
 
-    @JsonProperty
     @Schema(example = "200")
     private Integer code;
 }

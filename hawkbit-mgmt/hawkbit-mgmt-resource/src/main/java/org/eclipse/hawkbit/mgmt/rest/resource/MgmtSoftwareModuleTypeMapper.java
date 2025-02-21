@@ -54,9 +54,9 @@ final class MgmtSoftwareModuleTypeMapper {
 
         MgmtRestModelMapper.mapTypeToType(result, type);
         result.setMaxAssignments(type.getMaxAssignments());
-        result.setModuleId(type.getId());
+        result.setId(type.getId());
 
-        result.add(linkTo(methodOn(MgmtSoftwareModuleTypeRestApi.class).getSoftwareModuleType(result.getModuleId()))
+        result.add(linkTo(methodOn(MgmtSoftwareModuleTypeRestApi.class).getSoftwareModuleType(result.getId()))
                 .withSelfRel().expand());
 
         return result;

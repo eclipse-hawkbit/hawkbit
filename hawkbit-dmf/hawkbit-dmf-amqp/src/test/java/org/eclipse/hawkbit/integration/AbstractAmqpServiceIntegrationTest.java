@@ -306,14 +306,9 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
 
         DmfCreateThing payload = null;
         if (!StringUtils.isEmpty(name) || !CollectionUtils.isEmpty(attributes)) {
-            payload = new DmfCreateThing();
-            payload.setName(name);
-
-            if (!CollectionUtils.isEmpty(attributes)) {
-                final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
-                attributeUpdate.getAttributes().putAll(attributes);
-                payload.setAttributeUpdate(attributeUpdate);
-            }
+            payload = new DmfCreateThing(
+                    name, null,
+                    CollectionUtils.isEmpty(attributes) ? null : new DmfAttributeUpdate(attributes, null));
         }
 
         return createMessage(payload, messageProperties);
@@ -330,7 +325,8 @@ abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpIntegratio
 
     protected void createAndSendActionStatusUpdateMessage(final String target, final long actionId,
             final DmfActionStatus status) {
-        final DmfActionUpdateStatus dmfActionUpdateStatus = new DmfActionUpdateStatus(actionId, status, System.currentTimeMillis());
+        final DmfActionUpdateStatus dmfActionUpdateStatus = new DmfActionUpdateStatus(
+                actionId, status, System.currentTimeMillis(), null, null, null);
 
         final Message eventMessage = createUpdateActionEventMessage(dmfActionUpdateStatus);
         eventMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.THING_ID, target);

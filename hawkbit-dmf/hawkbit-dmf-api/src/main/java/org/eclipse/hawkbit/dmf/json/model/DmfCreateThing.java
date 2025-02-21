@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.dmf.json.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -23,12 +24,17 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfCreateThing {
 
-    @JsonProperty
-    private String name;
+    private final String name;
+    private final String type;
+    private final DmfAttributeUpdate attributeUpdate;
 
-    @JsonProperty
-    private String type;
-
-    @JsonProperty
-    private DmfAttributeUpdate attributeUpdate;
+    @JsonCreator
+    public DmfCreateThing(
+            @JsonProperty("name") final String name,
+            @JsonProperty("type") final String type,
+            @JsonProperty("attributeUpdate") final DmfAttributeUpdate attributeUpdate) {
+        this.name = name;
+        this.type = type;
+        this.attributeUpdate = attributeUpdate;
+    }
 }

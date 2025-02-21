@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.action;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
 import lombok.experimental.Accessors;
@@ -23,6 +22,5 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 @ToString
 public class MgmtActionRequestBodyPut {
 
-    @JsonProperty(value = "forceType")
-    private MgmtActionType actionType;
+    private MgmtActionType forceType;
 }
