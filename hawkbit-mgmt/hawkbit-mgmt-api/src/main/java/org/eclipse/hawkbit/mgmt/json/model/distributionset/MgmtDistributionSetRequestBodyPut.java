@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -26,19 +25,15 @@ import lombok.experimental.Accessors;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtDistributionSetRequestBodyPut {
 
-    @JsonProperty
     @Schema(description = "The name of the entity", example = "dsOne")
     private String name;
 
-    @JsonProperty
     @Schema(description = "The description of the entity", example = "Description of the distribution set.")
     private String description;
 
-    @JsonProperty
     @Schema(description = "Package version", example = "1.0.0")
     private String version;
 
-    @JsonProperty
     @Schema(description = """
             Should be set only if change of locked state is requested. If put, the distribution set locked flag will be
             set to the requested. Note: unlock (i.e. set this property to false) with extreme care!
@@ -47,7 +42,6 @@ public class MgmtDistributionSetRequestBodyPut {
             example = "true")
     private Boolean locked;
 
-    @JsonProperty
     @Schema(description = """
             True if DS is a required migration step for another DS. As a result the DS’s assignment will not be cancelled
             when another DS is assigned (note: updatable only if DS is not yet assigned to a target)""", example = "false")

@@ -67,9 +67,9 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
         }""")
 public class MgmtSoftwareModule extends MgmtNamedEntity {
 
-    @JsonProperty(value = "id", required = true)
+    @JsonProperty(required = true)
     @Schema(description = "The technical identifier of the entity", example = "6")
-    private Long moduleId;
+    private Long id;
 
     @JsonProperty(required = true)
     @Schema(description = "Package version", example = "1.0.0")
@@ -82,19 +82,15 @@ public class MgmtSoftwareModule extends MgmtNamedEntity {
     @Schema(description = "The software module type name of the entity", example = "OS")
     private String typeName;
 
-    @JsonProperty
     @Schema(description = "The software vendor", example = "Vendor Limited, California")
     private String vendor;
 
-    @JsonProperty
     @Schema(description = "If the software module is encrypted", example = "false")
     private boolean encrypted;
 
-    @JsonProperty
     @Schema(description = "If the software module is locked", example = "true")
     private boolean locked;
 
-    @JsonProperty
     @Schema(description = "If the software module is deleted", example = "false")
     private boolean deleted;
 }

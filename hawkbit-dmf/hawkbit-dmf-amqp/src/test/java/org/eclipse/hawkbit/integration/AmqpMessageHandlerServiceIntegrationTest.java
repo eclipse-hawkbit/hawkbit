@@ -729,9 +729,8 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
         // setup
         registerAndAssertTargetWithExistingTenant(controllerId);
-        final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
-        controllerAttribute.getAttributes().put("test1", "testA");
-        controllerAttribute.getAttributes().put("test2", "testB");
+        final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate(
+                Map.of("test1", "testA", "test2", "testB"), null);
         final Message createUpdateAttributesMessage = createUpdateAttributesMessage(null, TENANT_EXIST,
                 controllerAttribute);
         createUpdateAttributesMessage.getMessageProperties().getHeaders().remove(MessageHeaderKey.THING_ID);
@@ -741,7 +740,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
         // verify
         verifyOneDeadLetterMessage();
-        final DmfAttributeUpdate controllerAttributeEmpty = new DmfAttributeUpdate();
+        final DmfAttributeUpdate controllerAttributeEmpty = new DmfAttributeUpdate(null, null);
         assertUpdateAttributes(controllerId, controllerAttributeEmpty.getAttributes());
     }
 
@@ -754,11 +753,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     void updateAttributesWithWrongBody() {
         // setup
         registerAndAssertTargetWithExistingTenant(UPDATE_ATTR_TEST_CONTROLLER_ID);
-        final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
-        controllerAttribute.getAttributes().put("test1", "testA");
-        controllerAttribute.getAttributes().put("test2", "testB");
-        final Message createUpdateAttributesMessageWrongBody = createUpdateAttributesMessageWrongBody(
-                UPDATE_ATTR_TEST_CONTROLLER_ID);
+        final Message createUpdateAttributesMessageWrongBody = createUpdateAttributesMessageWrongBody( UPDATE_ATTR_TEST_CONTROLLER_ID);
 
         // test
         getDmfClient().send(createUpdateAttributesMessageWrongBody);
@@ -1051,9 +1046,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         removeAttributes.put("k1", "foo");
         removeAttributes.put("k3", "bar");
 
-        final DmfAttributeUpdate remove = new DmfAttributeUpdate();
-        remove.setMode(DmfUpdateMode.REMOVE);
-        remove.getAttributes().putAll(removeAttributes);
+        final DmfAttributeUpdate remove = new DmfAttributeUpdate(removeAttributes, DmfUpdateMode.REMOVE);
         sendUpdateAttributeMessage(remove);
 
         // validate
@@ -1071,9 +1064,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         mergeAttributes.put("k1", "v1_modified_again");
         mergeAttributes.put("k4", "v4");
 
-        final DmfAttributeUpdate merge = new DmfAttributeUpdate();
-        merge.setMode(DmfUpdateMode.MERGE);
-        merge.getAttributes().putAll(mergeAttributes);
+        final DmfAttributeUpdate merge = new DmfAttributeUpdate(mergeAttributes, DmfUpdateMode.MERGE);
         sendUpdateAttributeMessage(merge);
 
         // validate
@@ -1091,9 +1082,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         expectedAttributes.put("k2", "v2");
         expectedAttributes.put("k3", "v3");
 
-        final DmfAttributeUpdate replace = new DmfAttributeUpdate();
-        replace.setMode(DmfUpdateMode.REPLACE);
-        replace.getAttributes().putAll(expectedAttributes);
+        final DmfAttributeUpdate replace = new DmfAttributeUpdate(expectedAttributes, DmfUpdateMode.REPLACE);
         sendUpdateAttributeMessage(replace);
 
         // validate
@@ -1107,8 +1096,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         expectedAttributes.put("k0", "v0");
         expectedAttributes.put("k1", "v1");
 
-        final DmfAttributeUpdate defaultUpdate = new DmfAttributeUpdate();
-        defaultUpdate.getAttributes().putAll(expectedAttributes);
+        final DmfAttributeUpdate defaultUpdate = new DmfAttributeUpdate(expectedAttributes, null);
         sendUpdateAttributeMessage(defaultUpdate);
 
         // validate
@@ -1135,10 +1123,8 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     }
 
     private void sendUpdateAttributesMessageWithGivenAttributes(final String key, final String value) {
-        final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
-        controllerAttribute.getAttributes().put(key, value);
-        final Message message = createUpdateAttributesMessage(UPDATE_ATTR_TEST_CONTROLLER_ID, TENANT_EXIST,
-                controllerAttribute);
+        final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate(Map.of(key, value), null);
+        final Message message = createUpdateAttributesMessage(UPDATE_ATTR_TEST_CONTROLLER_ID, TENANT_EXIST, controllerAttribute);
         getDmfClient().send(message);
     }
 

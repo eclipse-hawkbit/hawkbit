@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -34,6 +33,5 @@ public class MgmtMaintenanceWindow extends MgmtMaintenanceWindowRequestBody {
     /**
      * Time in {@link TimeUnit#MILLISECONDS} of the next maintenance window start
      */
-    @JsonProperty
     private long nextStartAt;
 }

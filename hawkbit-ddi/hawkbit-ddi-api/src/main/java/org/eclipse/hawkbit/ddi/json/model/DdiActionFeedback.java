@@ -71,5 +71,4 @@ public class DdiActionFeedback {
     public DdiActionFeedback(final DdiStatus status) {
         this(status, null);
     }
-
 }

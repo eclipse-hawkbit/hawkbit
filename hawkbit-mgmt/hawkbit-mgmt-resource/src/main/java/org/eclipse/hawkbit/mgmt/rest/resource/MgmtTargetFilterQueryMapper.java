@@ -14,7 +14,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -49,7 +48,7 @@ public final class MgmtTargetFilterQueryMapper {
     static MgmtTargetFilterQuery toResponse(final TargetFilterQuery filter, final boolean confirmationFlowEnabled,
             final boolean isRepresentationFull) {
         final MgmtTargetFilterQuery targetRest = new MgmtTargetFilterQuery();
-        targetRest.setFilterId(filter.getId());
+        targetRest.setId(filter.getId());
         targetRest.setName(filter.getName());
         targetRest.setQuery(filter.getQuery());
 
@@ -84,7 +83,7 @@ public final class MgmtTargetFilterQueryMapper {
 
     static void addLinks(final MgmtTargetFilterQuery targetRest) {
         targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class)
-                .postAssignedDistributionSet(targetRest.getFilterId(), null)).withRel("autoAssignDS").expand());
+                .postAssignedDistributionSet(targetRest.getId(), null)).withRel("autoAssignDS").expand());
     }
 
     static TargetFilterQueryCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetFilterQueryRequestBody filterRest) {

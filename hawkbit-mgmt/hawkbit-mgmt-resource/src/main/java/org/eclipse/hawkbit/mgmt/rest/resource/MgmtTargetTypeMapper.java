@@ -56,14 +56,14 @@ public final class MgmtTargetTypeMapper {
         final MgmtTargetType result = new MgmtTargetType();
 
         MgmtRestModelMapper.mapTypeToType(result, type);
-        result.setTypeId(type.getId());
+        result.setId(type.getId());
         result.add(
-                linkTo(methodOn(MgmtTargetTypeRestApi.class).getTargetType(result.getTypeId())).withSelfRel().expand());
+                linkTo(methodOn(MgmtTargetTypeRestApi.class).getTargetType(result.getId())).withSelfRel().expand());
         return result;
     }
 
     static void addLinks(final MgmtTargetType result) {
-        result.add(linkTo(methodOn(MgmtTargetTypeRestApi.class).getCompatibleDistributionSets(result.getTypeId()))
+        result.add(linkTo(methodOn(MgmtTargetTypeRestApi.class).getCompatibleDistributionSets(result.getId()))
                 .withRel(MgmtRestConstants.TARGETTYPE_V1_DS_TYPES).expand());
     }
 

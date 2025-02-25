@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.softwaremodule;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.ToString;
@@ -23,15 +22,12 @@ import lombok.experimental.Accessors;
 @ToString
 public class MgmtSoftwareModuleRequestBodyPut {
 
-    @JsonProperty
     @Schema(example = "SM Description")
     private String description;
 
-    @JsonProperty
     @Schema(example = "SM Vendor Name")
     private String vendor;
 
-    @JsonProperty
     @Schema(description = """
             Should be set only if change of locked state is requested. If put, the software module locked flag will be
             set to the requested. Note: unlock (i.e. set this property to false) with extreme care!

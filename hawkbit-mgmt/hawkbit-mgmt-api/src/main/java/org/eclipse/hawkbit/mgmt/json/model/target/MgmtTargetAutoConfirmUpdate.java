@@ -24,11 +24,9 @@ import lombok.experimental.Accessors;
 @ToString
 public class MgmtTargetAutoConfirmUpdate {
 
-    @JsonProperty
     @Schema(description = "(Optional) Initiator set on activation", example = "custom_initiator_value")
     private final String initiator;
 
-    @JsonProperty
     @Schema(description = "(Optional) Remark set on activation", example = "custom_remark")
     private final String remark;
 

@@ -29,12 +29,10 @@ public abstract class MgmtTypeEntity extends MgmtNamedEntity {
     @Schema(description = "Key that can be interpreted by the target", example = "id.t23")
     private String key;
 
-    @JsonProperty
     @Schema(description = "Colour assigned to the entity that could be used for representation purposes",
             example = "brown")
     private String colour;
 
-    @JsonProperty
     @Schema(description = "Deleted flag, used for soft deleted entities", example = "false")
     private boolean deleted;
 }

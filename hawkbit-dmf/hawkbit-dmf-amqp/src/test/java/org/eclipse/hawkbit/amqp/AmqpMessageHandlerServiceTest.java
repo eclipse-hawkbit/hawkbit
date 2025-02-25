@@ -174,8 +174,7 @@ class AmqpMessageHandlerServiceTest {
         final String knownThingId = "2";
         final String knownThingName = "NonDefaultTargetName";
 
-        final DmfCreateThing payload = new DmfCreateThing();
-        payload.setName(knownThingName);
+        final DmfCreateThing payload = new DmfCreateThing(knownThingName, null, null);
 
         processThingCreatedMessage(knownThingId, payload);
 
@@ -190,8 +189,7 @@ class AmqpMessageHandlerServiceTest {
         final String knownThingId = "2";
         final String knownThingTypeName = "TargetTypeName";
 
-        final DmfCreateThing payload = new DmfCreateThing();
-        payload.setType(knownThingTypeName);
+        final DmfCreateThing payload = new DmfCreateThing(null, knownThingTypeName, null);
 
         processThingCreatedMessage(knownThingId, payload);
 
@@ -215,12 +213,9 @@ class AmqpMessageHandlerServiceTest {
     void createThingWithAttributes() {
         final String knownThingId = "4";
 
-        final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
-        attributeUpdate.getAttributes().put("testKey1", "testValue1");
-        attributeUpdate.getAttributes().put("testKey2", "testValue2");
+        final DmfAttributeUpdate attributeUpdate = dmfAttributeUpdate();
 
-        final DmfCreateThing payload = new DmfCreateThing();
-        payload.setAttributeUpdate(attributeUpdate);
+        final DmfCreateThing payload = new DmfCreateThing(null, null, attributeUpdate);
 
         processThingCreatedMessage(knownThingId, payload);
 
@@ -235,14 +230,9 @@ class AmqpMessageHandlerServiceTest {
         final String knownThingId = "5";
         final String knownThingName = "NonDefaultTargetName";
 
-        final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
-        attributeUpdate.getAttributes().put("testKey1", "testValue1");
-        attributeUpdate.getAttributes().put("testKey2", "testValue2");
-        attributeUpdate.setMode(DmfUpdateMode.REPLACE);
-
-        final DmfCreateThing payload = new DmfCreateThing();
-        payload.setName(knownThingName);
-        payload.setAttributeUpdate(attributeUpdate);
+        final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate(
+                Map.of("testKey1", "testValue1", "testKey2", "testValue2"), DmfUpdateMode.REPLACE);
+        final DmfCreateThing payload = new DmfCreateThing(knownThingName, null, attributeUpdate);
 
         processThingCreatedMessage(knownThingId, payload);
 
@@ -259,9 +249,7 @@ class AmqpMessageHandlerServiceTest {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, "UPDATE_ATTRIBUTES");
-        final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
-        attributeUpdate.getAttributes().put("testKey1", "testValue1");
-        attributeUpdate.getAttributes().put("testKey2", "testValue2");
+        final DmfAttributeUpdate attributeUpdate = dmfAttributeUpdate();
 
         final Message message = createMessage(attributeUpdate, messageProperties);
 
@@ -281,9 +269,7 @@ class AmqpMessageHandlerServiceTest {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, "UPDATE_ATTRIBUTES");
-        final DmfAttributeUpdate attributeUpdate = new DmfAttributeUpdate();
-        attributeUpdate.getAttributes().put("testKey1", "testValue1");
-        attributeUpdate.getAttributes().put("testKey2", "testValue2");
+        DmfAttributeUpdate attributeUpdate = dmfAttributeUpdate();
 
         when(controllerManagementMock.updateControllerAttributes(targetIdCaptor.capture(), attributesCaptor.capture(),
                 modeCaptor.capture())).thenReturn(null);
@@ -296,25 +282,34 @@ class AmqpMessageHandlerServiceTest {
         assertThingAttributesModeCapturedField(null);
 
         // send a message which specifies update mode MERGE
-        attributeUpdate.setMode(DmfUpdateMode.MERGE);
+        attributeUpdate = dmfAttributeUpdate(DmfUpdateMode.MERGE);
         message = createMessage(attributeUpdate, messageProperties);
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
         // verify that the update mode is converted and forwarded as expected
         assertThingAttributesModeCapturedField(UpdateMode.MERGE);
 
         // send a message which specifies update mode REPLACE
-        attributeUpdate.setMode(DmfUpdateMode.REPLACE);
+        attributeUpdate = dmfAttributeUpdate(DmfUpdateMode.REPLACE);
         message = createMessage(attributeUpdate, messageProperties);
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
         // verify that the update mode is converted and forwarded as expected
         assertThingAttributesModeCapturedField(UpdateMode.REPLACE);
 
         // send a message which specifies update mode REMOVE
-        attributeUpdate.setMode(DmfUpdateMode.REMOVE);
+        attributeUpdate = dmfAttributeUpdate(DmfUpdateMode.REMOVE);
         message = createMessage(attributeUpdate, messageProperties);
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
         // verify that the update mode is converted and forwarded as expected
         assertThingAttributesModeCapturedField(UpdateMode.REMOVE);
+    }
+
+    private static DmfAttributeUpdate dmfAttributeUpdate() {
+        return dmfAttributeUpdate(null);
+    }
+
+    private static DmfAttributeUpdate dmfAttributeUpdate(final DmfUpdateMode mode) {
+        return new DmfAttributeUpdate(
+                Map.of("testKey1", "testValue1", "testKey2", "testValue2"), mode);
     }
 
     @Test
@@ -470,7 +465,6 @@ class AmqpMessageHandlerServiceTest {
     @Test
     @Description("Test feedback code is persisted in messages when provided with DmfActionUpdateStatus")
     void feedBackCodeIsPersistedInMessages() throws IllegalAccessException {
-
         // Mock
         final Action action = createActionWithTarget(22L);
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
@@ -483,23 +477,22 @@ class AmqpMessageHandlerServiceTest {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
 
-        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(23L, DmfActionStatus.RUNNING);
-        actionUpdateStatus.setSoftwareModuleId(Long.valueOf(2));
-        actionUpdateStatus.setCode(12);
+        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(
+                23L, DmfActionStatus.RUNNING, null, 2L, null, 12);
 
         final Message message = createMessage(actionUpdateStatus, messageProperties);
 
         // test
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
 
-        final ArgumentCaptor<ActionStatusCreate> actionPropertiesCaptor = ArgumentCaptor
-                .forClass(ActionStatusCreate.class);
+        final ArgumentCaptor<ActionStatusCreate> actionPropertiesCaptor = ArgumentCaptor.forClass(ActionStatusCreate.class);
 
         verify(controllerManagementMock, times(1)).addUpdateActionStatus(actionPropertiesCaptor.capture());
 
         final JpaActionStatus jpaActionStatus = (JpaActionStatus) actionPropertiesCaptor.getValue().build();
         assertThat(jpaActionStatus.getCode()).as("Action status for reported code is missing").contains(12);
-        assertThat(jpaActionStatus.getMessages()).as("Action status message for reported code is missing")
+        assertThat(jpaActionStatus.getMessages())
+                .as("Action status message for reported code is missing")
                 .contains("Device reported status code: 12");
     }
 
@@ -542,10 +535,7 @@ class AmqpMessageHandlerServiceTest {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, "UPDATE_AUTO_CONFIRM");
-        final DmfAutoConfirmation autoConfirmation = new DmfAutoConfirmation();
-        autoConfirmation.setEnabled(true);
-        autoConfirmation.setInitiator(initiator);
-        autoConfirmation.setRemark(remark);
+        final DmfAutoConfirmation autoConfirmation = new DmfAutoConfirmation(true, initiator, remark);
 
         final Message message = createMessage(autoConfirmation, messageProperties);
 
@@ -569,7 +559,7 @@ class AmqpMessageHandlerServiceTest {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, "UPDATE_AUTO_CONFIRM");
-        final DmfAutoConfirmation autoConfirmation = new DmfAutoConfirmation();
+        final DmfAutoConfirmation autoConfirmation = new DmfAutoConfirmation(false, null, null);
 
         final Message message = createMessage(autoConfirmation, messageProperties);
 
@@ -649,9 +639,7 @@ class AmqpMessageHandlerServiceTest {
     }
 
     private DmfActionUpdateStatus createActionUpdateStatus(final DmfActionStatus status, final Long id) {
-        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(id, status);
-        actionUpdateStatus.setSoftwareModuleId(Long.valueOf(2));
-        return actionUpdateStatus;
+        return new DmfActionUpdateStatus(id, status, null, 2L, null, null);
     }
 
     private MessageProperties createMessageProperties(final MessageType type) {

@@ -22,18 +22,16 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 
 /**
  * JSON representation of a multi-action request.
  */
-@NoArgsConstructor
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfMultiActionRequest {
 
-    private List<DmfMultiActionElement> elements;
+    private final List<DmfMultiActionElement> elements;
 
     @JsonCreator
     public DmfMultiActionRequest(final List<DmfMultiActionElement> elements) {
@@ -45,41 +43,28 @@ public class DmfMultiActionRequest {
         return elements;
     }
 
-    public void addElement(final DmfMultiActionElement element) {
-        if (elements == null) {
-            elements = new ArrayList<>();
-        }
-        elements.add(element);
-    }
-
-    public void addElement(final EventTopic topic, final DmfActionRequest action, final int weight) {
-        final DmfMultiActionElement element = new DmfMultiActionElement();
-        element.setTopic(topic);
-        element.setAction(action);
-        element.setWeight(weight);
-        addElement(element);
-    }
-
     /**
      * Represents an element within a {@link DmfMultiActionRequest}.
      */
     @Data
     public static class DmfMultiActionElement {
 
-        @JsonProperty
-        private EventTopic topic;
+        private final EventTopic topic;
+        private final DmfActionRequest action;
+        private final int weight;
 
-        @JsonProperty
-        private DmfActionRequest action;
-
-        @JsonProperty
-        private int weight;
-
-        @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "topic", defaultImpl = DmfActionRequest.class)
-        @JsonSubTypes({ @Type(value = DmfDownloadAndUpdateRequest.class, name = "DOWNLOAD"),
-                @Type(value = DmfDownloadAndUpdateRequest.class, name = "DOWNLOAD_AND_INSTALL") })
-        public void setAction(final DmfActionRequest action) {
+        @JsonCreator
+        public DmfMultiActionElement(
+                @JsonProperty("topic") final EventTopic topic,
+                @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "topic", defaultImpl = DmfActionRequest.class)
+                @JsonSubTypes({
+                        @Type(value = DmfDownloadAndUpdateRequest.class, name = "DOWNLOAD"),
+                        @Type(value = DmfDownloadAndUpdateRequest.class, name = "DOWNLOAD_AND_INSTALL") })
+                @JsonProperty("action") final DmfActionRequest action,
+                @JsonProperty("weight") final int weight) {
+            this.topic = topic;
             this.action = action;
+            this.weight = weight;
         }
     }
 }

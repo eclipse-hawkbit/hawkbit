@@ -775,15 +775,14 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private DdiAutoConfirmationState getAutoConfirmationState(final String controllerId) {
         return confirmationManagement.getStatus(controllerId).map(status -> {
-            final DdiAutoConfirmationState state = DdiAutoConfirmationState.active(status.getActivatedAt());
-            state.setInitiator(status.getInitiator());
-            state.setRemark(status.getRemark());
+            final DdiAutoConfirmationState state = new DdiAutoConfirmationState(
+                    true, status.getInitiator(), status.getRemark(), status.getActivatedAt());
             log.trace("Returning state auto-conf state active [initiator='{}' | activatedAt={}] for device {}",
                     controllerId, status.getInitiator(), status.getActivatedAt());
             return state;
         }).orElseGet(() -> {
             log.trace("Returning state auto-conf state disabled for device {}", controllerId);
-            return DdiAutoConfirmationState.disabled();
+            return new DdiAutoConfirmationState(false, null, null, 0L);
         });
     }
 }

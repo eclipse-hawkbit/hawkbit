@@ -71,7 +71,7 @@ public final class MgmtDistributionSetMapper {
         final MgmtDistributionSet response = new MgmtDistributionSet();
         MgmtRestModelMapper.mapNamedToNamed(response, distributionSet);
 
-        response.setDsId(distributionSet.getId());
+        response.setId(distributionSet.getId());
         response.setVersion(distributionSet.getVersion());
         response.setComplete(distributionSet.isComplete());
         response.setType(distributionSet.getType().getKey());
@@ -85,14 +85,14 @@ public final class MgmtDistributionSetMapper {
 
         response.setRequiredMigrationStep(distributionSet.isRequiredMigrationStep());
 
-        response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(response.getDsId()))
+        response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(response.getId()))
                 .withSelfRel().expand());
 
         return response;
     }
 
     static void addLinks(final DistributionSet distributionSet, final MgmtDistributionSet response) {
-        response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getAssignedSoftwareModules(response.getDsId(),
+        response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getAssignedSoftwareModules(response.getId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null))
                 .withRel(MgmtRestConstants.DISTRIBUTIONSET_V1_MODULE).expand());
@@ -100,7 +100,7 @@ public final class MgmtDistributionSetMapper {
         response.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class)
                 .getDistributionSetType(distributionSet.getType().getId())).withRel("type").expand());
 
-        response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getMetadata(response.getDsId(),
+        response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getMetadata(response.getId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata")
                 .expand());

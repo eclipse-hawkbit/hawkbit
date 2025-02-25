@@ -90,52 +90,41 @@ public class MgmtTarget extends MgmtNamedEntity {
     @Schema(description = "Controller ID", example = "123")
     private String controllerId;
 
-    @JsonProperty
     @Schema(description = "If the target is in sync", example = "in_sync")
     private String updateStatus;
 
-    @JsonProperty
     @Schema(description = "Timestamp of the last controller request", example = "1691065941102")
     private Long lastControllerRequestAt;
 
-    @JsonProperty
     @Schema(description = "Install timestamp", example = "1691065941155")
     private Long installedAt;
 
-    @JsonProperty
     @Schema(description = "Last known IP address of the target. Only presented if IP address of the target " +
             "itself is known (connected directly through DDI API)", example = "192.168.0.1")
     private String ipAddress;
 
-    @JsonProperty
     @Schema(description = "The last known address URI of the target. Includes information of the target is " +
             "connected either directly (DDI) through HTTP or indirectly (DMF) through amqp.",
             example = "http://192.168.0.1")
     private String address;
 
-    @JsonProperty
     @Schema(description = "Poll status")
     private MgmtPollStatus pollStatus;
 
-    @JsonProperty
     @Schema(description = "Pre-Shared key that allows targets to authenticate at Direct Device Integration " +
             "API if enabled in the tenant settings", example = "38e6a19932b014040ba061795186514e")
     @ToString.Exclude
     private String securityToken;
 
-    @JsonProperty
     @Schema(description = "Request re-transmission of target attributes", example = "true")
     private boolean requestAttributes;
 
-    @JsonProperty
     @Schema(description = "ID of the target type", example = "19")
     private Long targetType;
 
-    @JsonProperty
     @Schema(description = "Name of the target type", example = "defaultType")
     private String targetTypeName;
 
-    @JsonProperty
     @Schema(description = "Present if user consent flow active. Indicates if auto-confirm is active", example = "false")
     private Boolean autoConfirmActive;
 }

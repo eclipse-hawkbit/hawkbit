@@ -11,22 +11,22 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import jakarta.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.ToString;
 import org.springframework.hateoas.RepresentationModel;
 
 /**
  * Update action resource.
  */
-@NoArgsConstructor // needed for json create
-@Getter
+@Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -201,27 +201,23 @@ import org.springframework.hateoas.RepresentationModel;
                 }""")
 public class DdiConfirmationBaseAction extends RepresentationModel<DdiConfirmationBaseAction> {
 
-    @JsonProperty("id")
     @NotNull
     @Schema(description = "Id of the action", example = "6")
-    private String id;
+    private final String id;
 
-    @JsonProperty("confirmation")
     @NotNull
     @Schema(description = "Deployment confirmation operation")
-    private DdiDeployment confirmation;
+    private final DdiDeployment confirmation;
 
     /**
-     * Action history containing current action status and a list of feedback
-     * messages received earlier from the controller.
+     * Action history containing current action status and a list of feedback messages received earlier from the controller.
      */
-    @JsonProperty("actionHistory")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Schema(description = """
             (Optional) GET parameter to retrieve a given number of messages which are previously
             provided by the device. Useful if the devices sent state information to the feedback channel and never
             stored them locally""")
-    private DdiActionHistory actionHistory;
+    private final DdiActionHistory actionHistory;
 
     /**
      * Constructor.
@@ -230,7 +226,11 @@ public class DdiConfirmationBaseAction extends RepresentationModel<DdiConfirmati
      * @param confirmation chunk details
      * @param actionHistory containing current action status and a list of feedback messages received earlier from the controller.
      */
-    public DdiConfirmationBaseAction(final String id, final DdiDeployment confirmation, final DdiActionHistory actionHistory) {
+    @JsonCreator
+    public DdiConfirmationBaseAction(
+            @JsonProperty(value = "id", required = true) @NonNull final String id,
+            @JsonProperty(value = "confirmation", required = true) @NonNull final DdiDeployment confirmation,
+            @JsonProperty("actionHistory") final DdiActionHistory actionHistory) {
         this.id = id;
         this.confirmation = confirmation;
         this.actionHistory = actionHistory;

@@ -224,13 +224,13 @@ public final class MgmtTargetMapper {
     static MgmtAction toResponse(final String targetId, final Action action) {
         final MgmtAction result = new MgmtAction();
 
-        result.setActionId(action.getId());
+        result.setId(action.getId());
         result.setType(getType(action));
         if (ActionType.TIMEFORCED == action.getActionType()) {
             result.setForceTime(action.getForcedTime());
         }
         action.getWeight().ifPresent(result::setWeight);
-        result.setActionType(MgmtRestModelMapper.convertActionType(action.getActionType()));
+        result.setForceType(MgmtRestModelMapper.convertActionType(action.getActionType()));
 
         if (action.isActive()) {
             result.setStatus(MgmtAction.ACTION_PENDING);
@@ -354,7 +354,7 @@ public final class MgmtTargetMapper {
         result.setMessages(messages);
         result.setReportedAt(actionStatus.getCreatedAt());
         result.setTimestamp(actionStatus.getOccurredAt());
-        result.setStatusId(actionStatus.getId());
+        result.setId(actionStatus.getId());
         result.setType(actionStatus.getStatus().name().toLowerCase());
         actionStatus.getCode().ifPresent(result::setCode);
 

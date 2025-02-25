@@ -26,11 +26,9 @@ public class MgmtDistributionSetAssignment extends MgmtId {
     @Schema(description = "Forcetime in milliseconds", example = "1691065930359")
     private long forcetime;
 
-    @JsonProperty
     @Schema(description = "Importance of the assignment", example = "23")
     private Integer weight;
 
-    @JsonProperty
     @Schema(description = """
             (Available with user consent flow active) Specifies if the confirmation by the device
             is required for this action""", example = "false")

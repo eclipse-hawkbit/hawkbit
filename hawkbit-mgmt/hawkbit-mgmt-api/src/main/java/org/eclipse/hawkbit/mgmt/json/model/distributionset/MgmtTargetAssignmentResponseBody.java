@@ -34,7 +34,7 @@ import org.springframework.hateoas.RepresentationModel;
 public class MgmtTargetAssignmentResponseBody extends RepresentationModel<MgmtTargetAssignmentResponseBody> {
 
     @Schema(description = """
-            Targets that had this distribution set already assigned (in "offline" case this includes
+            Targets that had this distribution already assigned (in "offline" case this includes
             targets that have arbitrary updates running)""")
     private int alreadyAssigned;
 
@@ -44,6 +44,7 @@ public class MgmtTargetAssignmentResponseBody extends RepresentationModel<MgmtTa
     /**
      * @return the count of assigned targets
      */
+    @Schema(description = "Targets that had this distribution set really assigned excluding already assigned")
     @JsonProperty("assigned")
     public int getAssigned() {
         return assignedActions == null ? 0 : assignedActions.size();
@@ -52,6 +53,7 @@ public class MgmtTargetAssignmentResponseBody extends RepresentationModel<MgmtTa
     /**
      * @return the total
      */
+    @Schema(description = "Total targets")
     @JsonProperty("total")
     public int getTotal() {
         return getAssigned() + alreadyAssigned;

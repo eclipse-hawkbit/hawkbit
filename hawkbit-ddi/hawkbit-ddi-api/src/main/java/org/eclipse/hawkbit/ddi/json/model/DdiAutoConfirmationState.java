@@ -11,17 +11,17 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import jakarta.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.hateoas.RepresentationModel;
 
-@NoArgsConstructor // needed for json create
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -32,25 +32,26 @@ public class DdiAutoConfirmationState extends RepresentationModel<DdiAutoConfirm
 
     @NotNull
     @Schema(example = "true")
-    private boolean active;
+    private final boolean active;
 
     @Schema(example = "exampleUserId")
-    private String initiator;
+    private final String initiator;
 
     @Schema(example = "exampleRemark")
-    private String remark;
+    private final String remark;
 
     @Schema(example = "1691065895439")
-    private Long activatedAt;
+    private final Long activatedAt;
 
-    public static DdiAutoConfirmationState active(final long activatedAt) {
-        final DdiAutoConfirmationState state = new DdiAutoConfirmationState();
-        state.setActive(true);
-        state.setActivatedAt(activatedAt);
-        return state;
-    }
-
-    public static DdiAutoConfirmationState disabled() {
-        return new DdiAutoConfirmationState();
+    @JsonCreator
+    public DdiAutoConfirmationState(
+            @JsonProperty("active") final boolean active,
+            @JsonProperty("initiator") final String initiator,
+            @JsonProperty("remark") final String remark,
+            @JsonProperty("activatedAt") final Long activatedAt) {
+        this.active = active;
+        this.initiator = initiator;
+        this.remark = remark;
+        this.activatedAt = activatedAt;
     }
 }

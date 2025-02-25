@@ -9,22 +9,21 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.hateoas.RepresentationModel;
 
 /**
  * {@link DdiControllerBase} resource content.
  */
-@NoArgsConstructor // needed for json deserialization
-@Getter
+@Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @JsonInclude(Include.NON_NULL)
@@ -56,15 +55,15 @@ import org.springframework.hateoas.RepresentationModel;
                 }""")
 public class DdiControllerBase extends RepresentationModel<DdiControllerBase> {
 
-    @JsonProperty
-    private DdiConfig config;
+    private final DdiConfig config;
 
     /**
      * Constructor.
      *
      * @param config configuration of the SP target
      */
-    public DdiControllerBase(final DdiConfig config) {
+    @JsonCreator
+    public DdiControllerBase(@JsonProperty("config") final DdiConfig config) {
         this.config = config;
     }
 }

@@ -9,38 +9,33 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.Data;
 
 /**
  * Polling interval for the SP target.
  */
-@NoArgsConstructor // needed for json create
-@Getter
-@EqualsAndHashCode
-@ToString
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = "Suggested sleep time between polls")
 public class DdiPolling {
 
-    @JsonProperty
     @Schema(description = "Sleep time in HH:MM:SS notation", pattern = "HH:MM:SS", example = "12:00:00")
-    private String sleep;
+    private final String sleep;
 
     /**
      * Constructor.
      *
      * @param sleep between polls
      */
-    public DdiPolling(final String sleep) {
+    @JsonCreator
+    public DdiPolling(@JsonProperty("sleep") final String sleep) {
         this.sleep = sleep;
     }
 }

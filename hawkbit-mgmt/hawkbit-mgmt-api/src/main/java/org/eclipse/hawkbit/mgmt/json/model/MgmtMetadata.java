@@ -32,7 +32,6 @@ public class MgmtMetadata {
     @Schema(description = "Metadata property key", example = "someKnownKey")
     private String key;
 
-    @JsonProperty
     @Schema(description = "Metadata property value", example = "someKnownKeyValue")
     private String value;
 }

@@ -63,13 +63,13 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
     public DistributionSetView(final HawkbitMgmtClient hawkbitClient) {
         super(
                 new DistributionSetFilter(hawkbitClient),
-                new SelectionGrid.EntityRepresentation<>(MgmtDistributionSet.class, MgmtDistributionSet::getDsId) {
+                new SelectionGrid.EntityRepresentation<>(MgmtDistributionSet.class, MgmtDistributionSet::getId) {
 
                     private final DistributionSetDetails details = new DistributionSetDetails(hawkbitClient);
 
                     @Override
                     protected void addColumns(Grid<MgmtDistributionSet> grid) {
-                        grid.addColumn(MgmtDistributionSet::getDsId).setHeader(Constants.ID).setAutoWidth(true);
+                        grid.addColumn(MgmtDistributionSet::getId).setHeader(Constants.ID).setAutoWidth(true);
                         grid.addColumn(MgmtDistributionSet::getName).setHeader(Constants.NAME).setAutoWidth(true);
                         grid.addColumn(MgmtDistributionSet::getVersion).setHeader(Constants.VERSION).setAutoWidth(true);
                         grid.addColumn(MgmtDistributionSet::getTypeName).setHeader(Constants.TYPE).setAutoWidth(true);
@@ -87,7 +87,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                 selectionGrid -> {
                     selectionGrid.getSelectedItems().forEach(
                             distributionSet -> hawkbitClient.getDistributionSetRestApi()
-                                    .deleteDistributionSet(distributionSet.getDsId()));
+                                    .deleteDistributionSet(distributionSet.getId()));
                     return CompletableFuture.completedFuture(null);
                 });
     }
@@ -95,11 +95,11 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
     private static SelectionGrid<MgmtSoftwareModule, Long> selectSoftwareModuleGrid() {
         return new SelectionGrid<>(
                 new SelectionGrid.EntityRepresentation<>(
-                        MgmtSoftwareModule.class, MgmtSoftwareModule::getModuleId) {
+                        MgmtSoftwareModule.class, MgmtSoftwareModule::getId) {
 
                     @Override
                     protected void addColumns(Grid<MgmtSoftwareModule> grid) {
-                        grid.addColumn(MgmtSoftwareModule::getModuleId).setHeader(Constants.ID).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getId).setHeader(Constants.ID).setAutoWidth(true);
                         grid.addColumn(MgmtSoftwareModule::getName).setHeader(Constants.NAME).setAutoWidth(true);
                         grid.addColumn(MgmtSoftwareModule::getVersion).setHeader(Constants.VERSION).setAutoWidth(true);
                         grid.addColumn(MgmtSoftwareModule::getTypeName).setHeader(Constants.TYPE).setAutoWidth(true);
@@ -187,7 +187,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             softwareModulesGrid.setItems(query -> Optional.ofNullable(
                     hawkbitClient.getDistributionSetRestApi()
                             .getAssignedSoftwareModules(
-                                    distributionSet.getDsId(),
+                                    distributionSet.getId(),
                                     query.getOffset(), query.getLimit(), Constants.NAME_ASC)
                             .getBody()).stream().flatMap(body -> body.getContent().stream()));
             softwareModulesGrid.setSelectionMode(Grid.SelectionMode.NONE);
@@ -274,7 +274,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                         .flatMap(Collection::stream)
                         .findFirst()
                         .orElseThrow()
-                        .getDsId();
+                        .getId();
                 new AddSoftwareModulesDialog(distributionSetId, hawkbitClient).open();
             });
         }
@@ -308,7 +308,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                         open();
                     }}.result(),
                     v -> {
-                        Utils.remove(softwareModulesGrid.getSelectedItems(), softwareModules, MgmtSoftwareModule::getModuleId);
+                        Utils.remove(softwareModulesGrid.getSelectedItems(), softwareModules, MgmtSoftwareModule::getId);
                         softwareModulesGrid.refreshGrid(false);
                         return CompletableFuture.completedFuture(null);
                     },
@@ -318,7 +318,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                 hawkbitClient.getDistributionSetRestApi().assignSoftwareModules(
                         distributionSetId, softwareModules.stream().map(softwareModule -> {
                             final MgmtSoftwareModuleAssignment assignment = new MgmtSoftwareModuleAssignment();
-                            assignment.setId(softwareModule.getModuleId());
+                            assignment.setId(softwareModule.getId());
                             return assignment;
                         }).toList());
                 close();
