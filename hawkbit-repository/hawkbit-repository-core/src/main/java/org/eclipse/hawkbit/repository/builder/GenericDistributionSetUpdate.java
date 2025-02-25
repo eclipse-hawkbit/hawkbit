@@ -20,9 +20,9 @@ import lombok.experimental.Accessors;
  * Update implementation.
  */
 @Data
+@Accessors(fluent = true) // override locked()
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-@Accessors(fluent = true)
 public class GenericDistributionSetUpdate extends AbstractDistributionSetUpdateCreate<DistributionSetUpdate> implements DistributionSetUpdate {
 
     @Nullable
