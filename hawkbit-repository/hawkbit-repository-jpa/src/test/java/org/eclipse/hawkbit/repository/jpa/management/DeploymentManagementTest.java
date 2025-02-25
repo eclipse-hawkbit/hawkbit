@@ -277,7 +277,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
         }
         // not exists
-        assignDS.add(100L);
+        assignDS.add(100_000L);
 
         final Long tagId = distributionSetTagManagement.create(entityFactory.tag().create().name("Tag1")).getId();
 
