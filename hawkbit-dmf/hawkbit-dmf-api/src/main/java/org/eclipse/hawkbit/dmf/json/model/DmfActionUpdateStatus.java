@@ -51,7 +51,7 @@ public class DmfActionUpdateStatus {
     }
 
     public DmfActionUpdateStatus(final Long actionId, final DmfActionStatus actionStatus) {
-        this(actionId, actionStatus, null, null, null, 0);
+        this(actionId, actionStatus, null, null, null, null);
     }
 
     public List<String> getMessage() {
