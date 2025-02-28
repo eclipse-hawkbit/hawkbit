@@ -33,6 +33,8 @@ jobs:
           cache: "maven"
 
       - name: Create hawkBit container images
+        env:
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_API_TOKEN }}
         run: |
           mvn clean install -DskipTests && \
           cd docker/docker_build && \

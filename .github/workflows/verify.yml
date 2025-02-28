@@ -48,7 +48,11 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Check file license headers
-        run: mvn license:check --batch-mode
+        run: mvn clean license:check --batch-mode
+        env:
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_API_TOKEN }}
 
       - name: Run tests & javadoc
-        run: mvn verify javadoc:javadoc --batch-mode
+        run: mvn clean verify javadoc:javadoc --batch-mode
+        env:
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_API_TOKEN }}
