@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -51,6 +52,7 @@ import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.simple.view.util.TableView;
 import org.eclipse.hawkbit.ui.simple.view.util.Utils;
 import org.springframework.util.ObjectUtils;
+import java.util.stream.Collectors;
 
 @PageTitle("Targets")
 @Route(value = "targets", layout = MainLayout.class)
@@ -73,7 +75,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                         grid.addColumn(MgmtTarget::getTargetTypeName).setHeader(Constants.TYPE).setAutoWidth(true);
 
                         grid.setItemDetailsRenderer(new ComponentRenderer<>(
-                                TargetDetails::new, TargetDetails::setItem));
+                                () -> new TargetDetails(hawkbitClient), TargetDetails::setItem));
                     }
                 },
                 (query, filter) -> hawkbitClient.getTargetRestApi()
@@ -209,20 +211,23 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
     private static class TargetDetails extends FormLayout {
 
+        private final transient HawkbitMgmtClient hawkbitClient;
         private final TextArea description = new TextArea(Constants.DESCRIPTION);
         private final TextField createdBy = Utils.textField(Constants.CREATED_BY);
         private final TextField createdAt = Utils.textField(Constants.CREATED_AT);
         private final TextField lastModifiedBy = Utils.textField(Constants.LAST_MODIFIED_BY);
         private final TextField lastModifiedAt = Utils.textField(Constants.LAST_MODIFIED_AT);
         private final TextField securityToken = Utils.textField(Constants.SECURITY_TOKEN);
+        private final TextArea targetAttributes = new TextArea(Constants.ATTRIBUTES);
 
-        private TargetDetails() {
+        private TargetDetails(HawkbitMgmtClient hawkbitClient) {
+            this.hawkbitClient = hawkbitClient;
             description.setMinLength(2);
             Stream.of(
                             description,
                             createdBy, createdAt,
                             lastModifiedBy, lastModifiedAt,
-                            securityToken)
+                            securityToken, targetAttributes)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -239,6 +244,13 @@ public class TargetView extends TableView<MgmtTarget, String> {
             lastModifiedBy.setValue(target.getLastModifiedBy());
             lastModifiedAt.setValue(new Date(target.getLastModifiedAt()).toString());
             securityToken.setValue(target.getSecurityToken());
+            var response = hawkbitClient.getTargetRestApi().getAttributes(target.getControllerId());
+            if (response.getStatusCode().is2xxSuccessful()) {
+                targetAttributes.setValue(Objects.requireNonNullElse(response.getBody(), Collections.emptyMap()).entrySet().stream().map(entry -> entry.getKey() + ": " +
+                        entry.getValue()).collect(Collectors.joining("\n")));
+            } else {
+                targetAttributes.setValue("Error occurred fetching attributes from server: " + response.getStatusCode());
+            }
         }
     }
 

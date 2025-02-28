@@ -26,6 +26,7 @@ public interface Constants {
     String LAST_MODIFIED_BY = "Last modified by";
     String LAST_MODIFIED_AT = "Last modified at";
     String SECURITY_TOKEN = "Security Token";
+    String ATTRIBUTES = "Attributes";
 
     // rollout
     String GROUP_COUNT = "Group Count";
