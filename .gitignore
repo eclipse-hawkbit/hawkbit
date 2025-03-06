@@ -69,3 +69,6 @@ spring-shell.log
 
 # Documentation
 .gitmodules
+
+# Develocity
+.mvn/.develocity/develocity-workspace-id
