@@ -48,7 +48,7 @@ or with MySQL
 ```bash
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/docker
-$ docker-compose -f docker-compose-monolith-simple-ui-mysql.yml up -d
+$ docker-compose -f docker-compose-monolith-with-simple-ui-mysql.yml up -d
 ```
 
 Note: _-d_ flag is used to run the containers in detached mode. If you want to see the logs, you can remove the flag.
@@ -78,7 +78,7 @@ or with MySQL
 ```bash
 $ git clone https://github.com/eclipse-hawkbit/hawkbit.git
 $ cd hawkbit/docker
-$ docker-compose -f docker-compose-micro-services-simple-ui-mysql.yml up -d
+$ docker-compose -f docker-compose-micro-services-with-simple-ui-mysql.yml up -d
 ```
 
 Note: _-d_ flag is used to run the containers in detached mode. If you want to see the logs, you can remove the flag.
