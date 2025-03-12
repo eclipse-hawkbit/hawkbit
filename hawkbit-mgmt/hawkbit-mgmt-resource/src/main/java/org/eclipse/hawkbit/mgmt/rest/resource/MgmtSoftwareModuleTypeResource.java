@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
@@ -74,6 +75,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     }
 
     @Override
+    @AuditLog(entity = "SoftwareModuleType", message = "Delete Software Module Type")
     public ResponseEntity<Void> deleteSoftwareModuleType(final Long softwareModuleTypeId) {
         softwareModuleTypeManagement.delete(softwareModuleTypeId);
         return ResponseEntity.ok().build();
