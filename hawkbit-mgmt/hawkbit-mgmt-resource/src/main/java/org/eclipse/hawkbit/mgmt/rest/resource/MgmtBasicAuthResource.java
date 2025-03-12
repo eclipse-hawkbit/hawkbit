@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.auth.MgmtUserInfo;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtBasicAuthRestApi;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -28,6 +29,7 @@ public class MgmtBasicAuthResource implements MgmtBasicAuthRestApi {
     }
 
     @Override
+    @AuditLog(entity = "BasicAuth", message = "Validate Basic Auth")
     public ResponseEntity<MgmtUserInfo> validateBasicAuth() {
         final MgmtUserInfo userInfo = new MgmtUserInfo();
         userInfo.setUsername(tenantAware.getCurrentUsername());
