@@ -23,6 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
+import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionHistory;
 import org.eclipse.hawkbit.ddi.json.model.DdiActivateAutoConfirmation;
@@ -451,6 +452,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     @Override
+    @AuditLog(entity = "DDI", message = "Activate Auto Confirmation", logResponse = true)
     public ResponseEntity<Void> activateAutoConfirmation(
             final String tenant, final String controllerId, final DdiActivateAutoConfirmation body) {
         final String initiator = body == null ? null : body.getInitiator();
@@ -462,6 +464,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     @Override
+    @AuditLog(entity = "DDI", message = "Deactivate Auto Confirmation", logResponse = true)
     public ResponseEntity<Void> deactivateAutoConfirmation(final String tenant, final String controllerId) {
         log.debug("Deactivate auto-confirmation request for device ‘{}‘", controllerId);
         confirmationManagement.deactivateAutoConfirmation(controllerId);

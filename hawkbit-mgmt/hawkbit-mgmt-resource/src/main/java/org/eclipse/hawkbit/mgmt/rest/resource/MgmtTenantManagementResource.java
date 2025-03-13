@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValue;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValueRequest;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTenantManagementRestApi;
@@ -72,6 +73,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
     }
 
     @Override
+    @AuditLog(entity = "TenantConfiguration", message = "Delete Tenant Configuration Value")
     public ResponseEntity<Void> deleteTenantConfigurationValue(final String keyName) {
         //Default DistributionSet Type cannot be deleted as is part of TenantMetadata
         if (isDefaultDistributionSetTypeKey(keyName)) {
@@ -90,6 +92,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
     }
 
     @Override
+    @AuditLog(entity = "TenantConfiguration", message = "Update Tenant Configuration Value")
     public ResponseEntity<MgmtSystemTenantConfigurationValue> updateTenantConfigurationValue(
             final String keyName, final MgmtSystemTenantConfigurationValueRequest configurationValueRest) {
         Serializable configurationValue = configurationValueRest.getValue();
@@ -106,6 +109,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
     }
 
     @Override
+    @AuditLog(entity = "TenantConfiguration", message = "Update Tenant Configuration")
     public ResponseEntity<List<MgmtSystemTenantConfigurationValue>> updateTenantConfiguration(
             final Map<String, Serializable> configurationValueMap) {
         final boolean containsNull = configurationValueMap.keySet().stream().anyMatch(Objects::isNull);

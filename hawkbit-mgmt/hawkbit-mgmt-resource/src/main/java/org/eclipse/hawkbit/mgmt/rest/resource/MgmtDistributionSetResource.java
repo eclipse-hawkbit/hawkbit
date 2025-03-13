@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import jakarta.validation.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -168,12 +169,14 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
+    @AuditLog(entity = "DistributionSet", message = "Delete Distribution Set")
     public ResponseEntity<Void> deleteDistributionSet(final Long distributionSetId) {
         distributionSetManagement.delete(distributionSetId);
         return ResponseEntity.ok().build();
     }
 
     @Override
+    @AuditLog(entity = "DistributionSet", message = "Update Distribution Set")
     public ResponseEntity<MgmtDistributionSet> updateDistributionSet(
             final Long distributionSetId,
             final MgmtDistributionSetRequestBodyPut toUpdate) {
@@ -343,6 +346,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
+    @AuditLog(entity = "DistributionSet", message = "Delete Assigned Distribution Set")
     public ResponseEntity<Void> deleteAssignSoftwareModules(final Long distributionSetId, final Long softwareModuleId) {
         distributionSetManagement.unassignSoftwareModule(distributionSetId, softwareModuleId);
         return ResponseEntity.ok().build();
@@ -396,6 +400,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
+    @AuditLog(entity = "DistributionSet", message = "Invalidate Distribution Set")
     public ResponseEntity<Void> invalidateDistributionSet(
             final Long distributionSetId, final MgmtInvalidateDistributionSetRequestBody invalidateRequestBody) {
         distributionSetInvalidationManagement

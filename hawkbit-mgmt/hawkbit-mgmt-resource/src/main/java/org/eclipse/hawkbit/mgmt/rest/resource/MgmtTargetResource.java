@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import jakarta.validation.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
@@ -138,6 +139,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
+    @AuditLog(entity = "Target", message = "Update Target")
     public ResponseEntity<MgmtTarget> updateTarget(final String targetId, final MgmtTargetRequestBody targetRest) {
         if (targetRest.getRequestAttributes() != null) {
             if (Boolean.TRUE.equals(targetRest.getRequestAttributes())) {
@@ -172,6 +174,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
+    @AuditLog(entity = "Target", message = "Delete Target")
     public ResponseEntity<Void> deleteTarget(final String targetId) {
         this.targetManagement.deleteByControllerID(targetId);
         log.debug("{} target deleted, return status {}", targetId, HttpStatus.OK);
@@ -179,12 +182,14 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
+    @AuditLog(entity = "Target", message = "Unassign Target Type")
     public ResponseEntity<Void> unassignTargetType(final String targetId) {
         this.targetManagement.unassignType(targetId);
         return ResponseEntity.ok().build();
     }
 
     @Override
+    @AuditLog(entity = "Target", message = "Assign Target")
     public ResponseEntity<Void> assignTargetType(final String targetId, final MgmtId targetTypeId) {
         this.targetManagement.assignType(targetId, targetTypeId.getId());
         return ResponseEntity.ok().build();
@@ -245,6 +250,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
+    @AuditLog(entity = "Target", message = "Cancel Target Action")
     public ResponseEntity<Void> cancelAction(final String targetId, final Long actionId, final boolean force) {
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
@@ -266,6 +272,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
+    @AuditLog(entity = "Target", message = "Update Target Action")
     public ResponseEntity<MgmtAction> updateAction(final String targetId, final Long actionId, final MgmtActionRequestBodyPut actionUpdate) {
 
         Action action = deploymentManagement.findAction(actionId)
@@ -285,6 +292,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
+    @AuditLog(entity = "Target", message = "Cancel Target Action Confirmation")
     public ResponseEntity<Void> updateActionConfirmation(final String targetId, final Long actionId,
             final MgmtActionConfirmationRequestBodyPut actionConfirmation) {
         log.debug("updateActionConfirmation with data [targetId={}, actionId={}]: {}", targetId, actionId, actionConfirmation);
@@ -369,6 +377,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
+    @AuditLog(entity = "Target", message = "Set Distribution Set To Target")
     public ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
             final String targetId, final MgmtDistributionSetAssignments dsAssignments, final Boolean offline) {
         if (offline != null && offline) {
@@ -452,6 +461,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
+    @AuditLog(entity = "Target", message = "Delete Target Metadata")
     public ResponseEntity<Void> deleteMetadata(final String targetId, final String metadataKey) {
         targetManagement.deleteMetaData(targetId, metadataKey);
         return ResponseEntity.ok().build();
@@ -472,6 +482,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
+    @AuditLog(entity = "Target", message = "Activate Target Auto Confirmation")
     public ResponseEntity<Void> activateAutoConfirm(final String targetId, final MgmtTargetAutoConfirmUpdate update) {
         final String initiator = getNullIfEmpty(update, MgmtTargetAutoConfirmUpdate::getInitiator);
         final String remark = getNullIfEmpty(update, MgmtTargetAutoConfirmUpdate::getRemark);
@@ -480,6 +491,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
+    @AuditLog(entity = "Target", message = "Deactivate Target Auto Confirmation")
     public ResponseEntity<Void> deactivateAutoConfirm(final String targetId) {
         confirmationManagement.deactivateAutoConfirmation(targetId);
         return new ResponseEntity<>(HttpStatus.OK);
