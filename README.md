@@ -93,14 +93,13 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
 ## SQL database
 
-| Database                          |                           H2                           |                                MySQL/MariaDB                                |                           MS SQL Server                           |                            PostgreSQL                             |      IBM DB2       |
-|-----------------------------------|:------------------------------------------------------:|:---------------------------------------------------------------------------:|:-----------------------------------------------------------------:|:-----------------------------------------------------------------:|:------------------:|
-| DDLs maintained by project        |                   :white_check_mark:                   |                             :white_check_mark:                              |                        :white_check_mark:                         |                        :white_check_mark:                         | :white_check_mark: |
-| Test dependencies defined         |                   :white_check_mark:                   |                             :white_check_mark:                              |                        :white_check_mark:                         |                        :white_check_mark:                         |                    |
-| Versions tested                   |                          2.1                           |                          MySQL 8.0.23, AWS Aurora                           |                      MS SQL Server 2017/2019                      |                         PostgreSQL 12/13                          |  DB2 Server v11.1  |
-| Docker image with driver provided |                   :white_check_mark:                   |                     :white_check_mark: (Tag: "-mysql")                      |                        :white_check_mark:                         |                        :white_check_mark:                         |                    |
-| JDBC driver                       | [H2 2.1.214](https://github.com/h2database/h2database) | [MariaDB Connector/J 2.7.8](https://github.com/MariaDB/mariadb-connector-j) | [MSSQL-JDBC 10.2.3.jre8](https://github.com/Microsoft/mssql-jdbc) | [PostgreSQL JDBC Driver 42.3.8](https://github.com/pgjdbc/pgjdbc) |                    |
-| Status                            |                       Test, Dev                        |                              Production grade                               |                         Production grade                          |                             Test, Dev                             |     Test, Dev      |
+| Database                          |                       H2                       |                             MySQL/MariaDB                             |                        PostgreSQL                        |
+|-----------------------------------|:----------------------------------------------:|:---------------------------------------------------------------------:|:--------------------------------------------------------:|
+| DDLs maintained by project        |               :white_check_mark:               |                          :white_check_mark:                           |                    :white_check_mark:                    |
+| Test dependencies defined         |               :white_check_mark:               |                          :white_check_mark:                           |                    :white_check_mark:                    |
+| Docker image with driver provided |               :white_check_mark:               |                  :white_check_mark: (Tag: "-mysql")                   |                    :white_check_mark:                    |
+| JDBC driver                       | [H2](https://github.com/h2database/h2database) | [MariaDB Connector/J](https://github.com/MariaDB/mariadb-connector-j) |[PostgreSQL JDBC Driver](https://github.com/pgjdbc/pgjdbc)|
+| Status                            |                   Test, Dev                    |                           Production grade                            |                        Test, Dev                         |
 
 ## (Optional) RabbitMQ: 3.6,3.7,3.8
 
