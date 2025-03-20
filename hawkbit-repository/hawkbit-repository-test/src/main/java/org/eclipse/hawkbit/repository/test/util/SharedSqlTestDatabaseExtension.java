@@ -56,9 +56,6 @@ public class SharedSqlTestDatabaseExtension implements BeforeAllCallback {
             case "H2":
                 database = new H2TestDatabase(context);
                 break;
-            case "SQL_SERVER":
-                database = new MsSqlTestDatabase(context);
-                break;
             case "MYSQL":
                 database = new MySqlTestDatabase(context);
                 break;

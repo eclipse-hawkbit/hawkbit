@@ -350,6 +350,9 @@ class RSQLUtilityTest {
         verify(criteriaBuilderMock, times(1)).like(pathOfString(baseSoftwareModuleRootMock), "a\\%%".toUpperCase(), '\\');
     }
 
+    // MsSQL is not officially supported
+    // thought it may be available through configuration and adding necessarily dependencies
+    // so we keep RSQL compatibility testing
     @Test
     void correctRsqlBuildsLikePredicateWithPercentageSQLServer() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
@@ -358,8 +361,7 @@ class RSQLUtilityTest {
         when(baseSoftwareModuleRootMock.getJavaType()).thenReturn((Class) String.class);
         when(criteriaBuilderMock.upper(pathOfString(baseSoftwareModuleRootMock))).thenReturn(pathOfString(baseSoftwareModuleRootMock));
         when(criteriaBuilderMock.like(any(Expression.class), anyString(), eq('\\'))).thenReturn(mock(Predicate.class));
-        when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class)))
-                .thenReturn(mock(Predicate.class));
+        when(criteriaBuilderMock.<String> greaterThanOrEqualTo(any(Expression.class), any(String.class))).thenReturn(mock(Predicate.class));
 
         // test
         RSQLUtility.buildRsqlSpecification(correctRsql, SoftwareModuleFields.class, null, Database.SQL_SERVER)
