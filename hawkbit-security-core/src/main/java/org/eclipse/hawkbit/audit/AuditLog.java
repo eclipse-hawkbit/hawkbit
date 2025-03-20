@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-
 package org.eclipse.hawkbit.audit;
 
 import java.lang.annotation.ElementType;
@@ -18,13 +17,18 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface AuditLog {
+
     enum Level {
         INFO, WARN, ERROR
     }
 
-    String entity();
-    String[] includeParams() default {};
-    String message() default "";
     Level level() default Level.INFO;
+
+    String entity();
+
+    String message() default "";
+
+    String[] logParams() default {};
+
     boolean logResponse() default false;
 }

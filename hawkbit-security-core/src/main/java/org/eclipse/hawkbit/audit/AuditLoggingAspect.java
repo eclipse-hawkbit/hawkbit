@@ -7,10 +7,15 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-
 package org.eclipse.hawkbit.audit;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -19,11 +24,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
+@Slf4j
 @Aspect
 @Component
 public class AuditLoggingAspect {
@@ -34,14 +35,25 @@ public class AuditLoggingAspect {
      */
     @Around("@annotation(auditLog)")
     public Object handleAuditLogging(final ProceedingJoinPoint joinPoint, final AuditLog auditLog) throws Throwable {
-        String paramsToLog = getParamsToLog(joinPoint, auditLog);
         try {
-            Object result = joinPoint.proceed();
-            ResultMessage resultMessage = getResultMessage(result, auditLog);
-            logAudit(joinPoint, auditLog, resultMessage.message(), paramsToLog, resultMessage.level());
+            final Object result = joinPoint.proceed();
+            try { // log success
+                final ResultMessage resultMessage = getResultMessage(result, auditLog);
+                final String paramsToLog = getParamsToLog(joinPoint, auditLog);
+                logAudit(joinPoint, auditLog, resultMessage.message(), paramsToLog, resultMessage.level());
+            } catch (final Throwable logError) {
+                // should never fail!
+                log.debug("Failed to log success", logError);
+            }
             return result;
-        } catch (Throwable t) {
-            logAudit(joinPoint, auditLog, t.getMessage(), paramsToLog, AuditLog.Level.ERROR);
+        } catch (final Throwable t) {
+            try {
+                final String paramsToLog = getParamsToLog(joinPoint, auditLog);
+                logAudit(joinPoint, auditLog, t.getMessage(), paramsToLog, AuditLog.Level.ERROR);
+            } catch (final Throwable logError) {
+                // should never fail!
+                log.debug("Failed to log error", logError);
+            }
             throw t;
         }
     }
@@ -49,12 +61,14 @@ public class AuditLoggingAspect {
     /**
      * Logs both the request details and the response.
      */
-    private void logAudit(final JoinPoint joinPoint, final AuditLog auditLog, final String resultMessage, final String paramsToLog, final AuditLog.Level logLevel) {
-        String methodName = joinPoint.getSignature().getName();
+    private void logAudit(
+            final JoinPoint joinPoint, final AuditLog auditLog, final String resultMessage, final String paramsToLog,
+            final AuditLog.Level logLevel) {
+        final String methodName = joinPoint.getSignature().getName();
 
-        String logMessage = String.format(
-            "Method: %s - Message: %s - Parameters: %s - Response: %s",
-            methodName, auditLog.message(), paramsToLog, resultMessage
+        final String logMessage = String.format(
+                "Method: %s - Message: %s - Parameters: %s - Response: %s",
+                methodName, auditLog.message(), paramsToLog, resultMessage
         );
 
         switch (logLevel) {
@@ -71,27 +85,27 @@ public class AuditLoggingAspect {
     }
 
     private String getParamsToLog(final JoinPoint joinPoint, final AuditLog auditLog) {
-        Object[] args = joinPoint.getArgs();
-        String[] includeParams = auditLog.includeParams();
+        final Object[] args = joinPoint.getArgs();
+        final String[] includeParams = auditLog.logParams();
 
         if (includeParams.length == 0) {
             return Arrays.deepToString(args);
         } else {
-            MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-            String[] paramNames = methodSignature.getParameterNames();
-            Map<String, Object> paramMap = IntStream.range(0, paramNames.length)
-                .boxed()
-                .collect(Collectors.toMap(i -> paramNames[i], i -> args[i]));
+            final MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+            final String[] paramNames = methodSignature.getParameterNames();
+            final Map<String, Object> paramMap = IntStream.range(0, paramNames.length)
+                    .boxed()
+                    .collect(Collectors.toMap(i -> paramNames[i], i -> args[i]));
 
             return Arrays.stream(includeParams)
-                .filter(paramMap::containsKey)
-                .map(name -> name + "=" + paramMap.get(name))
-                .collect(Collectors.joining(", "));
+                    .filter(paramMap::containsKey)
+                    .map(name -> name + "=" + paramMap.get(name))
+                    .collect(Collectors.joining(", "));
         }
     }
 
     private ResultMessage getResultMessage(final Object result, final AuditLog auditLog) {
-        ResultMessage.ResultMessageBuilder resultMessageBuilder = ResultMessage.builder();
+        final ResultMessage.ResultMessageBuilder resultMessageBuilder = ResultMessage.builder();
         if (result instanceof ResponseEntity<?> responseEntity) {
             int statusCode = responseEntity.getStatusCode().value();
             if (statusCode >= 200 && statusCode < 300) {
@@ -117,6 +131,5 @@ public class AuditLoggingAspect {
     }
 
     @Builder
-    private record ResultMessage(String message, AuditLog.Level level) {
-    }
+    private record ResultMessage(String message, AuditLog.Level level) {}
 }
