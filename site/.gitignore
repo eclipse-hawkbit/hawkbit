@@ -8,6 +8,7 @@ node_modules
 package.json
 package-lock.json
 # themes
+themes
 themes/hugo-material-docs
 # hugo
 public

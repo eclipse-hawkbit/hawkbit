@@ -11,25 +11,25 @@
       </div>
     </div>
 
-    {{ with .Site.Social.twitter }}
+    {{ with .Site.Params.Social.twitter }}
     <div class="button button-twitter" role="button" aria-label="Twitter">
        <a href="https://twitter.com/{{ . }}" title="@{{ . }} on Twitter" target="_blank" class="toggle-button icon icon-twitter"></a>
     </div>
     {{ end }}
 
-    {{ with .Site.Social.github }}
+    {{ with .Site.Params.Social.github }}
     <div class="button button-github" role="button" aria-label="GitHub">
       <a href="https://github.com/{{ . }}" title="@{{ . }} on GitHub" target="_blank" class="toggle-button icon icon-github"></a>
     </div>
     {{ end }}
 
-    {{ with .Site.Social.gitter }}
+    {{ with .Site.Params.Social.gitter }}
     <div class="button button-github" role="button" aria-label="Gitter">
       <a href="https://gitter.im/{{ . }}" title="@{{ . }} on Gitter" target="_blank" class="toggle-button icon fab fa-gitter"></a>
     </div>
     {{ end }}
 
-    {{ with .Site.Social.docker }}
+    {{ with .Site.Params.Social.docker }}
     <div class="button button-github" role="button" aria-label="Docker">
       <a href="https://hub.docker.com/u/{{ . }}" title="{{ . }} on Docker Hub" target="_blank" class="toggle-button icon fab fa-docker"></a>
     </div>
