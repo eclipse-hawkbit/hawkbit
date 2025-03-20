@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 
+import javax.sql.DataSource;
+
 import jakarta.persistence.EntityManager;
 import jakarta.validation.Validation;
 
@@ -78,6 +80,8 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleMetadataBuild
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetTypeBuilder;
+import org.eclipse.hawkbit.repository.jpa.cluster.LockProperties;
+import org.eclipse.hawkbit.repository.jpa.cluster.DistributedLockRepository;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitDefaultServiceExecutor;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -186,6 +190,9 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.integration.jdbc.lock.DefaultLockRepository;
+import org.springframework.integration.jdbc.lock.LockRepository;
+import org.springframework.integration.support.locks.DefaultLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.lang.NonNull;
 import org.springframework.retry.annotation.EnableRetry;
@@ -206,7 +213,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 @EnableRetry
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 @PropertySource("classpath:/hawkbit-jpa-defaults.properties")
-@Import({ JpaConfiguration.class, RepositoryDefaultConfiguration.class, DataSourceAutoConfiguration.class, SystemManagementCacheKeyGenerator.class })
+@Import({ JpaConfiguration.class, RepositoryDefaultConfiguration.class, LockProperties.class, DataSourceAutoConfiguration.class, SystemManagementCacheKeyGenerator.class })
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 public class RepositoryApplicationConfiguration {
 
@@ -263,6 +270,21 @@ public class RepositoryApplicationConfiguration {
                 return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
             }
         };
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    LockRepository lockRepository(
+            final DataSource dataSource, final LockProperties lockProperties, final PlatformTransactionManager txManager) {
+        final DefaultLockRepository repository = new DistributedLockRepository(dataSource, lockProperties, txManager);
+        repository.setPrefix("SP_");
+        return repository;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public LockRegistry lockRegistry() {
+        return new DefaultLockRegistry();
     }
 
     @Bean

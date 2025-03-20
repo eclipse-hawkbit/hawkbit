@@ -4,7 +4,7 @@ parent: Guides
 weight: 33
 ---
 
-hawkBit is able to run in a cluster with some constraints. This guide provides insights in the basic concepts and how to
+hawkBit is able to run in a cluster. This guide provides insights in the basic concepts and how to
 setup your own cluster. You can find additional information in
 the [hawkBit runtimes's README](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-monolith/hawkbit-update-server/README.md).
 <!--more-->
@@ -39,7 +39,7 @@ See [CacheAutoConfiguration](https://github.com/eclipse-hawkbit/hawkbit/blob/mas
 ## Schedulers
 
 Every node has multiple schedulers which run after a defined period of time. All schedulers always run on every node.
-This has to be kept in mind e.g. if the scheduler executes critical code which has to be executed only once.
+This has to be kept in mind e.g. if the scheduler executes critical code which has to be executed only once. This is implemented via using, by default, distributed database based lock.
 
 ## Known constraints
 
