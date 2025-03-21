@@ -70,7 +70,7 @@ public class JpaConfiguration extends JpaBaseConfiguration {
     }
 
     @Override
-    protected Map<String, Object> getVendorProperties() {
+    protected Map<String, Object> getVendorProperties(final DataSource dataSource) {
         final Map<String, Object> properties = new HashMap<>(7);
         // Turn off dynamic weaving to disable LTW lookup in static weaving mode
         properties.put(PersistenceUnitProperties.WEAVING, "false");
