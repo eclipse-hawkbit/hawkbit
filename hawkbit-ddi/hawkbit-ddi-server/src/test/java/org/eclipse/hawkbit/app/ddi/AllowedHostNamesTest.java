@@ -20,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(properties = {
+        "spring.flyway.enabled=true", // if hibernate is used there could be db inconsistencies when executing tests with and without flyway
         "hawkbit.server.security.allowedHostNames=localhost",
         "hawkbit.server.security.httpFirewallIgnoredPaths=/index.html" })
 @Feature("Integration Test - Security")
