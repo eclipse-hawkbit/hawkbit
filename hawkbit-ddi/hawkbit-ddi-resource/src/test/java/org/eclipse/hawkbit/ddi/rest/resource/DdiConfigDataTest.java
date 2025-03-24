@@ -137,8 +137,9 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
-    @Description("We verify that the config data (i.e. device attributes like serial number, hardware revision etc.) " +
-            "upload quota is enforced to protect the server from malicious attempts.")
+    @Description("""
+            We verify that the config data (i.e. device attributes like serial number, hardware revision etc.)
+            upload quota is enforced to protect the server from malicious attempts.""")
     void putTooMuchConfigData() throws Exception {
         testdataFactory.createTarget(TARGET1_ID);
 
@@ -148,15 +149,16 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
             attributes.put("dsafsdf" + i, "sdsds" + i);
         }
         mvc.perform(put(TARGET1_CONFIG_DATA_PATH, tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.configData(attributes).toString()).contentType(MediaType.APPLICATION_JSON))
+                        .content(JsonBuilder.configData(attributes).toString())
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         mvc.perform(put(TARGET1_CONFIG_DATA_PATH, tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.configData(Map.of("on too many", "sdsds")).toString()).contentType(MediaType.APPLICATION_JSON))
+                        .content(JsonBuilder.configData(Map.of("on too many", "sdsds")).toString())
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
-
     }
 
     @Test

@@ -47,7 +47,6 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @BeforeEach
     void setupBeforeTest() {
-
         final DistributionSet ds = testdataFactory.createDistributionSet("AssignedDs");
 
         final Map<String, String> attributes = new HashMap<>();
