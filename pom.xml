@@ -536,6 +536,27 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>com.gradle</groupId>
+                    <artifactId>develocity-maven-extension</artifactId>
+                    <configuration>
+                        <develocity>
+                            <plugins>
+                                <plugin>
+                                    <artifactId>maven-surefire-plugin</artifactId>
+                                    <outputs>
+                                        <directories>
+                                            <directory>
+                                                <name>allure.results.directory</name>
+                                                <path>${project.build.directory}/allure-results</path>
+                                            </directory>
+                                        </directories>
+                                    </outputs>
+                                </plugin>
+                            </plugins>
+                        </develocity>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
