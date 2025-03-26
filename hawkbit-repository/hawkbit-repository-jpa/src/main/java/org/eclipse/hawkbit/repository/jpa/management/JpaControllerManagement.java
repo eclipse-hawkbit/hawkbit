@@ -31,6 +31,7 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -126,6 +127,8 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class JpaControllerManagement extends JpaActionManagement implements ControllerManagement {
 
+    private static final Pattern PATTERN = Pattern.compile("[a-zA-Z0-9_\\-!@#$%^&*()+=\\[\\]{}|;:'\",.<>/\\\\?\\s]*");
+
     private final BlockingDeque<TargetPoll> queue;
 
     // TODO - make it final
@@ -197,7 +200,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         final long occurredAt = newActionStatus.getOccurredAt();
         switch (updatedActionStatus) {
             case ERROR: {
-                final JpaTarget target = (JpaTarget) action.getTarget();
+                final JpaTarget target = action.getTarget();
                 target.setUpdateStatus(TargetUpdateStatus.ERROR);
                 handleErrorOnAction(action, target);
                 break;
@@ -512,7 +515,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         if (action.isActive()) {
             log.debug("action ({}) was still active. Change to {}.", action, Status.CANCELING);
-            final JpaAction jpaAction = (JpaAction)action;
+            final JpaAction jpaAction = (JpaAction) action;
 
             jpaAction.setStatus(Status.CANCELING);
             // document that the status has been retrieved
@@ -533,7 +536,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         targetRepository.getAccessController().ifPresent(
                 accessController -> accessController.assertOperationAllowed(
                         AccessController.Operation.UPDATE,
-                        (JpaTarget) actionRepository
+                        actionRepository
                                 .findById(actionId)
                                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId))
                                 .getTarget()));
@@ -615,11 +618,11 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     private static boolean isAttributeKeyValid(final String key) {
-        return key != null && key.length() <= CONTROLLER_ATTRIBUTE_KEY_SIZE;
+        return key != null && key.length() <= CONTROLLER_ATTRIBUTE_KEY_SIZE && PATTERN.matcher(key).matches();
     }
 
     private static boolean isAttributeValueValid(final String value) {
-        return value == null || value.length() <= CONTROLLER_ATTRIBUTE_VALUE_SIZE;
+        return value == null || (value.length() <= CONTROLLER_ATTRIBUTE_VALUE_SIZE && PATTERN.matcher(value).matches());
     }
 
     private static void copy(final Map<String, String> src, final Map<String, String> trg) {
@@ -820,7 +823,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             return Optional.empty();
         }
 
-        final JpaTarget target = (JpaTarget) action.getTarget();
+        final JpaTarget target = action.getTarget();
         action.setActive(false);
         action.setStatus(DOWNLOADED);
         target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
@@ -854,11 +857,11 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
      * @return a present controllerId in case the attributes needs to be requested.
      */
     private JpaTarget handleFinishedAndStoreInTargetStatus(final long occurredAt, final JpaAction action) {
-        final JpaTarget target = (JpaTarget) action.getTarget();
+        final JpaTarget target = action.getTarget();
         action.setActive(false);
         action.setStatus(Status.FINISHED);
         if (target.getInstallationDate() == null || target.getInstallationDate() < occurredAt) {
-            final JpaDistributionSet ds = (JpaDistributionSet) entityManager.merge(action.getDistributionSet());
+            final JpaDistributionSet ds = entityManager.merge(action.getDistributionSet());
 
             target.setInstalledDistributionSet(ds);
             target.setInstallationDate(occurredAt);
@@ -866,7 +869,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             // Target reported an installation of a DOWNLOAD_ONLY assignment, the assigned DS has to be adapted
             // because the currently assigned DS can be unequal to the currently installed DS (the downloadOnly DS)
             if (isDownloadOnly(action)) {
-                target.setAssignedDistributionSet((JpaDistributionSet) action.getDistributionSet());
+                target.setAssignedDistributionSet(action.getDistributionSet());
             }
 
             // check if the assigned set is equal to the installed set (not

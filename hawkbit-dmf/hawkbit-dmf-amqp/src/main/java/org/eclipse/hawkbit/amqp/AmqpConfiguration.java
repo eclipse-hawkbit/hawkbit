@@ -9,11 +9,14 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import java.sql.SQLException;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.repository.urlhandler.ArtifactUrlHandler;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
@@ -36,11 +39,14 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
+import org.springframework.amqp.rabbit.listener.FatalExceptionStrategy;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -65,7 +71,8 @@ public class AmqpConfiguration {
     private final ConnectionFactory rabbitConnectionFactory;
     private ServiceMatcher serviceMatcher;
 
-    public AmqpConfiguration(final AmqpProperties amqpProperties, final AmqpDeadletterProperties amqpDeadletterProperties, final ConnectionFactory rabbitConnectionFactory) {
+    public AmqpConfiguration(final AmqpProperties amqpProperties, final AmqpDeadletterProperties amqpDeadletterProperties,
+            final ConnectionFactory rabbitConnectionFactory) {
         this.amqpProperties = amqpProperties;
         this.amqpDeadletterProperties = amqpDeadletterProperties;
         this.rabbitConnectionFactory = rabbitConnectionFactory;
@@ -76,48 +83,24 @@ public class AmqpConfiguration {
         this.serviceMatcher = serviceMatcher;
     }
 
+    @Bean
+    public FatalExceptionStrategy sqlFatalSQLExceptionStrategy(final AmqpProperties amqpProperties) {
+        return new SqlFatalExceptionStrategy(amqpProperties.getFatalSqlExceptionPolicy());
+    }
+
     /**
      * Creates a custom error handler bean.
      *
-     * @param handlers list of {@link AmqpErrorHandler} handlers
+     * @param fatalExceptionStrategies list of {@link FatalExceptionStrategy} handlers. isFatal will be called for causes,
+     *         up to the first fatal, so the implementation don't need to iterate over the causes.
      * @return the delegating error handler bean
      */
     @Bean
     @ConditionalOnMissingBean
-    public ErrorHandler errorHandler(final List<AmqpErrorHandler> handlers) {
-        return new DelegatingConditionalErrorHandler(
-                handlers,
-                new ConditionalRejectingErrorHandler(new DelayedRequeueExceptionStrategy(amqpProperties.getRequeueDelay())));
-    }
-
-    /**
-     * Error handler bean for all target attributes related fatal errors
-     *
-     * @return the invalid target attribute exception handler bean
-     */
-    @Bean
-    public AmqpErrorHandler invalidTargetAttributeConditionalExceptionHandler() {
-        return new InvalidTargetAttributeExceptionHandler();
-    }
-
-    /**
-     * Error handler bean for entity not found errors
-     *
-     * @return the entity not found exception handler bean
-     */
-    @Bean
-    public AmqpErrorHandler entityNotFoundExceptionHandler() {
-        return new EntityNotFoundExceptionHandler();
-    }
-
-    /**
-     * Error handler bean for amqp message conversion errors
-     *
-     * @return the amqp message conversion exception handler bean
-     */
-    @Bean
-    public AmqpErrorHandler messageConversionExceptionHandler() {
-        return new MessageConversionExceptionHandler();
+    public ErrorHandler errorHandler(
+            final List<FatalExceptionStrategy> fatalExceptionStrategies,
+            @Value("${hawkbit.dmf.rabbitmq.fatalExceptionTypes:}") final List<String> fatalExceptionTypes) {
+        return new ConditionalRejectingErrorHandler(new RequeueExceptionStrategy(fatalExceptionStrategies, fatalExceptionTypes));
     }
 
     /**
@@ -302,5 +285,40 @@ public class AmqpConfiguration {
         args.put("x-message-ttl", Duration.ofSeconds(30).toMillis());
         args.put("x-max-length", 1_000);
         return args;
+    }
+
+    @ToString
+    private static class SqlFatalExceptionStrategy implements FatalExceptionStrategy {
+
+        private final boolean fatalByDefault;
+        private final List<Integer> unlessErrorCodeIn;
+        private final List<String> unlessSqlStateIn;
+        private final List<Pattern> unlessMessageMatches;
+
+        public SqlFatalExceptionStrategy(final AmqpProperties.FatalSqlExceptionPolicy fatalSqlExceptions) {
+            this.fatalByDefault = fatalSqlExceptions.isByDefault();
+            this.unlessErrorCodeIn = fatalSqlExceptions.getUnlessErrorCodeIn();
+            this.unlessSqlStateIn = fatalSqlExceptions.getUnlessSqlStateIn();
+            this.unlessMessageMatches = fatalSqlExceptions.getUnlessMessageMatches();
+        }
+
+        @Override
+        public boolean isFatal(final Throwable t) {
+            if (t instanceof SQLException sqlException) {
+                if (unlessErrorCodeIn.contains(sqlException.getErrorCode())) {
+                    return !fatalByDefault;
+                } else if (unlessSqlStateIn.contains(sqlException.getSQLState())) {
+                    return !fatalByDefault;
+                } else {
+                    for (final Pattern pattern : unlessMessageMatches) {
+                        if (pattern.matcher(sqlException.getMessage()).matches()) {
+                            return !fatalByDefault;
+                        }
+                    }
+                    return fatalByDefault;
+                }
+            }
+            return false;
+        }
     }
 }
