@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.sdk.mgmt;
 
+import java.io.Serializable;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.util.Base64;
@@ -21,6 +22,7 @@ import feign.FeignException;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValueRequest;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
@@ -68,14 +70,14 @@ public class AuthenticationSetupHelper {
         if (!Boolean.TRUE.equals(Objects.requireNonNull(mgmtTenantManagementRestApi
                 .getTenantConfigurationValue(AUTHENTICATION_MODE_HEADER_ENABLED)
                 .getBody()).getValue())) {
-            mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_HEADER_ENABLED, true));
+            updateConfigurationValue(AUTHENTICATION_MODE_HEADER_ENABLED, true, mgmtTenantManagementRestApi);
         }
         final String fingerprint = ddiCA.getFingerprint();
         if (!fingerprint.equals(
                 Objects.requireNonNull(mgmtTenantManagementRestApi
                         .getTenantConfigurationValue(AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME)
                         .getBody()).getValue())) {
-            mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, fingerprint));
+            updateConfigurationValue(AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, fingerprint, mgmtTenantManagementRestApi);
         }
     }
 
@@ -85,7 +87,7 @@ public class AuthenticationSetupHelper {
         if (!(Boolean.TRUE.equals(Objects.requireNonNull(mgmtTenantManagementRestApi
                 .getTenantConfigurationValue(AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED)
                 .getBody()).getValue()))) {
-            mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, true));
+            updateConfigurationValue(AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, true, mgmtTenantManagementRestApi);
         }
     }
 
@@ -102,12 +104,12 @@ public class AuthenticationSetupHelper {
         if (!(Boolean.TRUE.equals(Objects.requireNonNull(mgmtTenantManagementRestApi
                 .getTenantConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED)
                 .getBody()).getValue()))) {
-            mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, true));
+            updateConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, true, mgmtTenantManagementRestApi);
         }
         if (!gatewayToken.equals(Objects.requireNonNull(mgmtTenantManagementRestApi
                 .getTenantConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY)
                 .getBody()).getValue())) {
-            mgmtTenantManagementRestApi.updateTenantConfiguration(Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, gatewayToken));
+            updateConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, gatewayToken, mgmtTenantManagementRestApi);
         }
     }
 
@@ -151,5 +153,10 @@ public class AuthenticationSetupHelper {
         }
 
         return securityTargetToken;
+    }
+
+    private static void updateConfigurationValue(
+            final String key, final Serializable value, final MgmtTenantManagementRestApi mgmtTenantManagementRestApi) {
+        mgmtTenantManagementRestApi.updateTenantConfigurationValue(key, new MgmtSystemTenantConfigurationValueRequest().setValue(value));
     }
 }
