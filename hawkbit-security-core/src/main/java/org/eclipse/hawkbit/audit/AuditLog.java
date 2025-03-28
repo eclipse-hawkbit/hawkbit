@@ -22,7 +22,13 @@ public @interface AuditLog {
         INFO, WARN, ERROR
     }
 
+    enum Type {
+        CREATE, READ, UPDATE, DELETE, EXECUTE
+    }
+
     Level level() default Level.INFO;
+
+    Type type();
 
     String entity();
 

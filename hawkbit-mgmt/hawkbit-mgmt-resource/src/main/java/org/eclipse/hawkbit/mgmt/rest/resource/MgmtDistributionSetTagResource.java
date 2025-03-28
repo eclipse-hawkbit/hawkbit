@@ -100,7 +100,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
-    @AuditLog(entity = "DistributionSetTag", message = "Update Distribution Set Tag")
+    @AuditLog(entity = "DistributionSetTag", type = AuditLog.Type.UPDATE, message = "Update Distribution Set Tag")
     public ResponseEntity<MgmtTag> updateDistributionSetTag(
             final Long distributionsetTagId,
             final MgmtTagRequestBodyPut restDSTagRest) {
@@ -116,7 +116,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
-    @AuditLog(entity = "DistributionSetTag", message = "Delete Distribution Set Tag")
+    @AuditLog(entity = "DistributionSetTag", type = AuditLog.Type.DELETE, message = "Delete Distribution Set Tag")
     public ResponseEntity<Void> deleteDistributionSetTag(
             final Long distributionsetTagId) {
         log.debug("Delete {} distribution set tag", distributionsetTagId);
@@ -172,7 +172,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
-    @AuditLog(entity = "DistributionSetTag", message = "Unassign Distribution Set From Tag")
+    @AuditLog(entity = "DistributionSetTag", type = AuditLog.Type.UPDATE, message = "Unassign Distribution Set From Tag")
     public ResponseEntity<Void> unassignDistributionSet(
             final Long distributionsetTagId,
             final Long distributionsetId) {
@@ -182,7 +182,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
-    @AuditLog(entity = "DistributionSetTag", message = "Unassign Distribution Sets From Tag")
+    @AuditLog(entity = "DistributionSetTag", type = AuditLog.Type.UPDATE, message = "Unassign Distribution Sets From Tag")
     public ResponseEntity<Void> unassignDistributionSets(
             final Long distributionsetTagId,
             final List<Long> distributionsetIds) {

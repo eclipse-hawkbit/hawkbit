@@ -67,8 +67,8 @@ public class AuditLoggingAspect {
         final String methodName = joinPoint.getSignature().getName();
 
         final String logMessage = String.format(
-                "Method: %s - Message: %s - Parameters: %s - Response: %s",
-                methodName, auditLog.message(), paramsToLog, resultMessage
+                "Type: %s, Method: %s - Message: %s - Parameters: %s - Response: %s",
+                auditLog.type(), methodName, auditLog.message(), paramsToLog, resultMessage
         );
 
         switch (logLevel) {

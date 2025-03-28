@@ -88,7 +88,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     @Override
-    @AuditLog(entity = "DistributionSetType", message = "Delete Distribution Set Type")
+    @AuditLog(entity = "DistributionSetType", type = AuditLog.Type.DELETE, message = "Delete Distribution Set Type")
     public ResponseEntity<Void> deleteDistributionSetType(final Long distributionSetTypeId) {
         distributionSetTypeManagement.delete(distributionSetTypeId);
 
@@ -96,7 +96,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     @Override
-    @AuditLog(entity = "DistributionSetType", message = "Update Distribution Set Type")
+    @AuditLog(entity = "DistributionSetType", type = AuditLog.Type.UPDATE, message = "Update Distribution Set Type")
     public ResponseEntity<MgmtDistributionSetType> updateDistributionSetType(
             final Long distributionSetTypeId, final MgmtDistributionSetTypeRequestBodyPut restDistributionSetType) {
         final DistributionSetType updated = distributionSetTypeManagement.update(entityFactory.distributionSetType()
@@ -156,7 +156,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     @Override
-    @AuditLog(entity = "DistributionSetType", message = "Remove Mandatory Module From Distribution Set Type")
+    @AuditLog(entity = "DistributionSetType", type = AuditLog.Type.UPDATE, message = "Remove Mandatory Module From Distribution Set Type")
     public ResponseEntity<Void> removeMandatoryModule(final Long distributionSetTypeId, final Long softwareModuleTypeId) {
         distributionSetTypeManagement.unassignSoftwareModuleType(distributionSetTypeId, softwareModuleTypeId);
         return ResponseEntity.ok().build();
@@ -168,7 +168,7 @@ public class MgmtDistributionSetTypeResource implements MgmtDistributionSetTypeR
     }
 
     @Override
-    @AuditLog(entity = "DistributionSetType", message = "Add Mandatory Module From Distribution Set Type")
+    @AuditLog(entity = "DistributionSetType", type = AuditLog.Type.UPDATE, message = "Add Mandatory Module From Distribution Set Type")
     public ResponseEntity<Void> addMandatoryModule(final Long distributionSetTypeId, final MgmtId smtId) {
         distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(distributionSetTypeId, Collections.singletonList(smtId.getId()));
         return ResponseEntity.ok().build();

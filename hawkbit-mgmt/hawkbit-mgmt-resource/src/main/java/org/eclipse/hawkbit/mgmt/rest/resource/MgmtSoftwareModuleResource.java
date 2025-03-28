@@ -147,7 +147,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    @AuditLog(entity = "SoftwareModule", message = "Delete Software Module Artifact")
+    @AuditLog(entity = "SoftwareModule", type = AuditLog.Type.DELETE, message = "Delete Software Module Artifact")
     public ResponseEntity<Void> deleteArtifact(final Long softwareModuleId, final Long artifactId) {
         findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
         artifactManagement.delete(artifactId);
@@ -225,7 +225,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    @AuditLog(entity = "SoftwareModule", message = "Delete Software Module")
+    @AuditLog(entity = "SoftwareModule", type = AuditLog.Type.DELETE, message = "Delete Software Module")
     public ResponseEntity<Void> deleteSoftwareModule(final Long softwareModuleId) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
         softwareModuleManagement.delete(module.getId());
@@ -277,7 +277,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    @AuditLog(entity = "SoftwareModule", message = "Delete Software Module Metadata")
+    @AuditLog(entity = "SoftwareModule", type = AuditLog.Type.DELETE, message = "Delete Software Module Metadata")
     public ResponseEntity<Void> deleteMetadata(final Long softwareModuleId, final String metadataKey) {
         softwareModuleManagement.deleteMetaData(softwareModuleId, metadataKey);
         return ResponseEntity.ok().build();

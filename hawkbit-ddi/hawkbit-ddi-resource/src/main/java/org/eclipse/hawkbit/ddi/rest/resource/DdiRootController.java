@@ -452,7 +452,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    @AuditLog(entity = "DDI", message = "Activate Auto Confirmation", logResponse = true)
+    @AuditLog(entity = "DDI", type = AuditLog.Type.UPDATE, message = "Activate Auto Confirmation", logResponse = true)
     public ResponseEntity<Void> activateAutoConfirmation(
             final String tenant, final String controllerId, final DdiActivateAutoConfirmation body) {
         final String initiator = body == null ? null : body.getInitiator();
@@ -464,7 +464,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    @AuditLog(entity = "DDI", message = "Deactivate Auto Confirmation", logResponse = true)
+    @AuditLog(entity = "DDI", type = AuditLog.Type.UPDATE, message = "Deactivate Auto Confirmation", logResponse = true)
     public ResponseEntity<Void> deactivateAutoConfirmation(final String tenant, final String controllerId) {
         log.debug("Deactivate auto-confirmation request for device ‘{}‘", controllerId);
         confirmationManagement.deactivateAutoConfirmation(controllerId);

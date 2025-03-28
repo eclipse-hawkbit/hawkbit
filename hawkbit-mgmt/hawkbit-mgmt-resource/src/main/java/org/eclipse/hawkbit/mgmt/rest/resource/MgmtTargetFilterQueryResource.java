@@ -128,7 +128,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
-    @AuditLog(entity = "TargetFilter", message = "Delete Target Filter")
+    @AuditLog(entity = "TargetFilter", type = AuditLog.Type.DELETE, message = "Delete Target Filter")
     public ResponseEntity<Void> deleteFilter(final Long filterId) {
         filterManagement.delete(filterId);
         log.debug("{} target filter query deleted, return status {}", filterId, HttpStatus.OK);
@@ -171,7 +171,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
-    @AuditLog(entity = "TargetFilter", message = "Delete Target Filter Assigned Distribution Set")
+    @AuditLog(entity = "TargetFilter", type = AuditLog.Type.DELETE, message = "Delete Target Filter Assigned Distribution Set")
     public ResponseEntity<Void> deleteAssignedDistributionSet(final Long filterId) {
         filterManagement.updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(null));
         return ResponseEntity.noContent().build();
