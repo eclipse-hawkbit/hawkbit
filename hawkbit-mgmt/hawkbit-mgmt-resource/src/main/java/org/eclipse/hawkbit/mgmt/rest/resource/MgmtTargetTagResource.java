@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
@@ -112,6 +113,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
+    @AuditLog(entity = "TargetTag", type = AuditLog.Type.DELETE, message = "Delete Target Tag")
     public ResponseEntity<Void> deleteTargetTag(final Long targetTagId) {
         log.debug("Delete {} target tag", targetTagId);
         final TargetTag targetTag = findTargetTagById(targetTagId);
@@ -166,6 +168,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
+    @AuditLog(entity = "TargetTag", type = AuditLog.Type.UPDATE, message = "Unassign Target From Target Tag")
     public ResponseEntity<Void> unassignTarget(final Long targetTagId, final String controllerId) {
         log.debug("Unassign target {} for target tag {}", controllerId, targetTagId);
         this.targetManagement.unassignTag(List.of(controllerId), targetTagId);
@@ -173,6 +176,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
+    @AuditLog(entity = "TargetTag", type = AuditLog.Type.UPDATE, message = "Unassign Targets From Target Tag")
     public ResponseEntity<Void> unassignTargets(
             final Long targetTagId, final OnNotFoundPolicy onNotFoundPolicy, final List<String> controllerIds) {
         log.debug("Unassign {} targets for target tag {}", controllerIds.size(), targetTagId);

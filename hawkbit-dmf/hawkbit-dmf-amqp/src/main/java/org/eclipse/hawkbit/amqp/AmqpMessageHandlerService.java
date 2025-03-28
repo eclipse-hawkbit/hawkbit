@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
@@ -406,6 +407,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
+    @AuditLog(entity = "DMF", type = AuditLog.Type.DELETE, message = "Delete Target", logResponse = true)
     private void deleteTarget(final Message message) {
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
         controllerManagement.deleteExistingTarget(thingId);

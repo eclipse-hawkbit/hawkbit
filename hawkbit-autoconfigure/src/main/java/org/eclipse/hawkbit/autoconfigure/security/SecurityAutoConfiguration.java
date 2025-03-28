@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.ContextAware;
+import org.eclipse.hawkbit.audit.AuditContextProvider;
 import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.tenancy.TenantAware.DefaultTenantResolver;
 import org.eclipse.hawkbit.tenancy.TenantAware.TenantResolver;
@@ -113,6 +114,12 @@ public class SecurityAutoConfiguration {
     @ConditionalOnMissingBean
     public AuditorAware<String> auditorAware() {
         return new SpringSecurityAuditorAware();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AuditContextProvider auditContextProvider() {
+        return AuditContextProvider.getInstance();
     }
 
     /**

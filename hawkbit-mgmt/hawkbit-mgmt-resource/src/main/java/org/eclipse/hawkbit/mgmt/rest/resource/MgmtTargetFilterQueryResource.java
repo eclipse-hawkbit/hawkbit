@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtDistributionSetAutoAssignment;
@@ -127,6 +128,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
+    @AuditLog(entity = "TargetFilter", type = AuditLog.Type.DELETE, message = "Delete Target Filter")
     public ResponseEntity<Void> deleteFilter(final Long filterId) {
         filterManagement.delete(filterId);
         log.debug("{} target filter query deleted, return status {}", filterId, HttpStatus.OK);
@@ -169,6 +171,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
+    @AuditLog(entity = "TargetFilter", type = AuditLog.Type.DELETE, message = "Delete Target Filter Assigned Distribution Set")
     public ResponseEntity<Void> deleteAssignedDistributionSet(final Long filterId) {
         filterManagement.updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(null));
         return ResponseEntity.noContent().build();
