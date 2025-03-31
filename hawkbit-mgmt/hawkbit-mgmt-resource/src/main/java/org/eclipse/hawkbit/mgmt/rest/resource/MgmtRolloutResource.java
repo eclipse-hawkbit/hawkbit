@@ -16,6 +16,7 @@ import java.util.Optional;
 import jakarta.validation.ValidationException;
 
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPost;
@@ -180,24 +181,28 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
+    @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, message = "Start Rollout")
     public ResponseEntity<Void> start(final Long rolloutId) {
         this.rolloutManagement.start(rolloutId);
         return ResponseEntity.ok().build();
     }
 
     @Override
+    @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, message = "Pause Rollout")
     public ResponseEntity<Void> pause(final Long rolloutId) {
         this.rolloutManagement.pauseRollout(rolloutId);
         return ResponseEntity.ok().build();
     }
 
     @Override
+    @AuditLog(entity = "Rollout", type = AuditLog.Type.DELETE, message = "Delete Rollout")
     public ResponseEntity<Void> delete(final Long rolloutId) {
         this.rolloutManagement.delete(rolloutId);
         return ResponseEntity.ok().build();
     }
 
     @Override
+    @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, message = "Resume Rollout")
     public ResponseEntity<Void> resume(final Long rolloutId) {
         this.rolloutManagement.resumeRollout(rolloutId);
         return ResponseEntity.ok().build();
@@ -276,6 +281,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
+    @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, message = "Trigger Next Rollout Group")
     public ResponseEntity<Void> triggerNextGroup(final Long rolloutId) {
         this.rolloutManagement.triggerNextGroup(rolloutId);
         return ResponseEntity.ok().build();
