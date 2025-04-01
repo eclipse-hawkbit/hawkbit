@@ -37,8 +37,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.session.SessionManagementFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
  * Security configuration for the REST management API.
@@ -110,7 +108,7 @@ public class MgmtSecurityConfiguration {
                         SessionManagementFilter.class);
 
         if (securityProperties.getCors().isEnabled()) {
-            http.cors(configurer -> configurer.configurationSource(corsConfigurationSource()));
+            http.cors(configurer -> configurer.configurationSource(securityProperties.getCors().toCorsConfigurationSource()));
         }
 
         if (securityProperties.isRequireSsl()) {
@@ -135,16 +133,5 @@ public class MgmtSecurityConfiguration {
         MdcHandler.Filter.addMdcFilter(http);
 
         return http.build();
-    }
-
-    private CorsConfigurationSource corsConfigurationSource() {
-        final CorsConfiguration corsConfiguration = new CorsConfiguration();
-
-        corsConfiguration.setAllowedOrigins(securityProperties.getCors().getAllowedOrigins());
-        corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.setAllowedHeaders(securityProperties.getCors().getAllowedHeaders());
-        corsConfiguration.setAllowedMethods(securityProperties.getCors().getAllowedMethods());
-        corsConfiguration.setExposedHeaders(securityProperties.getCors().getExposedHeaders());
-        return request -> corsConfiguration;
     }
 }

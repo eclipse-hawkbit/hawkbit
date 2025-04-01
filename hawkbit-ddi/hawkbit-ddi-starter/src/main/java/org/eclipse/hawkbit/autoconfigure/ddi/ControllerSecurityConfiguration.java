@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.security.controller.SecurityHeaderAuthenticator;
 import org.eclipse.hawkbit.security.controller.SecurityTokenAuthenticator;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -88,16 +89,15 @@ class ControllerSecurityConfiguration {
         return filterRegBean;
     }
 
+
     @Bean
     @Order(301)
-    protected SecurityFilterChain filterChainDDI(final HttpSecurity http) throws Exception {
+    protected SecurityFilterChain filterChainDDI(
+            final HttpSecurity http,
+            @Value("${hawkbit.server.security.cors.disableForDdiApi:false}") final boolean disableCorsForDdiApi) throws Exception {
         http
                 .securityMatcher(DDI_ANT_MATCHERS)
                 .csrf(AbstractHttpConfigurer::disable);
-
-        if (securityProperties.isRequireSsl()) {
-            http.requiresChannel(crmRegistry -> crmRegistry.anyRequest().requiresSecure());
-        }
 
         http
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())
@@ -118,6 +118,15 @@ class ControllerSecurityConfiguration {
                 .exceptionHandling(configurer -> configurer.authenticationEntryPoint(
                         (request, response, authException) -> response.setStatus(HttpStatus.UNAUTHORIZED.value())))
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+
+        if (securityProperties.getCors().isEnabled() && !disableCorsForDdiApi) {
+            http.cors(configurer -> configurer.configurationSource(securityProperties.getCors().toCorsConfigurationSource()));
+        }
+
+        if (securityProperties.isRequireSsl()) {
+            http.requiresChannel(crmRegistry -> crmRegistry.anyRequest().requiresSecure());
+        }
 
         MdcHandler.Filter.addMdcFilter(http);
 
