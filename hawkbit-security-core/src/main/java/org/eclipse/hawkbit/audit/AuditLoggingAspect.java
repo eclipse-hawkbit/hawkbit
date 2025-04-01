@@ -30,8 +30,16 @@ import org.springframework.stereotype.Component;
 public class AuditLoggingAspect {
 
     /**
-     * Around advice that applies to methods annotated with @AuditLog.
-     * It logs the request and, if logResponse is true, the response as well.
+     * Provides around advice for methods annotated with {@code @AuditLog}.
+     * <p>
+     * By default, all method parameters are logged. To restrict logging to specific parameters,
+     * specify them via the {@code logParams} attribute (e.g., {@code  = {"param1", "param2"}}).
+     * To disable parameter logging, use an empty array (i.e., {@code logParams = {}}).
+     * </p>
+     * <p>
+     * This advice logs the request details and, if {@code logResponse} is set to {@code true},
+     * logs the method response as well.
+     * </p>
      */
     @Around("@annotation(auditLog)")
     public Object handleAuditLogging(final ProceedingJoinPoint joinPoint, final AuditLog auditLog) throws Throwable {
@@ -86,9 +94,9 @@ public class AuditLoggingAspect {
 
     private String getParamsToLog(final JoinPoint joinPoint, final AuditLog auditLog) {
         final Object[] args = joinPoint.getArgs();
-        final String[] includeParams = auditLog.logParams();
+        final String[] logParams = auditLog.logParams();
 
-        if (includeParams.length == 0) {
+        if (isLogAll(logParams)) {
             return Arrays.deepToString(args);
         } else {
             final MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
@@ -97,7 +105,7 @@ public class AuditLoggingAspect {
                     .boxed()
                     .collect(Collectors.toMap(i -> paramNames[i], i -> args[i]));
 
-            return Arrays.stream(includeParams)
+            return Arrays.stream(logParams)
                     .filter(paramMap::containsKey)
                     .map(name -> name + "=" + paramMap.get(name))
                     .collect(Collectors.joining(", "));
@@ -128,6 +136,10 @@ public class AuditLoggingAspect {
         resultMessageBuilder.message(result != null ? result.toString() : "null");
         resultMessageBuilder.level(auditLog.level());
         return resultMessageBuilder.build();
+    }
+
+    private boolean isLogAll(String [] logParams) {
+        return Arrays.asList(logParams).contains("*");
     }
 
     @Builder
