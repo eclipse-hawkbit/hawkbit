@@ -191,8 +191,8 @@ import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.jdbc.lock.DefaultLockRepository;
+import org.springframework.integration.jdbc.lock.JdbcLockRegistry;
 import org.springframework.integration.jdbc.lock.LockRepository;
-import org.springframework.integration.support.locks.DefaultLockRegistry;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.lang.NonNull;
 import org.springframework.retry.annotation.EnableRetry;
@@ -283,8 +283,8 @@ public class RepositoryApplicationConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public LockRegistry lockRegistry() {
-        return new DefaultLockRegistry();
+    public LockRegistry lockRegistry(final LockRepository lockRepository) {
+        return new JdbcLockRegistry(lockRepository);
     }
 
     @Bean
