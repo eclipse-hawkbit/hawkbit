@@ -17,8 +17,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.integration.support.locks.DefaultLockRegistry;
-import org.springframework.integration.support.locks.LockRegistry;
 
 /**
  * Auto-Configuration for enabling JPA repository.
@@ -35,11 +33,5 @@ public class JpaRepositoryAutoConfiguration {
     @ConditionalOnMissingBean
     public VirtualPropertyReplacer virtualPropertyReplacer() {
         return new VirtualPropertyResolver();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public LockRegistry lockRegistry() {
-        return new DefaultLockRegistry();
     }
 }
