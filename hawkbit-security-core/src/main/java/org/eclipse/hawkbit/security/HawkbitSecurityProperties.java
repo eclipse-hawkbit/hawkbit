@@ -15,6 +15,8 @@ import java.util.List;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
  * Security related hawkBit configuration.
@@ -75,6 +77,22 @@ public class HawkbitSecurityProperties {
          * Exposed headers for CORS.
          */
         private List<String> exposedHeaders = Collections.emptyList();
+
+        public CorsConfiguration toCorsConfiguration() {
+            final CorsConfiguration corsConfiguration = new CorsConfiguration();
+
+            corsConfiguration.setAllowedOrigins(getAllowedOrigins());
+            corsConfiguration.setAllowCredentials(true);
+            corsConfiguration.setAllowedHeaders(getAllowedHeaders());
+            corsConfiguration.setAllowedMethods(getAllowedMethods());
+            corsConfiguration.setExposedHeaders(getExposedHeaders());
+            return corsConfiguration;
+        }
+
+        public CorsConfigurationSource toCorsConfigurationSource() {
+            final CorsConfiguration corsConfiguration = toCorsConfiguration();
+            return request -> corsConfiguration;
+        }
     }
 
     /**
