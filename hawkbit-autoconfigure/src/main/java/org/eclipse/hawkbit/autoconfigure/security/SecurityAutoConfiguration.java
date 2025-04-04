@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.audit.AuditContextProvider;
+import org.eclipse.hawkbit.audit.AuditLoggingAspect;
 import org.eclipse.hawkbit.im.authentication.SpRole;
 import org.eclipse.hawkbit.tenancy.TenantAware.DefaultTenantResolver;
 import org.eclipse.hawkbit.tenancy.TenantAware.TenantResolver;
@@ -120,6 +121,12 @@ public class SecurityAutoConfiguration {
     @ConditionalOnMissingBean
     public AuditContextProvider auditContextProvider() {
         return AuditContextProvider.getInstance();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AuditLoggingAspect auditLoggingAspect() {
+        return new AuditLoggingAspect();
     }
 
     /**
