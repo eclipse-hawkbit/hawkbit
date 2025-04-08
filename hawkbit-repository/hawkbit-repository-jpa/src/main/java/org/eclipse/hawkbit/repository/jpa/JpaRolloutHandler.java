@@ -10,8 +10,11 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.RolloutExecutor;
@@ -19,6 +22,7 @@ import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.TenantMetricsConfiguration;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -34,6 +38,7 @@ public class JpaRolloutHandler implements RolloutHandler {
     private final LockRegistry lockRegistry;
     private final PlatformTransactionManager txManager;
     private final ContextAware contextAware;
+    private final Optional<MeterRegistry> meterRegistry;
 
     /**
      * Constructor
@@ -47,13 +52,14 @@ public class JpaRolloutHandler implements RolloutHandler {
     public JpaRolloutHandler(final TenantAware tenantAware, final RolloutManagement rolloutManagement,
             final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
             final PlatformTransactionManager txManager,
-            final ContextAware contextAware) {
+            final ContextAware contextAware, final Optional<MeterRegistry> meterRegistry) {
         this.tenantAware = tenantAware;
         this.rolloutManagement = rolloutManagement;
         this.rolloutExecutor = rolloutExecutor;
         this.lockRegistry = lockRegistry;
         this.txManager = txManager;
         this.contextAware = contextAware;
+        this.meterRegistry = meterRegistry;
     }
 
     @Override
@@ -74,6 +80,8 @@ public class JpaRolloutHandler implements RolloutHandler {
 
         try {
             log.debug("Trigger handling {} rollouts.", rollouts.size());
+
+            final long startNano = System.nanoTime();
             rollouts.forEach(rolloutId -> {
                 try {
                     handleRolloutInNewTransaction(rolloutId, handlerId);
@@ -81,6 +89,10 @@ public class JpaRolloutHandler implements RolloutHandler {
                     log.error("Failed to process rollout with id {}", rolloutId, throwable);
                 }
             });
+            meterRegistry
+                    .map(mReg -> mReg.timer("hawkbit.rollout.handler", TenantMetricsConfiguration.TENANT_TAG, tenantAware.getCurrentTenant()))
+                    .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
+
             log.debug("Finished handling of the rollouts.");
         } finally {
             if (log.isTraceEnabled()) {
@@ -94,29 +106,37 @@ public class JpaRolloutHandler implements RolloutHandler {
         return tenant + "-rollout";
     }
 
-    // run in a tenant context, i.e. contextAware.getCurrentTenant() returns the tenant
-    // the rollout is made for
+    // run in a tenant context, i.e. contextAware.getCurrentTenant() returns the tenant the rollout is made for
     private void handleRolloutInNewTransaction(final long rolloutId, final String handlerId) {
+        final long startNano = System.nanoTime();
+
         DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId, status -> {
             rolloutManagement.get(rolloutId).ifPresentOrElse(
                     rollout ->
-                        // auditor is retrieved and set on transaction commit
-                        // if not overridden, the system user will be the auditor
-                        rollout.getAccessControlContext().ifPresentOrElse(
-                                context -> // has stored context - executes it with it
-                                        contextAware.runInContext(
-                                                context,
-                                                () -> rolloutExecutor.execute(rollout)),
-                                () -> // has no stored context - executes it in the tenant & user scope
-                                        contextAware.runAsTenantAsUser(
-                                                contextAware.getCurrentTenant(),
-                                                rollout.getCreatedBy(), () -> {
-                                                    rolloutExecutor.execute(rollout);
-                                                    return null;
-                                                })),
+                            // auditor is retrieved and set on transaction commit if not overridden, the system user will be the auditor
+                            rollout.getAccessControlContext().ifPresentOrElse(
+                                    context -> // has stored context - executes it with it
+                                            contextAware.runInContext(
+                                                    context,
+                                                    () -> rolloutExecutor.execute(rollout)),
+                                    () -> // has no stored context - executes it in the tenant & user scope
+                                            contextAware.runAsTenantAsUser(
+                                                    contextAware.getCurrentTenant(),
+                                                    rollout.getCreatedBy(), () -> {
+                                                        rolloutExecutor.execute(rollout);
+                                                        return null;
+                                                    })),
                     () -> log.error("Could not retrieve rollout with id {}. Will not continue with execution.",
                             rolloutId));
             return 0L;
         });
+
+        meterRegistry
+                .map(mReg -> mReg.timer(
+                        "hawkbit.rollout.handler",
+                        TenantMetricsConfiguration.TENANT_TAG, tenantAware.getCurrentTenant(),
+                        "rollout", String.valueOf(rolloutId)))
+                .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
+
     }
 }
