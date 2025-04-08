@@ -9,12 +9,16 @@
  */
 package org.eclipse.hawkbit.repository.jpa.autoassign;
 
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.TenantMetricsConfiguration;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -30,6 +34,7 @@ public class AutoAssignScheduler {
     private final SystemSecurityContext systemSecurityContext;
     private final AutoAssignExecutor autoAssignExecutor;
     private final LockRegistry lockRegistry;
+    private final Optional<MeterRegistry> meterRegistry;
 
     /**
      * Instantiates a new AutoAssignScheduler
@@ -41,11 +46,12 @@ public class AutoAssignScheduler {
      */
     public AutoAssignScheduler(final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext, final AutoAssignExecutor autoAssignExecutor,
-            final LockRegistry lockRegistry) {
+            final LockRegistry lockRegistry, final Optional<MeterRegistry> meterRegistry) {
         this.systemManagement = systemManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.autoAssignExecutor = autoAssignExecutor;
         this.lockRegistry = lockRegistry;
+        this.meterRegistry = meterRegistry;
     }
 
     /**
@@ -61,22 +67,33 @@ public class AutoAssignScheduler {
 
     @SuppressWarnings("squid:S3516")
     private Object executeAutoAssign() {
-        // workaround eclipselink that is currently not possible to
-        // execute a query without multitenancy if MultiTenant
-        // annotation is used.
-        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
-        // iterate through all tenants and execute the rollout check for
-        // each tenant separately.
+        // workaround eclipselink that is currently not possible to execute a query without multitenancy if MultiTenant
+        // annotation is used - https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So iterate through all tenants and execute the rollout
+        // check for each tenant separately.
         final Lock lock = lockRegistry.obtain("autoassign");
         if (!lock.tryLock()) {
             return null;
         }
 
+        final long startNano = System.nanoTime();
         try {
             log.debug("Auto assign scheduled execution has acquired lock and started for each tenant.");
-            systemManagement.forEachTenant(tenant -> autoAssignExecutor.checkAllTargets());
+            systemManagement.forEachTenant(tenant -> {
+                final long  startNanoT = System.nanoTime();
+
+                autoAssignExecutor.checkAllTargets();
+
+                meterRegistry
+                        .map(mReg -> mReg.timer(
+                                "hawkbit.autoassign.executor",
+                                TenantMetricsConfiguration.TENANT_TAG, tenant))
+                        .ifPresent(timer -> timer.record(System.nanoTime() - startNanoT, TimeUnit.NANOSECONDS));
+            });
         } finally {
             lock.unlock();
+            meterRegistry
+                    .map(mReg -> mReg.timer("hawkbit.autoassign.executor.all"))
+                    .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
             log.debug("Auto assign scheduled execution has released lock and finished.");
         }
 

@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.Validation;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
@@ -739,8 +740,8 @@ public class RepositoryApplicationConfiguration {
     @ConditionalOnMissingBean
     RolloutHandler rolloutHandler(final TenantAware tenantAware, final RolloutManagement rolloutManagement,
             final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
-            final PlatformTransactionManager txManager, final ContextAware contextAware) {
-        return new JpaRolloutHandler(tenantAware, rolloutManagement, rolloutExecutor, lockRegistry, txManager, contextAware);
+            final PlatformTransactionManager txManager, final ContextAware contextAware, final Optional<MeterRegistry> meterRegistry) {
+        return new JpaRolloutHandler(tenantAware, rolloutManagement, rolloutExecutor, lockRegistry, txManager, contextAware, meterRegistry);
     }
 
     @Bean
@@ -963,8 +964,8 @@ public class RepositoryApplicationConfiguration {
     @ConditionalOnProperty(prefix = "hawkbit.autoassign.scheduler", name = "enabled", matchIfMissing = true)
     AutoAssignScheduler autoAssignScheduler(final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext, final AutoAssignExecutor autoAssignExecutor,
-            final LockRegistry lockRegistry) {
-        return new AutoAssignScheduler(systemManagement, systemSecurityContext, autoAssignExecutor, lockRegistry);
+            final LockRegistry lockRegistry, final Optional<MeterRegistry> meterRegistry) {
+        return new AutoAssignScheduler(systemManagement, systemSecurityContext, autoAssignExecutor, lockRegistry, meterRegistry);
     }
 
     /**
@@ -1014,9 +1015,10 @@ public class RepositoryApplicationConfiguration {
     @ConditionalOnMissingBean
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.rollout.scheduler", name = "enabled", matchIfMissing = true)
-    RolloutScheduler rolloutScheduler(final SystemManagement systemManagement,
-                                      final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext, @Value("${hawkbit.rollout.executor.thread-pool.size:1}") final int threadPoolSize) {
-        return new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext,  threadPoolSize);
+    RolloutScheduler rolloutScheduler(
+            final SystemManagement systemManagement, final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext,
+            @Value("${hawkbit.rollout.executor.thread-pool.size:1}") final int threadPoolSize, final Optional<MeterRegistry> meterRegistry) {
+        return new RolloutScheduler(rolloutHandler, systemManagement, systemSecurityContext,  threadPoolSize, meterRegistry);
     }
 
     /**

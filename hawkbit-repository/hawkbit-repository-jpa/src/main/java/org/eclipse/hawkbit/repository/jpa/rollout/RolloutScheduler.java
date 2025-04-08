@@ -9,10 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rollout;
 
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.TenantMetricsConfiguration;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -29,14 +34,16 @@ public class RolloutScheduler {
     private final SystemManagement systemManagement;
     private final RolloutHandler rolloutHandler;
     private final SystemSecurityContext systemSecurityContext;
+    private final Optional<MeterRegistry> meterRegistry;
     private final ThreadPoolTaskExecutor rolloutTaskExecutor;
 
     public RolloutScheduler(
-        final RolloutHandler rolloutHandler, final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext,
-        final int threadPoolSize) {
+            final RolloutHandler rolloutHandler, final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext,
+            final int threadPoolSize, final Optional<MeterRegistry> meterRegistry) {
         this.systemManagement = systemManagement;
         this.rolloutHandler = rolloutHandler;
         this.systemSecurityContext = systemSecurityContext;
+        this.meterRegistry = meterRegistry;
         rolloutTaskExecutor = threadPoolTaskExecutor(threadPoolSize);
 
     }
@@ -48,6 +55,8 @@ public class RolloutScheduler {
     @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void runningRolloutScheduler() {
         log.debug("rollout schedule checker has been triggered.");
+        final long startNano = System.nanoTime();
+
         // run this code in system code privileged to have the necessary
         // permission to query and create entities.
         systemSecurityContext.runAsSystem(() -> {
@@ -56,8 +65,7 @@ public class RolloutScheduler {
             // annotation is used.
             // https://bugs.eclipse.org/bugs/show_bug.cgi?id=355458. So
             // iterate through all tenants and execute the rollout check for
-            // each tenant seperately.
-
+            // each tenant separately.
             systemManagement.forEachTenant(tenant -> {
                 if (rolloutTaskExecutor == null) {
                     handleAll(tenant);
@@ -67,15 +75,27 @@ public class RolloutScheduler {
             });
             return null;
         });
+
+        meterRegistry
+                .map(mReg -> mReg.timer("hawkbit.rollout.scheduler.all"))
+                .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
     }
 
     private void handleAll(final String tenant) {
         log.trace("Handling rollout for tenant: {}", tenant);
+        final long startNano = System.nanoTime();
+
         try {
             rolloutHandler.handleAll();
         } catch (Exception e) {
             log.error("Error processing rollout for tenant {}", tenant, e);
         }
+
+        meterRegistry
+                .map(mReg -> mReg.timer(
+                        "hawkbit.rollout.scheduler",
+                        TenantMetricsConfiguration.TENANT_TAG, tenant))
+                .ifPresent(timer -> timer.record(System.nanoTime() - startNano, TimeUnit.NANOSECONDS));
     }
 
     private void handleAllAsync(final String tenant) {
@@ -83,10 +103,9 @@ public class RolloutScheduler {
             handleAll(tenant);
             return null;
         }, tenant));
-
     }
 
-    private ThreadPoolTaskExecutor threadPoolTaskExecutor (final int threadPoolSize) {
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor(final int threadPoolSize) {
         if (threadPoolSize <= 1) {
             return null;
         }
@@ -101,5 +120,4 @@ public class RolloutScheduler {
         executor.initialize();
         return executor;
     }
-
 }
