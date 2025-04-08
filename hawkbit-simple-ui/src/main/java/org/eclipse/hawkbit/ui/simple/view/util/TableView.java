@@ -15,8 +15,12 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.theme.lumo.LumoUtility;
+
 import org.eclipse.hawkbit.ui.simple.view.Constants;
 
 @SuppressWarnings("java:S119") // better readability
@@ -24,16 +28,19 @@ public class TableView<T, ID> extends Div implements Constants {
 
     protected SelectionGrid<T, ID> selectionGrid;
     private final Filter filter;
+    final VerticalLayout gridLayout;
+    protected final HorizontalLayout controlsLayout;
 
     public TableView(
             final Filter.Rsql rsql,
             final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,
             final BiFunction<Query<T, Void>, String, Stream<T>> queryFn) {
-        this(rsql, null, entityRepresentation, queryFn, null, null);
+        this(rsql, null, entityRepresentation, queryFn);
     }
 
     public TableView(
-            final Filter.Rsql rsql, final Filter.Rsql alternativeRsql,
+            final Filter.Rsql rsql,
+            final Filter.Rsql alternativeRsql,
             final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,
             final BiFunction<Query<T, Void>, String, Stream<T>> queryFn) {
         this(rsql, alternativeRsql, entityRepresentation, queryFn, null, null);
@@ -59,13 +66,19 @@ public class TableView<T, ID> extends Div implements Constants {
 
         setSizeFull();
 
-        final VerticalLayout layout = new VerticalLayout(filter, selectionGrid);
-        layout.setSizeFull();
-        layout.setPadding(false);
-        layout.setSpacing(false);
+        gridLayout = new VerticalLayout(filter, selectionGrid);
+        gridLayout.setSizeFull();
+        gridLayout.setPadding(false);
+        gridLayout.setSpacing(false);
         if (addHandler != null || removeHandler != null) {
-            layout.add(Utils.addRemoveControls(addHandler, removeHandler, selectionGrid, false));
+            controlsLayout = Utils.addRemoveControls(addHandler, removeHandler, selectionGrid, false);
+        } else {
+            controlsLayout = new HorizontalLayout();
+            controlsLayout.setWidthFull();
+            controlsLayout.addClassNames(LumoUtility.Padding.Horizontal.XLARGE, LumoUtility.Padding.Vertical.SMALL, LumoUtility.BoxSizing.BORDER);
+            controlsLayout.setAlignItems(FlexComponent.Alignment.BASELINE);
         }
-        add(layout);
+        gridLayout.add(controlsLayout);
+        add(gridLayout);
     }
 }
