@@ -69,20 +69,6 @@ The additional activation for the individual tenant:
 
 ![Enable Gateway Token](../../images/security/gatewayToken.png)
 
-#### Anonymous access
-
-Here we offer general anonymous access for all targets (
-see [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java))
-which we consider not really sufficient for a production system but it might come in handy to get a project started in
-the beginning.
-
-However, anonymous download on the other side might be interesting even in production for scenarios where the artifact
-itself is already encrypted.
-
-The activation for the individual tenant:
-
-![Enable Anonymous Download](../../images/security/anonymousDownload.png)
-
 ### Certificate Authentication by Reverse Proxy
 
 hawkBit offers a certificate-based authentication mechanism, also known as mutual TLS (mTLS), which eliminates the need
