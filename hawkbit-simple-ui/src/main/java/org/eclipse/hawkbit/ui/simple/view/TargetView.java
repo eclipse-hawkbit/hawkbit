@@ -40,7 +40,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -370,26 +369,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     distributionSetO.getName() + ":" + distributionSetO.getVersion());
             distributionSet.setWidthFull();
 
-            actionType = new Select<>();
-            actionType.setLabel(Constants.ACTION_TYPE);
-            actionType.setItems(MgmtActionType.values());
-            actionType.setValue(MgmtActionType.FORCED);
-            final ComponentRenderer<Component, MgmtActionType> actionTypeRenderer = new ComponentRenderer<>(actionTypeO ->
-                    switch (actionTypeO) {
-                        case SOFT -> new Text(Constants.SOFT);
-                        case FORCED -> new Text(Constants.FORCED);
-                        case DOWNLOAD_ONLY -> new Text(Constants.DOWNLOAD_ONLY);
-                        case TIMEFORCED -> forceTime;
-                    });
-            actionType.addValueChangeListener(e -> actionType.setRenderer(actionTypeRenderer));
-            actionType.setItemLabelGenerator(startTypeO ->
-                    switch (startTypeO) {
-                        case SOFT -> Constants.SOFT;
-                        case FORCED -> Constants.FORCED;
-                        case DOWNLOAD_ONLY -> Constants.DOWNLOAD_ONLY;
-                        case TIMEFORCED -> "Time Forced at " + (forceTime.isEmpty() ? "" : " " + forceTime.getValue());
-                    });
-            actionType.setWidthFull();
+            actionType = Utils.actionTypeControls(forceTime);
 
             assign.setEnabled(false);
             addAssignClickListener(hawkbitClient, selectedTargets);
