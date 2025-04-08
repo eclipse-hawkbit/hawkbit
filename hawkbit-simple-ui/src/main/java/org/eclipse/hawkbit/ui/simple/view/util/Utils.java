@@ -78,8 +78,9 @@ public class Utils {
     public static <T, ID> HorizontalLayout addRemoveControls(
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> addHandler,
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler,
+            final Function<SelectionGrid<T, ID>, CompletionStage<Void>> assignHandler,
             final SelectionGrid<T, ID> selectionGrid, final boolean noPadding) {
-        if (addHandler == null && removeHandler == null) {
+        if (addHandler == null && removeHandler == null && assignHandler == null) {
             throw new IllegalArgumentException("At least one of add or remove handlers must not be null!");
         }
 
@@ -90,6 +91,14 @@ public class Utils {
         }
         layout.setAlignItems(FlexComponent.Alignment.BASELINE);
         layout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        if (assignHandler != null) {
+            final Button assignBtn = tooltip(new Button(VaadinIcon.LINK.create()), "Assign");
+            assignBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            assignBtn.addClickListener(e -> assignHandler
+                    .apply(selectionGrid)
+                    .thenAccept(v -> selectionGrid.refreshGrid(false)));
+            layout.add(assignBtn);
+        }
         if (addHandler != null) {
             final Button addBtn = tooltip(new Button(VaadinIcon.PLUS.create()), "Add");
             addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);

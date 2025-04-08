@@ -312,6 +312,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                         softwareModulesGrid.refreshGrid(false);
                         return CompletableFuture.completedFuture(null);
                     },
+                    null,
                     softwareModulesGrid, true);
             final Button finishBtn = Utils.tooltip(new Button("Finish"), "Finish (Esc)");
             finishBtn.addClickListener(e -> {
