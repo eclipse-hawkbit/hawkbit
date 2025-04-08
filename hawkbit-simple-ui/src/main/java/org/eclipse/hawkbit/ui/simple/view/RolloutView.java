@@ -318,26 +318,8 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             description.setMinLength(2);
             description.setWidthFull();
 
-            actionType = new Select<>();
-            actionType.setLabel(Constants.ACTION_TYPE);
-            actionType.setItems(MgmtActionType.values());
-            actionType.setValue(MgmtActionType.FORCED);
-            final ComponentRenderer<Component, MgmtActionType> actionTypeRenderer = new ComponentRenderer<>(actionTypeO ->
-                    switch (actionTypeO) {
-                        case SOFT -> new Text(Constants.SOFT);
-                        case FORCED -> new Text(Constants.FORCED);
-                        case DOWNLOAD_ONLY -> new Text(Constants.DOWNLOAD_ONLY);
-                        case TIMEFORCED -> forceTime;
-                    });
-            actionType.addValueChangeListener(e -> actionType.setRenderer(actionTypeRenderer));
-            actionType.setItemLabelGenerator(startTypeO ->
-                    switch (startTypeO) {
-                        case SOFT -> Constants.SOFT;
-                        case FORCED -> Constants.FORCED;
-                        case DOWNLOAD_ONLY -> Constants.DOWNLOAD_ONLY;
-                        case TIMEFORCED -> "Time Forced at " + (forceTime.isEmpty() ? "" : " " + forceTime.getValue());
-                    });
-            actionType.setWidthFull();
+            actionType = Utils.actionTypeControls(forceTime);
+
             startType = new Select<>();
             startType.setValue(StartType.MANUAL);
             startType.setLabel(Constants.START_TYPE);
