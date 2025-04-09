@@ -21,7 +21,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.tenancy.TenantAware.TenantResolver;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.boot.actuate.autoconfigure.observation.web.servlet.WebMvcObservationAutoConfiguration;
 import org.springframework.boot.actuate.metrics.data.DefaultRepositoryTagsProvider;
@@ -34,7 +33,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.repository.core.support.RepositoryMethodInvocationListener.RepositoryMethodInvocation;
 import org.springframework.http.server.observation.DefaultServerRequestObservationConvention;
@@ -47,7 +45,9 @@ public class TenantMetricsConfiguration {
 
     public static final String TENANT_TAG = "tenant";
 
-    @AutoConfiguration(after = ObservationAutoConfiguration.class)
+    @AutoConfiguration(afterName = {
+            "org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration",
+            "org.eclipse.hawkbit.autoconfigure.security.SecurityAutoConfiguration" })
     @ConditionalOnProperty(name = "hawkbit.metrics.tenancy.web.enabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnClass(name = { "org.springframework.web.servlet.DispatcherServlet", "io.micrometer.observation.Observation" })
@@ -87,11 +87,11 @@ public class TenantMetricsConfiguration {
         }
     }
 
-    @Configuration
+    @AutoConfiguration(afterName = "org.eclipse.hawkbit.autoconfigure.security.SecurityAutoConfiguration")
     @ConditionalOnProperty(name = "hawkbit.metrics.tenancy.repository.enabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnClass(name = {
             "io.micrometer.core.instrument.Tag",
-            "org.springframework.data.repository.core.support.RepositoryMethodInvocationListener.RepositoryMethodInvocation" })
+            "org.springframework.data.repository.core.support.RepositoryMethodInvocationListener" })
     @ConditionalOnBean(TenantResolver.class)
     public static class RepositoryConfig {
 
