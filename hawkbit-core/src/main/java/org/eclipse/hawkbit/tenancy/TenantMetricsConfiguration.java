@@ -51,7 +51,7 @@ public class TenantMetricsConfiguration {
     @ConditionalOnProperty(name = "hawkbit.metrics.tenancy.web.enabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     @ConditionalOnClass(name = { "org.springframework.web.servlet.DispatcherServlet", "io.micrometer.observation.Observation" })
-    @ConditionalOnBean(ObservationRegistry.class)
+    @ConditionalOnBean({ ObservationRegistry.class, TenantResolver.class })
     public static class WebConfig {
 
         @Bean
@@ -92,6 +92,7 @@ public class TenantMetricsConfiguration {
     @ConditionalOnClass(name = {
             "io.micrometer.core.instrument.Tag",
             "org.springframework.data.repository.core.support.RepositoryMethodInvocationListener.RepositoryMethodInvocation" })
+    @ConditionalOnBean(TenantResolver.class)
     public static class RepositoryConfig {
 
         @Bean
