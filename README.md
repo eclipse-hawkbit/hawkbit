@@ -135,6 +135,8 @@ own [Spring Boot](https://projects.spring.io/spring-boot/) based application.
 
 ## Build and start hawkBit [Update Server](hawkbit-monolith/hawkbit-update-server)
 
+**Note**: Make sure, that the `JAVA_HOME` environment variable is set to your installed JDK before executing maven.
+
 ```bash
 git clone https://github.com/eclipse-hawkbit/hawkbit.git
 cd hawkbit
