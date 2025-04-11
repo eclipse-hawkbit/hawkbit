@@ -42,7 +42,7 @@ import org.springframework.scheduling.annotation.Scheduled;
  * <ol>
  *     <li>The Spring property spring.jpa.properties.eclipselink.profiler=PerformanceMonitor shall be set - enables Eclipselink statistics
  *         collecting</li>
- *     <li>By default the periodic stdout log is disabled by setting hawkbit.jpa.statistics.dumpPeriodMS=9223372036854775807 (Long.MAX_VALUE) -
+ *     <li>By default the periodic stdout log is disabled by setting hawkbit.jpa.statistics.dump-period-ms=9223372036854775807 (Long.MAX_VALUE) -
  *         i.e. effectively <b>never</b>. If log is required it should be set to the required period</li>
  *     <li>The MeterRegistry shall be registered available - e.g. include org.springframework.boot:spring-boot-actuator-autoconfigure</li>
  *     <li>(?) When using in test the metrics MAYBE shall be enabled with @AutoConfigureObservability(tracing = false)</li>
@@ -78,7 +78,7 @@ public class Statistics {
     @Autowired
     public void setEntityManagerFactory(
             final EntityManagerFactory entityManagerFactory,
-            @Value("${hawkbit.jpa.statistics.dumpPeriodMS:9223372036854775807}") final long dumpPeriod) {
+            @Value("${hawkbit.jpa.statistics.dump-period-ms:9223372036854775807}") final long dumpPeriod) {
         this.entityManagerFactory = entityManagerFactory;
         // set stdout log PerformanceMonitor. By default, it is Long.MAX_VALUE (9223372036854775807) which effectively disable logging
         getPerformanceMonitor(entityManagerFactory).setDumpTime(dumpPeriod);
