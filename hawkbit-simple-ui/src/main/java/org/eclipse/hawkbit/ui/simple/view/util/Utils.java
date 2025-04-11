@@ -17,12 +17,16 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.eclipse.hawkbit.ui.simple.view.Constants;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -30,9 +34,11 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
@@ -78,8 +84,9 @@ public class Utils {
     public static <T, ID> HorizontalLayout addRemoveControls(
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> addHandler,
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler,
+            final Function<SelectionGrid<T, ID>, CompletionStage<Void>> assignHandler,
             final SelectionGrid<T, ID> selectionGrid, final boolean noPadding) {
-        if (addHandler == null && removeHandler == null) {
+        if (addHandler == null && removeHandler == null && assignHandler == null) {
             throw new IllegalArgumentException("At least one of add or remove handlers must not be null!");
         }
 
@@ -90,6 +97,14 @@ public class Utils {
         }
         layout.setAlignItems(FlexComponent.Alignment.BASELINE);
         layout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        if (assignHandler != null) {
+            final Button assignBtn = tooltip(new Button(VaadinIcon.LINK.create()), "Assign");
+            assignBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            assignBtn.addClickListener(e -> assignHandler
+                    .apply(selectionGrid)
+                    .thenAccept(v -> selectionGrid.refreshGrid(false)));
+            layout.add(assignBtn);
+        }
         if (addHandler != null) {
             final Button addBtn = tooltip(new Button(VaadinIcon.PLUS.create()), "Add");
             addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -146,6 +161,31 @@ public class Utils {
                 .withText(text)
                 .withPosition(Tooltip.TooltipPosition.TOP_START);
         return component;
+    }
+
+    public static Select<MgmtActionType> actionTypeControls(DateTimePicker forceTime) {
+
+        Select<MgmtActionType> actionType = new Select<>();
+        actionType.setLabel(Constants.ACTION_TYPE);
+        actionType.setItems(MgmtActionType.values());
+        actionType.setValue(MgmtActionType.FORCED);
+        final ComponentRenderer<Component, MgmtActionType> actionTypeRenderer = new ComponentRenderer<>(actionTypeO ->
+                switch (actionTypeO) {
+                    case SOFT -> new Text(Constants.SOFT);
+                    case FORCED -> new Text(Constants.FORCED);
+                    case DOWNLOAD_ONLY -> new Text(Constants.DOWNLOAD_ONLY);
+                    case TIMEFORCED -> forceTime;
+                });
+        actionType.addValueChangeListener(e -> actionType.setRenderer(actionTypeRenderer));
+        actionType.setItemLabelGenerator(startTypeO ->
+                switch (startTypeO) {
+                    case SOFT -> Constants.SOFT;
+                    case FORCED -> Constants.FORCED;
+                    case DOWNLOAD_ONLY -> Constants.DOWNLOAD_ONLY;
+                    case TIMEFORCED -> "Time Forced at " + (forceTime.isEmpty() ? "" : " " + forceTime.getValue());
+                });
+        actionType.setWidthFull();
+        return actionType;
     }
 
     public static class BaseDialog<T> extends Dialog {

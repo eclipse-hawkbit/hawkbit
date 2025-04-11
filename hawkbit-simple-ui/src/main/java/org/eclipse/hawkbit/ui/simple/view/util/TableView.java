@@ -29,14 +29,14 @@ public class TableView<T, ID> extends Div implements Constants {
             final Filter.Rsql rsql,
             final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,
             final BiFunction<Query<T, Void>, String, Stream<T>> queryFn) {
-        this(rsql, null, entityRepresentation, queryFn, null, null);
+        this(rsql, null, entityRepresentation, queryFn, null, null , null);
     }
 
     public TableView(
             final Filter.Rsql rsql, final Filter.Rsql alternativeRsql,
             final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,
             final BiFunction<Query<T, Void>, String, Stream<T>> queryFn) {
-        this(rsql, alternativeRsql, entityRepresentation, queryFn, null, null);
+        this(rsql, alternativeRsql, entityRepresentation, queryFn, null, null, null);
     }
 
     public TableView(
@@ -45,7 +45,7 @@ public class TableView<T, ID> extends Div implements Constants {
             final BiFunction<Query<T, Void>, String, Stream<T>> queryFn,
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> addHandler,
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler) {
-        this(rsql, null, entityRepresentation, queryFn, addHandler, removeHandler);
+        this(rsql, null, entityRepresentation, queryFn, addHandler, removeHandler, null);
     }
 
     public TableView(
@@ -53,7 +53,8 @@ public class TableView<T, ID> extends Div implements Constants {
             final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,
             final BiFunction<Query<T, Void>, String, Stream<T>> queryFn,
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> addHandler,
-            final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler) {
+            final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler,
+            final Function<SelectionGrid<T, ID>, CompletionStage<Void>> assignHandler) {
         selectionGrid = new SelectionGrid<>(entityRepresentation, queryFn);
         filter = new Filter(selectionGrid::setRsqlFilter, rsql, alternativeRsql);
 
@@ -63,8 +64,8 @@ public class TableView<T, ID> extends Div implements Constants {
         layout.setSizeFull();
         layout.setPadding(false);
         layout.setSpacing(false);
-        if (addHandler != null || removeHandler != null) {
-            layout.add(Utils.addRemoveControls(addHandler, removeHandler, selectionGrid, false));
+        if (addHandler != null || removeHandler != null || assignHandler != null) {
+            layout.add(Utils.addRemoveControls(addHandler, removeHandler, assignHandler, selectionGrid, false));
         }
         add(layout);
     }
