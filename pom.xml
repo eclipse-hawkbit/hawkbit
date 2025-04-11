@@ -64,7 +64,7 @@
         <rsql-parser.version>2.1.0</rsql-parser.version>
         <commons-io.version>2.18.0</commons-io.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-text.version>1.13.0</commons-text.version>
+        <commons-text.version>1.13.1</commons-text.version>
         <io-protostuff.version>1.8.0</io-protostuff.version>
         <!-- test -->
         <rabbitmq.http-client.version>5.3.0</rabbitmq.http-client.version>
