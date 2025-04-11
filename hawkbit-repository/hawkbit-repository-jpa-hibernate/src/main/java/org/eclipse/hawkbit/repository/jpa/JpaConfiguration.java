@@ -40,7 +40,7 @@ public class JpaConfiguration {
 
     protected JpaConfiguration(
             final TenantAware.TenantResolver tenantResolver,
-            @Value("${hibernate.enable_lazy_load_no_trans:true}") final boolean enableLazyLoadNoTrans) {
+            @Value("${hibernate.enable-lazy-load-no-trans:true}") final boolean enableLazyLoadNoTrans) {
         tenantIdentifier = new TenantIdentifier(tenantResolver);
         this.enableLazyLoadNoTrans = enableLazyLoadNoTrans;
     }

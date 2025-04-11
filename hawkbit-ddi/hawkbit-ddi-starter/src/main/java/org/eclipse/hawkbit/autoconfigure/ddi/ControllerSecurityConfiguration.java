@@ -94,7 +94,7 @@ class ControllerSecurityConfiguration {
     @Order(301)
     protected SecurityFilterChain filterChainDDI(
             final HttpSecurity http,
-            @Value("${hawkbit.server.security.cors.disableForDdiApi:false}") final boolean disableCorsForDdiApi) throws Exception {
+            @Value("${hawkbit.server.security.cors.disable-for-ddi-api:false}") final boolean disableCorsForDdiApi) throws Exception {
         http
                 .securityMatcher(DDI_ANT_MATCHERS)
                 .csrf(AbstractHttpConfigurer::disable);

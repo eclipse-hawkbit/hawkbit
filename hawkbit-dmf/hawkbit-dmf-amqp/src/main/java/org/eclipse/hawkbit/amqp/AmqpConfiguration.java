@@ -99,7 +99,7 @@ public class AmqpConfiguration {
     @ConditionalOnMissingBean
     public ErrorHandler errorHandler(
             final List<FatalExceptionStrategy> fatalExceptionStrategies,
-            @Value("${hawkbit.dmf.rabbitmq.fatalExceptionTypes:}") final List<String> fatalExceptionTypes) {
+            @Value("${hawkbit.dmf.rabbitmq.fatal-exception-types:}") final List<String> fatalExceptionTypes) {
         return new ConditionalRejectingErrorHandler(new RequeueExceptionStrategy(fatalExceptionStrategies, fatalExceptionTypes));
     }
 

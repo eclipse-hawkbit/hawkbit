@@ -29,7 +29,7 @@ public final class RsqlConfigHolder {
      * If RSQL comparison operators shall ignore the case. If ignore case is <code>true</code>
      * "x == ax" will match "x == aX"
      */
-    @Value("${hawkbit.rsql.ignoreCase:true}")
+    @Value("${hawkbit.rsql.ignore-case:true}")
     private boolean ignoreCase;
     /**
      * Declares if the database is case-insensitive, by default assumes <code>false</code>. In case it is case-sensitive and,
@@ -38,7 +38,7 @@ public final class RsqlConfigHolder {
      * If the database is declared as case-sensitive and ignoreCase is set to <code>false</code> the RSQL queries shall use strict
      * syntax - i.e. 'and' instead of 'AND' / 'aND'. Otherwise, the queries would be case-insensitive regarding operators.
      */
-    @Value("${hawkbit.rsql.caseInsensitiveDB:false}")
+    @Value("${hawkbit.rsql.case-insensitive-db:false}")
     private boolean caseInsensitiveDB;
 
     private RsqlVisitorFactory rsqlVisitorFactory;
@@ -52,7 +52,7 @@ public final class RsqlConfigHolder {
      * @deprecated in favour of G2 RSQL visitor. since 0.6.0
      */
     @Deprecated(forRemoval = true, since = "0.6.0")
-    @Value("${hawkbit.rsql.legacyRsqlVisitor:false}")
+    @Value("${hawkbit.rsql.legacy-rsql-visitor:false}")
     private boolean legacyRsqlVisitor;
 
     /**
