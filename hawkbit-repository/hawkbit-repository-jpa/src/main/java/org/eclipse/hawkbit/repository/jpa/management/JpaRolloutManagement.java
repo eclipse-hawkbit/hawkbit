@@ -29,6 +29,7 @@ import jakarta.validation.constraints.NotNull;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ContextAware;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -47,6 +48,7 @@ import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate;
@@ -195,6 +197,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             final RolloutGroupConditions conditions, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
         return create0(rollout, amountGroup, confirmationRequired, conditions, dynamicRolloutGroupTemplate);
     }
+
     private Rollout create0(
             final RolloutCreate rollout, final int amountGroup, final boolean confirmationRequired,
             final RolloutGroupConditions conditions, final DynamicRolloutGroupTemplate dynamicRolloutGroupTemplate) {
@@ -210,6 +213,12 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
 
         final JpaRollout rolloutRequest = (JpaRollout) rollout.build();
+        // scheduled rollout, the creator shall have permissions to start rollout
+        if (rolloutRequest.getStartAt() != null && rolloutRequest.getStartAt() != Long.MAX_VALUE && // if scheduled rollout
+                !systemSecurityContext.hasPermission(SpPermission.HANDLE_ROLLOUT) &&
+                !systemSecurityContext.hasPermission(SpPermission.SpringEvalExpressions.SYSTEM_ROLE)) {
+            throw new InsufficientPermissionException("You need permission to start rollouts to create a scheduled rollout");
+        }
         if (dynamicRolloutGroupTemplate != null && !rolloutRequest.isDynamic()) {
             throw new ValidationException("Dynamic group template is only allowed for dynamic rollouts");
         }
@@ -266,7 +275,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     public Slice<Rollout> findAllWithDetailedStatus(final Pageable pageable, final boolean deleted) {
         final Slice<Rollout> rollouts = JpaManagementHelper.convertPage(
-                rolloutRepository.findAll(RolloutSpecification.isDeleted(deleted, pageable.getSort()), JpaRollout_.GRAPH_ROLLOUT_DS, pageable), pageable);
+                rolloutRepository.findAll(RolloutSpecification.isDeleted(deleted, pageable.getSort()), JpaRollout_.GRAPH_ROLLOUT_DS, pageable),
+                pageable);
         setRolloutStatusDetails(rollouts);
         return rollouts;
     }
@@ -375,6 +385,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision, final String remark) {
         return approveOrDeny0(rolloutId, decision, remark);
     }
+
     private Rollout approveOrDeny0(final long rolloutId, final Rollout.ApprovalDecision decision, final String remark) {
         log.debug("approveOrDeny rollout called for rollout {} with decision {}", rolloutId, decision);
         final JpaRollout rollout = getRolloutOrThrowExceptionIfNotFound(rolloutId);
@@ -720,7 +731,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
     }
 
-    private @NotNull  Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rollouts) {
+    private @NotNull Map<Long, List<TotalTargetCountActionStatus>> getStatusCountItemForRollout(final List<Long> rollouts) {
         if (rollouts.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -819,7 +830,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
     }
 
-    private long calculateRemainingTargets(final List<RolloutGroup> groups, final String targetFilter, final Long createdAt, final Long dsTypeId) {
+    private long calculateRemainingTargets(final List<RolloutGroup> groups, final String targetFilter, final Long createdAt,
+            final Long dsTypeId) {
         final TargetCount targets = calculateTargets(targetFilter, createdAt, dsTypeId);
 
         final long totalTargets = targets.total();
