@@ -312,7 +312,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                 new JpaSoftwareModuleType(
                         org.eclipse.hawkbit.repository.Constants.SMT_DEFAULT_OS_KEY,
                         org.eclipse.hawkbit.repository.Constants.SMT_DEFAULT_OS_NAME,
-                        "Core firmware or operation system", 1));
+                        "Core firmware or operating system", 1));
 
         // make sure the module types get their IDs
         entityManager.flush();

@@ -35,6 +35,7 @@ import io.qameta.allure.Story;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.awaitility.Awaitility;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
@@ -59,6 +60,7 @@ import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -85,6 +87,7 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
+import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -1376,6 +1379,64 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.RUNNING, 10L);
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.SCHEDULED, 40L);
         validateRolloutActionStatus(myRolloutId, expectedTargetCountStatus);
+    }
+
+    @Test
+    @Description("Verify the creation and the start of a rollout.")
+    void createScheduledRollout() throws Exception {
+        final String rolloutName = "scheduledRolloutTest";
+        testdataFactory.createTargets(50, rolloutName + "-", rolloutName);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
+        distributionSetManagement.lock(distributionSet.getId());
+
+        final WithUser userWithoutHandleRollout = SecurityContextSwitch.withUser(
+                "user_without_handle_rollout",
+                SpPermission.READ_REPOSITORY, SpPermission.READ_TARGET, SpPermission.CREATE_ROLLOUT);
+        final WithUser userWithHandleRollout = SecurityContextSwitch.withUser(
+                "user_with_handle_rollout",
+                SpPermission.READ_REPOSITORY, SpPermission.READ_TARGET, SpPermission.CREATE_ROLLOUT, SpPermission.HANDLE_ROLLOUT);
+        final WithUser userWithSystemRole = SecurityContextSwitch.withUser(
+                "user_with_system_role",
+                SpPermission.SpringEvalExpressions.SYSTEM_ROLE);
+
+        final String filter = "controllerId==" + rolloutName + "-*";
+        // create scheduled rollout fails without handle rollout permission
+        assertThatExceptionOfType(InsufficientPermissionException.class)
+                .as("Insufficient permission exception when startAt and no handle rollout permission")
+                .isThrownBy(() -> SecurityContextSwitch.runAs(
+                        userWithoutHandleRollout, () -> createRolloutWithStartAt(rolloutName, filter, distributionSet, 1L)));
+        // same action succeeds with handle rollout permission
+        SecurityContextSwitch.runAs(
+                userWithHandleRollout,
+                () -> createRolloutWithStartAt(rolloutName + "_withStartTime", filter, distributionSet, 1L));
+        // same action succeeds with system role permission
+        SecurityContextSwitch.runAs(
+                userWithSystemRole,
+                () -> createRolloutWithStartAt(rolloutName + "_withStartTimeSystemRole", filter, distributionSet, 1L));
+        // same action succeeds without handle rollout permission but with null start at
+        SecurityContextSwitch.runAs(
+                userWithoutHandleRollout,
+                () -> createRolloutWithStartAt(rolloutName + "_withoutStartTime", filter, distributionSet, null));
+        // same action succeeds without handle rollout permission but with Long.MAX_VALUE start at
+        SecurityContextSwitch.runAs(
+                userWithoutHandleRollout,
+                () -> createRolloutWithStartAt(rolloutName + "_withLongMax", filter, distributionSet, Long.MAX_VALUE));
+    }
+    private Rollout createRolloutWithStartAt(final String rolloutName, final String filter, final DistributionSet distributionSet,
+            final Long startAt) {
+        return rolloutManagement.create(
+                entityFactory.rollout().create()
+                        .name(rolloutName)
+                        .description("desc")
+                        .targetFilterQuery(filter)
+                        .distributionSetId(distributionSet)
+                        .weight(1000)
+                        .startAt(startAt)
+                        .dynamic(false),
+                5, false, new RolloutGroupConditionBuilder().withDefaults()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "80")
+                        .errorCondition(RolloutGroupErrorCondition.THRESHOLD, "50")
+                        .errorAction(RolloutGroupErrorAction.PAUSE, null).build(), null);
     }
 
     @Test
