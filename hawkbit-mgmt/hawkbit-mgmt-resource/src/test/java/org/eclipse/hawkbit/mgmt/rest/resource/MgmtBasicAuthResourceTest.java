@@ -10,6 +10,8 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -80,20 +82,22 @@ class MgmtBasicAuthResourceTest {
     protected WebApplicationContext webApplicationContext;
     @Autowired
     MockMvc defaultMock;
-    private static final String TEST_USER = "testUser";
     private static final String DEFAULT_TENANT = "DEFAULT";
+    private static final String TEST_USER = "testUser";
 
     @Test
     @Description("Test of userinfo api with basic auth validation")
-    @WithUser(principal = TEST_USER)
+    @WithUser(principal = TEST_USER, authorities = {"READ", "WRITE", "DELETE"})
     void validateBasicAuthWithUserDetails() throws Exception {
         withSecurityMock().perform(get(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING))
                 .andDo(MockMvcResultPrinter.print())
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON_VALUE))
+                .andExpect(jsonPath("$.tenant", equalTo(DEFAULT_TENANT)))
                 .andExpect(jsonPath("$.username", equalTo(TEST_USER)))
-                .andExpect(jsonPath("$.tenant", equalTo(DEFAULT_TENANT)));
+                .andExpect(jsonPath("$.permissions.size()", is(3)))
+                .andExpect(jsonPath("$.permissions", hasItems("READ", "WRITE", "DELETE")));
     }
 
     @Test

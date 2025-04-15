@@ -21,4 +21,5 @@ public class MgmtUserInfo {
 
     private String tenant;
     private String username;
+    private String[] permissions;
 }
