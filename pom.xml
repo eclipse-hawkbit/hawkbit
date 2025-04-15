@@ -423,6 +423,7 @@
                                     <exclude>**/helm/**</exclude>
                                     <exclude>**/README</exclude>
                                     <exclude>**/.git*</exclude>
+                                    <exclude>**/robots.txt</exclude>
                                     <exclude>**/*.sql</exclude>
                                     <exclude>**/docker/**</exclude>
                                     <exclude>**/frontend/**</exclude>
