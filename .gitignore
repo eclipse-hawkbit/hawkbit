@@ -58,6 +58,9 @@ classpath-data.json
 
 # local Spring configs
 application-local.properties
+application-local.yaml
+application-local-*.properties
+application-local-*.yaml
 
 # Maven
 maven.properties
