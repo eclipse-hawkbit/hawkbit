@@ -1,0 +1,5 @@
+alter table sp_base_software_module rename sp_software_module;
+alter table sp_distributionset_tag rename sp_distribution_set_tag;
+alter table sp_ds_dstag rename sp_ds_tag;
+alter table sp_rolloutgroup rename sp_rollout_group;
+alter table sp_rollouttargetgroup rename sp_rollout_target_group;

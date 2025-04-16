@@ -38,7 +38,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 @ToString(callSuper = true)
 @IdClass(SwMetadataCompositeKey.class)
 @Entity
-@Table(name = "sp_sw_metadata")
+@Table(name = "sp_sm_metadata")
 public class JpaSoftwareModuleMetadata extends AbstractJpaMetaData implements SoftwareModuleMetadata {
 
     @Serial

@@ -36,7 +36,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 @NoArgsConstructor // Default constructor for JPA
 @IdClass(RolloutTargetGroupId.class)
 @Entity
-@Table(name = "sp_rollouttargetgroup")
+@Table(name = "sp_rollout_target_group")
 public class RolloutTargetGroup implements Serializable {
 
     @Serial
@@ -51,7 +51,7 @@ public class RolloutTargetGroup implements Serializable {
     @ManyToOne(optional = false, targetEntity = JpaTarget.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
     @JoinColumn(
             name = "target_id", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_target"))
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollout_target_group_target_id"))
     private JpaTarget target;
 
     @OneToMany(targetEntity = JpaAction.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })

@@ -80,7 +80,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Setter
     @ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = JpaDistributionSetType.class)
     @JoinColumn(
-            name = "ds_id", nullable = false, updatable = false,
+            name = "set_type", nullable = false, updatable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstype_ds"))
     @NotNull
     private DistributionSetType type;
@@ -100,15 +100,15 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
 
     @ManyToMany(targetEntity = JpaDistributionSetTag.class)
     @JoinTable(
-            name = "sp_ds_dstag",
+            name = "sp_ds_tag",
             joinColumns = {
                     @JoinColumn(
                             name = "ds", nullable = false,
-                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds")) },
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_tag_ds")) },
             inverseJoinColumns = {
                     @JoinColumn(
                             name = "TAG", nullable = false,
-                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag")) })
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_tag_tag")) })
     private Set<DistributionSetTag> tags = new HashSet<>();
 
     @ToString.Exclude

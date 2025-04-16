@@ -1,0 +1,1 @@
+alter table sp_base_software_module rename to sp_software_module;

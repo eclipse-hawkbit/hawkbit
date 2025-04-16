@@ -41,7 +41,7 @@ public class JpaDistributionSetMetadata extends AbstractJpaMetaData implements D
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ds_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_ds"))
+    @JoinColumn(name = "set_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_ds"))
     private JpaDistributionSet distributionSet;
 
     public JpaDistributionSetMetadata(final String key, final String value) {
