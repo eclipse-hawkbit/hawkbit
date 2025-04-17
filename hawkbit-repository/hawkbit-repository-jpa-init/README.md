@@ -21,7 +21,7 @@ There are two modes:
 **Note**: could also be configured using default flyway env properties
 
 ## Usage
-The module builds executable jar with all dependencies - _hawkbit-repository-jpa-init-\<revision\>-exec.jar_. It could be configured with environment properties and run as an executable jar:
+The module builds executable jar with all dependencies - _hawkbit-repository-jpa-init-\<revision\>.jar_. It could be configured with environment properties and run as an executable jar:
 ```shell
 # sets the mode - default if validate
 export hawkbit_db_mode=migrate 
@@ -33,12 +33,12 @@ export hawkbit_db_username=root
 #export hawkbit_db_password=
 
 # run executable jar
-java -jar target/hawkbit-repository-jpa-init-0-SNAPSHOT-exec.jar
+java -jar target/hawkbit-repository-jpa-init-0-SNAPSHOT.jar
 ```
 
 It could also be configured using system properties and run as a java main class:
 ```shell
-java -classpath target/hawkbit-repository-jpa-init-0-SNAPSHOT-exec.jar \
+java -classpath target/hawkbit-repository-jpa-init-0-SNAPSHOT.jar \
   -Dhawkbit.db.mode=migrate \
   -Dhawkbit.db.url=jdbc:mariadb://localhost:3306/hawkbit \
   -Dhawkbit.db.username=root \

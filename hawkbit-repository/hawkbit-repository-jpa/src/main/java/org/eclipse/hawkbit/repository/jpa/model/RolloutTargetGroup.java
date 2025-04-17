@@ -36,7 +36,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 @NoArgsConstructor // Default constructor for JPA
 @IdClass(RolloutTargetGroupId.class)
 @Entity
-@Table(name = "sp_rollouttargetgroup")
+@Table(name = "sp_rollout_target_group")
 public class RolloutTargetGroup implements Serializable {
 
     @Serial
@@ -44,20 +44,20 @@ public class RolloutTargetGroup implements Serializable {
 
     @Id
     @ManyToOne(optional = false, targetEntity = JpaRolloutGroup.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
-    @JoinColumn(name = "rolloutGroup_Id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_group"))
+    @JoinColumn(name = "rollout_group", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollout_target_group_rollout_group"))
     private JpaRolloutGroup rolloutGroup;
 
     @Id
     @ManyToOne(optional = false, targetEntity = JpaTarget.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
     @JoinColumn(
-            name = "target_id", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollouttargetgroup_target"))
+            name = "target", nullable = false, updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollout_target_group_target"))
     private JpaTarget target;
 
     @OneToMany(targetEntity = JpaAction.class, fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
     @JoinColumns(value = {
-            @JoinColumn(name = "rolloutgroup", nullable = false, insertable = false, updatable = false, referencedColumnName = "rolloutGroup_Id"),
-            @JoinColumn(name = "target", nullable = false, insertable = false, updatable = false, referencedColumnName = "target_id") })
+            @JoinColumn(name = "rollout_group", nullable = false, insertable = false, updatable = false, referencedColumnName = "rollout_group"),
+            @JoinColumn(name = "target", nullable = false, insertable = false, updatable = false, referencedColumnName = "target") })
     private List<JpaAction> actions;
 
     public RolloutTargetGroup(final RolloutGroup rolloutGroup, final Target target) {

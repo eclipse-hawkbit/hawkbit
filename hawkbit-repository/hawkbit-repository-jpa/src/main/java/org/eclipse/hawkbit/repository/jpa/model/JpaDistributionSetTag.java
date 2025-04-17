@@ -32,7 +32,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
  */
 @NoArgsConstructor // Default constructor needed for JPA entities.
 @Entity
-@Table(name = "sp_distributionset_tag",
+@Table(name = "sp_distribution_set_tag",
         indexes = {
                 @Index(name = "sp_idx_distribution_set_tag_prim", columnList = "tenant,id"),
                 @Index(name = "sp_idx_distribution_set_tag_01", columnList = "tenant,name") },

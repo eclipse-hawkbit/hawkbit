@@ -46,7 +46,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
  */
 @NoArgsConstructor // Default constructor needed for JPA entities.
 @Entity
-@Table(name = "sp_rolloutgroup", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "rollout", "tenant" }, name = "uk_rolloutgroup"))
+@Table(name = "sp_rollout_group", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "rollout", "tenant" }, name = "uk_rolloutgroup"))
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGroup, EventAwareEntity {
@@ -73,7 +73,7 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     @Setter
     @Getter
     @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
-    @JoinColumn(name = "parent_id")
+    @JoinColumn(name = "parent")
     private JpaRolloutGroup parent;
 
     @Setter

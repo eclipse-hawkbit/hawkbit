@@ -38,7 +38,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 @ToString(callSuper = true)
 @IdClass(SwMetadataCompositeKey.class)
 @Entity
-@Table(name = "sp_sw_metadata")
+@Table(name = "sp_sm_metadata")
 public class JpaSoftwareModuleMetadata extends AbstractJpaMetaData implements SoftwareModuleMetadata {
 
     @Serial
@@ -46,7 +46,7 @@ public class JpaSoftwareModuleMetadata extends AbstractJpaMetaData implements So
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "sw_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_sw"))
+    @JoinColumn(name = "sm", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_sm_metadata_sm"))
     private JpaSoftwareModule softwareModule;
 
     @Column(name = "target_visible")

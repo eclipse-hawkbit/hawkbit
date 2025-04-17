@@ -55,11 +55,11 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 @Getter
 @ToString(callSuper = true)
 @Entity
-@Table(name = "sp_base_software_module",
-        uniqueConstraints = @UniqueConstraint(columnNames = { "module_type", "name", "version", "tenant" }, name = "uk_base_sw_mod"),
+@Table(name = "sp_software_module",
+        uniqueConstraints = @UniqueConstraint(columnNames = { "sm_type", "name", "version", "tenant" }, name = "uk_base_sw_mod"),
         indexes = {
                 @Index(name = "sp_idx_base_sw_module_01", columnList = "tenant,deleted,name,version"),
-                @Index(name = "sp_idx_base_sw_module_02", columnList = "tenant,deleted,module_type"),
+                @Index(name = "sp_idx_base_sw_module_02", columnList = "tenant,deleted,sm_type"),
                 @Index(name = "sp_idx_base_sw_module_prim", columnList = "tenant,id") })
 @NamedEntityGraph(name = "SoftwareModule.artifacts", attributeNodes = { @NamedAttributeNode("artifacts") })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
@@ -73,8 +73,8 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     @Setter
     @ManyToOne
-    @JoinColumn(name = "module_type", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_module_type"))
+    @JoinColumn(name = "sm_type", nullable = false, updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_software_module_sm_type"))
     @NotNull
     private JpaSoftwareModuleType type;
 
