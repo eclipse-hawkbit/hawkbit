@@ -49,8 +49,8 @@ import org.springframework.util.CollectionUtils;
 @Table(name = "sp_distribution_set_type", indexes = {
         @Index(name = "sp_idx_distribution_set_type_01", columnList = "tenant,deleted"),
         @Index(name = "sp_idx_distribution_set_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_dst_name"),
-        @UniqueConstraint(columnNames = { "type_key", "tenant" }, name = "uk_dst_key") })
+        @UniqueConstraint(columnNames = { "tenant", "type_key"}, name = "uk_sp_distribution_set_type_type_key"),
+        @UniqueConstraint(columnNames = { "tenant", "name" }, name = "uk_sp_distribution_set_type_name") })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaDistributionSetType extends AbstractJpaTypeEntity implements DistributionSetType, EventAwareEntity {

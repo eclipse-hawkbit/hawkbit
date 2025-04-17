@@ -62,7 +62,9 @@ public class JpaTenantMetaData extends AbstractJpaBaseEntity implements TenantMe
     private String tenant;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "default_ds_type", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_tenant_md_default_ds_type"))
+    @JoinColumn(
+            name = "default_ds_type", nullable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_sp_tenant_default_ds_type"))
     private JpaDistributionSetType defaultDsType;
 
     public JpaTenantMetaData(final DistributionSetType defaultDsType, final String tenant) {

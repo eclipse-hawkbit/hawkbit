@@ -36,8 +36,8 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 @Table(name = "sp_software_module_type", indexes = {
         @Index(name = "sp_idx_software_module_type_01", columnList = "tenant,deleted"),
         @Index(name = "sp_idx_software_module_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "type_key", "tenant" }, name = "uk_smt_type_key"),
-        @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_smt_name") })
+        @UniqueConstraint(columnNames = { "tenant", "type_key" }, name = "uk_sp_software_module_type_type_key"),
+        @UniqueConstraint(columnNames = { "tenant", "name" }, name = "uk_sp_software_module_type_name") })
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaSoftwareModuleType extends AbstractJpaTypeEntity implements SoftwareModuleType, EventAwareEntity {

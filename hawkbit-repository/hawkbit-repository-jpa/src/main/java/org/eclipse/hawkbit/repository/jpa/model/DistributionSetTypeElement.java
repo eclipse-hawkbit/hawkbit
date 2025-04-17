@@ -48,7 +48,7 @@ public class DistributionSetTypeElement implements Serializable {
     @ManyToOne(optional = false)
     @JoinColumn(
             name = "distribution_set_type", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_element"))
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_distribution_set_type"))
     private JpaDistributionSetType dsType;
 
     @Getter
@@ -56,7 +56,7 @@ public class DistributionSetTypeElement implements Serializable {
     @ManyToOne(optional = false)
     @JoinColumn(
             name = "software_module_type", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_smtype"))
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_type_element_software_module_type"))
     private JpaSoftwareModuleType smType;
 
     @Setter

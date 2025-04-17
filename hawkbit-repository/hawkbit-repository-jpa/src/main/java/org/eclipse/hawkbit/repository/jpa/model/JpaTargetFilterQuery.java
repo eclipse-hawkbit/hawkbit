@@ -65,23 +65,25 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity imple
     private String query;
 
     @ManyToOne(optional = true, fetch = FetchType.LAZY, targetEntity = JpaDistributionSet.class)
-    @JoinColumn(name = "auto_assign_distribution_set", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_filter_auto_assign_ds"))
+    @JoinColumn(
+            name = "auto_assign_distribution_set",
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_filter_query_auto_assign_distribution_set"))
     private JpaDistributionSet autoAssignDistributionSet;
 
-    @Column(name = "auto_assign_action_type", nullable = true)
+    @Column(name = "auto_assign_action_type")
     @Convert(converter = JpaAction.ActionTypeConverter.class)
     private ActionType autoAssignActionType;
 
-    @Column(name = "auto_assign_weight", nullable = true)
+    @Column(name = "auto_assign_weight")
     private Integer autoAssignWeight;
 
-    @Column(name = "auto_assign_initiated_by", nullable = true, length = USERNAME_FIELD_LENGTH)
+    @Column(name = "auto_assign_initiated_by", length = USERNAME_FIELD_LENGTH)
     private String autoAssignInitiatedBy;
 
     @Column(name = "confirmation_required")
     private boolean confirmationRequired;
 
-    @Column(name = "access_control_context", nullable = true)
+    @Column(name = "access_control_context")
     private String accessControlContext;
 
     public JpaTargetFilterQuery(final String name, final String query, final DistributionSet autoAssignDistributionSet,
