@@ -54,7 +54,7 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     @ManyToOne(optional = false, cascade = { CascadeType.PERSIST }, fetch = FetchType.LAZY)
     @JoinColumn(
             name = "software_module", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_assigned_sm"))
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_artifact_software_module"))
     private JpaSoftwareModule softwareModule;
 
     @Column(name = "provided_file_name", length = 256, updatable = false)
