@@ -169,14 +169,14 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    @AuditLog(entity = "DistributionSet", type = AuditLog.Type.DELETE, message = "Delete Distribution Set")
+    @AuditLog(entity = "DistributionSet", type = AuditLog.Type.DELETE, description = "Delete Distribution Set")
     public ResponseEntity<Void> deleteDistributionSet(final Long distributionSetId) {
         distributionSetManagement.delete(distributionSetId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @AuditLog(entity = "DistributionSet", type = AuditLog.Type.UPDATE, message = "Update Distribution Set")
+    @AuditLog(entity = "DistributionSet", type = AuditLog.Type.UPDATE, description = "Update Distribution Set")
     public ResponseEntity<MgmtDistributionSet> updateDistributionSet(
             final Long distributionSetId,
             final MgmtDistributionSetRequestBodyPut toUpdate) {
@@ -346,7 +346,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    @AuditLog(entity = "DistributionSet", type = AuditLog.Type.DELETE, message = "Delete Assigned Distribution Set")
+    @AuditLog(entity = "DistributionSet", type = AuditLog.Type.DELETE, description = "Delete Assigned Distribution Set")
     public ResponseEntity<Void> deleteAssignSoftwareModules(final Long distributionSetId, final Long softwareModuleId) {
         distributionSetManagement.unassignSoftwareModule(distributionSetId, softwareModuleId);
         return ResponseEntity.ok().build();
@@ -400,7 +400,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    @AuditLog(entity = "DistributionSet", type = AuditLog.Type.DELETE, message = "Invalidate Distribution Set")
+    @AuditLog(entity = "DistributionSet", type = AuditLog.Type.DELETE, description = "Invalidate Distribution Set")
     public ResponseEntity<Void> invalidateDistributionSet(
             final Long distributionSetId, final MgmtInvalidateDistributionSetRequestBody invalidateRequestBody) {
         distributionSetInvalidationManagement

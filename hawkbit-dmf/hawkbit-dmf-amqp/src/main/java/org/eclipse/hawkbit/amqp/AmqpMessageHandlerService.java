@@ -407,7 +407,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
     }
 
-    @AuditLog(entity = "DMF", type = AuditLog.Type.DELETE, message = "Delete Target", logResponse = true)
+    @AuditLog(entity = "DMF", type = AuditLog.Type.DELETE, description = "Delete Target", logResponse = true)
     private void deleteTarget(final Message message) {
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
         controllerManagement.deleteExistingTarget(thingId);

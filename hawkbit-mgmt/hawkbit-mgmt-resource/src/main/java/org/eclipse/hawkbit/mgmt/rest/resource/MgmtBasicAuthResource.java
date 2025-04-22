@@ -32,7 +32,7 @@ public class MgmtBasicAuthResource implements MgmtBasicAuthRestApi {
     }
 
     @Override
-    @AuditLog(entity = "BasicAuth", type = AuditLog.Type.READ, message = "Validate Basic Auth")
+    @AuditLog(entity = "BasicAuth", type = AuditLog.Type.READ, description = "Validate Basic Auth")
     public ResponseEntity<MgmtUserInfo> validateBasicAuth() {
         final MgmtUserInfo userInfo = new MgmtUserInfo();
         userInfo.setTenant(tenantAware.getCurrentTenant());

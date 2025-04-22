@@ -32,7 +32,7 @@ public @interface AuditLog {
 
     String entity();
 
-    String message() default "";
+    String description() default "";
 
     String[] logParams() default {"*"};
 
