@@ -75,7 +75,7 @@ public class MgmtSoftwareModuleTypeResource implements MgmtSoftwareModuleTypeRes
     }
 
     @Override
-    @AuditLog(entity = "SoftwareModuleType", type = AuditLog.Type.DELETE, message = "Delete Software Module Type")
+    @AuditLog(entity = "SoftwareModuleType", type = AuditLog.Type.DELETE, description = "Delete Software Module Type")
     public ResponseEntity<Void> deleteSoftwareModuleType(final Long softwareModuleTypeId) {
         softwareModuleTypeManagement.delete(softwareModuleTypeId);
         return ResponseEntity.ok().build();

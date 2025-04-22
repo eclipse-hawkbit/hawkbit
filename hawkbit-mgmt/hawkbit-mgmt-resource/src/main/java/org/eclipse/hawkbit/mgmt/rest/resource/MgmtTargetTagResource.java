@@ -113,7 +113,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    @AuditLog(entity = "TargetTag", type = AuditLog.Type.DELETE, message = "Delete Target Tag")
+    @AuditLog(entity = "TargetTag", type = AuditLog.Type.DELETE, description = "Delete Target Tag")
     public ResponseEntity<Void> deleteTargetTag(final Long targetTagId) {
         log.debug("Delete {} target tag", targetTagId);
         final TargetTag targetTag = findTargetTagById(targetTagId);
@@ -168,7 +168,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    @AuditLog(entity = "TargetTag", type = AuditLog.Type.UPDATE, message = "Unassign Target From Target Tag")
+    @AuditLog(entity = "TargetTag", type = AuditLog.Type.UPDATE, description = "Unassign Target From Target Tag")
     public ResponseEntity<Void> unassignTarget(final Long targetTagId, final String controllerId) {
         log.debug("Unassign target {} for target tag {}", controllerId, targetTagId);
         this.targetManagement.unassignTag(List.of(controllerId), targetTagId);
@@ -176,7 +176,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    @AuditLog(entity = "TargetTag", type = AuditLog.Type.UPDATE, message = "Unassign Targets From Target Tag")
+    @AuditLog(entity = "TargetTag", type = AuditLog.Type.UPDATE, description = "Unassign Targets From Target Tag")
     public ResponseEntity<Void> unassignTargets(
             final Long targetTagId, final OnNotFoundPolicy onNotFoundPolicy, final List<String> controllerIds) {
         log.debug("Unassign {} targets for target tag {}", controllerIds.size(), targetTagId);

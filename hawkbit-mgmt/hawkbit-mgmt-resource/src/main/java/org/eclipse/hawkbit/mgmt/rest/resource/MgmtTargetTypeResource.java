@@ -80,7 +80,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     }
 
     @Override
-    @AuditLog(entity = "TargetType", type = AuditLog.Type.DELETE, message = "Delete Target Type")
+    @AuditLog(entity = "TargetType", type = AuditLog.Type.DELETE, description = "Delete Target Type")
     public ResponseEntity<Void> deleteTargetType(final Long targetTypeId) {
         log.debug("Delete {} target type", targetTypeId);
         targetTypeManagement.delete(targetTypeId);
@@ -111,14 +111,14 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     }
 
     @Override
-    @AuditLog(entity = "TargetType", type = AuditLog.Type.DELETE, message = "Remove Compatible Distribution Set From Target Type")
+    @AuditLog(entity = "TargetType", type = AuditLog.Type.DELETE, description = "Remove Compatible Distribution Set From Target Type")
     public ResponseEntity<Void> removeCompatibleDistributionSet(final Long targetTypeId, final Long distributionSetTypeId) {
         targetTypeManagement.unassignDistributionSetType(targetTypeId, distributionSetTypeId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @AuditLog(entity = "TargetType", type = AuditLog.Type.UPDATE, message = "Add Compatible Distribution Set To Target Type")
+    @AuditLog(entity = "TargetType", type = AuditLog.Type.UPDATE, description = "Add Compatible Distribution Set To Target Type")
     public ResponseEntity<Void> addCompatibleDistributionSets(
             final Long targetTypeId, final List<MgmtDistributionSetTypeAssignment> distributionSetTypeIds) {
         targetTypeManagement.assignCompatibleDistributionSetTypes(

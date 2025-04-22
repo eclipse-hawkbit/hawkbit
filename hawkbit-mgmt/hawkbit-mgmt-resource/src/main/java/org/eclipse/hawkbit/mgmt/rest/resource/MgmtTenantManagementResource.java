@@ -73,7 +73,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
     }
 
     @Override
-    @AuditLog(entity = "TenantConfiguration", type = AuditLog.Type.DELETE, message = "Delete Tenant Configuration Value")
+    @AuditLog(entity = "TenantConfiguration", type = AuditLog.Type.DELETE, description = "Delete Tenant Configuration Value")
     public ResponseEntity<Void> deleteTenantConfigurationValue(final String keyName) {
         //Default DistributionSet Type cannot be deleted as is part of TenantMetadata
         if (isDefaultDistributionSetTypeKey(keyName)) {
@@ -92,7 +92,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
     }
 
     @Override
-    @AuditLog(entity = "TenantConfiguration", type = AuditLog.Type.UPDATE, message = "Update Tenant Configuration Value")
+    @AuditLog(entity = "TenantConfiguration", type = AuditLog.Type.UPDATE, description = "Update Tenant Configuration Value")
     public ResponseEntity<MgmtSystemTenantConfigurationValue> updateTenantConfigurationValue(
             final String keyName, final MgmtSystemTenantConfigurationValueRequest configurationValueRest) {
         Serializable configurationValue = configurationValueRest.getValue();
@@ -109,7 +109,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
     }
 
     @Override
-    @AuditLog(entity = "TenantConfiguration", type = AuditLog.Type.UPDATE, message = "Update Tenant Configuration")
+    @AuditLog(entity = "TenantConfiguration", type = AuditLog.Type.UPDATE, description = "Update Tenant Configuration")
     public ResponseEntity<List<MgmtSystemTenantConfigurationValue>> updateTenantConfiguration(
             final Map<String, Serializable> configurationValueMap) {
         final boolean containsNull = configurationValueMap.keySet().stream().anyMatch(Objects::isNull);

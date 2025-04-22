@@ -181,28 +181,28 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
-    @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, message = "Start Rollout")
+    @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, description = "Start Rollout")
     public ResponseEntity<Void> start(final Long rolloutId) {
         this.rolloutManagement.start(rolloutId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, message = "Pause Rollout")
+    @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, description = "Pause Rollout")
     public ResponseEntity<Void> pause(final Long rolloutId) {
         this.rolloutManagement.pauseRollout(rolloutId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @AuditLog(entity = "Rollout", type = AuditLog.Type.DELETE, message = "Delete Rollout")
+    @AuditLog(entity = "Rollout", type = AuditLog.Type.DELETE, description = "Delete Rollout")
     public ResponseEntity<Void> delete(final Long rolloutId) {
         this.rolloutManagement.delete(rolloutId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, message = "Resume Rollout")
+    @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, description = "Resume Rollout")
     public ResponseEntity<Void> resume(final Long rolloutId) {
         this.rolloutManagement.resumeRollout(rolloutId);
         return ResponseEntity.ok().build();
@@ -281,7 +281,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     }
 
     @Override
-    @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, message = "Trigger Next Rollout Group")
+    @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, description = "Trigger Next Rollout Group")
     public ResponseEntity<Void> triggerNextGroup(final Long rolloutId) {
         this.rolloutManagement.triggerNextGroup(rolloutId);
         return ResponseEntity.ok().build();
