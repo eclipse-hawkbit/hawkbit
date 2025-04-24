@@ -31,6 +31,8 @@
         <module>hawkbit-repository-jpa</module>
         <module>hawkbit-repository-jpa-flyway</module>
 
+        <module>hawkbit-repository-jpa-init</module>
+
         <module>hawkbit-repository-test</module>
     </modules>
 </project>
