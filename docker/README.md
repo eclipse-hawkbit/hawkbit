@@ -14,17 +14,17 @@ $ docker run -d -p 8080:8080 hawkbit/hawkbit-update-server:latest
 Start the hawkBit Update Server together with an MySQL and RabbitMQ instance as containers (Requires Docker Compose to be installed)
 
 ```bash
-$ docker compose -f docker-compose-monolith-mysql.yml up
+$ docker compose -f mysql/docker-compose-monolith-mysql.yml up
 ```
 You could, also start it in different flavours, with UI or in microservices mode.
 
 Note: Whit the upper command CTRL+C shuts down all services. Add '-d' at the end to start all into detached mode:
 ```bash
-$ docker compose -f docker-compose-monolith-mysql.yml up -d
+$ docker compose -f mysql/docker-compose-monolith-mysql.yml up -d
 ```
 Then stop all services with:
 ```bash
-$ docker compose -f docker-compose-monolith-mysql.yml down
+$ docker compose -f mysql/docker-compose-monolith-mysql.yml down
 ```
 
 # Access

@@ -11,29 +11,29 @@ version: '3.7'
 
 services:
   # ---------------------
-  # Postgres service
+  # MySQL service
   # ---------------------
-  postgres:
-    image: "postgres:16.5"
-    ports:
-      - "5432:5432"
-    deploy:
-      restart_policy:
-        condition: on-failure
+  mysql:
+    image: "mysql:8.0"
     environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "admin"
-      POSTGRES_DB: "hawkbit"
+      MYSQL_DATABASE: "hawkbit"
+      # MYSQL_USER: "root" is created by default in the container for mysql 8.0+
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+    restart: always
+    ports:
+      - "3306:3306"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}"]
-      interval: 20s
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
       retries: 10
+    labels:
+      NAME: "mysql"
 
   # ---------------------
   # RabbitMQ service
   # ---------------------
   rabbitmq:
-    image: "rabbitmq:3-management-alpine"
+    image: "rabbitmq:4-management-alpine"
     hostname: "rabbitmq"
     environment:
       RABBITMQ_DEFAULT_VHOST: "/"

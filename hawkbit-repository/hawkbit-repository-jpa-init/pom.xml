@@ -118,12 +118,10 @@
                                 </manifest>
                             </archive>
                             <descriptors>
-                                <descriptor>src/assembly/exec.xml</descriptor>
+                                <!-- override default descriptor in order to merge services -->
+                                <descriptor>src/assembly/jar-with-dependencies.xml</descriptor>
                             </descriptors>
-<<<<<<< HEAD
                             <appendAssemblyId>false</appendAssemblyId>
-=======
->>>>>>> 4d0399611 (Standalone tool for initializing of hawkBit Database)
                         </configuration>
                     </execution>
                 </executions>
