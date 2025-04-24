@@ -51,17 +51,6 @@
             <artifactId>mariadb-java-client</artifactId>
         </dependency>
 
-        <!-- h2 flyway is supported by the flyway-core dependency -->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-mysql</artifactId>
-        </dependency>
-        <!-- Database END -->
-
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>

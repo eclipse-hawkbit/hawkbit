@@ -51,17 +51,6 @@
             <artifactId>mariadb-java-client</artifactId>
         </dependency>
 
-        <!-- h2 flyway is supported by the flyway-core dependency -->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-mysql</artifactId>
-        </dependency>
-        <!-- Database END -->
-
         <!-- Test -->
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
@@ -69,6 +58,19 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- h2 flyway is supported by the flyway-core dependency -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Database END -->
     </dependencies>
 
     <build>
