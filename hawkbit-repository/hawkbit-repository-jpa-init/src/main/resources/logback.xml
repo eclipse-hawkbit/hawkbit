@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+
+    Copyright (c) 2025 Contributors to the Eclipse Foundation
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+-->
+<!DOCTYPE configuration>
+
+<configuration>
+    <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
+    <import class="ch.qos.logback.core.ConsoleAppender"/>
+
+    <appender name="STDOUT" class="ConsoleAppender">
+        <encoder class="PatternLayoutEncoder">
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -%kvp- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.flywaydb.core.internal.command.DbValidate" level="DEBUG"/>
+    <logger name="org.flywaydb.core.internal.command.DbMigrate" level="DEBUG"/>
+
+    <root level="info">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>

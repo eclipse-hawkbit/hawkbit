@@ -1,3 +1,3 @@
 # hawkBit JPA Flyway migration
 
-JPA Flyway migrations scrypts
+JPA Flyway migrations scripts
