@@ -1,0 +1,110 @@
+#
+# Copyright (c) 2018 Bosch Software Innovations GmbH and others
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+version: '3.7'
+
+include:
+  - docker-compose-deps-postgres.yml
+
+services:
+
+  # ---------------------
+  # HawkBit DB Init
+  # ---------------------
+  hawkbit-db-init:
+    image: "hawkbit/hawkbit-repository-jpa-init:latest"
+    environment:
+      - 'HAWKBIT_DB_MODE=migrate'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
+      - 'SPRING_DATASOURCE_USERNAME=postgres'
+      - 'SPRING_DATASOURCE_PASSWORD=admin'
+      - 'AND_THEN=sleep infinity'
+    restart: always
+    healthcheck:
+      test: ["CMD", "pgrep", "sleep"]
+      start_period: 30s
+      interval: 10s
+      retries: 5
+      timeout: 60s
+    depends_on:
+      postgress:
+        condition: service_healthy
+    labels:
+      NAME: "hawkbit-db-init"
+
+  # ---------------------
+  # HawkBit DDI
+  # ---------------------
+  hawkbit-ddi:
+    image: "hawkbit/hawkbit-ddi-server:latest"
+    environment:
+      - 'PROFILES=postgresql'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
+      - 'SPRING_DATASOURCE_USERNAME=postgres'
+      - 'SPRING_DATASOURCE_PASSWORD=admin'
+      - 'SPRING_RABBITMQ_HOST=rabbitmq'
+      - 'SPRING_RABBITMQ_USERNAME=guest'
+      - 'SPRING_RABBITMQ_PASSWORD=guest'
+    restart: always
+    ports:
+      - "8081:8081"
+    depends_on:
+      hawkbit-db-init:
+        condition: service_healthy
+    labels:
+      NAME: "hawkbit-ddi"
+
+  # ---------------------
+  # HawkBit DMF
+  # ---------------------
+  hawkbit-dmf:
+    image: "hawkbit/hawkbit-dmf-server:latest"
+    environment:
+      - 'PROFILES=postgresql'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
+      - 'SPRING_DATASOURCE_USERNAME=postgres'
+      - 'SPRING_DATASOURCE_PASSWORD=admin'
+      - 'SPRING_RABBITMQ_HOST=rabbitmq'
+      - 'SPRING_RABBITMQ_USERNAME=guest'
+      - 'SPRING_RABBITMQ_PASSWORD=guest'
+    restart: always
+    depends_on:
+      hawkbit-db-init:
+        condition: service_healthy
+    labels:
+      NAME: "hawkbit-dmf"
+
+  # ---------------------
+  # HawkBit MGMT
+  # ---------------------
+  hawkbit-mgmt:
+    image: "hawkbit/hawkbit-mgmt-server:latest"
+    environment:
+      - 'PROFILES=postgresql'
+      - 'SPRING_FLYWAY_ENABLED=false'
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit'
+      - 'SPRING_DATASOURCE_USERNAME=postgres'
+      - 'SPRING_DATASOURCE_PASSWORD=admin'
+      - 'SPRING_RABBITMQ_HOST=rabbitmq'
+      - 'SPRING_RABBITMQ_USERNAME=guest'
+      - 'SPRING_RABBITMQ_PASSWORD=guest'
+    volumes:
+      - artifactrepo:/artifactrepo
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      hawkbit-db-init:
+        condition: service_healthy
+    labels:
+      NAME: "hawkbit-mgmt"
+
+volumes:
+  artifactrepo:
+    driver: local

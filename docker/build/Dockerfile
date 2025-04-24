@@ -23,7 +23,8 @@ RUN set -x &&\
  mkdir -p ${BUILD_DIR} &&\
  cd ${BUILD_DIR} &&\
  java -Djarmode=tools -jar /${APP}.jar extract --layers --launcher --destination . &&\
- rm /${APP}.jar
+ rm /${APP}.jar &&\
+ rm /${APP}.jar.asc
 
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
 

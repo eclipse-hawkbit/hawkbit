@@ -38,10 +38,14 @@ echo "hawkBit version  : ${VERSION}"
 echo "maven repository : ${MVN_REPO}"
 echo "docker tag       : ${TAG}"
 
-DOCKER_FILE="Dockerfile_dev"
-echo "docker file          : ${DOCKER_FILE}"
-
 function build() {
+  if [ "$1" == "hawkbit-repository-jpa-init" ]; then
+      DOCKER_FILE="Dockerfile_dbinit_dev"
+  else
+      DOCKER_FILE="Dockerfile_dev"
+  fi
+  echo "docker file          : ${DOCKER_FILE}"
+
   docker build -t hawkbit/$1:${TAG} --build-arg HAWKBIT_APP=$1 --build-arg HAWKBIT_VERSION=${VERSION} -f ${DOCKER_FILE} "${MVN_REPO}"
 }
 
@@ -54,6 +58,8 @@ if [ -z "$1" ]; then
     build "hawkbit-simple-ui"
     # monolith
     build "hawkbit-update-server"
+    # db init
+    build "hawkbit-repository-jpa-init"
 else
     echo "Build $1"
     build $1

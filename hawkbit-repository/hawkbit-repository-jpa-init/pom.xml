@@ -118,7 +118,8 @@
                                 </manifest>
                             </archive>
                             <descriptors>
-                                <descriptor>src/assembly/exec.xml</descriptor>
+                                <!-- override default descriptor in order to merge services -->
+                                <descriptor>src/assembly/jar-with-dependencies.xml</descriptor>
                             </descriptors>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>

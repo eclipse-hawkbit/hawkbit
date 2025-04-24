@@ -19,6 +19,7 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <containerDescriptorHandlers>
         <containerDescriptorHandler>
+            <!-- merge services for flyway -->
             <handlerName>metaInf-services</handlerName>
         </containerDescriptorHandler>
     </containerDescriptorHandlers>
