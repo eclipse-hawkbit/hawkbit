@@ -35,8 +35,9 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 @Setter
 @Getter
 @Entity
-@Table(name = "sp_tenant_configuration", uniqueConstraints = @UniqueConstraint(columnNames = { "conf_key",
-        "tenant" }, name = "uk_tenant_key"))
+@Table(
+        name = "sp_tenant_configuration",
+        uniqueConstraints = @UniqueConstraint(columnNames = { "conf_key", "tenant" }, name = "uk_tenant_configuration"))
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity implements TenantConfiguration, EventAwareEntity {

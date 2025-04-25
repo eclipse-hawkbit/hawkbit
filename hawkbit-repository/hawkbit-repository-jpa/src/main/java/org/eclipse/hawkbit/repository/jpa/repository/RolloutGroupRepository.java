@@ -54,8 +54,8 @@ public interface RolloutGroupRepository extends BaseEntityRepository<JpaRolloutG
      * @param status the status of the rolloutgroups
      * @return The child {@link RolloutGroup}s in a specific status
      */
-    @Query("SELECT g FROM JpaRolloutGroup g WHERE g.parent.id=:rolloutGroupId and g.status=:status")
-    List<JpaRolloutGroup> findByParentIdAndStatus(@Param("rolloutGroupId") long rolloutGroupId, @Param("status") RolloutGroupStatus status);
+    @Query("SELECT g FROM JpaRolloutGroup g WHERE g.parent.id=:rollout_group and g.status=:status")
+    List<JpaRolloutGroup> findByParentIdAndStatus(@Param("rollout_group") long rolloutGroupId, @Param("status") RolloutGroupStatus status);
 
     /**
      * Updates all {@link RolloutGroup#getStatus()} of children for given parent.

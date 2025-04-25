@@ -2,6 +2,7 @@
 alter table sp_base_software_module rename to sp_software_module;
 alter table sp_distributionset_tag rename to sp_distribution_set_tag;
 alter table sp_ds_dstag rename to sp_ds_tag;
+alter table sp_ds_module rename to sp_ds_sm;
 alter table sp_rolloutgroup rename to sp_rollout_group;
 alter table sp_rollouttargetgroup rename to sp_rollout_target_group;
 alter table sp_sw_metadata rename to sp_sm_metadata;
@@ -10,8 +11,7 @@ alter table sp_target_type_ds_type_relation rename to sp_target_type_ds_type;
 alter table sp_action rename column rolloutgroup to rollout_group;
 alter table sp_action_status_messages rename column action_status_id to action_status;
 alter table sp_distribution_set rename column ds_id to ds_type;
-alter table sp_ds_module rename column ds_id to ds_type;
-alter table sp_ds_module rename column module_id to sm_type;
+alter table sp_ds_sm rename column module_id to sm_id;
 alter table sp_ds_metadata rename column ds_id to ds;
 alter table sp_ds_tag rename column TAG to tag;
 alter table sp_rollout_group rename column parent_id to parent;
@@ -35,7 +35,7 @@ alter table sp_distribution_set rename index fk_ds_dstype_ds to fk_distribution_
 alter table sp_distribution_set_tag rename index uk_ds_tag to uk_distribution_set_tag;
 alter table sp_distribution_set_type rename index uk_dst_key to uk_distribution_set_type_type_key;
 alter table sp_distribution_set_type rename index uk_dst_name to uk_distribution_set_type_name;
-alter table sp_ds_module rename index fk_ds_module_module to fk_ds_module_sm_type;
+alter table sp_ds_sm rename index fk_ds_module_module to fk_ds_sm_sm_id;
 alter table sp_ds_tag rename index fk_ds_dstag_tag to fk_ds_tag_tag;
 alter table sp_ds_type_element rename index fk_ds_type_element_smtype to fk_ds_type_element_software_module_type;
 alter table sp_rollout rename index fk_rollout_ds to fk_rollout_distribution_set;

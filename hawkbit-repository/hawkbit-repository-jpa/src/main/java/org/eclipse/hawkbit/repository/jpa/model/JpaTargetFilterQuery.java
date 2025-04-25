@@ -46,7 +46,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 @Entity
 @Table(
         name = "sp_target_filter_query",
-        uniqueConstraints = @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_tenant_custom_filter_name"))
+        uniqueConstraints = @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_target_filter_query"))
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity implements TargetFilterQuery, EventAwareEntity {

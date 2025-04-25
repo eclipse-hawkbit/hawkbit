@@ -2,6 +2,7 @@
 alter table sp_base_software_module rename to sp_software_module;
 alter table sp_distributionset_tag rename to sp_distribution_set_tag;
 alter table sp_ds_dstag rename to sp_ds_tag;
+alter table sp_ds_module rename to sp_ds_sm;
 alter table sp_rolloutgroup rename to sp_rollout_group;
 alter table sp_rollouttargetgroup rename to sp_rollout_target_group;
 alter table sp_sw_metadata rename to sp_sm_metadata;
@@ -10,8 +11,7 @@ alter table sp_target_type_ds_type_relation rename to sp_target_type_ds_type;
 alter table sp_action rename column rolloutgroup to rollout_group;
 alter table sp_action_status_messages rename column action_status_id to action_status;
 alter table sp_distribution_set rename column ds_id to ds_type;
-alter table sp_ds_module rename column ds_id to ds_type;
-alter table sp_ds_module rename column module_id to sm_type;
+alter table sp_ds_sm rename column module_id to sm_id;
 alter table sp_ds_metadata rename column ds_id to ds;
 alter table sp_rollout_group rename column parent_id to parent;
 alter table sp_rollout_target_group rename column target_id to target;
@@ -34,8 +34,8 @@ alter table sp_distribution_set_tag rename constraint uk_ds_tag_sp_distributions
 alter table sp_distribution_set_type rename constraint uk_dst_key_sp_distribution_set_type to uk_distribution_set_type_type_key;
 alter table sp_distribution_set_type rename constraint uk_dst_name_sp_distribution_set_type to uk_distribution_set_type_name;
 alter table sp_ds_metadata rename constraint fk_metadata_ds to fk_ds_metadata_ds;
-alter table sp_ds_module rename constraint fk_ds_module_ds to fk_ds_module_ds_type;
-alter table sp_ds_module rename constraint fk_ds_module_module to fk_ds_module_sm_type;
+alter table sp_ds_sm rename constraint fk_ds_module_ds to fk_ds_sm_ds_id;
+alter table sp_ds_sm rename constraint fk_ds_module_module to fk_ds_sm_sm_id;
 alter table sp_ds_tag rename constraint fk_ds_dstag_ds to fk_ds_tag_ds;
 alter table sp_ds_tag rename constraint fk_ds_dstag_tag to fk_ds_tag_tag;
 alter table sp_ds_type_element rename constraint fk_ds_type_element_element to fk_ds_type_element_distribution_set_type;
@@ -74,7 +74,7 @@ alter table sp_distribution_set_type rename constraint pk_sp_distribution_set_ty
 alter table sp_distribution_set_tag rename constraint pk_sp_distributionset_tag to pk_distribution_set_tag;
 alter table sp_ds_tag rename constraint pk_sp_ds_dstag to pk_ds_tag;
 alter table sp_ds_metadata rename constraint pk_sp_ds_metadata to pk_ds_metadata;
-alter table sp_ds_module rename constraint pk_sp_ds_module to pk_ds_module;
+alter table sp_ds_sm rename constraint pk_sp_ds_module to pk_ds_sm;
 alter table sp_ds_type_element rename constraint pk_sp_ds_type_element to pk_ds_type_element;
 alter table sp_rollout rename constraint pk_sp_rollout to pk_rollout;
 alter table sp_rollout_group rename constraint pk_sp_rolloutgroup to pk_rollout_group;

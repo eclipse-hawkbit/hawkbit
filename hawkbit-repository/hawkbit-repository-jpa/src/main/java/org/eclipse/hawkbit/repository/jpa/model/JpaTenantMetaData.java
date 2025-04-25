@@ -44,9 +44,10 @@ import org.eclipse.hawkbit.repository.model.TenantMetaData;
 @NoArgsConstructor // Default constructor for JPA
 @Setter
 @Getter
-@Table(name = "sp_tenant", indexes = {
-        @Index(name = "sp_idx_tenant_prim", columnList = "tenant,id") }, uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "tenant" }, name = "uk_tenantmd_tenant") })
+@Table(
+        name = "sp_tenant",
+        indexes = { @Index(name = "sp_idx_tenant_prim", columnList = "tenant,id") },
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "tenant" }, name = "uk_tenant") })
 @NamedEntityGraph(name = "TenantMetaData.withDetails", attributeNodes = { @NamedAttributeNode("defaultDsType") })
 @Entity
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities

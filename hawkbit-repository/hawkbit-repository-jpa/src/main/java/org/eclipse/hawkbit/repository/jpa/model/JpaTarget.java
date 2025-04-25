@@ -82,7 +82,7 @@ import org.springframework.util.ObjectUtils;
                 @Index(name = "sp_idx_target_04", columnList = "tenant,created_at"),
                 @Index(name = "sp_idx_target_05", columnList = "tenant,last_modified_at"),
                 @Index(name = "sp_idx_target_prim", columnList = "tenant,id") },
-        uniqueConstraints = @UniqueConstraint(columnNames = { "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
+        uniqueConstraints = @UniqueConstraint(columnNames = { "controller_id", "tenant" }, name = "uk_target_controller_id"))
 @NamedEntityGraphs({
         @NamedEntityGraph(name = "Target.details", attributeNodes = {
                 @NamedAttributeNode("targetType"),
