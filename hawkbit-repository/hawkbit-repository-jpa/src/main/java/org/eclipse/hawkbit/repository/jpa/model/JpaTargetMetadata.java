@@ -43,7 +43,9 @@ public class JpaTargetMetadata extends AbstractJpaMetaData implements TargetMeta
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "target_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_metadata_target"))
+    @JoinColumn(
+            name = "target", nullable = false, updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_metadata_target"))
     private JpaTarget target;
 
     /**

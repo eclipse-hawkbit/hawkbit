@@ -62,7 +62,7 @@ import org.springframework.context.ApplicationEvent;
 @ToString(callSuper = true)
 @Entity
 @Table(name = "sp_distribution_set",
-        uniqueConstraints = { @UniqueConstraint(columnNames = { "name", "version", "tenant" }, name = "uk_distrib_set") },
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "name", "version", "tenant" }, name = "uk_distribution_set") },
         indexes = {
                 @Index(name = "sp_idx_distribution_set_01", columnList = "tenant,deleted,complete"),
                 @Index(name = "sp_idx_distribution_set_prim", columnList = "tenant,id") })
@@ -75,40 +75,38 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private static final String DELETED_PROPERTY = "deleted";
-
     @Setter
     @ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = JpaDistributionSetType.class)
     @JoinColumn(
-            name = "ds_id", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstype_ds"))
+            name = "ds_type", nullable = false, updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_distribution_set_ds_type"))
     @NotNull
     private DistributionSetType type;
 
     @ManyToMany(targetEntity = JpaSoftwareModule.class, fetch = FetchType.LAZY)
     @JoinTable(
-            name = "sp_ds_module",
+            name = "sp_ds_sm",
             joinColumns = {
                     @JoinColumn(
                             name = "ds_id", nullable = false,
-                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_ds")) },
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_sm_ds_id")) },
             inverseJoinColumns = {
                     @JoinColumn(
-                            name = "module_id", nullable = false,
-                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_module_module")) })
+                            name = "sm_id", nullable = false,
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_sm_sm_id")) })
     private Set<SoftwareModule> modules = new HashSet<>();
 
     @ManyToMany(targetEntity = JpaDistributionSetTag.class)
     @JoinTable(
-            name = "sp_ds_dstag",
+            name = "sp_ds_tag",
             joinColumns = {
                     @JoinColumn(
                             name = "ds", nullable = false,
-                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_ds")) },
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_tag_ds")) },
             inverseJoinColumns = {
                     @JoinColumn(
-                            name = "TAG", nullable = false,
-                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_dstag_tag")) })
+                            name = "tag", nullable = false,
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_tag_tag")) })
     private Set<DistributionSetTag> tags = new HashSet<>();
 
     @ToString.Exclude

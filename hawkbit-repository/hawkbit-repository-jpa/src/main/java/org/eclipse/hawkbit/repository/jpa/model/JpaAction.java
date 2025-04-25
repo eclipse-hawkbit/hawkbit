@@ -87,7 +87,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "distribution_set", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_ds"))
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_distribution_set"))
     @NotNull
     private JpaDistributionSet distributionSet;
 
@@ -95,7 +95,7 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "target", updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_act_hist_targ"))
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_target"))
     @NotNull
     private JpaTarget target;
 
@@ -135,8 +135,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Getter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
-            name = "rolloutgroup", updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rolloutgroup"))
+            name = "rollout_group", updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_rollout_group"))
     private JpaRolloutGroup rolloutGroup;
 
     @Getter

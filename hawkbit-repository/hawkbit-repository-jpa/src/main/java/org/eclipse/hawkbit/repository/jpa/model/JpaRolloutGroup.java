@@ -46,7 +46,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
  */
 @NoArgsConstructor // Default constructor needed for JPA entities.
 @Entity
-@Table(name = "sp_rolloutgroup", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "rollout", "tenant" }, name = "uk_rolloutgroup"))
+@Table(name = "sp_rollout_group", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "rollout", "tenant" }, name = "uk_rollout_group"))
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for sub entities
 @SuppressWarnings("squid:S2160")
 public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGroup, EventAwareEntity {
@@ -56,7 +56,9 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
 
     @Getter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rollout", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rolloutgroup_rollout"))
+    @JoinColumn(
+            name = "rollout", nullable = false, updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_rollout_group_rollout"))
     private JpaRollout rollout;
 
     @Setter
@@ -65,15 +67,16 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     @Convert(converter = RolloutGroupStatusConverter.class)
     private RolloutGroupStatus status = RolloutGroupStatus.CREATING;
 
-    @OneToMany(mappedBy = "rolloutGroup", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST,
-            CascadeType.REMOVE }, targetEntity = RolloutTargetGroup.class)
+    @OneToMany(
+            mappedBy = "rolloutGroup", fetch = FetchType.LAZY,
+            cascade = { CascadeType.PERSIST, CascadeType.REMOVE }, targetEntity = RolloutTargetGroup.class)
     private List<RolloutTargetGroup> rolloutTargetGroup;
 
     // No foreign key to avoid to many nested cascades on delete which some DBs cannot handle
     @Setter
     @Getter
     @ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST })
-    @JoinColumn(name = "parent_id")
+    @JoinColumn(name = "parent")
     private JpaRolloutGroup parent;
 
     @Setter

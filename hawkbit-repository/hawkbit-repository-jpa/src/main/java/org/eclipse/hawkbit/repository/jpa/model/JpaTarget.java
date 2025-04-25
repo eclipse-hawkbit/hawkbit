@@ -82,7 +82,7 @@ import org.springframework.util.ObjectUtils;
                 @Index(name = "sp_idx_target_04", columnList = "tenant,created_at"),
                 @Index(name = "sp_idx_target_05", columnList = "tenant,last_modified_at"),
                 @Index(name = "sp_idx_target_prim", columnList = "tenant,id") },
-        uniqueConstraints = @UniqueConstraint(columnNames = { "controller_id", "tenant" }, name = "uk_tenant_controller_id"))
+        uniqueConstraints = @UniqueConstraint(columnNames = { "controller_id", "tenant" }, name = "uk_target_controller_id"))
 @NamedEntityGraphs({
         @NamedEntityGraph(name = "Target.details", attributeNodes = {
                 @NamedAttributeNode("targetType"),
@@ -173,11 +173,11 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             joinColumns = {
                     @JoinColumn(
                             name = "target", nullable = false,
-                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_target")) },
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_target_tag_target")) },
             inverseJoinColumns = {
                     @JoinColumn(
                             name = "tag", nullable = false,
-                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_targtag_tag"))
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_target_tag_tag"))
             })
     private Set<TargetTag> tags;
 
@@ -186,8 +186,8 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @ElementCollection
     @CollectionTable(
             name = "sp_target_attributes",
-            joinColumns = { @JoinColumn(name = "target_id", nullable = false) },
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
+            joinColumns = { @JoinColumn(name = "target", nullable = false) },
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_attributes_target"))
     @Column(name = "attribute_value", length = Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE)
     @MapKeyColumn(name = "attribute_key", length = Target.CONTROLLER_ATTRIBUTE_KEY_SIZE)
     private Map<String, String> controllerAttributes;

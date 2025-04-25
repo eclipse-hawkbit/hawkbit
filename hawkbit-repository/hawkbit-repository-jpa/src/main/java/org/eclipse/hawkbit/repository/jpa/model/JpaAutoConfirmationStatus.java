@@ -37,7 +37,9 @@ public class JpaAutoConfirmationStatus extends AbstractJpaTenantAwareBaseEntity 
 
     // actually it is OneToOne - but lazy loading is not supported for OneToOne (at least for hibernate 6.6.2)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "target_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_auto_conf"))
+    @JoinColumn(
+            name = "target", nullable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_conf_status_target"))
     private JpaTarget target;
 
     @Column(name = "initiator", length = USERNAME_FIELD_LENGTH)

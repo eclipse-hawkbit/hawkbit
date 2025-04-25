@@ -42,7 +42,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 @Entity
 @Table(name = "sp_target_type", indexes = {
         @Index(name = "sp_idx_target_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_target_type_name") })
+        @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_target_name") })
 @SuppressWarnings("java:S2160") // the super class equals/hashcode shall be used
 public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, EventAwareEntity {
 
@@ -51,15 +51,15 @@ public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, 
 
     @ManyToMany(targetEntity = JpaDistributionSetType.class)
     @JoinTable(
-            name = "sp_target_type_ds_type_relation",
+            name = "sp_target_type_ds_type",
             joinColumns = {
                     @JoinColumn(
                             name = "target_type", nullable = false,
-                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_target_type")) },
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_ds_type_target_type")) },
             inverseJoinColumns = {
                     @JoinColumn(
                             name = "distribution_set_type", nullable = false,
-                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_ds_type")) })
+                            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_ds_type_distribution_set_type")) })
     private Set<DistributionSetType> distributionSetTypes = new HashSet<>();
 
     public JpaTargetType(final String key, final String name, final String description, final String colour) {

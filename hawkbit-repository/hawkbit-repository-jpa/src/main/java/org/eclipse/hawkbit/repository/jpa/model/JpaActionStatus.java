@@ -65,7 +65,7 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
             name = "action", nullable = false, updatable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_act_stat_action"))
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_status_action"))
     @NotNull
     private JpaAction action;
 
@@ -82,9 +82,9 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     @CollectionTable(
             name = "sp_action_status_messages",
             joinColumns = @JoinColumn(
-                    name = "action_status_id", nullable = false,
-                    foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_stat_msg_act_stat")),
-            indexes = { @Index(name = "sp_idx_action_status_msgs_01", columnList = "action_status_id") })
+                    name = "action_status", nullable = false,
+                    foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_action_status_messages_action_status")),
+            indexes = { @Index(name = "fk_action_status_messages_action_status", columnList = "action_status") })
     @Column(name = "detail_message", length = MESSAGE_ENTRY_LENGTH, nullable = false)
     private List<String> messages;
 
