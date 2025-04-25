@@ -42,7 +42,7 @@ public class HawkbitFlywayDbInit {
 
     public static final String MIGRATE = "migrate";
 
-    public static final String URL = prop("url", "jdbc:h2:mem:hawkbit;MODE=LEGACY;");
+    public static final String URL = prop("url", "jdbc:h2:mem:hawkbit");
     public static final String USER = prop("username", "sa");
     public static final String PASSWORD = prop("password", "");
     public static final String MODE = prop("mode", "validate");
