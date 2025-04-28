@@ -1,5 +1,5 @@
 # set Java
-ARG JAVA_VERSION=21.0.6_7
+ARG JAVA_VERSION=21.0.7_6
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine as build
 
 ARG HAWKBIT_APP=hawkbit-repository-jpa-init
