@@ -25,7 +25,7 @@ public class CacheProperties {
     /**
      * TTL for cached entries in millis.
      */
-    private int ttl;
+    private int ttl = 10_000; // default TTL - 10 seconds
 
     /**
      * Initial delay in millis
