@@ -51,7 +51,7 @@ public class HawkbitFlywayDbInit {
         final Flyway flyway = Flyway.configure()
                 .dataSource(URL, USER, PASSWORD)
                 .cleanDisabled(true)
-                .table("schema_version")
+                .table(prop("table", "schema_version"))
                 .sqlMigrationSuffixes(prop("sql-migration-suffixes", suffix(URL)) + ".sql")
                 .validateOnMigrate(true)
                 .envVars()
