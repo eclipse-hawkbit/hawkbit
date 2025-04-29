@@ -16,7 +16,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.time.ZoneOffset;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import jakarta.annotation.security.RolesAllowed;
@@ -24,7 +28,9 @@ import jakarta.annotation.security.RolesAllowed;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -39,6 +45,9 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
@@ -91,6 +100,16 @@ public class TargetView extends TableView<MgmtTarget, String> {
                             hawkbitClient.getTargetRestApi().deleteTarget(toDelete.getControllerId()));
                     return CompletableFuture.completedFuture(null);
                 });
+
+        Function<SelectionGrid<MgmtTarget, String>, CompletionStage<Void>> assignHandler = source -> new AssignDialog(
+                hawkbitClient, source.getSelectedItems()).result();
+
+        final Button assignBtn = Utils.tooltip(new Button(VaadinIcon.LINK.create()), "Assign");
+        assignBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        assignBtn.addClickListener(e -> assignHandler
+                .apply(selectionGrid)
+                .thenAccept(v -> selectionGrid.refreshGrid(false)));
+        controlsLayout.addComponentAtIndex(0, assignBtn);
     }
 
     private static class SimpleFilter implements Filter.Rsql {
@@ -322,6 +341,82 @@ public class TargetView extends TableView<MgmtTarget, String> {
                         .orElseThrow()
                         .getControllerId();
                 close();
+            });
+        }
+    }
+
+    private static class AssignDialog extends Utils.BaseDialog<Void> {
+
+        private final Select<MgmtDistributionSet> distributionSet;
+        private final Select<MgmtActionType> actionType;
+        private final DateTimePicker forceTime = new DateTimePicker("Force Time");
+        private final Button assign = new Button("Assign");
+
+        private AssignDialog(final HawkbitMgmtClient hawkbitClient, Set<MgmtTarget> selectedTargets) {
+            super("Assign Distribution Set");
+
+            distributionSet = new Select<>(
+                    "Distribution Set",
+                    this::readyToAssign,
+                    Optional.ofNullable(
+                                    hawkbitClient.getDistributionSetRestApi()
+                                            .getDistributionSets(0, 30, Constants.NAME_ASC, null)
+                                            .getBody())
+                            .map(body -> body.getContent().toArray(new MgmtDistributionSet[0]))
+                            .orElseGet(() -> new MgmtDistributionSet[0]));
+            distributionSet.setRequiredIndicatorVisible(true);
+            distributionSet.setItemLabelGenerator(distributionSetO ->
+                    distributionSetO.getName() + ":" + distributionSetO.getVersion());
+            distributionSet.setWidthFull();
+
+            actionType = Utils.actionTypeControls(forceTime);
+
+            assign.setEnabled(false);
+            addAssignClickListener(hawkbitClient, selectedTargets);
+            final Button cancel = Utils.tooltip(new Button("Cancel"), "Cancel (Esc)");
+            cancel.addClickListener(e -> close());
+            cancel.addClickShortcut(Key.ESCAPE);
+            final HorizontalLayout actions = new HorizontalLayout(assign, cancel);
+            actions.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+            actions.setSizeFull();
+
+            final VerticalLayout layout = new VerticalLayout();
+            layout.setSizeFull();
+            layout.setSpacing(false);
+            layout.add(
+                    distributionSet, actionType, actions);
+            add(layout);
+            open();
+        }
+
+        private void readyToAssign(final Object v) {
+            final boolean assignEnabled = !distributionSet.isEmpty();
+            if (assign.isEnabled() != assignEnabled) {
+                assign.setEnabled(assignEnabled);
+            }
+        }
+
+        private void addAssignClickListener(final HawkbitMgmtClient hawkbitClient, final Set<MgmtTarget> selectedTargets) {
+            assign.addClickListener(e -> {
+                close();
+                List<MgmtTargetAssignmentRequestBody> requests = new LinkedList<MgmtTargetAssignmentRequestBody>();
+
+                for (final MgmtTarget target : selectedTargets) {
+
+                    MgmtTargetAssignmentRequestBody request = new MgmtTargetAssignmentRequestBody(target.getControllerId());
+
+                    request.setType(actionType.getValue());
+                    if (actionType.getValue() == MgmtActionType.TIMEFORCED) {
+                        request.setForcetime(
+                                forceTime.isEmpty() ?
+                                        System.currentTimeMillis() :
+                                        forceTime.getValue().toEpochSecond(ZoneOffset.UTC) * 1000);
+                    }
+
+                    requests.add(request);
+                }
+                
+                hawkbitClient.getDistributionSetRestApi().createAssignedTarget(distributionSet.getValue().getId(), requests, null).getBody();
             });
         }
     }
