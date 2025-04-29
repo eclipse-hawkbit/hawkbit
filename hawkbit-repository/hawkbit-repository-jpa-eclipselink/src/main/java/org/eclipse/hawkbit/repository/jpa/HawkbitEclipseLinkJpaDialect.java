@@ -81,7 +81,7 @@ class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
         return translateJpaSystemExceptionIfPossible(dataAccessException);
     }
 
-    private DataAccessException translateJpaSystemExceptionIfPossible(
+    private static DataAccessException translateJpaSystemExceptionIfPossible(
             final DataAccessException accessException) {
         if (!(accessException instanceof JpaSystemException)) {
             return accessException;
@@ -94,7 +94,7 @@ class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
         return sqlException;
     }
 
-    private DataAccessException searchAndTranslateSqlException(final RuntimeException ex) {
+    private static DataAccessException searchAndTranslateSqlException(final RuntimeException ex) {
         final SQLException sqlException = findSqlException(ex);
         if (sqlException == null) {
             return null;
