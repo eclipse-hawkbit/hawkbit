@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.rest.util.FileStreamingFailedException;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType;
 import org.springframework.http.HttpStatus;
@@ -270,6 +271,21 @@ public class RestConfiguration {
             }
 
             return new ResponseEntity<>(createExceptionInfo(new MultiPartFileUploadException(responseCause)), HttpStatus.BAD_REQUEST);
+        }
+
+        @ExceptionHandler({DataIntegrityViolationException.class})
+        public ResponseEntity<ExceptionInfo> handleDataAccessException(final HttpServletRequest request, final DataIntegrityViolationException ex) {
+            if (log.isDebugEnabled()) {
+                logRequest(request, ex);
+            } else {
+                log.error("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL());
+            }
+
+            final ExceptionInfo response = new ExceptionInfo();
+            response.setMessage("The data provided violates integrity rules. Please ensure all required fields are valid.");
+            response.setExceptionClass(ex.getClass().getName());
+
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
         private static HttpStatus getStatusOrDefault(final SpServerError error) {

@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.repository.exception.ConcurrentModificationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.springframework.core.Ordered;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
@@ -49,12 +48,10 @@ public class ExceptionMappingAspectHandler implements Ordered {
 
     static {
         MAPPED_EXCEPTION_ORDER.add(DuplicateKeyException.class);
-        MAPPED_EXCEPTION_ORDER.add(DataIntegrityViolationException.class);
         MAPPED_EXCEPTION_ORDER.add(OptimisticLockingFailureException.class);
         MAPPED_EXCEPTION_ORDER.add(AccessDeniedException.class);
 
         EXCEPTION_MAPPING.put(DuplicateKeyException.class.getName(), EntityAlreadyExistsException.class.getName());
-        EXCEPTION_MAPPING.put(DataIntegrityViolationException.class.getName(), EntityAlreadyExistsException.class.getName());
 
         EXCEPTION_MAPPING.put(OptimisticLockingFailureException.class.getName(), ConcurrentModificationException.class.getName());
         EXCEPTION_MAPPING.put(AccessDeniedException.class.getName(), InsufficientPermissionException.class.getName());
