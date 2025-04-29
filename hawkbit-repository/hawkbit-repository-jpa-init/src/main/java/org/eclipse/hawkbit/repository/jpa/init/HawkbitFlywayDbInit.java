@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.init;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
 
 /**
@@ -38,25 +39,34 @@ import org.flywaydb.core.Flyway;
  * </ul>
  * Note: could also be configured using default flyway env properties
  */
+@Slf4j
 public class HawkbitFlywayDbInit {
 
     public static final String MIGRATE = "migrate";
 
+    public static final String MODE = prop("mode", "validate");
+
     public static final String URL = prop("url", "jdbc:h2:mem:hawkbit;MODE=LEGACY;");
     public static final String USER = prop("username", "sa");
     public static final String PASSWORD = prop("password", "");
-    public static final String MODE = prop("mode", "validate");
+    protected static final String TABLE = prop("table", "schema_version");
+
+    public static final String[] LOCATIONS = prop("locations", "db/migration").split(",");
+    public static final String SQL_MIGRATION_SUFFIXES = prop("sql-migration-suffixes", suffix(URL)) + ".sql";
 
     public static void main(final String[] args) {
         final Flyway flyway = Flyway.configure()
                 .dataSource(URL, USER, PASSWORD)
-                .locations(prop("locations", "db/migration").split(","))
-                .sqlMigrationSuffixes(prop("sql-migration-suffixes", suffix(URL)) + ".sql")
+                .table(TABLE)
+                .locations(LOCATIONS)
+                .sqlMigrationSuffixes(SQL_MIGRATION_SUFFIXES)
                 .cleanDisabled(true)
-                .table(prop("table", "schema_version"))
                 .validateOnMigrate(true)
                 .envVars()
                 .load();
+        log.info(
+                "Start ({}): {}@{}, table: {}, locations: {}, sql-migration-suffixes: {}",
+                MODE, USER, URL, TABLE, LOCATIONS, SQL_MIGRATION_SUFFIXES);
 
         if (MODE.equals(MIGRATE)) {
             flyway.migrate();
@@ -99,10 +109,8 @@ public class HawkbitFlywayDbInit {
         return System.getProperty("hawkbit.db." + key, System.getProperty("spring.datasource." + key));
     }
 
-    private static final Pattern PATTERN = Pattern.compile("jdbc:(?<database>\\w+):(\\\\)?.*", Pattern.CASE_INSENSITIVE);
-
     private static String suffix(final String url) {
-        final Matcher matcher = PATTERN.matcher(url);
+        final Matcher matcher = Pattern.compile("jdbc:(?<database>\\w+):(\\\\)?.*", Pattern.CASE_INSENSITIVE).matcher(url);
         if (!matcher.matches()) {
             throw new IllegalStateException("Invalid db url: " + url);
         }
