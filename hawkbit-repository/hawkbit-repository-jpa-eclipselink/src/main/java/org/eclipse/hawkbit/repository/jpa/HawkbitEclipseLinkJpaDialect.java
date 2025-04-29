@@ -15,6 +15,9 @@ import java.sql.SQLException;
 import jakarta.persistence.PersistenceException;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLErrorCodes;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
 import org.springframework.lang.NonNull;
 import org.springframework.orm.jpa.JpaSystemException;
@@ -54,7 +57,12 @@ class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private static final SQLStateSQLExceptionTranslator SQLSTATE_EXCEPTION_TRANSLATOR = new SQLStateSQLExceptionTranslator();
+    private SQLErrorCodeSQLExceptionTranslator sqlExceptionTranslator;
+
+    // providing list/set of codes which are not handled from the sql translator properly
+    private static final String[] DATA_INTEGRITY_VIOLATION_CODES = new String[] {
+            "1366"
+    };
 
     @Override
     public DataAccessException translateExceptionIfPossible(@NonNull final RuntimeException ex) {
@@ -66,7 +74,7 @@ class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
         return translateJpaSystemExceptionIfPossible(dataAccessException);
     }
 
-    private static DataAccessException translateJpaSystemExceptionIfPossible(
+    private DataAccessException translateJpaSystemExceptionIfPossible(
             final DataAccessException accessException) {
         if (!(accessException instanceof JpaSystemException)) {
             return accessException;
@@ -79,12 +87,13 @@ class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
         return sqlException;
     }
 
-    private static DataAccessException searchAndTranslateSqlException(final RuntimeException ex) {
+    private DataAccessException searchAndTranslateSqlException(final RuntimeException ex) {
         final SQLException sqlException = findSqlException(ex);
         if (sqlException == null) {
             return null;
         }
-        return SQLSTATE_EXCEPTION_TRANSLATOR.translate("", null, sqlException);
+
+        return sqlExceptionTranslator().translate("", null, sqlException);
     }
 
     private static SQLException findSqlException(final RuntimeException jpaSystemException) {
@@ -98,5 +107,22 @@ class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
         } while (exception != null);
 
         return null;
+    }
+
+    private SQLErrorCodes customSqlErrorCodes() {
+        SQLErrorCodes codes = new SQLErrorCodes();
+        codes.setDataIntegrityViolationCodes(DATA_INTEGRITY_VIOLATION_CODES);
+        return codes;
+    }
+
+
+    private SQLExceptionTranslator sqlExceptionTranslator() {
+        if (sqlExceptionTranslator == null) {
+            sqlExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator();
+            sqlExceptionTranslator.setSqlErrorCodes(customSqlErrorCodes());
+            return sqlExceptionTranslator;
+        }
+
+        return sqlExceptionTranslator;
     }
 }
