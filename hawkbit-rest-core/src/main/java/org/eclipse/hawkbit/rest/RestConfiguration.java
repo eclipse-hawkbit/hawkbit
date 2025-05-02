@@ -96,6 +96,7 @@ public class RestConfiguration {
         private static final HttpStatus DEFAULT_RESPONSE_STATUS = HttpStatus.INTERNAL_SERVER_ERROR;
 
         private static final String MESSAGE_FORMATTER_SEPARATOR = " ";
+        private static final String LOG_EXCEPTION_FORMAT = "Handling exception {} of request {}";
 
         static {
             ERROR_TO_HTTP_STATUS.put(SpServerError.SP_REPO_ENTITY_NOT_EXISTS, HttpStatus.NOT_FOUND);
@@ -278,7 +279,7 @@ public class RestConfiguration {
             if (log.isDebugEnabled()) {
                 logRequest(request, ex);
             } else {
-                log.error("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL());
+                log.error(LOG_EXCEPTION_FORMAT, ex.getClass().getName(), request.getRequestURL());
             }
 
             final ExceptionInfo response = new ExceptionInfo();
@@ -298,9 +299,9 @@ public class RestConfiguration {
         //  -> logging.level.org.eclipse.hawkbit.rest.RestConfiguration=TRACE
         private void logRequest(final HttpServletRequest request, final Exception ex) {
             if (log.isTraceEnabled()) {
-                log.trace("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL(), ex);
+                log.trace(LOG_EXCEPTION_FORMAT, ex.getClass().getName(), request.getRequestURL(), ex);
             } else {
-                log.debug("Handling exception {} of request {}", ex.getClass().getName(), request.getRequestURL());
+                log.debug(LOG_EXCEPTION_FORMAT, ex.getClass().getName(), request.getRequestURL());
             }
         }
 

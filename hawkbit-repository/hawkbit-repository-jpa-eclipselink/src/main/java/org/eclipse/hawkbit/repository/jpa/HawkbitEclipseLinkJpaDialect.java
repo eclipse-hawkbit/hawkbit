@@ -69,6 +69,8 @@ class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
 
         codes.setDataIntegrityViolationCodes(DATA_INTEGRITY_VIOLATION_CODES);
         SQL_EXCEPTION_TRANSLATOR.setSqlErrorCodes(codes);
+        // explicitly set old translator as a fallback (uses Subclass translator by default)
+        SQL_EXCEPTION_TRANSLATOR.setFallbackTranslator(new SQLStateSQLExceptionTranslator());
     }
 
     @Override
