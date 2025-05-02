@@ -57,7 +57,6 @@ class HawkbitEclipseLinkJpaDialect extends EclipseLinkJpaDialect {
     private static final long serialVersionUID = 1L;
 
     private static final SQLErrorCodeSQLExceptionTranslator SQL_EXCEPTION_TRANSLATOR;
-    private static final SQLStateSQLExceptionTranslator SQL_STATE_EXCEPTION_TRANSLATOR = new SQLStateSQLExceptionTranslator();
 
     // providing list/set of codes which are not handled from the sql translator properly
     private static final String[] DATA_INTEGRITY_VIOLATION_CODES = new String[] {
