@@ -27,12 +27,16 @@ public class JpaExceptionTranslator {
     private static final String[] DATA_INTEGRITY_VIOLATION_CODES = new String[] {
             "1366"
     };
+    private static final String[] DUPLICATE_KEY_VIOLATION_CODES = new String[] {
+            "1062"
+    };
 
     static {
         SQL_EXCEPTION_TRANSLATOR = new SQLErrorCodeSQLExceptionTranslator();
         SQLErrorCodes codes = new SQLErrorCodes();
 
         codes.setDataIntegrityViolationCodes(DATA_INTEGRITY_VIOLATION_CODES);
+        codes.setDuplicateKeyCodes(DUPLICATE_KEY_VIOLATION_CODES);
         SQL_EXCEPTION_TRANSLATOR.setSqlErrorCodes(codes);
         // explicitly set old translator as a fallback (uses Subclass translator by default)
         SQL_EXCEPTION_TRANSLATOR.setFallbackTranslator(new SQLStateSQLExceptionTranslator());
