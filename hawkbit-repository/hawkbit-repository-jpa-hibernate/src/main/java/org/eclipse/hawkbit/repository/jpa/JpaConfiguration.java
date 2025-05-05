@@ -13,6 +13,7 @@ import java.util.Collections;
 
 import org.eclipse.hawkbit.repository.jpa.model.EntityPropertyChangeListener;
 
+import org.eclipse.hawkbit.repository.jpa.utils.JpaExceptionTranslator;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.spi.BootstrapContext;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernatePropertiesCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 
 /**
  * General Hibernate configuration for hawkBit's Repository.
@@ -43,6 +45,13 @@ public class JpaConfiguration {
             @Value("${hibernate.enable-lazy-load-no-trans:true}") final boolean enableLazyLoadNoTrans) {
         tenantIdentifier = new TenantIdentifier(tenantResolver);
         this.enableLazyLoadNoTrans = enableLazyLoadNoTrans;
+    }
+
+    @Bean
+    HibernateJpaDialect hibernateJpaDialect() {
+        HibernateJpaDialect hibernateJpaDialect = new HibernateJpaDialect();
+        hibernateJpaDialect.setJdbcExceptionTranslator(JpaExceptionTranslator.getTranslator());
+        return hibernateJpaDialect;
     }
 
     @Bean
