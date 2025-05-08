@@ -411,6 +411,7 @@
                                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_20.txt</validHeader>
                                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_KIWIGRID_19.txt</validHeader>
                                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_ENAPTER.txt</validHeader>
+									<validHeader>licenses/LICENSE_HEADER_TEMPLATE_BLUEZONE_25.txt</validHeader>
                                 </validHeaders>
                                 <excludes>
                                     <exclude>.3rd-party/**</exclude>

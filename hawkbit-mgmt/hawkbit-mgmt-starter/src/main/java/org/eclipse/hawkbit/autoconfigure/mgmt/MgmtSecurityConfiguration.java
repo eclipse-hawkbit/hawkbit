@@ -10,18 +10,28 @@
 package org.eclipse.hawkbit.autoconfigure.mgmt;
 
 import java.util.List;
+import java.util.Collection;
+import java.util.Map;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 
+import lombok.Getter;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.oidc.OidcProperties;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.rest.SecurityManagedConfiguration;
 import org.eclipse.hawkbit.rest.security.DosFilter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.MdcHandler;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.tenancy.TenantAwareUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +43,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.AbstractOAuth2TokenAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.session.SessionManagementFilter;
@@ -42,13 +56,16 @@ import org.springframework.security.web.session.SessionManagementFilter;
  * Security configuration for the REST management API.
  */
 @Configuration
+@EnableConfigurationProperties({HawkbitSecurityProperties.class, OidcProperties.class})
 @EnableWebSecurity
 public class MgmtSecurityConfiguration {
 
     private final HawkbitSecurityProperties securityProperties;
+    private final OidcProperties oidcProperties;
 
-    public MgmtSecurityConfiguration(final HawkbitSecurityProperties securityProperties) {
+    public MgmtSecurityConfiguration(final HawkbitSecurityProperties securityProperties, final OidcProperties oidcProperties) {
         this.securityProperties = securityProperties;
+        this.oidcProperties = oidcProperties;
     }
 
     /**
@@ -68,6 +85,69 @@ public class MgmtSecurityConfiguration {
         filterRegBean.setName("dosMgmtFilter");
 
         return filterRegBean;
+    }
+
+    public class DefaultOAuth2ResourceServerCustomizer implements Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> {
+
+        @Getter
+        static class HawkbitJwtAuthenticationToken extends AbstractOAuth2TokenAuthenticationToken<Jwt> {
+            private static final long serialVersionUID = 1L;
+
+            private final String name;
+
+            public HawkbitJwtAuthenticationToken(Jwt jwt, TenantAwareUser user, Collection<GrantedAuthority> authorities) {
+                super(jwt, user, jwt, authorities);
+                setDetails(new TenantAwareAuthenticationDetails(user.getTenant(), false));
+                this.name = jwt.getSubject();
+                setAuthenticated(true);
+            }
+
+            public Map<String, Object> getTokenAttributes() {
+                return (this.getToken()).getClaims();
+            }
+
+        }
+
+        static Object followPathInJWTClaims(Jwt jwt, String path) {
+            final String[] parts = path.split("\\.");
+            Object current = jwt.getClaims();
+            for (final String part : parts) {
+                if (current instanceof Map) {
+                    current = ((Map<String, Object>) current).get(part);
+                } else {
+                    break;
+                }
+            }
+            return current;
+        }
+
+        @Override
+        public void customize(OAuth2ResourceServerConfigurer<HttpSecurity> oauth2ResourceServerConfigurer) {
+            final String usernameClaim = oidcProperties.getOauth2().getResourceserver().getJwt().getClaim().getUsername();
+            final String rolesClaim = oidcProperties.getOauth2().getResourceserver().getJwt().getClaim().getRoles();
+            final String tenantClaim = oidcProperties.getOauth2().getResourceserver().getJwt().getClaim().getTenant();
+            oauth2ResourceServerConfigurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
+
+                final String username = (String) followPathInJWTClaims(jwt, usernameClaim);
+                final String tenantName = tenantClaim == null ? "DEFAULT" : (String) followPathInJWTClaims(jwt, tenantClaim);
+                final Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+                final Collection<String> resourceRoles = (Collection<String>) followPathInJWTClaims(jwt, rolesClaim);
+                if (resourceRoles != null) {
+                    authorities.addAll(resourceRoles.stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toSet()));
+                }
+                final TenantAwareUser user = new TenantAwareUser(username, username, authorities, tenantName);
+                return new HawkbitJwtAuthenticationToken(jwt, user, authorities);
+            }));
+        }
+    }
+
+    @Bean(name = "hawkbitOAuth2ResourceServerCustomizer")
+    @ConditionalOnProperty(prefix = "hawkbit.server.security.oauth2.resourceserver", name = "enabled", matchIfMissing = false)
+    @ConditionalOnMissingBean(name = "hawkbitOAuth2ResourceServerCustomizer")
+    Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> defaultOAuth2ResourceServerCustomizer() {
+        return new DefaultOAuth2ResourceServerCustomizer();
     }
 
     @Bean
