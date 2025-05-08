@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
+import lombok.Getter;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.oidc.OidcProperties;
@@ -46,7 +47,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.AbstractOAuth2TokenAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
@@ -56,14 +56,14 @@ import org.springframework.security.web.session.SessionManagementFilter;
  * Security configuration for the REST management API.
  */
 @Configuration
-@EnableConfigurationProperties({ HawkbitSecurityProperties.class, OidcProperties.class })
+@EnableConfigurationProperties({HawkbitSecurityProperties.class, OidcProperties.class})
 @EnableWebSecurity
 public class MgmtSecurityConfiguration {
 
     private final HawkbitSecurityProperties securityProperties;
     private final OidcProperties oidcProperties;
 
-    public MgmtSecurityConfiguration(final HawkbitSecurityProperties securityProperties,final OidcProperties oidcProperties) {
+    public MgmtSecurityConfiguration(final HawkbitSecurityProperties securityProperties, final OidcProperties oidcProperties) {
         this.securityProperties = securityProperties;
         this.oidcProperties = oidcProperties;
     }
@@ -89,12 +89,15 @@ public class MgmtSecurityConfiguration {
 
     public class DefaultOAuth2ResourceServerCustomizer implements Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> {
 
+        @Getter
         static class HawkbitJwtAuthenticationToken extends AbstractOAuth2TokenAuthenticationToken<Jwt> {
             private static final long serialVersionUID = 1L;
+
             private final String name;
+
             public HawkbitJwtAuthenticationToken(Jwt jwt, TenantAwareUser user, Collection<GrantedAuthority> authorities) {
-                super(jwt,user,jwt,authorities);
-                setDetails(new TenantAwareAuthenticationDetails(user.getTenant(),false));
+                super(jwt, user, jwt, authorities);
+                setDetails(new TenantAwareAuthenticationDetails(user.getTenant(), false));
                 this.name = jwt.getSubject();
                 setAuthenticated(true);
             }
@@ -103,16 +106,13 @@ public class MgmtSecurityConfiguration {
                 return (this.getToken()).getClaims();
             }
 
-            public String getName() {
-                return this.name;
-            }
         }
 
-        static Object followPathInJWTClaims(Jwt jwt, String path){
-            String[] parts = path.split("\\.");
+        static Object followPathInJWTClaims(Jwt jwt, String path) {
+            final String[] parts = path.split("\\.");
             Object current = jwt.getClaims();
-            for(String part : parts){
-                if(current instanceof Map) {
+            for (final String part : parts) {
+                if (current instanceof Map) {
                     current = ((Map<String, Object>) current).get(part);
                 } else {
                     break;
@@ -128,16 +128,16 @@ public class MgmtSecurityConfiguration {
             final String tenantClaim = oidcProperties.getOauth2().getResourceserver().getJwt().getClaim().getTenant();
             oauth2ResourceServerConfigurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
 
-                String username = (String) followPathInJWTClaims(jwt,usernameClaim);
-                String tenantName = tenantClaim == null ? "DEFAULT" : (String) followPathInJWTClaims(jwt,tenantClaim);
-                Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-                Collection<String> resourceRoles = (Collection<String>)followPathInJWTClaims(jwt,rolesClaim);
-                if(resourceRoles != null){
+                final String username = (String) followPathInJWTClaims(jwt, usernameClaim);
+                final String tenantName = tenantClaim == null ? "DEFAULT" : (String) followPathInJWTClaims(jwt, tenantClaim);
+                final Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+                final Collection<String> resourceRoles = (Collection<String>) followPathInJWTClaims(jwt, rolesClaim);
+                if (resourceRoles != null) {
                     authorities.addAll(resourceRoles.stream()
-                            .map(x -> new SimpleGrantedAuthority(x))
+                            .map(SimpleGrantedAuthority::new)
                             .collect(Collectors.toSet()));
                 }
-                TenantAwareUser user = new TenantAwareUser(username,username,authorities,tenantName);
+                final TenantAwareUser user = new TenantAwareUser(username, username, authorities, tenantName);
                 return new HawkbitJwtAuthenticationToken(jwt, user, authorities);
             }));
         }

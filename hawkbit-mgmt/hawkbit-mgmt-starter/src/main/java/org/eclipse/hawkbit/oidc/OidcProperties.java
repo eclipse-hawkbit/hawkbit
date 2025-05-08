@@ -25,11 +25,11 @@ public class OidcProperties {
 
     @Data
     public static class Oauth2 {
-        private final OidcProperties.Oauth2.Resourceserver resourceserver = new OidcProperties.Oauth2.Resourceserver();
+        private final OidcProperties.Oauth2.ResourceServer resourceserver = new OidcProperties.Oauth2.ResourceServer();
 
         @Data
-        public static class Resourceserver {
-            private final OidcProperties.Oauth2.Resourceserver.Jwt jwt = new OidcProperties.Oauth2.Resourceserver.Jwt();
+        public static class ResourceServer {
+            private final OidcProperties.Oauth2.ResourceServer.Jwt jwt = new OidcProperties.Oauth2.ResourceServer.Jwt();
 
             /**
              * Indicates whether the default OAuth2 resource server configuration is enabled.
@@ -41,7 +41,7 @@ public class OidcProperties {
 
             @Data
             public static class Jwt {
-                private final OidcProperties.Oauth2.Resourceserver.Jwt.Claim claim = new OidcProperties.Oauth2.Resourceserver.Jwt.Claim();
+                private final OidcProperties.Oauth2.ResourceServer.Jwt.Claim claim = new OidcProperties.Oauth2.ResourceServer.Jwt.Claim();
 
                 @Data
                 public static class Claim {
