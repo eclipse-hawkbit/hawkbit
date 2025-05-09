@@ -9,16 +9,20 @@
  */
 package org.eclipse.hawkbit.autoconfigure.mgmt;
 
+import java.io.Serial;
+import java.util.Collections;
 import java.util.List;
 import java.util.Collection;
 import java.util.Map;
-import java.util.HashSet;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.oidc.OidcProperties;
+import org.eclipse.hawkbit.oidc.OidcProperties.Oauth2.ResourceServer.Jwt.Claim;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.rest.SecurityManagedConfiguration;
 import org.eclipse.hawkbit.rest.security.DosFilter;
@@ -55,6 +59,7 @@ import org.springframework.security.web.session.SessionManagementFilter;
 /**
  * Security configuration for the REST management API.
  */
+@Slf4j
 @Configuration
 @EnableConfigurationProperties({HawkbitSecurityProperties.class, OidcProperties.class})
 @EnableWebSecurity
@@ -87,64 +92,8 @@ public class MgmtSecurityConfiguration {
         return filterRegBean;
     }
 
-    public class DefaultOAuth2ResourceServerCustomizer implements Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> {
-
-        @Getter
-        static class HawkbitJwtAuthenticationToken extends AbstractOAuth2TokenAuthenticationToken<Jwt> {
-            private static final long serialVersionUID = 1L;
-
-            private final String name;
-
-            public HawkbitJwtAuthenticationToken(Jwt jwt, TenantAwareUser user, Collection<GrantedAuthority> authorities) {
-                super(jwt, user, jwt, authorities);
-                setDetails(new TenantAwareAuthenticationDetails(user.getTenant(), false));
-                this.name = jwt.getSubject();
-                setAuthenticated(true);
-            }
-
-            public Map<String, Object> getTokenAttributes() {
-                return (this.getToken()).getClaims();
-            }
-
-        }
-
-        static Object followPathInJWTClaims(Jwt jwt, String path) {
-            final String[] parts = path.split("\\.");
-            Object current = jwt.getClaims();
-            for (final String part : parts) {
-                if (current instanceof Map) {
-                    current = ((Map<String, Object>) current).get(part);
-                } else {
-                    break;
-                }
-            }
-            return current;
-        }
-
-        @Override
-        public void customize(OAuth2ResourceServerConfigurer<HttpSecurity> oauth2ResourceServerConfigurer) {
-            final String usernameClaim = oidcProperties.getOauth2().getResourceserver().getJwt().getClaim().getUsername();
-            final String rolesClaim = oidcProperties.getOauth2().getResourceserver().getJwt().getClaim().getRoles();
-            final String tenantClaim = oidcProperties.getOauth2().getResourceserver().getJwt().getClaim().getTenant();
-            oauth2ResourceServerConfigurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
-
-                final String username = (String) followPathInJWTClaims(jwt, usernameClaim);
-                final String tenantName = tenantClaim == null ? "DEFAULT" : (String) followPathInJWTClaims(jwt, tenantClaim);
-                final Collection<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-                final Collection<String> resourceRoles = (Collection<String>) followPathInJWTClaims(jwt, rolesClaim);
-                if (resourceRoles != null) {
-                    authorities.addAll(resourceRoles.stream()
-                            .map(SimpleGrantedAuthority::new)
-                            .collect(Collectors.toSet()));
-                }
-                final TenantAwareUser user = new TenantAwareUser(username, username, authorities, tenantName);
-                return new HawkbitJwtAuthenticationToken(jwt, user, authorities);
-            }));
-        }
-    }
-
     @Bean(name = "hawkbitOAuth2ResourceServerCustomizer")
-    @ConditionalOnProperty(prefix = "hawkbit.server.security.oauth2.resourceserver", name = "enabled", matchIfMissing = false)
+    @ConditionalOnProperty(prefix = "hawkbit.server.security.oauth2.resourceserver", name = "enabled")
     @ConditionalOnMissingBean(name = "hawkbitOAuth2ResourceServerCustomizer")
     Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> defaultOAuth2ResourceServerCustomizer() {
         return new DefaultOAuth2ResourceServerCustomizer();
@@ -213,5 +162,75 @@ public class MgmtSecurityConfiguration {
         MdcHandler.Filter.addMdcFilter(http);
 
         return http.build();
+    }
+
+    private class DefaultOAuth2ResourceServerCustomizer implements Customizer<OAuth2ResourceServerConfigurer<HttpSecurity>> {
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public void customize(OAuth2ResourceServerConfigurer<HttpSecurity> oauth2ResourceServerConfigurer) {
+            final Claim claim = oidcProperties.getOauth2().getResourceserver().getJwt().getClaim();
+            final String usernameClaim = claim.getUsername();
+            final String tenantClaim = claim.getTenant();
+            final String rolesClaim = claim.getRoles();
+            oauth2ResourceServerConfigurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
+                final String username = followPathInJwtClaims(jwt, usernameClaim, String.class);
+                final String tenant = tenantClaim == null ? "DEFAULT" : followPathInJwtClaims(jwt, tenantClaim, String.class);
+                final Collection<GrantedAuthority> authorities = Optional
+                        .ofNullable(followPathInJwtClaims(jwt, rolesClaim, Collection.class))
+                        .map(resourceRoles -> ((Collection<String>)resourceRoles).stream()
+                                .distinct()
+                                .map(SimpleGrantedAuthority::new)
+                                .map(GrantedAuthority.class::cast)
+                                .toList())
+                        .orElseGet(Collections::emptyList);
+                return new HawkbitJwtAuthenticationToken(jwt, new TenantAwareUser(username, username, authorities, tenant), authorities);
+            }));
+        }
+
+        @SuppressWarnings("unchecked")
+        private static <T> T followPathInJwtClaims(final Jwt jwt, final String path, final Class<T> clazz) {
+            final String[] chunks = path.split("\\.");
+            Object current = jwt.getClaims();
+            for (final String chunk : chunks) {
+                if (current instanceof Map<?, ?> map) {
+                    current = map.get(chunk);
+                } else if (current == null) {
+                    return null;
+                } else {
+                    log.warn("Unexpected claim type for path {} (chunk {})! Expected a Map but got {}", path, chunk, current.getClass());
+                    return null;
+                }
+            }
+
+            if (!clazz.isInstance(current)) {
+                log.warn("Unexpected claim type for path {}! Expected a {} but got {}", path, clazz.getName(), current.getClass());
+                return null;
+            }
+
+            return (T)current;
+        }
+
+        @Getter
+        @EqualsAndHashCode(callSuper = true)
+        private static class HawkbitJwtAuthenticationToken extends AbstractOAuth2TokenAuthenticationToken<Jwt> {
+
+            @Serial
+            private static final long serialVersionUID = 1L;
+
+            private final String name;
+
+            private HawkbitJwtAuthenticationToken(final Jwt jwt, TenantAwareUser user, final Collection<GrantedAuthority> authorities) {
+                super(jwt, user, jwt, authorities);
+                setDetails(new TenantAwareAuthenticationDetails(user.getTenant(), false));
+                name = jwt.getSubject();
+                setAuthenticated(true);
+            }
+
+            @Override
+            public Map<String, Object> getTokenAttributes() {
+                return getToken().getClaims();
+            }
+        }
     }
 }
