@@ -172,6 +172,6 @@ facing [DDI API](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-
 version 'v1' and will be kept stable.
 
 Server facing and [DMF API](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api)
-are [Management API](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-rest/hawkbit-mgmt-api) are on v1 as
+are [Management API](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-mgmt/hawkbit-mgmt-api) are on v1 as
 well. However, we cannot fully guarantee the same stability during hawkBit's 0.X development but we will try as best we
 can.
