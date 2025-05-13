@@ -32,7 +32,7 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
     }
 
     @SuppressWarnings("java:S1066") // java:S1066 - more readable with separate "if" statements
-    protected QuertPath getQuertPath(final ComparisonNode node) {
+    protected QueryPath getQueryPath(final ComparisonNode node) {
         final int firstSeparatorIndex = node.getSelector().indexOf(RsqlQueryField.SUB_ATTRIBUTE_SEPARATOR);
         final String enumName = (firstSeparatorIndex == -1
                 ? node.getSelector()
@@ -67,7 +67,7 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
                 }
             }
 
-            return new QuertPath(enumValue, split);
+            return new QueryPath(enumValue, split);
         } catch (final IllegalArgumentException e) {
             throw createRSQLParameterUnsupportedException(node, e);
         }
@@ -128,12 +128,12 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
     }
 
     @Value
-    protected class QuertPath {
+    protected class QueryPath {
 
         A enumValue;
         String[] jpaPath;
 
-        private QuertPath(final A enumValue, final String[] jpaPath) {
+        private QueryPath(final A enumValue, final String[] jpaPath) {
             this.enumValue = enumValue;
             this.jpaPath = jpaPath;
         }

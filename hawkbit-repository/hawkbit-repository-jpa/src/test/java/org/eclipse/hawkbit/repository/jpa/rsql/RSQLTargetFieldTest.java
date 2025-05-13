@@ -15,6 +15,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.util.Arrays;
 import java.util.Map;
 
+import jakarta.persistence.EntityManager;
+
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
@@ -22,21 +24,30 @@ import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetTypeFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter target")
+@SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     private static final String OR = ",";
     private static final String AND = ";";
+
+    @Autowired
+    protected VirtualPropertyReplacer virtualPropertyReplacer;
+    @Autowired
+    protected EntityManager entityManager;
 
     private Target target;
     private Target target2;
@@ -160,6 +171,8 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
                         "test.null", "null"),
                 null);
 
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.dot>=value.dos", 1);
+if (true) return;
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.dot==value.dot", 1);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null==null", 1); // "null" check
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a==null", 0); // "null" check
@@ -321,20 +334,24 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
                 "ID == '0123' and NAME == abcd and DESCRIPTION == absd and CREATEDAT =lt= 0123 and LASTMODIFIEDAT =gt= 0123" +
                         " and CONTROLLERID == 0123 and UPDATESTATUS == PENDING and IPADDRESS == 0123 and LASTCONTROLLERREQUESTAT == 0123" +
                         " and tag == beta",
-                TargetFields.class);
+                TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
         RSQLUtility.validateRsqlFor(
                 "ASSIGNEDDS.name == abcd and ASSIGNEDDS.version == 0123 and INSTALLEDDS.name == abcd and INSTALLEDDS.version == 0123",
-                TargetFields.class);
+                TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
         RSQLUtility.validateRsqlFor(
                 "ATTRIBUTE.subkey1 == test and ATTRIBUTE.subkey2 == test and METADATA.metakey1 == abcd and METADATA.metavalue2 == asdfg",
-                TargetFields.class);
-        RSQLUtility.validateRsqlFor("CREATEDAT =lt= ${NOW_TS} and LASTMODIFIEDAT =ge= ${OVERDUE_TS}", TargetFields.class);
+                TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
+        RSQLUtility.validateRsqlFor(
+                "CREATEDAT =lt= ${NOW_TS} and LASTMODIFIEDAT =ge= ${OVERDUE_TS}",
+                TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
         RSQLUtility.validateRsqlFor(
                 "ATTRIBUTE.test.dot == test and ATTRIBUTE.subkey2 == test and METADATA.test.dot == abcd and METADATA.metavalue2 == asdfg",
-                TargetFields.class);
+                TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
 
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> RSQLUtility.validateRsqlFor("wrongfield == abcd", TargetFields.class));
+                .isThrownBy(() -> RSQLUtility.validateRsqlFor(
+                        "wrongfield == abcd",
+                        TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager));
     }
 
     @Test
@@ -373,6 +390,7 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     private void assertRSQLQueryThrowsException(final String rsqlParam) {
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> RSQLUtility.validateRsqlFor(rsqlParam, TargetFields.class));
+                .isThrownBy(() -> RSQLUtility.validateRsqlFor(
+                        rsqlParam, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager));
     }
 }

@@ -15,6 +15,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.util.Arrays;
 import java.util.Collections;
 
+import jakarta.persistence.EntityManager;
+
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
@@ -23,19 +25,28 @@ import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.jpa.vendor.Database;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter distribution set")
+@SuppressWarnings("java:S6813") // constructor injects are not possible for test classes
 class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
+
+    @Autowired
+    protected VirtualPropertyReplacer virtualPropertyReplacer;
+    @Autowired
+    protected EntityManager entityManager;
 
     private DistributionSet ds;
     private SoftwareModule sm;
@@ -190,11 +201,14 @@ class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(DistributionSetFields.METADATA.name() + ".key*==value.dot", 0);
         assertRSQLQuery(DistributionSetFields.METADATA.name() + ".*==value.dot", 0);
         assertRSQLQuery(DistributionSetFields.METADATA.name() + "..==value.dot", 0);
-        assertRSQLQueryThrowsException(DistributionSetFields.METADATA.name() + ".==value.dot",
+        assertRSQLQueryThrowsException(
+                DistributionSetFields.METADATA.name() + ".==value.dot",
                 RSQLParameterUnsupportedFieldException.class);
-        assertRSQLQueryThrowsException(DistributionSetFields.METADATA.name() + "*==value.dot",
+        assertRSQLQueryThrowsException(
+                DistributionSetFields.METADATA.name() + "*==value.dot",
                 RSQLParameterUnsupportedFieldException.class);
-        assertRSQLQueryThrowsException(DistributionSetFields.METADATA.name() + "==value.dot",
+        assertRSQLQueryThrowsException(
+                DistributionSetFields.METADATA.name() + "==value.dot",
                 RSQLParameterUnsupportedFieldException.class);
 
     }
@@ -206,18 +220,15 @@ class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
         assertThat(countAll).as("Found entity size is wrong").isEqualTo(expectedEntity);
     }
 
-    private <T extends Throwable> void assertRSQLQueryThrowsException(final String rsqlParam,
-            final Class<T> expectedException) {
+    private <T extends Throwable> void assertRSQLQueryThrowsException(final String rsqlParam, final Class<T> expectedException) {
         assertThatExceptionOfType(expectedException)
-                .isThrownBy(() -> RSQLUtility.validateRsqlFor(rsqlParam, DistributionSetFields.class));
+                .isThrownBy(() -> RSQLUtility.validateRsqlFor(
+                        rsqlParam, DistributionSetFields.class, JpaDistributionSet.class, virtualPropertyReplacer, entityManager));
     }
 
-    private DistributionSet createDistributionSetWithMetadata(final String metadataKeyName,
-            final String metadataValue) {
+    private DistributionSet createDistributionSetWithMetadata(final String metadataKeyName, final String metadataValue) {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        createDistributionSetMetadata(distributionSet.getId(),
-                entityFactory.generateDsMetadata(metadataKeyName, metadataValue));
+        createDistributionSetMetadata(distributionSet.getId(), entityFactory.generateDsMetadata(metadataKeyName, metadataValue));
         return distributionSet;
     }
-
 }

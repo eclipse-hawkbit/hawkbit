@@ -15,8 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
- * Helper class providing static access to the RSQL configuration as managed the ignoreCase and
- * the {@link RsqlVisitorFactory} bean.
+ * Helper class providing static access to the RSQL configuration as managed bean.
  */
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 @Getter
@@ -26,8 +25,7 @@ public final class RsqlConfigHolder {
     private static final RsqlConfigHolder SINGLETON = new RsqlConfigHolder();
 
     /**
-     * If RSQL comparison operators shall ignore the case. If ignore case is <code>true</code>
-     * "x == ax" will match "x == aX"
+     * If RSQL comparison operators shall ignore the case. If ignore case is <code>true</code> "x == ax" will match "x == aX"
      */
     @Value("${hawkbit.rsql.ignore-case:true}")
     private boolean ignoreCase;
@@ -40,13 +38,6 @@ public final class RsqlConfigHolder {
      */
     @Value("${hawkbit.rsql.case-insensitive-db:false}")
     private boolean caseInsensitiveDB;
-
-    private RsqlVisitorFactory rsqlVisitorFactory;
-
-    @Autowired
-    public void setRsqlVisitorFactory(final RsqlVisitorFactory rsqlVisitorFactory) {
-        this.rsqlVisitorFactory = rsqlVisitorFactory;
-    }
 
     /**
      * @deprecated in favour of G2 RSQL visitor. since 0.6.0

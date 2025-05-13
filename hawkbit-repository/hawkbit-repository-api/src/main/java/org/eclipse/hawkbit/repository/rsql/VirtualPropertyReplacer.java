@@ -22,8 +22,7 @@ public interface VirtualPropertyReplacer extends Serializable {
     /**
      * Looks up a placeholders and replaces them
      *
-     * @param input the input string in which virtual properties should be
-     *         replaced
+     * @param input the input string in which virtual properties should be replaced
      * @return the result of the replacement
      */
     String replace(String input);

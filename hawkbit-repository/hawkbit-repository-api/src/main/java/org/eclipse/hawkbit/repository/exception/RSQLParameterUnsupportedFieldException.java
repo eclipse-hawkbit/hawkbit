@@ -11,12 +11,16 @@ package org.eclipse.hawkbit.repository.exception;
 
 import java.io.Serial;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
  * Exception used by the REST API in case of invalid field name in the rsql search parameter.
  */
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class RSQLParameterUnsupportedFieldException extends AbstractServerRtException {
 
     @Serial

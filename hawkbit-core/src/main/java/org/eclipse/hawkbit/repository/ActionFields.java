@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -53,13 +54,8 @@ public enum ActionFields implements RsqlQueryField, FieldValueConverter<ActionFi
     }
 
     @Override
-    public Object convertValue(final ActionFields e, final String value) {
-        return STATUS == e ? convertStatusValue(value) : value;
-    }
-
-    @Override
-    public String[] possibleValues(final ActionFields e) {
-        return STATUS == e ? new String[] { ACTIVE, INACTIVE } : new String[0];
+    public Object convertValue(final ActionFields enumValue, final String value) {
+        return STATUS == enumValue ? convertStatusValue(value) : value;
     }
 
     private static Object convertStatusValue(final String value) {
@@ -69,7 +65,7 @@ public enum ActionFields implements RsqlQueryField, FieldValueConverter<ActionFi
         } else if (trimmedValue.equalsIgnoreCase(INACTIVE)) {
             return false;
         } else {
-            return null;
+            throw new IllegalArgumentException("field 'status' must be one of the following values {" + ACTIVE + ", " + INACTIVE + "}");
         }
     }
 }
