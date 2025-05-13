@@ -10,6 +10,8 @@
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import java.io.Serial;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -103,19 +105,27 @@ public final class RSQLUtility {
      * @throws RSQLParserException if RSQL syntax is invalid
      * @throws RSQLParameterUnsupportedFieldException if RSQL key is not allowed
      */
-    public static <A extends Enum<A> & RsqlQueryField> void validateRsqlFor(
-            final String rsql, final Class<A> fieldNameProvider) {
-        final RSQLVisitor<Void, String> visitor =
-                RsqlConfigHolder.getInstance().getRsqlVisitorFactory().validationRsqlVisitor(fieldNameProvider);
+    public static <A extends Enum<A> & RsqlQueryField> void validateRsqlFor(final String rsql, final Class<A> fieldNameProvider) {
+        final RSQLVisitor<Void, String> visitor = RsqlConfigHolder.getInstance().getRsqlVisitorFactory()
+                .validationRsqlVisitor(fieldNameProvider);
         final Node rootNode = parseRsql(rsql);
         rootNode.accept(visitor);
     }
 
+    static final ComparisonOperator IS = new ComparisonOperator("=is=", "=eq=");
+    static final ComparisonOperator NOT = new ComparisonOperator("=not=", "=ne=");
+    private static final Set<ComparisonOperator> OPERATORS;
+    static {
+        final Set<ComparisonOperator> operators = new HashSet<>(RSQLOperators.defaultOperators());
+        // == and != alternatives just treating "null" string as null not as a "null"
+        operators.add(IS);
+        operators.add(NOT);
+        OPERATORS = Collections.unmodifiableSet(operators);
+    }
     private static Node parseRsql(final String rsql) {
         log.debug("Parsing rsql string {}", rsql);
         try {
-            final Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
-            return new RSQLParser(operators).parse(
+            return new RSQLParser(OPERATORS).parse(
                     RsqlConfigHolder.getInstance().isCaseInsensitiveDB() || RsqlConfigHolder.getInstance().isIgnoreCase()
                             ? rsql.toLowerCase()
                             : rsql);
