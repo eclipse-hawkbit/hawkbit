@@ -26,6 +26,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
@@ -105,14 +106,33 @@ public class Utils {
             layout.add(addBtn);
         }
         if (removeHandler != null) {
+            final ConfirmDialog dialog = promptForDeleteConfirmation(removeHandler, selectionGrid);
             final Button removeBtn = tooltip(new Button(VaadinIcon.MINUS.create()), "Remove");
             removeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_CONTRAST);
-            removeBtn.addClickListener(e -> removeHandler
-                    .apply(selectionGrid)
-                    .thenAccept(v -> selectionGrid.refreshGrid(false)));
+            removeBtn.addClickListener(e -> dialog.open());
+
             layout.add(removeBtn);
         }
         return layout;
+    }
+
+    private static <T, ID> ConfirmDialog promptForDeleteConfirmation(Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler, SelectionGrid<T, ID> selectionGrid) {
+        final ConfirmDialog dialog = new ConfirmDialog();
+        dialog.setHeader("Confirm Deletion");
+        dialog.setText("Are you sure you want to delete the selected items? This action cannot be undone.");
+
+        dialog.setCancelable(true);
+        dialog.addCancelListener(event -> dialog.close());
+
+        dialog.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
+        dialog.setConfirmText("Delete");
+        dialog.addConfirmListener(event -> {
+            removeHandler
+                    .apply(selectionGrid)
+                    .thenAccept(v -> selectionGrid.refreshGrid(false));
+            dialog.close();
+        });
+        return dialog;
     }
 
     public static <T> void remove(final Collection<T> remove, final Set<T> from, final Function<T, ?> idFn) {
