@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import jakarta.annotation.security.RolesAllowed;
 
+import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentRequestBody;
@@ -44,6 +45,7 @@ import org.eclipse.hawkbit.ui.simple.view.util.Utils;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
@@ -63,6 +65,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import jdk.jshell.execution.Util;
 import org.springframework.util.ObjectUtils;
 
 @PageTitle("Targets")
@@ -71,6 +74,7 @@ import org.springframework.util.ObjectUtils;
 @Uses(Icon.class)
 public class TargetView extends TableView<MgmtTarget, String> {
 
+    public static final String STATUS = "Status";
     public static final String CONTROLLER_ID = "Controller Id";
     public static final String TAG = "Tag";
 
@@ -81,6 +85,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
                     @Override
                     protected void addColumns(final Grid<MgmtTarget> grid) {
+                        grid.addColumn(new ComponentRenderer<Component, MgmtTarget>(TargetStatusCell::new)).setHeader(STATUS).setAutoWidth(true).setFlexGrow(0);
                         grid.addColumn(MgmtTarget::getControllerId).setHeader(CONTROLLER_ID).setAutoWidth(true);
                         grid.addColumn(MgmtTarget::getName).setHeader(Constants.NAME).setAutoWidth(true);
                         grid.addColumn(MgmtTarget::getTargetTypeName).setHeader(Constants.TYPE).setAutoWidth(true);
@@ -465,9 +470,65 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
                     requests.add(request);
                 }
-                
+
                 hawkbitClient.getDistributionSetRestApi().createAssignedTarget(distributionSet.getValue().getId(), requests, null).getBody();
             });
+        }
+    }
+
+    private static class TargetStatusCell extends HorizontalLayout {
+
+        private final MgmtTarget target;
+        private final TextArea description = new TextArea(Constants.DESCRIPTION);
+        private final TextField createdBy = Utils.textField(Constants.CREATED_BY);
+        private final TextField createdAt = Utils.textField(Constants.CREATED_AT);
+        private final TextField lastModifiedBy = Utils.textField(Constants.LAST_MODIFIED_BY);
+        private final TextField lastModifiedAt = Utils.textField(Constants.LAST_MODIFIED_AT);
+        private final TextField securityToken = Utils.textField(Constants.SECURITY_TOKEN);
+        private final TextArea targetAttributes = new TextArea(Constants.ATTRIBUTES);
+
+        private TargetStatusCell(MgmtTarget target) {
+            this.target = target;
+            MgmtPollStatus pollStatus = target.getPollStatus();
+            String targetUpdateStatus = Optional.ofNullable(target.getUpdateStatus()).orElse("unknown");
+            add(pollStatusIconMapper(pollStatus), targetUpdateStatusMapper(targetUpdateStatus));
+            setWidth(50, Unit.PIXELS);
+        }
+
+        private Icon targetUpdateStatusMapper(String targetUpdateStatus) {
+            VaadinIcon icon = switch (targetUpdateStatus) {
+                case "error" -> VaadinIcon.EXCLAMATION_CIRCLE;
+                case "in_sync" -> VaadinIcon.CHECK_CIRCLE;
+                case "pending" -> VaadinIcon.ADJUST;
+                case "registered" -> VaadinIcon.DOT_CIRCLE;
+                default -> VaadinIcon.QUESTION_CIRCLE;
+            };
+
+            String color = switch (targetUpdateStatus) {
+                case "error" -> "red";
+                case "in_sync" -> "green";
+                case "pending" -> "orange";
+                case "registered" -> "lightblue";
+                default -> "blue";
+            };
+
+            Icon statusIcon = Utils.tooltip(icon.create(), targetUpdateStatus);
+            statusIcon.setColor(color);
+            statusIcon.addClassNames(LumoUtility.IconSize.SMALL);
+            return statusIcon;
+        }
+
+        private Icon pollStatusIconMapper(MgmtPollStatus pollStatus) {
+            Icon pollIcon;
+            if (pollStatus == null) {
+                pollIcon = Utils.tooltip(VaadinIcon.QUESTION_CIRCLE.create(), "No Poll Status");
+            } else if (pollStatus.isOverdue()) {
+                pollIcon = Utils.tooltip(VaadinIcon.EXCLAMATION_CIRCLE.create(), "Overdue");
+            } else {
+                pollIcon = Utils.tooltip(VaadinIcon.CLOCK.create(), "In Time");
+            }
+            pollIcon.addClassNames(LumoUtility.IconSize.SMALL);
+            return pollIcon;
         }
     }
 }
