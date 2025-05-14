@@ -25,6 +25,7 @@ import jakarta.annotation.security.RolesAllowed;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.dependency.Uses;
@@ -237,15 +238,15 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             final Button cancel = Utils.tooltip(new Button("Cancel"), "Cancel (Esc)");
             cancel.addClickListener(e -> close());
             create.addClickShortcut(Key.ESCAPE);
-            final HorizontalLayout actions = new HorizontalLayout(create, cancel);
-            actions.setSizeFull();
-            actions.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+            create.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            getFooter().add(cancel);
+            getFooter().add(create);
 
             final VerticalLayout layout = new VerticalLayout();
             layout.setSizeFull();
             layout.setPadding(true);
             layout.setSpacing(false);
-            layout.add(type, name, version, vendor, description, requiredMigrationStep, actions);
+            layout.add(type, name, version, vendor, description, requiredMigrationStep);
             add(layout);
             open();
         }
@@ -304,7 +305,8 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                             softwareModulesGrid.refreshGrid(false);
                             close();
                         });
-                        add(addBtn);
+                        addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                        getFooter().add(addBtn);
                         open();
                     }}.result(),
                     v -> {
@@ -324,9 +326,9 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                 close();
             });
             finishBtn.addClickShortcut(Key.ENTER);
-            final HorizontalLayout finish = new HorizontalLayout(finishBtn);
-            finish.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-            finish.setWidthFull();
+            finishBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            getFooter().add(finishBtn);
+
             final HorizontalLayout addRemove = new HorizontalLayout(addRemoveControls);
             addRemove.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
             addRemove.setWidthFull();
@@ -334,7 +336,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             final VerticalLayout layout = new VerticalLayout();
             layout.setSizeFull();
             layout.setSpacing(false);
-            layout.add(softwareModulesGrid, addRemove, finish);
+            layout.add(softwareModulesGrid, addRemove);
             add(layout);
         }
     }

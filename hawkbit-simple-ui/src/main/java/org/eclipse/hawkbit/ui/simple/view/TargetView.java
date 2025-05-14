@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.ui.simple.view;
 
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -17,10 +18,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.time.ZoneOffset;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.annotation.security.RolesAllowed;
@@ -61,7 +62,6 @@ import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.simple.view.util.TableView;
 import org.eclipse.hawkbit.ui.simple.view.util.Utils;
 import org.springframework.util.ObjectUtils;
-import java.util.stream.Collectors;
 
 @PageTitle("Targets")
 @Route(value = "targets", layout = MainLayout.class)
@@ -187,7 +187,6 @@ public class TargetView extends TableView<MgmtTarget, String> {
             final Button saveBtn = Utils.tooltip(new Button(VaadinIcon.ARCHIVE.create()), "Save (Enter)");
             saveBtn.addClickListener(e ->
                     new Utils.BaseDialog<Void>("Save Filter") {{
-                        setHeight("40%");
                         final Button finishBtn = Utils.tooltip(new Button("Save"), "Save (Enter)");
                         final TextField name = Utils.textField(
                                 Constants.NAME,
@@ -205,7 +204,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
                                             .getFilters(0, 30, null, null, null).getBody().getContent());
                             close();
                         });
-                        add(name, finishBtn);
+                        getFooter().add(finishBtn);
+                        add(name);
                         open();
                     }});
             saveBtn.addClickShortcut(Key.ENTER);
@@ -307,19 +307,18 @@ public class TargetView extends TableView<MgmtTarget, String> {
             addCreateClickListener(register, hawkbitClient);
             register.setEnabled(false);
             register.addClickShortcut(Key.ENTER);
+            register.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             final Button cancel = Utils.tooltip(new Button("Cancel"), "Cancel (Esc)");
             cancel.addClickListener(e -> close());
             register.addClickShortcut(Key.ESCAPE);
-            final HorizontalLayout actions = new HorizontalLayout(register, cancel);
-            actions.setSizeFull();
-            actions.setPadding(true);
-            actions.setSpacing(true);
+            getFooter().add(cancel);
+            getFooter().add(register);
 
             final VerticalLayout layout = new VerticalLayout();
             layout.setSizeFull();
             layout.setPadding(true);
             layout.setSpacing(false);
-            layout.add(type, controllerId, name, description, actions);
+            layout.add(type, controllerId, name, description);
             add(layout);
             open();
         }
@@ -372,19 +371,18 @@ public class TargetView extends TableView<MgmtTarget, String> {
             actionType = Utils.actionTypeControls(forceTime);
 
             assign.setEnabled(false);
+            assign.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             addAssignClickListener(hawkbitClient, selectedTargets);
             final Button cancel = Utils.tooltip(new Button("Cancel"), "Cancel (Esc)");
             cancel.addClickListener(e -> close());
             cancel.addClickShortcut(Key.ESCAPE);
-            final HorizontalLayout actions = new HorizontalLayout(assign, cancel);
-            actions.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-            actions.setSizeFull();
+            getFooter().add(cancel);
+            getFooter().add(assign);
 
             final VerticalLayout layout = new VerticalLayout();
             layout.setSizeFull();
             layout.setSpacing(false);
-            layout.add(
-                    distributionSet, actionType, actions);
+            layout.add(distributionSet, actionType);
             add(layout);
             open();
         }

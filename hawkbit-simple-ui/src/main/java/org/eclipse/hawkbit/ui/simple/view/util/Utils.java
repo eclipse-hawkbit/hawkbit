@@ -17,13 +17,14 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.eclipse.hawkbit.ui.simple.view.Constants;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
+import org.eclipse.hawkbit.ui.simple.view.Constants;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -205,7 +206,7 @@ public class Utils {
 
         protected BaseDialog(final String headerTitle) {
             setHeaderTitle(headerTitle);
-            setHeightFull();
+            setMinWidth(640, Unit.PIXELS);
 
             setModal(true);
             setDraggable(true);
