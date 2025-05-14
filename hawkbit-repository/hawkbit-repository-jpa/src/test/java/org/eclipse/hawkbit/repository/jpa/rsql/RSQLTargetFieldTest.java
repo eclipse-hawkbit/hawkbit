@@ -172,7 +172,6 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
                 null);
 
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.dot>=value.dos", 1);
-if (true) return;
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.dot==value.dot", 1);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.null==null", 1); // "null" check
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.n/a==null", 0); // "null" check

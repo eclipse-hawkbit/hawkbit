@@ -75,7 +75,8 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
     private final Map<String, Path<?>> attributeToPath = new HashMap<>();
     private boolean inOr;
 
-    public JpaQueryRsqlVisitorG2(final Class<A> enumType,
+    public JpaQueryRsqlVisitorG2(
+            final Class<A> enumType,
             final Root<T> root, final CriteriaQuery<?> query, final CriteriaBuilder cb,
             final Database database, final VirtualPropertyReplacer virtualPropertyReplacer, final boolean ensureIgnoreCase) {
         super(enumType);
@@ -107,17 +108,15 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
 
     @Override
     public List<Predicate> visit(final ComparisonNode node, final String param) {
-        final QueryPath queryField = getQueryPath(node);
-        final Path<?> fieldPath = getFieldPath(root, queryField);
-        return Collections.singletonList(toPredicate(node, queryField, fieldPath, getValues(node, queryField, fieldPath)));
+        final QueryPath queryPath = getQueryPath(node);
+        final Path<?> fieldPath = getFieldPath(root, queryPath);
+        return Collections.singletonList(toPredicate(node, queryPath, fieldPath, getValues(node, queryPath, fieldPath)));
     }
 
     @SuppressWarnings("java:S3776") // java:S3776 - easier to read at one place
-    private Predicate toPredicate(
-            final ComparisonNode node, final QueryPath queryField,
-            final Path<?> fieldPath, final List<Object> values) {
+    private Predicate toPredicate(final ComparisonNode node, final QueryPath queryPath, final Path<?> fieldPath, final List<Object> values) {
         final Predicate mapEntryKeyPredicate;
-        if (queryField.getEnumValue().isMap()) {
+        if (queryPath.getEnumValue().isMap()) {
             if (node.getOperator() == RSQLUtility.IS) {
                 // special handling of "not-exists"
                 if (values.size() != 1) {
@@ -125,55 +124,55 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
                 }
                 if (values.get(0) == null) {
                     // IS operator for maps and null value is treated as doesn't exist correspondingly
-                    ((PluralJoin<?, ?, ?>) fieldPath).on(toMapEntryKeyPredicate(queryField, fieldPath));
-                    return cb.isNull(getValueFieldPath(queryField, fieldPath));
+                    ((PluralJoin<?, ?, ?>) fieldPath).on(toMapEntryKeyPredicate(queryPath, fieldPath));
+                    return cb.isNull(getValueFieldPath(queryPath, fieldPath));
                 }
             } else if (node.getOperator() == RSQLUtility.NOT) {
                 if (values.size() != 1) {
                     throw new RSQLParameterSyntaxException("The operator '" + RSQLUtility.NOT + "' can only be used with one value");
                 }
                 // NOT operator for maps and null value is treated as does exist correspondingly
-                ((PluralJoin<?, ?, ?>) fieldPath).on(toMapEntryKeyPredicate(queryField, fieldPath));
-                final Path<?> valueFieldPath = getValueFieldPath(queryField, fieldPath);
+                ((PluralJoin<?, ?, ?>) fieldPath).on(toMapEntryKeyPredicate(queryPath, fieldPath));
+                final Path<?> valueFieldPath = getValueFieldPath(queryPath, fieldPath);
                 if (values.get(0) == null) {
                     // special handling of "exists"
                     return cb.isNotNull(valueFieldPath);
                 } else {
                     // special handling or "not equal" or null (same as != but with possible optimized join - no subquery)
-                    return toNotEqualToPredicate(queryField, valueFieldPath, values.get(0));
+                    return toNotEqualToPredicate(queryPath, valueFieldPath, values.get(0));
                 }
             }
-            mapEntryKeyPredicate = toMapEntryKeyPredicate(queryField, fieldPath);
+            mapEntryKeyPredicate = toMapEntryKeyPredicate(queryPath, fieldPath);
         } else {
             mapEntryKeyPredicate = null;
         }
 
-        final Predicate valuePredicate = toOperatorAndValuePredicate(node, queryField, getValueFieldPath(queryField, fieldPath), values);
+        final Predicate valuePredicate = toOperatorAndValuePredicate(node, queryPath, getValueFieldPath(queryPath, fieldPath), values);
 
         return mapEntryKeyPredicate == null ? valuePredicate : cb.and(mapEntryKeyPredicate, valuePredicate);
     }
 
-    private Predicate toMapEntryKeyPredicate(final QueryPath queryField, final Path<?> fieldPath) {
-        final String[] graph = queryField.getJpaPath();
-        return equal(mapEntryKeyPath(queryField, fieldPath), graph[graph.length - 1]);
+    private Predicate toMapEntryKeyPredicate(final QueryPath queryPath, final Path<?> fieldPath) {
+        final String[] graph = queryPath.getJpaPath();
+        return equal(mapEntryKeyPath(queryPath, fieldPath), graph[graph.length - 1]);
     }
 
     @SuppressWarnings("unchecked")
-    private Path<String> mapEntryKeyPath(final QueryPath queryField, final Path<?> fieldPath) {
+    private Path<String> mapEntryKeyPath(final QueryPath queryPath, final Path<?> fieldPath) {
         if (fieldPath instanceof MapJoin) {
             // Currently we support only string key. So below cast is safe.
             return (Path<String>) ((MapJoin<?, ?, ?>) fieldPath).key();
         }
 
-        return fieldPath.get(queryField.getEnumValue().getSubEntityMapTuple()
+        return fieldPath.get(queryPath.getEnumValue().getSubEntityMapTuple()
                 .map(Entry::getKey)
                 .orElseThrow(() -> new UnsupportedOperationException(String.format(
                         "For the fields, defined as Map, only %s java type or tuple in the form of %s are allowed!",
                         Map.class.getName(), AbstractMap.SimpleImmutableEntry.class.getName()))));
     }
 
-    private Path<?> getValueFieldPath(final QueryPath quertPath, final Path<?> fieldPath) {
-        final A enumField = quertPath.getEnumValue();
+    private Path<?> getValueFieldPath(final QueryPath queryPath, final Path<?> fieldPath) {
+        final A enumField = queryPath.getEnumValue();
         if (enumField.isMap()) {
             final Path<?> mapValuePath = enumField.getSubEntityMapTuple().map(Entry::getValue).map(fieldPath::get).orElse(null);
             return mapValuePath == null ? fieldPath : mapValuePath;
@@ -183,20 +182,20 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
     }
 
     private Predicate toOperatorAndValuePredicate(
-            final ComparisonNode node, final QueryPath queryField, final Path<?> fieldPath, final List<Object> values) {
+            final ComparisonNode node, final QueryPath queryPath, final Path<?> fieldPath, final List<Object> values) {
         // only 'equal' and 'notEqual' can handle transformed value like enums.
         // The JPA API cannot handle object types for greaterThan etc. methods. For them, it shall be a string.
         final Object value = values.get(0);
         final String operator = node.getOperator().getSymbol();
         return switch (operator) {
             case "==", "=is=", "=eq=" -> toEqualToPredicate(fieldPath, value);
-            case "!=", "=not=", "=ne=" -> toNotEqualToPredicate(queryField, fieldPath, value);
+            case "!=", "=not=", "=ne=" -> toNotEqualToPredicate(queryPath, fieldPath, value);
             case "=gt=" -> cb.greaterThan(pathOfString(fieldPath), String.valueOf(value)); // JPA handles numbers
             case "=ge=" -> cb.greaterThanOrEqualTo(pathOfString(fieldPath), String.valueOf(value));
             case "=lt=" -> cb.lessThan(pathOfString(fieldPath), String.valueOf(value));
             case "=le=" -> cb.lessThanOrEqualTo(pathOfString(fieldPath), String.valueOf(value));
             case "=in=" -> in(pathOfString(fieldPath), values);
-            case "=out=" -> toOutPredicate(queryField, fieldPath, values);
+            case "=out=" -> toOutPredicate(queryPath, fieldPath, values);
             default -> throw new RSQLParameterSyntaxException("Operator symbol {" + operator + "} is either not supported or not implemented");
         };
     }
@@ -207,6 +206,10 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         }
 
         if ((value instanceof String valueStr) && !NumberUtils.isCreatable(valueStr)) {
+            if (ObjectUtils.isEmpty(value)) {
+                return cb.or(cb.isNull(fieldPath), cb.equal(pathOfString(fieldPath), ""));
+            }
+
             final Path<String> stringExpression = pathOfString(fieldPath);
             if (isPattern(valueStr)) { // a pattern, use like
                 return like(stringExpression, toSQL(valueStr));
@@ -220,13 +223,17 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
 
     // if value is null -> not null
     // if value is not null -> null or not equal value
-    private Predicate toNotEqualToPredicate(final QueryPath queryField, final Path<?> fieldPath, final Object value) {
+    private Predicate toNotEqualToPredicate(final QueryPath queryPath, final Path<?> fieldPath, final Object value) {
         if (value == null) {
             return cb.isNotNull(fieldPath);
         }
 
         if (value instanceof String valueStr && !NumberUtils.isCreatable(valueStr)) {
-            if (isSimpleField(queryField)) {
+            if (ObjectUtils.isEmpty(value)) {
+                return cb.and(cb.isNotNull(fieldPath), cb.notEqual(pathOfString(fieldPath), ""));
+            }
+
+            if (isSimpleField(queryPath)) {
                 if (isPattern(valueStr)) { // a pattern, use like
                     return cb.or(cb.isNull(fieldPath), notLike(pathOfString(fieldPath), toSQL(valueStr)));
                 } else {
@@ -235,7 +242,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
             }
 
             return toNotExistsSubQueryPredicate(
-                    queryField, fieldPath, expressionToCompare ->
+                    queryPath, fieldPath, expressionToCompare ->
                             isPattern(valueStr)
                                     ? like(expressionToCompare, toSQL(valueStr)) // a pattern, use like
                                     : equal(expressionToCompare, valueStr));
@@ -244,18 +251,18 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         return toNullOrNotEqualPredicate(fieldPath, value);
     }
 
-    private Predicate toOutPredicate(final QueryPath queryField, final Path<?> fieldPath, final List<Object> values) {
-        if (isSimpleField(queryField)) {
+    private Predicate toOutPredicate(final QueryPath queryPath, final Path<?> fieldPath, final List<Object> values) {
+        if (isSimpleField(queryPath)) {
             return cb.or(cb.isNull(fieldPath), cb.not(in(pathOfString(fieldPath), values)));
         }
 
-        return toNotExistsSubQueryPredicate(queryField, fieldPath, expressionToCompare -> in(expressionToCompare, values));
+        return toNotExistsSubQueryPredicate(queryPath, fieldPath, expressionToCompare -> in(expressionToCompare, values));
     }
 
-    private Path<?> getFieldPath(final Root<?> root, final QueryPath queryField) {
-        final String[] split = queryField.getJpaPath();
+    private Path<?> getFieldPath(final Root<?> root, final QueryPath queryPath) {
+        final String[] split = queryPath.getJpaPath();
         Path<?> fieldPath = null;
-        for (int i = 0, end = queryField.getEnumValue().isMap() ? split.length - 1 : split.length; i < end; i++) {
+        for (int i = 0, end = queryPath.getEnumValue().isMap() ? split.length - 1 : split.length; i < end; i++) {
             final String fieldNameSplit = split[i];
             fieldPath = fieldPath == null ? getPath(root, fieldNameSplit) : fieldPath.get(fieldNameSplit);
         }
@@ -266,12 +273,12 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
     }
 
     @SuppressWarnings("java:S3776") // java:S3776 - easier to read at one place
-    private List<Object> getValues(final ComparisonNode node, final AbstractRSQLVisitor<A>.QueryPath queryField, final Path<?> fieldPath) {
+    private List<Object> getValues(final ComparisonNode node, final AbstractRSQLVisitor<A>.QueryPath queryPath, final Path<?> fieldPath) {
         final List<Object> values = node.getArguments().stream()
                 // if lookup is available, replace macros ...
                 .map(value -> virtualPropertyReplacer == null ? value : virtualPropertyReplacer.replace(value))
                 // converts value to the correct type
-                .map(value -> convertValueIfNecessary(node, queryField.getEnumValue(), fieldPath, value))
+                .map(value -> convertValueIfNecessary(node, queryPath.getEnumValue(), fieldPath, value))
                 .toList();
         if (values.isEmpty()) {
             throw new RSQLParameterSyntaxException("RSQL values must not be empty", null);
@@ -330,7 +337,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private Predicate toNotExistsSubQueryPredicate(
-            final QueryPath queryField, final Path<?> fieldPath, final Function<Path<String>, Predicate> subQueryPredicateProvider) {
+            final QueryPath queryPath, final Path<?> fieldPath, final Function<Path<String>, Predicate> subQueryPredicateProvider) {
         // if a subquery the field's parent joins are not actually used
         if (!inOr) {
             // so, if not in or (hence not reused) we remove them. Parent shall be a Join
@@ -344,10 +351,10 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
                 subquery.select(subqueryRoot)
                         .where(cb.and(
                                 cb.equal(
-                                        root.get(queryField.getEnumValue().identifierFieldName()),
-                                        subqueryRoot.get(queryField.getEnumValue().identifierFieldName())),
+                                        root.get(queryPath.getEnumValue().identifierFieldName()),
+                                        subqueryRoot.get(queryPath.getEnumValue().identifierFieldName())),
                                 subQueryPredicateProvider.apply(
-                                        getExpressionToCompare(queryField.getEnumValue(), getFieldPath(subqueryRoot, queryField)))))));
+                                        getExpressionToCompare(queryPath.getEnumValue(), getFieldPath(subqueryRoot, queryPath)))))));
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -406,8 +413,8 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         return value;
     }
 
-    private boolean isSimpleField(final QueryPath queryField) {
-        return queryField.getJpaPath().length == 1 || (queryField.getJpaPath().length == 2 && queryField.getEnumValue().isMap());
+    private boolean isSimpleField(final QueryPath queryPath) {
+        return queryPath.getJpaPath().length == 1 || (queryPath.getJpaPath().length == 2 && queryPath.getEnumValue().isMap());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
