@@ -50,6 +50,33 @@ class RSQLToSQLTest {
     }
 
     @Test
+    void printSimple() {
+        print(JpaTarget.class, TargetFields.class, "controllerId==ctrlr1");
+        print(JpaTarget.class, TargetFields.class, "targettype.key==type1");
+        print(JpaTarget.class, TargetFields.class, "tag==tag1");
+        print(JpaTarget.class, TargetFields.class, "metadata.key1==value1");
+        print(JpaTarget.class, TargetFields.class, "attribute.key1==value1");
+    }
+
+    @Test
+    void printAnd() {
+        print(JpaTarget.class, TargetFields.class, "controllerId==ctrlr1 and controllerId==ctrlr2");
+        print(JpaTarget.class, TargetFields.class, "targettype.key==type1 and targettype.key==type2");
+        print(JpaTarget.class, TargetFields.class, "tag==tag1 and tag==tag2 and tag=tag3");
+        print(JpaTarget.class, TargetFields.class, "metadata.key1==value1 and metadata.key2==value2");
+        print(JpaTarget.class, TargetFields.class, "attribute.key1==value1 and attribute.key2==value2");
+    }
+
+    @Test
+    void printOr() {
+        print(JpaTarget.class, TargetFields.class, "controllerId==ctrlr1 or controllerId==ctrlr2");
+        print(JpaTarget.class, TargetFields.class, "targettype.key==type1 or targettype.key==type2");
+        print(JpaTarget.class, TargetFields.class, "tag==tag1 or tag==tag2 or tag==tag3");
+        print(JpaTarget.class, TargetFields.class, "metadata.key1==value1 or metadata.key2==value2");
+        print(JpaTarget.class, TargetFields.class, "attribute.key1==value1 or attribute.key2==value2");
+    }
+
+    @Test
     void printSameTableMultiJoin() {
         print(JpaTarget.class, TargetFields.class, "installedds.version==1.0.0 or assignedds.version==2.0.0");
     }
