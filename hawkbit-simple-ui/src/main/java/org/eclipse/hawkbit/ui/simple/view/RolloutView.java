@@ -23,6 +23,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dependency.Uses;
@@ -31,7 +32,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -358,13 +358,13 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             errorThreshold.setSuffixComponent(percentSuffix);
 
             create.setEnabled(false);
+            create.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             addCreateClickListener(hawkbitClient);
             final Button cancel = Utils.tooltip(new Button("Cancel"), "Cancel (Esc)");
             cancel.addClickListener(e -> close());
             cancel.addClickShortcut(Key.ESCAPE);
-            final HorizontalLayout actions = new HorizontalLayout(create, cancel);
-            actions.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-            actions.setSizeFull();
+            getFooter().add(cancel);
+            getFooter().add(create);
 
             final VerticalLayout layout = new VerticalLayout();
             layout.setSizeFull();
@@ -373,8 +373,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                     name, distributionSet, targetFilter, description,
                     actionType, startType,
                     groupNumber, triggerThreshold, errorThreshold,
-                    dynamic,
-                    actions);
+                    dynamic);
             add(layout);
             open();
         }

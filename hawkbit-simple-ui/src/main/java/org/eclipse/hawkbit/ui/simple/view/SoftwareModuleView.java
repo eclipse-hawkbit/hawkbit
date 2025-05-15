@@ -28,14 +28,13 @@ import jakarta.annotation.security.RolesAllowed;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -269,20 +268,19 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             create.setEnabled(false);
             addCreateClickListener(hawkbitClient);
             create.addClickShortcut(Key.ENTER);
+            create.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             final Button cancel = Utils.tooltip(new Button("Cancel"), "Cancel (Esc)");
             cancel.addClickListener(e -> close());
             cancel.addClickShortcut(Key.ESCAPE);
-            final HorizontalLayout actions = new HorizontalLayout(create, cancel);
-            actions.setSizeFull();
-            actions.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+            getFooter().add(cancel);
+            getFooter().add(create);
 
             final VerticalLayout layout = new VerticalLayout();
             layout.setSizeFull();
             layout.setSpacing(false);
             layout.add(
                     type, name, version, vendor, description, enableArtifactEncryption,
-                    createDistributionSet, distType, distRequiredMigrationStep,
-                    actions);
+                    createDistributionSet, distType, distRequiredMigrationStep);
             add(layout);
             open();
         }
@@ -373,11 +371,10 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             finishBtn.addClickListener(e -> close());
             finishBtn.addClickShortcut(Key.ENTER);
             finishBtn.setHeightFull();
-            final HorizontalLayout finish = new HorizontalLayout(finishBtn);
-            finish.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-            finish.setWidthFull();
+            finishBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            getFooter().add(finishBtn);
 
-            final VerticalLayout layout = new VerticalLayout(artifactGrid, uploadBtn, finish);
+            final VerticalLayout layout = new VerticalLayout(artifactGrid, uploadBtn);
             layout.setSizeFull();
             layout.setSpacing(false);
             add(layout);
