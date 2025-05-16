@@ -39,14 +39,15 @@ import org.springframework.test.context.ContextConfiguration;
 @SuppressWarnings("java:S2699") // java:S2699 - manual test, don't actually does assertions
 class RSQLToSQLTest {
 
+    private static final boolean FULL = Boolean.getBoolean("full");
     private RSQLToSQL rsqlToSQL;
-
 
     @Test
     void print() {
         print(JpaTarget.class, TargetFields.class, "tag==tag1 and tag==tag2");
         print(JpaTarget.class, TargetFields.class, "tag==tag1 or tag==tag2 or tag==tag3");
         print(JpaTarget.class, TargetFields.class, "targettype.key==type1 and metadata.key1==target1-value1");
+        print(JpaTarget.class, TargetFields.class, "targettype.key==type1 or metadata.key1==target1-value1");
         print(JpaTarget.class, TargetFields.class, "(tag!=TAG1 or tag !=TAG2)");
     }
 
@@ -105,9 +106,9 @@ class RSQLToSQLTest {
     private <T, A extends Enum<A> & RsqlQueryField> void print(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
         System.out.println(rsql);
         System.out.println("\tlegacy:\n" +
-                "\t\t" + rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, true));
+                "\t\t" + useStar(rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, true)));
         System.out.println("\tG2:\n" +
-                "\t\t" + rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, false));
+                "\t\t" + useStar(rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, false)));
     }
 
     private <T, A extends Enum<A> & RsqlQueryField> void printFrom(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
@@ -116,5 +117,9 @@ class RSQLToSQLTest {
                 "\t\t" + from(rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, true)));
         System.out.println("\tG2:\n" +
                 "\t\t" + from(rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, false)));
+    }
+
+    private static String useStar(final String sql) {
+        return FULL ? sql : sql.replaceAll("^SELECT [^(]* FROM", "SELECT * FROM");
     }
 }
