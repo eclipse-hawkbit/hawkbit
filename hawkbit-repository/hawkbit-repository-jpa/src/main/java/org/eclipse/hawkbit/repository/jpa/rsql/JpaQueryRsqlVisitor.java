@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -82,14 +81,15 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
     private final Database database;
     private final boolean ensureIgnoreCase;
     private final Root<T> root;
-    private final SimpleTypeConverter simpleTypeConverter;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
+    private final SimpleTypeConverter simpleTypeConverter;
 
     private int level;
     private boolean isOrLevel;
     private boolean joinsNeeded;
 
-    public JpaQueryRsqlVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
+    public JpaQueryRsqlVisitor(
+            final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
             final CriteriaQuery<?> query, final boolean ensureIgnoreCase) {
         super(enumType);
@@ -129,7 +129,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
     // https://jira.sonarsource.com/browse/SONARJAVA-1478
     @SuppressWarnings({ "squid:S2095" })
     public List<Predicate> visit(final ComparisonNode node, final String param) {
-        final QuertPath queryPath = getQuertPath(node);
+        final QueryPath queryPath = getQueryPath(node);
 
         final List<String> values = node.getArguments();
         final List<Object> transformedValues = new ArrayList<>();
@@ -266,7 +266,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
      * @return the Path for a field
      */
     @SuppressWarnings("unchecked")
-    private Path<Object> getFieldPath(final A enumField, final QuertPath queryPath) {
+    private Path<Object> getFieldPath(final A enumField, final QueryPath queryPath) {
         return (Path<Object>) getFieldPath(root, queryPath.getJpaPath(), enumField.isMap(),
                 this::getJoinFieldPath).orElseThrow(
                 () -> new RSQLParameterUnsupportedFieldException("RSQL field path cannot be empty", null));
@@ -303,7 +303,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
             return transformEnumValue(node, value, javaType);
         }
         if (fieldName instanceof FieldValueConverter) {
-            return convertFieldConverterValue(node, fieldName, value);
+            return convertFieldConverterValue(fieldName, value);
         }
 
         if (Boolean.TYPE.equals(javaType)) {
@@ -317,28 +317,24 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
         try {
             return simpleTypeConverter.convertIfNecessary(value, javaType);
         } catch (final TypeMismatchException e) {
-            throw new RSQLParameterSyntaxException(
+            throw new RSQLParameterUnsupportedFieldException(
                     "The value of the given search parameter field {" + node.getSelector()
-                            + "} is not well formed. Only a boolean (true or false) value will be expected {",
+                            + "} is not well formed. Only a boolean (true or false) value will be expected",
                     e);
         }
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Object convertFieldConverterValue(final ComparisonNode node, final A fieldName, final String value) {
-        final Object convertedValue = ((FieldValueConverter) fieldName).convertValue(fieldName, value);
-        if (convertedValue == null) {
-            throw new RSQLParameterUnsupportedFieldException(
-                    "field {" + node.getSelector() + "} must be one of the following values {"
-                            + Arrays.toString(((FieldValueConverter) fieldName).possibleValues(fieldName)) + "}",
-                    null);
-        } else {
-            return convertedValue;
+    private Object convertFieldConverterValue(final A fieldName, final String value) {
+        try {
+            return ((FieldValueConverter) fieldName).convertValue(fieldName, value);
+        } catch (final Exception e) {
+            throw new RSQLParameterSyntaxException(e.getMessage(), null);
         }
     }
 
     private List<Predicate> mapToPredicate(final ComparisonNode node, final Path<Object> fieldPath,
-            final List<String> values, final List<Object> transformedValues, final QuertPath queryPath) {
+            final List<String> values, final List<Object> transformedValues, final QueryPath queryPath) {
 
         String value = values.get(0);
         // if lookup is available, replace macros ...
@@ -355,7 +351,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
     }
 
     private Predicate addOperatorPredicate(final ComparisonNode node, final Path<Object> fieldPath,
-            final List<Object> transformedValues, final String value, final QuertPath queryPath) {
+            final List<Object> transformedValues, final String value, final QueryPath queryPath) {
 
         // only 'equal' and 'notEqual' can handle transformed value like
         // enums. The JPA API cannot handle object types for greaterThan etc
@@ -388,7 +384,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
 
     private Predicate getOutPredicate(
             final List<Object> transformedValues,
-            final QuertPath queryPath, final Path<Object> fieldPath) {
+            final QueryPath queryPath, final Path<Object> fieldPath) {
         final String[] fieldNames = queryPath.getJpaPath();
 
         if (isSimpleField(fieldNames, queryPath.getEnumValue().isMap())) {
@@ -412,7 +408,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
     }
 
     @SuppressWarnings("unchecked")
-    private Predicate mapToMapPredicate(final Path<Object> fieldPath, final QuertPath queryPath) {
+    private Predicate mapToMapPredicate(final Path<Object> fieldPath, final QueryPath queryPath) {
         if (!queryPath.getEnumValue().isMap()) {
             return null;
         }
@@ -452,7 +448,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
     }
 
     private Predicate getNotEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath,
-            final QuertPath queryPath) {
+            final QueryPath queryPath) {
 
         if (transformedValue == null) {
             return cb.isNotNull(pathOfString(fieldPath));

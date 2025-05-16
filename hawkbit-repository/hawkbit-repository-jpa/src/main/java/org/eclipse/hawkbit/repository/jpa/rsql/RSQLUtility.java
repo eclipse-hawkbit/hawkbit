@@ -10,9 +10,12 @@
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import java.io.Serial;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -103,27 +106,27 @@ public final class RSQLUtility {
      * @throws RSQLParserException if RSQL syntax is invalid
      * @throws RSQLParameterUnsupportedFieldException if RSQL key is not allowed
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static <A extends Enum<A> & RsqlQueryField> void validateRsqlFor(
-            final String rsql, final Class<A> fieldNameProvider) {
-        final RSQLVisitor<Void, String> visitor =
-                RsqlConfigHolder.getInstance().getRsqlVisitorFactory().validationRsqlVisitor(fieldNameProvider);
-        final Node rootNode = parseRsql(rsql);
-        rootNode.accept(visitor);
+            final String rsql, final Class<A> fieldNameProvider,
+            final Class<?> jpaType,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final EntityManager entityManager) {
+        final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        final CriteriaQuery<?> criteriaQuery = criteriaBuilder.createQuery(jpaType);
+        new RSQLSpecification<>(rsql, fieldNameProvider, virtualPropertyReplacer, null)
+                .toPredicate(criteriaQuery.from((Class)jpaType), criteriaQuery, criteriaBuilder);
     }
 
-    private static Node parseRsql(final String rsql) {
-        log.debug("Parsing rsql string {}", rsql);
-        try {
-            final Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
-            return new RSQLParser(operators).parse(
-                    RsqlConfigHolder.getInstance().isCaseInsensitiveDB() || RsqlConfigHolder.getInstance().isIgnoreCase()
-                            ? rsql.toLowerCase()
-                            : rsql);
-        } catch (final IllegalArgumentException e) {
-            throw new RSQLParameterSyntaxException("RSQL filter must not be null", e);
-        } catch (final RSQLParserException e) {
-            throw new RSQLParameterSyntaxException(e);
-        }
+    static final ComparisonOperator IS = new ComparisonOperator("=is=", "=eq=");
+    static final ComparisonOperator NOT = new ComparisonOperator("=not=", "=ne=");
+    private static final Set<ComparisonOperator> OPERATORS;
+
+    static {
+        final Set<ComparisonOperator> operators = new HashSet<>(RSQLOperators.defaultOperators());
+        // == and != alternatives just treating "null" string as null not as a "null"
+        operators.add(IS);
+        operators.add(NOT);
+        OPERATORS = Collections.unmodifiableSet(operators);
     }
 
     private static final class RSQLSpecification<A extends Enum<A> & RsqlQueryField, T> implements Specification<T> {
@@ -136,7 +139,8 @@ public final class RSQLUtility {
         private final VirtualPropertyReplacer virtualPropertyReplacer;
         private final Database database;
 
-        private RSQLSpecification(final String rsql, final Class<A> enumType,
+        private RSQLSpecification(
+                final String rsql, final Class<A> enumType,
                 final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
             this.rsql = rsql;
             this.enumType = enumType;
@@ -150,17 +154,16 @@ public final class RSQLUtility {
             query.distinct(true);
 
             final RSQLVisitor<List<Predicate>, String> jpqQueryRSQLVisitor =
-                    RsqlConfigHolder.getInstance().isLegacyRsqlVisitor() ?
-                            new JpaQueryRsqlVisitor<>(
+                    RsqlConfigHolder.getInstance().isLegacyRsqlVisitor()
+                            ? new JpaQueryRsqlVisitor<>(
                                     root, cb, enumType,
                                     virtualPropertyReplacer, database, query,
                                     !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase())
-                            :
-                                    new JpaQueryRsqlVisitorG2<>(
-                                            enumType, root, query, cb,
-                                            database, virtualPropertyReplacer,
-                                            !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance()
-                                                    .isIgnoreCase());
+                            : new JpaQueryRsqlVisitorG2<>(
+                                    enumType, root, query, cb,
+                                    database, virtualPropertyReplacer,
+                                    !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance()
+                                            .isIgnoreCase());
             final List<Predicate> accept = rootNode.accept(jpqQueryRSQLVisitor);
 
             if (CollectionUtils.isEmpty(accept)) {
@@ -168,6 +171,20 @@ public final class RSQLUtility {
             } else {
                 return cb.and(accept.toArray(new Predicate[0]));
             }
+        }
+    }
+
+    private static Node parseRsql(final String rsql) {
+        log.debug("Parsing rsql string {}", rsql);
+        try {
+            return new RSQLParser(OPERATORS).parse(
+                    RsqlConfigHolder.getInstance().isCaseInsensitiveDB() || RsqlConfigHolder.getInstance().isIgnoreCase()
+                            ? rsql.toLowerCase()
+                            : rsql);
+        } catch (final IllegalArgumentException e) {
+            throw new RSQLParameterSyntaxException("RSQL filter must not be null", e);
+        } catch (final RSQLParserException e) {
+            throw new RSQLParameterSyntaxException(e);
         }
     }
 }

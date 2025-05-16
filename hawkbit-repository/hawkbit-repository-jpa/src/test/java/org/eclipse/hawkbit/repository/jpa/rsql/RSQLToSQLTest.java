@@ -57,12 +57,12 @@ class RSQLToSQLTest {
         print(JpaTarget.class, TargetFields.class, "controllerId==ctrlr1");
         // reference - fk to a table
         print(JpaTarget.class, TargetFields.class, "assignedds.name==x and assignedds.version==y");
+        // list (map table that refers main)
+        print(JpaTarget.class, TargetFields.class, "metadata.key1==value1");
+        // map (map table that refers main)
+        print(JpaTarget.class, TargetFields.class, "attribute.key1==value1");
         // list of non-simple (with mapping table)
         print(JpaTarget.class, TargetFields.class, "tag==tag1");
-        // list (map table that refers main)
-        print(JpaTarget.class, TargetFields.class, "attribute.key1==value1");
-        // map (map table that refers main)
-        print(JpaTarget.class, TargetFields.class, "metadata.key1==value1");
     }
 
     @Test

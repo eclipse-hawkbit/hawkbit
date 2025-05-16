@@ -146,7 +146,6 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluati
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
-import org.eclipse.hawkbit.repository.jpa.rsql.DefaultRsqlVisitorFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -159,7 +158,6 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
-import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
@@ -656,10 +654,11 @@ public class RepositoryApplicationConfiguration {
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final JpaProperties properties, final TenantConfigurationManagement tenantConfigurationManagement,
             final RepositoryProperties repositoryProperties,
-            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final AuditorAware<String> auditorAware) {
+            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final AuditorAware<String> auditorAware,
+            final EntityManager entityManager) {
         return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetManagement,
                 virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase(),
-                tenantConfigurationManagement, repositoryProperties, systemSecurityContext, contextAware, auditorAware);
+                tenantConfigurationManagement, repositoryProperties, systemSecurityContext, contextAware, auditorAware, entityManager);
     }
 
     /**
@@ -1015,23 +1014,12 @@ public class RepositoryApplicationConfiguration {
     }
 
     /**
-     * Creates the {@link RsqlVisitorFactory} bean.
-     *
-     * @return A new {@link RsqlVisitorFactory} bean.
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    RsqlVisitorFactory rsqlVisitorFactory() {
-        return new DefaultRsqlVisitorFactory();
-    }
-
-    /**
      * Obtains the {@link RsqlConfigHolder} bean.
      *
      * @return The {@link RsqlConfigHolder} singleton.
      */
     @Bean
-    RsqlConfigHolder rsqlVisitorFactoryHolder() {
+    RsqlConfigHolder rsqlConfigHolder() {
         return RsqlConfigHolder.getInstance();
     }
 

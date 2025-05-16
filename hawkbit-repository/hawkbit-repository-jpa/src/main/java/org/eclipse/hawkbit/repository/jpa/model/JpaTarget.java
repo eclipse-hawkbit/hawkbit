@@ -188,8 +188,8 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             name = "sp_target_attributes",
             joinColumns = { @JoinColumn(name = "target", nullable = false) },
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_attributes_target"))
-    @Column(name = "attribute_value", length = Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE)
     @MapKeyColumn(name = "attribute_key", length = Target.CONTROLLER_ATTRIBUTE_KEY_SIZE)
+    @Column(name = "attribute_value", length = Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE)
     private Map<String, String> controllerAttributes;
 
     @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaTargetMetadata.class)

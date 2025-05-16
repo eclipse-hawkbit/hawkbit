@@ -694,13 +694,12 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public boolean isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(final String controllerId,
             final long distributionSetId, final String targetFilterQuery) {
-        RSQLUtility.validateRsqlFor(targetFilterQuery, TargetFields.class);
+        RSQLUtility.validateRsqlFor(targetFilterQuery, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
         final DistributionSet ds = distributionSetManagement.get(distributionSetId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, distributionSetId));
         final Long distSetTypeId = ds.getType().getId();
         final List<Specification<JpaTarget>> specList = Arrays.asList(
-                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer,
-                        database),
+                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
                 TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId),
                 TargetSpecifications.hasControllerId(controllerId));

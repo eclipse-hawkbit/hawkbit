@@ -44,14 +44,12 @@ import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
-import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -88,8 +86,6 @@ class RSQLUtilityTest {
     private TenantConfigurationManagement confMgmt;
     @MockitoBean
     private SystemSecurityContext securityContext;
-    @MockitoBean
-    private RsqlVisitorFactory rsqlVisitorFactory;
     @Mock
     private Root<Object> baseSoftwareModuleRootMock;
     @Mock
@@ -107,63 +103,6 @@ class RSQLUtilityTest {
     void beforeEach() {
         setupRoot(baseSoftwareModuleRootMock);
         setupRoot(subqueryRootMock);
-    }
-
-    @Test
-    @Description("Testing throwing exception in case of not allowed RSQL key")
-    void rsqlUnsupportedFieldExceptionTest() {
-        final String rsql1 = "wrongfield == abcd";
-        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> validateRsqlForTestFields(rsql1));
-
-        final String rsql2 = "wrongfield == abcd or TESTFIELD_WITH_SUB_ENTITIES.subentity11 == 0123";
-        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> validateRsqlForTestFields(rsql2));
-    }
-
-    @Test
-    @Description("Testing exception in case of not allowed subkey")
-    void rsqlUnsupportedSubkeyThrowException() {
-        final String rsql1 = "TESTFIELD_WITH_SUB_ENTITIES.unsupported == abcd and TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123";
-        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> validateRsqlForTestFields(rsql1));
-
-        final String rsql2 = "TESTFIELD_WITH_SUB_ENTITIES.unsupported == abcd or TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123";
-        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> validateRsqlForTestFields(rsql2));
-
-        final String rsql3 = "TESTFIELD == abcd or TESTFIELD_WITH_SUB_ENTITIES.unsupported == 0123";
-        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> validateRsqlForTestFields(rsql3));
-    }
-
-    @Test
-    @Description("Testing valid RSQL keys based on TestFieldEnum.class")
-    void rsqlFieldValidation() {
-
-        final String rsql1 = "TESTFIELD_WITH_SUB_ENTITIES.subentity11 == abcd and TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123";
-        final String rsql2 = "TESTFIELD_WITH_SUB_ENTITIES.subentity11 == abcd or TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123";
-        final String rsql3 = "TESTFIELD_WITH_SUB_ENTITIES.subentity11 == abcd and TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123 and TESTFIELD == any";
-
-        validateRsqlForTestFields(rsql1);
-        validateRsqlForTestFields(rsql2);
-        validateRsqlForTestFields(rsql3);
-    }
-
-    @Test
-    @Description("Verify that RSQL expressions are validated case insensitive")
-    void mixedCaseRsqlFieldValidation() {
-        when(rsqlVisitorFactory.validationRsqlVisitor(TargetFields.class)).thenReturn(new FieldValidationRsqlVisitor<>(TargetFields.class));
-        final String rsqlWithMixedCase = "name==b And name==c aND Name==d OR NAME=iN=y oR nAme=IN=z";
-        RSQLUtility.validateRsqlFor(rsqlWithMixedCase, TargetFields.class);
-    }
-
-    @Test
-    void wrongRsqlSyntaxThrowSyntaxException() {
-        final Specification<Object> rsqlSpecification = RSQLUtility.buildRsqlSpecification("name==abc;d", SoftwareModuleFields.class, null, testDb);
-        assertThatExceptionOfType(RSQLParameterSyntaxException.class)
-                .as("RSQLParameterSyntaxException because of wrong RSQL syntax")
-                .isThrownBy(() -> rsqlSpecification.toPredicate(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock));
     }
 
     @Test
@@ -481,12 +420,6 @@ class RSQLUtilityTest {
         return (Path<Y>) path;
     }
 
-    private void validateRsqlForTestFields(final String rsql) {
-        when(rsqlVisitorFactory.validationRsqlVisitor(TestFieldEnum.class)).thenReturn(
-                new FieldValidationRsqlVisitor<>(TestFieldEnum.class));
-        RSQLUtility.validateRsqlFor(rsql, TestFieldEnum.class);
-    }
-
     private void reset0(final Object... mocks) {
         reset(mocks);
         if (Arrays.asList(mocks).contains(baseSoftwareModuleRootMock)) {
@@ -553,7 +486,7 @@ class RSQLUtilityTest {
         }
 
         @Bean
-        RsqlConfigHolder rsqlVisitorFactoryHolder() {
+        RsqlConfigHolder rsqlConfigHolder() {
             return RsqlConfigHolder.getInstance();
         }
     }

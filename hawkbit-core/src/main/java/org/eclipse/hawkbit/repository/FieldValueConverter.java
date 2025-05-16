@@ -21,21 +21,13 @@ package org.eclipse.hawkbit.repository;
 public interface FieldValueConverter<T extends Enum<T>> {
 
     /**
-     * Converts the given {@code value} into the representation to build a
-     * generic query.
+     * Converts the given {@code value} into the representation to build ageneric query.
      *
-     * @param e the enum to build the value for
+     * @param enumValue the enum to build the value for
      * @param value the value in string representation
      * @return the converted object or {@code null} if conversation fails, if given enum does not need to be converted the
      *         unmodified {@code value} is returned.
+     * @throws IllegalArgumentException if the value is not supported
      */
-    Object convertValue(final T e, final String value);
-
-    /**
-     * returns the possible values associated with the given enum type.
-     *
-     * @param e the enum type to retrieve the possible values
-     * @return the possible values for a specific enum or {@code null}
-     */
-    String[] possibleValues(final T e);
+    Object convertValue(final T enumValue, final String value);
 }

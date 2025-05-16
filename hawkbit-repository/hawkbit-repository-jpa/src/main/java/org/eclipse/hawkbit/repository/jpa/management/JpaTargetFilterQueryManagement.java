@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.EntityManager;
 import jakarta.validation.constraints.NotNull;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
@@ -39,6 +40,7 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -83,6 +85,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private final SystemSecurityContext systemSecurityContext;
     private final ContextAware contextAware;
     private final AuditorAware<String> auditorAware;
+    private final EntityManager entityManager;
     private final Database database;
 
     @SuppressWarnings("java:S107")
@@ -91,7 +94,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final Database database, final TenantConfigurationManagement tenantConfigurationManagement,
             final RepositoryProperties repositoryProperties,
-            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final AuditorAware<String> auditorAware) {
+            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware, final AuditorAware<String> auditorAware,
+            final EntityManager entityManager) {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetManagement = targetManagement;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
@@ -103,6 +107,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         this.systemSecurityContext = systemSecurityContext;
         this.contextAware = contextAware;
         this.auditorAware = auditorAware;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -114,7 +119,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
         create.getQuery().ifPresent(query -> {
             // validate the RSQL query syntax
-            RSQLUtility.validateRsqlFor(query, TargetFields.class);
+            RSQLUtility.validateRsqlFor(query, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
 
             // enforce the 'max targets per auto assign' quota right here even
             // if the result of the filter query can vary over time
@@ -143,7 +148,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Override
     public boolean verifyTargetFilterQuerySyntax(final String query) {
         try {
-            RSQLUtility.validateRsqlFor(query, TargetFields.class);
+            RSQLUtility.validateRsqlFor(query, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager);
             return true;
         } catch (final RSQLParserException | RSQLParameterUnsupportedFieldException e) {
             log.debug("The RSQL query '{}}' is invalid.", query, e);
