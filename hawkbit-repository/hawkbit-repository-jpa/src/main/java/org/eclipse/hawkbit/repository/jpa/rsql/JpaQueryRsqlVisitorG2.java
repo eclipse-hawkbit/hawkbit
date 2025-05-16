@@ -298,8 +298,13 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         if (!attribute.isCollection()) {
             // it is a SingularAttribute and not join if it is of basic or entity persistence type
             final Type.PersistenceType persistenceType = ((SingularAttribute<?, ?>) attribute).getType().getPersistenceType();
-            if (persistenceType.equals(Type.PersistenceType.BASIC) || persistenceType.equals(Type.PersistenceType.ENTITY)) {
+            if (persistenceType == Type.PersistenceType.BASIC) {
                 return root.get(fieldNameSplit);
+            } else if (persistenceType == Type.PersistenceType.ENTITY) {
+                return root.getJoins().stream()
+                        .filter(join -> join.getAttribute().equals(attribute))
+                        .findFirst()
+                        .orElseGet(() -> root.join(fieldNameSplit, JoinType.LEFT));
             }
         } // if a collection - it is a join
         if (inOr && root == this.root) { // try to reuse join of the same "or" level and no subquery
