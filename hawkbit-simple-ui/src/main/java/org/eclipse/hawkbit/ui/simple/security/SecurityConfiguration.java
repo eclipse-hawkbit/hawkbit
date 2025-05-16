@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.ui.simple.security;
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
 import org.eclipse.hawkbit.ui.simple.view.LoginView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -24,11 +26,15 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @EnableWebSecurity
 @Configuration
+@EnableConfigurationProperties({ OidcClientProperties.class })
 public class SecurityConfiguration extends VaadinWebSecurity {
+
     private Customizer<OAuth2LoginConfigurer<HttpSecurity>> oAuth2LoginConfigurerCustomizer;
 
     @Autowired(required = false)
-    public void setOAuth2LoginConfigurerCustomizer(final Customizer<OAuth2LoginConfigurer<HttpSecurity>> oauth2LoginConfigurerCustomizer) {
+    public void setOAuth2LoginConfigurerCustomizer(
+            @Qualifier("hawkbitOAuth2ClientCustomizer") final Customizer<OAuth2LoginConfigurer<HttpSecurity>> oauth2LoginConfigurerCustomizer
+    ) {
         this.oAuth2LoginConfigurerCustomizer = oauth2LoginConfigurerCustomizer;
     }
 

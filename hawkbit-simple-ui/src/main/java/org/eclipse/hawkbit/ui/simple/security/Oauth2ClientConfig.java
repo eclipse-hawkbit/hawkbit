@@ -9,8 +9,8 @@
  */
 package org.eclipse.hawkbit.ui.simple.security;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -19,10 +19,10 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.cli
 
 @Configuration
 public class Oauth2ClientConfig {
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnBean(Oauth2ClientConfig.class)
-    Customizer<OAuth2LoginConfigurer<HttpSecurity>> oAuth2LoginConfigurerCustomizer() {
+    @Bean(name = "hawkbitOAuth2ClientCustomizer")
+    @ConditionalOnProperty(prefix = "hawkbit.server.security.oauth2.client", name = "enabled")
+    @ConditionalOnMissingBean(name = "hawkbitOAuth2ClientCustomizer")
+    Customizer<OAuth2LoginConfigurer<HttpSecurity>> defaultOAuth2ClientCustomizer() {
         return Customizer.withDefaults();
     }
 }

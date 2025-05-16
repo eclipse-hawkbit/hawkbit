@@ -9,18 +9,6 @@
  */
 package org.eclipse.hawkbit.ui.simple;
 
-import java.util.Base64;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
-
-import org.eclipse.hawkbit.sdk.HawkbitClient;
-import org.eclipse.hawkbit.sdk.HawkbitServer;
-import org.eclipse.hawkbit.sdk.Tenant;
-import org.eclipse.hawkbit.ui.simple.security.OAuth2TokenManager;
-import org.eclipse.hawkbit.ui.simple.view.util.Utils;
-
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
@@ -30,6 +18,12 @@ import feign.RequestInterceptor;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
+import org.eclipse.hawkbit.sdk.HawkbitClient;
+import org.eclipse.hawkbit.sdk.HawkbitServer;
+import org.eclipse.hawkbit.sdk.Tenant;
+import org.eclipse.hawkbit.ui.simple.security.OAuth2TokenManager;
+import org.eclipse.hawkbit.ui.simple.view.util.Utils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.FeignClientsConfiguration;
@@ -48,6 +42,11 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
+import java.util.Base64;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 
 import static feign.Util.ISO_8859_1;
 import static java.util.Collections.emptyList;
@@ -57,15 +56,18 @@ import static java.util.Collections.emptyList;
 @SpringBootApplication
 @Import(FeignClientsConfiguration.class)
 public class SimpleUIApp implements AppShellConfigurator {
+
     private static final Function<OAuth2TokenManager, RequestInterceptor> AUTHORIZATION = (oAuth2TokenManager) -> requestTemplate -> {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof OAuth2AuthenticationToken oAuth2AuthenticationToken) {
+        if (oAuth2TokenManager != null && authentication instanceof OAuth2AuthenticationToken oAuth2AuthenticationToken) {
             String bearerToken = oAuth2TokenManager.getToken(oAuth2AuthenticationToken);
             requestTemplate.header("Authorization", "Bearer " + bearerToken);
         } else {
-            requestTemplate.header("Authorization", "Basic " + Base64.getEncoder().encodeToString(
-                    (Objects.requireNonNull(authentication.getPrincipal(), "User is null!") + ":" + Objects.requireNonNull(
-                            authentication.getCredentials(), "Password is not available!")).getBytes(ISO_8859_1)));
+            requestTemplate.header(
+                    "Authorization", "Basic " + Base64.getEncoder().encodeToString(
+                            (Objects.requireNonNull(authentication.getPrincipal(), "User is null!") + ":" + Objects.requireNonNull(
+                                    authentication.getCredentials(), "Password is not available!")).getBytes(ISO_8859_1))
+            );
         }
     };
 
@@ -86,13 +88,17 @@ public class SimpleUIApp implements AppShellConfigurator {
             final Encoder encoder,
             final Decoder decoder,
             final Contract contract,
+            @Autowired(required = false)
             final OAuth2TokenManager oAuth2TokenManager
     ) {
         return new HawkbitClient(
                 hawkBitServer, encoder, decoder, contract,
                 ERROR_DECODER,
                 (tenant, controller) ->
-                        controller == null ? AUTHORIZATION.apply(oAuth2TokenManager) : HawkbitClient.DEFAULT_REQUEST_INTERCEPTOR_FN.apply(tenant, controller));
+                        controller == null
+                                ? AUTHORIZATION.apply(oAuth2TokenManager)
+                                : HawkbitClient.DEFAULT_REQUEST_INTERCEPTOR_FN.apply(tenant, controller)
+        );
     }
 
     @Bean
@@ -128,8 +134,10 @@ public class SimpleUIApp implements AppShellConfigurator {
             final String username = authentication.getName();
             final String password = authentication.getCredentials().toString();
 
-            final List<SimpleGrantedAuthority> grantedAuthorities = getGrantedAuthorities(hawkbitClient, new UsernamePasswordAuthenticationToken(username, password));
+            final List<SimpleGrantedAuthority> grantedAuthorities = getGrantedAuthorities(
+                    hawkbitClient, new UsernamePasswordAuthenticationToken(username, password));
             return new UsernamePasswordAuthenticationToken(username, password, grantedAuthorities) {
+
                 @Override
                 public void eraseCredentials() {
                     // don't erase credentials because they will be used

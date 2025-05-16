@@ -9,13 +9,13 @@
  */
 package org.eclipse.hawkbit.ui.simple.security;
 
-import java.util.Optional;
-
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2RefreshTokenGrantRequest;
 import org.springframework.security.oauth2.client.endpoint.RestClientRefreshTokenTokenResponseClient;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -25,17 +25,26 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenRespon
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
+@ConditionalOnBean(name = "hawkbitOAuth2ClientCustomizer")
 public class OAuth2TokenManager {
+
     private final OAuth2AuthorizedClientService clientService;
     private final OAuth2AuthorizedClientManager clientManager;
+    private final OAuth2AccessTokenResponseClient<OAuth2RefreshTokenGrantRequest> tokenResponseClient;
 
-    OAuth2TokenManager(final OAuth2AuthorizedClientService clientService, final OAuth2AuthorizedClientManager clientManager) {
+    OAuth2TokenManager(
+            final OAuth2AuthorizedClientService clientService,
+            final OAuth2AuthorizedClientManager clientManager
+    ) {
         this.clientService = clientService;
         this.clientManager = clientManager;
+        this.tokenResponseClient = new RestClientRefreshTokenTokenResponseClient();
     }
 
-    public String getToken(OAuth2AuthenticationToken authentication) {
+    public String getToken(final OAuth2AuthenticationToken authentication) {
         return Optional.ofNullable(authorizedToken(authentication)).orElse(
                 ((DefaultOidcUser) authentication.getPrincipal()).getIdToken().getTokenValue()
         );
@@ -44,7 +53,7 @@ public class OAuth2TokenManager {
     /**
      * Tries to refresh the id token if it is expired and adds it to the request.
      */
-    private String authorizedToken(OAuth2AuthenticationToken authentication) {
+    private String authorizedToken(final OAuth2AuthenticationToken authentication) {
         String registrationId = authentication.getAuthorizedClientRegistrationId();
         OAuth2AuthorizeRequest request = OAuth2AuthorizeRequest.withClientRegistrationId(registrationId).principal(authentication).build();
 
@@ -65,8 +74,9 @@ public class OAuth2TokenManager {
         // if this is null, please request it via the scopes
         if (refreshToken == null) return null;
 
-        OAuth2RefreshTokenGrantRequest refreshTokenGrantRequest = new OAuth2RefreshTokenGrantRequest(clientRegistration, accessToken, refreshToken);
-        OAuth2AccessTokenResponse response = new RestClientRefreshTokenTokenResponseClient().getTokenResponse(refreshTokenGrantRequest);
+        OAuth2RefreshTokenGrantRequest refreshTokenGrantRequest = new OAuth2RefreshTokenGrantRequest(
+                clientRegistration, accessToken, refreshToken);
+        OAuth2AccessTokenResponse response = tokenResponseClient.getTokenResponse(refreshTokenGrantRequest);
         return (String) response.getAdditionalParameters().get("id_token");
     }
 }
