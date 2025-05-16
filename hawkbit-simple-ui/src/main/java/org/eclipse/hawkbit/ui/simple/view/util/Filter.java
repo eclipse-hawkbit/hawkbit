@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -46,25 +47,25 @@ public class Filter extends Div {
         filtersDiv.add(primaryRsql.components());
         filtersDiv.addClassName(LumoUtility.Gap.SMALL);
 
-        final Button searchBtn = Utils.tooltip(new Button(VaadinIcon.REFRESH.create()), "Search");
+        final Button searchBtn = Utils.tooltip(new Button(VaadinIcon.SEARCH.create()), "Search (Enter)");
         searchBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         searchBtn.addClickListener(e -> changeListener.accept(rsql.filter()));
-        final Button resetBtn = Utils.tooltip(new Button(VaadinIcon.ERASER.create()), "Reset");
+        searchBtn.addClickShortcut(Key.ENTER);
+        final Button resetBtn = Utils.tooltip(new Button(VaadinIcon.REFRESH.create()), "Reset");
         resetBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         resetBtn.addClickListener(e -> {
             clear(layout.getChildren());
             changeListener.accept(primaryRsql.filter());
         });
 
-        final Div actionDiv = new Div();
-        actionDiv.add(searchBtn, resetBtn);
-        actionDiv.addClassNames(LumoUtility.Gap.SMALL);
+        final HorizontalLayout actions = new HorizontalLayout(searchBtn, resetBtn);
+        actions.addClassNames(LumoUtility.Gap.SMALL);
 
         layout.setPadding(true);
         layout.setAlignItems(FlexComponent.Alignment.BASELINE);
         layout.add(filtersDiv);
+        layout.add(actions);
 
-        layout.add(actionDiv);
         if (secondaryOptionalRsql != null) {
             final Button toggleBtn = Utils.tooltip(new Button(VaadinIcon.FLIP_V.create()), "Toggle Search");
             toggleBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
