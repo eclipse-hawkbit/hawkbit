@@ -296,8 +296,9 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         // see org.eclipse.persistence.internal.jpa.querydef.FromImpl implementation for more details when root.get creates a join
         final Attribute<?, ?> attribute = root.getModel().getAttribute(fieldNameSplit);
         if (!attribute.isCollection()) {
-            // it is a SingularAttribute and not join if it is of basic persistent type
-            if (((SingularAttribute<?, ?>) attribute).getType().getPersistenceType().equals(Type.PersistenceType.BASIC)) {
+            // it is a SingularAttribute and not join if it is of basic or entity persistence type
+            final Type.PersistenceType persistenceType = ((SingularAttribute<?, ?>) attribute).getType().getPersistenceType();
+            if (persistenceType.equals(Type.PersistenceType.BASIC) || persistenceType.equals(Type.PersistenceType.ENTITY)) {
                 return root.get(fieldNameSplit);
             }
         } // if a collection - it is a join

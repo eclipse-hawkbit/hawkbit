@@ -41,6 +41,7 @@ class RSQLToSQLTest {
 
     private RSQLToSQL rsqlToSQL;
 
+
     @Test
     void print() {
         print(JpaTarget.class, TargetFields.class, "tag==tag1 and tag==tag2");
@@ -51,18 +52,23 @@ class RSQLToSQLTest {
 
     @Test
     void printSimple() {
+        // simple - column in table
         print(JpaTarget.class, TargetFields.class, "controllerId==ctrlr1");
-        print(JpaTarget.class, TargetFields.class, "targettype.key==type1");
+        // reference - fk to a table
+        print(JpaTarget.class, TargetFields.class, "assignedds.name==x and assignedds.version==y");
+        // list of non-simple (with mapping table)
         print(JpaTarget.class, TargetFields.class, "tag==tag1");
-        print(JpaTarget.class, TargetFields.class, "metadata.key1==value1");
+        // list (map table that refers main)
         print(JpaTarget.class, TargetFields.class, "attribute.key1==value1");
+        // map (map table that refers main)
+        print(JpaTarget.class, TargetFields.class, "metadata.key1==value1");
     }
 
     @Test
     void printAnd() {
         print(JpaTarget.class, TargetFields.class, "controllerId==ctrlr1 and controllerId==ctrlr2");
         print(JpaTarget.class, TargetFields.class, "targettype.key==type1 and targettype.key==type2");
-        print(JpaTarget.class, TargetFields.class, "tag==tag1 and tag==tag2 and tag=tag3");
+        print(JpaTarget.class, TargetFields.class, "tag==tag1 and tag==tag2 and tag==tag3");
         print(JpaTarget.class, TargetFields.class, "metadata.key1==value1 and metadata.key2==value2");
         print(JpaTarget.class, TargetFields.class, "attribute.key1==value1 and attribute.key2==value2");
     }
