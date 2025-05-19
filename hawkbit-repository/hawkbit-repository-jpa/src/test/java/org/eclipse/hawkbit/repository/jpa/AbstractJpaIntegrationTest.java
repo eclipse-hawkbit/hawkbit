@@ -303,7 +303,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     }
 
     protected Set<TargetTag> getTargetTags(final String controllerId) {
-        return targetManagement.getTagsByControllerId(controllerId);
+        return targetManagement.getTags(controllerId);
     }
 
     protected JpaRolloutGroup refresh(final RolloutGroup group) {

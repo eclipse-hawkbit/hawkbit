@@ -35,7 +35,6 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
@@ -434,8 +433,7 @@ public interface TargetManagement {
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Page<Target> findByInstalledDistributionSetAndRsql(@NotNull Pageable pageReq, long distributionSetId,
-            @NotNull String rsqlParam);
+    Page<Target> findByInstalledDistributionSetAndRsql(@NotNull Pageable pageReq, long distributionSetId, @NotNull String rsqlParam);
 
     /**
      * Retrieves the {@link Target} which have a certain {@link TargetUpdateStatus}.
@@ -510,6 +508,19 @@ public interface TargetManagement {
     Page<Target> findByRsqlAndTag(@NotNull Pageable pageable, @NotNull String rsqlParam, long tagId);
 
     /**
+     * Verify if a target matches a specific target filter query, does not have a
+     * specific DS already assigned and is compatible with it.
+     *
+     * @param controllerId of the {@link org.eclipse.hawkbit.repository.model.Target} to check
+     * @param distributionSetId of the {@link org.eclipse.hawkbit.repository.model.DistributionSet} to consider
+     * @param targetFilterQuery to execute
+     * @return true if it matches
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    boolean isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(
+            @NotNull String controllerId, long distributionSetId, @NotNull String targetFilterQuery);
+
+    /**
      * Initiates {@link TargetType} assignment to given {@link Target}s. If some
      * targets in the list have the {@link TargetType} not yet assigned, they will
      * get assigned. If all targets are already of that type, there will be no
@@ -525,12 +536,10 @@ public interface TargetManagement {
     TargetTypeAssignmentResult assignType(@NotEmpty Collection<String> controllerIds, @NotNull Long typeId);
 
     /**
-     * Initiates {@link TargetType} un-assignment to given {@link Target}s. The type
-     * of the targets will be set to {@code null}
+     * Initiates {@link TargetType} un-assignment to given {@link Target}s. The type of the targets will be set to {@code null}
      *
      * @param controllerIds to remove the type from
-     * @return {@link TargetTypeAssignmentResult} with all metadata of the
-     *         assignment outcome.
+     * @return {@link TargetTypeAssignmentResult} with all metadata of the assignment outcome.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTypeAssignmentResult unassignType(@NotEmpty Collection<String> controllerIds);
@@ -632,6 +641,26 @@ public interface TargetManagement {
     List<Target> get(@NotNull Collection<Long> ids);
 
     /**
+     * Verifies that {@link Target} with given controller ID exists in the
+     * repository.
+     *
+     * @param controllerId of target
+     * @return {@code true} if target with given ID exists
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    boolean existsByControllerId(@NotEmpty String controllerId);
+
+    /**
+     * Finds a single target tags its id.
+     *
+     * @param controllerId of the {@link Target}
+     * @return the found Tag set
+     * @throws EntityNotFoundException if target with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Set<TargetTag> getTags(@NotEmpty String controllerId);
+
+    /**
      * Get controller attributes of given {@link Target}.
      *
      * @param controllerId of the target
@@ -671,55 +700,36 @@ public interface TargetManagement {
     Page<Target> findByControllerAttributesRequested(@NotNull Pageable pageReq);
 
     /**
-     * Verifies that {@link Target} with given controller ID exists in the
-     * repository.
-     *
-     * @param controllerId of target
-     * @return {@code true} if target with given ID exists
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    boolean existsByControllerId(@NotEmpty String controllerId);
-
-    /**
-     * Verify if a target matches a specific target filter query, does not have a
-     * specific DS already assigned and is compatible with it.
-     *
-     * @param controllerId of the {@link org.eclipse.hawkbit.repository.model.Target} to
-     *         check
-     * @param distributionSetId of the
-     *         {@link org.eclipse.hawkbit.repository.model.DistributionSet} to
-     *         consider
-     * @param targetFilterQuery to execute
-     * @return true if it matches
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    boolean isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(@NotNull String controllerId,
-            long distributionSetId, @NotNull String targetFilterQuery);
-
-    /**
-     * Finds a single target tags its id.
-     *
-     * @param controllerId of the {@link Target}
-     * @return the found Tag set
-     * @throws EntityNotFoundException if target with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Set<TargetTag> getTagsByControllerId(@NotEmpty String controllerId);
-
-    /**
-     * Creates a list of target meta data entries.
+     * Creates a list of target meta-data entries.
      *
      * @param controllerId {@link Target} controller id the metadata has to be created for
-     * @param metadata the meta data entries to create or update
-     * @return the updated or created target metadata entries
+     * @param metadata the meta-data entries to create or update
      * @throws EntityNotFoundException if given target does not exist
-     * @throws EntityAlreadyExistsException in case one of the metadata entry already exists for the specific
-     *         key
-     * @throws AssignmentQuotaExceededException if the maximum number of {@link MetaData} entries is exceeded for
-     *         the addressed {@link Target}
+     * @throws EntityAlreadyExistsException in case one of the metadata entry already exists for the specific key
+     * @throws AssignmentQuotaExceededException if the maximum number of {@link MetaData} entries is exceeded for the addressed {@link Target}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    List<TargetMetadata> createMetaData(@NotEmpty String controllerId, @NotEmpty Collection<MetaData> metadata);
+    void createMetadata(@NotEmpty String controllerId, @NotEmpty Map<String, String> metadata);
+
+    /**
+     * Finds a single target meta-data by its id.
+     *
+     * @param controllerId of the {@link Target}
+     * @return the found target metadata
+     * @throws EntityNotFoundException if target with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Map<String, String> getMetadata(@NotEmpty String controllerId);
+
+    /**
+     * Updates a target meta-data value if corresponding entry exists.
+     *
+     * @param controllerId {@link Target} controller id of the metadata entry to be updated
+     * @param metadata meta data entry to be updated
+     * @throws EntityNotFoundException in case the metadata entry does not exist and cannot be updated
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    void updateMetadata(@NotEmpty String controllerId, @NotNull Map<String, String> metadata);
 
     /**
      * Deletes a target meta data entry.
@@ -729,64 +739,5 @@ public interface TargetManagement {
      * @throws EntityNotFoundException if given target does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    void deleteMetaData(@NotEmpty String controllerId, @NotEmpty String key);
-
-    /**
-     * Finds all meta data by the given target id.
-     *
-     * @param pageable the page request to page the result
-     * @param controllerId the controller id to retrieve the metadata from
-     * @return a paged result of all meta data entries for a given target id
-     * @throws EntityNotFoundException if target with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<TargetMetadata> findMetaDataByControllerId(@NotNull Pageable pageable, @NotEmpty String controllerId);
-
-    /**
-     * Counts all meta data by the given target id.
-     *
-     * @param controllerId the controller id to retrieve the meta data from
-     * @return count of all meta data entries for a given target id
-     * @throws EntityNotFoundException if target with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    long countMetaDataByControllerId(@NotEmpty String controllerId);
-
-    /**
-     * Finds all metadata by the given target id and query.
-     *
-     * @param pageable the page request to page the result
-     * @param controllerId the controller id to retrieve the metadata from
-     * @param rsqlParam rsql query string
-     * @return a paged result of all meta data entries for a given target id
-     * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
-     *         given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
-     * @throws EntityNotFoundException if target with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<TargetMetadata> findMetaDataByControllerIdAndRsql(@NotNull Pageable pageable, @NotEmpty String controllerId,
-            @NotNull String rsqlParam);
-
-    /**
-     * Finds a single target meta data by its id.
-     *
-     * @param controllerId of the {@link Target}
-     * @param key of the meta data element
-     * @return the found TargetMetadata
-     * @throws EntityNotFoundException if target with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<TargetMetadata> getMetaDataByControllerId(@NotEmpty String controllerId, @NotEmpty String key);
-
-    /**
-     * Updates a target meta data value if corresponding entry exists.
-     *
-     * @param controllerId {@link Target} controller id of the metadata entry to be updated
-     * @param metadata meta data entry to be updated
-     * @return the updated meta data entry
-     * @throws EntityNotFoundException in case the metadata entry does not exist and cannot be updated
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    TargetMetadata updateMetadata(@NotEmpty String controllerId, @NotNull MetaData metadata);
+    boolean deleteMetadata(@NotEmpty String controllerId, @NotEmpty String key);
 }

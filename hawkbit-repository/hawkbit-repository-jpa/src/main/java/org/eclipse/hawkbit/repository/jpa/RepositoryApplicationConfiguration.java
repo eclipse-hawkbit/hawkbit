@@ -132,7 +132,6 @@ import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleMetadataRepos
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleTypeRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.TargetMetadataRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
@@ -622,7 +621,7 @@ public class RepositoryApplicationConfiguration {
     @Bean
     @ConditionalOnMissingBean
     TargetManagement targetManagement(final EntityManager entityManager, final QuotaManagement quotaManagement,
-            final TargetRepository targetRepository, final TargetMetadataRepository targetMetadataRepository,
+            final TargetRepository targetRepository,
             final RolloutGroupRepository rolloutGroupRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
             final TargetTypeRepository targetTypeRepository, final TargetTagRepository targetTagRepository,
@@ -630,7 +629,7 @@ public class RepositoryApplicationConfiguration {
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final JpaProperties properties, final DistributionSetManagement distributionSetManagement) {
         return new JpaTargetManagement(entityManager, distributionSetManagement, quotaManagement, targetRepository,
-                targetTypeRepository, targetMetadataRepository, rolloutGroupRepository, targetFilterQueryRepository,
+                targetTypeRepository, rolloutGroupRepository, targetFilterQueryRepository,
                 targetTagRepository, eventPublisherHolder, tenantAware, virtualPropertyReplacer,
                 properties.getDatabase());
     }

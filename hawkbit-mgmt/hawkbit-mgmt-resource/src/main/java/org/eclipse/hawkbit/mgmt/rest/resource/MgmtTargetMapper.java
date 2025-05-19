@@ -18,7 +18,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -46,11 +48,9 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
@@ -79,10 +79,8 @@ public final class MgmtTargetMapper {
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
                 ActionFields.ID.getJpaEntityFieldName() + ":" + SortDirection.DESC, null))
                 .withRel(MgmtRestConstants.TARGET_V1_ACTIONS).expand());
-        response.add(linkTo(methodOn(MgmtTargetRestApi.class).getMetadata(response.getControllerId(),
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata")
-                .expand());
+        response.add(linkTo(methodOn(MgmtTargetRestApi.class).getMetadata(response.getControllerId()))
+                .withRel("metadata").expand());
         if (response.getTargetType() != null) {
             response.add(linkTo(methodOn(MgmtTargetTypeRestApi.class).getTargetType(response.getTargetType()))
                     .withRel(MgmtRestConstants.TARGET_V1_ASSIGNED_TARGET_TYPE).expand());
@@ -196,19 +194,14 @@ public final class MgmtTargetMapper {
                 .toList();
     }
 
-    static List<MetaData> fromRequestTargetMetadata(final List<MgmtMetadata> metadata,
-            final EntityFactory entityFactory) {
-        if (metadata == null) {
-            return Collections.emptyList();
-        }
-
-        return metadata.stream().map(
-                        metadataRest -> entityFactory.generateTargetMetadata(metadataRest.getKey(), metadataRest.getValue()))
-                .toList();
+    static Map<String, String> fromRequestMetadata(final List<MgmtMetadata> metadata) {
+        return metadata == null
+                ? Collections.emptyMap()
+                : metadata.stream().collect(Collectors.toMap(MgmtMetadata::getKey, MgmtMetadata::getValue));
     }
 
-    static List<MgmtActionStatus> toActionStatusRestResponse(final Collection<ActionStatus> actionStatus,
-            final DeploymentManagement deploymentManagement) {
+    static List<MgmtActionStatus> toActionStatusRestResponse(
+            final Collection<ActionStatus> actionStatus, final DeploymentManagement deploymentManagement) {
         if (actionStatus == null) {
             return Collections.emptyList();
         }
@@ -308,15 +301,15 @@ public final class MgmtTargetMapper {
         return actions.stream().map(action -> toResponse(targetId, action)).toList();
     }
 
-    static MgmtMetadata toResponseTargetMetadata(final TargetMetadata metadata) {
+    static MgmtMetadata toResponseMetadata(final String key, final String value) {
         final MgmtMetadata metadataRest = new MgmtMetadata();
-        metadataRest.setKey(metadata.getKey());
-        metadataRest.setValue(metadata.getValue());
+        metadataRest.setKey(key);
+        metadataRest.setValue(value);
         return metadataRest;
     }
 
-    static List<MgmtMetadata> toResponseTargetMetadata(final List<TargetMetadata> metadata) {
-        return metadata.stream().map(MgmtTargetMapper::toResponseTargetMetadata).toList();
+    static List<MgmtMetadata> toResponseMetadata(final Map<String, String> metadata) {
+        return metadata.entrySet().stream().map(e -> toResponseMetadata(e.getKey(), e.getValue())).toList();
     }
 
     private static void addPollStatus(final Target target, final MgmtTarget targetRest, final Function<Target, PollStatus> pollStatusResolver) {

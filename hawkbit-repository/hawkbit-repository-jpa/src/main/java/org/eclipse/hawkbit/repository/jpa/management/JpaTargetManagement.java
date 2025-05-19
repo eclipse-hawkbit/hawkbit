@@ -31,6 +31,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.MapJoin;
 import jakarta.persistence.criteria.Root;
+import jakarta.persistence.metamodel.MapAttribute;
 import jakarta.validation.constraints.NotEmpty;
 
 import org.apache.commons.collections4.ListUtils;
@@ -39,12 +40,10 @@ import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TargetMetadataFields;
 import org.eclipse.hawkbit.repository.TimestampCalculator;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
@@ -52,18 +51,13 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
-import org.eclipse.hawkbit.repository.jpa.model.TargetMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.TargetMetadataRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTypeRepository;
@@ -73,11 +67,9 @@ import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
@@ -109,7 +101,6 @@ public class JpaTargetManagement implements TargetManagement {
     private final QuotaManagement quotaManagement;
     private final TargetRepository targetRepository;
     private final TargetTypeRepository targetTypeRepository;
-    private final TargetMetadataRepository targetMetadataRepository;
     private final RolloutGroupRepository rolloutGroupRepository;
     private final TargetFilterQueryRepository targetFilterQueryRepository;
     private final TargetTagRepository targetTagRepository;
@@ -122,7 +113,6 @@ public class JpaTargetManagement implements TargetManagement {
     public JpaTargetManagement(final EntityManager entityManager,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
-            final TargetMetadataRepository targetMetadataRepository,
             final RolloutGroupRepository rolloutGroupRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
             final TargetTagRepository targetTagRepository, final EventPublisherHolder eventPublisherHolder,
@@ -133,7 +123,6 @@ public class JpaTargetManagement implements TargetManagement {
         this.quotaManagement = quotaManagement;
         this.targetRepository = targetRepository;
         this.targetTypeRepository = targetTypeRepository;
-        this.targetMetadataRepository = targetMetadataRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetTagRepository = targetTagRepository;
@@ -597,7 +586,7 @@ public class JpaTargetManagement implements TargetManagement {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
 
         targetRepository.getAccessController().ifPresent(acm ->
-            acm.assertOperationAllowed(AccessController.Operation.UPDATE, target));
+                acm.assertOperationAllowed(AccessController.Operation.UPDATE, target));
 
         final JpaTargetType targetType = getTargetTypeByIdAndThrowIfNotFound(targetTypeId);
         target.setTargetType(targetType);
@@ -636,57 +625,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Map<String, String> getControllerAttributes(final String controllerId) {
-        getByControllerIdAndThrowIfNotFound(controllerId);
-
-        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
-
-        final Root<JpaTarget> targetRoot = query.from(JpaTarget.class);
-        query.where(cb.equal(targetRoot.get(JpaTarget_.controllerId), controllerId));
-
-        final MapJoin<JpaTarget, String, String> attributes = targetRoot.join(JpaTarget_.controllerAttributes);
-        query.multiselect(attributes.key(), attributes.value());
-        query.orderBy(cb.asc(attributes.key()));
-
-        final List<Object[]> attr = entityManager.createQuery(query).getResultList();
-
-        return attr.stream().collect(Collectors.toMap(entry -> (String) entry[0], entry -> (String) entry[1],
-                (v1, v2) -> v1, LinkedHashMap::new));
-    }
-
-    @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void requestControllerAttributes(final String controllerId) {
-        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
-        targetRepository.getAccessController()
-                .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, target));
-        target.setRequestControllerAttributes(true);
-        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() ->
-                eventPublisherHolder.getEventPublisher()
-                        .publishEvent(new TargetAttributesRequestedEvent(
-                                tenantAware.getCurrentTenant(), target.getId(), target.getControllerId(),
-                                target.getAddress() != null ? target.getAddress().toString() : null,
-                                JpaTarget.class, eventPublisherHolder.getApplicationId())));
-    }
-
-    @Override
-    public boolean isControllerAttributesRequested(final String controllerId) {
-        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
-
-        return target.isRequestControllerAttributes();
-    }
-
-    @Override
-    public Page<Target> findByControllerAttributesRequested(final Pageable pageReq) {
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.hasRequestControllerAttributesTrue()),
-                pageReq
-        );
-    }
-
-    @Override
     public boolean existsByControllerId(final String controllerId) {
         return targetRepository.exists(TargetSpecifications.hasControllerId(controllerId));
     }
@@ -710,115 +648,122 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Set<TargetTag> getTagsByControllerId(@NotEmpty String controllerId) {
+    public Set<TargetTag> getTags(@NotEmpty String controllerId) {
         // the method has PreAuthorized by itself
-        return ((JpaTarget)getWithTags(controllerId)).getTags();
+        return ((JpaTarget) getWithTags(controllerId)).getTags();
+    }
+
+    @Override
+    public Map<String, String> getControllerAttributes(final String controllerId) {
+        return getMap(controllerId, JpaTarget_.controllerAttributes);
     }
 
     @Override
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<TargetMetadata> createMetaData(final String controllerId, final Collection<MetaData> md) {
+    public void requestControllerAttributes(final String controllerId) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
-
-        md.forEach(meta -> checkAndThrowIfTargetMetadataAlreadyExists(
-                new TargetMetadataCompositeKey(target.getId(), meta.getKey())));
-
-        assertMetaDataQuota(target.getId(), md.size());
-
-        final JpaTarget updatedTarget = JpaManagementHelper.touch(entityManager, targetRepository, target);
-
-        final List<TargetMetadata> createdMetadata = md.stream()
-                .map(meta -> targetMetadataRepository.save(new JpaTargetMetadata(meta.getKey(), meta.getValue(), updatedTarget)))
-                .collect(Collectors.toUnmodifiableList());
-
-        // TargetUpdatedEvent is not sent within the touch() method due to the
-        // "lastModifiedAt" field being ignored in JpaTarget
-        eventPublisherHolder.getEventPublisher().publishEvent(new TargetUpdatedEvent(updatedTarget, eventPublisherHolder.getApplicationId()));
-
-        return createdMetadata;
-    }
-
-    @Override
-    @Transactional
-    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
-            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void deleteMetaData(final String controllerId, final String key) {
-        final JpaTargetMetadata metadata = (JpaTargetMetadata) getMetaDataByControllerId(controllerId, key)
-                .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, controllerId, key));
-
-        final JpaTarget target = JpaManagementHelper.touch(
-                entityManager, targetRepository, getByControllerIdAndThrowIfNotFound(controllerId));
-
         targetRepository.getAccessController()
                 .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, target));
-
-        targetMetadataRepository.deleteById(metadata.getId());
-        // target update event is set to ignore "lastModifiedAt" field, so it is
-        // not send automatically within the touch() method
-        eventPublisherHolder.getEventPublisher()
-                .publishEvent(new TargetUpdatedEvent(target, eventPublisherHolder.getApplicationId()));
+        target.setRequestControllerAttributes(true);
+        AfterTransactionCommitExecutorHolder.getInstance().getAfterCommit().afterCommit(() ->
+                eventPublisherHolder.getEventPublisher()
+                        .publishEvent(new TargetAttributesRequestedEvent(
+                                tenantAware.getCurrentTenant(), target.getId(), target.getControllerId(),
+                                target.getAddress() != null ? target.getAddress().toString() : null,
+                                JpaTarget.class, eventPublisherHolder.getApplicationId())));
     }
 
     @Override
-    public Page<TargetMetadata> findMetaDataByControllerId(final Pageable pageable, final String controllerId) {
-        final Long id = getByControllerIdAndThrowIfNotFound(controllerId).getId();
-
-        return JpaManagementHelper.findAllWithCountBySpec(targetMetadataRepository, Collections.singletonList(metadataByTargetIdSpec(id)),
-                pageable
-        );
+    public boolean isControllerAttributesRequested(final String controllerId) {
+        return getByControllerIdAndThrowIfNotFound(controllerId).isRequestControllerAttributes();
     }
 
     @Override
-    public long countMetaDataByControllerId(@NotEmpty final String controllerId) {
-        final Long targetId = getByControllerIdAndThrowIfNotFound(controllerId).getId();
-
-        return JpaManagementHelper.countBySpec(targetMetadataRepository,
-                Collections.singletonList(metadataByTargetIdSpec(targetId)));
-    }
-
-    @Override
-    public Page<TargetMetadata> findMetaDataByControllerIdAndRsql(final Pageable pageable, final String controllerId,
-            final String rsqlParam) {
-        final Long targetId = getByControllerIdAndThrowIfNotFound(controllerId).getId();
-
-        final List<Specification<JpaTargetMetadata>> specList = Arrays.asList(RSQLUtility
-                        .buildRsqlSpecification(rsqlParam, TargetMetadataFields.class, virtualPropertyReplacer, database),
-                metadataByTargetIdSpec(targetId));
-
-        return JpaManagementHelper.findAllWithCountBySpec(targetMetadataRepository, specList, pageable);
-    }
-
-    @Override
-    public Optional<TargetMetadata> getMetaDataByControllerId(final String controllerId, final String key) {
-        final Long targetId = getByControllerIdAndThrowIfNotFound(controllerId).getId();
-
-        return targetMetadataRepository.findById(new TargetMetadataCompositeKey(targetId, key)).map(t -> t);
+    public Page<Target> findByControllerAttributesRequested(final Pageable pageReq) {
+        return JpaManagementHelper.findAllWithCountBySpec(
+                targetRepository,
+                List.of(TargetSpecifications.hasRequestControllerAttributesTrue()),
+                pageReq);
     }
 
     @Override
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public TargetMetadata updateMetadata(final String controllerId, final MetaData md) {
+    public void createMetadata(final String controllerId, final Map<String, String> md) {
+        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
 
-        // check if exists otherwise throw entity not found exception
-        final JpaTargetMetadata updatedMetadata = (JpaTargetMetadata) getMetaDataByControllerId(controllerId,
-                md.getKey())
-                .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, controllerId, md.getKey()));
-        updatedMetadata.setValue(md.getValue());
-        // touch it to update the lock revision because we are modifying the
-        // target indirectly
-        final JpaTarget target = JpaManagementHelper.touch(entityManager, targetRepository,
-                getByControllerIdAndThrowIfNotFound(controllerId));
+        // get the modifiable metadata map
+        final Map<String, String> metadata = target.getMetadata();
+        md.keySet().forEach(key -> {
+            if (metadata.containsKey(key)) {
+                throw new EntityAlreadyExistsException("Metadata entry with key '" + key + "' already exists");
+            }
+        });
+        metadata.putAll(md);
 
-        final JpaTargetMetadata metadata = targetMetadataRepository.save(updatedMetadata);
-        // target update event is set to ignore "lastModifiedAt" field, so it is
-        // not send automatically within the touch() method
-        eventPublisherHolder.getEventPublisher()
-                .publishEvent(new TargetUpdatedEvent(target, eventPublisherHolder.getApplicationId()));
-        return metadata;
+        assertMetadataQuota(target.getId(), metadata.size());
+
+        targetRepository.save(target);
+    }
+
+    @Override
+    public Map<String, String> getMetadata(final String controllerId) {
+        return getMap(controllerId, JpaTarget_.metadata);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void updateMetadata(final String controllerId, final Map<String, String> md) {
+        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
+
+        // get the modifiable metadata map
+        final Map<String, String> metadata = target.getMetadata();
+        metadata.putAll(md);
+        assertMetadataQuota(target.getId(), metadata.size());
+
+        targetRepository.save(target);
+    }
+
+    @Override
+    @Transactional
+    @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
+            backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public boolean deleteMetadata(final String controllerId, final String key) {
+        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
+
+        // get the modifiable metadata map
+        final Map<String, String> metadata = target.getMetadata();
+        if (metadata.remove(key) == null) {
+            return false;
+        } else {
+            targetRepository.save(target);
+            return true;
+        }
+    }
+
+    private Map<String, String> getMap(final String controllerId, final MapAttribute<JpaTarget, String, String> mapAttribute) {
+        getByControllerIdAndThrowIfNotFound(controllerId);
+
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
+
+        final Root<JpaTarget> targetRoot = query.from(JpaTarget.class);
+        query.where(cb.equal(targetRoot.get(JpaTarget_.controllerId), controllerId));
+
+        final MapJoin<JpaTarget, String, String> mapJoin = targetRoot.join(mapAttribute);
+        query.multiselect(mapJoin.key(), mapJoin.value());
+        query.orderBy(cb.asc(mapJoin.key()));
+
+        return entityManager
+                .createQuery(query)
+                .getResultList()
+                .stream()
+                .collect(Collectors.toMap(entry -> (String) entry[0], entry -> (String) entry[1], (v1, v2) -> v1, LinkedHashMap::new));
     }
 
     private static boolean hasTagsFilterActive(final FilterParams filterParams) {
@@ -851,20 +796,9 @@ public class JpaTargetManagement implements TargetManagement {
         return targetTypeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(TargetType.class, id));
     }
 
-    private void checkAndThrowIfTargetMetadataAlreadyExists(final TargetMetadataCompositeKey metadataId) {
-        if (targetMetadataRepository.existsById(metadataId)) {
-            throw new EntityAlreadyExistsException(
-                    "Metadata entry with key '" + metadataId.getKey() + "' already exists");
-        }
-    }
-
-    private void assertMetaDataQuota(final Long targetId, final int requested) {
-        QuotaHelper.assertAssignmentQuota(targetId, requested, quotaManagement.getMaxMetaDataEntriesPerTarget(),
-                TargetMetadata.class, Target.class, targetMetadataRepository::countByTargetId);
-    }
-
-    private Specification<JpaTargetMetadata> metadataByTargetIdSpec(final Long targetId) {
-        return (root, query, cb) -> cb.equal(root.get(JpaTargetMetadata_.target).get(AbstractJpaBaseEntity_.id), targetId);
+    private void assertMetadataQuota(final Long targetId, final int requested) {
+        final int limit = quotaManagement.getMaxMetaDataEntriesPerTarget();
+        QuotaHelper.assertAssignmentQuota(targetId, requested, limit, "Metadata", Target.class.getSimpleName(), null);
     }
 
     private List<Specification<JpaTarget>> buildSpecificationList(final FilterParams filterParams) {

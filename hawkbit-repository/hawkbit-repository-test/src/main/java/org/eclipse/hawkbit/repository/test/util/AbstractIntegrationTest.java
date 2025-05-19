@@ -424,10 +424,6 @@ public abstract class AbstractIntegrationTest {
         return distributionSetManagement.putMetaData(dsId, md);
     }
 
-    protected void createTargetMetadata(final String controllerId, final MetaData md) {
-        createTargetMetadata(controllerId, Collections.singletonList(md));
-    }
-
     protected Long getOsModule(final DistributionSet ds) {
         return ds.findFirstModuleByType(osType).orElseThrow(NoSuchElementException::new).getId();
     }
@@ -503,9 +499,5 @@ public abstract class AbstractIntegrationTest {
         } catch (final IOException e) {
             throw new ArtifactStoreException("Cannot create temp file", e);
         }
-    }
-
-    private void createTargetMetadata(final String controllerId, final List<MetaData> md) {
-        targetManagement.createMetaData(controllerId, md);
     }
 }

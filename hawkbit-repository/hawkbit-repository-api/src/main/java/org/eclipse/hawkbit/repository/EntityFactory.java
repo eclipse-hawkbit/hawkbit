@@ -55,16 +55,6 @@ public interface EntityFactory {
             @Size(max = MetaData.VALUE_MAX_SIZE) String value);
 
     /**
-     * Generates an {@link MetaData} element for target without persisting it.
-     *
-     * @param key {@link MetaData#getKey()}
-     * @param value {@link MetaData#getValue()}
-     * @return {@link MetaData} object
-     */
-    MetaData generateTargetMetadata(@Size(min = 1, max = MetaData.KEY_MAX_SIZE) @NotNull String key,
-            @Size(max = MetaData.VALUE_MAX_SIZE) String value);
-
-    /**
      * @return {@link SoftwareModuleMetadataBuilder} object
      */
     SoftwareModuleMetadataBuilder softwareModuleMetadata();

@@ -57,7 +57,6 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
@@ -421,57 +420,40 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<List<MgmtTag>> getTags(final String targetId) {
-        final Set<TargetTag> tags = targetManagement.getTagsByControllerId(targetId);
+        final Set<TargetTag> tags = targetManagement.getTags(targetId);
         return ResponseEntity.ok(MgmtTagMapper.toResponse(tags == null ? Collections.emptyList() : tags.stream().toList()));
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtMetadata>> getMetadata(
-            final String targetId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeDistributionSetMetadataSortParam(sortParam);
+    public void createMetadata(final String targetId, final List<MgmtMetadata> metadataRest) {
+        targetManagement.createMetadata(targetId, MgmtTargetMapper.fromRequestMetadata(metadataRest));
+    }
 
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Page<TargetMetadata> metaDataPage;
-
-        if (rsqlParam != null) {
-            metaDataPage = targetManagement.findMetaDataByControllerIdAndRsql(pageable, targetId, rsqlParam);
-        } else {
-            metaDataPage = targetManagement.findMetaDataByControllerId(pageable, targetId);
-        }
-
-        return ResponseEntity.ok(new PagedList<>(MgmtTargetMapper.toResponseTargetMetadata(
-                metaDataPage.getContent()), metaDataPage.getTotalElements()));
+    @Override
+    public ResponseEntity<PagedList<MgmtMetadata>> getMetadata(final String targetId) {
+        final Map<String, String> metadata = targetManagement.getMetadata(targetId);
+        return ResponseEntity.ok(new PagedList<>(MgmtTargetMapper.toResponseMetadata(metadata), metadata.size()));
     }
 
     @Override
     public ResponseEntity<MgmtMetadata> getMetadataValue(final String targetId, final String metadataKey) {
-        final TargetMetadata findOne = targetManagement.getMetaDataByControllerId(targetId, metadataKey)
-                .orElseThrow(() -> new EntityNotFoundException(TargetMetadata.class, targetId, metadataKey));
-        return ResponseEntity.ok(MgmtTargetMapper.toResponseTargetMetadata(findOne));
+        final String metadataValue = targetManagement.getMetadata(targetId).get(metadataKey);
+        if (metadataValue == null) {
+            throw new EntityNotFoundException("Target metadata", targetId + ":" + metadataKey);
+        }
+        return ResponseEntity.ok(MgmtTargetMapper.toResponseMetadata(metadataKey, metadataValue));
     }
 
     @Override
-    public ResponseEntity<MgmtMetadata> updateMetadata(final String targetId, final String metadataKey, final MgmtMetadataBodyPut metadata) {
-        final TargetMetadata updated = targetManagement.updateMetadata(targetId,
-                entityFactory.generateTargetMetadata(metadataKey, metadata.getValue()));
-        return ResponseEntity.ok(MgmtTargetMapper.toResponseTargetMetadata(updated));
+    public void updateMetadata(final String targetId, final String metadataKey, final MgmtMetadataBodyPut metadata) {
+        targetManagement.updateMetadata(targetId, Map.of(metadataKey, metadata.getValue()));
     }
 
     @Override
     @AuditLog(entity = "Target", type = AuditLog.Type.DELETE, description = "Delete Target Metadata")
     public ResponseEntity<Void> deleteMetadata(final String targetId, final String metadataKey) {
-        targetManagement.deleteMetaData(targetId, metadataKey);
-        return ResponseEntity.ok().build();
-    }
-
-    @Override
-    public ResponseEntity<List<MgmtMetadata>> createMetadata(final String targetId, final List<MgmtMetadata> metadataRest) {
-        final List<TargetMetadata> created = targetManagement.createMetaData(targetId,
-                MgmtTargetMapper.fromRequestTargetMetadata(metadataRest, entityFactory));
-        return new ResponseEntity<>(MgmtTargetMapper.toResponseTargetMetadata(created), HttpStatus.CREATED);
+        final boolean foundAndDeleted = targetManagement.deleteMetadata(targetId, metadataKey);
+        return (foundAndDeleted ? ResponseEntity.ok() : ResponseEntity.notFound()).build();
     }
 
     @Override

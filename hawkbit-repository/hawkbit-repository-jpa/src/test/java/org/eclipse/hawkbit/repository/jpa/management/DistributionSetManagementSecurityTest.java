@@ -68,7 +68,7 @@ class DistributionSetManagementSecurityTest
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void createMetaDataPermissionsCheck() {
         assertPermissions(
-                () -> distributionSetManagement.putMetaData(1L, List.of(entityFactory.generateTargetMetadata("key", "value"))),
+                () -> distributionSetManagement.putMetaData(1L, List.of(entityFactory.generateDsMetadata("key", "value"))),
                 List.of(SpPermission.UPDATE_REPOSITORY));
     }
 
