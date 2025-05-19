@@ -43,6 +43,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -65,6 +66,7 @@ import org.eclipse.hawkbit.ui.simple.view.util.Filter;
 import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.simple.view.util.TableView;
 import org.eclipse.hawkbit.ui.simple.view.util.Utils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import java.util.stream.Collectors;
 
@@ -92,7 +94,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                         grid.addColumn(MgmtTarget::getTargetTypeName).setHeader(Constants.TYPE).setAutoWidth(true);
 
                         grid.setItemDetailsRenderer(new ComponentRenderer<>(
-                                () -> new TargetDetails(hawkbitClient), TargetDetails::setItem));
+                                () -> new TargetDetailedView(hawkbitClient), TargetDetailedView::setItem));
                     }
                 },
                 (query, filter) -> hawkbitClient.getTargetRestApi()
@@ -298,6 +300,25 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
     }
 
+    private static class TargetDetailedView extends TabSheet {
+
+        private final TargetDetails targetDetails;
+        private final TargetAssignedInstalled targetAssignedInstalled;
+
+        private TargetDetailedView(HawkbitMgmtClient hawkbitClient) {
+            targetDetails = new TargetDetails(hawkbitClient);
+            targetAssignedInstalled = new TargetAssignedInstalled(hawkbitClient);
+            setWidthFull();
+            add("Details", targetDetails);
+            add("Assigned / Installed", targetAssignedInstalled);
+        }
+
+        private void setItem(final MgmtTarget target) {
+            this.targetDetails.setItem(target);
+            this.targetAssignedInstalled.setItem(target);
+        }
+    }
+
     private static class TargetDetails extends FormLayout {
 
         private final transient HawkbitMgmtClient hawkbitClient;
@@ -322,7 +343,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                         add(field);
                     });
 
-            setResponsiveSteps(new ResponsiveStep("0", 2));
+            setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
             setColspan(description, 2);
         }
 
@@ -340,6 +361,42 @@ public class TargetView extends TableView<MgmtTarget, String> {
             } else {
                 targetAttributes.setValue("Error occurred fetching attributes from server: " + response.getStatusCode());
             }
+        }
+    }
+
+    private static class TargetAssignedInstalled extends FormLayout {
+
+        private final transient HawkbitMgmtClient hawkbitClient;
+        private final TextArea assigned = new TextArea("Assigned Distribution Set");
+        private final TextArea installed = new TextArea("Installed Distribution Set");
+
+        private TargetAssignedInstalled(HawkbitMgmtClient hawkbitClient) {
+            this.hawkbitClient = hawkbitClient;
+            assigned.setReadOnly(true);
+            installed.setReadOnly(true);
+            assigned.setWidthFull();
+            installed.setWidthFull();
+            add(assigned, installed);
+            setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
+        }
+
+        private void setItem(final MgmtTarget target) {
+            Optional.ofNullable(hawkbitClient.getTargetRestApi().getInstalledDistributionSet(target.getControllerId()))
+                    .map(ResponseEntity<MgmtDistributionSet>::getBody)
+                    .ifPresent(value -> {
+                        installed.setValue("Name : " + value.getName() + "\n" +
+                                "Version : " + value.getVersion() + "\n" +
+                                value.getModules().stream().map(module -> module.getTypeName() + ": " + module.getVersion())
+                                        .collect(Collectors.joining("\n")));
+                    });
+            Optional.ofNullable(hawkbitClient.getTargetRestApi().getAssignedDistributionSet(target.getControllerId()))
+                    .map(ResponseEntity<MgmtDistributionSet>::getBody)
+                    .ifPresent(value -> {
+                        assigned.setValue("Name : " + value.getName() + "\n" +
+                                "Version : " + value.getVersion() + "\n" +
+                                value.getModules().stream().map(module -> module.getTypeName() + ": " + module.getVersion())
+                                        .collect(Collectors.joining("\n")));
+                    });
         }
     }
 
