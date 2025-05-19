@@ -23,9 +23,9 @@ public interface FieldValueConverter<T extends Enum<T>> {
     /**
      * Converts the given {@code value} into the representation to build ageneric query.
      *
-     * @param enumValue the enum to build the value for
+     * @param enumValue the enum value to build the value for
      * @param value the value in string representation
-     * @return the converted object or {@code null} if conversation fails, if given enum does not need to be converted the
+     * @return the converted object if conversion is applicable, or if the given enum value does not need to be converted the
      *         unmodified {@code value} is returned.
      * @throws IllegalArgumentException if the value is not supported
      */
