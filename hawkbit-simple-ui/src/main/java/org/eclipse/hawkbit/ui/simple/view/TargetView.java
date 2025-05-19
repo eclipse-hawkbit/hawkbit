@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.ui.simple.view;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -23,6 +24,10 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Input;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.shared.Registration;
 import jakarta.annotation.security.RolesAllowed;
 
 import com.vaadin.flow.component.Component;
@@ -51,10 +56,12 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
+import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
+import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
@@ -68,6 +75,7 @@ import org.eclipse.hawkbit.ui.simple.view.util.TableView;
 import org.eclipse.hawkbit.ui.simple.view.util.Utils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
+
 import java.util.stream.Collectors;
 
 @PageTitle("Targets")
@@ -304,18 +312,23 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
         private final TargetDetails targetDetails;
         private final TargetAssignedInstalled targetAssignedInstalled;
+        private final TargetTags targetTags;
 
         private TargetDetailedView(HawkbitMgmtClient hawkbitClient) {
             targetDetails = new TargetDetails(hawkbitClient);
             targetAssignedInstalled = new TargetAssignedInstalled(hawkbitClient);
+            targetTags = new TargetTags(hawkbitClient);
             setWidthFull();
+
             add("Details", targetDetails);
             add("Assigned / Installed", targetAssignedInstalled);
+            add("Tags", targetTags);
         }
 
         private void setItem(final MgmtTarget target) {
             this.targetDetails.setItem(target);
             this.targetAssignedInstalled.setItem(target);
+            this.targetTags.setItem(target);
         }
     }
 
@@ -343,7 +356,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                         add(field);
                     });
 
-            setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
+            setResponsiveSteps(new ResponsiveStep("0", 2));
             setColspan(description, 2);
         }
 
@@ -397,6 +410,113 @@ public class TargetView extends TableView<MgmtTarget, String> {
                                 value.getModules().stream().map(module -> module.getTypeName() + ": " + module.getVersion())
                                         .collect(Collectors.joining("\n")));
                     });
+        }
+    }
+
+    private static class TargetTags extends VerticalLayout {
+
+        private final transient HawkbitMgmtClient hawkbitClient;
+        private final ComboBox<MgmtTag> tagSelector = new ComboBox<>(TAG);
+        private final HorizontalLayout tagsArea = new HorizontalLayout();
+        private Registration changeListener;
+
+        private TargetTags(HawkbitMgmtClient hawkbitClient) {
+            this.hawkbitClient = hawkbitClient;
+            setWidthFull();
+            setPadding(false);
+            setSpacing(true);
+            setAlignItems(FlexComponent.Alignment.STRETCH);
+            setJustifyContentMode(JustifyContentMode.CENTER);
+
+            final HorizontalLayout tagSelectorLayout = buildTagSelectionLayout(hawkbitClient);
+            add(tagSelectorLayout);
+
+            tagsArea.setWrap(true);
+            tagsArea.setWidthFull();
+            add(tagsArea);
+        }
+
+        private HorizontalLayout buildTagSelectionLayout(HawkbitMgmtClient hawkbitClient) {
+            final Button createTagButton = new Button("Create Tag");
+            createTagButton.addClickListener(event -> {
+                new CreateTagDialog(hawkbitClient, () -> tagSelector.setItems(fetchAvailableTags())).result();
+            });
+
+            tagSelector.setWidthFull();
+            tagSelector.setItemLabelGenerator(MgmtTag::getName);
+            tagSelector.setClearButtonVisible(true);
+            tagSelector.setItems(fetchAvailableTags());
+
+            final HorizontalLayout tagSelectorLayout = new HorizontalLayout(tagSelector, createTagButton);
+            tagSelectorLayout.setWidthFull();
+            tagSelectorLayout.setSpacing(true);
+            tagSelectorLayout.setAlignItems(Alignment.END);
+            tagSelectorLayout.setJustifyContentMode(JustifyContentMode.CENTER);
+            return tagSelectorLayout;
+        }
+
+        private void setItem(final MgmtTarget target) {
+            if (changeListener != null) {
+                changeListener.remove();
+            }
+            changeListener = tagSelector.addValueChangeListener(event -> {
+                if (event.getValue() != null) {
+                    hawkbitClient.getTargetTagRestApi().assignTarget(event.getValue().getId(), target.getControllerId());
+                    refreshTargetTagsList(target);
+                    tagSelector.clear();
+                }
+            });
+            refreshTargetTagsList(target);
+        }
+
+        private void refreshTargetTagsList(MgmtTarget target) {
+            tagsArea.removeAll();
+
+            final List<MgmtTag> tagList = Optional.ofNullable(hawkbitClient.getTargetRestApi().getTags(target.getControllerId()).getBody())
+                    .orElse(Collections.emptyList());
+
+            for (MgmtTag tag : tagList) {
+                tagsArea.add(buildTargetTagBadge(tag, target.getControllerId()));
+            }
+        }
+
+        private Span buildTargetTagBadge(MgmtTag tag, String controllerId) {
+            Button clearButton = new Button(VaadinIcon.CLOSE_SMALL.create());
+            clearButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY_INLINE);
+            clearButton.getStyle().set("margin-inline-start", "var(--lumo-space-xs)");
+            clearButton.getElement().setAttribute("aria-label", "Clear filter: " + tag.getName());
+            clearButton.getElement().setAttribute("title", "Clear filter: " + tag.getName());
+
+            Span pill = new Span();
+            pill.getElement().getThemeList().add("badge pill");
+            pill.getStyle().set("background-color", tag.getColour());
+            pill.getStyle().set("margin-inline-end", "var(--lumo-space-xs)");
+
+            Span badge = new Span(pill, new Span(tag.getName()), clearButton);
+            badge.getElement().getThemeList().add("badge contrast pill");
+
+            clearButton.addClickListener(event -> {
+                hawkbitClient.getTargetTagRestApi().unassignTarget(tag.getId(), controllerId);
+                badge.getElement().removeFromParent();
+            });
+
+            return badge;
+        }
+
+        private List<MgmtTag> fetchAvailableTags() {
+            List<MgmtTag> tags = new ArrayList<>();
+            int fetched = 0;
+            int offset = 0;
+            do {
+                List<MgmtTag> page = Optional.ofNullable(
+                                hawkbitClient.getTargetTagRestApi().getTargetTags(offset, 50, Constants.NAME_ASC, null).getBody())
+                        .map(PagedList::getContent)
+                        .orElse(Collections.emptyList());
+                tags.addAll(page);
+                fetched = page.size();
+                offset += fetched;
+            } while (fetched > 0);
+            return tags;
         }
     }
 
@@ -547,7 +667,52 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
     }
 
+    private static class CreateTagDialog extends Utils.BaseDialog<Void> {
+
+        private final TextField name;
+        private final TextArea description = new TextArea(Constants.DESCRIPTION);
+
+        private CreateTagDialog(final HawkbitMgmtClient hawkbitClient, Runnable onSuccess) {
+            super("Create Tag");
+
+            FormLayout formLayout = new FormLayout();
+            formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
+            final Button create = Utils.tooltip(new Button("Create"), "Create (Enter)");
+            final Button cancel = Utils.tooltip(new Button("Cancel"), "Cancel (Esc)");
+
+            Input colorInput = new Input();
+            colorInput.setType("color");
+            name = Utils.textField("Tag Name", e -> create.setEnabled(!e.getHasValue().isEmpty()));
+            formLayout.add(name);
+            formLayout.add(description);
+            formLayout.addFormItem(colorInput, "Color Selection");
+            add(formLayout);
+
+            create.setEnabled(false);
+            create.addClickShortcut(Key.ENTER);
+            create.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            create.addClickListener(e -> {
+                hawkbitClient.getTargetTagRestApi().createTargetTags(List.of(
+                        new MgmtTagRequestBodyPut()
+                                .setName(name.getValue())
+                                .setDescription(description.getValue())
+                                .setColour(colorInput.getValue())
+                ));
+                onSuccess.run();
+                close();
+            });
+
+            cancel.addClickListener(e -> close());
+            cancel.addClickShortcut(Key.ESCAPE);
+
+            getFooter().add(cancel);
+            getFooter().add(create);
+            open();
+        }
+    }
+
     private static class TargetStatusCell extends HorizontalLayout {
+
         private TargetStatusCell(MgmtTarget target) {
             MgmtPollStatus pollStatus = target.getPollStatus();
             String targetUpdateStatus = Optional.ofNullable(target.getUpdateStatus()).orElse("unknown");
