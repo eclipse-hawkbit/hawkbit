@@ -9,9 +9,29 @@
  */
 package org.eclipse.hawkbit.ui.simple.view;
 
-import com.vaadin.flow.component.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.time.ZoneOffset;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import jakarta.annotation.security.RolesAllowed;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dependency.Uses;
@@ -29,7 +49,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import jakarta.annotation.security.RolesAllowed;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
@@ -47,14 +66,7 @@ import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.simple.view.util.TableView;
 import org.eclipse.hawkbit.ui.simple.view.util.Utils;
 import org.springframework.util.ObjectUtils;
-
-import java.time.ZoneOffset;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @PageTitle("Targets")
 @Route(value = "targets", layout = MainLayout.class)
@@ -369,7 +381,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
             register.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             final Button cancel = Utils.tooltip(new Button("Cancel"), "Cancel (Esc)");
             cancel.addClickListener(e -> close());
-            register.addClickShortcut(Key.ESCAPE);
+            cancel.addClickShortcut(Key.ESCAPE);
             getFooter().add(cancel);
             getFooter().add(register);
 
@@ -479,18 +491,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
     }
 
     private static class TargetStatusCell extends HorizontalLayout {
-
-        private final MgmtTarget target;
-        private final TextArea description = new TextArea(Constants.DESCRIPTION);
-        private final TextField createdBy = Utils.textField(Constants.CREATED_BY);
-        private final TextField createdAt = Utils.textField(Constants.CREATED_AT);
-        private final TextField lastModifiedBy = Utils.textField(Constants.LAST_MODIFIED_BY);
-        private final TextField lastModifiedAt = Utils.textField(Constants.LAST_MODIFIED_AT);
-        private final TextField securityToken = Utils.textField(Constants.SECURITY_TOKEN);
-        private final TextArea targetAttributes = new TextArea(Constants.ATTRIBUTES);
-
         private TargetStatusCell(MgmtTarget target) {
-            this.target = target;
             MgmtPollStatus pollStatus = target.getPollStatus();
             String targetUpdateStatus = Optional.ofNullable(target.getUpdateStatus()).orElse("unknown");
             add(pollStatusIconMapper(pollStatus), targetUpdateStatusMapper(targetUpdateStatus));
