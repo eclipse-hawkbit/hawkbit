@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.rsql;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
