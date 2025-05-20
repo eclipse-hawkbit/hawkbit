@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -37,14 +38,9 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
     @Test
     @Description("Verifies read access rules for target types")
     void verifyTargetTypeReadOperations() {
-        permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
-
-        final TargetType permittedTargetType = targetTypeManagement
-                .create(entityFactory.targetType().create().name("type1"));
-
-        final TargetType hiddenTargetType = targetTypeManagement
-                .create(entityFactory.targetType().create().name("type2"));
+        final TargetType permittedTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type1"));
+        final TargetType hiddenTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type2"));
 
         // define access controlling rule
         defineAccess(AccessController.Operation.READ, permittedTargetType);
@@ -67,12 +63,12 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
         assertThat(targetTypeManagement.count()).isEqualTo(1);
 
         // verify targetTypeManagement#countByName
-//        assertThat(targetTypeManagement.countByName(permittedTargetType.getName())).isEqualTo(1);
-//        assertThat(targetTypeManagement.countByName(hiddenTargetType.getName())).isZero();
+        assertThat(targetTypeManagement.countByName(permittedTargetType.getName())).isEqualTo(1);
+        assertThat(targetTypeManagement.countByName(hiddenTargetType.getName())).isZero();
 
         // verify targetTypeManagement#countByName
-//        assertThat(targetTypeManagement.countByName(permittedTargetType.getName())).isEqualTo(1);
-//        assertThat(targetTypeManagement.countByName(hiddenTargetType.getName())).isZero();
+        assertThat(targetTypeManagement.countByName(permittedTargetType.getName())).isEqualTo(1);
+        assertThat(targetTypeManagement.countByName(hiddenTargetType.getName())).isZero();
 
         // verify targetTypeManagement#get by id
         assertThat(targetTypeManagement.get(permittedTargetType.getId())).isPresent();
@@ -161,12 +157,8 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
                 .isInstanceOf(InsufficientPermissionException.class);
     }
 
-    private void defineAccess(final AccessController.Operation operation, final TargetType... targetType) {
-        defineAccess(operation, List.of(targetType));
-    }
-
-    private void defineAccess(final AccessController.Operation operation, final List<TargetType> targetTypes) {
-        final List<Long> ids = targetTypes.stream().map(TargetType::getId).toList();
+    private void defineAccess(final AccessController.Operation operation, final TargetType... targetTypes) {
+        final List<Long> ids = Stream.of(targetTypes).map(TargetType::getId).toList();
         testAccessControlManger.defineAccessRule(
                 JpaTargetType.class, operation,
                 TargetTypeSpecification.hasIdIn(ids),

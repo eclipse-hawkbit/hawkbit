@@ -31,7 +31,23 @@ public class TestAccessControlManger {
     public <T> void defineAccessRule(
             final Class<T> ruleClass, final AccessController.Operation operation,
             final Specification<T> specification, final Predicate<T> check) {
-        accessRules.put(new AccessRuleId<>(ruleClass, operation), new AccessRule<>(specification, check));
+        defineAccessRule(ruleClass, operation, specification, check, false);
+    }
+
+    public <T> void overwriteAccessRule(
+            final Class<T> ruleClass, final AccessController.Operation operation,
+            final Specification<T> specification, final Predicate<T> check) {
+        defineAccessRule(ruleClass, operation, specification, check, true);
+    }
+
+    private <T> void defineAccessRule(
+            final Class<T> ruleClass, final AccessController.Operation operation,
+            final Specification<T> specification, final Predicate<T> check, final boolean overwrite) {
+        final AccessRuleId<T> ruleId = new AccessRuleId<>(ruleClass, operation);
+        if (!overwrite && accessRules.containsKey(ruleId)) {
+            throw new IllegalStateException("Access rule already defined for " + ruleId + "! You should explicitly set overwrite to true.");
+        }
+        accessRules.put(ruleId, new AccessRule<>(specification, check));
     }
 
     public <T extends AbstractJpaBaseEntity> Specification<T> getAccessRule(final Class<T> ruleClass,
@@ -53,8 +69,7 @@ public class TestAccessControlManger {
         } else {
             for (final T entity : entities) {
                 if (!accessRule.checker.test(entity)) {
-                    throw new InsufficientPermissionException(
-                            "Access to " + ruleClass.getName() + "/" + entity + " not allowed by checker!");
+                    throw new InsufficientPermissionException("Access to " + ruleClass.getName() + "/" + entity + " not allowed by checker!");
                 }
             }
         }

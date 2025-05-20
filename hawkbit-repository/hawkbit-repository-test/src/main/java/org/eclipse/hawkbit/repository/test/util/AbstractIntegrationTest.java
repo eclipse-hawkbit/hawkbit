@@ -21,6 +21,7 @@ import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +57,6 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
@@ -412,16 +412,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected boolean isConfirmationFlowActive() {
-        return tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED,
-                Boolean.class).getValue();
-    }
-
-    protected DistributionSetMetadata createDistributionSetMetadata(final long dsId, final MetaData md) {
-        return createDistributionSetMetadata(dsId, Collections.singletonList(md)).get(0);
-    }
-
-    protected List<DistributionSetMetadata> createDistributionSetMetadata(final long dsId, final List<MetaData> md) {
-        return distributionSetManagement.putMetaData(dsId, md);
+        return tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, Boolean.class).getValue();
     }
 
     protected Long getOsModule(final DistributionSet ds) {

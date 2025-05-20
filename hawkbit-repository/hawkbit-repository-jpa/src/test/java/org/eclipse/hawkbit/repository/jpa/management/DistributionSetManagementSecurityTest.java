@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.List;
+import java.util.Map;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -66,17 +67,36 @@ class DistributionSetManagementSecurityTest
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void createMetaDataPermissionsCheck() {
+    void createMetadataPermissionsCheck() {
         assertPermissions(
-                () -> distributionSetManagement.putMetaData(1L, List.of(entityFactory.generateDsMetadata("key", "value"))),
+                () -> {
+                    distributionSetManagement.createMetadata(1L, Map.of("key", "value"));
+                    return null;
+                },
                 List.of(SpPermission.UPDATE_REPOSITORY));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void deleteMetaDataPermissionsCheck() {
+    void getMetadataPermissiosCheck() {
+        assertPermissions(() -> distributionSetManagement.getMetadata(1L), List.of(SpPermission.READ_REPOSITORY));
+    }
+
+    @Test
+    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
+    void updateMetadataPermissionsCheck() {
         assertPermissions(() -> {
-            distributionSetManagement.deleteMetaData(1L, "key");
+                    distributionSetManagement.updateMetadata(1L,"key", "value");
+                    return null;
+                },
+                List.of(SpPermission.UPDATE_REPOSITORY));
+    }
+
+    @Test
+    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
+    void deleteMetadataPermissionsCheck() {
+        assertPermissions(() -> {
+            distributionSetManagement.deleteMetadata(1L, "key");
             return null;
         }, List.of(SpPermission.UPDATE_REPOSITORY));
     }
@@ -137,25 +157,6 @@ class DistributionSetManagementSecurityTest
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findMetaDataByDistributionSetIdPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.findMetaDataByDistributionSetId(1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void countMetaDataByDistributionSetIdPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.countMetaDataByDistributionSetId(1L), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findMetaDataByDistributionSetIdAndRsqlPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.findMetaDataByDistributionSetIdAndRsql(1L, "rsql", PAGE),
-                List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByCompletedPermissionsCheck() {
         assertPermissions(() -> distributionSetManagement.findByCompleted(PAGE, true), List.of(SpPermission.READ_REPOSITORY));
     }
@@ -194,12 +195,6 @@ class DistributionSetManagementSecurityTest
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getMetaDataByDistributionSetIdPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.findMetaDataByDistributionSetId(1L, "key"), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void isInUsePermissionsCheck() {
         assertPermissions(() -> distributionSetManagement.isInUse(1L), List.of(SpPermission.READ_REPOSITORY));
     }
@@ -208,13 +203,6 @@ class DistributionSetManagementSecurityTest
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void unassignSoftwareModulePermissionsCheck() {
         assertPermissions(() -> distributionSetManagement.unassignSoftwareModule(1L, 1L), List.of(SpPermission.UPDATE_REPOSITORY));
-    }
-
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void updateMetaDataPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.updateMetaData(1L, entityFactory.generateDsMetadata("key", "value")),
-                List.of(SpPermission.UPDATE_REPOSITORY));
     }
 
     @Test

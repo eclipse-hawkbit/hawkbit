@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -30,7 +31,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldExc
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -124,29 +124,38 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
     List<DistributionSet> unassignTag(@NotEmpty Collection<Long> ids, long tagId);
 
     /**
-     * Creates a list of distribution set meta-data entries.
+     * Creates a map of distribution set meta-data entries.
      *
      * @param id if the {@link DistributionSet} the metadata has to be created for
      * @param metadata the meta-data entries to create or update
-     * @return the updated or created distribution set meta-data entries
      * @throws EntityNotFoundException if given set does not exist
      * @throws EntityAlreadyExistsException in case one of the meta-data entry already exists for the specific key
      * @throws AssignmentQuotaExceededException if the maximum number of {@link MetaData} entries is exceeded for the addressed
      *         {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    List<DistributionSetMetadata> putMetaData(long id, @NotEmpty Collection<MetaData> metadata);
+    void createMetadata(long id, @NotEmpty Map<String, String> metadata);
 
     /**
-     * Updates a distribution set meta-data value if corresponding entry exists.
+     * Finds all meta-data by the given distribution set id.
+     *
+     * @param id the distribution set id to retrieve the meta-data from
+     * @return a paged result of all meta-data entries for a given distribution set id
+     * @throws EntityNotFoundException if distribution set with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Map<String, String> getMetadata(long id);
+
+    /**
+     * Updates a distribution set meta-data values by adding them.
      *
      * @param id {@link DistributionSet} of the meta-data entry to be updated
-     * @param metadata meta-data entry to be updated
-     * @return the updated meta-data entry
+     * @param key meta data-entry key to be updated
+     * @param value meta data-entry to be new value
      * @throws EntityNotFoundException in case the meta-data entry does not exist and cannot be updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetMetadata updateMetaData(long id, @NotNull MetaData metadata);
+    void updateMetadata(long id, @NotNull String key, @NotNull String value);
 
     /**
      * Deletes a distribution set meta-data entry.
@@ -156,7 +165,7 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      * @throws EntityNotFoundException if given set does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    void deleteMetaData(long id, @NotEmpty String key);
+    void deleteMetadata(long id, @NotEmpty String key);
 
     /**
      * Locks a distribution set. From then on its functional properties could not be changed, and it could be assigned to targets
@@ -222,33 +231,6 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
     Optional<DistributionSet> findByNameAndVersion(@NotEmpty String distributionName, @NotEmpty String version);
 
     /**
-     * Finds all meta-data by the given distribution set id.
-     *
-     * @param id the distribution set id to retrieve the meta-data from
-     * @param pageable the page request to page the result
-     * @return a paged result of all meta-data entries for a given distribution
-     *         set id
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSetMetadata> findMetaDataByDistributionSetId(long id, @NotNull Pageable pageable);
-
-    /**
-     * Finds all meta-data by the given distribution set id.
-     *
-     * @param id the distribution set id to retrieve the meta-data from
-     * @param rsqlParam rsql query string
-     * @param pageable the page request to page the result
-     * @return a paged result of all meta-data entries for a given distribution set id
-     * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the given
-     *         {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
-     * @throws EntityNotFoundException of distribution set with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSetMetadata> findMetaDataByDistributionSetIdAndRsql(long id, @NotNull String rsqlParam, @NotNull Pageable pageable);
-
-    /**
      * Finds all {@link DistributionSet}s based on completeness.
      *
      * @param pageable the pagination parameter
@@ -294,25 +276,6 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSet> findByRsqlAndTag(@NotNull String rsqlParam, long tagId, @NotNull Pageable pageable);
-
-    /**
-     * Finds a single distribution set meta-data by its id.
-     *
-     * @param id of the {@link DistributionSet}
-     * @param key of the meta-data element
-     * @return the found DistributionSetMetadata
-     * @throws EntityNotFoundException is set with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<DistributionSetMetadata> findMetaDataByDistributionSetId(long id, @NotEmpty String key);/**
-     * Counts all meta-data by the given distribution set id.
-     *
-     * @param id the distribution set id to retrieve the meta-data count from
-     * @return count of ds metadata
-     * @throws EntityNotFoundException if distribution set with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    long countMetaDataByDistributionSetId(long id);
 
     /**
      * Counts all {@link DistributionSet}s based on completeness.
