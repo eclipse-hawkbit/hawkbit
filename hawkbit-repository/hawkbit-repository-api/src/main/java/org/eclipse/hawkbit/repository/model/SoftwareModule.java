@@ -23,6 +23,16 @@ public interface SoftwareModule extends NamedVersionedEntity {
     int VENDOR_MAX_SIZE = 256;
 
     /**
+     * Maximum length of metadata key.
+     */
+    int METADATA_KEY_MAX_SIZE = 128;
+
+    /**
+     * Maximum length of metadata value.
+     */
+    int METADATA_VALUE_MAX_SIZE = 4000;
+
+    /**
      * @return the type of the software module
      */
     SoftwareModuleType getType();

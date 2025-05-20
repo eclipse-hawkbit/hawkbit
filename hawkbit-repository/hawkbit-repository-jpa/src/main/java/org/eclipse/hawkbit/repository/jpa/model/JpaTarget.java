@@ -37,7 +37,6 @@ import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.NamedEntityGraphs;
-import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
@@ -187,8 +186,8 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             name = "sp_target_attributes",
             joinColumns = { @JoinColumn(name = "target", nullable = false) },
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_attributes_target"))
-    @MapKeyColumn(name = "attribute_key", length = Target.CONTROLLER_ATTRIBUTE_KEY_SIZE)
-    @Column(name = "attribute_value", length = Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE)
+    @MapKeyColumn(name = "attribute_key", length = Target.CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE)
+    @Column(name = "attribute_value", length = Target.CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE)
     private Map<String, String> controllerAttributes;
 
     // no cascade option on an ElementCollection, the target objects are always persisted, merged, removed with their parent
@@ -198,8 +197,8 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             name = "sp_target_metadata",
             joinColumns = { @JoinColumn(name = "target", nullable = false) },
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_metadata_target"))
-    @MapKeyColumn(name = "meta_key", length = Target.CONTROLLER_METADATA_KEY_SIZE)
-    @Column(name = "meta_value", length = Target.CONTROLLER_METADATA_VALUE_SIZE)
+    @MapKeyColumn(name = "meta_key", length = Target.METADATA_MAX_KEY_SIZE)
+    @Column(name = "meta_value", length = Target.METADATA_MAX_VALUE_SIZE)
     private Map<String, String> metadata;
 
     @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaAction.class)

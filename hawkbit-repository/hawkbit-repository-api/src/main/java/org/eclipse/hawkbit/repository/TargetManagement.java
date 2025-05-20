@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -521,15 +520,12 @@ public interface TargetManagement {
             @NotNull String controllerId, long distributionSetId, @NotNull String targetFilterQuery);
 
     /**
-     * Initiates {@link TargetType} assignment to given {@link Target}s. If some
-     * targets in the list have the {@link TargetType} not yet assigned, they will
-     * get assigned. If all targets are already of that type, there will be no
-     * un-assignment.
+     * Initiates {@link TargetType} assignment to given {@link Target}s. If some targets in the list have the {@link TargetType}
+     * not yet assigned, they will get assigned. If all targets are already of that type, there will be no un-assignment.
      *
      * @param controllerIds to set the type to
      * @param typeId to assign targets to
-     * @return {@link TargetTypeAssignmentResult} with all metadata of the
-     *         assignment outcome.
+     * @return {@link TargetTypeAssignmentResult} with all meta-data of the assignment outcome.
      * @throws EntityNotFoundException if target type with given id does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
@@ -539,7 +535,7 @@ public interface TargetManagement {
      * Initiates {@link TargetType} un-assignment to given {@link Target}s. The type of the targets will be set to {@code null}
      *
      * @param controllerIds to remove the type from
-     * @return {@link TargetTypeAssignmentResult} with all metadata of the assignment outcome.
+     * @return {@link TargetTypeAssignmentResult} with all meta-data of the assignment outcome.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTypeAssignmentResult unassignType(@NotEmpty Collection<String> controllerIds);
@@ -701,11 +697,11 @@ public interface TargetManagement {
     /**
      * Creates a list of target meta-data entries.
      *
-     * @param controllerId {@link Target} controller id the metadata has to be created for
+     * @param controllerId {@link Target} controller id the meta-data has to be created for
      * @param metadata the meta-data entries to create or update
      * @throws EntityNotFoundException if given target does not exist
-     * @throws EntityAlreadyExistsException in case one of the metadata entry already exists for the specific key
-     * @throws AssignmentQuotaExceededException if the maximum number of {@link MetaData} entries is exceeded for the addressed {@link Target}
+     * @throws EntityAlreadyExistsException in case one of the metad-ata entry already exists for the specific key
+     * @throws AssignmentQuotaExceededException if the maximum number of meta-data entries is exceeded for the addressed {@link Target}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     void createMetadata(@NotEmpty String controllerId, @NotEmpty Map<String, String> metadata);
@@ -714,7 +710,7 @@ public interface TargetManagement {
      * Finds a single target meta-data by its id.
      *
      * @param controllerId of the {@link Target}
-     * @return the found target metadata
+     * @return the found target meta-data
      * @throws EntityNotFoundException if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
@@ -723,10 +719,10 @@ public interface TargetManagement {
     /**
      * Updates a target meta-data value if corresponding entry exists.
      *
-     * @param controllerId {@link Target} controller id of the metadata entry to be updated
+     * @param controllerId {@link Target} controller id of the meta-data entry to be updated
      * @param key meta data-entry key to be updated
      * @param value meta data-entry to be new value
-     * @throws EntityNotFoundException in case the metadata entry does not exist and cannot be updated
+     * @throws EntityNotFoundException in case the meta-data entry does not exist and cannot be updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     void updateMetadata(@NotEmpty String controllerId, @NotNull String key, @NotNull String value);
@@ -734,7 +730,7 @@ public interface TargetManagement {
     /**
      * Deletes a target meta data entry.
      *
-     * @param controllerId where metadata has to be deleted
+     * @param controllerId where meta-data has to be deleted
      * @param key of the meta data element
      * @throws EntityNotFoundException if given target does not exist
      */

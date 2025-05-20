@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.repository.jpa.management;
 
 import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
 import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
-import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
-import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE;
+import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE;
+import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE;
 
 import java.net.URI;
 import java.time.Duration;
@@ -618,11 +618,11 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     private static boolean isAttributeKeyValid(final String key) {
-        return key != null && key.length() <= CONTROLLER_ATTRIBUTE_KEY_SIZE && PATTERN.matcher(key).matches();
+        return key != null && key.length() <= CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE && PATTERN.matcher(key).matches();
     }
 
     private static boolean isAttributeValueValid(final String value) {
-        return value == null || (value.length() <= CONTROLLER_ATTRIBUTE_VALUE_SIZE && PATTERN.matcher(value).matches());
+        return value == null || (value.length() <= CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE && PATTERN.matcher(value).matches());
     }
 
     private static void copy(final Map<String, String> src, final Map<String, String> trg) {

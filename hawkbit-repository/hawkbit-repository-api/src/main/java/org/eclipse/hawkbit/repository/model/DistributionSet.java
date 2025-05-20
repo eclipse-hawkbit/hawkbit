@@ -26,12 +26,12 @@ public interface DistributionSet extends NamedVersionedEntity {
     /**
      * Maximum length of metadata key.
      */
-    int METADATA_KEY_SIZE = 128;
+    int METADATA_MAX_KEY_SIZE = 128;
 
     /**
      * Maximum length of metadata value.
      */
-    int METADATA_VALUE_SIZE = 4000;
+    int METADATA_MAX_VALUE_SIZE = 4000;
 
     /**
      * @return type of the {@link DistributionSet}.

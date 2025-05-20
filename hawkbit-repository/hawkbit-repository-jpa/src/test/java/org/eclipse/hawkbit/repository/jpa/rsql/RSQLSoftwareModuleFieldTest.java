@@ -51,11 +51,11 @@ class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
 
         final SoftwareModuleMetadataCreate softwareModuleMetadata = entityFactory.softwareModuleMetadata()
                 .create(ah.getId()).key("metaKey").value("metaValue");
-        softwareModuleManagement.updateMetaData(softwareModuleMetadata);
+        softwareModuleManagement.updateMetadata(softwareModuleMetadata);
 
         final SoftwareModuleMetadataCreate softwareModuleMetadata2 = entityFactory.softwareModuleMetadata()
                 .create(ah2.getId()).key("metaKey").value("value");
-        softwareModuleManagement.updateMetaData(softwareModuleMetadata2);
+        softwareModuleManagement.updateMetadata(softwareModuleMetadata2);
     }
 
     @Test

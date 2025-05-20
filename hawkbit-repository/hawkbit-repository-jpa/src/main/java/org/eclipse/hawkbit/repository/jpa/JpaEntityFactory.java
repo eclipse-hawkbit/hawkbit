@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagBuilder;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.springframework.validation.annotation.Validated;
 
 /**

@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.builder;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import org.eclipse.hawkbit.repository.model.MetaData;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 
 /**
@@ -22,10 +22,10 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 public interface SoftwareModuleMetadataUpdate {
 
     /**
-     * @param value for {@link MetaData#getValue()}
+     * @param value for {@link SoftwareModuleMetadata#getValue()}
      * @return updated builder instance
      */
-    SoftwareModuleMetadataUpdate value(@Size(min = 1, max = MetaData.VALUE_MAX_SIZE) @NotNull String value);
+    SoftwareModuleMetadataUpdate value(@Size(min = 1, max = SoftwareModule.METADATA_VALUE_MAX_SIZE) @NotNull String value);
 
     /**
      * @param visible for {@link SoftwareModuleMetadata#isTargetVisible()}
