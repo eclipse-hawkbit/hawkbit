@@ -220,11 +220,6 @@
     </developers>
 
     <distributionManagement>
-        <repository>
-            <id>ossrh</id>
-            <name>hawkBit Repository - Release</name>
-            <url>https://central.sonatype.org/publish/publish-portal-maven/</url>
-        </repository>
         <snapshotRepository>
             <id>ossrh</id>
             <name>hawkBit Repository - Snapshots</name>
