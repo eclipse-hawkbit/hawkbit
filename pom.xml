@@ -223,12 +223,12 @@
         <repository>
             <id>ossrh</id>
             <name>hawkBit Repository - Release</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            <url>https://central.sonatype.org/publish/publish-portal-maven/</url>
         </repository>
         <snapshotRepository>
             <id>ossrh</id>
             <name>hawkBit Repository - Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -565,14 +565,12 @@
                            sure that all artifacts of a multi-module project are deployed as a whole
                            at the end of the build process instead of deploying each module's artifacts
                            individually as part of building the module. -->
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>${nexus.staging.maven.plugin.version}</version>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.7.0</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                            <publishingServerId>central</publishingServerId>
                         </configuration>
                     </plugin>
                 </plugins>
