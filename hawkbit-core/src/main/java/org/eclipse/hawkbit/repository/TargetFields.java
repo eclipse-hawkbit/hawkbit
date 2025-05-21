@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
@@ -41,7 +40,7 @@ public enum TargetFields implements RsqlQueryField {
             DistributionSetFields.NAME.getJpaEntityFieldName(), DistributionSetFields.VERSION.getJpaEntityFieldName()),
     TAG("tags", TagFields.NAME.getJpaEntityFieldName()),
     LASTCONTROLLERREQUESTAT("lastTargetQuery"),
-    METADATA("metadata", new SimpleImmutableEntry<>("key", "value")),
+    METADATA("metadata"),
     TARGETTYPE("targetType", TargetTypeFields.KEY.getJpaEntityFieldName(), TargetTypeFields.NAME.getJpaEntityFieldName());
 
     private final String jpaEntityFieldName;
@@ -54,10 +53,6 @@ public enum TargetFields implements RsqlQueryField {
 
     TargetFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
         this(jpaEntityFieldName, List.of(subEntityAttributes), null);
-    }
-
-    TargetFields(final String jpaEntityFieldName, final Entry<String, String> subEntityMapTuple) {
-        this(jpaEntityFieldName, Collections.emptyList(), subEntityMapTuple);
     }
 
     TargetFields(final String jpaEntityFieldName, final List<String> subEntityAttributes, final Entry<String, String> subEntityMapTuple) {
@@ -73,6 +68,6 @@ public enum TargetFields implements RsqlQueryField {
 
     @Override
     public boolean isMap() {
-        return this == ATTRIBUTE || getSubEntityMapTuple().isPresent();
+        return this == ATTRIBUTE || this == METADATA;
     }
 }

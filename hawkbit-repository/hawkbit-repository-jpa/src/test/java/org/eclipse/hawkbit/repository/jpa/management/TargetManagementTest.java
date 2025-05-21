@@ -60,17 +60,14 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldExc
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
@@ -81,7 +78,6 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 
@@ -99,7 +95,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget();
         assertThat(targetManagement.getByControllerID(NOT_EXIST_ID)).isNotPresent();
         assertThat(targetManagement.get(NOT_EXIST_IDL)).isNotPresent();
-        assertThat(targetManagement.getMetaDataByControllerId(target.getControllerId(), NOT_EXIST_ID)).isNotPresent();
+        assertThat(targetManagement.getMetadata(target.getControllerId()).get(NOT_EXIST_ID)).isNull();
     }
 
     @Test
@@ -113,20 +109,15 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget();
 
         verifyThrownExceptionBy(
-                () -> targetManagement.assignTag(Collections.singletonList(target.getControllerId()), NOT_EXIST_IDL),
-                "TargetTag");
-        verifyThrownExceptionBy(() -> targetManagement.assignTag(Collections.singletonList(NOT_EXIST_ID), tag.getId()),
-                "Target");
+                () -> targetManagement.assignTag(Collections.singletonList(target.getControllerId()), NOT_EXIST_IDL), "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.assignTag(Collections.singletonList(NOT_EXIST_ID), tag.getId()), "Target");
 
         verifyThrownExceptionBy(() -> targetManagement.findByTag(PAGE, NOT_EXIST_IDL), "TargetTag");
         verifyThrownExceptionBy(() -> targetManagement.findByRsqlAndTag(PAGE, "name==*", NOT_EXIST_IDL), "TargetTag");
 
-        verifyThrownExceptionBy(() -> targetManagement.countByAssignedDistributionSet(NOT_EXIST_IDL),
-                "DistributionSet");
-        verifyThrownExceptionBy(() -> targetManagement.countByInstalledDistributionSet(NOT_EXIST_IDL),
-                "DistributionSet");
-        verifyThrownExceptionBy(() -> targetManagement.existsByInstalledOrAssignedDistributionSet(NOT_EXIST_IDL),
-                "DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.countByAssignedDistributionSet(NOT_EXIST_IDL), "DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.countByInstalledDistributionSet(NOT_EXIST_IDL), "DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.existsByInstalledOrAssignedDistributionSet(NOT_EXIST_IDL), "DistributionSet");
 
         verifyThrownExceptionBy(() -> targetManagement.countByTargetFilterQuery(NOT_EXIST_IDL), "TargetFilterQuery");
         verifyThrownExceptionBy(() -> targetManagement.countByRsqlAndNonDSAndCompatibleAndUpdatable(NOT_EXIST_IDL, "name==*"),
@@ -138,45 +129,29 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(
                 () -> targetManagement.findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(PAGE, NOT_EXIST_IDL, "name==*"),
                 "DistributionSet");
-        verifyThrownExceptionBy(() -> targetManagement.findByInRolloutGroupWithoutAction(PAGE, NOT_EXIST_IDL),
-                "RolloutGroup");
-        verifyThrownExceptionBy(() -> targetManagement.findByAssignedDistributionSet(PAGE, NOT_EXIST_IDL),
-                "DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.findByInRolloutGroupWithoutAction(PAGE, NOT_EXIST_IDL), "RolloutGroup");
+        verifyThrownExceptionBy(() -> targetManagement.findByAssignedDistributionSet(PAGE, NOT_EXIST_IDL), "DistributionSet");
         verifyThrownExceptionBy(
-                () -> targetManagement.findByAssignedDistributionSetAndRsql(PAGE, NOT_EXIST_IDL, "name==*"),
-                "DistributionSet");
+                () -> targetManagement.findByAssignedDistributionSetAndRsql(PAGE, NOT_EXIST_IDL, "name==*"), "DistributionSet");
 
-        verifyThrownExceptionBy(() -> targetManagement.findByInstalledDistributionSet(PAGE, NOT_EXIST_IDL),
-                "DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.findByInstalledDistributionSet(PAGE, NOT_EXIST_IDL), "DistributionSet");
         verifyThrownExceptionBy(
-                () -> targetManagement.findByInstalledDistributionSetAndRsql(PAGE, NOT_EXIST_IDL, "name==*"),
-                "DistributionSet");
+                () -> targetManagement.findByInstalledDistributionSetAndRsql(PAGE, NOT_EXIST_IDL, "name==*"), "DistributionSet");
 
         verifyThrownExceptionBy(() -> targetManagement
                 .assignTag(Collections.singletonList(target.getControllerId()), Long.parseLong(NOT_EXIST_ID)), "TargetTag");
         verifyThrownExceptionBy(
-                () -> targetManagement.assignTag(Collections.singletonList(NOT_EXIST_ID), tag.getId()),
-                "Target");
+                () -> targetManagement.assignTag(Collections.singletonList(NOT_EXIST_ID), tag.getId()), "Target");
 
         verifyThrownExceptionBy(() -> targetManagement.unassignTag(List.of(NOT_EXIST_ID), tag.getId()), "Target");
-        verifyThrownExceptionBy(() -> targetManagement.unassignTag(List.of(target.getControllerId()), NOT_EXIST_IDL),
-                "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.unassignTag(List.of(target.getControllerId()), NOT_EXIST_IDL), "TargetTag");
         verifyThrownExceptionBy(() -> targetManagement.update(entityFactory.target().update(NOT_EXIST_ID)), "Target");
 
-        verifyThrownExceptionBy(() -> targetManagement.createMetaData(NOT_EXIST_ID,
-                Collections.singletonList(entityFactory.generateTargetMetadata("123", "123"))), "Target");
-        verifyThrownExceptionBy(() -> targetManagement.deleteMetaData(NOT_EXIST_ID, "xxx"), "Target");
-        verifyThrownExceptionBy(() -> targetManagement.deleteMetaData(target.getControllerId(), NOT_EXIST_ID),
-                "TargetMetadata");
-        verifyThrownExceptionBy(() -> targetManagement.getMetaDataByControllerId(NOT_EXIST_ID, "xxx"), "Target");
-        verifyThrownExceptionBy(() -> targetManagement.findMetaDataByControllerId(PAGE, NOT_EXIST_ID), "Target");
-        verifyThrownExceptionBy(() -> targetManagement.findMetaDataByControllerIdAndRsql(PAGE, NOT_EXIST_ID, "key==*"),
-                "Target");
-        verifyThrownExceptionBy(
-                () -> targetManagement.updateMetadata(NOT_EXIST_ID, entityFactory.generateTargetMetadata("xxx", "xxx")),
-                "Target");
-        verifyThrownExceptionBy(() -> targetManagement.updateMetadata(target.getControllerId(),
-                entityFactory.generateTargetMetadata(NOT_EXIST_ID, "xxx")), "TargetMetadata");
+        verifyThrownExceptionBy(() -> targetManagement.createMetadata(NOT_EXIST_ID, Map.of("123", "123")), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.deleteMetadata(NOT_EXIST_ID, "xxx"), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.deleteMetadata(target.getControllerId(), NOT_EXIST_ID), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.getMetadata(NOT_EXIST_ID).get("xxx"), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.updateMetadata(NOT_EXIST_ID, "xxx", "xxx"), "Target");
     }
 
     @Test
@@ -764,68 +739,75 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Checks that metadata for a target can be created.")
-    void createTargetMetadata() {
-        final String knownKey = "targetMetaKnownKey";
-        final String knownValue = "targetMetaKnownValue";
-
-        final Target target = testdataFactory.createTarget("targetIdWithMetadata");
-        final JpaTargetMetadata createdMetadata = insertTargetMetadata(knownKey, knownValue, target);
-
-        assertThat(createdMetadata).isNotNull();
-        assertThat(createdMetadata.getId().getKey()).isEqualTo(knownKey);
-        assertThat(createdMetadata.getTarget().getControllerId()).isEqualTo(target.getControllerId());
-        assertThat(createdMetadata.getTarget().getId()).isEqualTo(target.getId());
-        assertThat(createdMetadata.getValue()).isEqualTo(knownValue);
+    void createMetadata() {
+        insertMetadata(
+                "targetMetaKnownKey", "targetMetaKnownValue",
+                testdataFactory.createTarget("targetIdWithMetadata")); // and validate
     }
 
     @Test
     @Description("Verifies the enforcement of the metadata quota per target.")
-    void createTargetMetadataUntilQuotaIsExceeded() {
+    void createMetadataUntilQuotaIsExceeded() {
         // add meta-data one by one
         final Target target1 = testdataFactory.createTarget("target1");
         final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerTarget();
         for (int i = 0; i < maxMetaData; ++i) {
-            assertThat(insertTargetMetadata("k" + i, "v" + i, target1)).isNotNull();
+            insertMetadata("k" + i, "v" + i, target1);
         }
 
         // quota exceeded
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> insertTargetMetadata("k" + maxMetaData, "v" + maxMetaData, target1));
+                .isThrownBy(() -> insertMetadata("k" + maxMetaData, "v" + maxMetaData, target1));
 
         // add multiple meta data entries at once
         final Target target2 = testdataFactory.createTarget("target2");
-        final List<MetaData> metaData2 = new ArrayList<>();
-        for (int i = 0; i < maxMetaData + 1; ++i) {
-            metaData2.add(new JpaTargetMetadata("k" + i, "v" + i, target2));
+        final Map<String, String> metaData2 = new HashMap<>();
+        for (int i = 0; i < maxMetaData + 1; i++) {
+            metaData2.put("k" + i, "v" + i);
         }
         // verify quota is exceeded
         final String target2ControllerId = target2.getControllerId();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> targetManagement.createMetaData(target2ControllerId, metaData2));
+                .isThrownBy(() -> targetManagement.createMetadata(target2ControllerId, metaData2));
 
         // add some meta data entries
         final Target target3 = testdataFactory.createTarget("target3");
         final int firstHalf = maxMetaData / 2;
-        for (int i = 0; i < firstHalf; ++i) {
-            insertTargetMetadata("k" + i, "v" + i, target3);
+        for (int i = 0; i < firstHalf; i++) {
+            insertMetadata("k" + i, "v" + i, target3);
         }
         // add too many data entries
         final int secondHalf = maxMetaData - firstHalf;
-        final List<MetaData> metaData3 = new ArrayList<>();
-        for (int i = 0; i < secondHalf + 1; ++i) {
-            metaData3.add(new JpaTargetMetadata("kk" + i, "vv" + i, target3));
+        final Map<String, String> metaData3 = new HashMap<>();
+        for (int i = 0; i < secondHalf + 1; i++) {
+            metaData3.put("kk" + i, "vv" + i);
         }
         // verify quota is exceeded
         final String target3ControllerId = target3.getControllerId();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> targetManagement.createMetaData(target3ControllerId, metaData3));
+                .isThrownBy(() -> targetManagement.createMetadata(target3ControllerId, metaData3));
+    }
 
+
+
+    @Test
+    @Description("Queries and loads the metadata related to a given target.")
+    void getMetadata() {
+        // create targets
+        final Target target1 = createTargetWithMetadata("target1", 10);
+        final Target target2 = createTargetWithMetadata("target2", 8);
+
+        final Map<String, String> metadataOfTarget1 = targetManagement.getMetadata(target1.getControllerId());
+        final Map<String, String> metadataOfTarget2 = targetManagement.getMetadata(target2.getControllerId());
+
+        assertThat(metadataOfTarget1).hasSize(10);
+        assertThat(metadataOfTarget2).hasSize(8);
     }
 
     @Test
     @WithUser(allSpPermissions = true)
     @Description("Checks that metadata for a target can be updated.")
-    void updateTargetMetadata() {
+    void updateMetadata() {
         final String knownKey = "myKnownKey";
         final String knownValue = "myKnownValue";
         final String knownUpdateValue = "myNewUpdatedValue";
@@ -836,26 +818,36 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(target.getOptLockRevision()).isEqualTo(1);
 
         // create target meta data entry
-        insertTargetMetadata(knownKey, knownValue, target);
+        insertMetadata(knownKey, knownValue, target);
 
-        Target changedLockRevisionTarget = targetManagement.get(target.getId()).orElseThrow(NoSuchElementException::new);
+        final Target changedLockRevisionTarget = targetManagement.get(target.getId()).orElseThrow(NoSuchElementException::new);
         assertThat(changedLockRevisionTarget.getOptLockRevision()).isEqualTo(2);
 
         // update the target metadata
-        final JpaTargetMetadata updated = (JpaTargetMetadata) targetManagement.updateMetadata(
-                target.getControllerId(), entityFactory.generateTargetMetadata(knownKey, knownUpdateValue));
-        // we are updating the target meta-data so also modifying the base
-        // software module so opt lock revision must be three
-        changedLockRevisionTarget = targetManagement.get(target.getId()).orElseThrow(NoSuchElementException::new);
-        assertThat(changedLockRevisionTarget.getOptLockRevision()).isEqualTo(3);
-        assertThat(changedLockRevisionTarget.getLastModifiedAt()).isPositive();
+        targetManagement.updateMetadata(target.getControllerId(), knownKey, knownUpdateValue);
+        // we are updating the target meta-data so also modifying the target so opt lock revision must be three
+        final Target changedLockRevisionTarget2 = targetManagement.get(target.getId()).orElseThrow(NoSuchElementException::new);
+        assertThat(changedLockRevisionTarget2.getOptLockRevision()).isEqualTo(3);
+        assertThat(changedLockRevisionTarget2.getLastModifiedAt()).isPositive();
 
         // verify updated meta data contains the updated value
-        assertThat(updated).isNotNull();
-        assertThat(updated.getValue()).isEqualTo(knownUpdateValue);
-        assertThat(updated.getId().getKey()).isEqualTo(knownKey);
-        assertThat(updated.getTarget().getControllerId()).isEqualTo(target.getControllerId());
-        assertThat(updated.getTarget().getId()).isEqualTo(target.getId());
+        assertThat(targetManagement.getMetadata(target.getControllerId()).get(knownKey)).isEqualTo(knownUpdateValue);
+    }
+
+    @Test
+    @Description("Queries and loads the metadata related to a given target.")
+    void deleteMetadata() {
+        final String knownKey = "myKnownKey";
+        final String knownValue = "myKnownValue";
+
+        // create target
+        final String controllerId = createTargetWithMetadata("target1", 10).getControllerId();
+        targetManagement.createMetadata(controllerId, Map.of(knownKey, knownValue));
+
+        targetManagement.deleteMetadata(controllerId, knownKey);
+        // already removed
+        assertThatExceptionOfType(EntityNotFoundException.class)
+                .isThrownBy(() -> targetManagement.deleteMetadata(controllerId, knownKey));
     }
 
     @Test
@@ -961,26 +953,6 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(resultC.getAssigned()).isEqualTo(9);
         assertThat(resultC.getAlreadyAssigned()).isZero();
         checkTargetsHaveType(typeATargets, typeB);
-    }
-
-    @Test
-    @Description("Queries and loads the metadata related to a given target.")
-    void findAllTargetMetadataByControllerId() {
-        // create targets
-        final Target target1 = createTargetWithMetadata("target1", 10);
-        final Target target2 = createTargetWithMetadata("target2", 8);
-
-        final Page<TargetMetadata> metadataOfTarget1 = targetManagement
-                .findMetaDataByControllerId(PageRequest.of(0, 100), target1.getControllerId());
-
-        final Page<TargetMetadata> metadataOfTarget2 = targetManagement
-                .findMetaDataByControllerId(PageRequest.of(0, 100), target2.getControllerId());
-
-        assertThat(metadataOfTarget1.getNumberOfElements()).isEqualTo(10);
-        assertThat(metadataOfTarget1.getTotalElements()).isEqualTo(10);
-
-        assertThat(metadataOfTarget2.getNumberOfElements()).isEqualTo(8);
-        assertThat(metadataOfTarget2.getTotalElements()).isEqualTo(8);
     }
 
     @Test
@@ -1419,11 +1391,9 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    private JpaTargetMetadata insertTargetMetadata(final String knownKey, final String knownValue,
-            final Target target) {
-        final JpaTargetMetadata metadata = new JpaTargetMetadata(knownKey, knownValue, target);
-        return (JpaTargetMetadata) targetManagement
-                .createMetaData(target.getControllerId(), Collections.singletonList(metadata)).get(0);
+    private void insertMetadata(final String knownKey, final String knownValue, final Target target) {
+        targetManagement.createMetadata(target.getControllerId(), Map.of(knownKey, knownValue));
+        assertThat(targetManagement.getMetadata(target.getControllerId()).get(knownKey)).isEqualTo(knownValue);
     }
 
     private void checkTargetsHaveType(final List<Target> targets, final TargetType type) {
@@ -1440,7 +1410,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget(controllerId);
 
         for (int index = 1; index <= count; index++) {
-            insertTargetMetadata("key" + index, controllerId + "-value" + index, target);
+            insertMetadata("key" + index, controllerId + "-value" + index, target);
         }
 
         return target;
@@ -1450,7 +1420,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget(controllerId, controllerId, targetTypeId);
 
         for (int index = 1; index <= count; index++) {
-            insertTargetMetadata("key" + index, controllerId + "-value" + index, target);
+            insertMetadata("key" + index, controllerId + "-value" + index, target);
         }
 
         return target;

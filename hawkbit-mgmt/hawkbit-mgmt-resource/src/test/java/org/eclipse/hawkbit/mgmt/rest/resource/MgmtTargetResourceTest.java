@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -74,12 +73,10 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -114,8 +111,6 @@ import org.springframework.test.web.servlet.ResultActions;
 @Story("Target Resource")
 class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
-    @Autowired
-    ActionRepository actionRepository;
     private static final String TARGET_DESCRIPTION_TEST = "created in test";
     private static final String JSON_PATH_ROOT = "$";
     // fields, attributes
@@ -139,23 +134,26 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     private static final String JSON_PATH_DESCRIPTION = JSON_PATH_ROOT + JSON_PATH_FIELD_DESCRIPTION;
     private static final String JSON_PATH_LAST_REQUEST_AT = JSON_PATH_ROOT + JSON_PATH_FIELD_LAST_REQUEST_AT;
     private static final String JSON_PATH_TYPE = JSON_PATH_ROOT + JSON_PATH_FIELD_TARGET_TYPE;
+
     @Autowired
-    private ObjectMapper objectMapper;
+    ActionRepository actionRepository;
     @Autowired
     private JpaProperties jpaProperties;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     @Description("Ensures that when targetType value of -1 is provided the target type is unassigned from the target.")
-    public void updateTargetAndUnnasignTargetType() throws Exception {
+    void updateTargetAndUnassignTargetType() throws Exception {
         final String knownControllerId = "123";
         final String knownNewAddress = "amqp://test123/foobar";
         final String knownNameNotModify = "controllerName";
-        final Long unnasignTargetTypeValue = -1L;
+        final Long unassignTargetTypeValue = -1L;
 
         final TargetType targetType = targetTypeManagement.create(
                 entityFactory.targetType().create().name("targettype1").description("targettypedes1"));
 
-        final String body = new JSONObject().put("targetType", unnasignTargetTypeValue).toString();
+        final String body = new JSONObject().put("targetType", unassignTargetTypeValue).toString();
 
         // create a target with the created TargetType
         targetManagement.create(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModify)
@@ -183,18 +181,18 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Ensures that when targetType value of -1 is provided the target type is unassigned from the target when updating multiple fields in target object.")
-    public void updateTargetNameAndUnnasignTargetType() throws Exception {
+    void updateTargetNameAndUnassignTargetType() throws Exception {
         final String knownControllerId = "123";
         final String knownNewAddress = "amqp://test123/foobar";
         final String knownNameNotModify = "controllerName";
-        final Long unnasignTargetTypeValue = -1L;
+        final Long unassignTargetTypeValue = -1L;
         final String controllerNewName = "controllerNewName";
 
         final TargetType targetType = targetTypeManagement.create(
                 entityFactory.targetType().create().name("targettype1").description("targettypedes1"));
 
         final String body = new JSONObject()
-                .put("targetType", unnasignTargetTypeValue).put("name", "controllerNewName")
+                .put("targetType", unassignTargetTypeValue).put("name", "controllerNewName")
                 .toString();
 
         // create a target with the created TargetType
@@ -223,7 +221,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Handles the GET request of retrieving all targets within SP..")
-    public void getTargets() throws Exception {
+    void getTargets() throws Exception {
         enableConfirmationFlow();
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING))
                 .andExpect(status().isOk())
@@ -232,33 +230,15 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Handles the GET request of retrieving all targets within SP based by parameter.")
-    public void getTargetsWithParameters() throws Exception {
+    void getTargetsWithParameters() throws Exception {
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "?limit=10&sort=name:ASC&offset=0&q=name==a"))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print());
     }
 
     @Test
-    @Description("Get a paged list of meta data for a target with standard page size.")
-    public void getMetadata() throws Exception {
-        final int totalMetadata = 4;
-        final String knownKeyPrefix = "knownKey";
-        final String knownValuePrefix = "knownValue";
-        final Target testTarget = testdataFactory.createTarget("targetId");
-        for (int index = 0; index < totalMetadata; index++) {
-            targetManagement.createMetaData(testTarget.getControllerId(), List.of(
-                    entityFactory.generateTargetMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
-        }
-
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata", testTarget.getControllerId()))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON));
-    }
-
-    @Test
     @Description("Handles the POST request to activate auto-confirm on a target. Payload can be provided to specify more details about the operation.")
-    public void postActivateAutoConfirm() throws Exception {
+    void postActivateAutoConfirm() throws Exception {
         final Target testTarget = testdataFactory.createTarget("targetId");
 
         final MgmtTargetAutoConfirmUpdate body = new MgmtTargetAutoConfirmUpdate("custom_initiator_value",
@@ -273,7 +253,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Handles the POST request to deactivate auto-confirm on a target.")
-    public void postDeactivateAutoConfirm() throws Exception {
+    void postDeactivateAutoConfirm() throws Exception {
         final Target testTarget = testdataFactory.createTarget("targetId");
         confirmationManagement.activateAutoConfirmation(testTarget.getControllerId(), null, null);
 
@@ -285,7 +265,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Test confirmation of single Action with confirm status. Check that Action goes into Running status with appropriate messages and status code")
-    public void updateActionConfirmationWithConfirm() throws Exception {
+    void updateActionConfirmationWithConfirm() throws Exception {
         final int expectedStatusCode = 210;
         final String expectedStatusMessage1 = "some-custom-message1";
         final String expectedStatusMessage2 = "some-custom-message2";
@@ -296,7 +276,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Test confirmation of single Action with deny status. Check that Action stays in WAIT_FOR_CONFIRMATION status with appropriate messages and status code")
-    public void updateActionConfirmationWithDeny() throws Exception {
+    void updateActionConfirmationWithDeny() throws Exception {
         final int expectedStatusCode = 410;
         final String expectedStatusMessage1 = "some-error-custom-message1";
         final String expectedStatusMessage2 = "some-error-custom-message2";
@@ -307,7 +287,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Test confirmation of single Action with wrong ControllerId - e.g. the given Action is not assigned to the given Target - confirmation call must fail.")
-    public void updateActionConfirmationFailsIfActionNotAssignedToTarget() throws Exception {
+    void updateActionConfirmationFailsIfActionNotAssignedToTarget() throws Exception {
         final int payloadCallCode = 200;
         final String payloadCallMessage1 = "random1";
         final String payloadCallMessage2 = "random2";
@@ -2005,17 +1985,10 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("[0].key", equalTo(knownKey1)))
-                .andExpect(jsonPath("[0].value", equalTo(knownValue1)))
-                .andExpect(jsonPath("[1].key", equalTo(knownKey2)))
-                .andExpect(jsonPath("[1].value", equalTo(knownValue2)));
+                .andExpect(content().string(""));
 
-        final TargetMetadata metaKey1 = targetManagement.getMetaDataByControllerId(knownControllerId, knownKey1).get();
-        final TargetMetadata metaKey2 = targetManagement.getMetaDataByControllerId(knownControllerId, knownKey2).get();
-
-        assertThat(metaKey1.getValue()).isEqualTo(knownValue1);
-        assertThat(metaKey2.getValue()).isEqualTo(knownValue2);
+        assertThat(targetManagement.getMetadata(knownControllerId).get(knownKey1)).isEqualTo(knownValue1);
+        assertThat(targetManagement.getMetadata(knownControllerId).get(knownKey2)).isEqualTo(knownValue2);
 
         // verify quota enforcement
         final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerTarget();
@@ -2025,16 +1998,14 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
             metaData2.put(new JSONObject().put("key", knownKey1 + i).put("value", knownValue1 + i));
         }
 
-        mvc.perform(post("/rest/v1/targets/{targetId}/metadata", knownControllerId).accept(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/rest/v1/targets/{targetId}/metadata", knownControllerId)
+                        .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
 
-        // verify that the number of meta data entries has not changed
-        // (we cannot use the PAGE constant here as it tries to sort by ID)
-        assertThat(targetManagement.findMetaDataByControllerId(PageRequest.of(0, Integer.MAX_VALUE), knownControllerId)
-                .getTotalElements()).isEqualTo(metaData1.length());
-
+        // verify that the number of meta-data entries has not changed (we cannot use the PAGE constant here as it tries to sort by ID)
+        assertThat(targetManagement.getMetadata(knownControllerId)).hasSize(metaData1.length());
     }
 
     @Test
@@ -2056,14 +2027,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                         .content(jsonObject.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("key", equalTo(knownKey)))
-                .andExpect(jsonPath("value", equalTo(updateValue)));
+                .andExpect(content().string(""));
 
-        final TargetMetadata updatedTargetMetadata = targetManagement
-                .getMetaDataByControllerId(knownControllerId, knownKey).get();
-        assertThat(updatedTargetMetadata.getValue()).isEqualTo(updateValue);
-
+        assertThat(targetManagement.getMetadata(knownControllerId).get(knownKey)).isEqualTo(updateValue);
     }
 
     @Test
@@ -2081,7 +2047,12 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(targetManagement.getMetaDataByControllerId(knownControllerId, knownKey)).isNotPresent();
+        // already deleted
+        mvc.perform(delete("/rest/v1/targets/{targetId}/metadata/{key}", knownControllerId, knownKey))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
+
+        assertThat(targetManagement.getMetadata(knownControllerId).get(knownKey)).isNull();
     }
 
     @Test
@@ -2103,7 +2074,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
-        assertThat(targetManagement.getMetaDataByControllerId(knownControllerId, knownKey)).isPresent();
+        assertThat(targetManagement.getMetadata(knownControllerId).get(knownKey)).isNotNull();
     }
 
     @Test
@@ -2126,53 +2097,27 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Ensures that a metadata entry paged list selection through API reflectes the repository content.")
-    void getPagedListOfMetadata() throws Exception {
+    void getMetadata() throws Exception {
         final String knownControllerId = "targetIdWithMetadata";
 
         final int totalMetadata = 10;
-        final int limitParam = 5;
-        final String offsetParam = "0";
         final String knownKeyPrefix = "knownKey";
         final String knownValuePrefix = "knownValue";
 
         setupTargetWithMetadata(knownControllerId, knownKeyPrefix, knownValuePrefix, totalMetadata);
 
-        mvc.perform(get("/rest/v1/targets/{targetId}/metadata?offset=" + offsetParam + "&limit=" + limitParam,
-                        knownControllerId))
+        mvc.perform(get("/rest/v1/targets/{targetId}/metadata", knownControllerId))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("size", equalTo(limitParam)))
+                .andExpect(jsonPath("size", equalTo(totalMetadata)))
                 .andExpect(jsonPath("total", equalTo(totalMetadata)))
                 .andExpect(jsonPath("content[0].key", equalTo("knownKey0")))
                 .andExpect(jsonPath("content[0].value", equalTo("knownValue0")));
-
-    }
-
-    @Test
-    @Description("Ensures that a target metadata filtered query with value==knownValue1 parameter returns only the metadata entries with that value.")
-    void searchDistributionSetMetadataRsql() throws Exception {
-        final String knownControllerId = "targetIdWithMetadata";
-
-        final int totalMetadata = 10;
-        final String knownKeyPrefix = "knownKey";
-        final String knownValuePrefix = "knownValue";
-
-        setupTargetWithMetadata(knownControllerId, knownKeyPrefix, knownValuePrefix, totalMetadata);
-
-        final String rsqlSearchValue1 = "value==knownValue1";
-
-        mvc.perform(get("/rest/v1/targets/{targetId}/metadata?q=" + rsqlSearchValue1, knownControllerId))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("size", equalTo(1)))
-                .andExpect(jsonPath("total", equalTo(1)))
-                .andExpect(jsonPath("content[0].key", equalTo("knownKey1")))
-                .andExpect(jsonPath("content[0].value", equalTo("knownValue1")));
     }
 
     @Test
     @Description("A request for assigning multiple DS to a target results in a Bad Request when multiassignment in disabled.")
-    void multiassignmentRequestNotAllowedIfDisabled() throws Exception {
+    void multiAssignmentRequestNotAllowedIfDisabled() throws Exception {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final List<Long> dsIds = testdataFactory.createDistributionSets(2).stream().map(DistributionSet::getId)
                 .toList();
@@ -2953,23 +2898,20 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         return targetManagement.getByControllerID(tA.getControllerId()).get();
     }
 
-    private void setupTargetWithMetadata(final String knownControllerId, final String knownKey,
-            final String knownValue) {
+    private void setupTargetWithMetadata(final String knownControllerId, final String knownKey, final String knownValue) {
         testdataFactory.createTarget(knownControllerId);
-        targetManagement.createMetaData(knownControllerId,
-                Collections.singletonList(entityFactory.generateTargetMetadata(knownKey, knownValue)));
+        targetManagement.createMetadata(knownControllerId, Map.of(knownKey, knownValue));
     }
 
-    private void setupTargetWithMetadata(final String knownControllerId, final String knownKeyPrefix,
-            final String knownValuePrefix, final int totalMetadata) {
+    private void setupTargetWithMetadata(
+            final String knownControllerId, final String knownKeyPrefix, final String knownValuePrefix, final int totalMetadata) {
         testdataFactory.createTarget(knownControllerId);
 
-        final List<MetaData> targetMetadataEntries = new LinkedList<>();
+        final Map<String, String> metadataEntries = new HashMap<>();
         for (int index = 0; index < totalMetadata; index++) {
-            targetMetadataEntries
-                    .add(entityFactory.generateTargetMetadata(knownKeyPrefix + index, knownValuePrefix + index));
+            metadataEntries.put(knownKeyPrefix + index, knownValuePrefix + index);
         }
-        targetManagement.createMetaData(knownControllerId, targetMetadataEntries);
+        targetManagement.createMetadata(knownControllerId, metadataEntries);
     }
 
     private Action updateActionStatus(final Action action, final Status status, final Integer statusCode) {

@@ -79,7 +79,7 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
                         .description("targetDesc123"));
         target = controllerManagement.updateControllerAttributes(target.getControllerId(), Map.of("revision", "1.1"), null);
         target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(target.getControllerId(), LOCALHOST);
-        createTargetMetadata(target.getControllerId(), entityFactory.generateTargetMetadata("metaKey", "metaValue"));
+        targetManagement.createMetadata(target.getControllerId(), Map.of("metaKey", "metaValue"));
         assignDistributionSet(ds.getId(), target.getControllerId());
         targetManagement.assignType(target.getControllerId(), targetType1.getId());
 
@@ -89,7 +89,7 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
                         .description("targetId1234"));
         target2 = controllerManagement.updateControllerAttributes(target2.getControllerId(), Map.of("revision", "1.2"), null);
         targetManagement.assignType(target2.getControllerId(), targetType2.getId());
-        createTargetMetadata(target2.getControllerId(), entityFactory.generateTargetMetadata("metaKey", "value"));
+        targetManagement.createMetadata(target2.getControllerId(), Map.of("metaKey", "value"));
         target2 = controllerManagement.findOrRegisterTargetIfItDoesNotExist(target2.getControllerId(), LOCALHOST);
         targetManagement.assignTag(Arrays.asList(target.getControllerId(), target2.getControllerId()), targetTag.getId());
 
@@ -270,7 +270,7 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter target by metadata")
     void testFilterByMetadata() {
-        createTargetMetadata(testdataFactory.createTarget().getControllerId(), entityFactory.generateTargetMetadata("key.dot", "value.dot"));
+        targetManagement.createMetadata(testdataFactory.createTarget().getControllerId(), Map.of("key.dot", "value.dot"));
 
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==metaValue", 1);
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==null", 0); // "null" check

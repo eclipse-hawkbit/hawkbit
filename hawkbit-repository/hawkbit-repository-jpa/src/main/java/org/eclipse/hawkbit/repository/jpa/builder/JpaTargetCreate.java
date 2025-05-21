@@ -37,12 +37,7 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
 
     @Override
     public JpaTarget build() {
-        final JpaTarget target;
-        if (ObjectUtils.isEmpty(securityToken)) {
-            target = new JpaTarget(controllerId);
-        } else {
-            target = new JpaTarget(controllerId, securityToken);
-        }
+        final JpaTarget target = new JpaTarget(controllerId, securityToken);
 
         if (!ObjectUtils.isEmpty(name)) {
             target.setName(name);

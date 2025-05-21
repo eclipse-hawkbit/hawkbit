@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAutoConfirmUpdate;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -47,6 +48,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * API for handling target operations.
@@ -728,14 +730,46 @@ public interface MgmtTargetRestApi {
     ResponseEntity<List<MgmtTag>> getTags(@PathVariable("targetId") String targetId);
 
     /**
+     * Creates a list of metadata for a specific target.
+     *
+     * @param targetId the ID of the targetId to create metadata for
+     * @param metadataRest the list of metadata entries to create
+     */
+    @Operation(summary = "Create a list of metadata for a specific target", description = "Create a list of metadata entries Required permissions: READ_REPOSITORY and UPDATE_TARGET")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully created"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
+                            "data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Target not found", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
+                    "user in another request at the same time. You may retry your modification request.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
+                    "supported by the server for this resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
+    @PostMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata",
+            consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
+    @ResponseStatus(HttpStatus.CREATED)
+    void createMetadata(@PathVariable("targetId") String targetId, @RequestBody List<MgmtMetadata> metadataRest);
+
+    /**
      * Gets a paged list of metadata for a target.
      *
      * @param targetId the ID of the target for the metadata
-     * @param pagingOffsetParam the offset of list of targets for pagination, might not be present in the rest request then default value will
-     *         be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax {@code q=key==abc}
      * @return status OK if get request is successful with the paged list of metadata
      */
     @Operation(summary = "Return metadata for specific target", description = "Get a paged list of metadata for a target. Required permission: READ_REPOSITORY")
@@ -758,32 +792,9 @@ public interface MgmtTargetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtMetadata>> getMetadata(
-            @PathVariable("targetId") String targetId,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
-            @Schema(description = "The paging offset (default is 0)")
-            int pagingOffsetParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
-            @Schema(description = "The maximum number of entries in a page (default is 50)")
-            int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false)
-            @Schema(description = """
-                    The query parameter sort allows to define the sort order for the result of a query. A sort criteria
-                    consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
-                    The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
-                    in the result.""")
-            String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
-            String rsqlParam);
+    @GetMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("targetId") String targetId);
 
     /**
      * Gets a single metadata value for a specific key of a target.
@@ -824,7 +835,6 @@ public interface MgmtTargetRestApi {
      * @param targetId the ID of the target to update the metadata entry
      * @param metadataKey the key of the metadata to update the value
      * @param metadata update body
-     * @return status OK if the update request is successful and the updated metadata result
      */
     @Operation(summary = "Updates a single metadata value of a target", description = "Update a single metadata value for speficic key. Required permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
@@ -834,8 +844,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "404", description = "Target not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
@@ -852,9 +861,9 @@ public interface MgmtTargetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{metadataKey}",
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtMetadata> updateMetadata(
+    @PutMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{metadataKey}")
+    @ResponseStatus(HttpStatus.OK)
+    void updateMetadata(
             @PathVariable("targetId") String targetId,
             @PathVariable("metadataKey") String metadataKey,
             @RequestBody MgmtMetadataBodyPut metadata);
@@ -887,49 +896,8 @@ public interface MgmtTargetRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @DeleteMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{metadataKey}")
-    ResponseEntity<Void> deleteMetadata(
-            @PathVariable("targetId") String targetId,
-            @PathVariable("metadataKey") String metadataKey);
-
-    /**
-     * Creates a list of metadata for a specific target.
-     *
-     * @param targetId the ID of the targetId to create metadata for
-     * @param metadataRest the list of metadata entries to create
-     * @return status created if post request is successful with the value of the created metadata
-     */
-    @Operation(summary = "Create a list of metadata for a specific target", description = "Create a list of metadata entries Required permissions: READ_REPOSITORY and UPDATE_TARGET")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successfully created"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Target not found", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                    "user in another request at the same time. You may retry your modification request.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                    "supported by the server for this resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
-    @PostMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata",
-            consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE },
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtMetadata>> createMetadata(
-            @PathVariable("targetId") String targetId,
-            @RequestBody List<MgmtMetadata> metadataRest);
+    @ResponseStatus(HttpStatus.OK)
+    void deleteMetadata(@PathVariable("targetId") String targetId, @PathVariable("metadataKey") String metadataKey);
 
     /**
      * Get the current auto-confirm state for a specific target.
@@ -945,8 +913,7 @@ public interface MgmtTargetRestApi {
             @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "403",
-                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
-                            "data volume restriction applies.",
+                    description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "404", description = "Target not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",

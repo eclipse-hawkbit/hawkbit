@@ -48,6 +48,16 @@ public interface Target extends NamedEntity {
     int CONTROLLER_ATTRIBUTE_VALUE_SIZE = 128;
 
     /**
+     * Maximum length of metadata key.
+     */
+    int CONTROLLER_METADATA_KEY_SIZE = 128;
+
+    /**
+     * Maximum length of metadata value.
+     */
+    int CONTROLLER_METADATA_VALUE_SIZE = 4000;
+
+    /**
      * @return business identifier of the {@link Target}
      */
     String getControllerId();

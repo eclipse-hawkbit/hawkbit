@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.List;
+import java.util.Map;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -341,6 +342,26 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
+    void existsByControllerIdPermissionsCheck() {
+        assertPermissions(() -> targetManagement.existsByControllerId("controllerId"), List.of(SpPermission.READ_TARGET));
+    }
+
+    @Test
+    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
+    void isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatablePermissionsCheck() {
+        assertPermissions(
+                () -> targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable("controllerId", 1L, "controllerId==id"),
+                List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
+    }
+
+    @Test
+    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
+    void getTagsPermissionsCheck() {
+        assertPermissions(() -> targetManagement.getTags("controllerId"), List.of(SpPermission.READ_TARGET));
+    }
+
+    @Test
+    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void getControllerAttributesPermissionsCheck() {
         assertPermissions(() -> targetManagement.getControllerAttributes("controllerId"), List.of(SpPermission.READ_TARGET));
     }
@@ -368,72 +389,38 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void existsByControllerIdPermissionsCheck() {
-        assertPermissions(() -> targetManagement.existsByControllerId("controllerId"), List.of(SpPermission.READ_TARGET));
-    }
-
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatablePermissionsCheck() {
+    void createMetadataPermissionsCheck() {
         assertPermissions(
-                () -> targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable("controllerId", 1L, "controllerId==id"),
-                List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
-    }
-
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getTagsByControllerIdPermissionsCheck() {
-        assertPermissions(() -> targetManagement.getTagsByControllerId("controllerId"), List.of(SpPermission.READ_TARGET));
-    }
-
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void createMetaDataPermissionsCheck() {
-        assertPermissions(
-                () -> targetManagement.createMetaData("controllerId", List.of(entityFactory.generateTargetMetadata("key", "value"))),
+                () -> {
+                    targetManagement.createMetadata("controllerId", Map.of("key", "value"));
+                    return null;
+                },
                 List.of(SpPermission.UPDATE_REPOSITORY));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void deleteMetaDataPermissionsCheck() {
-        assertPermissions(() -> {
-            targetManagement.deleteMetaData("controllerId", "key");
-            return null;
-        }, List.of(SpPermission.UPDATE_REPOSITORY));
-    }
-
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void countMetaDataByControllerIdPermissionsCheck() {
-        assertPermissions(() -> targetManagement.countMetaDataByControllerId("controllerId"), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findMetaDataByControllerIdAndRsqlPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findMetaDataByControllerIdAndRsql(PAGE, "controllerId", "controllerId==id"),
-                List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getMetaDataByControllerIdPermissionsCheck() {
-        assertPermissions(() -> targetManagement.getMetaDataByControllerId("controllerId", "key"), List.of(SpPermission.READ_REPOSITORY));
-    }
-
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findMetaDataByControllerIdPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findMetaDataByControllerId(PAGE, "controllerId"), List.of(SpPermission.READ_REPOSITORY));
+    void getMetadataPermissionsCheck() {
+        assertPermissions(() -> targetManagement.getMetadata("controllerId"), List.of(SpPermission.READ_REPOSITORY));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     @WithUser(principal = "user", authorities = { SpPermission.UPDATE_REPOSITORY })
     void updateMetadataPermissionsCheck() {
-        assertPermissions(() -> targetManagement.updateMetadata("controllerId", entityFactory.generateTargetMetadata("key", "value")),
+        assertPermissions(() -> {
+                    targetManagement.updateMetadata("controllerId", "key", "value");
+                    return null;
+                },
                 List.of(SpPermission.UPDATE_REPOSITORY));
     }
 
+    @Test
+    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
+    void deleteMetadataPermissionsCheck() {
+        assertPermissions(() -> {
+            targetManagement.deleteMetadata("controllerId", "key");
+            return null;
+        }, List.of(SpPermission.UPDATE_REPOSITORY));
+    }
 }

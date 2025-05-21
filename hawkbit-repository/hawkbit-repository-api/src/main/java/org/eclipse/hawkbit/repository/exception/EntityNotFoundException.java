@@ -75,10 +75,20 @@ public class EntityNotFoundException extends AbstractServerRtException {
      * @param type of the entity that was not found
      * @param entityId of the {@link BaseEntity}
      */
-    public EntityNotFoundException(final Class<? extends BaseEntity> type, final Object entityId) {
-        super(type.getSimpleName() + " with given identifier {" + entityId + "} does not exist.",
+    public EntityNotFoundException(final String type, final Object entityId) {
+        super(type + " with given identifier {" + entityId + "} does not exist.",
                 THIS_ERROR,
-                Map.of(TYPE, type.getSimpleName(), ENTITY_ID, entityId));
+                Map.of(TYPE, type, ENTITY_ID, entityId));
+    }
+
+    /**
+     * Parameterized constructor for {@link BaseEntity} not found.
+     *
+     * @param type of the entity that was not found
+     * @param entityId of the {@link BaseEntity}
+     */
+    public EntityNotFoundException(final Class<? extends BaseEntity> type, final Object entityId) {
+        this(type.getSimpleName(), entityId);
     }
 
     /**
