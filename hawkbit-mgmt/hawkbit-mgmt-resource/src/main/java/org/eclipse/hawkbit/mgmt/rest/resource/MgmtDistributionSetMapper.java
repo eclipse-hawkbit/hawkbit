@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -31,7 +33,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
 
@@ -51,16 +52,6 @@ public final class MgmtDistributionSetMapper {
     static List<DistributionSetCreate> dsFromRequest(
             final Collection<MgmtDistributionSetRequestBodyPost> sets, final EntityFactory entityFactory) {
         return sets.stream().map(dsRest -> fromRequest(dsRest, entityFactory)).toList();
-    }
-
-    static List<MetaData> fromRequestDsMetadata(final List<MgmtMetadata> metadata, final EntityFactory entityFactory) {
-        if (metadata == null) {
-            return Collections.emptyList();
-        }
-
-        return metadata.stream()
-                .map(metadataRest -> entityFactory.generateDsMetadata(metadataRest.getKey(), metadataRest.getValue()))
-                .toList();
     }
 
     static MgmtDistributionSet toResponse(final DistributionSet distributionSet) {
@@ -100,10 +91,8 @@ public final class MgmtDistributionSetMapper {
         response.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class)
                 .getDistributionSetType(distributionSet.getType().getId())).withRel("type").expand());
 
-        response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getMetadata(response.getId(),
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata")
-                .expand());
+        response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getMetadata(response.getId()))
+                .withRel("metadata").expand());
     }
 
     static MgmtTargetAssignmentResponseBody toResponse(final DistributionSetAssignmentResult dsAssignmentResult) {
@@ -138,19 +127,21 @@ public final class MgmtDistributionSetMapper {
                 sets.stream().map(MgmtDistributionSetMapper::toResponse).toList());
     }
 
-    static MgmtMetadata toResponseDsMetadata(final DistributionSetMetadata metadata) {
+    static MgmtMetadata toResponseDsMetadata(final String key, String value) {
         final MgmtMetadata metadataRest = new MgmtMetadata();
-        metadataRest.setKey(metadata.getKey());
-        metadataRest.setValue(metadata.getValue());
+        metadataRest.setKey(key);
+        metadataRest.setValue(value);
         return metadataRest;
     }
 
-    static List<MgmtMetadata> toResponseDsMetadata(final List<DistributionSetMetadata> metadata) {
-        final List<MgmtMetadata> mappedList = new ArrayList<>(metadata.size());
-        for (final DistributionSetMetadata distributionSetMetadata : metadata) {
-            mappedList.add(toResponseDsMetadata(distributionSetMetadata));
-        }
-        return mappedList;
+    static Map<String, String> fromRequestDsMetadata(final List<MgmtMetadata> metadata) {
+        return metadata == null
+                ? Collections.emptyMap()
+                : metadata.stream().collect(Collectors.toMap(MgmtMetadata::getKey, MgmtMetadata::getValue));
+    }
+
+    static List<MgmtMetadata> toResponseDsMetadata(final Map<String, String> metadata) {
+        return metadata.entrySet().stream().map(e -> toResponseDsMetadata(e.getKey(), e.getValue())).toList();
     }
 
     static List<MgmtDistributionSet> toResponseFromDsList(final List<DistributionSet> sets) {

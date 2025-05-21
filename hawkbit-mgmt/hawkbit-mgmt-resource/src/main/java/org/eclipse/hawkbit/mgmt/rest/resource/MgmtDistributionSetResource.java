@@ -14,6 +14,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -54,7 +55,6 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -279,64 +279,37 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtMetadata>> getMetadata(
-            final Long distributionSetId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeDistributionSetMetadataSortParam(sortParam);
+    public void createMetadata(final Long distributionSetId, final List<MgmtMetadata> metadataRest) {
+        distributionSetManagement.createMetadata(distributionSetId, MgmtDistributionSetMapper.fromRequestDsMetadata(metadataRest));
+    }
 
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Page<DistributionSetMetadata> metaDataPage;
-
-        if (rsqlParam != null) {
-            metaDataPage = distributionSetManagement.findMetaDataByDistributionSetIdAndRsql(distributionSetId, rsqlParam, pageable
-            );
-        } else {
-            metaDataPage = distributionSetManagement.findMetaDataByDistributionSetId(distributionSetId, pageable);
-        }
-
-        return ResponseEntity
-                .ok(new PagedList<>(MgmtDistributionSetMapper.toResponseDsMetadata(metaDataPage.getContent()), metaDataPage.getTotalElements()));
+    @Override
+    public ResponseEntity<PagedList<MgmtMetadata>> getMetadata(final Long distributionSetId) {
+        final Map<String, String> metadata = distributionSetManagement.getMetadata(distributionSetId);
+        return ResponseEntity.ok(new PagedList<>(MgmtDistributionSetMapper.toResponseDsMetadata(metadata), metadata.size()));
     }
 
     @Override
     public ResponseEntity<MgmtMetadata> getMetadataValue(final Long distributionSetId, final String metadataKey) {
-        // check if distribution set exists otherwise throw exception immediately
-        final DistributionSetMetadata findOne = distributionSetManagement
-                .findMetaDataByDistributionSetId(distributionSetId, metadataKey)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetMetadata.class, distributionSetId, metadataKey));
-        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDsMetadata(findOne));
+        final String metadataValue = distributionSetManagement.getMetadata(distributionSetId).get(metadataKey);
+        if (metadataValue == null) {
+            throw new EntityNotFoundException("Target metadata", distributionSetId + ":" + metadataKey);
+        }
+        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDsMetadata(metadataKey, metadataValue));
     }
 
     @Override
-    public ResponseEntity<MgmtMetadata> updateMetadata(
-            final Long distributionSetId, final String metadataKey, final MgmtMetadataBodyPut metadata) {
-        // check if distribution set exists otherwise throw exception immediately
-        final DistributionSetMetadata updated = distributionSetManagement.updateMetaData(distributionSetId,
-                entityFactory.generateDsMetadata(metadataKey, metadata.getValue()));
-        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDsMetadata(updated));
+    public void updateMetadata(final Long distributionSetId, final String metadataKey, final MgmtMetadataBodyPut metadata) {
+        distributionSetManagement.updateMetadata(distributionSetId, metadataKey, metadata.getValue());
     }
 
     @Override
-    public ResponseEntity<Void> deleteMetadata(final Long distributionSetId, final String metadataKey) {
-        // check if distribution set exists otherwise throw exception immediately
-        distributionSetManagement.deleteMetaData(distributionSetId, metadataKey);
-        return ResponseEntity.ok().build();
+    public void deleteMetadata(final Long distributionSetId, final String metadataKey) {
+        distributionSetManagement.deleteMetadata(distributionSetId, metadataKey);
     }
 
     @Override
-    public ResponseEntity<List<MgmtMetadata>> createMetadata(final Long distributionSetId, final List<MgmtMetadata> metadataRest) {
-        // check if distribution set exists otherwise throw exception immediately
-        final List<DistributionSetMetadata> created = distributionSetManagement.putMetaData(distributionSetId,
-                MgmtDistributionSetMapper.fromRequestDsMetadata(metadataRest, entityFactory));
-        return new ResponseEntity<>(MgmtDistributionSetMapper.toResponseDsMetadata(created), HttpStatus.CREATED);
-
-    }
-
-    @Override
-    public ResponseEntity<Void> assignSoftwareModules(
-            final Long distributionSetId, final List<MgmtSoftwareModuleAssignment> softwareModuleIDs) {
+    public ResponseEntity<Void> assignSoftwareModules(final Long distributionSetId, final List<MgmtSoftwareModuleAssignment> softwareModuleIDs) {
         distributionSetManagement.assignSoftwareModules(
                 distributionSetId,
                 softwareModuleIDs.stream()

@@ -119,7 +119,6 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHol
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetMetadataRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTypeRepository;
@@ -536,7 +535,6 @@ public class RepositoryApplicationConfiguration {
             final DistributionSetRepository distributionSetRepository,
             final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
-            final DistributionSetMetadataRepository distributionSetMetadataRepository,
             final TargetRepository targetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
             final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement tenantConfigurationManagement,
@@ -544,7 +542,7 @@ public class RepositoryApplicationConfiguration {
             final DistributionSetTagRepository distributionSetTagRepository,
             final JpaProperties properties, final RepositoryProperties repositoryProperties) {
         return new JpaDistributionSetManagement(entityManager, distributionSetRepository, distributionSetTagManagement,
-                systemManagement, distributionSetTypeManagement, quotaManagement, distributionSetMetadataRepository,
+                systemManagement, distributionSetTypeManagement, quotaManagement,
                 targetRepository, targetFilterQueryRepository, actionRepository,
                 TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement),
                 virtualPropertyReplacer, softwareModuleRepository, distributionSetTagRepository,
