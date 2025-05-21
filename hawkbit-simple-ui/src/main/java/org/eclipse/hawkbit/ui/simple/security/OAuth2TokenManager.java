@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.ui.simple.security;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 
 @Component
-@ConditionalOnBean(name = "hawkbitOAuth2ClientCustomizer")
+@ConditionalOnProperty(prefix = "hawkbit.server.security.oauth2.client", name = "enabled")
 public class OAuth2TokenManager {
 
     private final OAuth2AuthorizedClientService clientService;
