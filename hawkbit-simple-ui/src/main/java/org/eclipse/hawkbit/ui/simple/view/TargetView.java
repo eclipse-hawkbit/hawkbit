@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.ui.simple.view;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -18,30 +20,31 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.time.ZoneOffset;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Input;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.shared.Registration;
 import jakarta.annotation.security.RolesAllowed;
 
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Input;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -54,9 +57,12 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
+import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
+import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentRequestBody;
@@ -69,14 +75,14 @@ import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryReq
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetType;
 import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
 import org.eclipse.hawkbit.ui.simple.MainLayout;
+import org.eclipse.hawkbit.ui.simple.components.SpinnerIcon;
 import org.eclipse.hawkbit.ui.simple.view.util.Filter;
 import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.simple.view.util.TableView;
 import org.eclipse.hawkbit.ui.simple.view.util.Utils;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
-
-import java.util.stream.Collectors;
 
 @PageTitle("Targets")
 @Route(value = "targets", layout = MainLayout.class)
@@ -108,7 +114,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
                 (query, filter) -> hawkbitClient.getTargetRestApi()
                         .getTargets(
                                 query.getOffset(), query.getPageSize(), Constants.NAME_ASC,
-                                filter)
+                                filter
+                        )
                         .getBody()
                         .getContent()
                         .stream(),
@@ -117,7 +124,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     selectionGrid.getSelectedItems().forEach(toDelete ->
                             hawkbitClient.getTargetRestApi().deleteTarget(toDelete.getControllerId()));
                     return CompletableFuture.completedFuture(null);
-                });
+                }
+        );
 
         Function<SelectionGrid<MgmtTarget, String>, CompletionStage<Void>> assignHandler = source -> new AssignDialog(
                 hawkbitClient, source.getSelectedItems()).result();
@@ -171,7 +179,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
                             "controllerid", controllerId.getOptionalValue(),
                             "targettype.name", type.getSelectedItems().stream().map(MgmtTargetType::getName)
                                     .toList(),
-                            "tag", tag.getSelectedItems()));
+                            "tag", tag.getSelectedItems()
+                    ));
         }
     }
 
@@ -313,22 +322,26 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private final TargetDetails targetDetails;
         private final TargetAssignedInstalled targetAssignedInstalled;
         private final TargetTags targetTags;
+        private final TargetActions targetActions;
 
         private TargetDetailedView(HawkbitMgmtClient hawkbitClient) {
             targetDetails = new TargetDetails(hawkbitClient);
             targetAssignedInstalled = new TargetAssignedInstalled(hawkbitClient);
             targetTags = new TargetTags(hawkbitClient);
+            targetActions = new TargetActions(hawkbitClient);
             setWidthFull();
 
             add("Details", targetDetails);
             add("Assigned / Installed", targetAssignedInstalled);
             add("Tags", targetTags);
+            add("Action History", targetActions);
         }
 
         private void setItem(final MgmtTarget target) {
             this.targetDetails.setItem(target);
             this.targetAssignedInstalled.setItem(target);
             this.targetTags.setItem(target);
+            this.targetActions.setItem(target);
         }
     }
 
@@ -342,6 +355,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private final TextField lastModifiedAt = Utils.textField(Constants.LAST_MODIFIED_AT);
         private final TextField securityToken = Utils.textField(Constants.SECURITY_TOKEN);
         private final TextArea targetAttributes = new TextArea(Constants.ATTRIBUTES);
+        private MgmtTarget target;
 
         private TargetDetails(HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
@@ -350,7 +364,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
                             description,
                             createdBy, createdAt,
                             lastModifiedBy, lastModifiedAt,
-                            securityToken, targetAttributes)
+                            securityToken, targetAttributes
+                    )
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -361,6 +376,11 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
 
         private void setItem(final MgmtTarget target) {
+            this.target = target;
+        }
+
+        @Override
+        protected void onAttach(AttachEvent attachEvent) {
             description.setValue(target.getDescription() == null ? "N/A" : target.getDescription());
             createdBy.setValue(target.getCreatedBy());
             createdAt.setValue(new Date(target.getCreatedAt()).toString());
@@ -369,8 +389,9 @@ public class TargetView extends TableView<MgmtTarget, String> {
             securityToken.setValue(target.getSecurityToken());
             var response = hawkbitClient.getTargetRestApi().getAttributes(target.getControllerId());
             if (response.getStatusCode().is2xxSuccessful()) {
-                targetAttributes.setValue(Objects.requireNonNullElse(response.getBody(), Collections.emptyMap()).entrySet().stream().map(entry -> entry.getKey() + ": " +
-                        entry.getValue()).collect(Collectors.joining("\n")));
+                targetAttributes.setValue(Objects.requireNonNullElse(response.getBody(), Collections.emptyMap()).entrySet().stream()
+                        .map(entry -> entry.getKey() + ": " +
+                                entry.getValue()).collect(Collectors.joining("\n")));
             } else {
                 targetAttributes.setValue("Error occurred fetching attributes from server: " + response.getStatusCode());
             }
@@ -382,6 +403,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private final transient HawkbitMgmtClient hawkbitClient;
         private final TextArea assigned = new TextArea("Assigned Distribution Set");
         private final TextArea installed = new TextArea("Installed Distribution Set");
+        private MgmtTarget target;
 
         private TargetAssignedInstalled(HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
@@ -394,6 +416,11 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
 
         private void setItem(final MgmtTarget target) {
+            this.target = target;
+        }
+
+        @Override
+        protected void onAttach(AttachEvent attachEvent) {
             Optional.ofNullable(hawkbitClient.getTargetRestApi().getInstalledDistributionSet(target.getControllerId()))
                     .map(ResponseEntity<MgmtDistributionSet>::getBody)
                     .ifPresent(value -> {
@@ -419,6 +446,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private final ComboBox<MgmtTag> tagSelector = new ComboBox<>(TAG);
         private final HorizontalLayout tagsArea = new HorizontalLayout();
         private Registration changeListener;
+        private MgmtTarget target;
 
         private TargetTags(HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
@@ -456,6 +484,11 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
 
         private void setItem(final MgmtTarget target) {
+            this.target = target;
+        }
+
+        @Override
+        protected void onAttach(AttachEvent attachEvent) {
             if (changeListener != null) {
                 changeListener.remove();
             }
@@ -474,6 +507,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
             final List<MgmtTag> tagList = Optional.ofNullable(hawkbitClient.getTargetRestApi().getTags(target.getControllerId()).getBody())
                     .orElse(Collections.emptyList());
+            LoggerFactory.getLogger(TargetTags.class).info("Tags: {}", tagList);
 
             for (MgmtTag tag : tagList) {
                 tagsArea.add(buildTargetTagBadge(tag, target.getControllerId()));
@@ -481,6 +515,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
 
         private Span buildTargetTagBadge(MgmtTag tag, String controllerId) {
+            LoggerFactory.getLogger(TargetTags.class).info("Tag: {}", tag);
             Button clearButton = new Button(VaadinIcon.CLOSE_SMALL.create());
             clearButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY_INLINE);
             clearButton.getStyle().set("margin-inline-start", "var(--lumo-space-xs)");
@@ -520,6 +555,199 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
     }
 
+    private static class TargetActions extends Grid<TargetActions.ActionStatusEntry> {
+
+        private final transient HawkbitMgmtClient hawkbitClient;
+        private MgmtTarget target;
+
+        private TargetActions(HawkbitMgmtClient hawkbitClient) {
+            this.hawkbitClient = hawkbitClient;
+            setWidthFull();
+            addColumn(new ComponentRenderer<Component, ActionStatusEntry>(ActionStatusEntry::getActiveIcon)).setHeader("Active")
+                    .setAutoWidth(true)
+                    .setFlexGrow(0);
+            addColumn(ActionStatusEntry::getDistributionSetName).setHeader("Distribution Set").setAutoWidth(true);
+            addColumn(ActionStatusEntry::getLastModifiedAt).setHeader("Last Modified").setAutoWidth(true)
+                    .setFlexGrow(0).setComparator(ActionStatusEntry::getLastModifiedAt);
+            addColumn(new ComponentRenderer<Component, ActionStatusEntry>(ActionStatusEntry::getActionTypeIcon)).setHeader("Status")
+                    .setAutoWidth(true)
+                    .setFlexGrow(0);
+            addColumn(new ComponentRenderer<Component, ActionStatusEntry>(ActionStatusEntry::getForceTypeIcon)).setHeader("Type")
+                    .setAutoWidth(true)
+                    .setFlexGrow(0);
+            addColumn(new ComponentRenderer<Component, ActionStatusEntry>(ActionStatusEntry::getActionsLayout)).setHeader("Actions")
+                    .setAutoWidth(true)
+                    .setFlexGrow(0);
+        }
+
+        private void setItem(final MgmtTarget target) {
+            this.target = target;
+        }
+
+        private List<ActionStatusEntry> fetchActions() {
+            return this.hawkbitClient.getTargetRestApi().getActionHistory(target.getControllerId(), 0, 30, null, null)
+                    .getBody()
+                    .getContent()
+                    .stream()
+                    .map(action -> new ActionStatusEntry(action, () -> setItems(fetchActions())))
+                    .filter(value -> value.action != null)
+                    .collect(Collectors.toList());
+        }
+
+        @Override
+        protected void onAttach(AttachEvent attachEvent) {
+            setItems(fetchActions());
+        }
+
+        private class ActionStatusEntry {
+
+            MgmtAction action;
+            MgmtDistributionSet distributionSet;
+            Runnable onUpdate;
+
+            public ActionStatusEntry(MgmtAction mgmtAction, Runnable onUpdate) {
+                this.action = hawkbitClient.getActionRestApi().getAction(mgmtAction.getId()).getBody();
+                this.onUpdate = onUpdate;
+                if (action == null) {
+                    LoggerFactory.getLogger(ActionStatusEntry.class).error("Unable to fetch the action with id : {}", mgmtAction.getId());
+                    return;
+                }
+                this.action.getLink("distributionset").ifPresent(link -> {
+                    try {
+                        Long dsId = Long.parseLong(link.getHref().substring(link.getHref().lastIndexOf("/") + 1));
+                        this.distributionSet = hawkbitClient.getDistributionSetRestApi().getDistributionSet(dsId).getBody();
+                    } catch (NumberFormatException e) {
+                        LoggerFactory.getLogger(ActionStatusEntry.class).error("Error parsing distribution set ID", e);
+                    }
+                });
+            }
+
+            private Boolean isActive() {
+                return action.getStatus().equals(MgmtAction.ACTION_PENDING);
+            }
+
+            private Boolean isCancelingOrCanceled() {
+                return action.getType().equals(MgmtAction.ACTION_CANCEL);
+            }
+
+            public Icon getActiveIcon() {
+                Icon icon;
+                if (isActive()) {
+                    icon = new SpinnerIcon();
+                } else {
+                    icon = VaadinIcon.CHECK_CIRCLE.create();
+                }
+                icon.addClassNames(LumoUtility.IconSize.SMALL);
+                return Utils.tooltip(icon, action.getStatus());
+            }
+
+            public Icon getActionTypeIcon() {
+                Icon icon;
+                if (action.getType().equals(MgmtAction.ACTION_UPDATE)) {
+                    icon = VaadinIcon.CHECK_CIRCLE.create();
+                    icon.setColor("green");
+                } else {
+                    icon = VaadinIcon.CLOSE_CIRCLE.create();
+                    icon.setColor("red");
+                }
+                icon.addClassNames(LumoUtility.IconSize.SMALL);
+                return Utils.tooltip(icon, action.getType());
+            }
+
+            public String getDistributionSetName() {
+                return distributionSet != null ? distributionSet.getName() : "Distribution Set not found";
+            }
+
+            public Instant getLastModifiedAt() {
+                return Instant.ofEpochMilli(action.getLastModifiedAt());
+            }
+
+            public Icon getForceTypeIcon() {
+                Icon icon = switch (action.getForceType()) {
+                    case FORCED -> VaadinIcon.BOLT.create();
+                    case TIMEFORCED -> VaadinIcon.USER_CLOCK.create();
+                    case SOFT -> VaadinIcon.USER_CHECK.create();
+                    case DOWNLOAD_ONLY -> VaadinIcon.DOWNLOAD.create();
+                };
+                return Utils.tooltip(icon, action.getForceType().getName());
+            }
+
+            public HorizontalLayout getActionsLayout() {
+                HorizontalLayout actionsLayout = new HorizontalLayout();
+                actionsLayout.setSpacing(true);
+                actionsLayout.setPadding(true);
+                actionsLayout.setWidthFull();
+
+                Button cancelButton = Utils.tooltip(new Button(VaadinIcon.CLOSE.create()), "Cancel Action");
+                if (isActive() && !isCancelingOrCanceled()) {
+                    cancelButton.addClickListener(e -> {
+                        String message = "Are you sure you want to cancel the action ?";
+                        promptForConfirmAction(
+                                message, onUpdate, () -> {
+                                    hawkbitClient.getTargetRestApi().cancelAction(target.getControllerId(), action.getId(), false);
+                                }
+                        ).open();
+                    });
+                } else {
+                    cancelButton.setEnabled(false);
+                }
+
+                Button forceButton = Utils.tooltip(new Button(VaadinIcon.BOLT.create()), "Force Action");
+                if (isActive() && !isCancelingOrCanceled() && action.getForceType() != MgmtActionType.FORCED) {
+                    forceButton.addClickListener(e -> {
+                        String message = "Are you sure you want to force the action ?";
+                        promptForConfirmAction(
+                                message, onUpdate, () -> {
+                                    MgmtActionRequestBodyPut setForced = new MgmtActionRequestBodyPut();
+                                    setForced.setForceType(MgmtActionType.FORCED);
+                                    hawkbitClient.getTargetRestApi().updateAction(target.getControllerId(), action.getId(), setForced);
+                                }
+                        ).open();
+                    });
+                } else {
+                    forceButton.setEnabled(false);
+                }
+
+                Button forceQuitButton = Utils.tooltip(new Button(VaadinIcon.CLOSE.create()), "Force Cancel");
+                forceQuitButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+                if (isActive() && isCancelingOrCanceled()) {
+                    forceQuitButton.addClickListener(e -> {
+                        String message = "Are you sure you want to force cancel the action ?";
+                        promptForConfirmAction(
+                                message, onUpdate, () -> {
+                                    hawkbitClient.getTargetRestApi().cancelAction(target.getControllerId(), action.getId(), true);
+                                }
+                        ).open();
+                    });
+                } else {
+                    forceQuitButton.setEnabled(false);
+                }
+
+                actionsLayout.add(cancelButton, forceButton, forceQuitButton);
+                return actionsLayout;
+            }
+
+            private static ConfirmDialog promptForConfirmAction(String message, Runnable refreshActions, Runnable actionConsumer) {
+                final ConfirmDialog dialog = new ConfirmDialog();
+                dialog.setHeader("Confirm Action");
+                dialog.setText(message);
+
+                dialog.setCancelable(true);
+                dialog.addCancelListener(event -> dialog.close());
+
+                dialog.setConfirmButtonTheme(ButtonVariant.LUMO_ERROR.getVariantName());
+                dialog.setConfirmText("Confirm");
+                dialog.addConfirmListener(event -> {
+                    actionConsumer.run();
+                    refreshActions.run();
+                    dialog.close();
+                });
+                return dialog;
+            }
+        }
+    }
+
     private static class RegisterDialog extends Utils.BaseDialog<Void> {
 
         private final Select<MgmtTargetType> type;
@@ -539,12 +767,15 @@ public class TargetView extends TableView<MgmtTarget, String> {
                             .getTargetTypes(0, 30, Constants.NAME_ASC, null)
                             .getBody()
                             .getContent()
-                            .toArray(new MgmtTargetType[0]));
+                            .toArray(new MgmtTargetType[0])
+            );
             type.setWidthFull();
             type.setEmptySelectionAllowed(true);
             type.setItemLabelGenerator(item -> item == null ? "" : item.getName());
-            controllerId = Utils.textField(CONTROLLER_ID,
-                    e -> register.setEnabled(!e.getHasValue().isEmpty()));
+            controllerId = Utils.textField(
+                    CONTROLLER_ID,
+                    e -> register.setEnabled(!e.getHasValue().isEmpty())
+            );
             controllerId.focus();
             name = Utils.textField(Constants.NAME);
             name.setWidthFull();
@@ -610,7 +841,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
                                             .getDistributionSets(0, 30, Constants.NAME_ASC, null)
                                             .getBody())
                             .map(body -> body.getContent().toArray(new MgmtDistributionSet[0]))
-                            .orElseGet(() -> new MgmtDistributionSet[0]));
+                            .orElseGet(() -> new MgmtDistributionSet[0])
+            );
             distributionSet.setRequiredIndicatorVisible(true);
             distributionSet.setItemLabelGenerator(distributionSetO ->
                     distributionSetO.getName() + ":" + distributionSetO.getVersion());

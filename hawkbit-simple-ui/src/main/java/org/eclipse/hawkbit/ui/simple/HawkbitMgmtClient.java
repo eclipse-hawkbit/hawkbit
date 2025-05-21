@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 
 import feign.FeignException;
 import lombok.Getter;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTagRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetTypeRestApi;
@@ -45,6 +46,7 @@ public class HawkbitMgmtClient {
     private final MgmtTargetFilterQueryRestApi targetFilterQueryRestApi;
     private final MgmtRolloutRestApi rolloutRestApi;
     private final MgmtTenantManagementRestApi tenantManagementRestApi;
+    private final MgmtActionRestApi actionRestApi;
 
     HawkbitMgmtClient(final Tenant tenant, final HawkbitClient hawkbitClient) {
         this.tenant = tenant;
@@ -61,6 +63,7 @@ public class HawkbitMgmtClient {
         targetFilterQueryRestApi = service(MgmtTargetFilterQueryRestApi.class);
         rolloutRestApi = service(MgmtRolloutRestApi.class);
         tenantManagementRestApi = service(MgmtTenantManagementRestApi.class);
+        actionRestApi = service(MgmtActionRestApi.class);
     }
 
     boolean hasSoftwareModulesRead() {
