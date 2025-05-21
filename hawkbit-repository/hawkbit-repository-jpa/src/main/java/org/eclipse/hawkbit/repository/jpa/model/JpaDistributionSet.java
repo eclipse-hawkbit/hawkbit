@@ -116,8 +116,8 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
             name = "sp_ds_metadata",
             joinColumns = { @JoinColumn(name = "ds", nullable = false) },
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_metadata_ds"))
-    @MapKeyColumn(name = "meta_key", length = DistributionSet.METADATA_KEY_SIZE)
-    @Column(name = "meta_value", length = DistributionSet.METADATA_VALUE_SIZE)
+    @MapKeyColumn(name = "meta_key", length = DistributionSet.METADATA_MAX_KEY_SIZE)
+    @Column(name = "meta_value", length = DistributionSet.METADATA_MAX_VALUE_SIZE)
     private Map<String, String> metadata;
 
     @Column(name = "complete")

@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThis
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Statistic;
 import org.springframework.data.domain.Page;
@@ -126,12 +125,11 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
     /**
      * Creates a map of distribution set meta-data entries.
      *
-     * @param id if the {@link DistributionSet} the metadata has to be created for
+     * @param id if the {@link DistributionSet} the meta-data has to be created for
      * @param metadata the meta-data entries to create or update
      * @throws EntityNotFoundException if given set does not exist
      * @throws EntityAlreadyExistsException in case one of the meta-data entry already exists for the specific key
-     * @throws AssignmentQuotaExceededException if the maximum number of {@link MetaData} entries is exceeded for the addressed
-     *         {@link DistributionSet}
+     * @throws AssignmentQuotaExceededException if the maximum number of meta-data entries is exceeded for the addressed {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     void createMetadata(long id, @NotEmpty Map<String, String> metadata);

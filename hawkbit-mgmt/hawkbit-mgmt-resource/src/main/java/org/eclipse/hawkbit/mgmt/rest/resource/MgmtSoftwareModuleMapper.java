@@ -117,15 +117,10 @@ public final class MgmtSoftwareModuleMapper {
     static void addLinks(final SoftwareModule softwareModule, final MgmtSoftwareModule response) {
         response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifacts(response.getId(), null, null))
                 .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_ARTIFACT).expand());
-
-        response.add(linkTo(
-                methodOn(MgmtSoftwareModuleTypeRestApi.class).getSoftwareModuleType(softwareModule.getType().getId()))
+        response.add(linkTo(methodOn(MgmtSoftwareModuleTypeRestApi.class).getSoftwareModuleType(softwareModule.getType().getId()))
                 .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_TYPE).expand());
-
-        response.add(linkTo(methodOn(MgmtSoftwareModuleResource.class).getMetadata(response.getId(),
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata")
-                .expand().expand());
+        response.add(linkTo(methodOn(MgmtSoftwareModuleResource.class).getMetadata(response.getId()))
+                .withRel("metadata").expand());
     }
 
     static MgmtArtifact toResponse(final Artifact artifact) {

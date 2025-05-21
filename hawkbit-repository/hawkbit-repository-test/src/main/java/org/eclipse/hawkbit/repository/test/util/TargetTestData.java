@@ -23,10 +23,10 @@ public class TargetTestData {
 
     static {
         final Random rand = new SecureRandom();
-        ATTRIBUTE_KEY_TOO_LONG = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_KEY_SIZE + 1, rand);
-        ATTRIBUTE_KEY_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_KEY_SIZE, rand);
-        ATTRIBUTE_VALUE_TOO_LONG = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE + 1, rand);
-        ATTRIBUTE_VALUE_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE, rand);
+        ATTRIBUTE_KEY_TOO_LONG = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE + 1, rand);
+        ATTRIBUTE_KEY_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE, rand);
+        ATTRIBUTE_VALUE_TOO_LONG = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE + 1, rand);
+        ATTRIBUTE_VALUE_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE, rand);
     }
 
     private TargetTestData() {

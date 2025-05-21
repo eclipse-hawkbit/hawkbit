@@ -40,22 +40,22 @@ public interface Target extends NamedEntity {
     /**
      * Maximum length of key of controller attribute
      */
-    int CONTROLLER_ATTRIBUTE_KEY_SIZE = 128;
+    int CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE = 128;
 
     /**
      * Maximum length of value of controller attribute
      */
-    int CONTROLLER_ATTRIBUTE_VALUE_SIZE = 128;
+    int CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE = 128;
 
     /**
      * Maximum length of metadata key.
      */
-    int CONTROLLER_METADATA_KEY_SIZE = 128;
+    int METADATA_MAX_KEY_SIZE = 128;
 
     /**
      * Maximum length of metadata value.
      */
-    int CONTROLLER_METADATA_VALUE_SIZE = 4000;
+    int METADATA_MAX_VALUE_SIZE = 4000;
 
     /**
      * @return business identifier of the {@link Target}

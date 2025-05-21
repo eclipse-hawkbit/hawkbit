@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
 import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutGroupFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
-import org.eclipse.hawkbit.repository.SoftwareModuleMetadataFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
 import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TargetFields;
@@ -130,22 +129,6 @@ public final class PagingUtility {
             return Sort.by(Direction.DESC, ActionStatusFields.ID.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(ActionStatusFields.class, sortParam));
-    }
-
-    public static Sort sanitizeMetadataSortParam(final String sortParam) {
-        if (sortParam == null) {
-            // default
-            return Sort.by(Direction.ASC, SoftwareModuleMetadataFields.KEY.getJpaEntityFieldName());
-        }
-        return Sort.by(SortUtility.parse(SoftwareModuleMetadataFields.class, sortParam));
-    }
-
-    public static Sort sanitizeSoftwareModuleMetadataSortParam(final String sortParam) {
-        if (sortParam == null) {
-            // default
-            return Sort.by(Direction.ASC, SoftwareModuleMetadataFields.KEY.getJpaEntityFieldName());
-        }
-        return Sort.by(SortUtility.parse(SoftwareModuleMetadataFields.class, sortParam));
     }
 
     public static Sort sanitizeRolloutSortParam(final String sortParam) {
