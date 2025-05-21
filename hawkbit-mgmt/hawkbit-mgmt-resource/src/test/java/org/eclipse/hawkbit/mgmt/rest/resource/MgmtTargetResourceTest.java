@@ -144,16 +144,16 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Ensures that when targetType value of -1 is provided the target type is unassigned from the target.")
-    void updateTargetAndUnnasignTargetType() throws Exception {
+    void updateTargetAndUnassignTargetType() throws Exception {
         final String knownControllerId = "123";
         final String knownNewAddress = "amqp://test123/foobar";
         final String knownNameNotModify = "controllerName";
-        final Long unnasignTargetTypeValue = -1L;
+        final Long unassignTargetTypeValue = -1L;
 
         final TargetType targetType = targetTypeManagement.create(
                 entityFactory.targetType().create().name("targettype1").description("targettypedes1"));
 
-        final String body = new JSONObject().put("targetType", unnasignTargetTypeValue).toString();
+        final String body = new JSONObject().put("targetType", unassignTargetTypeValue).toString();
 
         // create a target with the created TargetType
         targetManagement.create(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModify)
@@ -181,18 +181,18 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Ensures that when targetType value of -1 is provided the target type is unassigned from the target when updating multiple fields in target object.")
-    void updateTargetNameAndUnnasignTargetType() throws Exception {
+    void updateTargetNameAndUnassignTargetType() throws Exception {
         final String knownControllerId = "123";
         final String knownNewAddress = "amqp://test123/foobar";
         final String knownNameNotModify = "controllerName";
-        final Long unnasignTargetTypeValue = -1L;
+        final Long unassignTargetTypeValue = -1L;
         final String controllerNewName = "controllerNewName";
 
         final TargetType targetType = targetTypeManagement.create(
                 entityFactory.targetType().create().name("targettype1").description("targettypedes1"));
 
         final String body = new JSONObject()
-                .put("targetType", unnasignTargetTypeValue).put("name", "controllerNewName")
+                .put("targetType", unassignTargetTypeValue).put("name", "controllerNewName")
                 .toString();
 
         // create a target with the created TargetType
@@ -2046,6 +2046,11 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(delete("/rest/v1/targets/{targetId}/metadata/{key}", knownControllerId, knownKey))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+
+        // already deleted
+        mvc.perform(delete("/rest/v1/targets/{targetId}/metadata/{key}", knownControllerId, knownKey))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
 
         assertThat(targetManagement.getMetadata(knownControllerId).get(knownKey)).isNull();
     }

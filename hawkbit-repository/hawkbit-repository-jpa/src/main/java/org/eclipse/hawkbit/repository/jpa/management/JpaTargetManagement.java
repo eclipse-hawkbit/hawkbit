@@ -683,9 +683,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Page<Target> findByControllerAttributesRequested(final Pageable pageReq) {
         return JpaManagementHelper.findAllWithCountBySpec(
-                targetRepository,
-                List.of(TargetSpecifications.hasRequestControllerAttributesTrue()),
-                pageReq);
+                targetRepository, List.of(TargetSpecifications.hasRequestControllerAttributesTrue()), pageReq);
     }
 
     @Override
@@ -705,7 +703,6 @@ public class JpaTargetManagement implements TargetManagement {
         metadata.putAll(md);
 
         assertMetadataQuota(target.getId(), metadata.size());
-
         targetRepository.save(target);
     }
 
@@ -718,13 +715,15 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void updateMetadata(final String controllerId, final Map<String, String> md) {
+    public void updateMetadata(final String controllerId, final String key, final String value) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
 
         // get the modifiable metadata map
         final Map<String, String> metadata = target.getMetadata();
-        metadata.putAll(md);
-        assertMetadataQuota(target.getId(), metadata.size());
+        if (!metadata.containsKey(key)) {
+            throw new EntityNotFoundException("Target metadata", controllerId + ":" + key);
+        }
+        metadata.put(key, value);
 
         targetRepository.save(target);
     }
@@ -733,17 +732,16 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(retryFor = { ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX,
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public boolean deleteMetadata(final String controllerId, final String key) {
+    public void deleteMetadata(final String controllerId, final String key) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
 
         // get the modifiable metadata map
         final Map<String, String> metadata = target.getMetadata();
         if (metadata.remove(key) == null) {
-            return false;
-        } else {
-            targetRepository.save(target);
-            return true;
+            throw new EntityNotFoundException("Target metadata", controllerId + ":" + key);
         }
+
+        targetRepository.save(target);
     }
 
     private Map<String, String> getMap(final String controllerId, final MapAttribute<JpaTarget, String, String> mapAttribute) {

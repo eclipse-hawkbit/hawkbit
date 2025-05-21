@@ -734,7 +734,6 @@ public interface MgmtTargetRestApi {
      *
      * @param targetId the ID of the targetId to create metadata for
      * @param metadataRest the list of metadata entries to create
-     * @return status created if post request is successful with the value of the created metadata
      */
     @Operation(summary = "Create a list of metadata for a specific target", description = "Create a list of metadata entries Required permissions: READ_REPOSITORY and UPDATE_TARGET")
     @ApiResponses(value = {
@@ -763,8 +762,7 @@ public interface MgmtTargetRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @PostMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata",
-            consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE },
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+            consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
     @ResponseStatus(HttpStatus.CREATED)
     void createMetadata(@PathVariable("targetId") String targetId, @RequestBody List<MgmtMetadata> metadataRest);
 
@@ -772,11 +770,6 @@ public interface MgmtTargetRestApi {
      * Gets a paged list of metadata for a target.
      *
      * @param targetId the ID of the target for the metadata
-     * @param pagingOffsetParam the offset of list of targets for pagination, might not be present in the rest request then default value will
-     *         be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax {@code q=key==abc}
      * @return status OK if get request is successful with the paged list of metadata
      */
     @Operation(summary = "Return metadata for specific target", description = "Get a paged list of metadata for a target. Required permission: READ_REPOSITORY")
@@ -799,8 +792,8 @@ public interface MgmtTargetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @GetMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata",
+            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("targetId") String targetId);
 
     /**
@@ -842,7 +835,6 @@ public interface MgmtTargetRestApi {
      * @param targetId the ID of the target to update the metadata entry
      * @param metadataKey the key of the metadata to update the value
      * @param metadata update body
-     * @return status OK if the update request is successful and the updated metadata result
      */
     @Operation(summary = "Updates a single metadata value of a target", description = "Update a single metadata value for speficic key. Required permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
@@ -869,8 +861,7 @@ public interface MgmtTargetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{metadataKey}",
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{metadataKey}")
     @ResponseStatus(HttpStatus.OK)
     void updateMetadata(
             @PathVariable("targetId") String targetId,
@@ -905,7 +896,8 @@ public interface MgmtTargetRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @DeleteMapping(value = MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{metadataKey}")
-    ResponseEntity<Void> deleteMetadata(@PathVariable("targetId") String targetId, @PathVariable("metadataKey") String metadataKey);
+    @ResponseStatus(HttpStatus.OK)
+    void deleteMetadata(@PathVariable("targetId") String targetId, @PathVariable("metadataKey") String metadataKey);
 
     /**
      * Get the current auto-confirm state for a specific target.

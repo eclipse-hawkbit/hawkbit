@@ -446,14 +446,13 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public void updateMetadata(final String targetId, final String metadataKey, final MgmtMetadataBodyPut metadata) {
-        targetManagement.updateMetadata(targetId, Map.of(metadataKey, metadata.getValue()));
+        targetManagement.updateMetadata(targetId, metadataKey, metadata.getValue());
     }
 
     @Override
     @AuditLog(entity = "Target", type = AuditLog.Type.DELETE, description = "Delete Target Metadata")
-    public ResponseEntity<Void> deleteMetadata(final String targetId, final String metadataKey) {
-        final boolean foundAndDeleted = targetManagement.deleteMetadata(targetId, metadataKey);
-        return (foundAndDeleted ? ResponseEntity.ok() : ResponseEntity.notFound()).build();
+    public void deleteMetadata(final String targetId, final String metadataKey) {
+        targetManagement.deleteMetadata(targetId, metadataKey);
     }
 
     @Override

@@ -641,8 +641,7 @@ public interface TargetManagement {
     List<Target> get(@NotNull Collection<Long> ids);
 
     /**
-     * Verifies that {@link Target} with given controller ID exists in the
-     * repository.
+     * Verifies that {@link Target} with given controller ID exists in the repository.
      *
      * @param controllerId of target
      * @return {@code true} if target with given ID exists
@@ -725,11 +724,12 @@ public interface TargetManagement {
      * Updates a target meta-data value if corresponding entry exists.
      *
      * @param controllerId {@link Target} controller id of the metadata entry to be updated
-     * @param metadata meta data entry to be updated
+     * @param key meta data-entry key to be updated
+     * @param value meta data-entry to be new value
      * @throws EntityNotFoundException in case the metadata entry does not exist and cannot be updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    void updateMetadata(@NotEmpty String controllerId, @NotNull Map<String, String> metadata);
+    void updateMetadata(@NotEmpty String controllerId, @NotNull String key, @NotNull String value);
 
     /**
      * Deletes a target meta data entry.
@@ -739,5 +739,5 @@ public interface TargetManagement {
      * @throws EntityNotFoundException if given target does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    boolean deleteMetadata(@NotEmpty String controllerId, @NotEmpty String key);
+    void deleteMetadata(@NotEmpty String controllerId, @NotEmpty String key);
 }

@@ -109,20 +109,15 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget();
 
         verifyThrownExceptionBy(
-                () -> targetManagement.assignTag(Collections.singletonList(target.getControllerId()), NOT_EXIST_IDL),
-                "TargetTag");
-        verifyThrownExceptionBy(() -> targetManagement.assignTag(Collections.singletonList(NOT_EXIST_ID), tag.getId()),
-                "Target");
+                () -> targetManagement.assignTag(Collections.singletonList(target.getControllerId()), NOT_EXIST_IDL), "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.assignTag(Collections.singletonList(NOT_EXIST_ID), tag.getId()), "Target");
 
         verifyThrownExceptionBy(() -> targetManagement.findByTag(PAGE, NOT_EXIST_IDL), "TargetTag");
         verifyThrownExceptionBy(() -> targetManagement.findByRsqlAndTag(PAGE, "name==*", NOT_EXIST_IDL), "TargetTag");
 
-        verifyThrownExceptionBy(() -> targetManagement.countByAssignedDistributionSet(NOT_EXIST_IDL),
-                "DistributionSet");
-        verifyThrownExceptionBy(() -> targetManagement.countByInstalledDistributionSet(NOT_EXIST_IDL),
-                "DistributionSet");
-        verifyThrownExceptionBy(() -> targetManagement.existsByInstalledOrAssignedDistributionSet(NOT_EXIST_IDL),
-                "DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.countByAssignedDistributionSet(NOT_EXIST_IDL), "DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.countByInstalledDistributionSet(NOT_EXIST_IDL), "DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.existsByInstalledOrAssignedDistributionSet(NOT_EXIST_IDL), "DistributionSet");
 
         verifyThrownExceptionBy(() -> targetManagement.countByTargetFilterQuery(NOT_EXIST_IDL), "TargetFilterQuery");
         verifyThrownExceptionBy(() -> targetManagement.countByRsqlAndNonDSAndCompatibleAndUpdatable(NOT_EXIST_IDL, "name==*"),
@@ -134,35 +129,29 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(
                 () -> targetManagement.findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(PAGE, NOT_EXIST_IDL, "name==*"),
                 "DistributionSet");
-        verifyThrownExceptionBy(() -> targetManagement.findByInRolloutGroupWithoutAction(PAGE, NOT_EXIST_IDL),
-                "RolloutGroup");
-        verifyThrownExceptionBy(() -> targetManagement.findByAssignedDistributionSet(PAGE, NOT_EXIST_IDL),
-                "DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.findByInRolloutGroupWithoutAction(PAGE, NOT_EXIST_IDL), "RolloutGroup");
+        verifyThrownExceptionBy(() -> targetManagement.findByAssignedDistributionSet(PAGE, NOT_EXIST_IDL), "DistributionSet");
         verifyThrownExceptionBy(
-                () -> targetManagement.findByAssignedDistributionSetAndRsql(PAGE, NOT_EXIST_IDL, "name==*"),
-                "DistributionSet");
+                () -> targetManagement.findByAssignedDistributionSetAndRsql(PAGE, NOT_EXIST_IDL, "name==*"), "DistributionSet");
 
-        verifyThrownExceptionBy(() -> targetManagement.findByInstalledDistributionSet(PAGE, NOT_EXIST_IDL),
-                "DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.findByInstalledDistributionSet(PAGE, NOT_EXIST_IDL), "DistributionSet");
         verifyThrownExceptionBy(
-                () -> targetManagement.findByInstalledDistributionSetAndRsql(PAGE, NOT_EXIST_IDL, "name==*"),
-                "DistributionSet");
+                () -> targetManagement.findByInstalledDistributionSetAndRsql(PAGE, NOT_EXIST_IDL, "name==*"), "DistributionSet");
 
         verifyThrownExceptionBy(() -> targetManagement
                 .assignTag(Collections.singletonList(target.getControllerId()), Long.parseLong(NOT_EXIST_ID)), "TargetTag");
         verifyThrownExceptionBy(
-                () -> targetManagement.assignTag(Collections.singletonList(NOT_EXIST_ID), tag.getId()),
-                "Target");
+                () -> targetManagement.assignTag(Collections.singletonList(NOT_EXIST_ID), tag.getId()), "Target");
 
         verifyThrownExceptionBy(() -> targetManagement.unassignTag(List.of(NOT_EXIST_ID), tag.getId()), "Target");
-        verifyThrownExceptionBy(() -> targetManagement.unassignTag(List.of(target.getControllerId()), NOT_EXIST_IDL),
-                "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.unassignTag(List.of(target.getControllerId()), NOT_EXIST_IDL), "TargetTag");
         verifyThrownExceptionBy(() -> targetManagement.update(entityFactory.target().update(NOT_EXIST_ID)), "Target");
 
         verifyThrownExceptionBy(() -> targetManagement.createMetadata(NOT_EXIST_ID, Map.of("123", "123")), "Target");
         verifyThrownExceptionBy(() -> targetManagement.deleteMetadata(NOT_EXIST_ID, "xxx"), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.deleteMetadata(target.getControllerId(), NOT_EXIST_ID), "Target");
         verifyThrownExceptionBy(() -> targetManagement.getMetadata(NOT_EXIST_ID).get("xxx"), "Target");
-        verifyThrownExceptionBy(() -> targetManagement.updateMetadata(NOT_EXIST_ID, Map.of("xxx", "xxx")), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.updateMetadata(NOT_EXIST_ID, "xxx", "xxx"), "Target");
     }
 
     @Test
@@ -835,7 +824,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(changedLockRevisionTarget.getOptLockRevision()).isEqualTo(2);
 
         // update the target metadata
-        targetManagement.updateMetadata(target.getControllerId(), Map.of(knownKey, knownUpdateValue));
+        targetManagement.updateMetadata(target.getControllerId(), knownKey, knownUpdateValue);
         // we are updating the target meta-data so also modifying the target so opt lock revision must be three
         final Target changedLockRevisionTarget2 = targetManagement.get(target.getId()).orElseThrow(NoSuchElementException::new);
         assertThat(changedLockRevisionTarget2.getOptLockRevision()).isEqualTo(3);
@@ -852,12 +841,13 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String knownValue = "myKnownValue";
 
         // create target
-        final Target target = createTargetWithMetadata("target1", 10);
-        targetManagement.updateMetadata(target.getControllerId(), Map.of(knownKey, knownValue));
+        final String controllerId = createTargetWithMetadata("target1", 10).getControllerId();
+        targetManagement.createMetadata(controllerId, Map.of(knownKey, knownValue));
 
-        assertThat(targetManagement.deleteMetadata(target.getControllerId(), knownKey)).isTrue();
+        targetManagement.deleteMetadata(controllerId, knownKey);
         // already removed
-        assertThat(targetManagement.deleteMetadata(target.getControllerId(), knownKey)).isFalse();
+        assertThatExceptionOfType(EntityNotFoundException.class)
+                .isThrownBy(() -> targetManagement.deleteMetadata(controllerId, knownKey));
     }
 
     @Test

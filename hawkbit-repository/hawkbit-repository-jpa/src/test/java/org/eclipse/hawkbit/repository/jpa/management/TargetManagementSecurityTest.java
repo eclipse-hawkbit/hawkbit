@@ -409,7 +409,7 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
     @WithUser(principal = "user", authorities = { SpPermission.UPDATE_REPOSITORY })
     void updateMetadataPermissionsCheck() {
         assertPermissions(() -> {
-                    targetManagement.updateMetadata("controllerId", Map.of("key", "value"));
+                    targetManagement.updateMetadata("controllerId", "key", "value");
                     return null;
                 },
                 List.of(SpPermission.UPDATE_REPOSITORY));
