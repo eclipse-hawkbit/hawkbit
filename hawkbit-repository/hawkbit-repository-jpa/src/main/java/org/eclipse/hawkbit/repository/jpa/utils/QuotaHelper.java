@@ -13,6 +13,7 @@ import java.util.function.ToLongFunction;
 
 import jakarta.validation.constraints.NotNull;
 
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
@@ -20,7 +21,7 @@ import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException
 /**
  * Helper class to check quotas.
  */
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public final class QuotaHelper {
 
