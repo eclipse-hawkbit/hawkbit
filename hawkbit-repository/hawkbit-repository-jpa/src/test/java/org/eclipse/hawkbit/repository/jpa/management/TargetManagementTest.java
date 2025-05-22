@@ -794,14 +794,9 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Queries and loads the metadata related to a given target.")
     void getMetadata() {
         // create targets
-        final Target target1 = createTargetWithMetadata("target1", 10);
-        final Target target2 = createTargetWithMetadata("target2", 8);
-
-        final Map<String, String> metadataOfTarget1 = targetManagement.getMetadata(target1.getControllerId());
-        final Map<String, String> metadataOfTarget2 = targetManagement.getMetadata(target2.getControllerId());
-
-        assertThat(metadataOfTarget1).hasSize(10);
-        assertThat(metadataOfTarget2).hasSize(8);
+        assertThat(targetManagement.getMetadata(testdataFactory.createTarget("target0").getControllerId())).isEmpty();
+        assertThat(targetManagement.getMetadata(createTargetWithMetadata("target1", 10).getControllerId())).hasSize(10);
+        assertThat(targetManagement.getMetadata(createTargetWithMetadata("target2", 8).getControllerId())).hasSize(8);
     }
 
     @Test
