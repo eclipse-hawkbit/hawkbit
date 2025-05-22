@@ -80,6 +80,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
+    protected static final String SOFTWARE_MODULE_METADATA = "SoftwareModuleMetadata";
     private final EntityManager entityManager;
     private final DistributionSetRepository distributionSetRepository;
     private final SoftwareModuleRepository softwareModuleRepository;
@@ -298,7 +299,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     public SoftwareModuleMetadata getMetadata(final long id, final String key) {
         assertSoftwareModuleExists(id);
 
-        return findMetadata(id, key).orElseThrow(() -> new EntityNotFoundException("SoftwareModuleMetadata", id + ":" + key));
+        return findMetadata(id, key).orElseThrow(() -> new EntityNotFoundException(SOFTWARE_MODULE_METADATA, id + ":" + key));
     }
 
     @Override
@@ -337,7 +338,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         // check if exists otherwise throw entity not found exception
         final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) findMetadata(
                 update.getSoftwareModuleId(), update.getKey())
-                .orElseThrow(() -> new EntityNotFoundException("SoftwareModuleMetadata", update.getSoftwareModuleId() + ":" + update.getKey()));
+                .orElseThrow(() -> new EntityNotFoundException(SOFTWARE_MODULE_METADATA, update.getSoftwareModuleId() + ":" + update.getKey()));
 
         update.getValue().ifPresent(metadata::setValue);
         update.isTargetVisible().ifPresent(metadata::setTargetVisible);
@@ -352,7 +353,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteMetadata(final long id, final String key) {
         final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) findMetadata(id, key)
-                .orElseThrow(() -> new EntityNotFoundException("SoftwareModuleMetadata", id + ":" + key));
+                .orElseThrow(() -> new EntityNotFoundException(SOFTWARE_MODULE_METADATA, id + ":" + key));
 
         JpaManagementHelper.touch(entityManager, softwareModuleRepository, metadata.getSoftwareModule());
         softwareModuleMetadataRepository.deleteById(metadata.getId());
