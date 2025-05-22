@@ -31,8 +31,7 @@ public interface TargetCreate {
     TargetCreate controllerId(@Size(min = 1, max = Target.CONTROLLER_ID_MAX_SIZE) @NotNull String controllerId);
 
     /**
-     * @param name for {@link Target#getName()} filled with
-     *         {@link #controllerId(String)} as default if not set explicitly
+     * @param name for {@link Target#getName()} filled with {@link #controllerId(String)} as default if not set explicitly
      * @return updated builder instance
      */
     TargetCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
@@ -50,8 +49,7 @@ public interface TargetCreate {
     TargetCreate targetType(Long targetTypeId);
 
     /**
-     * @param securityToken for {@link Target#getSecurityToken()} is generated with a
-     *         random sequence as default if not set explicitly
+     * @param securityToken for {@link Target#getSecurityToken()} is generated with a random sequence as default if not set explicitly
      * @return updated builder instance
      */
     TargetCreate securityToken(@Size(min = 1, max = Target.SECURITY_TOKEN_MAX_SIZE) @NotNull String securityToken);
@@ -70,9 +68,7 @@ public interface TargetCreate {
     TargetCreate lastTargetQuery(Long lastTargetQuery);
 
     /**
-     * @param status for {@link Target#getUpdateStatus()} is
-     *         {@link TargetUpdateStatus#UNKNOWN} as default if not set
-     *         explicitly
+     * @param status for {@link Target#getUpdateStatus()} is {@link TargetUpdateStatus#UNKNOWN} as default if not set explicitly
      * @return updated builder instance
      */
     TargetCreate status(@NotNull TargetUpdateStatus status);
