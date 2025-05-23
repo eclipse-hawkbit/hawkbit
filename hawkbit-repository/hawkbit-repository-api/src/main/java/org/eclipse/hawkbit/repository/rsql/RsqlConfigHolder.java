@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.rsql;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -23,6 +24,11 @@ public final class RsqlConfigHolder {
 
     private static final RsqlConfigHolder SINGLETON = new RsqlConfigHolder();
 
+    public enum RsqlToSpecBuilder {
+        G2, // G2 RSQL visitor
+        LEGACY, // legacy RSQL visitor
+        G3 // G3 RSQL visitor - still experimental
+    }
     /**
      * If RSQL comparison operators shall ignore the case. If ignore case is <code>true</code> "x == ax" will match "x == aX"
      */
@@ -39,11 +45,12 @@ public final class RsqlConfigHolder {
     private boolean caseInsensitiveDB;
 
     /**
-     * @deprecated in favour of G2 RSQL visitor. since 0.6.0
+     * @deprecated in favour fixed final visitor / spec builder of G2 RSQL visitor / G3 spec builder. since 0.6.0
      */
+    @Setter // for tests only
     @Deprecated(forRemoval = true, since = "0.6.0")
-    @Value("${hawkbit.rsql.legacy-rsql-visitor:false}")
-    private boolean legacyRsqlVisitor;
+    @Value("${hawkbit.rsql.rsql-to-spec-builder:G3}") //
+    private RsqlToSpecBuilder rsqlToSpecBuilder;
 
     /**
      * @return The holder singleton instance.

@@ -86,8 +86,6 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
         }
     }
 
-
-
     /**
      * Contains the sub entity the given field.
      *

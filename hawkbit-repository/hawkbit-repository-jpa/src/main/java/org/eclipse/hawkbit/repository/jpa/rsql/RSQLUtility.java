@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
+import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.G3;
+import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY;
+
 import java.io.Serial;
 import java.util.Collections;
 import java.util.HashSet;
@@ -34,6 +37,8 @@ import org.apache.commons.lang3.text.StrLookup;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.jpa.rsql3.RsqlParser;
+import org.eclipse.hawkbit.repository.jpa.rsql3.SpecificationBuilder;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
@@ -150,26 +155,33 @@ public final class RSQLUtility {
 
         @Override
         public Predicate toPredicate(final Root<T> root, final CriteriaQuery<?> query, final CriteriaBuilder cb) {
-            final Node rootNode = parseRsql(rsql);
-            query.distinct(true);
-
-            final RSQLVisitor<List<Predicate>, String> jpqQueryRSQLVisitor =
-                    RsqlConfigHolder.getInstance().isLegacyRsqlVisitor()
-                            ? new JpaQueryRsqlVisitor<>(
-                                    root, cb, enumType,
-                                    virtualPropertyReplacer, database, query,
-                                    !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase())
-                            : new JpaQueryRsqlVisitorG2<>(
-                                    enumType, root, query, cb,
-                                    database, virtualPropertyReplacer,
-                                    !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance()
-                                            .isIgnoreCase());
-            final List<Predicate> accept = rootNode.accept(jpqQueryRSQLVisitor);
-
-            if (CollectionUtils.isEmpty(accept)) {
-                return cb.conjunction();
+            if (RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == G3) {
+                return new SpecificationBuilder<T>(
+                        virtualPropertyReplacer,
+                        !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase(),
+                        database).specification(RsqlParser.parse(rsql, enumType)).toPredicate(root, query, cb);
             } else {
-                return cb.and(accept.toArray(new Predicate[0]));
+                final Node rootNode = parseRsql(rsql);
+                query.distinct(true);
+
+                final RSQLVisitor<List<Predicate>, String> jpqQueryRSQLVisitor =
+                        RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY
+                                ? new JpaQueryRsqlVisitor<>(
+                                        root, cb, enumType,
+                                        virtualPropertyReplacer, database, query,
+                                        !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase())
+                                : new JpaQueryRsqlVisitorG2<>(
+                                        enumType, root, query, cb,
+                                        database, virtualPropertyReplacer,
+                                        !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance()
+                                                .isIgnoreCase());
+                final List<Predicate> accept = rootNode.accept(jpqQueryRSQLVisitor);
+
+                if (CollectionUtils.isEmpty(accept)) {
+                    return cb.conjunction();
+                } else {
+                    return cb.and(accept.toArray(new Predicate[0]));
+                }
             }
         }
     }

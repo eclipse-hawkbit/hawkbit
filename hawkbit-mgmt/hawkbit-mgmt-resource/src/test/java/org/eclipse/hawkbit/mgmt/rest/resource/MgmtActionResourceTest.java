@@ -322,15 +322,10 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         assignDistributionSet(ds, Collections.singletonList(target));
 
-        final String rsqlTargetControllerId = "target.controllerId==knownTargetId";
-        final String rsqlTargetName = "target.name==knownTargetName";
-        final String rsqlTargetUpdateStatus = "target.updateStatus==pending";
-        final String rsqlTargetAddress = "target.address==http://0.0.0.0";
-
-        verifyResultsByTargetPropertyFilter(target, ds, rsqlTargetControllerId);
-        verifyResultsByTargetPropertyFilter(target, ds, rsqlTargetName);
-        verifyResultsByTargetPropertyFilter(target, ds, rsqlTargetUpdateStatus);
-        verifyResultsByTargetPropertyFilter(target, ds, rsqlTargetAddress);
+        verifyResultsByTargetPropertyFilter(target, ds, "target.controllerId==knownTargetId");
+        verifyResultsByTargetPropertyFilter(target, ds, "target.name==knownTargetName");
+        verifyResultsByTargetPropertyFilter(target, ds, "target.updateStatus==pending");
+        verifyResultsByTargetPropertyFilter(target, ds, "target.address==http://0.0.0.0");
     }
 
     @Test
