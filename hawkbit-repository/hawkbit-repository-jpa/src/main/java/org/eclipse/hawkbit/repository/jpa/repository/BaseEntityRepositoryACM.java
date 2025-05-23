@@ -31,7 +31,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.repository.query.FluentQuery;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -172,6 +171,11 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     }
 
     @Override
+    public Page<T> findAll(final Specification<T> spec, final Specification<T> countSpec, final Pageable pageable) {
+        return repository.findAll(accessController.appendAccessRules(AccessController.Operation.READ, spec), countSpec, pageable);
+    }
+
+    @Override
     @NonNull
     public List<T> findAll(final Specification<T> spec, @NonNull final Sort sort) {
         return repository.findAll(accessController.appendAccessRules(AccessController.Operation.READ, spec), sort);
@@ -194,7 +198,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     }
 
     @Override
-    public <S extends T, R> R findBy(final Specification<T> spec, final Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+    public <S extends T, R> R findBy(final Specification<T> spec, final Function<? super SpecificationFluentQuery<S>, R> queryFunction) {
         Objects.requireNonNull(spec, SPEC_MUST_NOT_BE_NULL);
         return repository.findBy(
                 // spec shall be non-null and the result of appending rules shall be non-null
