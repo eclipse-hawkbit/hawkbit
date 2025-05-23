@@ -42,11 +42,6 @@ public enum ActionFields implements RsqlQueryField, FieldValueConverter<ActionFi
     private final String jpaEntityFieldName;
     private final List<String> subEntityAttributes;
 
-    ActionFields(final String jpaEntityFieldName) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
-        this.subEntityAttributes = Collections.emptyList();
-    }
-
     ActionFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
         this.jpaEntityFieldName = jpaEntityFieldName;
         this.subEntityAttributes = List.of(subEntityAttributes);

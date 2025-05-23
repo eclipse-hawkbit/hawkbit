@@ -60,7 +60,7 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
             for (int i = 1; i < split.length; i++) {
                 split[i] = getFormattedSubEntityAttribute(enumValue, split[i]);
 
-                if (!enumValue.containsSubEntityAttribute(split[i])) {
+                if (!containsSubEntityAttribute(enumValue, split[i])) {
                     if (i != split.length - 1 || !enumValue.isMap()) {
                         throw createRSQLParameterUnsupportedException(node, null);
                     } // otherwise - the key of map is not in the sub entity attributes
@@ -84,6 +84,32 @@ public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
         } else {
             return rsqlFieldName.split(RsqlQueryField.SUB_ATTRIBUTE_SPLIT_REGEX);
         }
+    }
+
+
+
+    /**
+     * Contains the sub entity the given field.
+     *
+     * @param propertyField the given field
+     * @return <code>true</code> contains <code>false</code> contains not
+     */
+    private boolean containsSubEntityAttribute(final A enumField, final String propertyField) {
+        final List<String> subEntityAttributes = enumField.getSubEntityAttributes();
+        if (subEntityAttributes.contains(propertyField)) {
+            return true;
+        }
+
+        for (final String attribute : subEntityAttributes) {
+            final String[] graph = attribute.split(RsqlQueryField.SUB_ATTRIBUTE_SPLIT_REGEX);
+            for (final String subAttribute : graph) {
+                if (subAttribute.equalsIgnoreCase(propertyField)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**

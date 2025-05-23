@@ -25,7 +25,7 @@ public enum TargetFilterQueryFields implements RsqlQueryField {
     AUTOASSIGNDISTRIBUTIONSET("autoAssignDistributionSet", "name", "version");
 
     private final String jpaEntityFieldName;
-    private List<String> subEntityAttributes;
+    private final List<String> subEntityAttributes;
 
     TargetFilterQueryFields(final String jpaEntityFieldName) {
         this(jpaEntityFieldName, Collections.emptyList());
