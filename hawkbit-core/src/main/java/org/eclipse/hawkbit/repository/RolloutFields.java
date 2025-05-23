@@ -24,17 +24,14 @@ public enum RolloutFields implements RsqlQueryField {
     NAME("name"),
     DESCRIPTION("description"),
     STATUS("status"),
-    DISTRIBUTIONSET("distributionSet", DistributionSetFields.ID.getJpaEntityFieldName(),
+    DISTRIBUTIONSET(
+            "distributionSet",
+            DistributionSetFields.ID.getJpaEntityFieldName(),
             DistributionSetFields.NAME.getJpaEntityFieldName(), DistributionSetFields.VERSION.getJpaEntityFieldName(),
             DistributionSetFields.TYPE.getJpaEntityFieldName());
 
     private final String jpaEntityFieldName;
     private final List<String> subEntityAttributes;
-
-    RolloutFields(final String jpaEntityFieldName) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
-        this.subEntityAttributes = Collections.emptyList();
-    }
 
     RolloutFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
         this.jpaEntityFieldName = jpaEntityFieldName;

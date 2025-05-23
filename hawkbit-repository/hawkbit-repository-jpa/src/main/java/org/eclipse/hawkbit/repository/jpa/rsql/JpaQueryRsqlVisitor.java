@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 Bosch.IO GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -344,9 +343,8 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
 
         final Predicate mapPredicate = mapToMapPredicate(fieldPath, queryPath);
 
-        final Predicate valuePredicate = addOperatorPredicate(node, getMapValueFieldPath(queryPath.getEnumValue(), fieldPath),
-                transformedValues, value, queryPath);
 
+        final Predicate valuePredicate = addOperatorPredicate(node, fieldPath, transformedValues, value, queryPath);
         return toSingleList(mapPredicate != null ? cb.and(mapPredicate, valuePredicate) : valuePredicate);
     }
 
@@ -398,15 +396,6 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
                 expressionToCompare -> in(expressionToCompare, transformedValues));
     }
 
-    private Path<Object> getMapValueFieldPath(final A enumField, final Path<Object> fieldPath) {
-        final String valueFieldNameFromSubEntity = enumField.getSubEntityMapTuple().map(Entry::getValue).orElse(null);
-
-        if (!enumField.isMap() || valueFieldNameFromSubEntity == null) {
-            return fieldPath;
-        }
-        return fieldPath.get(valueFieldNameFromSubEntity);
-    }
-
     @SuppressWarnings("unchecked")
     private Predicate mapToMapPredicate(final Path<Object> fieldPath, final QueryPath queryPath) {
         if (!queryPath.getEnumValue().isMap()) {
@@ -415,16 +404,8 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
 
         final String[] graph = queryPath.getJpaPath();
         final String keyValue = graph[graph.length - 1];
-        if (fieldPath instanceof MapJoin) {
-            // Currently we support only string key. So below cast is safe.
-            return equal((Expression<String>) (((MapJoin<?, ?, ?>) fieldPath).key()), keyValue);
-        }
-
-        final String keyFieldName = queryPath.getEnumValue().getSubEntityMapTuple().map(Entry::getKey)
-                .orElseThrow(() -> new UnsupportedOperationException(
-                        "For the fields, defined as Map, only Map java type or tuple in the form of " +
-                                "SimpleImmutableEntry are allowed. Neither of those could be found!"));
-        return equal(fieldPath.get(keyFieldName), keyValue);
+        // Currently we support only string key. So below cast is safe.
+        return equal((Expression<String>) (((MapJoin<?, ?, ?>) fieldPath).key()), keyValue);
     }
 
     private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
@@ -514,17 +495,12 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & RsqlQueryField, T> extends 
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private Expression<String> getExpressionToCompare(final Path innerFieldPath, final A enumField) {
-        if (!enumField.isMap()) {
-            return pathOfString(innerFieldPath);
-        }
-        if (innerFieldPath instanceof MapJoin) {
+        if (enumField.isMap()){
             // Currently we support only string key. So below cast is safe.
             return (Expression<String>) (((MapJoin<?, ?, ?>) pathOfString(innerFieldPath)).value());
+        } else {
+            return pathOfString(innerFieldPath);
         }
-        final String valueFieldName = enumField.getSubEntityMapTuple().map(Entry::getValue)
-                .orElseThrow(() -> new UnsupportedOperationException(
-                        "For the fields, defined as Map, only Map java type or tuple in the form of SimpleImmutableEntry are allowed. Neither of those could be found!"));
-        return pathOfString(innerFieldPath).get(valueFieldName);
     }
 
     private String toSQL(final String transformedValue) {

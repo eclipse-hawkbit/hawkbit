@@ -36,12 +36,6 @@ class FileNameFieldsTest {
             assertThat(matchingClasses).isNotEmpty();
             matchingClasses.forEach(providerClass -> {
                 assertThat(providerClass.getEnumConstants()).isNotEmpty();
-                for (final RsqlQueryField provider : providerClass.getEnumConstants()) {
-                    if (provider.isMap() && !provider.getSubEntityAttributes().isEmpty()) {
-                        throw new UnsupportedOperationException(
-                                "Currently sub-entity attributes for maps are not supported, alternatively you could use the key/value tuple, defined by SimpleImmutableEntry class");
-                    }
-                }
             });
         }
     }

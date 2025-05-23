@@ -13,8 +13,7 @@ package org.eclipse.hawkbit.repository;
  * A value convert which converts given string based values into an object which
  * can be used for building generic queries. Mapping external API values e.g.
  * REST API to inside representation on database. E.g. mapping 'pending' or
- * 'finished' values in rest queries to Action#isActive boolean
- * value.
+ * 'finished' values in rest queries to Action#isActive boolean value.
  *
  * @param <T> the enum parameter
  */
