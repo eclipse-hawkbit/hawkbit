@@ -35,7 +35,7 @@
     </licenses>
 
     <properties>
-        <revision>0-SNAPSHOT</revision>
+        <revision>0.3.0M2</revision>
         <java.version>17</java.version>
         <!-- java.version is used to build the hawkbit in general, however, some artifacts which could be used
         as libraries in other projects might be compiled with a different, lower, java version. -->
