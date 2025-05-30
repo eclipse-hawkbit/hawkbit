@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
-import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY;
+import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY_G1;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -1031,7 +1031,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test that RSQL filter finds targets with tag and metadata.")
     void findTargetsByRsqlWithTypeAndMetadata() {
-        if (RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY) {
+        if (RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY_G1) {
             // legacy visitor fail with that
             return;
         }

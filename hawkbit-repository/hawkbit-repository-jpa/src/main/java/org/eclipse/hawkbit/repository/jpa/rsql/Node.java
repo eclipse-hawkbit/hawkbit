@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.rsql3;
+package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import java.util.ArrayList;
 import java.util.List;

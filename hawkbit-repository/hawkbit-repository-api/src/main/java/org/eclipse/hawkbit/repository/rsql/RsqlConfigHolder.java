@@ -25,9 +25,9 @@ public final class RsqlConfigHolder {
     private static final RsqlConfigHolder SINGLETON = new RsqlConfigHolder();
 
     public enum RsqlToSpecBuilder {
-        G2, // G2 RSQL visitor
-        LEGACY, // legacy RSQL visitor
-        G3 // G3 RSQL visitor - still experimental
+        LEGACY_G1, // legacy RSQL visitor
+        LEGACY_G2, // G2 RSQL visitor
+        G3 // G3 RSQL visitor - still experimental / yet default
     }
     /**
      * If RSQL comparison operators shall ignore the case. If ignore case is <code>true</code> "x == ax" will match "x == aX"

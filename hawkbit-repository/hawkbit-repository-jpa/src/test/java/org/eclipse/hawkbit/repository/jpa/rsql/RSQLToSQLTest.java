@@ -9,9 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
-import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.G2;
+import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY_G2;
 import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.G3;
-import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY;
+import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY_G1;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
 
 import jakarta.persistence.EntityManager;
@@ -113,8 +113,8 @@ class RSQLToSQLTest {
 
     private <T, A extends Enum<A> & RsqlQueryField> void print(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
         System.out.println(rsql);
-        final String legacy = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, LEGACY);
-        final String g2 = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, G2);
+        final String legacy = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, LEGACY_G1);
+        final String g2 = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, LEGACY_G2);
         final String g3 = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, G3);
         System.out.println("\tlegacy:\n\t\t" + useStar(legacy));
         System.out.println("\tG2:\n\t\t" + useStar(g2));
@@ -126,8 +126,8 @@ class RSQLToSQLTest {
 
     private <T, A extends Enum<A> & RsqlQueryField> void printFrom(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
         System.out.println(rsql);
-        final String legacy = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, LEGACY);
-        final String g2 = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, G2);
+        final String legacy = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, LEGACY_G1);
+        final String g2 = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, LEGACY_G2);
         final String g3 = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, G3);
         System.out.println("\tlegacy:\n\t\t" + from(legacy));
         System.out.println("\tG2:\n\t\t" + from(g2));

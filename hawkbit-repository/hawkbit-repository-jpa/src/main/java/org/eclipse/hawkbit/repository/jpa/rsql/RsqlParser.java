@@ -7,19 +7,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.rsql3;
+package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.eclipse.hawkbit.repository.RsqlQueryField.SUB_ATTRIBUTE_SEPARATOR;
-import static org.eclipse.hawkbit.repository.jpa.rsql3.Node.Comparison.Operator.EQ;
-import static org.eclipse.hawkbit.repository.jpa.rsql3.Node.Comparison.Operator.GT;
-import static org.eclipse.hawkbit.repository.jpa.rsql3.Node.Comparison.Operator.GTE;
-import static org.eclipse.hawkbit.repository.jpa.rsql3.Node.Comparison.Operator.IN;
-import static org.eclipse.hawkbit.repository.jpa.rsql3.Node.Comparison.Operator.LIKE;
-import static org.eclipse.hawkbit.repository.jpa.rsql3.Node.Comparison.Operator.LT;
-import static org.eclipse.hawkbit.repository.jpa.rsql3.Node.Comparison.Operator.LTE;
-import static org.eclipse.hawkbit.repository.jpa.rsql3.Node.Comparison.Operator.NE;
-import static org.eclipse.hawkbit.repository.jpa.rsql3.Node.Comparison.Operator.NOT_IN;
-import static org.eclipse.hawkbit.repository.jpa.rsql3.Node.Comparison.Operator.NOT_LIKE;
+import static org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison.Operator.EQ;
+import static org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison.Operator.GT;
+import static org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison.Operator.GTE;
+import static org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison.Operator.IN;
+import static org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison.Operator.LIKE;
+import static org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison.Operator.LT;
+import static org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison.Operator.LTE;
+import static org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison.Operator.NE;
+import static org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison.Operator.NOT_IN;
+import static org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison.Operator.NOT_LIKE;
 
 import java.util.HashSet;
 import java.util.List;
@@ -44,7 +44,7 @@ import org.eclipse.hawkbit.repository.FieldValueConverter;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.jpa.rsql3.Node.Comparison;
+import org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 
 /**

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 devolo AG and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,15 +7,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.rsql;
+package org.eclipse.hawkbit.repository.jpa.rsqllegacy;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import jakarta.validation.constraints.NotNull;
 
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
+import cz.jirutka.rsql.parser.ast.ComparisonOperator;
+import cz.jirutka.rsql.parser.ast.RSQLOperators;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
@@ -24,6 +29,19 @@ import org.springframework.util.ObjectUtils;
 
 @Slf4j
 public abstract class AbstractRSQLVisitor<A extends Enum<A> & RsqlQueryField> {
+
+    static final ComparisonOperator IS = new ComparisonOperator("=is=", "=eq=");
+    static final ComparisonOperator NOT = new ComparisonOperator("=not=", "=ne=");
+
+    static final Set<ComparisonOperator> OPERATORS;
+
+    static {
+        final Set<ComparisonOperator> operators = new HashSet<>(RSQLOperators.defaultOperators());
+        // == and != alternatives just treating "null" string as null not as a "null"
+        operators.add(IS);
+        operators.add(NOT);
+        OPERATORS = Collections.unmodifiableSet(operators);
+    }
 
     private final Class<A> rsqlQueryFieldType;
 
