@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 Bosch.IO GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.rsql;
+package org.eclipse.hawkbit.repository.jpa.rsqllegacy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +54,12 @@ import org.springframework.util.ObjectUtils;
  *
  * @param <A> the enum for providing the field name of the entity field to filter on.
  * @param <T> the entity type referenced by the root
+ * @deprecated Old implementation of RSQL Visitor (G2). Deprecated in favour of next gen implementation -
+ *            {@link org.eclipse.hawkbit.repository.jpa.rsql.SpecificationBuilder}.
+ *            It will be kept for some time in order to keep backward compatibility and to allow for a smooth transition. Also, in case of
+ *            problems with the new implementation, this one can be used as a fallback.
  */
+@Deprecated(forRemoval = true, since = "0.9.0")
 @Slf4j
 public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
         extends AbstractRSQLVisitor<A> implements RSQLVisitor<List<Predicate>, String> {
@@ -115,19 +120,19 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
     private Predicate toPredicate(final ComparisonNode node, final QueryPath queryPath, final Path<?> fieldPath, final List<Object> values) {
         final Predicate mapEntryKeyPredicate;
         if (queryPath.getEnumValue().isMap()) {
-            if (node.getOperator() == RSQLUtility.IS) {
+            if (node.getOperator() == IS) {
                 // special handling of "not-exists"
                 if (values.size() != 1) {
-                    throw new RSQLParameterSyntaxException("The operator '" + RSQLUtility.IS + "' can only be used with one value");
+                    throw new RSQLParameterSyntaxException("The operator '" + IS + "' can only be used with one value");
                 }
                 if (values.get(0) == null) {
                     // IS operator for maps and null value is treated as doesn't exist correspondingly
                     ((PluralJoin<?, ?, ?>) fieldPath).on(toMapEntryKeyPredicate(queryPath, fieldPath));
                     return cb.isNull(fieldPath);
                 }
-            } else if (node.getOperator() == RSQLUtility.NOT) {
+            } else if (node.getOperator() == NOT) {
                 if (values.size() != 1) {
-                    throw new RSQLParameterSyntaxException("The operator '" + RSQLUtility.NOT + "' can only be used with one value");
+                    throw new RSQLParameterSyntaxException("The operator '" + NOT + "' can only be used with one value");
                 }
                 // NOT operator for maps and null value is treated as does exist correspondingly
                 ((PluralJoin<?, ?, ?>) fieldPath).on(toMapEntryKeyPredicate(queryPath, fieldPath));
@@ -371,7 +376,7 @@ public class JpaQueryRsqlVisitorG2<A extends Enum<A> & RsqlQueryField, T>
 
         if ("null".equals(value)) {
             final ComparisonOperator operator = node.getOperator();
-            if (operator == RSQLUtility.IS || operator == RSQLUtility.NOT) {
+            if (operator == IS || operator == NOT) {
                 return null;
             }
         }
