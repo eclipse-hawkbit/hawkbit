@@ -7,14 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa;
+package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.persistence.TypedQuery;
+import jakarta.persistence.Query;
 
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +41,7 @@ import org.hibernate.sql.exec.spi.JdbcParametersList;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 @Slf4j
-public class Utils {
+public class HibernateUtils {
 
     private static final Method getSqmTranslatorFactory;
 
@@ -55,12 +55,12 @@ public class Utils {
         getSqmTranslatorFactory = method;
     }
 
-    public static String toSql(final TypedQuery<?> typedQuery) {
+    public static String toSql(final Query query) {
         if (getSqmTranslatorFactory == null) {
             throw new UnsupportedOperationException("SqmTranslatorFactory resolver is not available");
         }
 
-        final QuerySqmImpl<?> hqlQuery = typedQuery.unwrap(QuerySqmImpl.class);
+        final QuerySqmImpl<?> hqlQuery = query.unwrap(QuerySqmImpl.class);
         final SessionFactoryImplementor factory = hqlQuery.getSessionFactory();
         final SharedSessionContractImplementor session = hqlQuery.getSession();
         final SessionFactoryImplementor sessionFactory = session.getFactory();

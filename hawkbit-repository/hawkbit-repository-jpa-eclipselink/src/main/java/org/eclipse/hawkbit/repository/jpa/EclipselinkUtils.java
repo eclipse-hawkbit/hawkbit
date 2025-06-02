@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import jakarta.persistence.TypedQuery;
+import jakarta.persistence.Query;
 
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +18,12 @@ import org.eclipse.persistence.jpa.JpaQuery;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 @Slf4j
-public class Utils {
+public class EclipselinkUtils {
 
-    public static String toSql(final TypedQuery<?> typedQuery) {
-        typedQuery.setParameter(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, "DEFAULT");
+    public static String toSql(final Query query) {
+        query.setParameter(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, "DEFAULT");
         // executes the query - otherwise the SQL string is not generated
-        typedQuery.getResultList();
-        return typedQuery.unwrap(JpaQuery.class).getDatabaseQuery().getSQLString();
+        query.getResultList();
+        return query.unwrap(JpaQuery.class).getDatabaseQuery().getSQLString();
     }
 }

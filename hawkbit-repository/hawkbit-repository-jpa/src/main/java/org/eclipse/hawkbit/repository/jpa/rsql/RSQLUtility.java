@@ -10,21 +10,12 @@
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.G3;
-import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY_G1;
-
-import java.io.Serial;
-import java.util.List;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 
-import cz.jirutka.rsql.parser.RSQLParser;
 import cz.jirutka.rsql.parser.RSQLParserException;
-import cz.jirutka.rsql.parser.ast.Node;
-import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,15 +23,12 @@ import org.apache.commons.lang3.text.StrLookup;
 import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.jpa.rsqllegacy.JpaQueryRsqlVisitor;
-import org.eclipse.hawkbit.repository.jpa.rsqllegacy.JpaQueryRsqlVisitorG2;
 import org.eclipse.hawkbit.repository.jpa.rsqllegacy.SpecificationBuilderLegacy;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
-import org.springframework.util.CollectionUtils;
 
 /**
  * A utility class which is able to parse RSQL strings into an spring data
@@ -99,7 +87,11 @@ public final class RSQLUtility {
             return new SpecificationBuilder<T>(
                     virtualPropertyReplacer,
                     !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase(),
-                    database).specification(RsqlParser.parse(rsql, rsqlQueryFieldType));
+                    database)
+                    .specification(RsqlParser.parse(
+                            RsqlConfigHolder.getInstance().isCaseInsensitiveDB() || RsqlConfigHolder.getInstance().isIgnoreCase()
+                                    ? rsql.toLowerCase() : rsql,
+                            rsqlQueryFieldType));
         } else {
             return new SpecificationBuilderLegacy<A, T>(rsqlQueryFieldType, virtualPropertyReplacer, database).specification(rsql);
         }
@@ -113,7 +105,7 @@ public final class RSQLUtility {
      * @throws RSQLParserException if RSQL syntax is invalid
      * @throws RSQLParameterUnsupportedFieldException if RSQL key is not allowed
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <A extends Enum<A> & RsqlQueryField> void validateRsqlFor(
             final String rsql, final Class<A> rsqlQueryFieldType,
             final Class<?> jpaType,
@@ -121,6 +113,6 @@ public final class RSQLUtility {
         final CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<?> criteriaQuery = criteriaBuilder.createQuery(jpaType);
         buildRsqlSpecification(rsql, rsqlQueryFieldType, virtualPropertyReplacer, null)
-                .toPredicate(criteriaQuery.from((Class)jpaType), criteriaQuery, criteriaBuilder);
+                .toPredicate(criteriaQuery.from((Class) jpaType), criteriaQuery, criteriaBuilder);
     }
 }

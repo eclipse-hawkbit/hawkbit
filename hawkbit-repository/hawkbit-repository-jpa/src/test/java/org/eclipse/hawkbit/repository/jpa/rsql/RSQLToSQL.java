@@ -9,13 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
+import java.lang.reflect.InvocationTargetException;
+
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 
 import org.eclipse.hawkbit.repository.RsqlQueryField;
-import org.eclipse.hawkbit.repository.jpa.Utils;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder;
 import org.springframework.orm.jpa.vendor.Database;
@@ -24,16 +26,34 @@ public class RSQLToSQL {
 
     private static final Database DATABASE = Database.H2;
     private final EntityManager entityManager;
+    private final boolean isEclipselink;
 
     public RSQLToSQL(final EntityManager entityManager) {
         this.entityManager = entityManager;
+        isEclipselink = entityManager.getProperties().keySet().stream().anyMatch(key -> key.startsWith("eclipselink."));
     }
 
     public <T, A extends Enum<A> & RsqlQueryField> String toSQL(
             final Class<T> domainClass, final Class<A> fieldsClass, final String rsql, final RsqlToSpecBuilder rsqlToSpecBuilder) {
         final CriteriaQuery<T> query = createQuery(domainClass, fieldsClass, rsql, rsqlToSpecBuilder);
         final TypedQuery<?> typedQuery = entityManager.createQuery(query);
-        return Utils.toSql(typedQuery);
+        if (isEclipselink) {
+            try {
+                return (String)Class.forName("org.eclipse.hawkbit.repository.jpa.EclipselinkUtils")
+                        .getMethod("toSql", Query.class)
+                        .invoke(null, typedQuery);
+            } catch (final IllegalAccessException | NoSuchMethodException | ClassNotFoundException e) {
+                throw new IllegalStateException(e);
+            } catch (final InvocationTargetException e) {
+                if (e.getCause() instanceof RuntimeException re) {
+                    throw re;
+                } else {
+                    throw new IllegalStateException(e.getCause());
+                }
+            }
+        } else {
+            return HibernateUtils.toSql(typedQuery);
+        }
     }
 
     private <T, A extends Enum<A> & RsqlQueryField> CriteriaQuery<T> createQuery(

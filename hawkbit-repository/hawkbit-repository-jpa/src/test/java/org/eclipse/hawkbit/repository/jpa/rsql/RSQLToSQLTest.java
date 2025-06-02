@@ -46,10 +46,11 @@ class RSQLToSQLTest {
     private RSQLToSQL rsqlToSQL;
 
     @Test
-    void p() {
-        print(JpaTarget.class, TargetFields.class, TargetFields.TAG.name() + "==''");
-        print(JpaTarget.class, TargetFields.class, TargetFields.TAG.name() + "!=''");
+    void printPG() {
+        printFrom(JpaTarget.class, TargetFields.class, "tag!=TAG1 and tag==TAG2");
+        printFrom(JpaTarget.class, TargetFields.class, "tag==TAG1 and tag!=TAG2");
     }
+
     @Test
     void print() {
         print(JpaTarget.class, TargetFields.class, "tag==tag1 and tag==tag2");
@@ -97,9 +98,9 @@ class RSQLToSQLTest {
     }
 
     @Test
-    void printPG() {
-        printFrom(JpaTarget.class, TargetFields.class, "tag!=TAG1 and tag==TAG2");
-        printFrom(JpaTarget.class, TargetFields.class, "tag==TAG1 and tag!=TAG2");
+    void printEmpty() {
+        print(JpaTarget.class, TargetFields.class, TargetFields.TAG.name() + "==''");
+        print(JpaTarget.class, TargetFields.class, TargetFields.TAG.name() + "!=''");
     }
 
     private static String from(final String sql) {

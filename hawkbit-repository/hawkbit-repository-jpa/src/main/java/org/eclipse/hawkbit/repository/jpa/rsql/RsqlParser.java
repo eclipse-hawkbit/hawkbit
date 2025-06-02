@@ -45,7 +45,6 @@ import org.eclipse.hawkbit.repository.RsqlQueryField;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison;
-import org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder;
 
 /**
  * {@link RsqlParser} parses RSQL query stings to {@link Node} objects. Doing that it does the following:
@@ -82,15 +81,13 @@ public class RsqlParser {
     }
 
     public static <T extends Enum<T> & RsqlQueryField> Node parse(final String rsql, final Class<T> rsqlQueryFieldType) {
-        return parse(rsql, key -> resolveKey(key, rsqlQueryFieldType));
+        return parse(rsql, rsqlQueryFieldType == null ? null : key -> resolveKey(key, rsqlQueryFieldType));
     }
 
     private static Node parse(final String rsql, final Function<String, Key> keyResolver) {
         try {
             return PARSER
-                    .parse(RsqlConfigHolder.getInstance().isCaseInsensitiveDB() || RsqlConfigHolder.getInstance().isIgnoreCase()
-                            ? rsql.toLowerCase()
-                            : rsql)
+                    .parse(rsql)
                     .accept(new RsqlVisitor(keyResolver));
         } catch (final RSQLParserException e) {
             throw new RSQLParameterSyntaxException(e);
