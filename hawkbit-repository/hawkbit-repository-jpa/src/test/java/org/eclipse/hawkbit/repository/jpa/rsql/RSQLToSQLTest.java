@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
+import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY_G2;
+import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.G3;
+import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY_G1;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
 
 import jakarta.persistence.EntityManager;
@@ -42,6 +45,11 @@ class RSQLToSQLTest {
     private static final boolean FULL = Boolean.getBoolean("full");
     private RSQLToSQL rsqlToSQL;
 
+    @Test
+    void p() {
+        print(JpaTarget.class, TargetFields.class, TargetFields.TAG.name() + "==''");
+        print(JpaTarget.class, TargetFields.class, TargetFields.TAG.name() + "!=''");
+    }
     @Test
     void print() {
         print(JpaTarget.class, TargetFields.class, "tag==tag1 and tag==tag2");
@@ -105,18 +113,28 @@ class RSQLToSQLTest {
 
     private <T, A extends Enum<A> & RsqlQueryField> void print(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
         System.out.println(rsql);
-        System.out.println("\tlegacy:\n" +
-                "\t\t" + useStar(rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, true)));
-        System.out.println("\tG2:\n" +
-                "\t\t" + useStar(rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, false)));
+        final String legacy = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, LEGACY_G1);
+        final String g2 = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, LEGACY_G2);
+        final String g3 = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, G3);
+        System.out.println("\tlegacy:\n\t\t" + useStar(legacy));
+        System.out.println("\tG2:\n\t\t" + useStar(g2));
+        System.out.println("\tG3:\n\t\t" + useStar(g3));
+        if (!g2.equals(g3)) {
+            System.out.println("\tG2 != G3 for rsql: " + rsql);
+        }
     }
 
     private <T, A extends Enum<A> & RsqlQueryField> void printFrom(final Class<T> domainClass, final Class<A> fieldsClass, final String rsql) {
         System.out.println(rsql);
-        System.out.println("\tlegacy:\n" +
-                "\t\t" + from(rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, true)));
-        System.out.println("\tG2:\n" +
-                "\t\t" + from(rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, false)));
+        final String legacy = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, LEGACY_G1);
+        final String g2 = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, LEGACY_G2);
+        final String g3 = rsqlToSQL.toSQL(domainClass, fieldsClass, rsql, G3);
+        System.out.println("\tlegacy:\n\t\t" + from(legacy));
+        System.out.println("\tG2:\n\t\t" + from(g2));
+        System.out.println("\tG2:\n\t\t" + from(g3));
+        if (!g2.equals(g3)) {
+            System.out.println("\tG2 != G3 for rsql: " + rsql);
+        }
     }
 
     private static String useStar(final String sql) {
