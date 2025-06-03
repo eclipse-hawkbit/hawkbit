@@ -518,7 +518,6 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
             final List<MgmtTag> tagList = Optional.ofNullable(hawkbitClient.getTargetRestApi().getTags(target.getControllerId()).getBody())
                     .orElse(Collections.emptyList());
-            LoggerFactory.getLogger(TargetTags.class).info("Tags: {}", tagList);
 
             for (MgmtTag tag : tagList) {
                 tagsArea.add(buildTargetTagBadge(tag, target.getControllerId()));
@@ -526,7 +525,6 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
 
         private Span buildTargetTagBadge(MgmtTag tag, String controllerId) {
-            LoggerFactory.getLogger(TargetTags.class).info("Tag: {}", tag);
             Button clearButton = new Button(VaadinIcon.CLOSE_SMALL.create());
             clearButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST, ButtonVariant.LUMO_TERTIARY_INLINE);
             clearButton.getStyle().set("margin-inline-start", "var(--lumo-space-xs)");

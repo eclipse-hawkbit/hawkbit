@@ -51,7 +51,7 @@ import java.util.function.Function;
 import static feign.Util.ISO_8859_1;
 import static java.util.Collections.emptyList;
 
-@Theme(themeClass = Lumo.class)
+@Theme("hawkbit")
 @PWA(name = "hawkBit UI", shortName = "hawkBit UI")
 @SpringBootApplication
 @Import(FeignClientsConfiguration.class)

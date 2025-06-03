@@ -1,5 +1,6 @@
 bundles
-frontend
+src/main/frontend/*
+!src/main/frontend/themes/
 node_modules
 package.json
 package-lock.json
