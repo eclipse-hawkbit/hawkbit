@@ -76,7 +76,6 @@ import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryReq
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetType;
 import org.eclipse.hawkbit.ui.simple.HawkbitMgmtClient;
 import org.eclipse.hawkbit.ui.simple.MainLayout;
-import org.eclipse.hawkbit.ui.simple.components.SpinnerIcon;
 import org.eclipse.hawkbit.ui.simple.view.util.Filter;
 import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.simple.view.util.TableView;
@@ -572,19 +571,19 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private TargetActions(HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
             setWidthFull();
-            addColumn(new ComponentRenderer<Component, ActionStatusEntry>(ActionStatusEntry::getActiveIcon)).setHeader("Active")
+            addColumn(new ComponentRenderer<Component, ActionStatusEntry>(ActionStatusEntry::getStatusIcon)).setHeader("Status")
                     .setAutoWidth(true)
                     .setFlexGrow(0);
             addColumn(ActionStatusEntry::getDistributionSetName).setHeader("Distribution Set").setAutoWidth(true);
             addColumn(ActionStatusEntry::getLastModifiedAt).setHeader("Last Modified").setAutoWidth(true)
                     .setFlexGrow(0).setComparator(ActionStatusEntry::getLastModifiedAt);
-            addColumn(new ComponentRenderer<Component, ActionStatusEntry>(ActionStatusEntry::getActionTypeIcon)).setHeader("Status")
-                    .setAutoWidth(true)
-                    .setFlexGrow(0);
             addColumn(new ComponentRenderer<Component, ActionStatusEntry>(ActionStatusEntry::getForceTypeIcon)).setHeader("Type")
                     .setAutoWidth(true)
                     .setFlexGrow(0);
             addColumn(new ComponentRenderer<Component, ActionStatusEntry>(ActionStatusEntry::getActionsLayout)).setHeader("Actions")
+                    .setAutoWidth(true)
+                    .setFlexGrow(0);
+            addColumn(new ComponentRenderer<Component, ActionStatusEntry>(ActionStatusEntry::getForceQuitLayout)).setHeader("Force Quit")
                     .setAutoWidth(true)
                     .setFlexGrow(0);
         }
@@ -639,28 +638,30 @@ public class TargetView extends TableView<MgmtTarget, String> {
                 return action.getType().equals(MgmtAction.ACTION_CANCEL);
             }
 
-            public Icon getActiveIcon() {
+            public Component getStatusIcon() {
+                HorizontalLayout layout = new HorizontalLayout();
                 Icon icon;
                 if (isActive()) {
-                    icon = new SpinnerIcon();
-                } else {
-                    icon = VaadinIcon.CHECK_CIRCLE.create();
-                }
-                icon.addClassNames(LumoUtility.IconSize.SMALL);
-                return Utils.tooltip(icon, action.getStatus());
-            }
-
-            public Icon getActionTypeIcon() {
-                Icon icon;
-                if (action.getType().equals(MgmtAction.ACTION_UPDATE)) {
-                    icon = VaadinIcon.CHECK_CIRCLE.create();
+                    if (isCancelingOrCanceled()) {
+                        icon = Utils.tooltip(VaadinIcon.ADJUST.create(), "Pending Cancellation");
+                        icon.setColor("red");
+                    } else {
+                        icon = Utils.tooltip(VaadinIcon.ADJUST.create(), "Pending Update");
+                        icon.setColor("orange");
+                    }
+                } else if (action.getType().equals(MgmtAction.ACTION_UPDATE)) {
+                    icon = Utils.tooltip(VaadinIcon.CHECK_CIRCLE.create(), "Updated");
                     icon.setColor("green");
                 } else {
-                    icon = VaadinIcon.CLOSE_CIRCLE.create();
+                    icon = Utils.tooltip(VaadinIcon.CLOSE_CIRCLE.create(), "Canceled");
                     icon.setColor("red");
                 }
+
                 icon.addClassNames(LumoUtility.IconSize.SMALL);
-                return Utils.tooltip(icon, action.getType());
+                layout.add(icon);
+                layout.setWidth(50, Unit.PIXELS);
+                layout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+                return layout;
             }
 
             public String getDistributionSetName() {
@@ -684,8 +685,6 @@ public class TargetView extends TableView<MgmtTarget, String> {
             public HorizontalLayout getActionsLayout() {
                 HorizontalLayout actionsLayout = new HorizontalLayout();
                 actionsLayout.setSpacing(true);
-                actionsLayout.setPadding(true);
-                actionsLayout.setWidthFull();
 
                 Button cancelButton = Utils.tooltip(new Button(VaadinIcon.CLOSE.create()), "Cancel Action");
                 if (isActive() && !isCancelingOrCanceled()) {
@@ -717,8 +716,19 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     forceButton.setEnabled(false);
                 }
 
+                actionsLayout.add(cancelButton, forceButton);
+                return actionsLayout;
+            }
+
+            public HorizontalLayout getForceQuitLayout() {
+                HorizontalLayout forceQuitLayout = new HorizontalLayout();
+                forceQuitLayout.setSpacing(true);
+                forceQuitLayout.setPadding(true);
+                forceQuitLayout.setWidthFull();
+                forceQuitLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+
                 Button forceQuitButton = Utils.tooltip(new Button(VaadinIcon.CLOSE.create()), "Force Cancel");
-                forceQuitButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
+                forceQuitButton.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY_INLINE);
 
                 if (isActive() && isCancelingOrCanceled()) {
                     forceQuitButton.addClickListener(e -> {
@@ -733,8 +743,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     forceQuitButton.setEnabled(false);
                 }
 
-                actionsLayout.add(cancelButton, forceButton, forceQuitButton);
-                return actionsLayout;
+                forceQuitLayout.add(forceQuitButton);
+                return forceQuitLayout;
             }
 
             private static ConfirmDialog promptForConfirmAction(String message, Runnable refreshActions, Runnable actionConsumer) {
