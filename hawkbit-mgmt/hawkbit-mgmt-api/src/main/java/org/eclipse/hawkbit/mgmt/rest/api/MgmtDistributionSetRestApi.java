@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * REST Resource handling for DistributionSet CRUD operations.
@@ -474,14 +476,49 @@ public interface MgmtDistributionSetRestApi {
             @RequestParam(value = "offline", required = false) Boolean offline);
 
     /**
+     * Creates a list of meta-data for a specific distribution set.
+     *
+     * @param distributionSetId the ID of the distribution set to create meta data for
+     * @param metadataRest the list of meta-data entries to create
+     */
+    @Operation(summary = "Create a list of meta data for a specific distribution set",
+            description = "Create a list of meta data entries Required permissions: READ_REPOSITORY and UPDATE_TARGET")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully created"),
+            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
+                    "changed (i.e. read-only) or data volume restriction applies.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "404", description = "Distribution Set not found.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
+                    "user in another request at the same time. You may retry your modification request.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
+                    "supported by the server for this resource.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                    "and the client has to wait another second.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
+            consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
+    @ResponseStatus(HttpStatus.CREATED)
+    void createMetadata(
+            @PathVariable("distributionSetId") Long distributionSetId,
+            @RequestBody List<MgmtMetadata> metadataRest);
+
+    /**
      * Gets a paged list of meta-data for a distribution set.
      *
      * @param distributionSetId the ID of the distribution set for the meta-data
-     * @param pagingOffsetParam the offset of list of targets for pagination, might not be present in the rest request then default value will
-     *         be applied
-     * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
-     * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax {@code q=key==abc}
      * @return status OK if get request is successful with the paged list of meta data
      */
     @Operation(summary = "Return meta data for Distribution Set", description = "Get a paged list of meta data for a " +
@@ -507,37 +544,14 @@ public interface MgmtDistributionSetRestApi {
     })
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<PagedList<MgmtMetadata>> getMetadata(
-            @PathVariable("distributionSetId") Long distributionSetId,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
-            @Schema(description = "The paging offset (default is 0)")
-            int pagingOffsetParam,
-            @RequestParam(
-                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
-                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
-            @Schema(description = "The maximum number of entries in a page (default is 50)")
-            int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false)
-            @Schema(description = """
-                    The query parameter sort allows to define the sort order for the result of a query. A sort criteria
-                    consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
-                    The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
-                    in the result.""")
-            String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
-            String rsqlParam);
+    ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("distributionSetId") Long distributionSetId);
 
     /**
-     * Gets a single meta data value for a specific key of a distribution set.
+     * Gets a single meta-data value for a specific key of a distribution set.
      *
-     * @param distributionSetId the ID of the distribution set to get the meta data from
-     * @param metadataKey the key of the meta data entry to retrieve the value from
-     * @return status OK if get request is successful with the value of the meta data
+     * @param distributionSetId the ID of the distribution set to get the meta-data from
+     * @param metadataKey the key of the meta-data entry to retrieve the value from
+     * @return status OK with the value of the meta-data, if the request is successful
      */
     @Operation(summary = "Return single meta data value for a specific key of a Distribution Set",
             description = "Get a single meta data value for a meta data key. Required permission: READ_REPOSITORY")
@@ -567,12 +581,11 @@ public interface MgmtDistributionSetRestApi {
             @PathVariable("metadataKey") String metadataKey);
 
     /**
-     * Updates a single meta data value of a distribution set.
+     * Updates a single meta-data value of a distribution set.
      *
      * @param distributionSetId the ID of the distribution set to update the meta data entry
-     * @param metadataKey the key of the meta data to update the value
+     * @param metadataKey the key of the meta-data to update the value
      * @param metadata update body
-     * @return status OK if the update request is successful and the updated meta data result
      */
     @Operation(summary = "Update single meta data value of a distribution set", description = "Update a single meta " +
             "data value for speficic key. Required permission: UPDATE_REPOSITORY")
@@ -601,9 +614,9 @@ public interface MgmtDistributionSetRestApi {
                     "and the client has to wait another second.",
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
-    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata/{metadataKey}",
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtMetadata> updateMetadata(
+    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata/{metadataKey}")
+    @ResponseStatus(HttpStatus.OK)
+    void updateMetadata(
             @PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("metadataKey") String metadataKey,
             @RequestBody MgmtMetadataBodyPut metadata);
@@ -613,7 +626,6 @@ public interface MgmtDistributionSetRestApi {
      *
      * @param distributionSetId the ID of the distribution set to delete the meta data entry
      * @param metadataKey the key of the meta data to delete
-     * @return status OK if the delete request is successful
      */
     @Operation(summary = "Delete a single meta data entry from the distribution set", description = "Delete a single " +
             "meta data. Required permission: UPDATE_REPOSITORY")
@@ -637,50 +649,10 @@ public interface MgmtDistributionSetRestApi {
                     content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata/{metadataKey}")
-    ResponseEntity<Void> deleteMetadata(
+    @ResponseStatus(HttpStatus.OK)
+    void deleteMetadata(
             @PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("metadataKey") String metadataKey);
-
-    /**
-     * Creates a list of meta data for a specific distribution set.
-     *
-     * @param distributionSetId the ID of the distribution set to create meta data for
-     * @param metadataRest the list of meta data entries to create
-     * @return status created if post request is successful with the value of the created meta data
-     */
-    @Operation(summary = "Create a list of meta data for a specific distribution set", description = "Create a list " +
-            "of meta data entries Required permissions: READ_REPOSITORY and UPDATE_TARGET")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successfully created"),
-            @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-            @ApiResponse(responseCode = "401", description = "The request requires user authentication.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
-                    "changed (i.e. read-only) or data volume restriction applies.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "404", description = "Distribution Set not found.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another " +
-                    "user in another request at the same time. You may retry your modification request.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not " +
-                    "supported by the server for this resource.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-            @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
-                    "and the client has to wait another second.",
-                    content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
-    })
-    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
-            consumes = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE },
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtMetadata>> createMetadata(
-            @PathVariable("distributionSetId") Long distributionSetId,
-            @RequestBody List<MgmtMetadata> metadataRest);
 
     /**
      * Assigns a list of software modules to a distribution set.

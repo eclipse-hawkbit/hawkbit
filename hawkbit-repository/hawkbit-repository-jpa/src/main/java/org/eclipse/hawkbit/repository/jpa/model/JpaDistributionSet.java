@@ -13,13 +13,14 @@ import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -28,9 +29,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
@@ -47,7 +48,6 @@ import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetExcepti
 import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -109,11 +109,16 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
                             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_tag_tag")) })
     private Set<DistributionSetTag> tags = new HashSet<>();
 
-    @ToString.Exclude
-    @OneToMany(mappedBy = "distributionSet", fetch = FetchType.LAZY,
-            cascade = { CascadeType.REMOVE },
-            targetEntity = JpaDistributionSetMetadata.class)
-    private List<DistributionSetMetadata> metadata;
+    // no cascade option on an ElementCollection, the target objects are always persisted, merged, removed with their parent
+    @Getter
+    @ElementCollection
+    @CollectionTable(
+            name = "sp_ds_metadata",
+            joinColumns = { @JoinColumn(name = "ds", nullable = false) },
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_ds_metadata_ds"))
+    @MapKeyColumn(name = "meta_key", length = DistributionSet.METADATA_MAX_KEY_SIZE)
+    @Column(name = "meta_value", length = DistributionSet.METADATA_MAX_VALUE_SIZE)
+    private Map<String, String> metadata;
 
     @Column(name = "complete")
     private boolean complete;
@@ -215,14 +220,6 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         }
 
         return tags.remove(tag);
-    }
-
-    public List<DistributionSetMetadata> getMetadata() {
-        if (metadata == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(metadata);
     }
 
     public void lock() {

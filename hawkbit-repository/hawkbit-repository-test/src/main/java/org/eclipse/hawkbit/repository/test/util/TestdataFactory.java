@@ -1210,9 +1210,9 @@ public class TestdataFactory {
     }
 
     private void addTestModuleMetadata(final SoftwareModule module) {
-        softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
+        softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(module.getId())
                 .key(VISIBLE_SM_MD_KEY).value(VISIBLE_SM_MD_VALUE).targetVisible(true));
-        softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
+        softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(module.getId())
                 .key(INVISIBLE_SM_MD_KEY).value(INVISIBLE_SM_MD_VALUE).targetVisible(false));
     }
 

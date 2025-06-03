@@ -243,9 +243,9 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Artifact artifactSignature = testdataFactory.createArtifact(nextBytes(ARTIFACT_SIZE),
                 getOsModule(ds), "test1.signature", ARTIFACT_SIZE);
 
-        softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
+        softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
                 .key(visibleMetadataOsKey).value(visibleMetadataOsValue).targetVisible(true));
-        softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
+        softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
                 .key("metaDataNotVisible").value("withValue").targetVisible(false));
 
         final Target savedTarget = createTargetAndAssertNoActiveActions();
@@ -360,9 +360,9 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Artifact artifactSignature = testdataFactory.createArtifact(
                 nextBytes(ARTIFACT_SIZE), getOsModule(ds), "test1.signature", ARTIFACT_SIZE);
 
-        softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
+        softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
                 .key("metaDataVisible").value("withValue").targetVisible(true));
-        softwareModuleManagement.updateMetaData(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
+        softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(getOsModule(ds))
                 .key("metaDataNotVisible").value("withValue").targetVisible(false));
 
         final Target savedTarget = createTargetAndAssertNoActiveActions();

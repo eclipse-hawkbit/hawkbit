@@ -26,9 +26,6 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagBuilder;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -70,16 +67,6 @@ public class JpaEntityFactory implements EntityFactory {
     @Override
     public DistributionSetBuilder distributionSet() {
         return distributionSetBuilder;
-    }
-
-    @Override
-    public MetaData generateDsMetadata(final String key, final String value) {
-        return new JpaDistributionSetMetadata(key, value == null ? null : value.strip());
-    }
-
-    @Override
-    public MetaData generateTargetMetadata(final String key, final String value) {
-        return new JpaTargetMetadata(key, value == null ? null : value.strip());
     }
 
     @Override

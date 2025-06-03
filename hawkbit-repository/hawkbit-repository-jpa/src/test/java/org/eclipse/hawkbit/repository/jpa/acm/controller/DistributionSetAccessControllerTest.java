@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.persistence.criteria.Predicate;
 
@@ -28,14 +29,12 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.jupiter.api.Test;
@@ -121,12 +120,18 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
     @Description("Verifies read access rules for distribution sets")
     void verifyDistributionSetUpdates() {
         // permit all operations first to prepare test setup
+        permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);
 
         final DistributionSet permitted = testdataFactory.createDistributionSet();
+        final String mdPresetKey = "metadata.preset";
+        final String mdPresetValue = "presetValue";
+        distributionSetManagement.createMetadata(permitted.getId(), Map.of(mdPresetKey, mdPresetValue));
         final DistributionSet readOnly = testdataFactory.createDistributionSet();
+        distributionSetManagement.createMetadata(readOnly.getId(), Map.of(mdPresetKey, mdPresetValue));
         final DistributionSet hidden = testdataFactory.createDistributionSet();
+        distributionSetManagement.createMetadata(hidden.getId(), Map.of(mdPresetKey, mdPresetValue));
 
         final SoftwareModule swModule = testdataFactory.createSoftwareModuleOs();
 
@@ -134,52 +139,49 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         testAccessControlManger.deleteAllRules();
         // define access controlling rule
         defineAccess(AccessController.Operation.READ, permitted, readOnly);
-
-        // allow updating the permitted distributionSet
-        defineAccess(AccessController.Operation.READ, permitted);
         defineAccess(AccessController.Operation.UPDATE, permitted);
 
         // verify distributionSetManagement#assignSoftwareModules
-        final var singleModuleIdList = Collections.singletonList(swModule.getId());
+        final List<Long> singleModuleIdList = Collections.singletonList(swModule.getId());
         assertThat(distributionSetManagement.assignSoftwareModules(permitted.getId(), singleModuleIdList))
                 .satisfies(ds -> assertThat(ds.getModules().stream().map(Identifiable::getId).toList()).contains(swModule.getId()));
         final Long readOnlyId = readOnly.getId();
         assertThatThrownBy(() -> distributionSetManagement.assignSoftwareModules(readOnlyId, singleModuleIdList))
                 .as("Distribution set not allowed to me modified.")
-                .isInstanceOf(EntityNotFoundException.class);
+                .isInstanceOf(InsufficientPermissionException.class);
         final Long hiddenId = hidden.getId();
         assertThatThrownBy(() -> distributionSetManagement.assignSoftwareModules(hiddenId, singleModuleIdList))
                 .as("Distribution set should not be visible.")
                 .isInstanceOf(EntityNotFoundException.class);
 
-        final JpaDistributionSetMetadata metadata = new JpaDistributionSetMetadata("test", "test");
+        final Map<String, String> metadata = Map.of("test.create", mdPresetValue);
 
         // verify distributionSetManagement#createMetaData
-        final List<MetaData> metadataList = Collections.singletonList(metadata);
-        distributionSetManagement.putMetaData(permitted.getId(), metadataList);
-        assertThatThrownBy(() -> distributionSetManagement.putMetaData(readOnlyId, metadataList))
-                .as("Distribution set not allowed to me modified.")
-                .isInstanceOf(EntityNotFoundException.class);
-        assertThatThrownBy(() -> distributionSetManagement.putMetaData(hiddenId, metadataList))
+        distributionSetManagement.createMetadata(permitted.getId(), metadata);
+        assertThatThrownBy(() -> distributionSetManagement.createMetadata(readOnlyId, metadata))
+                .as("Distribution set not allowed to be modified.")
+                .isInstanceOf(InsufficientPermissionException.class);
+        assertThatThrownBy(() -> distributionSetManagement.createMetadata(hiddenId, metadata))
                 .as("Distribution set should not be visible.")
                 .isInstanceOf(EntityNotFoundException.class);
 
         // verify distributionSetManagement#updateMetaData
-        distributionSetManagement.updateMetaData(permitted.getId(), metadata);
-        assertThatThrownBy(() -> distributionSetManagement.updateMetaData(readOnlyId, metadata))
+        final String newValue = "newValue";
+        distributionSetManagement.updateMetadata(permitted.getId(), mdPresetKey, newValue);
+        assertThatThrownBy(() -> distributionSetManagement.updateMetadata(readOnlyId, mdPresetKey, newValue))
                 .as("Distribution set not allowed to me modified.")
-                .isInstanceOf(EntityNotFoundException.class);
-        assertThatThrownBy(() -> distributionSetManagement.updateMetaData(hiddenId, metadata))
+                .isInstanceOf(InsufficientPermissionException.class);
+        assertThatThrownBy(() -> distributionSetManagement.updateMetadata(hiddenId, mdPresetKey, newValue))
                 .as("Distribution set should not be visible.")
                 .isInstanceOf(EntityNotFoundException.class);
 
         // verify distributionSetManagement#deleteMetaData
-        final String metadataKey = metadata.getKey();
-        distributionSetManagement.deleteMetaData(permitted.getId(), metadataKey);
-        assertThatThrownBy(() -> distributionSetManagement.deleteMetaData(readOnlyId, metadataKey))
+        final String metadataKey = metadata.entrySet().stream().findAny().get().getKey();
+        distributionSetManagement.deleteMetadata(permitted.getId(), metadataKey);
+        assertThatThrownBy(() -> distributionSetManagement.deleteMetadata(readOnlyId, mdPresetKey))
                 .as("Distribution set not allowed to me modified.")
-                .isInstanceOf(EntityNotFoundException.class);
-        assertThatThrownBy(() -> distributionSetManagement.deleteMetaData(hiddenId, metadataKey))
+                .isInstanceOf(InsufficientPermissionException.class);
+        assertThatThrownBy(() -> distributionSetManagement.deleteMetadata(hiddenId, mdPresetKey))
                 .as("Distribution set should not be visible.")
                 .isInstanceOf(EntityNotFoundException.class);
     }

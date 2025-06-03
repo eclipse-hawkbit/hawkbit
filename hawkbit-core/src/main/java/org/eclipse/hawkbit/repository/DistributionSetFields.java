@@ -9,11 +9,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Optional;
 
 import lombok.Getter;
 
@@ -34,33 +30,19 @@ public enum DistributionSetFields implements RsqlQueryField {
     COMPLETE("complete"),
     MODULE("modules", SoftwareModuleFields.ID.getJpaEntityFieldName(), SoftwareModuleFields.NAME.getJpaEntityFieldName()),
     TAG("tags", "name"),
-    METADATA("metadata", new SimpleImmutableEntry<>("key", "value")),
+    METADATA("metadata"),
     VALID("valid");
 
     private final String jpaEntityFieldName;
     private final List<String> subEntityAttributes;
-    private final Entry<String, String> subEntityMapTuple;
-
-    DistributionSetFields(final String jpaEntityFieldName) {
-        this(jpaEntityFieldName, Collections.emptyList(), null);
-    }
 
     DistributionSetFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
-        this(jpaEntityFieldName, List.of(subEntityAttributes), null);
-    }
-
-    DistributionSetFields(final String jpaEntityFieldName, final Entry<String, String> subEntityMapTuple) {
-        this(jpaEntityFieldName, Collections.emptyList(), subEntityMapTuple);
-    }
-
-    DistributionSetFields(final String jpaEntityFieldName, List<String> subEntityAttributes, final Entry<String, String> subEntityMapTuple) {
         this.jpaEntityFieldName = jpaEntityFieldName;
-        this.subEntityMapTuple = subEntityMapTuple;
-        this.subEntityAttributes = subEntityAttributes;
+        this.subEntityAttributes = List.of(subEntityAttributes);
     }
 
     @Override
-    public Optional<Entry<String, String>> getSubEntityMapTuple() {
-        return Optional.ofNullable(subEntityMapTuple);
+    public boolean isMap() {
+        return this == METADATA;
     }
 }

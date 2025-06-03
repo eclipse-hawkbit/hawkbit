@@ -13,10 +13,13 @@ import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
@@ -24,6 +27,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
@@ -69,8 +73,6 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private static final String DELETED_PROPERTY = "deleted";
-
     @Setter
     @ManyToOne
     @JoinColumn(name = "sm_type", nullable = false, updatable = false,
@@ -92,11 +94,16 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @Column(name = "encrypted")
     private boolean encrypted;
 
-    @ToString.Exclude
-    @OneToMany(mappedBy = "softwareModule", fetch = FetchType.LAZY,
-            cascade = { CascadeType.REMOVE },
-            targetEntity = JpaSoftwareModuleMetadata.class)
-    private List<JpaSoftwareModuleMetadata> metadata;
+    // no cascade option on an ElementCollection, the target objects are always persisted, merged, removed with their parent.
+    @Getter
+    @ElementCollection
+    @CollectionTable(
+            name = "sp_sm_metadata",
+            joinColumns = { @JoinColumn(name = "sm", nullable = false) },
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_sm_metadata_sm"))
+    @MapKeyColumn(name = "meta_key", length = SoftwareModule.METADATA_KEY_MAX_SIZE)
+    @Column(name = "meta_value", length = SoftwareModule.METADATA_VALUE_MAX_SIZE)
+    private Map<String, String> metadata;
 
     @Column(name = "locked")
     private boolean locked;

@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.Collections;
 import java.util.List;
 
 import lombok.Getter;
@@ -27,16 +26,12 @@ public enum DistributionSetTagFields implements RsqlQueryField {
     NAME(TagFields.NAME.getJpaEntityFieldName()),
     DESCRIPTION(TagFields.DESCRIPTION.getJpaEntityFieldName()),
     COLOUR(TagFields.COLOUR.getJpaEntityFieldName()),
-    DISTRIBUTIONSET("assignedToDistributionSet",
+    DISTRIBUTIONSET(
+            "assignedToDistributionSet",
             DistributionSetFields.ID.getJpaEntityFieldName(), DistributionSetFields.NAME.getJpaEntityFieldName());
 
     private final String jpaEntityFieldName;
     private final List<String> subEntityAttributes;
-
-    DistributionSetTagFields(final String jpaEntityFieldName) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
-        this.subEntityAttributes = Collections.emptyList();
-    }
 
     DistributionSetTagFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
         this.jpaEntityFieldName = jpaEntityFieldName;

@@ -9,24 +9,26 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.io.Serializable;
+
 /**
- * {@link MetaData} element of a {@link SoftwareModule}.
+ * Metadata element of a {@link SoftwareModule}. The software module metadata is not only (key, value) pair (like the metadata of
+ * targets and distribution sets), but also contains the information if the metadata is visible for targets as part of {@link Action}.
  */
-public interface SoftwareModuleMetadata extends MetaData {
+public interface SoftwareModuleMetadata extends Serializable {
 
     /**
-     * @return {@link SoftwareModule} this entry belongs to.
+     * @return the key
      */
-    SoftwareModule getSoftwareModule();
-
-    @Override
-    default Long getEntityId() {
-        return getSoftwareModule().getId();
-    }
+    String getKey();
 
     /**
-     * @return <code>true</code> if element is visible for targets as part of
-     *         {@link Action}.
+     * @return the value
+     */
+    String getValue();
+
+    /**
+     * @return <code>true</code> if element is visible for targets as part of {@link Action}.
      */
     boolean isTargetVisible();
 }

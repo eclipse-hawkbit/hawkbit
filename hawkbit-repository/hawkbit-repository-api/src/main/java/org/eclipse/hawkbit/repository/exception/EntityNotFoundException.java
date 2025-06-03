@@ -18,7 +18,6 @@ import lombok.Getter;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
-import org.eclipse.hawkbit.repository.model.MetaData;
 
 /**
  * the {@link EntityNotFoundException} is thrown when a entity queried but not found.
@@ -75,34 +74,18 @@ public class EntityNotFoundException extends AbstractServerRtException {
      * @param type of the entity that was not found
      * @param entityId of the {@link BaseEntity}
      */
+    public EntityNotFoundException(final String type, final Object entityId) {
+        super(type + " with given identifier {" + entityId + "} does not exist.", THIS_ERROR, Map.of(TYPE, type, ENTITY_ID, entityId));
+    }
+
+    /**
+     * Parameterized constructor for {@link BaseEntity} not found.
+     *
+     * @param type of the entity that was not found
+     * @param entityId of the {@link BaseEntity}
+     */
     public EntityNotFoundException(final Class<? extends BaseEntity> type, final Object entityId) {
-        super(type.getSimpleName() + " with given identifier {" + entityId + "} does not exist.",
-                THIS_ERROR,
-                Map.of(TYPE, type.getSimpleName(), ENTITY_ID, entityId));
-    }
-
-    /**
-     * Parameterized constructor for {@link MetaData} not found.
-     *
-     * @param type of the entity that was not found
-     * @param entityId of the {@link BaseEntity} the {@link MetaData} was for
-     * @param key for the {@link MetaData} entry
-     */
-    public EntityNotFoundException(final Class<? extends MetaData> type, final Long entityId, final String key) {
-        this(type, String.valueOf(entityId), key);
-    }
-
-    /**
-     * Parameterized constructor for {@link MetaData} not found.
-     *
-     * @param type of the entity that was not found
-     * @param entityId of the {@link BaseEntity} the {@link MetaData} was for
-     * @param key for the {@link MetaData} entry
-     */
-    public EntityNotFoundException(final Class<? extends MetaData> type, final String entityId, final String key) {
-        super(type.getSimpleName() + " for given entity {" + toEntityString(entityId) + "} and with key {" + key + "} does not exist.",
-                THIS_ERROR,
-                Map.of(TYPE, type.getSimpleName(), ENTITY_ID, entityId, KEY, key));
+        this(type.getSimpleName(), entityId);
     }
 
     /**
@@ -112,10 +95,14 @@ public class EntityNotFoundException extends AbstractServerRtException {
      * @param expected collection of the {@link BaseEntity#getId()}s
      * @param found collection of the {@link BaseEntity#getId()}s
      */
-    public EntityNotFoundException(final Class<? extends BaseEntity> type, final Collection<?> expected,
-            final Collection<?> found) {
-        super(type.getSimpleName() + "s with given identifiers {" + toEntityString(expected.stream().filter(id -> !found.contains(id))
-                        .map(String::valueOf).collect(Collectors.joining(","))) + "} do not exist.",
+    public EntityNotFoundException(final Class<? extends BaseEntity> type, final Collection<?> expected, final Collection<?> found) {
+        super(
+                String.format("%ss with given identifiers {%s} do not exist.",
+                        type.getSimpleName(),
+                        toEntityString(expected.stream()
+                                .filter(id -> !found.contains(id))
+                                .map(String::valueOf)
+                                .collect(Collectors.joining(",")))),
                 THIS_ERROR,
                 Map.of(TYPE, type.getSimpleName(), ENTITY_ID, expected.stream().filter(id -> !found.contains(id)).map(String::valueOf)));
     }

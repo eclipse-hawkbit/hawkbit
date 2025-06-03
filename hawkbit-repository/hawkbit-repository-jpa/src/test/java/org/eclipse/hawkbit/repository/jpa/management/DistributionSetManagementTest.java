@@ -18,7 +18,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
@@ -49,17 +51,14 @@ import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -71,8 +70,6 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 
 /**
  * {@link DistributionSetManagement} tests.
@@ -96,7 +93,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(distributionSetManagement.get(NOT_EXIST_IDL)).isNotPresent();
         assertThat(distributionSetManagement.getWithDetails(NOT_EXIST_IDL)).isNotPresent();
         assertThat(distributionSetManagement.findByNameAndVersion(NOT_EXIST_ID, NOT_EXIST_ID)).isNotPresent();
-        assertThat(distributionSetManagement.findMetaDataByDistributionSetId(set.getId(), NOT_EXIST_ID)).isNotPresent();
+        assertThat(distributionSetManagement.getMetadata(set.getId()).get(NOT_EXIST_ID)).isNull();
     }
 
     @Test
@@ -138,44 +135,30 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> distributionSetManagement.create(
                 entityFactory.distributionSet().create().name("xxx").type(NOT_EXIST_ID)), "DistributionSetType");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.putMetaData(
-                NOT_EXIST_IDL, singletonList(entityFactory.generateDsMetadata("123", "123"))), "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.createMetadata(NOT_EXIST_IDL, Map.of("123", "123")), "DistributionSet");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.delete(singletonList(NOT_EXIST_IDL)), "DistributionSet");
         verifyThrownExceptionBy(() -> distributionSetManagement.delete(NOT_EXIST_IDL), "DistributionSet");
-        verifyThrownExceptionBy(() -> distributionSetManagement.deleteMetaData(NOT_EXIST_IDL, "xxx"),
-                "DistributionSet");
-        verifyThrownExceptionBy(() -> distributionSetManagement.deleteMetaData(set.getId(), NOT_EXIST_ID),
-                "DistributionSetMetadata");
+        verifyThrownExceptionBy(() -> distributionSetManagement.deleteMetadata(NOT_EXIST_IDL, "xxx"), "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.deleteMetadata(set.getId(), NOT_EXIST_ID), "DistributionSet");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.findByAction(NOT_EXIST_IDL), "Action");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.findMetaDataByDistributionSetId(NOT_EXIST_IDL, "xxx"),
-                "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.getMetadata(NOT_EXIST_IDL).get("xxx"), "DistributionSet");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.findMetaDataByDistributionSetId(NOT_EXIST_IDL, PAGE),
-                "DistributionSet");
-
-        verifyThrownExceptionBy(
-                () -> distributionSetManagement.findMetaDataByDistributionSetIdAndRsql(NOT_EXIST_IDL, "name==*", PAGE),
-                "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.getMetadata(NOT_EXIST_IDL).get(PAGE), "DistributionSet");
 
         assertThatThrownBy(() -> distributionSetManagement.isInUse(NOT_EXIST_IDL))
                 .isInstanceOf(EntityNotFoundException.class).hasMessageContaining(NOT_EXIST_ID)
                 .hasMessageContaining("DistributionSet");
 
         verifyThrownExceptionBy(
-                () -> distributionSetManagement.update(entityFactory.distributionSet().update(NOT_EXIST_IDL)),
-                "DistributionSet");
+                () -> distributionSetManagement.update(entityFactory.distributionSet().update(NOT_EXIST_IDL)), "DistributionSet");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.updateMetaData(NOT_EXIST_IDL,
-                entityFactory.generateDsMetadata("xxx", "xxx")), "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.updateMetadata(NOT_EXIST_IDL,"xxx", "xxx"), "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.updateMetadata(set.getId(),NOT_EXIST_ID, "xxx"), "DistributionSet");
 
-        verifyThrownExceptionBy(() -> distributionSetManagement.updateMetaData(set.getId(),
-                entityFactory.generateDsMetadata(NOT_EXIST_ID, "xxx")), "DistributionSetMetadata");
-
-        verifyThrownExceptionBy(() -> distributionSetManagement.getOrElseThrowException(NOT_EXIST_IDL),
-                "DistributionSet");
+        verifyThrownExceptionBy(() -> distributionSetManagement.getOrElseThrowException(NOT_EXIST_IDL), "DistributionSet");
 
         verifyThrownExceptionBy(() -> distributionSetManagement.getValidAndComplete(NOT_EXIST_IDL), "DistributionSet");
 
@@ -247,68 +230,57 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Checks that metadata for a distribution set can be created.")
-    void createDistributionSetMetadata() {
+    void createMetadata() {
         final String knownKey = "dsMetaKnownKey";
         final String knownValue = "dsMetaKnownValue";
 
         final DistributionSet ds = testdataFactory.createDistributionSet("testDs");
 
-        final DistributionSetMetadata metadata = new JpaDistributionSetMetadata(knownKey, ds, knownValue);
-        final JpaDistributionSetMetadata createdMetadata = (JpaDistributionSetMetadata) createDistributionSetMetadata(
-                ds.getId(), metadata);
-
-        assertThat(createdMetadata).isNotNull();
-        assertThat(createdMetadata.getId().getKey()).isEqualTo(knownKey);
-        assertThat(createdMetadata.getDistributionSet().getId()).isEqualTo(ds.getId());
-        assertThat(createdMetadata.getValue()).isEqualTo(knownValue);
+        insertMetadata(knownKey, knownValue, ds); // and validate
     }
 
     @Test
     @Description("Verifies the enforcement of the metadata quota per distribution set.")
-    void createDistributionSetMetadataUntilQuotaIsExceeded() {
+    void createMetadataUntilQuotaIsExceeded() {
 
         // add meta data one by one
         final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
         final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerDistributionSet();
         for (int i = 0; i < maxMetaData; ++i) {
-            assertThat((JpaDistributionSetMetadata) createDistributionSetMetadata(ds1.getId(),
-                    new JpaDistributionSetMetadata("k" + i, ds1, "v" + i))).isNotNull();
+            insertMetadata("k" + i, "v" + i, ds1);
         }
 
         // quota exceeded
-        final Long ds1Id = ds1.getId();
-        final JpaDistributionSetMetadata jpaMaxMetaData = new JpaDistributionSetMetadata("k" + maxMetaData, ds1, "v" + maxMetaData);
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> createDistributionSetMetadata(ds1Id, jpaMaxMetaData));
+                .isThrownBy(() -> insertMetadata("k" + maxMetaData, "v" + maxMetaData, ds1));
 
         // add multiple meta data entries at once
         final DistributionSet ds2 = testdataFactory.createDistributionSet("ds2");
-        final List<MetaData> metaData2 = new ArrayList<>();
+        final Map<String, String> metaData2 = new HashMap<>();
         for (int i = 0; i < maxMetaData + 1; ++i) {
-            metaData2.add(new JpaDistributionSetMetadata("k" + i, ds2, "v" + i));
+            metaData2.put("k" + i, "v" + i);
         }
         // verify quota is exceeded
         final Long ds2Id = ds2.getId();
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> createDistributionSetMetadata(ds2Id, metaData2));
+                .isThrownBy(() -> distributionSetManagement.createMetadata(ds2Id, metaData2));
 
         // add some meta data entries
         final DistributionSet ds3 = testdataFactory.createDistributionSet("ds3");
         final int firstHalf = Math.round((maxMetaData) / 2.f);
         final Long ds3Id = ds3.getId();
         for (int i = 0; i < firstHalf; ++i) {
-            createDistributionSetMetadata(ds3Id, new JpaDistributionSetMetadata("k" + i, ds3, "v" + i));
+            insertMetadata("k" + i, "v" + i, ds3);
         }
         // add too many data entries
         final int secondHalf = maxMetaData - firstHalf;
-        final List<MetaData> metaData3 = new ArrayList<>();
+        final Map<String, String> metaData3 = new HashMap<>();
         for (int i = 0; i < secondHalf + 1; ++i) {
-            metaData3.add(new JpaDistributionSetMetadata("kk" + i, ds3, "vv" + i));
+            metaData3.put("kk" + i, "vv" + i);
         }
         // verify quota is exceeded
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
-                .isThrownBy(() -> createDistributionSetMetadata(ds3Id, metaData3));
-
+                .isThrownBy(() -> distributionSetManagement.createMetadata(ds3Id, metaData3));
     }
 
     @Test
@@ -507,7 +479,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @WithUser(allSpPermissions = true)
     @Description("Checks that metadata for a distribution set can be updated.")
-    void updateDistributionSetMetadata() {
+    void updateMetadata() {
         final String knownKey = "myKnownKey";
         final String knownValue = "myKnownValue";
         final String knownUpdateValue = "myNewUpdatedValue";
@@ -519,26 +491,22 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         waitNextMillis();
         // create an DS meta data entry
-        createDistributionSetMetadata(ds.getId(), new JpaDistributionSetMetadata(knownKey, ds, knownValue));
+        insertMetadata(knownKey, knownValue, ds);
 
         final DistributionSet changedLockRevisionDS = getOrThrow(distributionSetManagement.get(ds.getId()));
         assertThat(changedLockRevisionDS.getOptLockRevision()).isEqualTo(2);
 
         waitNextMillis();
         // update the DS metadata
-        final JpaDistributionSetMetadata updated = (JpaDistributionSetMetadata) distributionSetManagement
-                .updateMetaData(ds.getId(), entityFactory.generateDsMetadata(knownKey, knownUpdateValue));
+        distributionSetManagement.updateMetadata(ds.getId(), knownKey, knownUpdateValue);
         // we are updating the sw metadata so also modifying the base software
         // module so opt lock revision must be three
         final DistributionSet reloadedDS = getOrThrow(distributionSetManagement.get(ds.getId()));
         assertThat(reloadedDS.getOptLockRevision()).isEqualTo(3);
         assertThat(reloadedDS.getLastModifiedAt()).isPositive();
 
-        // verify updated meta data contains the updated value
-        assertThat(updated).isNotNull();
-        assertThat(updated.getValue()).isEqualTo(knownUpdateValue);
-        assertThat(updated.getId().getKey()).isEqualTo(knownKey);
-        assertThat(updated.getDistributionSet().getId()).isEqualTo(ds.getId());
+        // verify updated meta data is the updated value
+        assertThat(distributionSetManagement.getMetadata(ds.getId()).get(knownKey)).isEqualTo(knownUpdateValue);
     }
 
     @Test
@@ -783,37 +751,22 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Queries and loads the metadata related to a given software module.")
-    void findAllDistributionSetMetadataByDsId() {
+    @Description("Queries and loads the metadata related to a given distribution set.")
+    void getMetadata() {
         // create a DS
         final DistributionSet ds1 = testdataFactory.createDistributionSet("testDs1");
         final DistributionSet ds2 = testdataFactory.createDistributionSet("testDs2");
 
         for (int index = 0; index < quotaManagement.getMaxMetaDataEntriesPerDistributionSet(); index++) {
-            createDistributionSetMetadata(ds1.getId(),
-                    new JpaDistributionSetMetadata("key" + index, ds1, "value" + index));
+            insertMetadata("key" + index, "value" + index, ds1);
         }
 
         for (int index = 0; index <= quotaManagement.getMaxMetaDataEntriesPerDistributionSet() - 2; index++) {
-            createDistributionSetMetadata(ds2.getId(),
-                    new JpaDistributionSetMetadata("key" + index, ds2, "value" + index));
+            insertMetadata("key" + index, "value" + index, ds2);
         }
 
-        final Page<DistributionSetMetadata> metadataOfDs1 = distributionSetManagement
-                .findMetaDataByDistributionSetId(ds1.getId(), PageRequest.of(0, 100));
-
-        final Page<DistributionSetMetadata> metadataOfDs2 = distributionSetManagement
-                .findMetaDataByDistributionSetId(ds2.getId(), PageRequest.of(0, 100));
-
-        assertThat(metadataOfDs1.getNumberOfElements())
-                .isEqualTo(quotaManagement.getMaxMetaDataEntriesPerDistributionSet());
-        assertThat(metadataOfDs1.getTotalElements())
-                .isEqualTo(quotaManagement.getMaxMetaDataEntriesPerDistributionSet());
-
-        assertThat(metadataOfDs2.getNumberOfElements())
-                .isEqualTo(quotaManagement.getMaxMetaDataEntriesPerDistributionSet() - 1);
-        assertThat(metadataOfDs2.getTotalElements())
-                .isEqualTo(quotaManagement.getMaxMetaDataEntriesPerDistributionSet() - 1);
+        assertThat(distributionSetManagement.getMetadata(ds1.getId())).hasSize(quotaManagement.getMaxMetaDataEntriesPerDistributionSet());
+        assertThat(distributionSetManagement.getMetadata(ds2.getId())).hasSize(quotaManagement.getMaxMetaDataEntriesPerDistributionSet() - 1);
     }
 
     @Test
@@ -897,23 +850,20 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final String knownUpdateValue = "knownUpdateValue";
 
         final Long dsId = testdataFactory.createDistributionSet().getId();
-        distributionSetManagement.putMetaData(dsId,
-                singletonList(entityFactory.generateDsMetadata(knownKey1, knownValue)));
+        distributionSetManagement.createMetadata(dsId, Map.of(knownKey1, knownValue));
 
         distributionSetInvalidationManagement.invalidateDistributionSet(
                 new DistributionSetInvalidation(singletonList(dsId), CancelationType.NONE, false));
 
         // assert that no new metadata can be created
-        final List<MetaData> metadata = singletonList(entityFactory.generateDsMetadata(knownKey2, knownValue));
         assertThatExceptionOfType(InvalidDistributionSetException.class)
                 .as("Invalid distributionSet should throw an exception")
-                .isThrownBy(() -> distributionSetManagement.putMetaData(dsId, metadata));
+                .isThrownBy(() -> distributionSetManagement.createMetadata(dsId, Map.of(knownKey2, knownValue)));
 
         // assert that an existing metadata can not be updated
-        final MetaData metadata2 = entityFactory.generateDsMetadata(knownKey1, knownUpdateValue);
         assertThatExceptionOfType(InvalidDistributionSetException.class)
                 .as("Invalid distributionSet should throw an exception")
-                .isThrownBy(() -> distributionSetManagement.updateMetaData(dsId, metadata2));
+                .isThrownBy(() -> distributionSetManagement.updateMetadata(dsId, knownKey1, knownUpdateValue));
     }
 
     @Test
@@ -1263,6 +1213,11 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThatFilterDoesNotContainAnyDistributionSet(DistributionSetFilter.builder()
                 .typeId(standardDsType.getId()).searchText(text).tagNames(singletonList(dsTagA.getName()))
                 .isComplete(Boolean.FALSE).isDeleted(Boolean.FALSE));
+    }
+
+    private void insertMetadata(final String knownKey, final String knownValue, final DistributionSet distributionSet) {
+        distributionSetManagement.createMetadata(distributionSet.getId(), Map.of(knownKey, knownValue));
+        assertThat(distributionSetManagement.getMetadata(distributionSet.getId()).get(knownKey)).isEqualTo(knownValue);
     }
 
     private void assertThatFilterContainsOnlyGivenDistributionSets(final DistributionSetFilterBuilder filterBuilder,

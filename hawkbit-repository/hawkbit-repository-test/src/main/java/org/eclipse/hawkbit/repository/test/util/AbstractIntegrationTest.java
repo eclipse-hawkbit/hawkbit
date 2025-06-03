@@ -56,9 +56,7 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -412,20 +410,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected boolean isConfirmationFlowActive() {
-        return tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED,
-                Boolean.class).getValue();
-    }
-
-    protected DistributionSetMetadata createDistributionSetMetadata(final long dsId, final MetaData md) {
-        return createDistributionSetMetadata(dsId, Collections.singletonList(md)).get(0);
-    }
-
-    protected List<DistributionSetMetadata> createDistributionSetMetadata(final long dsId, final List<MetaData> md) {
-        return distributionSetManagement.putMetaData(dsId, md);
-    }
-
-    protected void createTargetMetadata(final String controllerId, final MetaData md) {
-        createTargetMetadata(controllerId, Collections.singletonList(md));
+        return tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, Boolean.class).getValue();
     }
 
     protected Long getOsModule(final DistributionSet ds) {
@@ -503,9 +488,5 @@ public abstract class AbstractIntegrationTest {
         } catch (final IOException e) {
             throw new ArtifactStoreException("Cannot create temp file", e);
         }
-    }
-
-    private void createTargetMetadata(final String controllerId, final List<MetaData> md) {
-        targetManagement.createMetaData(controllerId, md);
     }
 }

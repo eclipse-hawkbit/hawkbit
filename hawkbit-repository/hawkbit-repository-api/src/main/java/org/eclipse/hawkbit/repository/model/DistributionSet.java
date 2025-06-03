@@ -24,6 +24,16 @@ import java.util.Set;
 public interface DistributionSet extends NamedVersionedEntity {
 
     /**
+     * Maximum length of metadata key.
+     */
+    int METADATA_MAX_KEY_SIZE = 128;
+
+    /**
+     * Maximum length of metadata value.
+     */
+    int METADATA_MAX_VALUE_SIZE = 4000;
+
+    /**
      * @return type of the {@link DistributionSet}.
      */
     DistributionSetType getType();

@@ -12,8 +12,6 @@ package org.eclipse.hawkbit.repository;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -35,50 +33,10 @@ public interface RsqlQueryField {
     String getJpaEntityFieldName();
 
     /**
-     * Contains the sub entity the given field.
-     *
-     * @param propertyField the given field
-     * @return <code>true</code> contains <code>false</code> contains not
-     */
-    default boolean containsSubEntityAttribute(final String propertyField) {
-        final List<String> subEntityAttributes = getSubEntityAttributes();
-        if (subEntityAttributes.contains(propertyField)) {
-            return true;
-        }
-
-        for (final String attribute : subEntityAttributes) {
-            final String[] graph = attribute.split(SUB_ATTRIBUTE_SPLIT_REGEX);
-            for (final String subAttribute : graph) {
-                if (subAttribute.equalsIgnoreCase(propertyField)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * @return all sub entities attributes.
      */
     default List<String> getSubEntityAttributes() {
         return Collections.emptyList();
-    }
-
-    /**
-     * @return a key/value tuple of a sub entity.
-     */
-    default Optional<Entry<String, String>> getSubEntityMapTuple() {
-        return Optional.empty();
-    }
-
-    /**
-     * Is the entity field a {@link Map} consisting of key-value pairs.
-     *
-     * @return <code>true</code> is a map <code>false</code> is not a map
-     */
-    default boolean isMap() {
-        return getSubEntityMapTuple().isPresent();
     }
 
     /**
@@ -88,5 +46,14 @@ public interface RsqlQueryField {
      */
     default String identifierFieldName() {
         return "id";
+    }
+
+    /**
+     * Is the entity field a {@link Map} consisting of key-value pairs.
+     *
+     * @return <code>true</code> is a map <code>false</code> is not a map
+     */
+    default boolean isMap() {
+        return false;
     }
 }

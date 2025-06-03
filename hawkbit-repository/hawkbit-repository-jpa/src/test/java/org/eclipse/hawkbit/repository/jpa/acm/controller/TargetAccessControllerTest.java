@@ -220,13 +220,12 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
 
         final Target permittedTarget = targetManagement
                 .create(entityFactory.target().create().controllerId("device01").status(TargetUpdateStatus.REGISTERED));
-
         final String hiddenTargetControllerId = targetManagement
                 .create(entityFactory.target().create().controllerId("device02").status(TargetUpdateStatus.REGISTERED))
                 .getControllerId();
 
         // define access controlling rule
-        defineAccess(AccessController.Operation.READ, permittedTarget);
+        overwriteAccess(AccessController.Operation.READ, permittedTarget);
 
         // verify targetManagement#findByUpdateStatus before assignment
         assertThat(targetManagement.findByUpdateStatus(Pageable.unpaged(), TargetUpdateStatus.REGISTERED).get()
@@ -269,18 +268,15 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
 
         final Target manageableTarget = targetManagement
                 .create(entityFactory.target().create().controllerId("device01").status(TargetUpdateStatus.REGISTERED));
-
         final Target readOnlyTarget = targetManagement
                 .create(entityFactory.target().create().controllerId("device02").status(TargetUpdateStatus.REGISTERED));
 
-        // define access controlling rule
-        defineAccess(AccessController.Operation.READ, manageableTarget, readOnlyTarget);
-
-        defineAccess(AccessController.Operation.UPDATE, manageableTarget);
+        // overwriting full access controlling rule
+        overwriteAccess(AccessController.Operation.READ, manageableTarget, readOnlyTarget);
+        overwriteAccess(AccessController.Operation.UPDATE, manageableTarget);
 
         // assignment is permitted for manageableTarget
-        assertThat(assignDistributionSet(firstDsId, manageableTarget.getControllerId()).getAssigned())
-                .isEqualTo(1);
+        assertThat(assignDistributionSet(firstDsId, manageableTarget.getControllerId()).getAssigned()).isEqualTo(1);
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
         final var readOnlyTargetControllerId = readOnlyTarget.getControllerId();
@@ -309,19 +305,17 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
 
         final List<Target> updateTargets = testdataFactory.createTargets("update1", "update2", "update3");
         final List<Target> readTargets = testdataFactory.createTargets("read1", "read2", "read3", "read4");
-        final List<Target> hiddenTargets = testdataFactory.createTargets(
-                "hidden1", "hidden2", "hidden3", "hidden4", "hidden5");
+        final List<Target> hiddenTargets = testdataFactory.createTargets("hidden1", "hidden2", "hidden3", "hidden4", "hidden5");
 
         defineAccess(AccessController.Operation.UPDATE, updateTargets);
-        defineAccess(AccessController.Operation.READ, merge(readTargets, updateTargets));
+        overwriteAccess(AccessController.Operation.READ, merge(readTargets, updateTargets));
 
-        final Rollout rollout = testdataFactory.createRolloutByVariables("testRollout", "description",
-                updateTargets.size(), "id==*", ds, "50", "5");
+        final Rollout rollout = testdataFactory.createRolloutByVariables(
+                "testRollout", "description", updateTargets.size(), "id==*", ds, "50", "5");
 
         assertThat(rollout.getTotalTargets()).isEqualTo(updateTargets.size());
 
-        final List<RolloutGroup> content = rolloutGroupManagement.findByRollout(rollout.getId(), Pageable.unpaged())
-                .getContent();
+        final List<RolloutGroup> content = rolloutGroupManagement.findByRollout(rollout.getId(), Pageable.unpaged()).getContent();
         assertThat(content).hasSize(updateTargets.size());
 
         final List<Target> rolloutTargets = content.stream().flatMap(
@@ -388,6 +382,18 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
     private void defineAccess(final AccessController.Operation operation, final List<Target> targets) {
         final List<Long> ids = targets.stream().map(Target::getId).toList();
         testAccessControlManger.defineAccessRule(
+                JpaTarget.class, operation,
+                TargetSpecifications.hasIdIn(ids),
+                target -> ids.contains(target.getId()));
+    }
+
+    private void overwriteAccess(final AccessController.Operation operation, final Target... target) {
+        overwriteAccess(operation, List.of(target));
+    }
+
+    private void overwriteAccess(final AccessController.Operation operation, final List<Target> targets) {
+        final List<Long> ids = targets.stream().map(Target::getId).toList();
+        testAccessControlManger.overwriteAccessRule(
                 JpaTarget.class, operation,
                 TargetSpecifications.hasIdIn(ids),
                 target -> ids.contains(target.getId()));

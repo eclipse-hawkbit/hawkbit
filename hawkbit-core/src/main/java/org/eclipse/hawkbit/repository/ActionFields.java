@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.Collections;
 import java.util.List;
 
 import lombok.Getter;
@@ -41,11 +40,6 @@ public enum ActionFields implements RsqlQueryField, FieldValueConverter<ActionFi
 
     private final String jpaEntityFieldName;
     private final List<String> subEntityAttributes;
-
-    ActionFields(final String jpaEntityFieldName) {
-        this.jpaEntityFieldName = jpaEntityFieldName;
-        this.subEntityAttributes = Collections.emptyList();
-    }
 
     ActionFields(final String jpaEntityFieldName, final String... subEntityAttributes) {
         this.jpaEntityFieldName = jpaEntityFieldName;

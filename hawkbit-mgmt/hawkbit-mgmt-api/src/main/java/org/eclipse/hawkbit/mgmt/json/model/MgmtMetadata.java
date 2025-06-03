@@ -19,7 +19,7 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 
 /**
- * The representation of an meta data in the REST API for POST/Create.
+ * The representation of a meta-data in the REST API for POST/Create.
  */
 @Data
 @Accessors(chain = true)
@@ -29,9 +29,9 @@ import lombok.experimental.Accessors;
 public class MgmtMetadata {
 
     @JsonProperty(required = true)
-    @Schema(description = "Metadata property key", example = "someKnownKey")
+    @Schema(description = "Metadata property key", example = "country")
     private String key;
 
-    @Schema(description = "Metadata property value", example = "someKnownKeyValue")
+    @Schema(description = "Metadata property value", example = "DE")
     private String value;
 }

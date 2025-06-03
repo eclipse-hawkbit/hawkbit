@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.validation.ValidationException;
@@ -234,62 +235,42 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     }
 
     @Override
-    public ResponseEntity<PagedList<MgmtSoftwareModuleMetadata>> getMetadata(
-            final Long softwareModuleId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+    public void createMetadata(final Long softwareModuleId, final List<MgmtSoftwareModuleMetadata> metadataRest) {
+        softwareModuleManagement.createMetadata(MgmtSoftwareModuleMapper.fromRequestSwMetadata(entityFactory, softwareModuleId, metadataRest));
+    }
+
+    @Override
+    public ResponseEntity<PagedList<MgmtSoftwareModuleMetadata>> getMetadata(final Long softwareModuleId) {
         // check if software module exists otherwise throw exception immediately
         findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
 
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeSoftwareModuleMetadataSortParam(sortParam);
-
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Page<SoftwareModuleMetadata> metaDataPage;
-
-        if (rsqlParam != null) {
-            metaDataPage = softwareModuleManagement.findMetaDataByRsql(softwareModuleId, rsqlParam, pageable);
-        } else {
-            metaDataPage = softwareModuleManagement.findMetaDataBySoftwareModuleId(pageable, softwareModuleId);
-        }
-
-        return ResponseEntity
-                .ok(new PagedList<>(MgmtSoftwareModuleMapper.toResponseSwMetadata(metaDataPage.getContent()), metaDataPage.getTotalElements()));
+        final List<SoftwareModuleMetadata> metadata = softwareModuleManagement.getMetadata(softwareModuleId);
+        return ResponseEntity.ok(new PagedList<>(MgmtSoftwareModuleMapper.toResponseSwMetadata(metadata), metadata.size()));
     }
 
     @Override
     public ResponseEntity<MgmtSoftwareModuleMetadata> getMetadataValue(final Long softwareModuleId, final String metadataKey) {
-        final SoftwareModuleMetadata findOne = softwareModuleManagement
-                .findMetaDataBySoftwareModuleId(softwareModuleId, metadataKey).orElseThrow(
-                        () -> new EntityNotFoundException(SoftwareModuleMetadata.class, softwareModuleId, metadataKey));
+        final SoftwareModuleMetadata findOne = softwareModuleManagement.getMetadata(softwareModuleId).stream()
+                .filter(entry -> entry.getKey().equals(metadataKey))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("SoftwareModule metadata", softwareModuleId + ":" + metadataKey));
 
         return ResponseEntity.ok(MgmtSoftwareModuleMapper.toResponseSwMetadata(findOne));
     }
 
     @Override
-    public ResponseEntity<MgmtSoftwareModuleMetadata> updateMetadata(
-            final Long softwareModuleId, final String metadataKey, final MgmtSoftwareModuleMetadataBodyPut metadata) {
-        final SoftwareModuleMetadata updated = softwareModuleManagement
-                .updateMetaData(entityFactory.softwareModuleMetadata().update(softwareModuleId, metadataKey)
-                        .value(metadata.getValue()).targetVisible(metadata.getTargetVisible()));
-
-        return ResponseEntity.ok(MgmtSoftwareModuleMapper.toResponseSwMetadata(updated));
+    public void updateMetadata(final Long softwareModuleId, final String metadataKey, final MgmtSoftwareModuleMetadataBodyPut metadata) {
+        softwareModuleManagement.updateMetadata(
+                entityFactory.softwareModuleMetadata()
+                        .update(softwareModuleId, metadataKey)
+                        .value(metadata.getValue())
+                        .targetVisible(metadata.getTargetVisible()));
     }
 
     @Override
     @AuditLog(entity = "SoftwareModule", type = AuditLog.Type.DELETE, description = "Delete Software Module Metadata")
-    public ResponseEntity<Void> deleteMetadata(final Long softwareModuleId, final String metadataKey) {
-        softwareModuleManagement.deleteMetaData(softwareModuleId, metadataKey);
-        return ResponseEntity.ok().build();
-    }
-
-    @Override
-    public ResponseEntity<List<MgmtSoftwareModuleMetadata>> createMetadata(
-            final Long softwareModuleId, final List<MgmtSoftwareModuleMetadata> metadataRest) {
-        final List<SoftwareModuleMetadata> created = softwareModuleManagement.putMetaData(
-                MgmtSoftwareModuleMapper.fromRequestSwMetadata(entityFactory, softwareModuleId, metadataRest));
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(MgmtSoftwareModuleMapper.toResponseSwMetadata(created));
+    public void deleteMetadata(final Long softwareModuleId, final String metadataKey) {
+        softwareModuleManagement.deleteMetadata(softwareModuleId, metadataKey);
     }
 
     private static MgmtRepresentationMode parseRepresentationMode(final String representationModeParam) {

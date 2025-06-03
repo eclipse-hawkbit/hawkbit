@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -51,7 +52,6 @@ import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -890,20 +890,20 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .getWithDetails(distributionSetManagement.findByRsql("name==three", PAGE).getContent().get(0).getId())
                 .get();
 
-        assertThat((Object)JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat((Object) JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/distributionsets/" + one.getId());
 
-        assertThat((Object)JsonPath.compile("[0]id").read(mvcResult.getResponse().getContentAsString()))
+        assertThat((Object) JsonPath.compile("[0]id").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString(String.valueOf(one.getId()));
-        assertThat((Object)JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat((Object) JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/distributionsets/" + two.getId());
 
-        assertThat((Object)JsonPath.compile("[1]id").read(mvcResult.getResponse().getContentAsString()))
+        assertThat((Object) JsonPath.compile("[1]id").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString(String.valueOf(two.getId()));
-        assertThat((Object)JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
+        assertThat((Object) JsonPath.compile("[2]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString("http://localhost/rest/v1/distributionsets/" + three.getId());
 
-        assertThat((Object)JsonPath.compile("[2]id").read(mvcResult.getResponse().getContentAsString()))
+        assertThat((Object) JsonPath.compile("[2]id").read(mvcResult.getResponse().getContentAsString()))
                 .hasToString(String.valueOf(three.getId()));
 
         // check in database
@@ -1105,23 +1105,14 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         metaData1.put(new JSONObject().put("key", knownKey1).put("value", knownValue1));
         metaData1.put(new JSONObject().put("key", knownKey2).put("value", knownValue2));
 
-        mvc.perform(post("/rest/v1/distributionsets/{dsId}/metadata", testDS.getId()).accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
+        mvc.perform(post("/rest/v1/distributionsets/{dsId}/metadata", testDS.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(metaData1.toString()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("[0]key", equalTo(knownKey1)))
-                .andExpect(jsonPath("[0]value", equalTo(knownValue1)))
-                .andExpect(jsonPath("[1]key", equalTo(knownKey2)))
-                .andExpect(jsonPath("[1]value", equalTo(knownValue2)));
+                .andExpect(status().isCreated());
 
-        final DistributionSetMetadata metaKey1 = distributionSetManagement
-                .findMetaDataByDistributionSetId(testDS.getId(), knownKey1).get();
-        final DistributionSetMetadata metaKey2 = distributionSetManagement
-                .findMetaDataByDistributionSetId(testDS.getId(), knownKey2).get();
-
-        assertThat(metaKey1.getValue()).isEqualTo(knownValue1);
-        assertThat(metaKey2.getValue()).isEqualTo(knownValue2);
+        assertThat(distributionSetManagement.getMetadata(testDS.getId()).get(knownKey1)).isEqualTo(knownValue1);
+        assertThat(distributionSetManagement.getMetadata(testDS.getId()).get(knownKey2)).isEqualTo(knownValue2);
 
         // verify quota enforcement
         final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerDistributionSet();
@@ -1131,17 +1122,14 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
             metaData2.put(new JSONObject().put("key", knownKey1 + i).put("value", knownValue1 + i));
         }
 
-        mvc.perform(post("/rest/v1/distributionsets/{dsId}/metadata", testDS.getId()).accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON).content(metaData2.toString()))
+        mvc.perform(post("/rest/v1/distributionsets/{dsId}/metadata", testDS.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(metaData2.toString()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
 
-        // verify that the number of meta data entries has not changed
-        // (we cannot use the PAGE constant here as it tries to sort by ID)
-        assertThat(distributionSetManagement
-                .findMetaDataByDistributionSetId(testDS.getId(), PageRequest.of(0, Integer.MAX_VALUE))
-                .getTotalElements()).isEqualTo(metaData1.length());
-
+        // verify that the number of meta-data entries has not changed (we cannot use the PAGE constant here as it tries to sort by ID)
+        assertThat(distributionSetManagement.getMetadata(testDS.getId())).hasSize(metaData1.length());
     }
 
     @Test
@@ -1151,25 +1139,18 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
         final String updateValue = "valueForUpdate";
-
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        createDistributionSetMetadata(testDS.getId(), entityFactory.generateDsMetadata(knownKey, knownValue));
+        distributionSetManagement.createMetadata(testDS.getId(), Map.of(knownKey, knownValue));
 
         final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue);
 
         mvc.perform(put("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey)
-                        .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonObject.toString()))
                 .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("key", equalTo(knownKey)))
-                .andExpect(jsonPath("value", equalTo(updateValue)));
+                .andExpect(status().isOk());
 
-        final DistributionSetMetadata assertDS = distributionSetManagement
-                .findMetaDataByDistributionSetId(testDS.getId(), knownKey).get();
-        assertThat(assertDS.getValue()).isEqualTo(updateValue);
-
+        assertThat(distributionSetManagement.getMetadata(testDS.getId()).get(knownKey)).isEqualTo(updateValue);
     }
 
     @Test
@@ -1180,13 +1161,18 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final String knownValue = "knownValue";
 
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        createDistributionSetMetadata(testDS.getId(), entityFactory.generateDsMetadata(knownKey, knownValue));
+        distributionSetManagement.createMetadata(testDS.getId(), Map.of(knownKey, knownValue));
 
         mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(distributionSetManagement.findMetaDataByDistributionSetId(testDS.getId(), knownKey)).isNotPresent();
+        // already deleted
+        mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
+
+        assertThat(distributionSetManagement.getMetadata(testDS.getId()).get(knownKey)).isNull();
     }
 
     @Test
@@ -1195,9 +1181,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         // prepare and create metadata for deletion
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
-
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        createDistributionSetMetadata(testDS.getId(), entityFactory.generateDsMetadata(knownKey, knownValue));
+        distributionSetManagement.createMetadata(testDS.getId(), Map.of(knownKey, knownValue));
 
         mvc.perform(delete("/rest/v1/distributionsets/{dsId}/metadata/XXX", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print())
@@ -1207,17 +1192,17 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
-        assertThat(distributionSetManagement.findMetaDataByDistributionSetId(testDS.getId(), knownKey)).isPresent();
+        assertThat(distributionSetManagement.getMetadata(testDS.getId()).get(knownKey)).isNotNull();
     }
 
     @Test
     @Description("Ensures that a metadata entry selection through API reflects the repository content.")
-    void geteMetadataKey() throws Exception {
+    void getMetadataKey() throws Exception {
         // prepare and create metadata
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        createDistributionSetMetadata(testDS.getId(), entityFactory.generateDsMetadata(knownKey, knownValue));
+        distributionSetManagement.createMetadata(testDS.getId(), Map.of(knownKey, knownValue));
 
         mvc.perform(get("/rest/v1/distributionsets/{dsId}/metadata/{key}", testDS.getId(), knownKey))
                 .andDo(MockMvcResultPrinter.print())
@@ -1234,41 +1219,13 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         final String knownValuePrefix = "knownValue";
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         for (int index = 0; index < totalMetadata; index++) {
-            distributionSetManagement.putMetaData(testDS.getId(),
-                    List.of(entityFactory.generateDsMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
+            distributionSetManagement.createMetadata(testDS.getId(), Map.of(knownKeyPrefix + index, knownValuePrefix + index));
         }
 
-        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
-                        testDS.getId()))
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata", testDS.getId()))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON));
-    }
-
-    @Test
-    @Description("Ensures that a metadata entry paged list selection through API reflectes the repository content.")
-    void getPagedListOfMetadata() throws Exception {
-
-        final int totalMetadata = 10;
-        final int limitParam = 5;
-        final String offsetParam = "0";
-        final String knownKeyPrefix = "knownKey";
-        final String knownValuePrefix = "knownValue";
-        final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        for (int index = 0; index < totalMetadata; index++) {
-            createDistributionSetMetadata(testDS.getId(),
-                    entityFactory.generateDsMetadata(knownKeyPrefix + index, knownValuePrefix + index));
-        }
-
-        mvc.perform(get("/rest/v1/distributionsets/{dsId}/metadata?offset=" + offsetParam + "&limit=" + limitParam,
-                        testDS.getId()))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("size", equalTo(limitParam)))
-                .andExpect(jsonPath("total", equalTo(totalMetadata)))
-                .andExpect(jsonPath("content[0].key", equalTo("knownKey0")))
-                .andExpect(jsonPath("content[0].value", equalTo("knownValue0")));
-
     }
 
     @Test
@@ -1332,29 +1289,6 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andExpect(jsonPath("total", equalTo(1)))
                 .andExpect(jsonPath("size", equalTo(1)))
                 .andExpect(jsonPath("content[0].controllerId", equalTo("1")));
-    }
-
-    @Test
-    @Description("Ensures that a DS metadata filtered query with value==knownValue1 parameter returns only the metadata entries with that value.")
-    void searchDistributionSetMetadataRsql() throws Exception {
-        final int totalMetadata = 10;
-        final String knownKeyPrefix = "knownKey";
-        final String knownValuePrefix = "knownValue";
-        final DistributionSet testDS = testdataFactory.createDistributionSet("one");
-        for (int index = 0; index < totalMetadata; index++) {
-            createDistributionSetMetadata(testDS.getId(),
-                    entityFactory.generateDsMetadata(knownKeyPrefix + index, knownValuePrefix + index));
-        }
-
-        final String rsqlSearchValue1 = "value==knownValue1";
-
-        mvc.perform(get("/rest/v1/distributionsets/{dsId}/metadata?q=" + rsqlSearchValue1, testDS.getId()))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("size", equalTo(1)))
-                .andExpect(jsonPath("total", equalTo(1)))
-                .andExpect(jsonPath("content[0].key", equalTo("knownKey1")))
-                .andExpect(jsonPath("content[0].value", equalTo("knownValue1")));
     }
 
     @Test

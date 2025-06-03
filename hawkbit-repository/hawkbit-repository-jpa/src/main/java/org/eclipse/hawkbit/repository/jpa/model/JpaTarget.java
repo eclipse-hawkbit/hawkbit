@@ -37,7 +37,6 @@ import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.NamedEntityGraphs;
-import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
@@ -59,7 +58,6 @@ import org.eclipse.hawkbit.repository.jpa.utils.MapAttributeConverter;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -181,19 +179,27 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             })
     private Set<TargetTag> tags;
 
-    // no cascade option on an ElementCollection, the target objects are always persisted, merged, removed with their parent.
+    // no cascade option on an ElementCollection, the target objects are always persisted, merged, removed with their parent
     @Getter
     @ElementCollection
     @CollectionTable(
             name = "sp_target_attributes",
             joinColumns = { @JoinColumn(name = "target", nullable = false) },
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_attributes_target"))
-    @MapKeyColumn(name = "attribute_key", length = Target.CONTROLLER_ATTRIBUTE_KEY_SIZE)
-    @Column(name = "attribute_value", length = Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE)
+    @MapKeyColumn(name = "attribute_key", length = Target.CONTROLLER_ATTRIBUTE_MAX_KEY_SIZE)
+    @Column(name = "attribute_value", length = Target.CONTROLLER_ATTRIBUTE_MAX_VALUE_SIZE)
     private Map<String, String> controllerAttributes;
 
-    @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaTargetMetadata.class)
-    private List<TargetMetadata> metadata;
+    // no cascade option on an ElementCollection, the target objects are always persisted, merged, removed with their parent
+    @Getter
+    @ElementCollection
+    @CollectionTable(
+            name = "sp_target_metadata",
+            joinColumns = { @JoinColumn(name = "target", nullable = false) },
+            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_metadata_target"))
+    @MapKeyColumn(name = "meta_key", length = Target.METADATA_MAX_KEY_SIZE)
+    @Column(name = "meta_value", length = Target.METADATA_MAX_VALUE_SIZE)
+    private Map<String, String> metadata;
 
     @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE }, targetEntity = JpaAction.class)
     private List<JpaAction> actions;
@@ -201,15 +207,11 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
     private List<RolloutTargetGroup> rolloutTargetGroup;
 
-    public JpaTarget(final String controllerId) {
-        this(controllerId, SecurityTokenGeneratorHolder.getInstance().generateToken());
-    }
-
     public JpaTarget(final String controllerId, final String securityToken) {
         this.controllerId = controllerId;
-        // truncate controller ID to max name length (if needed)
+        // truncate controller ID to max name length (if too big)
         setName(controllerId != null && controllerId.length() > NAME_MAX_SIZE ? controllerId.substring(0, NAME_MAX_SIZE) : controllerId);
-        this.securityToken = securityToken;
+        this.securityToken = ObjectUtils.isEmpty(securityToken) ? SecurityTokenGeneratorHolder.getInstance().generateToken() : securityToken;
     }
 
     @Override
@@ -285,10 +287,6 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
 
     public Set<TargetTag> getTags() {
         return tags == null ? Collections.emptySet() : Collections.unmodifiableSet(tags);
-    }
-
-    public List<TargetMetadata> getMetadata() {
-        return metadata == null ? Collections.emptyList() : Collections.unmodifiableList(metadata);
     }
 
     public void addAction(final Action action) {
