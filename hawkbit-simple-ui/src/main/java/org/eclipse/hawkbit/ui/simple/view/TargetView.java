@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -421,21 +422,31 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
         @Override
         protected void onAttach(AttachEvent attachEvent) {
-            Optional.ofNullable(hawkbitClient.getTargetRestApi().getInstalledDistributionSet(target.getControllerId()))
+            updateDistributionSetInfo(
+                    () -> hawkbitClient.getTargetRestApi().getInstalledDistributionSet(target.getControllerId()),
+                    installed
+            );
+            updateDistributionSetInfo(
+                    () -> hawkbitClient.getTargetRestApi().getAssignedDistributionSet(target.getControllerId()),
+                    assigned
+            );
+        }
+
+        private void updateDistributionSetInfo(Supplier<ResponseEntity<MgmtDistributionSet>> supplier, TextArea textArea) {
+            Optional.ofNullable(supplier.get())
                     .map(ResponseEntity<MgmtDistributionSet>::getBody)
                     .ifPresent(value -> {
-                        installed.setValue("Name : " + value.getName() + "\n" +
-                                "Version : " + value.getVersion() + "\n" +
+                        final String description = """
+                                Name:  %s
+                                Version: %s
+                                %s
+                                """.replaceAll("\n", System.lineSeparator());
+                        textArea.setValue(description.formatted(
+                                value.getName(),
+                                value.getVersion(),
                                 value.getModules().stream().map(module -> module.getTypeName() + ": " + module.getVersion())
-                                        .collect(Collectors.joining("\n")));
-                    });
-            Optional.ofNullable(hawkbitClient.getTargetRestApi().getAssignedDistributionSet(target.getControllerId()))
-                    .map(ResponseEntity<MgmtDistributionSet>::getBody)
-                    .ifPresent(value -> {
-                        assigned.setValue("Name : " + value.getName() + "\n" +
-                                "Version : " + value.getVersion() + "\n" +
-                                value.getModules().stream().map(module -> module.getTypeName() + ": " + module.getVersion())
-                                        .collect(Collectors.joining("\n")));
+                                        .collect(Collectors.joining(System.lineSeparator()))
+                        ));
                     });
         }
     }
