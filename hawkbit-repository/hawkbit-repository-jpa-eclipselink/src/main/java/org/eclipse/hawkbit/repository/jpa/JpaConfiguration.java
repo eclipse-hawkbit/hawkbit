@@ -14,14 +14,17 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import lombok.Data;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
@@ -32,16 +35,29 @@ import org.springframework.transaction.jta.JtaTransactionManager;
  * General EclipseLink configuration for hawkBit's Repository.
  */
 @Configuration
+@Import(JpaConfiguration.Properties.class)
 public class JpaConfiguration extends JpaBaseConfiguration {
 
+    @Data
+    @ConfigurationProperties // predix is "/" intentionally
+    protected static class Properties {
+
+        private final Map<String, String> eclipselink = new HashMap<>();
+    }
+
     private final TenantAware.TenantResolver tenantResolver;
+    // only for testing purposes ddl generation may be enabled
+    private final Map<String, String> eclipselinkProperties;
+
 
     protected JpaConfiguration(
             final DataSource dataSource, final JpaProperties properties,
             final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider,
-            final TenantAware.TenantResolver tenantResolver) {
+            final TenantAware.TenantResolver tenantResolver,
+            final Properties eclipselinkProperties) {
         super(dataSource, properties, jtaTransactionManagerProvider);
         this.tenantResolver = tenantResolver;
+        this.eclipselinkProperties = eclipselinkProperties.getEclipselink();
     }
 
     /**
@@ -76,7 +92,7 @@ public class JpaConfiguration extends JpaBaseConfiguration {
         properties.put(PersistenceUnitProperties.WEAVING, "false");
         // needed for reports
         properties.put(PersistenceUnitProperties.ALLOW_NATIVE_SQL_QUERIES, "true");
-        // flyway
+        // by default - none, flyway
         properties.put(PersistenceUnitProperties.DDL_GENERATION, "none");
         // Embed into hawkBit logging
         properties.put(PersistenceUnitProperties.LOGGING_LOGGER, "JavaLogger");
@@ -86,6 +102,9 @@ public class JpaConfiguration extends JpaBaseConfiguration {
         properties.put(PersistenceUnitProperties.BATCH_WRITING, "JDBC");
         // Batch size
         properties.put(PersistenceUnitProperties.BATCH_WRITING_SIZE, "500");
+
+        // override with all explicitly configured properties
+        properties.putAll(eclipselinkProperties);
         return properties;
     }
 }

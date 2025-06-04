@@ -152,11 +152,9 @@ public class SpecificationBuilder<T> {
                 } else {
                     final MapJoin<?, ?, ?> mapPath = (MapJoin<?, ?, ?>) pathResolver.getPath(attribute);
                     final Path<String> valuePath = (Path<String>) mapPath.value();
-                    return cb.and(
-                            equal(mapPath.key(), split[1]),
-                            isNot(op)
-                                    ? notEqualInLike(comparison, (PluralAttribute<?, ?, ?>) attribute, null)
-                                    : compare(comparison, valuePath));
+                    return isNot(op)
+                            ? compare(comparison, pathResolver.getJoinOnInner(attribute, split[1]))
+                            : cb.and(equal(mapPath.key(), split[1]), compare(comparison, valuePath));
                 }
             } else if (attribute instanceof SetAttribute<?, ?> setAttribute) {
                 if (split.length < 2 || ObjectUtils.isEmpty(split[1])) {
@@ -413,6 +411,10 @@ public class SpecificationBuilder<T> {
                 return getCollectionPathResolver(attribute.getName()).getJoinOn(value);
             }
 
+            private MapJoin<?, ?, ?> getJoinOnInner(final Attribute<?, ?> attribute, final Object value) {
+                return getCollectionPathResolver(attribute.getName()).getJoinOnInner(value);
+            }
+
             private void reset() {
                 attributeToPathResolver.values().forEach(CollectionPathResolver::reset);
             }
@@ -428,6 +430,7 @@ public class SpecificationBuilder<T> {
                 private final List<Path<?>> paths = new ArrayList<>();
                 private int pos;
                 private final Map<Object, MapJoin<?, ?, ?>> joinOnCache = new HashMap<>();
+                private final Map<Object, MapJoin<?, ?, ?>> joinOnInnerCache = new HashMap<>();
 
                 private CollectionPathResolver(final String attributeName) {
                     this.attributeName = attributeName;
@@ -447,6 +450,14 @@ public class SpecificationBuilder<T> {
                 private MapJoin<?, ?, ?> getJoinOn(final Object value) {
                     return joinOnCache.computeIfAbsent(value, k -> {
                         final MapJoin<?, ?, ?> mapPath = (MapJoin<?, ?, ?>) root.join(attributeName, JoinType.LEFT);
+                        mapPath.on(equal(mapPath.key(), k));
+                        return mapPath;
+                    });
+                }
+
+                private MapJoin<?, ?, ?> getJoinOnInner(final Object value) {
+                    return joinOnInnerCache.computeIfAbsent(value, k -> {
+                        final MapJoin<?, ?, ?> mapPath = (MapJoin<?, ?, ?>) root.join(attributeName, JoinType.INNER);
                         mapPath.on(equal(mapPath.key(), k));
                         return mapPath;
                     });
