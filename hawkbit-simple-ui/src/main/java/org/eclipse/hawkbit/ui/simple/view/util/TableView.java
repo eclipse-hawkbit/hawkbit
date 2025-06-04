@@ -14,11 +14,20 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import org.eclipse.hawkbit.ui.simple.view.Constants;
@@ -30,6 +39,9 @@ public class TableView<T, ID> extends Div implements Constants {
     private final Filter filter;
     final VerticalLayout gridLayout;
     protected final HorizontalLayout controlsLayout;
+    protected final SplitLayout splitLayout;
+    protected final Div detailsPanel = new Div();
+    protected Button currentSelectionButton;
 
     public TableView(
             final Filter.Rsql rsql,
@@ -43,7 +55,7 @@ public class TableView<T, ID> extends Div implements Constants {
             final Filter.Rsql alternativeRsql,
             final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,
             final BiFunction<Query<T, Void>, String, Stream<T>> queryFn) {
-        this(rsql, alternativeRsql, entityRepresentation, queryFn, null, null);
+        this(rsql, alternativeRsql, entityRepresentation, queryFn, null, null, null);
     }
 
     public TableView(
@@ -52,7 +64,7 @@ public class TableView<T, ID> extends Div implements Constants {
             final BiFunction<Query<T, Void>, String, Stream<T>> queryFn,
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> addHandler,
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler) {
-        this(rsql, null, entityRepresentation, queryFn, addHandler, removeHandler);
+        this(rsql, null, entityRepresentation, queryFn, addHandler, removeHandler, null);
     }
 
     public TableView(
@@ -60,13 +72,28 @@ public class TableView<T, ID> extends Div implements Constants {
             final SelectionGrid.EntityRepresentation<T, ID> entityRepresentation,
             final BiFunction<Query<T, Void>, String, Stream<T>> queryFn,
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> addHandler,
-            final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler) {
+            final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler,
+            final Function<T, Component> detailsButtonHandler
+    ) {
         selectionGrid = new SelectionGrid<>(entityRepresentation, queryFn);
+        selectionGrid.setSizeFull();
         filter = new Filter(selectionGrid::setRsqlFilter, rsql, alternativeRsql);
 
         setSizeFull();
 
-        gridLayout = new VerticalLayout(filter, selectionGrid);
+        splitLayout = new SplitLayout();
+        splitLayout.setSizeFull();
+        splitLayout.setOrientation(SplitLayout.Orientation.HORIZONTAL);
+        splitLayout.addThemeVariants(SplitLayoutVariant.LUMO_SMALL);
+        splitLayout.setSplitterPosition(100);
+        splitLayout.addToPrimary(selectionGrid);
+
+        if (detailsButtonHandler != null) {
+            ComponentRenderer<Button, T> renderer = new ComponentRenderer<>(renderDetailsButton(detailsButtonHandler));
+            selectionGrid.addColumn(renderer).setHeader("Details").setAutoWidth(true).setFlexGrow(0);
+        }
+
+        gridLayout = new VerticalLayout(filter, splitLayout);
         gridLayout.setSizeFull();
         gridLayout.setPadding(false);
         gridLayout.setSpacing(false);
@@ -80,5 +107,44 @@ public class TableView<T, ID> extends Div implements Constants {
         }
         gridLayout.add(controlsLayout);
         add(gridLayout);
+    }
+
+    private SerializableFunction<T, Button> renderDetailsButton(final Function<T, Component> selectionHandler) {
+        return (selectedItem) -> {
+            int DEFAULT_OPEN_POSITION_SIZE = 50;
+            final Button button = new Button(VaadinIcon.EYE.create());
+            button.getStyle().set("color", "var(--lumo-secondary-text-color)");
+
+            button.addClickListener(event -> {
+                final Icon eyeIcon = VaadinIcon.EYE.create();
+                final Icon closeIcon = VaadinIcon.CLOSE_SMALL.create();
+
+                if (button == currentSelectionButton) {
+                    button.setIcon(eyeIcon);
+                    button.getStyle().set("color", "var(--lumo-secondary-text-color)");
+                    detailsPanel.removeAll();
+                    splitLayout.remove(detailsPanel);
+                    splitLayout.setSplitterPosition(100);
+                    currentSelectionButton = null;
+                } else {
+                    button.setIcon(closeIcon);
+                    button.getStyle().set("color", "var(--lumo-primary-color)");
+                    if (currentSelectionButton == null) {
+                        splitLayout.addToSecondary(detailsPanel);
+                    } else {
+                        currentSelectionButton.setIcon(eyeIcon);
+                        currentSelectionButton.getStyle().set("color", "var(--lumo-secondary-text-color)");
+                    }
+                    detailsPanel.removeAll();
+                    splitLayout.setSplitterPosition(DEFAULT_OPEN_POSITION_SIZE);
+                    detailsPanel.add(selectionHandler.apply(selectedItem));
+                    currentSelectionButton = button;
+                }
+            });
+
+            button.setTooltipText("Show details");
+            button.addThemeVariants(ButtonVariant.LUMO_SMALL);
+            return button;
+        };
     }
 }
