@@ -47,6 +47,7 @@ class RSQLToSQLTest {
 
     @Test
     void printPG() {
+        printFrom(JpaTarget.class, TargetFields.class, "metadata.x==y");
         printFrom(JpaTarget.class, TargetFields.class, "tag!=TAG1 and tag==TAG2");
         printFrom(JpaTarget.class, TargetFields.class, "tag==TAG1 and tag!=TAG2");
     }
