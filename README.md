@@ -32,18 +32,11 @@ see [hawkBit Documentation](https://www.eclipse.dev/hawkbit/)
 - Having issues with hawkBit? Open a [GitHub issue](https://github.com/eclipse-hawkbit/hawkbit/issues).
 - You can also check out our [Project Homepage](https://www.eclipse.dev/hawkbit) for further contact options.
 
-# hawkBit sandbox
+# hawkBit evaluation
 
-We offer a sandbox installation that is free for everyone to try out hawkBit. However, keep in mind that the sandbox
-database will be reset from time to time. It is also not possible to upload any artifacts into the sandbox. But you can
-use it to try out the Management API and DDI API. Keep in mind as well that you are not permitted to store any kind of
-personal data in the sandbox.
+The following vendors offer free trial accounts for their hawkBit compatible products:
 
-[https://hawkbit.eclipseprojects.io](https://hawkbit.eclipseprojects.io)
-
-In addition the following vendors offer free trial accounts for their hawkBit compatible products:
-
-- [Bosch IoT Rollouts](https://developer.bosch-iot-suite.com/service/rollouts)
+- [Bosch IoT Rollouts](https://bosch-iot-suite.com/service/rollouts/)
 - [Kynetics Update Factory](https://www.kynetics.com/iot-platform-update-factory)
 
 # Device Integration (Client libraries)
@@ -62,10 +55,6 @@ The [hara-ddiclient repository](https://github.com/eclipse-hara/hara-ddiclient) 
 
 The hara-ddiclient library has [reached version 2.x](https://github.com/eclipse-hara/hara-ddiclient/releases), and has
 been successfully used in production for years.
-
-Additionally, the hawkBit project has the long term goal to provide [Eclipse Hono](https://github.com/eclipse/hono)
-integration which will provide connectivity through various IoT protocols and as a result will allow a wide range of
-clients to connect to hawkBit.
 
 ## Other open-source hawkBit Clients
 
