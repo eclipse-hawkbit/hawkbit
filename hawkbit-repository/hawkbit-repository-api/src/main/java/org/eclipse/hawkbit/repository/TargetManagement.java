@@ -253,12 +253,12 @@ public interface TargetManagement {
      * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    Slice<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatibleAndUpdatable(@NotNull Pageable pageRequest,
+    Slice<Target> findByTargetFilterQueryAndNotInRolloutAndCompatibleAndUpdatable(@NotNull Pageable pageRequest,
             @NotEmpty Collection<Long> groups, @NotNull String targetFilterQuery,
             @NotNull DistributionSetType distributionSetType);
 
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    Slice<Target> findByNotInGEGroupAndNotInActiveActionGEWeightOrInRolloutAndTargetFilterQueryAndCompatibleAndUpdatable(
+    Slice<Target> findByTargetFilterQueryAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
             @NotNull Pageable pageRequest, final long rolloutId, final int weight, final long firstGroupId, @NotNull String targetFilterQuery,
             @NotNull DistributionSetType distributionSetType);
 
