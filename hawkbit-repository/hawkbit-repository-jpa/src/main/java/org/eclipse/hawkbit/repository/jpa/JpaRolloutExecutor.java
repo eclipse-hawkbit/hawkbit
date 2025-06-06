@@ -647,7 +647,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                     rollout.getRolloutGroups(), RolloutGroupStatus.READY, group);
             final Slice<Target> targets;
             if (!RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
-                targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+                targets = targetManagement.findByTargetFilterQueryAndNotInRolloutAndCompatibleAndUpdatable(
                         pageRequest, readyGroups, targetFilter, rollout.getDistributionSet().getType());
             } else {
                 targets = targetManagement.findByFailedRolloutAndNotInRolloutGroups(
@@ -771,7 +771,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final String targetFilter, final long limit) {
         return DeploymentHelper.runInNewTransaction(txManager, "createActionsForRolloutDynamicGroup", status -> {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
-            final Slice<Target> targets = targetManagement.findByNotInGEGroupAndNotInActiveActionGEWeightOrInRolloutAndTargetFilterQueryAndCompatibleAndUpdatable(
+            final Slice<Target> targets = targetManagement.findByTargetFilterQueryAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
                     pageRequest,
                     rollout.getId(), rollout.getWeight().orElse(1000), // Dynamic rollouts shall always have weight!
                     rolloutGroupRepository.findByRolloutOrderByIdAsc(rollout).get(0).getId(),
