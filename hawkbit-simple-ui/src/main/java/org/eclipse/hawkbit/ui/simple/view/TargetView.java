@@ -106,9 +106,6 @@ public class TargetView extends TableView<MgmtTarget, String> {
                         grid.addColumn(MgmtTarget::getControllerId).setHeader(CONTROLLER_ID).setAutoWidth(true);
                         grid.addColumn(MgmtTarget::getName).setHeader(Constants.NAME).setAutoWidth(true);
                         grid.addColumn(MgmtTarget::getTargetTypeName).setHeader(Constants.TYPE).setAutoWidth(true);
-
-                        grid.setItemDetailsRenderer(new ComponentRenderer<>(
-                                () -> new TargetDetailedView(hawkbitClient), TargetDetailedView::setItem));
                     }
                 },
                 (query, filter) -> hawkbitClient.getTargetRestApi()
@@ -124,6 +121,11 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     selectionGrid.getSelectedItems().forEach(toDelete ->
                             hawkbitClient.getTargetRestApi().deleteTarget(toDelete.getControllerId()));
                     return CompletableFuture.completedFuture(null);
+                },
+                (target) -> {
+                    var targetDetailedView = new TargetDetailedView(hawkbitClient);
+                    targetDetailedView.setItem(target);
+                    return targetDetailedView;
                 }
         );
 
@@ -317,7 +319,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
     }
 
-    private static class TargetDetailedView extends TabSheet {
+    protected static class TargetDetailedView extends TabSheet {
 
         private final TargetDetails targetDetails;
         private final TargetAssignedInstalled targetAssignedInstalled;
@@ -483,7 +485,6 @@ public class TargetView extends TableView<MgmtTarget, String> {
             tagSelector.setWidthFull();
             tagSelector.setItemLabelGenerator(MgmtTag::getName);
             tagSelector.setClearButtonVisible(true);
-            tagSelector.setItems(fetchAvailableTags());
 
             final HorizontalLayout tagSelectorLayout = new HorizontalLayout(tagSelector, createTagButton);
             tagSelectorLayout.setWidthFull();
@@ -499,6 +500,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
         @Override
         protected void onAttach(AttachEvent attachEvent) {
+            tagSelector.setItems(fetchAvailableTags());
             if (changeListener != null) {
                 changeListener.remove();
             }
