@@ -36,6 +36,7 @@ import org.springframework.orm.jpa.vendor.Database;
 
 @SuppressWarnings("java:S5961") // complex check because the matter is very complex
 @DataJpaTest(properties = {
+        "spring.jpa.database=H2",
         "logging.level.org.eclipse.hawkbit.repository.jpa.rsql=DEBUG"
 }, excludeAutoConfiguration = { FlywayAutoConfiguration.class })
 @EnableAutoConfiguration
