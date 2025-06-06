@@ -60,6 +60,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
@@ -70,6 +71,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentR
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
@@ -101,7 +103,9 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
                     @Override
                     protected void addColumns(final Grid<MgmtTarget> grid) {
-                        grid.addColumn(new ComponentRenderer<Component, MgmtTarget>(TargetStatusCell::new)).setHeader(STATUS).setAutoWidth(true)
+                        grid.addColumn(new ComponentRenderer<>(TargetStatusCell::new))
+                                .setHeader(STATUS)
+                                .setAutoWidth(true)
                                 .setFlexGrow(0);
                         grid.addColumn(MgmtTarget::getControllerId).setHeader(CONTROLLER_ID).setAutoWidth(true);
                         grid.addColumn(MgmtTarget::getName).setHeader(Constants.NAME).setAutoWidth(true);
@@ -109,34 +113,29 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     }
                 },
                 (query, filter) -> hawkbitClient.getTargetRestApi()
-                        .getTargets(
-                                query.getOffset(), query.getPageSize(), Constants.NAME_ASC,
-                                filter
-                        )
+                        .getTargets(query.getOffset(), query.getPageSize(), Constants.NAME_ASC, filter)
                         .getBody()
                         .getContent()
                         .stream(),
                 source -> new RegisterDialog(hawkbitClient).result(),
                 selectionGrid -> {
-                    selectionGrid.getSelectedItems().forEach(toDelete ->
-                            hawkbitClient.getTargetRestApi().deleteTarget(toDelete.getControllerId()));
+                    selectionGrid.getSelectedItems()
+                            .forEach(toDelete -> hawkbitClient.getTargetRestApi().deleteTarget(toDelete.getControllerId()));
                     return CompletableFuture.completedFuture(null);
                 },
-                (target) -> {
-                    var targetDetailedView = new TargetDetailedView(hawkbitClient);
+                target -> {
+                    final TargetDetailedView targetDetailedView = new TargetDetailedView(hawkbitClient);
                     targetDetailedView.setItem(target);
                     return targetDetailedView;
                 }
         );
 
-        Function<SelectionGrid<MgmtTarget, String>, CompletionStage<Void>> assignHandler = source -> new AssignDialog(
-                hawkbitClient, source.getSelectedItems()).result();
+        final Function<SelectionGrid<MgmtTarget, String>, CompletionStage<Void>> assignHandler =
+                source -> new AssignDialog(hawkbitClient, source.getSelectedItems()).result();
 
         final Button assignBtn = Utils.tooltip(new Button(VaadinIcon.LINK.create()), "Assign");
         assignBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        assignBtn.addClickListener(e -> assignHandler
-                .apply(selectionGrid)
-                .thenAccept(v -> selectionGrid.refreshGrid(false)));
+        assignBtn.addClickListener(e -> assignHandler.apply(selectionGrid).thenAccept(v -> selectionGrid.refreshGrid(false)));
         controlsLayout.addComponentAtIndex(0, assignBtn);
     }
 
@@ -181,8 +180,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                             "controllerid", controllerId.getOptionalValue(),
                             "targettype.name", type.getSelectedItems().stream().map(MgmtTargetType::getName)
                                     .toList(),
-                            "tag", tag.getSelectedItems()
-                    ));
+                            "tag", tag.getSelectedItems()));
         }
     }
 
@@ -212,8 +210,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
             });
             savedFilters.setEmptySelectionAllowed(true);
             savedFilters.setItems(listFilters(hawkbitClient));
-            savedFilters.setItemLabelGenerator(
-                    query -> Optional.ofNullable(query).map(MgmtTargetFilterQuery::getName).orElse("<select saved filter>"));
+            savedFilters.setItemLabelGenerator(query ->
+                    Optional.ofNullable(query).map(MgmtTargetFilterQuery::getName).orElse("<select saved filter>"));
             savedFilters.setWidthFull();
 
             textFilter.setWidthFull();
@@ -230,81 +228,72 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
 
         private static List<MgmtTargetFilterQuery> listFilters(HawkbitMgmtClient hawkbitClient) {
-            return Optional.ofNullable(
-                    hawkbitClient.getTargetFilterQueryRestApi()
-                            .getFilters(0, 30, null, null, null)
-                            .getBody().getContent()
-            ).orElse(Collections.emptyList());
+            return Optional
+                    .ofNullable(
+                            hawkbitClient.getTargetFilterQueryRestApi()
+                                    .getFilters(0, 30, null, null, null)
+                                    .getBody()
+                                    .getContent())
+                    .orElse(Collections.emptyList());
         }
 
         private ComponentEventListener<ClickEvent<Button>> createBtnListener(HawkbitMgmtClient hawkbitClient) {
             return e ->
-                    new Utils.BaseDialog<Void>("Create New Filter") {
-
-                        {
-                            final Button finishBtn = Utils.tooltip(new Button("Save"), "Save (Enter)");
-                            final TextField name = Utils.textField(
-                                    Constants.NAME,
-                                    e -> finishBtn.setEnabled(!e.getHasValue().isEmpty())
-                            );
-                            name.focus();
-                            finishBtn.addClickShortcut(Key.ENTER);
-                            finishBtn.setEnabled(false);
-                            finishBtn.addClickListener(e -> {
-                                final MgmtTargetFilterQueryRequestBody createRequest = new MgmtTargetFilterQueryRequestBody();
-                                createRequest.setName(name.getValue());
-                                createRequest.setQuery(textFilter.getValue());
-                                hawkbitClient.getTargetFilterQueryRestApi().createFilter(createRequest);
-                                savedFilters.setItems(
-                                        listFilters(hawkbitClient));
-                                close();
-                            });
-                            getFooter().add(finishBtn);
-                            add(name);
-                            open();
-                        }
-                    };
+                    new Utils.BaseDialog<Void>("Create New Filter") {{
+                        final Button finishBtn = Utils.tooltip(new Button("Save"), "Save (Enter)");
+                        final TextField name = Utils.textField(Constants.NAME, e -> finishBtn.setEnabled(!e.getHasValue().isEmpty()));
+                        name.focus();
+                        finishBtn.addClickShortcut(Key.ENTER);
+                        finishBtn.setEnabled(false);
+                        finishBtn.addClickListener(e -> {
+                            final MgmtTargetFilterQueryRequestBody createRequest = new MgmtTargetFilterQueryRequestBody();
+                            createRequest.setName(name.getValue());
+                            createRequest.setQuery(textFilter.getValue());
+                            hawkbitClient.getTargetFilterQueryRestApi().createFilter(createRequest);
+                            savedFilters.setItems(listFilters(hawkbitClient));
+                            close();
+                        });
+                        getFooter().add(finishBtn);
+                        add(name);
+                        open();
+                    }};
         }
 
         private ComponentEventListener<ClickEvent<Button>> updateBtnListener(HawkbitMgmtClient hawkbitClient) {
             return e -> {
                 final MgmtTargetFilterQuery selected = savedFilters.getValue();
-                if (selected == null) return;
+                if (selected == null) {
+                    return;
+                }
 
-                new Utils.BaseDialog<Void>("Update Filter") {
+                new Utils.BaseDialog<Void>("Update Filter") {{
+                    final Button finishBtn = Utils.tooltip(new Button("Update"), "Update (Enter)");
+                    finishBtn.setEnabled(false);
 
-                    {
-                        final Button finishBtn = Utils.tooltip(new Button("Update"), "Update (Enter)");
-                        finishBtn.setEnabled(false);
+                    final TextField name = Utils.textField(Constants.NAME, e -> finishBtn.setEnabled(!e.getHasValue().isEmpty()));
+                    name.focus();
+                    name.setValue(selected.getName());
 
-                        final TextField name = Utils.textField(
-                                Constants.NAME,
-                                e -> finishBtn.setEnabled(!e.getHasValue().isEmpty())
-                        );
-                        name.focus();
-                        name.setValue(selected.getName());
+                    final TextArea filterValue = new TextArea("Filter Value");
+                    filterValue.setReadOnly(true);
+                    filterValue.setValue(textFilter.getValue());
+                    filterValue.setWidthFull();
 
-                        final TextArea filterValue = new TextArea("Filter Value");
-                        filterValue.setReadOnly(true);
-                        filterValue.setValue(textFilter.getValue());
-                        filterValue.setWidthFull();
+                    finishBtn.addClickShortcut(Key.ENTER);
+                    finishBtn.addClickListener(e -> {
+                        final MgmtTargetFilterQueryRequestBody updateRequest = new MgmtTargetFilterQueryRequestBody();
+                        updateRequest.setName(name.getValue());
+                        updateRequest.setQuery(textFilter.getValue());
+                        hawkbitClient.getTargetFilterQueryRestApi().updateFilter(selected.getId(), updateRequest);
+                        savedFilters.setItems(listFilters(hawkbitClient));
+                        close();
+                    });
+                    getFooter().add(finishBtn);
 
-                        finishBtn.addClickShortcut(Key.ENTER);
-                        finishBtn.addClickListener(e -> {
-                            final MgmtTargetFilterQueryRequestBody updateRequest = new MgmtTargetFilterQueryRequestBody();
-                            updateRequest.setName(name.getValue());
-                            updateRequest.setQuery(textFilter.getValue());
-                            hawkbitClient.getTargetFilterQueryRestApi().updateFilter(selected.getId(), updateRequest);
-                            savedFilters.setItems(listFilters(hawkbitClient));
-                            close();
-                        });
-                        getFooter().add(finishBtn);
-
-                        add(name);
-                        add(filterValue);
-                        open();
-                    }
-                };
+                    add(name);
+                    add(filterValue);
+                    open();
+                }};
             };
         }
 
@@ -326,7 +315,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private final TargetTags targetTags;
         private final TargetActions targetActions;
 
-        private TargetDetailedView(HawkbitMgmtClient hawkbitClient) {
+        private TargetDetailedView(final HawkbitMgmtClient hawkbitClient) {
             targetDetails = new TargetDetails(hawkbitClient);
             targetAssignedInstalled = new TargetAssignedInstalled(hawkbitClient);
             targetTags = new TargetTags(hawkbitClient);
@@ -357,17 +346,16 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private final TextField lastModifiedAt = Utils.textField(Constants.LAST_MODIFIED_AT);
         private final TextField securityToken = Utils.textField(Constants.SECURITY_TOKEN);
         private final TextArea targetAttributes = new TextArea(Constants.ATTRIBUTES);
-        private MgmtTarget target;
+        private transient MgmtTarget target;
 
-        private TargetDetails(HawkbitMgmtClient hawkbitClient) {
+        private TargetDetails(final HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
             description.setMinLength(2);
             Stream.of(
                             description,
                             createdBy, createdAt,
                             lastModifiedBy, lastModifiedAt,
-                            securityToken, targetAttributes
-                    )
+                            securityToken, targetAttributes)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -382,18 +370,18 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
 
         @Override
-        protected void onAttach(AttachEvent attachEvent) {
+        protected void onAttach(final AttachEvent attachEvent) {
             description.setValue(target.getDescription() == null ? "N/A" : target.getDescription());
             createdBy.setValue(target.getCreatedBy());
             createdAt.setValue(new Date(target.getCreatedAt()).toString());
             lastModifiedBy.setValue(target.getLastModifiedBy());
             lastModifiedAt.setValue(new Date(target.getLastModifiedAt()).toString());
             securityToken.setValue(target.getSecurityToken());
-            var response = hawkbitClient.getTargetRestApi().getAttributes(target.getControllerId());
+            final ResponseEntity<MgmtTargetAttributes> response = hawkbitClient.getTargetRestApi().getAttributes(target.getControllerId());
             if (response.getStatusCode().is2xxSuccessful()) {
                 targetAttributes.setValue(Objects.requireNonNullElse(response.getBody(), Collections.emptyMap()).entrySet().stream()
-                        .map(entry -> entry.getKey() + ": " +
-                                entry.getValue()).collect(Collectors.joining("\n")));
+                        .map(entry -> entry.getKey() + ": " + entry.getValue())
+                        .collect(Collectors.joining("\n")));
             } else {
                 targetAttributes.setValue("Error occurred fetching attributes from server: " + response.getStatusCode());
             }
@@ -405,7 +393,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private final transient HawkbitMgmtClient hawkbitClient;
         private final TextArea assigned = new TextArea("Assigned Distribution Set");
         private final TextArea installed = new TextArea("Installed Distribution Set");
-        private MgmtTarget target;
+        private transient MgmtTarget target;
 
         private TargetAssignedInstalled(HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
@@ -423,14 +411,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
         @Override
         protected void onAttach(AttachEvent attachEvent) {
-            updateDistributionSetInfo(
-                    () -> hawkbitClient.getTargetRestApi().getInstalledDistributionSet(target.getControllerId()),
-                    installed
-            );
-            updateDistributionSetInfo(
-                    () -> hawkbitClient.getTargetRestApi().getAssignedDistributionSet(target.getControllerId()),
-                    assigned
-            );
+            updateDistributionSetInfo(() -> hawkbitClient.getTargetRestApi().getInstalledDistributionSet(target.getControllerId()), installed);
+            updateDistributionSetInfo(() -> hawkbitClient.getTargetRestApi().getAssignedDistributionSet(target.getControllerId()), assigned);
         }
 
         private void updateDistributionSetInfo(Supplier<ResponseEntity<MgmtDistributionSet>> supplier, TextArea textArea) {
@@ -441,7 +423,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                                 Name:  %s
                                 Version: %s
                                 %s
-                                """.replaceAll("\n", System.lineSeparator());
+                                """.replace("\n", System.lineSeparator());
                         textArea.setValue(description.formatted(
                                 value.getName(),
                                 value.getVersion(),
@@ -458,7 +440,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private final ComboBox<MgmtTag> tagSelector = new ComboBox<>(TAG);
         private final HorizontalLayout tagsArea = new HorizontalLayout();
         private Registration changeListener;
-        private MgmtTarget target;
+        private transient MgmtTarget target;
 
         private TargetTags(HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
@@ -478,9 +460,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
         private HorizontalLayout buildTagSelectionLayout(HawkbitMgmtClient hawkbitClient) {
             final Button createTagButton = new Button("Create Tag");
-            createTagButton.addClickListener(event -> {
-                new CreateTagDialog(hawkbitClient, () -> tagSelector.setItems(fetchAvailableTags())).result();
-            });
+            createTagButton.addClickListener(event ->
+                    new CreateTagDialog(hawkbitClient, () -> tagSelector.setItems(fetchAvailableTags())).result());
 
             tagSelector.setWidthFull();
             tagSelector.setItemLabelGenerator(MgmtTag::getName);
@@ -565,29 +546,25 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
     }
 
+    @Slf4j
     private static class TargetActions extends Grid<TargetActions.ActionStatusEntry> {
 
         private final transient HawkbitMgmtClient hawkbitClient;
-        private MgmtTarget target;
+        private transient MgmtTarget target;
 
-        private TargetActions(HawkbitMgmtClient hawkbitClient) {
+        private TargetActions(final HawkbitMgmtClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
             setWidthFull();
-            addColumn(new ComponentRenderer<Component, ActionStatusEntry>(ActionStatusEntry::getStatusIcon)).setHeader("Status")
-                    .setAutoWidth(true)
-                    .setFlexGrow(0);
+            addColumn(new ComponentRenderer<>(ActionStatusEntry::getStatusIcon)).setHeader(STATUS).setAutoWidth(true).setFlexGrow(0);
             addColumn(ActionStatusEntry::getDistributionSetName).setHeader("Distribution Set").setAutoWidth(true);
-            addColumn(ActionStatusEntry::getLastModifiedAt).setHeader("Last Modified").setAutoWidth(true)
-                    .setFlexGrow(0).setComparator(ActionStatusEntry::getLastModifiedAt);
-            addColumn(new ComponentRenderer<Component, ActionStatusEntry>(ActionStatusEntry::getForceTypeIcon)).setHeader("Type")
+            addColumn(ActionStatusEntry::getLastModifiedAt)
+                    .setHeader("Last Modified")
                     .setAutoWidth(true)
-                    .setFlexGrow(0);
-            addColumn(new ComponentRenderer<Component, ActionStatusEntry>(ActionStatusEntry::getActionsLayout)).setHeader("Actions")
-                    .setAutoWidth(true)
-                    .setFlexGrow(0);
-            addColumn(new ComponentRenderer<Component, ActionStatusEntry>(ActionStatusEntry::getForceQuitLayout)).setHeader("Force Quit")
-                    .setAutoWidth(true)
-                    .setFlexGrow(0);
+                    .setFlexGrow(0)
+                    .setComparator(ActionStatusEntry::getLastModifiedAt);
+            addColumn(new ComponentRenderer<>(ActionStatusEntry::getForceTypeIcon)).setHeader("Type").setAutoWidth(true).setFlexGrow(0);
+            addColumn(new ComponentRenderer<>(ActionStatusEntry::getActionsLayout)).setHeader("Actions").setAutoWidth(true).setFlexGrow(0);
+            addColumn(new ComponentRenderer<>(ActionStatusEntry::getForceQuitLayout)).setHeader("Force Quit").setAutoWidth(true).setFlexGrow(0);
         }
 
         private void setItem(final MgmtTarget target) {
@@ -595,13 +572,13 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
 
         private List<ActionStatusEntry> fetchActions() {
-            return this.hawkbitClient.getTargetRestApi().getActionHistory(target.getControllerId(), 0, 30, null, null)
+            return hawkbitClient.getTargetRestApi().getActionHistory(target.getControllerId(), 0, 30, null, null)
                     .getBody()
                     .getContent()
                     .stream()
                     .map(action -> new ActionStatusEntry(action, () -> setItems(fetchActions())))
                     .filter(value -> value.action != null)
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
         @Override
@@ -611,15 +588,15 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
         private class ActionStatusEntry {
 
-            MgmtAction action;
+            final MgmtAction action;
+            final Runnable onUpdate;
             MgmtDistributionSet distributionSet;
-            Runnable onUpdate;
 
-            public ActionStatusEntry(MgmtAction mgmtAction, Runnable onUpdate) {
+            public ActionStatusEntry(final MgmtAction mgmtAction, final Runnable onUpdate) {
                 this.action = hawkbitClient.getActionRestApi().getAction(mgmtAction.getId()).getBody();
                 this.onUpdate = onUpdate;
                 if (action == null) {
-                    LoggerFactory.getLogger(ActionStatusEntry.class).error("Unable to fetch the action with id : {}", mgmtAction.getId());
+                    log.error("Unable to fetch the action with id : {}", mgmtAction.getId());
                     return;
                 }
                 this.action.getLink("distributionset").ifPresent(link -> {
@@ -627,22 +604,22 @@ public class TargetView extends TableView<MgmtTarget, String> {
                         Long dsId = Long.parseLong(link.getHref().substring(link.getHref().lastIndexOf("/") + 1));
                         this.distributionSet = hawkbitClient.getDistributionSetRestApi().getDistributionSet(dsId).getBody();
                     } catch (NumberFormatException e) {
-                        LoggerFactory.getLogger(ActionStatusEntry.class).error("Error parsing distribution set ID", e);
+                        log.error("Error parsing distribution set ID", e);
                     }
                 });
             }
 
-            private Boolean isActive() {
+            private boolean isActive() {
                 return action.getStatus().equals(MgmtAction.ACTION_PENDING);
             }
 
-            private Boolean isCancelingOrCanceled() {
+            private boolean isCancelingOrCanceled() {
                 return action.getType().equals(MgmtAction.ACTION_CANCEL);
             }
 
             public Component getStatusIcon() {
-                HorizontalLayout layout = new HorizontalLayout();
-                Icon icon;
+                final HorizontalLayout layout = new HorizontalLayout();
+                final Icon icon;
                 if (isActive()) {
                     if (isCancelingOrCanceled()) {
                         icon = Utils.tooltip(VaadinIcon.ADJUST.create(), "Pending Cancellation");
@@ -667,7 +644,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
             }
 
             public String getDistributionSetName() {
-                return distributionSet != null ? distributionSet.getName() : "Distribution Set not found";
+                return Optional.ofNullable(distributionSet).map(MgmtDistributionSet::getName).orElse("Distribution Set not found");
             }
 
             public Instant getLastModifiedAt() {
@@ -685,24 +662,22 @@ public class TargetView extends TableView<MgmtTarget, String> {
             }
 
             public HorizontalLayout getActionsLayout() {
-                HorizontalLayout actionsLayout = new HorizontalLayout();
+                final HorizontalLayout actionsLayout = new HorizontalLayout();
                 actionsLayout.setSpacing(true);
 
-                Button cancelButton = Utils.tooltip(new Button(VaadinIcon.CLOSE.create()), "Cancel Action");
+                final Button cancelButton = Utils.tooltip(new Button(VaadinIcon.CLOSE.create()), "Cancel Action");
                 if (isActive() && !isCancelingOrCanceled()) {
                     cancelButton.addClickListener(e -> {
                         String message = "Are you sure you want to cancel the action ?";
                         promptForConfirmAction(
-                                message, onUpdate, () -> {
-                                    hawkbitClient.getTargetRestApi().cancelAction(target.getControllerId(), action.getId(), false);
-                                }
-                        ).open();
+                                message, onUpdate,
+                                () -> hawkbitClient.getTargetRestApi().cancelAction(target.getControllerId(), action.getId(), false)).open();
                     });
                 } else {
                     cancelButton.setEnabled(false);
                 }
 
-                Button forceButton = Utils.tooltip(new Button(VaadinIcon.BOLT.create()), "Force Action");
+                final Button forceButton = Utils.tooltip(new Button(VaadinIcon.BOLT.create()), "Force Action");
                 if (isActive() && !isCancelingOrCanceled() && action.getForceType() != MgmtActionType.FORCED) {
                     forceButton.addClickListener(e -> {
                         String message = "Are you sure you want to force the action ?";
@@ -723,23 +698,21 @@ public class TargetView extends TableView<MgmtTarget, String> {
             }
 
             public HorizontalLayout getForceQuitLayout() {
-                HorizontalLayout forceQuitLayout = new HorizontalLayout();
+                final HorizontalLayout forceQuitLayout = new HorizontalLayout();
                 forceQuitLayout.setSpacing(true);
                 forceQuitLayout.setPadding(true);
                 forceQuitLayout.setWidthFull();
                 forceQuitLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 
-                Button forceQuitButton = Utils.tooltip(new Button(VaadinIcon.CLOSE.create()), "Force Cancel");
+                final Button forceQuitButton = Utils.tooltip(new Button(VaadinIcon.CLOSE.create()), "Force Cancel");
                 forceQuitButton.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY_INLINE);
 
                 if (isActive() && isCancelingOrCanceled()) {
                     forceQuitButton.addClickListener(e -> {
                         String message = "Are you sure you want to force cancel the action ?";
                         promptForConfirmAction(
-                                message, onUpdate, () -> {
-                                    hawkbitClient.getTargetRestApi().cancelAction(target.getControllerId(), action.getId(), true);
-                                }
-                        ).open();
+                                message, onUpdate,
+                                () -> hawkbitClient.getTargetRestApi().cancelAction(target.getControllerId(), action.getId(), true)).open();
                     });
                 } else {
                     forceQuitButton.setEnabled(false);
@@ -782,8 +755,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
             final Button register = Utils.tooltip(new Button("Register"), "Register (Enter)");
             type = new Select<>(
                     "Type",
-                    e -> {
-                    },
+                    e -> {},
                     hawkbitClient.getTargetTypeRestApi()
                             .getTargetTypes(0, 30, Constants.NAME_ASC, null)
                             .getBody()
@@ -793,10 +765,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
             type.setWidthFull();
             type.setEmptySelectionAllowed(true);
             type.setItemLabelGenerator(item -> item == null ? "" : item.getName());
-            controllerId = Utils.textField(
-                    CONTROLLER_ID,
-                    e -> register.setEnabled(!e.getHasValue().isEmpty())
-            );
+            controllerId = Utils.textField(CONTROLLER_ID,e -> register.setEnabled(!e.getHasValue().isEmpty()));
             controllerId.focus();
             name = Utils.textField(Constants.NAME);
             name.setWidthFull();
@@ -808,7 +777,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
             register.setEnabled(false);
             register.addClickShortcut(Key.ENTER);
             register.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            final Button cancel = Utils.tooltip(new Button("Cancel"), "Cancel (Esc)");
+            final Button cancel = Utils.tooltip(new Button(CANCEL), CANCEL_ESC);
             cancel.addClickListener(e -> close());
             cancel.addClickShortcut(Key.ESCAPE);
             getFooter().add(cancel);
@@ -874,7 +843,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
             assign.setEnabled(false);
             assign.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             addAssignClickListener(hawkbitClient, selectedTargets);
-            final Button cancel = Utils.tooltip(new Button("Cancel"), "Cancel (Esc)");
+            final Button cancel = Utils.tooltip(new Button(CANCEL), CANCEL_ESC);
             cancel.addClickListener(e -> close());
             cancel.addClickShortcut(Key.ESCAPE);
             getFooter().add(cancel);
@@ -898,11 +867,10 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private void addAssignClickListener(final HawkbitMgmtClient hawkbitClient, final Set<MgmtTarget> selectedTargets) {
             assign.addClickListener(e -> {
                 close();
-                List<MgmtTargetAssignmentRequestBody> requests = new LinkedList<MgmtTargetAssignmentRequestBody>();
 
+                final List<MgmtTargetAssignmentRequestBody> requests = new LinkedList<>();
                 for (final MgmtTarget target : selectedTargets) {
-
-                    MgmtTargetAssignmentRequestBody request = new MgmtTargetAssignmentRequestBody(target.getControllerId());
+                    final MgmtTargetAssignmentRequestBody request = new MgmtTargetAssignmentRequestBody(target.getControllerId());
 
                     request.setType(actionType.getValue());
                     if (actionType.getValue() == MgmtActionType.TIMEFORCED) {
@@ -928,12 +896,12 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private CreateTagDialog(final HawkbitMgmtClient hawkbitClient, Runnable onSuccess) {
             super("Create Tag");
 
-            FormLayout formLayout = new FormLayout();
+            final FormLayout formLayout = new FormLayout();
             formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
             final Button create = Utils.tooltip(new Button("Create"), "Create (Enter)");
-            final Button cancel = Utils.tooltip(new Button("Cancel"), "Cancel (Esc)");
+            final Button cancel = Utils.tooltip(new Button(CANCEL), CANCEL_ESC);
 
-            Input colorInput = new Input();
+            final Input colorInput = new Input();
             colorInput.setType("color");
             name = Utils.textField("Tag Name", e -> create.setEnabled(!e.getHasValue().isEmpty()));
             formLayout.add(name);
@@ -949,8 +917,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                         new MgmtTagRequestBodyPut()
                                 .setName(name.getValue())
                                 .setDescription(description.getValue())
-                                .setColour(colorInput.getValue())
-                ));
+                                .setColour(colorInput.getValue())));
                 onSuccess.run();
                 close();
             });
@@ -966,15 +933,15 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
     private static class TargetStatusCell extends HorizontalLayout {
 
-        private TargetStatusCell(MgmtTarget target) {
-            MgmtPollStatus pollStatus = target.getPollStatus();
-            String targetUpdateStatus = Optional.ofNullable(target.getUpdateStatus()).orElse("unknown");
+        private TargetStatusCell(final MgmtTarget target) {
+            final MgmtPollStatus pollStatus = target.getPollStatus();
+            final String targetUpdateStatus = Optional.ofNullable(target.getUpdateStatus()).orElse("unknown");
             add(pollStatusIconMapper(pollStatus), targetUpdateStatusMapper(targetUpdateStatus));
             setWidth(50, Unit.PIXELS);
         }
 
-        private Icon targetUpdateStatusMapper(String targetUpdateStatus) {
-            VaadinIcon icon = switch (targetUpdateStatus) {
+        private Icon targetUpdateStatusMapper(final String targetUpdateStatus) {
+            final VaadinIcon icon = switch (targetUpdateStatus) {
                 case "error" -> VaadinIcon.EXCLAMATION_CIRCLE;
                 case "in_sync" -> VaadinIcon.CHECK_CIRCLE;
                 case "pending" -> VaadinIcon.ADJUST;
@@ -982,7 +949,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                 default -> VaadinIcon.QUESTION_CIRCLE;
             };
 
-            String color = switch (targetUpdateStatus) {
+            final String color = switch (targetUpdateStatus) {
                 case "error" -> "red";
                 case "in_sync" -> "green";
                 case "pending" -> "orange";
@@ -990,14 +957,14 @@ public class TargetView extends TableView<MgmtTarget, String> {
                 default -> "blue";
             };
 
-            Icon statusIcon = Utils.tooltip(icon.create(), targetUpdateStatus);
+            final Icon statusIcon = Utils.tooltip(icon.create(), targetUpdateStatus);
             statusIcon.setColor(color);
             statusIcon.addClassNames(LumoUtility.IconSize.SMALL);
             return statusIcon;
         }
 
         private Icon pollStatusIconMapper(MgmtPollStatus pollStatus) {
-            Icon pollIcon;
+            final Icon pollIcon;
             if (pollStatus == null) {
                 pollIcon = Utils.tooltip(VaadinIcon.QUESTION_CIRCLE.create(), "No Poll Status");
             } else if (pollStatus.isOverdue()) {

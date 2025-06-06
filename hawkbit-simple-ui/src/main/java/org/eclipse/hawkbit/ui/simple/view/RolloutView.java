@@ -360,7 +360,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
             create.setEnabled(false);
             create.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
             addCreateClickListener(hawkbitClient);
-            final Button cancel = Utils.tooltip(new Button("Cancel"), "Cancel (Esc)");
+            final Button cancel = Utils.tooltip(new Button(CANCEL), CANCEL_ESC);
             cancel.addClickListener(e -> close());
             cancel.addClickShortcut(Key.ESCAPE);
             getFooter().add(cancel);
