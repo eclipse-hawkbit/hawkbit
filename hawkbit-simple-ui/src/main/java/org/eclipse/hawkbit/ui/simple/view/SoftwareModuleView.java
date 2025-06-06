@@ -269,7 +269,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             addCreateClickListener(hawkbitClient);
             create.addClickShortcut(Key.ENTER);
             create.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            final Button cancel = Utils.tooltip(new Button("Cancel"), "Cancel (Esc)");
+            final Button cancel = Utils.tooltip(new Button(CANCEL), CANCEL_ESC);
             cancel.addClickListener(e -> close());
             cancel.addClickShortcut(Key.ESCAPE);
             getFooter().add(cancel);

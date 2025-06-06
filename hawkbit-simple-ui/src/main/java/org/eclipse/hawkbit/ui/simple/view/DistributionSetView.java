@@ -235,7 +235,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             create.setEnabled(false);
             addCreateClickListener();
             create.addClickShortcut(Key.ENTER);
-            final Button cancel = Utils.tooltip(new Button("Cancel"), "Cancel (Esc)");
+            final Button cancel = Utils.tooltip(new Button(CANCEL), CANCEL_ESC);
             cancel.addClickListener(e -> close());
             create.addClickShortcut(Key.ESCAPE);
             create.addThemeVariants(ButtonVariant.LUMO_PRIMARY);

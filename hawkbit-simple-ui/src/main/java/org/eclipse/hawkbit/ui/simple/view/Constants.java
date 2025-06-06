@@ -48,5 +48,9 @@ public interface Constants {
     String AUTO = "Auto";
     String DYNAMIC = "Dynamic";
 
+    // dialog
+    String CANCEL = "Cancel";
+    String CANCEL_ESC = "Cancel (Esc)";
+
     String NAME_ASC = "name:asc";
 }
