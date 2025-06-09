@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import org.eclipse.hawkbit.rest.OpenApiConfiguration;
+import org.eclipse.hawkbit.rest.OpenApi;
 import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +26,6 @@ import org.springframework.stereotype.Controller;
 @Configuration
 @EnableMethodSecurity(proxyTargetClass = true, securedEnabled = true)
 @ComponentScan
-@Import({ RestConfiguration.class, OpenApiConfiguration.class })
+@Import({ RestConfiguration.class, OpenApi.class })
 @PropertySource("classpath:/hawkbit-mgmt-api-defaults.properties")
 public class MgmtApiConfiguration {}
