@@ -412,6 +412,6 @@ public interface RolloutManagement {
      *
      * @param rollouts the rollouts to be enriched.
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
-    void setRolloutStatusDetails(final Slice<Rollout> rollouts);
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    Slice<Rollout> getRolloutWithStatusDetails(final Slice<Rollout> rollouts);
 }

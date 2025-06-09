@@ -62,7 +62,11 @@ final class MgmtRolloutMapper {
         return toResponseRollout(rollouts, false);
     }
 
-    static List<MgmtRolloutResponseBody> toResponseRollout(final List<Rollout> rollouts, final boolean withDetails) {
+    static List<MgmtRolloutResponseBody> toResponseRolloutWithDetails(final List<Rollout> rollouts) {
+        return toResponseRollout(rollouts, true);
+    }
+
+    private static List<MgmtRolloutResponseBody> toResponseRollout(final List<Rollout> rollouts, final boolean withDetails) {
         if (rollouts == null) {
             return Collections.emptyList();
         }

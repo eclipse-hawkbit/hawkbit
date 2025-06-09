@@ -94,18 +94,19 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Page<Rollout> rollouts;
         if (rsqlParam != null) {
-            rollouts = this.rolloutManagement.findByRsql(pageable, rsqlParam, false);
+            rollouts = rolloutManagement.findByRsql(pageable, rsqlParam, false);
         } else {
-            rollouts = this.rolloutManagement.findAll(pageable, false);
+            rollouts = rolloutManagement.findAll(pageable, false);
         }
 
         final long totalElements = rollouts.getTotalElements();
 
+        final List<MgmtRolloutResponseBody> rest;
         if (isFullMode) {
-            this.rolloutManagement.setRolloutStatusDetails(rollouts);
+            rest = MgmtRolloutMapper.toResponseRolloutWithDetails(rolloutManagement.getRolloutWithStatusDetails(rollouts).getContent());
+        } else {
+            rest = MgmtRolloutMapper.toResponseRollout(rollouts.getContent());
         }
-
-        final List<MgmtRolloutResponseBody> rest = MgmtRolloutMapper.toResponseRollout(rollouts.getContent(), isFullMode);
 
         return ResponseEntity.ok(new PagedList<>(rest, totalElements));
     }
