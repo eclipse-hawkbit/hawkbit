@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPos
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
-import org.eclipse.hawkbit.rest.OpenApiConfiguration;
+import org.eclipse.hawkbit.rest.OpenApi;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -44,7 +44,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
 @Tag(
         name = "Rollouts", description = "REST API for Rollout CRUD operations.",
-        extensions = @Extension(name = OpenApiConfiguration.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = ROLLOUT_ORDER)))
+        extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = ROLLOUT_ORDER)))
 public interface MgmtRolloutRestApi {
 
     /**

@@ -16,7 +16,7 @@ import java.io.InputStream;
 import io.swagger.v3.oas.annotations.extensions.Extension;
 import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.eclipse.hawkbit.rest.OpenApiConfiguration;
+import org.eclipse.hawkbit.rest.OpenApi;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @FunctionalInterface
 @Tag(
         name = "Download artifact", description = "API to download artifacts.",
-        extensions = @Extension(name = OpenApiConfiguration.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = DOWNLOAD_ARTIFACT_ORDER)))
+        extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = DOWNLOAD_ARTIFACT_ORDER)))
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtDownloadArtifactRestApi {
 

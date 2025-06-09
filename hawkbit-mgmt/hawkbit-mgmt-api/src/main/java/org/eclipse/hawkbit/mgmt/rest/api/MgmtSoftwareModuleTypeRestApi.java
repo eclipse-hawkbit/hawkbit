@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPut;
-import org.eclipse.hawkbit.rest.OpenApiConfiguration;
+import org.eclipse.hawkbit.rest.OpenApi;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -45,7 +45,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
 @Tag(
         name = "Software Module Types", description = "REST API for SoftwareModuleTypes CRUD operations.",
-        extensions = @Extension(name = OpenApiConfiguration.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = SOFTWARE_MODULE_TYPE_ORDER)))
+        extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = SOFTWARE_MODULE_TYPE_ORDER)))
 public interface MgmtSoftwareModuleTypeRestApi {
 
     /**

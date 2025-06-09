@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.extensions.Extension;
 import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.auth.MgmtUserInfo;
-import org.eclipse.hawkbit.rest.OpenApiConfiguration;
+import org.eclipse.hawkbit.rest.OpenApi;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @SuppressWarnings("squid:S1609")
 @Tag(
         name = "Basic Authentication", description = "API for basic auth user validation.",
-        extensions = @Extension(name = OpenApiConfiguration.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = BASIC_AUTH_ORDER)))
+        extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = BASIC_AUTH_ORDER)))
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtBasicAuthRestApi {
 

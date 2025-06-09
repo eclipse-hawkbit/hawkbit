@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionS
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
-import org.eclipse.hawkbit.rest.OpenApiConfiguration;
+import org.eclipse.hawkbit.rest.OpenApi;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -46,7 +46,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
 @Tag(
         name = "Distribution Set Types", description = "REST Resource handling for DistributionSetType CRUD operations.",
-        extensions = @Extension(name = OpenApiConfiguration.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = DISTRIBUTION_SET_TYPE_ORDER)))
+        extensions = @Extension(name = OpenApi.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = DISTRIBUTION_SET_TYPE_ORDER)))
 public interface MgmtDistributionSetTypeRestApi {
 
     /**

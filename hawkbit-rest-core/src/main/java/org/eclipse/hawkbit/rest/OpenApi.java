@@ -14,32 +14,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.tags.Tag;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import lombok.NoArgsConstructor;
 
-@Configuration
-@ConditionalOnProperty(value = OpenApiConfiguration.HAWKBIT_SERVER_OPENAPI_ENABLED, havingValue = "true", matchIfMissing = true)
-public class OpenApiConfiguration {
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
+public class OpenApi {
 
     public static final String HAWKBIT_SERVER_OPENAPI_ENABLED = "hawkbit.server.openapi.enabled";
 
     public static final String X_HAWKBIT = "x-hawkbit";
     public static final String ORDER = "order";
-
-    private static final String API_TITLE = "hawkBit REST APIs";
-    private static final String API_VERSION = "v1";
-    private static final String DESCRIPTION = """
-            Eclipse hawkBit™ is a domain-independent back-end framework for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
-            """;
-
-    @Bean
-    public OpenAPI openApi() {
-        return new OpenAPI().info(new Info().title(API_TITLE).version(API_VERSION).description(DESCRIPTION));
-    }
 
     public static List<Tag> sort(final List<Tag> tags) {
         tags.sort(TAG_COMPARATOR);

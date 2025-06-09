@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
-import org.eclipse.hawkbit.rest.OpenApiConfiguration;
+import org.eclipse.hawkbit.rest.OpenApi;
 import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -23,5 +23,5 @@ import org.springframework.stereotype.Controller;
  */
 @Configuration
 @ComponentScan
-@Import({ RestConfiguration.class, OpenApiConfiguration.class, DdiOpenApiConfiguration.class })
+@Import({ RestConfiguration.class, OpenApi.class, DdiOpenApiConfiguration.class })
 public class DdiApiConfiguration {}

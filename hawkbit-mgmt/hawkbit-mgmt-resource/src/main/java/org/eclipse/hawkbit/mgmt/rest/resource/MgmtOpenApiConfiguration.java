@@ -17,7 +17,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
-import org.eclipse.hawkbit.rest.OpenApiConfiguration;
+import org.eclipse.hawkbit.rest.OpenApi;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnProperty(value = OpenApiConfiguration.HAWKBIT_SERVER_OPENAPI_ENABLED, havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(value = OpenApi.HAWKBIT_SERVER_OPENAPI_ENABLED, havingValue = "true", matchIfMissing = true)
 public class MgmtOpenApiConfiguration {
 
     private static final String BASIC_AUTH_SEC_SCHEME_NAME = "Basic";
@@ -80,7 +80,7 @@ public class MgmtOpenApiConfiguration {
                                                                 .in(SecurityScheme.In.HEADER)
                                                                 .bearerFormat("JWT")
                                                                 .scheme("bearer")))
-                                .tags(OpenApiConfiguration.sort(openApi.getTags())))
+                                .tags(OpenApi.sort(openApi.getTags())))
                 .build();
     }
 
