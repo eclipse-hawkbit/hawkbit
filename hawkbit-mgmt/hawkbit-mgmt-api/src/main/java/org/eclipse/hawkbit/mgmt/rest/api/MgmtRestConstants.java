@@ -227,4 +227,20 @@ public final class MgmtRestConstants {
      * Request parameter if the artifact url handler should be used
      */
     public static final String REQUEST_PARAMETER_USE_ARTIFACT_URL_HANDLER = "useartifacturlhandler";
+
+    // Orders
+    public static final String TARGET_ORDER = "1000";
+    public static final String TARGET_TAG_ORDER = "2000";
+    public static final String TARGET_TYPE_ORDER = "3000";
+    public static final String TARGET_FILTER_ORDER = "4000";
+    public static final String ACTION_ORDER = "5000";
+    public static final String ROLLOUT_ORDER = "6000";
+    public static final String DISTRIBUTION_SET_ORDER = "7000";
+    public static final String DISTRIBUTION_SET_TYPE_ORDER = "8000";
+    public static final String DISTRIBUTION_SET_TAG_ORDER = "9000";
+    public static final String SOFTWARE_MODULE_ORDER = "10000";
+    public static final String SOFTWARE_MODULE_TYPE_ORDER = "11000";
+    public static final String TENANT_ORDER = "100000";
+    public static final String BASIC_AUTH_ORDER = "200000";
+    public static final String DOWNLOAD_ARTIFACT_ORDER = "1000000";
 }
