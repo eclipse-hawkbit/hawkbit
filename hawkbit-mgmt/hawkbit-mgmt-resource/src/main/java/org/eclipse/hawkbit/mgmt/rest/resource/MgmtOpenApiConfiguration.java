@@ -45,6 +45,7 @@ public class MgmtOpenApiConfiguration {
                         openApi
                                 .info(new Info()
                                         .title("Management API")
+                                        .version("v1")
                                         .description("""
                                                 The Management API provides access to the management features of the hawkBit.
                                                 It allows for managing devices, deployments, and other.
