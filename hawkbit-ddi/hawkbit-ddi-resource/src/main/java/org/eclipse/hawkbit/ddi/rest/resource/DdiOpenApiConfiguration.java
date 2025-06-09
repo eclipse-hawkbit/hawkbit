@@ -19,17 +19,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnProperty(
-        value = OpenApiConfiguration.HAWKBIT_SERVER_SWAGGER_ENABLED,
-        havingValue = "true",
-        matchIfMissing = true)
+@ConditionalOnProperty(value = OpenApiConfiguration.HAWKBIT_SERVER_OPENAPI_ENABLED, havingValue = "true", matchIfMissing = true)
 public class DdiOpenApiConfiguration {
 
     private static final String DDI_TOKEN_SEC_SCHEME_NAME = "Token";
 
     @Bean
     @ConditionalOnProperty(
-            value = "hawkbit.server.swagger.ddi.api.group.enabled",
+            value = "hawkbit.server.openapi.ddi.enabled",
             havingValue = "true",
             matchIfMissing = true)
     public GroupedOpenApi ddiApi() {
