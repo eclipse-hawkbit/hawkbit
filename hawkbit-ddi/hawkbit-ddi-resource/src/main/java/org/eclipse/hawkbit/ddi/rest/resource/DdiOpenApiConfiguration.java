@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.ddi.rest.resource;
 
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.eclipse.hawkbit.rest.OpenApiConfiguration;
@@ -24,7 +25,7 @@ import org.springframework.context.annotation.Configuration;
         matchIfMissing = true)
 public class DdiOpenApiConfiguration {
 
-    private static final String DDI_TOKEN_SEC_SCHEME_NAME = "DDI Target/GatewayToken Authentication";
+    private static final String DDI_TOKEN_SEC_SCHEME_NAME = "Token";
 
     @Bean
     @ConditionalOnProperty(
@@ -38,16 +39,20 @@ public class DdiOpenApiConfiguration {
                 .pathsToMatch("/{tenant}/controller/**")
                 .addOpenApiCustomizer(openApi ->
                         openApi
+                                .info(new Info()
+                                        .title("Direct Device Integration API")
+                                        .version("v1")
+                                        .description("The Direct Device Integration (DDI) API provides a way for devices to interact directly with the hawkBit."))
                                 .addSecurityItem(new SecurityRequirement().addList(DDI_TOKEN_SEC_SCHEME_NAME))
                                 .components(
                                         openApi
                                                 .getComponents()
                                                 .addSecuritySchemes(DDI_TOKEN_SEC_SCHEME_NAME,
                                                         new SecurityScheme()
-                                                                .name("Authorization")
+                                                                .name(DDI_TOKEN_SEC_SCHEME_NAME)
+                                                                .description("Format: (Target|Gateway)Token &lt;token&gt;")
                                                                 .type(SecurityScheme.Type.APIKEY)
-                                                                .in(SecurityScheme.In.HEADER)
-                                                                .description("Format: (Target|Gateway)Token &lt;token&gt;"))))
+                                                                .in(SecurityScheme.In.HEADER))))
                 .build();
     }
 }
