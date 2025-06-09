@@ -9,9 +9,13 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.SOFTWARE_MODULE_ORDER;
+
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.extensions.Extension;
+import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,6 +28,7 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleMeta
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPut;
+import org.eclipse.hawkbit.rest.OpenApiConfiguration;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
@@ -46,7 +51,9 @@ import org.springframework.web.multipart.MultipartFile;
  * operations.
  */
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
-@Tag(name = "Software Modules", description = "REST API for SoftwareModule and related Artifact CRUD operations.")
+@Tag(
+        name = "Software Modules", description = "REST API for SoftwareModule and related Artifact CRUD operations.",
+        extensions = @Extension(name = OpenApiConfiguration.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = SOFTWARE_MODULE_ORDER)))
 public interface MgmtSoftwareModuleRestApi {
 
     /**

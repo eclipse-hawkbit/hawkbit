@@ -9,7 +9,11 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.TARGET_FILTER_ORDER;
+
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.extensions.Extension;
+import io.swagger.v3.oas.annotations.extensions.ExtensionProperty;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -20,6 +24,7 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtDistributionSetAutoAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
+import org.eclipse.hawkbit.rest.OpenApiConfiguration;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -36,7 +41,9 @@ import org.springframework.web.bind.annotation.RequestParam;
  * Api for handling target operations.
  */
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
-@Tag(name = "Target Filter Queries", description = "REST API for Target Filter Queries CRUD operations.")
+@Tag(
+        name = "Target Filter Queries", description = "REST API for Target Filter Queries CRUD operations.",
+        extensions = @Extension(name = OpenApiConfiguration.X_HAWKBIT, properties = @ExtensionProperty(name = "order", value = TARGET_FILTER_ORDER)))
 public interface MgmtTargetFilterQueryRestApi {
 
     /**
