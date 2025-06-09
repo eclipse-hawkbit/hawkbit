@@ -277,8 +277,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         final Slice<Rollout> rollouts = JpaManagementHelper.convertPage(
                 rolloutRepository.findAll(RolloutSpecification.isDeleted(deleted, pageable.getSort()), JpaRollout_.GRAPH_ROLLOUT_DS, pageable),
                 pageable);
-        setRolloutStatusDetails(rollouts);
-        return rollouts;
+        return getRolloutWithStatusDetails(rollouts);
     }
 
     @Override
@@ -295,8 +294,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             final boolean deleted) {
         final Slice<Rollout> findAll = JpaManagementHelper.findAllWithoutCountBySpec(rolloutRepository, pageable,
                 Collections.singletonList(RolloutSpecification.likeName(searchText, deleted)));
-        setRolloutStatusDetails(findAll);
-        return findAll;
+        return getRolloutWithStatusDetails(findAll);
     }
 
     @Override
@@ -499,7 +497,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public void setRolloutStatusDetails(final Slice<Rollout> rollouts) {
+    public Slice<Rollout> getRolloutWithStatusDetails(final Slice<Rollout> rollouts) {
         final List<Long> rolloutIds = rollouts.getContent().stream().map(Rollout::getId).toList();
         final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(rolloutIds);
 
@@ -510,6 +508,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 ((JpaRollout) rollout).setTotalTargetCountStatus(totalTargetCountStatus);
             });
         }
+        return rollouts;
     }
 
     /**
