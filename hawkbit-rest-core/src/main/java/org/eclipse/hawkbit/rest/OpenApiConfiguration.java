@@ -22,13 +22,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnProperty(
-        value = OpenApiConfiguration.HAWKBIT_SERVER_SWAGGER_ENABLED,
-        havingValue = "true",
-        matchIfMissing = true)
+@ConditionalOnProperty(value = OpenApiConfiguration.HAWKBIT_SERVER_OPENAPI_ENABLED, havingValue = "true", matchIfMissing = true)
 public class OpenApiConfiguration {
 
-    public static final String HAWKBIT_SERVER_SWAGGER_ENABLED = "hawkbit.server.swagger.enabled";
+    public static final String HAWKBIT_SERVER_OPENAPI_ENABLED = "hawkbit.server.openapi.enabled";
 
     public static final String X_HAWKBIT = "x-hawkbit";
     public static final String ORDER = "order";

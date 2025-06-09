@@ -19,10 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnProperty(
-        value = "hawkbit.server.swagger.enabled",
-        havingValue = "true",
-        matchIfMissing = true)
+@ConditionalOnProperty(value = OpenApiConfiguration.HAWKBIT_SERVER_OPENAPI_ENABLED, havingValue = "true", matchIfMissing = true)
 public class MgmtOpenApiConfiguration {
 
     private static final String BASIC_AUTH_SEC_SCHEME_NAME = "Basic";
@@ -30,7 +27,7 @@ public class MgmtOpenApiConfiguration {
 
     @Bean
     @ConditionalOnProperty(
-            value = OpenApiConfiguration.HAWKBIT_SERVER_SWAGGER_ENABLED,
+            value = "hawkbit.server.openapi.mgmt.enabled",
             havingValue = "true",
             matchIfMissing = true)
     public GroupedOpenApi mgmtApi() {
