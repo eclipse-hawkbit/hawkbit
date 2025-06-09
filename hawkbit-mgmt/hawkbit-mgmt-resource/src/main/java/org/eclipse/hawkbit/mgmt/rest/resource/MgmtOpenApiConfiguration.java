@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.eclipse.hawkbit.rest.OpenApiConfiguration;
@@ -24,8 +25,8 @@ import org.springframework.context.annotation.Configuration;
         matchIfMissing = true)
 public class MgmtOpenApiConfiguration {
 
-    private static final String BASIC_AUTH_SEC_SCHEME_NAME = "Basic Authentication";
-    private static final String BEARER_AUTH_SEC_SCHEME_NAME = "Bearer Authentication";
+    private static final String BASIC_AUTH_SEC_SCHEME_NAME = "Basic";
+    private static final String BEARER_AUTH_SEC_SCHEME_NAME = "Bearer";
 
     @Bean
     @ConditionalOnProperty(
@@ -36,9 +37,15 @@ public class MgmtOpenApiConfiguration {
         return GroupedOpenApi
                 .builder()
                 .group("Management API")
-                .pathsToMatch("/rest/v*/**")
+                .pathsToMatch("/rest/v*/**", "/{tenant}/rest/v*/**")
                 .addOpenApiCustomizer(openApi ->
                         openApi
+                                .info(new Info()
+                                        .title("Management API")
+                                        .description("""
+                                                The Management API provides access to the management features of the hawkBit.
+                                                It allows for managing devices, deployments, and other.
+                                                """))
                                 .addSecurityItem(new SecurityRequirement()
                                         .addList(BASIC_AUTH_SEC_SCHEME_NAME)
                                         .addList(BEARER_AUTH_SEC_SCHEME_NAME))
@@ -48,12 +55,14 @@ public class MgmtOpenApiConfiguration {
                                                 .addSecuritySchemes(BASIC_AUTH_SEC_SCHEME_NAME,
                                                         new SecurityScheme()
                                                                 .name(BASIC_AUTH_SEC_SCHEME_NAME)
+                                                                .description(BASIC_AUTH_SEC_SCHEME_NAME + " Authentication")
                                                                 .type(SecurityScheme.Type.HTTP)
                                                                 .in(SecurityScheme.In.HEADER)
                                                                 .scheme("basic"))
                                                 .addSecuritySchemes(BEARER_AUTH_SEC_SCHEME_NAME,
                                                         new SecurityScheme()
                                                                 .name(BEARER_AUTH_SEC_SCHEME_NAME)
+                                                                .description(BEARER_AUTH_SEC_SCHEME_NAME + " Authentication")
                                                                 .type(SecurityScheme.Type.HTTP)
                                                                 .in(SecurityScheme.In.HEADER)
                                                                 .bearerFormat("JWT")
