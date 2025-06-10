@@ -65,19 +65,13 @@ public class MgmtOpenApiConfiguration {
                                                 .getComponents()
                                                 .addSecuritySchemes(BASIC_AUTH_SEC_SCHEME_NAME,
                                                         new SecurityScheme()
-                                                                .name(BASIC_AUTH_SEC_SCHEME_NAME)
-                                                                .description(
-                                                                        BASIC_AUTH_SEC_SCHEME_NAME + " Authentication")
+                                                                .description(BASIC_AUTH_SEC_SCHEME_NAME + " Authentication")
                                                                 .type(SecurityScheme.Type.HTTP)
-                                                                .in(SecurityScheme.In.HEADER)
                                                                 .scheme("basic"))
                                                 .addSecuritySchemes(BEARER_AUTH_SEC_SCHEME_NAME,
                                                         new SecurityScheme()
-                                                                .name(BEARER_AUTH_SEC_SCHEME_NAME)
-                                                                .description(
-                                                                        BEARER_AUTH_SEC_SCHEME_NAME + " Authentication")
+                                                                .description(BEARER_AUTH_SEC_SCHEME_NAME + " Authentication")
                                                                 .type(SecurityScheme.Type.HTTP)
-                                                                .in(SecurityScheme.In.HEADER)
                                                                 .bearerFormat("JWT")
                                                                 .scheme("bearer")))
                                 .tags(OpenApi.sort(openApi.getTags())))
