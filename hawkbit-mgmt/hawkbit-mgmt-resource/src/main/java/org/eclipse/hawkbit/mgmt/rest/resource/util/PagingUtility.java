@@ -35,22 +35,6 @@ import org.springframework.data.domain.Sort.Direction;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PagingUtility {
 
-    public static int sanitizeOffsetParam(final int offset) {
-        if (offset < 0) {
-            return MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE;
-        }
-        return offset;
-    }
-
-    public static int sanitizePageLimitParam(final int pageLimit) {
-        if (pageLimit < 1) {
-            return MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE;
-        } else if (pageLimit > MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT) {
-            return MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT;
-        }
-        return pageLimit;
-    }
-
     public static Sort sanitizeTargetSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
@@ -149,10 +133,25 @@ public final class PagingUtility {
         return Sort.by(SortUtility.parse(RolloutGroupFields.class, sortParam));
     }
 
-    public static Pageable toPageable(final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+    public static Pageable toPageable(final int pagingOffsetParam, final int pagingLimitParam, final Sort sort) {
         final int sanitizedOffsetParam = sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = sanitizeRolloutSortParam(sortParam);
-        return new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+        return new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sort);
+    }
+
+    private static int sanitizeOffsetParam(final int offset) {
+        if (offset < 0) {
+            return MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE;
+        }
+        return offset;
+    }
+
+    private static int sanitizePageLimitParam(final int pageLimit) {
+        if (pageLimit < 1) {
+            return MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE;
+        } else if (pageLimit > MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT) {
+            return MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT;
+        }
+        return pageLimit;
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.rest.resource;
+package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -37,7 +37,7 @@ import org.springframework.util.CollectionUtils;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtTargetFilterQueryMapper {
 
-    static List<MgmtTargetFilterQuery> toResponse(
+    public static List<MgmtTargetFilterQuery> toResponse(
             final List<TargetFilterQuery> filters, final boolean confirmationFlowEnabled, final boolean isRepresentationFull) {
         if (CollectionUtils.isEmpty(filters)) {
             return Collections.emptyList();
@@ -45,8 +45,8 @@ public final class MgmtTargetFilterQueryMapper {
         return filters.stream().map(filter -> toResponse(filter, confirmationFlowEnabled, isRepresentationFull)).toList();
     }
 
-    static MgmtTargetFilterQuery toResponse(final TargetFilterQuery filter, final boolean confirmationFlowEnabled,
-            final boolean isRepresentationFull) {
+    public static MgmtTargetFilterQuery toResponse(
+            final TargetFilterQuery filter, final boolean confirmationFlowEnabled, final boolean isRepresentationFull) {
         final MgmtTargetFilterQuery targetRest = new MgmtTargetFilterQuery();
         targetRest.setId(filter.getId());
         targetRest.setName(filter.getName());
@@ -81,16 +81,16 @@ public final class MgmtTargetFilterQueryMapper {
         return targetRest;
     }
 
-    static void addLinks(final MgmtTargetFilterQuery targetRest) {
+    public static void addLinks(final MgmtTargetFilterQuery targetRest) {
         targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class)
                 .postAssignedDistributionSet(targetRest.getId(), null)).withRel("autoAssignDS").expand());
     }
 
-    static TargetFilterQueryCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetFilterQueryRequestBody filterRest) {
+    public static TargetFilterQueryCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetFilterQueryRequestBody filterRest) {
         return entityFactory.targetFilterQuery().create().name(filterRest.getName()).query(filterRest.getQuery());
     }
 
-    static AutoAssignDistributionSetUpdate fromRequest(final EntityFactory entityFactory, final long filterId,
+    public static AutoAssignDistributionSetUpdate fromRequest(final EntityFactory entityFactory, final long filterId,
             final MgmtDistributionSetAutoAssignment assignRest) {
         final ActionType type = MgmtRestModelMapper.convertActionType(assignRest.getType());
 

@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeDistributionSetSortParam;
+
 import java.text.MessageFormat;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
@@ -38,13 +40,18 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleAssi
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtDeploymentRequestMapper;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtDistributionSetMapper;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtRestModelMapper;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtSoftwareModuleMapper;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetFilterQueryMapper;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -64,7 +71,6 @@ import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -113,11 +119,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeDistributionSetSortParam(sortParam);
-
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
         final Slice<DistributionSet> findDsPage;
         final long countModulesAll;
         if (rsqlParam != null) {
@@ -193,39 +195,27 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
-            final Long distributionSetId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
-
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+            final Long distributionSetId, final String rsqlParam,
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
         final Page<Target> targetsAssignedDS;
         if (rsqlParam != null) {
-            targetsAssignedDS = this.targetManagement.findByAssignedDistributionSetAndRsql(pageable, distributionSetId,
-                    rsqlParam);
+            targetsAssignedDS = this.targetManagement.findByAssignedDistributionSetAndRsql(pageable, distributionSetId, rsqlParam);
         } else {
             targetsAssignedDS = this.targetManagement.findByAssignedDistributionSet(pageable, distributionSetId);
         }
 
-        return ResponseEntity
-                .ok(new PagedList<>(MgmtTargetMapper.toResponse(targetsAssignedDS.getContent(), tenantConfigHelper),
-                        targetsAssignedDS.getTotalElements()));
+        return ResponseEntity.ok(new PagedList<>(
+                MgmtTargetMapper.toResponse(targetsAssignedDS.getContent(), tenantConfigHelper), targetsAssignedDS.getTotalElements()));
     }
 
     @Override
     public ResponseEntity<PagedList<MgmtTarget>> getInstalledTargets(
-            final Long distributionSetId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
-        // check if distribution set exists otherwise throw exception
-        // immediately
+            final Long distributionSetId, final String rsqlParam,
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+        // check if distribution set exists otherwise throw exception immediately
         distributionSetManagement.getOrElseThrowException(distributionSetId);
-
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
-
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
         final Page<Target> targetsInstalledDS;
         if (rsqlParam != null) {
             targetsInstalledDS = this.targetManagement.findByInstalledDistributionSetAndRsql(pageable, distributionSetId, rsqlParam);
@@ -233,26 +223,21 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             targetsInstalledDS = this.targetManagement.findByInstalledDistributionSet(pageable, distributionSetId);
         }
 
-        return ResponseEntity
-                .ok(new PagedList<>(MgmtTargetMapper.toResponse(targetsInstalledDS.getContent(), tenantConfigHelper),
-                        targetsInstalledDS.getTotalElements()));
+        return ResponseEntity.ok(new PagedList<>(
+                MgmtTargetMapper.toResponse(targetsInstalledDS.getContent(), tenantConfigHelper), targetsInstalledDS.getTotalElements()));
     }
 
     @Override
     public ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
-            final Long distributionSetId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeTargetFilterQuerySortParam(sortParam);
-
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+            final Long distributionSetId, final String rsqlParam,
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
         final Page<TargetFilterQuery> targetFilterQueries = targetFilterQueryManagement
                 .findByAutoAssignDSAndRsql(pageable, distributionSetId, rsqlParam);
 
-        return ResponseEntity
-                .ok(new PagedList<>(MgmtTargetFilterQueryMapper.toResponse(targetFilterQueries.getContent(),
-                        tenantConfigHelper.isConfirmationFlowEnabled(), false), targetFilterQueries.getTotalElements()));
+        return ResponseEntity.ok(new PagedList<>(
+                MgmtTargetFilterQueryMapper.toResponse(targetFilterQueries.getContent(), tenantConfigHelper.isConfirmationFlowEnabled(), false),
+                targetFilterQueries.getTotalElements()));
     }
 
     @Override
@@ -309,7 +294,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> assignSoftwareModules(final Long distributionSetId, final List<MgmtSoftwareModuleAssignment> softwareModuleIDs) {
+    public ResponseEntity<Void> assignSoftwareModules(final Long distributionSetId,
+            final List<MgmtSoftwareModuleAssignment> softwareModuleIDs) {
         distributionSetManagement.assignSoftwareModules(
                 distributionSetId,
                 softwareModuleIDs.stream()
@@ -329,13 +315,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<PagedList<MgmtSoftwareModule>> getAssignedSoftwareModules(
             final Long distributionSetId,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeSoftwareModuleSortParam(sortParam);
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Page<SoftwareModule> softwaremodules = softwareModuleManagement.findByAssignedTo(distributionSetId, pageable);
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
+        final Page<SoftwareModule> softwareModules = softwareModuleManagement.findByAssignedTo(distributionSetId, pageable);
         return ResponseEntity.ok(new PagedList<>(MgmtSoftwareModuleMapper.toResponse(
-                softwaremodules.getContent()), softwaremodules.getTotalElements()));
+                softwareModules.getContent()), softwareModules.getTotalElements()));
     }
 
     @Override

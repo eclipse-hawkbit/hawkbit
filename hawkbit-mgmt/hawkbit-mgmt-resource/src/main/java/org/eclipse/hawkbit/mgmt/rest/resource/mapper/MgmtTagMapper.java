@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.rest.resource;
+package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -34,9 +34,9 @@ import org.eclipse.hawkbit.rest.json.model.ResponseList;
  * A mapper which maps repository model to RESTful model representation and back.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-final class MgmtTagMapper {
+public final class MgmtTagMapper {
 
-    static List<MgmtTag> toResponse(final List<TargetTag> targetTags) {
+    public static List<MgmtTag> toResponse(final List<TargetTag> targetTags) {
         final List<MgmtTag> tagsRest = new ArrayList<>();
         if (targetTags == null) {
             return tagsRest;
@@ -50,7 +50,7 @@ final class MgmtTagMapper {
         return new ResponseList<>(tagsRest);
     }
 
-    static MgmtTag toResponse(final TargetTag targetTag) {
+    public static MgmtTag toResponse(final TargetTag targetTag) {
         final MgmtTag response = new MgmtTag();
         if (targetTag == null) {
             return response;
@@ -63,14 +63,14 @@ final class MgmtTagMapper {
         return response;
     }
 
-    static void addLinks(final TargetTag targetTag, final MgmtTag response) {
+    public static void addLinks(final TargetTag targetTag, final MgmtTag response) {
         response.add(linkTo(methodOn(MgmtTargetTagRestApi.class).getAssignedTargets(targetTag.getId(),
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("assignedTargets")
+                null, MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
+                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null)).withRel("assignedTargets")
                 .expand());
     }
 
-    static List<MgmtTag> toResponseDistributionSetTag(final List<DistributionSetTag> distributionSetTags) {
+    public static List<MgmtTag> toResponseDistributionSetTag(final List<DistributionSetTag> distributionSetTags) {
         final List<MgmtTag> tagsRest = new ArrayList<>();
         if (distributionSetTags == null) {
             return tagsRest;
@@ -84,7 +84,7 @@ final class MgmtTagMapper {
         return new ResponseList<>(tagsRest);
     }
 
-    static MgmtTag toResponse(final DistributionSetTag distributionSetTag) {
+    public static MgmtTag toResponse(final DistributionSetTag distributionSetTag) {
         final MgmtTag response = new MgmtTag();
         if (distributionSetTag == null) {
             return null;
@@ -99,14 +99,14 @@ final class MgmtTagMapper {
         return response;
     }
 
-    static void addLinks(final DistributionSetTag distributionSetTag, final MgmtTag response) {
+    public static void addLinks(final DistributionSetTag distributionSetTag, final MgmtTag response) {
         response.add(linkTo(methodOn(MgmtDistributionSetTagRestApi.class).getAssignedDistributionSets(
-                distributionSetTag.getId(), MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null))
+                distributionSetTag.getId(), null, MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
+                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null))
                 .withRel("assignedDistributionSets").expand());
     }
 
-    static List<TagCreate> mapTagFromRequest(final EntityFactory entityFactory, final Collection<MgmtTagRequestBodyPut> tags) {
+    public static List<TagCreate> mapTagFromRequest(final EntityFactory entityFactory, final Collection<MgmtTagRequestBodyPut> tags) {
         return tags.stream()
                 .map(tagRest -> entityFactory.tag().create().name(tagRest.getName())
                         .description(tagRest.getDescription()).colour(tagRest.getColour()))

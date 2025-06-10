@@ -307,7 +307,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                     this::readyToCreate,
                     Optional.ofNullable(
                                     hawkbitClient.getTargetFilterQueryRestApi()
-                                            .getFilters(0, 30, Constants.NAME_ASC, null, null)
+                                            .getFilters(null, 0, 30, Constants.NAME_ASC, null)
                                             .getBody())
                             .map(body -> body.getContent().toArray(new MgmtTargetFilterQuery[0]))
                             .orElseGet(() -> new MgmtTargetFilterQuery[0]));

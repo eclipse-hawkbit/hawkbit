@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Bosch.IO GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.rest.resource;
+package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -43,7 +43,7 @@ public final class MgmtActionMapper {
                 .toList());
     }
 
-    static MgmtAction toResponse(final Action action, final MgmtRepresentationMode repMode) {
+    public static MgmtAction toResponse(final Action action, final MgmtRepresentationMode repMode) {
         final String controllerId = action.getTarget().getControllerId();
         if (repMode == MgmtRepresentationMode.COMPACT) {
             return MgmtTargetMapper.toResponse(controllerId, action);

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.rest.resource;
+package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -75,9 +75,9 @@ public final class MgmtTargetMapper {
                 .withRel(MgmtRestConstants.TARGET_V1_INSTALLED_DISTRIBUTION_SET).expand());
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getAttributes(response.getControllerId()))
                 .withRel(MgmtRestConstants.TARGET_V1_ATTRIBUTES).expand());
-        response.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionHistory(response.getControllerId(), 0,
+        response.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionHistory(response.getControllerId(), null, 0,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
-                ActionFields.ID.getJpaEntityFieldName() + ":" + SortDirection.DESC, null))
+                ActionFields.ID.getJpaEntityFieldName() + ":" + SortDirection.DESC))
                 .withRel(MgmtRestConstants.TARGET_V1_ACTIONS).expand());
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getMetadata(response.getControllerId()))
                 .withRel("metadata").expand());
@@ -130,8 +130,8 @@ public final class MgmtTargetMapper {
      * @param target the target
      * @return the response
      */
-    public static MgmtTarget toResponse(final Target target, final TenantConfigHelper configHelper,
-            final Function<Target, PollStatus> pollStatusResolver) {
+    public static MgmtTarget toResponse(
+            final Target target, final TenantConfigHelper configHelper, final Function<Target, PollStatus> pollStatusResolver) {
         if (target == null) {
             return null;
         }
@@ -176,31 +176,28 @@ public final class MgmtTargetMapper {
             targetRest.setAutoConfirmActive(target.getAutoConfirmationStatus() != null);
         }
 
-        targetRest.add(
-                linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel().expand());
+        targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel().expand());
 
         addPollStatus(target, targetRest, pollStatusResolver == null ? configHelper.pollStatusResolver() : pollStatusResolver);
 
         return targetRest;
     }
 
-    static List<TargetCreate> fromRequest(final EntityFactory entityFactory,
-            final Collection<MgmtTargetRequestBody> targetsRest) {
+    public static List<TargetCreate> fromRequest(final EntityFactory entityFactory, final Collection<MgmtTargetRequestBody> targetsRest) {
         if (targetsRest == null) {
             return Collections.emptyList();
         }
 
-        return targetsRest.stream().map(targetRest -> fromRequest(entityFactory, targetRest))
-                .toList();
+        return targetsRest.stream().map(targetRest -> fromRequest(entityFactory, targetRest)).toList();
     }
 
-    static Map<String, String> fromRequestMetadata(final List<MgmtMetadata> metadata) {
+    public static Map<String, String> fromRequestMetadata(final List<MgmtMetadata> metadata) {
         return metadata == null
                 ? Collections.emptyMap()
                 : metadata.stream().collect(Collectors.toMap(MgmtMetadata::getKey, MgmtMetadata::getValue));
     }
 
-    static List<MgmtActionStatus> toActionStatusRestResponse(
+    public static List<MgmtActionStatus> toActionStatusRestResponse(
             final Collection<ActionStatus> actionStatus, final DeploymentManagement deploymentManagement) {
         if (actionStatus == null) {
             return Collections.emptyList();
@@ -214,7 +211,7 @@ public final class MgmtTargetMapper {
                 .toList();
     }
 
-    static MgmtAction toResponse(final String targetId, final Action action) {
+    public static MgmtAction toResponse(final String targetId, final Action action) {
         final MgmtAction result = new MgmtAction();
 
         result.setId(action.getId());
@@ -263,7 +260,7 @@ public final class MgmtTargetMapper {
         return result;
     }
 
-    static MgmtAction toResponseWithLinks(final String controllerId, final Action action) {
+    public static MgmtAction toResponseWithLinks(final String controllerId, final Action action) {
         final MgmtAction result = toResponse(controllerId, action);
 
         if (action.isCancelingOrCanceled()) {
@@ -293,7 +290,7 @@ public final class MgmtTargetMapper {
         return result;
     }
 
-    static List<MgmtAction> toResponse(final String targetId, final Collection<Action> actions) {
+    public static List<MgmtAction> toResponse(final String targetId, final Collection<Action> actions) {
         if (actions == null) {
             return Collections.emptyList();
         }
@@ -301,14 +298,14 @@ public final class MgmtTargetMapper {
         return actions.stream().map(action -> toResponse(targetId, action)).toList();
     }
 
-    static MgmtMetadata toResponseMetadata(final String key, final String value) {
+    public static MgmtMetadata toResponseMetadata(final String key, final String value) {
         final MgmtMetadata metadataRest = new MgmtMetadata();
         metadataRest.setKey(key);
         metadataRest.setValue(value);
         return metadataRest;
     }
 
-    static List<MgmtMetadata> toResponseMetadata(final Map<String, String> metadata) {
+    public static List<MgmtMetadata> toResponseMetadata(final Map<String, String> metadata) {
         return metadata.entrySet().stream().map(e -> toResponseMetadata(e.getKey(), e.getValue())).toList();
     }
 
@@ -341,7 +338,7 @@ public final class MgmtTargetMapper {
         return null;
     }
 
-    private static MgmtActionStatus toResponse(final ActionStatus actionStatus, final List<String> messages) {
+    public static MgmtActionStatus toResponse(final ActionStatus actionStatus, final List<String> messages) {
         final MgmtActionStatus result = new MgmtActionStatus();
 
         result.setMessages(messages);

@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeRolloutSortParam;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,6 +28,8 @@ import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponse
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtRolloutMapper;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -83,7 +87,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     public ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam,
             final String representationModeParam) {
-        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sortParam);
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeRolloutSortParam(sortParam));
         final boolean isFullMode = parseRepresentationMode(representationModeParam) == MgmtRepresentationMode.FULL;
 
         final Page<Rollout> rollouts;
@@ -205,7 +209,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             final Long rolloutId,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam,
             final String representationModeParam) {
-        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sortParam);
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeRolloutSortParam(sortParam));
         final boolean isFullMode = parseRepresentationMode(representationModeParam) == MgmtRepresentationMode.FULL;
 
         final Page<RolloutGroup> rolloutGroups;
@@ -247,8 +251,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             final Long rolloutId, final Long groupId,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
         findRolloutOrThrowException(rolloutId);
-        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sortParam);
-
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeRolloutSortParam(sortParam));
         final Page<Target> rolloutGroupTargets;
         if (rsqlParam == null) {
             rolloutGroupTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroup(groupId, pageable);

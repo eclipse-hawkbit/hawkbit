@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.rest.resource;
+package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -15,7 +15,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValue;
+import org.eclipse.hawkbit.mgmt.rest.resource.MgmtTenantManagementResource;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 
 /**
  * A mapper which maps repository model to RESTful model representation and back.
@@ -34,7 +36,7 @@ public final class MgmtTenantManagementMapper {
         restConfValue.setCreatedBy(repoConfValue.getCreatedBy());
         restConfValue.setLastModifiedAt(repoConfValue.getLastModifiedAt());
         restConfValue.setLastModifiedBy(repoConfValue.getLastModifiedBy());
-        restConfValue.add(linkTo(methodOn(MgmtTenantManagementResource.class).getTenantConfigurationValue(key)).withSelfRel().expand());
+        restConfValue.add(WebMvcLinkBuilder.linkTo(methodOn(MgmtTenantManagementResource.class).getTenantConfigurationValue(key)).withSelfRel().expand());
         return restConfValue;
     }
 
