@@ -118,7 +118,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
         final Slice<DistributionSet> findDsPage;
         final long countModulesAll;

@@ -827,7 +827,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     this::readyToAssign,
                     Optional.ofNullable(
                                     hawkbitClient.getDistributionSetRestApi()
-                                            .getDistributionSets(0, 30, Constants.NAME_ASC, null)
+                                            .getDistributionSets(null, 0, 30, Constants.NAME_ASC)
                                             .getBody())
                             .map(body -> body.getContent().toArray(new MgmtDistributionSet[0]))
                             .orElseGet(() -> new MgmtDistributionSet[0])

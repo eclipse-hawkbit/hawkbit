@@ -113,7 +113,7 @@ public final class MgmtRolloutMapper {
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).deny(rollout.getId(), null)).withRel("deny").expand());
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRolloutGroups(
                     rollout.getId(),
-                    REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE, REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null, null))
+                    null, REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE, REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null))
                     .withRel("groups").expand());
 
             final DistributionSet distributionSet = rollout.getDistributionSet();

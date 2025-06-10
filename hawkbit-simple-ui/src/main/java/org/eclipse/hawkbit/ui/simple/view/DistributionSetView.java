@@ -81,7 +81,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                 },
                 (query, rsqlFilter) -> Optional.ofNullable(
                                 hawkbitClient.getDistributionSetRestApi()
-                                        .getDistributionSets(query.getOffset(), query.getPageSize(), Constants.NAME_ASC, rsqlFilter)
+                                        .getDistributionSets(rsqlFilter, query.getOffset(), query.getPageSize(), Constants.NAME_ASC)
                                         .getBody())
                         .stream().flatMap(body -> body.getContent().stream()),
                 e -> new CreateDialog(hawkbitClient).result(),

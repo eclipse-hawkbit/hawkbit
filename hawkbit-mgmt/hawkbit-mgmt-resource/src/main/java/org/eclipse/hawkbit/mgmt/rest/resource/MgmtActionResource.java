@@ -40,7 +40,7 @@ public class MgmtActionResource implements MgmtActionRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtAction>> getActions(
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam,
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam,
             final String representationModeParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeActionSortParam(sortParam));
 

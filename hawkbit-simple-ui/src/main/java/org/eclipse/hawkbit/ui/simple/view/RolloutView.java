@@ -91,7 +91,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 (query, rsqlFilter) -> Optional.ofNullable(
                         hawkbitClient.getRolloutRestApi()
                                 .getRollouts(
-                                        query.getOffset(), query.getPageSize(), Constants.NAME_ASC, rsqlFilter, "full")
+                                        rsqlFilter, query.getOffset(), query.getPageSize(), Constants.NAME_ASC, "full")
                                 .getBody()).stream().flatMap(page -> page.getContent().stream()),
                 selectionGrid -> new CreateDialog(hawkbitClient).result(),
                 selectionGrid -> {
@@ -243,8 +243,8 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                             hawkbitClient.getRolloutRestApi()
                                     .getRolloutGroups(
                                             rollout.getId(),
-                                            query.getOffset(), query.getPageSize(),
-                                            null, null, "full")
+                                            null, query.getOffset(), query.getPageSize(),
+                                            null, "full")
                                     .getBody())
                     .stream().flatMap(body -> body.getContent().stream())
                     .skip(query.getOffset())
@@ -294,7 +294,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                     this::readyToCreate,
                     Optional.ofNullable(
                                     hawkbitClient.getDistributionSetRestApi()
-                                            .getDistributionSets(0, 30, Constants.NAME_ASC, null)
+                                            .getDistributionSets(null, 0, 30, Constants.NAME_ASC)
                                             .getBody())
                             .map(body -> body.getContent().toArray(new MgmtDistributionSet[0]))
                             .orElseGet(() -> new MgmtDistributionSet[0]));
