@@ -103,7 +103,7 @@ class SoftwareManagementSecurityTest
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findMetaDataBySoftwareModuleIdAndTargetVisiblePermissionsCheck() {
-        assertPermissions(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(PAGE, 1L),
+        assertPermissions(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(1L, PAGE),
                 List.of(SpPermission.READ_REPOSITORY));
     }
 

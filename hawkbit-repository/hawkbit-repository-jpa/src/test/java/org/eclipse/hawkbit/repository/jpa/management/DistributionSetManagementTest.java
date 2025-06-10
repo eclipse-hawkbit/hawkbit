@@ -579,7 +579,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     void findDistributionSetsWithoutLazy() {
         testdataFactory.createDistributionSets(20);
 
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(20);
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).hasSize(20);
     }
 
     @Test
@@ -729,7 +729,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.delete(ds1.getId());
         // not assigned so not marked as deleted but fully deleted
         assertThat(distributionSetRepository.findAll()).hasSize(1);
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(1);
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).hasSize(1);
     }
 
     @Test
@@ -791,7 +791,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // not assigned so not marked as deleted
         assertThat(distributionSetRepository.findAll()).hasSize(4);
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(2);
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).hasSize(2);
         assertThat(distributionSetManagement.findAll(PAGE)).hasSize(2);
         assertThat(distributionSetManagement.findByRsql("name==*", PAGE)).hasSize(2);
         assertThat(distributionSetManagement.count()).isEqualTo(2);

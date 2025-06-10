@@ -134,7 +134,7 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatablePermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(PAGE, 1L, "controllerId==id"),
+        assertPermissions(() -> targetManagement.findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(1L, "controllerId==id", PAGE),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
     }
 
@@ -149,9 +149,9 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByTargetFilterQueryAndNotInRolloutAndCompatibleAndUpdatablePermissionsCheck() {
         assertPermissions(
-                () -> targetManagement.findByTargetFilterQueryAndNotInRolloutAndCompatibleAndUpdatable(PAGE, List.of(1L),
-                        "controllerId==id",
-                        entityFactory.distributionSetType().create().build()), List.of(SpPermission.READ_TARGET, SpPermission.READ_ROLLOUT));
+                () -> targetManagement.findByTargetFilterQueryAndNotInRolloutAndCompatibleAndUpdatable(List.of(1L), "controllerId==id",
+                        entityFactory.distributionSetType().create().build(), PAGE
+                ), List.of(SpPermission.READ_TARGET, SpPermission.READ_ROLLOUT));
     }
 
     @Test
@@ -171,7 +171,7 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByFailedRolloutAndNotInRolloutGroupsPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByFailedRolloutAndNotInRolloutGroups(PAGE, List.of(1L), "1"),
+        assertPermissions(() -> targetManagement.findByFailedRolloutAndNotInRolloutGroups("1", List.of(1L), PAGE),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_ROLLOUT));
     }
 
@@ -185,20 +185,20 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByInRolloutGroupWithoutActionPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByInRolloutGroupWithoutAction(PAGE, 1L), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetManagement.findByInRolloutGroupWithoutAction(1L, PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByAssignedDistributionSetPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByAssignedDistributionSet(PAGE, 1L),
+        assertPermissions(() -> targetManagement.findByAssignedDistributionSet(1L, PAGE),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByAssignedDistributionSetAndRsqlPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByAssignedDistributionSetAndRsql(PAGE, 1L, "controllerId==id"),
+        assertPermissions(() -> targetManagement.findByAssignedDistributionSetAndRsql(1L, "controllerId==id", PAGE),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
     }
 
@@ -217,28 +217,28 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByFiltersPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByFilters(PAGE, new FilterParams(null, null, null, null, null, null)),
+        assertPermissions(() -> targetManagement.findByFilters(new FilterParams(null, null, null, null, null, null), PAGE),
                 List.of(SpPermission.READ_TARGET));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByInstalledDistributionSetPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByInstalledDistributionSet(PAGE, 1L),
+        assertPermissions(() -> targetManagement.findByInstalledDistributionSet(1L, PAGE),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByInstalledDistributionSetAndRsqlPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByInstalledDistributionSetAndRsql(PAGE, 1L, "controllerId==id"),
+        assertPermissions(() -> targetManagement.findByInstalledDistributionSetAndRsql(1L, "controllerId==id", PAGE),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByUpdateStatusPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByUpdateStatus(PAGE, TargetUpdateStatus.IN_SYNC), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetManagement.findByUpdateStatus(TargetUpdateStatus.IN_SYNC, PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     @Test
@@ -250,25 +250,25 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByRsqlPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByRsql(PAGE, "controllerId==id"), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetManagement.findByRsql("controllerId==id", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByTargetFilterQueryPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByTargetFilterQuery(PAGE, 1L), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetManagement.findByTargetFilterQuery(1L, PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByTagPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByTag(PAGE, 1L), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetManagement.findByTag(1L, PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByRsqlAndTagPermissionsCheck() {
-        assertPermissions(() -> targetManagement.findByRsqlAndTag(PAGE, "controllerId==id", 1L), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetManagement.findByRsqlAndTag("controllerId==id", 1L, PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     @Test

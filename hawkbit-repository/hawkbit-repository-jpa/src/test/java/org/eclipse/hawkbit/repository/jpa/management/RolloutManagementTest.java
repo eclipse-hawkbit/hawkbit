@@ -922,7 +922,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         expectedTargetCountStatus.put(TotalTargetCountStatus.Status.FINISHED, 9L);
         validateRolloutActionStatus(rolloutTwo.getId(), expectedTargetCountStatus);
         changeStatusForAllRunningActions(rolloutTwo, Status.FINISHED);
-        final Page<Target> targetPage = targetManagement.findByUpdateStatus(PAGE, TargetUpdateStatus.IN_SYNC);
+        final Page<Target> targetPage = targetManagement.findByUpdateStatus(TargetUpdateStatus.IN_SYNC, PAGE);
         final List<Target> targetList = targetPage.getContent();
         // 15 targets in finished/IN_SYNC status and same DS assigned
         assertThat(targetList).hasSize(amountTargetsForRollout);
@@ -1050,7 +1050,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutHandler.handleAll();
 
         final Slice<Rollout> rolloutPage = rolloutManagement
-                .findAllWithDetailedStatus(new OffsetBasedPageRequest(0, 100, Sort.by(Direction.ASC, "name")), false);
+                .findAllWithDetailedStatus(false, new OffsetBasedPageRequest(0, 100, Sort.by(Direction.ASC, "name")));
         final List<Rollout> rolloutList = rolloutPage.getContent();
 
         // validate rolloutA -> 6 running and 6 ready
@@ -1113,7 +1113,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         }
 
         final Slice<Rollout> rollout = rolloutManagement.findByRsqlWithDetailedStatus(
-                new OffsetBasedPageRequest(0, 100, Sort.by(Direction.ASC, "name")), "name==Rollout*", false);
+                "name==Rollout*", false, new OffsetBasedPageRequest(0, 100, Sort.by(Direction.ASC, "name")));
         final List<Rollout> rolloutList = rollout.getContent();
         assertThat(rolloutList).hasSize(5);
         int i = 1;
@@ -1196,41 +1196,41 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final String successCondition = "50";
         final String errorCondition = "80";
         final String rolloutName = "MyRollout";
-        Rollout myRollout = createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountGroups,
-                successCondition, errorCondition, rolloutName, rolloutName);
+        Rollout myRollout = createTestRolloutWithTargetsAndDistributionSet(
+                amountTargetsForRollout, amountGroups, successCondition, errorCondition, rolloutName, rolloutName);
 
         testdataFactory.createTargets(amountOtherTargets, "others-", "rollout");
 
-        final String rsqlParam = "controllerId==*MyRoll*";
+        final String rsql = "controllerId==*MyRoll*";
 
         rolloutManagement.start(myRollout.getId());
 
         // Run here, because scheduler is disabled during tests
         rolloutHandler.handleAll();
 
-        final Condition<String> targetBelongsInRollout = new Condition<>(s -> s.startsWith(rolloutName),
-                "Target belongs into rollout");
+        final Condition<String> targetBelongsInRollout = new Condition<>(s -> s.startsWith(rolloutName), "Target belongs into rollout");
 
         myRollout = reloadRollout(myRollout);
-        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(myRollout.getId(), PAGE)
-                .getContent();
+        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(myRollout.getId(), PAGE).getContent();
 
         Page<Target> targetPage = rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(
-                new OffsetBasedPageRequest(0, 100), rolloutGroups.get(0).getId(), rsqlParam);
+                rolloutGroups.get(0).getId(), rsql, new OffsetBasedPageRequest(0, 100));
         final List<Target> targetlistGroup1 = targetPage.getContent();
         assertThat(targetlistGroup1).hasSize(5);
         assertThat(targetlistGroup1.stream().map(Target::getControllerId).toList())
                 .are(targetBelongsInRollout);
 
-        targetPage = rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(new OffsetBasedPageRequest(0, 100),
-                rolloutGroups.get(1).getId(), rsqlParam);
+        targetPage = rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(rolloutGroups.get(1).getId(), rsql,
+                new OffsetBasedPageRequest(0, 100)
+        );
         final List<Target> targetlistGroup2 = targetPage.getContent();
         assertThat(targetlistGroup2).hasSize(5);
         assertThat(targetlistGroup2.stream().map(Target::getControllerId).toList())
                 .are(targetBelongsInRollout);
 
-        targetPage = rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(new OffsetBasedPageRequest(0, 100),
-                rolloutGroups.get(2).getId(), rsqlParam);
+        targetPage = rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(rolloutGroups.get(2).getId(), rsql,
+                new OffsetBasedPageRequest(0, 100)
+        );
         final List<Target> targetlistGroup3 = targetPage.getContent();
         assertThat(targetlistGroup3).hasSize(5);
         assertThat(targetlistGroup3.stream().map(Target::getControllerId).toList()).are(targetBelongsInRollout);
@@ -1399,6 +1399,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 userWithoutHandleRollout,
                 () -> createRolloutWithStartAt(rolloutName + "_withLongMax", filter, distributionSet, Long.MAX_VALUE));
     }
+
     private Rollout createRolloutWithStartAt(final String rolloutName, final String filter, final DistributionSet distributionSet,
             final Long startAt) {
         return rolloutManagement.create(
@@ -1877,10 +1878,10 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .isThrownBy(() -> rolloutManagement.update(rolloutUpdate))
                 .withMessageContaining("" + createdRollout.getId());
 
-        assertThat(rolloutManagement.findAll(PAGE, true).getContent()).hasSize(1);
-        assertThat(rolloutManagement.findAll(PAGE, false).getContent()).isEmpty();
-        assertThat(rolloutManagement.findByRsql(PAGE, "name==*", true).getContent()).hasSize(1);
-        assertThat(rolloutManagement.findByRsql(PAGE, "name==*", false).getContent()).isEmpty();
+        assertThat(rolloutManagement.findAll(true, PAGE).getContent()).hasSize(1);
+        assertThat(rolloutManagement.findAll(false, PAGE).getContent()).isEmpty();
+        assertThat(rolloutManagement.findByRsql("name==*", true, PAGE).getContent()).hasSize(1);
+        assertThat(rolloutManagement.findByRsql("name==*", false, PAGE).getContent()).isEmpty();
         assertThat(rolloutManagement.count()).isZero();
         assertThat(rolloutGroupManagement.findByRolloutWithDetailedStatus(createdRollout.getId(), PAGE).getContent()).hasSize(amountGroups);
 
@@ -1923,11 +1924,11 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutReady = reloadRollout(rolloutReady);
 
         final List<Rollout> rolloutsOrderedByStatus = rolloutManagement
-                .findAll(PageRequest.of(0, 500, Sort.by(Direction.ASC, "status")), false).getContent();
+                .findAll(false, PageRequest.of(0, 500, Sort.by(Direction.ASC, "status"))).getContent();
         assertThat(rolloutsOrderedByStatus).containsSubsequence(List.of(rolloutReady, rolloutRunning));
 
         final List<Rollout> rolloutsOrderedByName = rolloutManagement
-                .findAll(PageRequest.of(0, 500, Sort.by(Direction.ASC, "name")), false).getContent();
+                .findAll(false, PageRequest.of(0, 500, Sort.by(Direction.ASC, "name"))).getContent();
         assertThat(rolloutsOrderedByName).containsSubsequence(List.of(rolloutRunning, rolloutReady));
     }
 
@@ -2298,7 +2299,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> targets = rolloutGroupManagement.findTargetsOfRolloutGroup(rolloutGroupId, PAGE)
                 .getContent();
         targets.forEach(target -> {
-            deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId()).getContent().stream().map(Identifiable::getId)
+            deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE).getContent().stream().map(Identifiable::getId)
                     .forEach(actionId -> {
                         deploymentManagement.cancelAction(actionId);
                         deploymentManagement.forceQuitAction(actionId);

@@ -68,11 +68,11 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
                 .containsOnly(permittedTarget.getId());
 
         // verify targetManagement#findByRsql
-        assertThat(targetManagement.findByRsql(Pageable.unpaged(), "id==*").get().map(Identifiable::getId).toList())
+        assertThat(targetManagement.findByRsql("id==*", Pageable.unpaged()).get().map(Identifiable::getId).toList())
                 .containsOnly(permittedTarget.getId());
 
         // verify targetManagement#findByUpdateStatus
-        assertThat(targetManagement.findByUpdateStatus(Pageable.unpaged(), TargetUpdateStatus.REGISTERED).get()
+        assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.REGISTERED, Pageable.unpaged()).get()
                 .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
 
         // verify targetManagement#getByControllerID
@@ -105,11 +105,11 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
                 .create(entityFactory.targetFilterQuery().create().name("test").query("id==*"));
 
         // verify targetManagement#findByTargetFilterQuery
-        assertThat(targetManagement.findByTargetFilterQuery(Pageable.unpaged(), targetFilterQuery.getId()).get()
+        assertThat(targetManagement.findByTargetFilterQuery(targetFilterQuery.getId(), Pageable.unpaged()).get()
                 .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
 
         // verify targetManagement#findByTargetFilterQuery (used by UI)
-        assertThat(targetManagement.findByFilters(Pageable.unpaged(), new FilterParams(null, null, null, null)).get()
+        assertThat(targetManagement.findByFilters(new FilterParams(null, null, null, null), Pageable.unpaged()).get()
                 .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
     }
 
@@ -145,11 +145,11 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
 
         // verify targetManagement#findByTag
         assertThat(
-                targetManagement.findByTag(Pageable.unpaged(), myTagId).get().map(Identifiable::getId).toList())
+                targetManagement.findByTag(myTagId, Pageable.unpaged()).get().map(Identifiable::getId).toList())
                 .containsOnly(permittedTarget.getId(), readOnlyTarget.getId());
 
         // verify targetManagement#findByRsqlAndTag
-        assertThat(targetManagement.findByRsqlAndTag(Pageable.unpaged(), "id==*", myTagId).get()
+        assertThat(targetManagement.findByRsqlAndTag("id==*", myTagId, Pageable.unpaged()).get()
                 .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId(), readOnlyTarget.getId());
 
         // verify targetManagement#assignTag on permitted target
@@ -228,7 +228,7 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
         overwriteAccess(AccessController.Operation.READ, permittedTarget);
 
         // verify targetManagement#findByUpdateStatus before assignment
-        assertThat(targetManagement.findByUpdateStatus(Pageable.unpaged(), TargetUpdateStatus.REGISTERED).get()
+        assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.REGISTERED, Pageable.unpaged()).get()
                 .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
 
         testAccessControlManger.defineAccessRule(
@@ -241,11 +241,11 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
         assertThatThrownBy(() -> assignDistributionSet(dsId, hiddenTargetControllerId)).isInstanceOf(AssertionError.class);
 
         // verify targetManagement#findByUpdateStatus(REGISTERED) after assignment
-        assertThat(targetManagement.findByUpdateStatus(Pageable.unpaged(), TargetUpdateStatus.REGISTERED)
+        assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.REGISTERED, Pageable.unpaged())
                 .getTotalElements()).isZero();
 
         // verify targetManagement#findByUpdateStatus(PENDING) after assignment
-        assertThat(targetManagement.findByUpdateStatus(Pageable.unpaged(), TargetUpdateStatus.PENDING).get()
+        assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.PENDING, Pageable.unpaged()).get()
                 .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
     }
 
@@ -364,7 +364,7 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
 
         autoAssignChecker.checkAllTargets();
 
-        assertThat(targetManagement.findByAssignedDistributionSet(Pageable.unpaged(), distributionSet.getId())
+        assertThat(targetManagement.findByAssignedDistributionSet(distributionSet.getId(), Pageable.unpaged())
                 .getContent())
                 .hasSize(updateTargets.size())
                 .allMatch(assignedTarget -> updateTargets.stream()

@@ -106,12 +106,12 @@ public interface TargetFilterQueryManagement {
      * Retrieves all {@link TargetFilterQuery}s which match the given name
      * filter.
      *
-     * @param pageable pagination parameter
      * @param name name filter
+     * @param pageable pagination parameter
      * @return the page with the found {@link TargetFilterQuery}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<TargetFilterQuery> findByName(@NotNull Pageable pageable, @NotNull String name);
+    Slice<TargetFilterQuery> findByName(@NotNull String name, @NotNull Pageable pageable);
 
     /**
      * Counts all {@link TargetFilterQuery}s which match the given name filter.
@@ -123,50 +123,47 @@ public interface TargetFilterQueryManagement {
     long countByName(@NotNull String name);
 
     /**
-     * Retrieves all {@link TargetFilterQuery} which match the given RSQL
-     * filter.
+     * Retrieves all {@link TargetFilterQuery} which match the given RSQL filter.
      *
-     * @param pageable pagination parameter
      * @param rsqlFilter RSQL filter string
+     * @param pageable pagination parameter
      * @return the page with the found {@link TargetFilterQuery}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlFilter);
+    Page<TargetFilterQuery> findByRsql(@NotNull String rsqlFilter, @NotNull Pageable pageable);
 
     /**
      * Retrieves all {@link TargetFilterQuery}s which match the given query.
      *
-     * @param pageable pagination parameter
      * @param query the query saved in the target filter query
+     * @param pageable pagination parameter
      * @return the page with the found {@link TargetFilterQuery}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<TargetFilterQuery> findByQuery(@NotNull Pageable pageable, @NotNull String query);
+    Slice<TargetFilterQuery> findByQuery(@NotNull String query, @NotNull Pageable pageable);
 
     /**
-     * Retrieves all {@link TargetFilterQuery}s which match the given
-     * auto-assign distribution set ID.
+     * Retrieves all {@link TargetFilterQuery}s which match the given auto-assign distribution set ID.
      *
-     * @param pageable pagination parameter
      * @param setId the auto assign distribution set
+     * @param pageable pagination parameter
      * @return the page with the found {@link TargetFilterQuery}s
      * @throws EntityNotFoundException if DS with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<TargetFilterQuery> findByAutoAssignDistributionSetId(@NotNull Pageable pageable, long setId);
+    Slice<TargetFilterQuery> findByAutoAssignDistributionSetId(long setId, @NotNull Pageable pageable);
 
     /**
-     * Retrieves all {@link TargetFilterQuery}s which match the given
-     * auto-assign distribution set and RSQL filter.
+     * Retrieves all {@link TargetFilterQuery}s which match the given auto-assign distribution set and RSQL filter.
      *
-     * @param pageable pagination parameter
      * @param setId the auto assign distribution set
-     * @param rsqlParam RSQL filter
+     * @param rsql RSQL filter
+     * @param pageable pagination parameter
      * @return the page with the found {@link TargetFilterQuery}s
      * @throws EntityNotFoundException if DS with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findByAutoAssignDSAndRsql(@NotNull Pageable pageable, long setId, String rsqlParam);
+    Page<TargetFilterQuery> findByAutoAssignDSAndRsql(long setId, String rsql, @NotNull Pageable pageable);
 
     /**
      * Retrieves all {@link TargetFilterQuery}s with an auto-assign distribution set.

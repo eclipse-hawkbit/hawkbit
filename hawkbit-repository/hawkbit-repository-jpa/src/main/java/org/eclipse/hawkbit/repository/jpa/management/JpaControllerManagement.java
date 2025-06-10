@@ -326,12 +326,12 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final long actionId) {
+    public Page<ActionStatus> findActionStatusByAction(final long actionId, final Pageable pageable) {
         if (!actionRepository.existsById(actionId)) {
             throw new EntityNotFoundException(Action.class, actionId);
         }
 
-        return actionStatusRepository.findByActionId(pageReq, actionId);
+        return actionStatusRepository.findByActionId(pageable, actionId);
     }
 
     @Override

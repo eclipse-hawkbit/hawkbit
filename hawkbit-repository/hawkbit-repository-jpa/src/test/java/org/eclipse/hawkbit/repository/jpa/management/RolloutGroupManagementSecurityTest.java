@@ -68,7 +68,7 @@ class RolloutGroupManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findTargetsOfRolloutGroupByRsqlPermissionsCheck() {
-        assertPermissions(() -> rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(PAGE, 1L, "name==*"),
+        assertPermissions(() -> rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(1L, "name==*", PAGE),
                 List.of(SpPermission.READ_ROLLOUT, SpPermission.READ_TARGET));
     }
 

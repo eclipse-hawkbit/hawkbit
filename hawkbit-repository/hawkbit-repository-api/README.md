@@ -45,6 +45,6 @@ List<Target> getByControllerID(@NotEmpty Collection<String> controllerId);
 Optional<Target> findFirstByDescription(@NotEmpty String description);
 
 // Query/search repository (page might be empty, no EntityNotFoundException) (note: pageReq always first in signature)
-Page<Target> findByAssignedDistributionSet(@NotNull Pageable pageReq, @NotNull Long distributionSetID);
+Page<Target> findByAssignedDistributionSet(@NotNull Long distributionSetID, @NotNull Pageable pageable);
 
 ```

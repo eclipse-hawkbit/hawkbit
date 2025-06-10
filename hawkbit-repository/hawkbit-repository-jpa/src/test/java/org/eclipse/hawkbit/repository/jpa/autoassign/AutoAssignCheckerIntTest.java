@@ -434,7 +434,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     private void verifyThatTargetsHaveDistributionSetAssignedAndActionStatus(final DistributionSet set,
             final List<Target> targets, final Action.Status status) {
         final List<String> targetIds = targets.stream().map(Target::getControllerId).toList();
-        final List<Target> targetsWithAssignedDS = targetManagement.findByAssignedDistributionSet(PAGE, set.getId()).getContent();
+        final List<Target> targetsWithAssignedDS = targetManagement.findByAssignedDistributionSet(set.getId(), PAGE).getContent();
         assertThat(targetsWithAssignedDS).isNotEmpty();
         assertThat(targetsWithAssignedDS).allMatch(target -> targetIds.contains(target.getControllerId()));
 

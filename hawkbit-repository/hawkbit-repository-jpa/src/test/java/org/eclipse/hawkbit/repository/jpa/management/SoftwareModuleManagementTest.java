@@ -694,9 +694,9 @@ class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(metadataSw2).hasSize(metadataCountSw2);
 
         final Page<SoftwareModuleMetadata> metadataSw1V = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(
-                PAGE_REQUEST_100, sw1.getId());
+                sw1.getId(), PAGE_REQUEST_100);
         final Page<SoftwareModuleMetadata> metadataSw2V = softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(
-                PAGE_REQUEST_100, sw2.getId());
+                sw2.getId(), PAGE_REQUEST_100);
         assertThat(metadataSw1V.getNumberOfElements()).isEqualTo(metadataCountSw1);
         assertThat(metadataSw1V.getTotalElements()).isEqualTo(metadataCountSw1);
         assertThat(metadataSw2V.getNumberOfElements()).isZero();

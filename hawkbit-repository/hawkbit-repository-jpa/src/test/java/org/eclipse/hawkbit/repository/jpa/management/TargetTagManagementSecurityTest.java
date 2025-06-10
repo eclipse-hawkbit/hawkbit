@@ -61,7 +61,7 @@ class TargetTagManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByRsqlPermissionsCheck() {
-        assertPermissions(() -> targetTagManagement.findByRsql(PAGE, "name==tag"), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetTagManagement.findByRsql("name==tag", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     @Test

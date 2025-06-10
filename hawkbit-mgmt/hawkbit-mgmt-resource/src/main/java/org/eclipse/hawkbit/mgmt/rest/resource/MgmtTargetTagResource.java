@@ -70,7 +70,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         if (rsqlParam == null) {
             findTargetsAll = this.tagManagement.findAll(pageable);
         } else {
-            findTargetsAll = this.tagManagement.findByRsql(pageable, rsqlParam);
+            findTargetsAll = this.tagManagement.findByRsql(rsqlParam, pageable);
         }
 
         final List<MgmtTag> rest = MgmtTagMapper.toResponse(findTargetsAll.getContent());
@@ -128,9 +128,9 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeTagSortParam(sortParam));
         final Page<Target> findTargetsAll;
         if (rsqlParam == null) {
-            findTargetsAll = targetManagement.findByTag(pageable, targetTagId);
+            findTargetsAll = targetManagement.findByTag(targetTagId, pageable);
         } else {
-            findTargetsAll = targetManagement.findByRsqlAndTag(pageable, rsqlParam, targetTagId);
+            findTargetsAll = targetManagement.findByRsqlAndTag(rsqlParam, targetTagId, pageable);
         }
 
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent(), tenantConfigHelper);

@@ -156,33 +156,33 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByRsql(final String targetFilterQuery) {
+    public long countByRsql(final String rsql) {
         return JpaManagementHelper.countBySpec(
                 targetRepository,
-                List.of(RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database)));
+                List.of(RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database)));
     }
 
     @Override
-    public long countByRsqlAndUpdatable(String targetFilterQuery) {
+    public long countByRsqlAndUpdatable(String rsql) {
         final List<Specification<JpaTarget>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database));
+                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database));
         return targetRepository.count(
                 AccessController.Operation.UPDATE,
                 combineWithAnd(specList));
     }
 
     @Override
-    public long countByRsqlAndCompatible(final String targetFilterQuery, final Long distributionSetIdTypeId) {
+    public long countByRsqlAndCompatible(final String rsql, final Long distributionSetIdTypeId) {
         final List<Specification<JpaTarget>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
+                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetIdTypeId));
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }
 
     @Override
-    public long countByRsqlAndCompatibleAndUpdatable(String targetFilterQuery, Long distributionSetIdTypeId) {
+    public long countByRsqlAndCompatibleAndUpdatable(String rsql, Long distributionSetIdTypeId) {
         final List<Specification<JpaTarget>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
+                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetIdTypeId));
         return targetRepository.count(AccessController.Operation.UPDATE, combineWithAnd(specList));
     }
@@ -246,8 +246,8 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(final Pageable pageRequest,
-            final long distributionSetId, final String targetFilterQuery) {
+    public Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(final long distributionSetId, final String rsql,
+            final Pageable pageable) {
         final DistributionSet jpaDistributionSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
         final Long distSetTypeId = jpaDistributionSet.getType().getId();
 
@@ -255,15 +255,15 @@ public class JpaTargetManagement implements TargetManagement {
                 .findAllWithoutCount(
                         AccessController.Operation.UPDATE,
                         combineWithAnd(List.of(
-                                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
+                                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                                 TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
                                 TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId))),
-                        pageRequest)
+                        pageable)
                 .map(Target.class::cast);
     }
 
     @Override
-    public long countByRsqlAndNonDSAndCompatibleAndUpdatable(final long distributionSetId, final String targetFilterQuery) {
+    public long countByRsqlAndNonDSAndCompatibleAndUpdatable(final long distributionSetId, final String rsql) {
         final DistributionSet jpaDistributionSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
         final Long distSetTypeId = jpaDistributionSet.getType().getId();
 
@@ -271,35 +271,35 @@ public class JpaTargetManagement implements TargetManagement {
                 AccessController.Operation.UPDATE,
                 combineWithAnd(List.of(
                         RSQLUtility.buildRsqlSpecification(
-                                targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
+                                rsql, TargetFields.class, virtualPropertyReplacer, database),
                         TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
                         TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId))));
     }
 
     @Override
     public Slice<Target> findByTargetFilterQueryAndNotInRolloutAndCompatibleAndUpdatable(
-            final Pageable pageRequest, final Collection<Long> groups, final String targetFilterQuery, final DistributionSetType dsType) {
+            final Collection<Long> groups, final String targetFilterQuery, final DistributionSetType dsType, final Pageable pageable) {
         return targetRepository
                 .findAllWithoutCount(AccessController.Operation.UPDATE,
                         combineWithAnd(List.of(
                                 RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
                                 TargetSpecifications.isNotInRolloutGroups(groups),
                                 TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()))),
-                        pageRequest)
+                        pageable)
                 .map(Target.class::cast);
     }
 
     @Override
     public Slice<Target> findByTargetFilterQueryAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
-            final Pageable pageRequest, final long rolloutId, final int weight, final long firstGroupId, final String targetFilterQuery,
-            final DistributionSetType distributionSetType) {
+            final long rolloutId, final int weight, final long firstGroupId, final String targetFilterQuery,
+            final DistributionSetType distributionSetType, final Pageable pageable) {
         return targetRepository
                 .findAllWithoutCount(AccessController.Operation.UPDATE,
                         combineWithAnd(List.of(
                                 RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
                                 TargetSpecifications.hasNoOverridingActionsAndNotInRollout(weight, rolloutId),
                                 TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetType.getId()))),
-                        pageRequest)
+                        pageable)
                 .map(Target.class::cast);
     }
 
@@ -309,21 +309,20 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Slice<Target> findByFailedRolloutAndNotInRolloutGroups(Pageable pageRequest, Collection<Long> groups,
-            String rolloutId) {
+    public Slice<Target> findByFailedRolloutAndNotInRolloutGroups(String rolloutId, Collection<Long> groups, Pageable pageable) {
         final List<Specification<JpaTarget>> specList = List.of(
                 TargetSpecifications.failedActionsForRollout(rolloutId),
                 TargetSpecifications.isNotInRolloutGroups(groups));
 
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageRequest);
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
     }
 
     @Override
     public long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
-            final String targetFilterQuery, final Collection<Long> groups, final DistributionSetType dsType) {
+            final String rsql, final Collection<Long> groups, final DistributionSetType dsType) {
         return targetRepository.count(AccessController.Operation.UPDATE,
                 combineWithAnd(List.of(
-                        RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
+                        RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                         TargetSpecifications.isNotInRolloutGroups(groups),
                         TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()))));
     }
@@ -337,33 +336,33 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Slice<Target> findByInRolloutGroupWithoutAction(final Pageable pageRequest, final long group) {
+    public Slice<Target> findByInRolloutGroupWithoutAction(final long group, final Pageable pageable) {
         if (!rolloutGroupRepository.existsById(group)) {
             throw new EntityNotFoundException(RolloutGroup.class, group);
         }
 
         return JpaManagementHelper.findAllWithoutCountBySpec(
-                targetRepository, List.of(TargetSpecifications.hasNoActionInRolloutGroup(group)), pageRequest);
+                targetRepository, List.of(TargetSpecifications.hasNoActionInRolloutGroup(group)), pageable);
     }
 
     @Override
-    public Page<Target> findByAssignedDistributionSet(final Pageable pageReq, final long distributionSetId) {
+    public Page<Target> findByAssignedDistributionSet(final long distributionSetId, final Pageable pageable) {
         final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
 
         return JpaManagementHelper.findAllWithCountBySpec(
                 targetRepository,
-                List.of(TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId())), pageReq);
+                List.of(TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId())), pageable);
     }
 
     @Override
-    public Page<Target> findByAssignedDistributionSetAndRsql(final Pageable pageReq, final long distributionSetId, final String rsqlParam) {
+    public Page<Target> findByAssignedDistributionSetAndRsql(final long distributionSetId, final String rsql, final Pageable pageable) {
         final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
 
         final List<Specification<JpaTarget>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer, database),
+                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId()));
 
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageReq);
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
     }
 
     @Override
@@ -382,13 +381,13 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Slice<Target> findByFilters(final Pageable pageable, final FilterParams filterParams) {
+    public Slice<Target> findByFilters(final FilterParams filterParams, final Pageable pageable) {
         final List<Specification<JpaTarget>> specList = buildSpecificationList(filterParams);
         return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, specList, pageable);
     }
 
     @Override
-    public Page<Target> findByInstalledDistributionSet(final Pageable pageReq, final long distributionSetId) {
+    public Page<Target> findByInstalledDistributionSet(final long distributionSetId, final Pageable pageReq) {
         final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
 
         return JpaManagementHelper.findAllWithCountBySpec(
@@ -396,18 +395,18 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByInstalledDistributionSetAndRsql(final Pageable pageable, final long distributionSetId, final String rsqlParam) {
+    public Page<Target> findByInstalledDistributionSetAndRsql(final long distributionSetId, final String rsql, final Pageable pageable) {
         final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
 
         final List<Specification<JpaTarget>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer, database),
+                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.hasInstalledDistributionSet(validDistSet.getId()));
 
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
     }
 
     @Override
-    public Page<Target> findByUpdateStatus(final Pageable pageable, final TargetUpdateStatus status) {
+    public Page<Target> findByUpdateStatus(final TargetUpdateStatus status, final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(
                 targetRepository, List.of(TargetSpecifications.hasTargetUpdateStatus(status)), pageable);
     }
@@ -418,15 +417,15 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Slice<Target> findByRsql(final Pageable pageable, final String targetFilterQuery) {
+    public Slice<Target> findByRsql(final String rsql, final Pageable pageable) {
         return JpaManagementHelper.findAllWithoutCountBySpec(
                 targetRepository,
-                List.of(RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database)), pageable
+                List.of(RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database)), pageable
         );
     }
 
     @Override
-    public Slice<Target> findByTargetFilterQuery(final Pageable pageable, final long targetFilterQueryId) {
+    public Slice<Target> findByTargetFilterQuery(final long targetFilterQueryId, final Pageable pageable) {
         final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
@@ -437,17 +436,17 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByTag(final Pageable pageable, final long tagId) {
+    public Page<Target> findByTag(final long tagId, final Pageable pageable) {
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, List.of(TargetSpecifications.hasTag(tagId)), pageable);
     }
 
     @Override
-    public Page<Target> findByRsqlAndTag(final Pageable pageable, final String rsqlParam, final long tagId) {
+    public Page<Target> findByRsqlAndTag(final String rsql, final long tagId, final Pageable pageable) {
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
 
         final List<Specification<JpaTarget>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer, database),
+                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.hasTag(tagId));
 
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
@@ -665,9 +664,9 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByControllerAttributesRequested(final Pageable pageReq) {
+    public Page<Target> findByControllerAttributesRequested(final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(
-                targetRepository, List.of(TargetSpecifications.hasRequestControllerAttributesTrue()), pageReq);
+                targetRepository, List.of(TargetSpecifications.hasRequestControllerAttributesTrue()), pageable);
     }
 
     @Override

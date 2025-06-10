@@ -280,9 +280,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Page<DistributionSet> findByRsql(final String rsqlParam, final Pageable pageable) {
+    public Page<DistributionSet> findByRsql(final String rsql, final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, List.of(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class, virtualPropertyReplacer, database),
+                RSQLUtility.buildRsqlSpecification(rsql, DistributionSetFields.class, virtualPropertyReplacer, database),
                 DistributionSetSpecification.isNotDeleted()), pageable);
     }
 
@@ -511,7 +511,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Slice<DistributionSet> findByCompleted(final Pageable pageReq, final Boolean complete) {
+    public Slice<DistributionSet> findByCompleted(final Boolean complete, final Pageable pageReq) {
         final List<Specification<JpaDistributionSet>> specifications = buildSpecsByComplete(complete);
 
         return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, specifications, pageReq);
@@ -547,11 +547,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Page<DistributionSet> findByRsqlAndTag(final String rsqlParam, final long tagId, final Pageable pageable) {
+    public Page<DistributionSet> findByRsqlAndTag(final String rsql, final long tagId, final Pageable pageable) {
         assertDsTagExists(tagId);
 
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, List.of(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class, virtualPropertyReplacer,
+                RSQLUtility.buildRsqlSpecification(rsql, DistributionSetFields.class, virtualPropertyReplacer,
                         database),
                 DistributionSetSpecification.hasTag(tagId), DistributionSetSpecification.isNotDeleted()), pageable);
     }

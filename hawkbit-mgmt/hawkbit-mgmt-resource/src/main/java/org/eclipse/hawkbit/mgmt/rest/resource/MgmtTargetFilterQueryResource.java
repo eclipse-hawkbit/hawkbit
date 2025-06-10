@@ -80,7 +80,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         final Slice<TargetFilterQuery> findTargetFiltersAll;
         final long countTargetsAll;
         if (rsqlParam != null) {
-            final Page<TargetFilterQuery> findFilterPage = filterManagement.findByRsql(pageable, rsqlParam);
+            final Page<TargetFilterQuery> findFilterPage = filterManagement.findByRsql(rsqlParam, pageable);
             countTargetsAll = findFilterPage.getTotalElements();
             findTargetFiltersAll = findFilterPage;
         } else {

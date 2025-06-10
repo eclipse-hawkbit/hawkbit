@@ -122,7 +122,7 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findActionStatusByActionPermissionsCheck() {
-        assertPermissions(() -> deploymentManagement.findActionStatusByAction(Pageable.unpaged(), 1L), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> deploymentManagement.findActionStatusByAction(1L, Pageable.unpaged()), List.of(SpPermission.READ_TARGET));
     }
 
     @Test
@@ -134,7 +134,7 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findMessagesByActionStatusIdPermissionsCheck() {
-        assertPermissions(() -> deploymentManagement.findMessagesByActionStatusId(PAGE, 1L), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> deploymentManagement.findMessagesByActionStatusId(1L, PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     @Test
@@ -146,14 +146,14 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findActiveActionsByTargetPermissionsCheck() {
-        assertPermissions(() -> deploymentManagement.findActiveActionsByTarget(Pageable.unpaged(), "controllerId"),
+        assertPermissions(() -> deploymentManagement.findActiveActionsByTarget("controllerId", Pageable.unpaged()),
                 List.of(SpPermission.READ_TARGET));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findInActiveActionsByTargetPermissionsCheck() {
-        assertPermissions(() -> deploymentManagement.findInActiveActionsByTarget(Pageable.unpaged(), "controllerId"),
+        assertPermissions(() -> deploymentManagement.findInActiveActionsByTarget("controllerId", Pageable.unpaged()),
                 List.of(SpPermission.READ_TARGET));
     }
 

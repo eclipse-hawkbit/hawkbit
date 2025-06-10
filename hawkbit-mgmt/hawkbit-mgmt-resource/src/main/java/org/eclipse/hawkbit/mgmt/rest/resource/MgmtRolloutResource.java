@@ -94,13 +94,13 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final List<MgmtRolloutResponseBody> rest;
         if (isFullMode) {
             rollouts = rsqlParam == null
-                    ? rolloutManagement.findAllWithDetailedStatus(pageable, false)
-                    : rolloutManagement.findByRsqlWithDetailedStatus(pageable, rsqlParam, false);
+                    ? rolloutManagement.findAllWithDetailedStatus(false, pageable)
+                    : rolloutManagement.findByRsqlWithDetailedStatus(rsqlParam, false, pageable);
             rest = MgmtRolloutMapper.toResponseRolloutWithDetails(rollouts.getContent());
         } else {
              rollouts = rsqlParam == null
-                    ? rolloutManagement.findAll(pageable, false)
-                    : rolloutManagement.findByRsql(pageable, rsqlParam, false);
+                    ? rolloutManagement.findAll(false, pageable)
+                    : rolloutManagement.findByRsql(rsqlParam, false, pageable);
             rest = MgmtRolloutMapper.toResponseRollout(rollouts.getContent());
         }
         return ResponseEntity.ok(new PagedList<>(rest, rollouts.getTotalElements()));
@@ -256,7 +256,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         if (rsqlParam == null) {
             rolloutGroupTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroup(groupId, pageable);
         } else {
-            rolloutGroupTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(pageable, groupId, rsqlParam);
+            rolloutGroupTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(groupId, rsqlParam, pageable);
         }
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(rolloutGroupTargets.getContent(), tenantConfigHelper);
         return ResponseEntity.ok(new PagedList<>(rest, rolloutGroupTargets.getTotalElements()));

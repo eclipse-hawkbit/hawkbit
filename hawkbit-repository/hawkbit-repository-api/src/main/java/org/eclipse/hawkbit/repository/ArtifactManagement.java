@@ -114,13 +114,13 @@ public interface ArtifactManagement {
     /**
      * Get local artifact for a base software module.
      *
-     * @param pageReq Pageable parameter
      * @param softwareModuleId software module id
+     * @param pageable Pageable parameter
      * @return Page<Artifact>
      * @throws EntityNotFoundException if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<Artifact> findBySoftwareModule(@NotNull Pageable pageReq, long softwareModuleId);
+    Page<Artifact> findBySoftwareModule(long softwareModuleId, @NotNull Pageable pageable);
 
     /**
      * Count local artifacts for a base software module.

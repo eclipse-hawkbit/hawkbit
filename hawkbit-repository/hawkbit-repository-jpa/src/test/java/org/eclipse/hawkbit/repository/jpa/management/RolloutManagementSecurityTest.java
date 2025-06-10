@@ -27,7 +27,6 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.PageImpl;
 
 @Slf4j
 @Feature("SecurityTests - RolloutManagement")
@@ -127,26 +126,26 @@ class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findAllPermissionsCheck() {
-        assertPermissions(() -> rolloutManagement.findAll(PAGE, false), List.of(SpPermission.READ_ROLLOUT));
+        assertPermissions(() -> rolloutManagement.findAll(false, PAGE), List.of(SpPermission.READ_ROLLOUT));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByRsqlPermissionsCheck() {
-        assertPermissions(() -> rolloutManagement.findByRsql(PAGE, "id==1", false), List.of(SpPermission.READ_ROLLOUT));
+        assertPermissions(() -> rolloutManagement.findByRsql("id==1", false, PAGE), List.of(SpPermission.READ_ROLLOUT));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findAllWithDetailedStatusPermissionsCheck() {
-        assertPermissions(() -> rolloutManagement.findAllWithDetailedStatus(PAGE, false), List.of(SpPermission.READ_ROLLOUT));
+        assertPermissions(() -> rolloutManagement.findAllWithDetailedStatus(false, PAGE), List.of(SpPermission.READ_ROLLOUT));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByRsqlWithDetailedStatusPermissionsCheck() {
         assertPermissions(() ->
-                rolloutManagement.findByRsqlWithDetailedStatus(PAGE, "name==*", false), List.of(SpPermission.READ_ROLLOUT));
+                rolloutManagement.findByRsqlWithDetailedStatus("name==*", false, PAGE), List.of(SpPermission.READ_ROLLOUT));
     }
 
     @Test

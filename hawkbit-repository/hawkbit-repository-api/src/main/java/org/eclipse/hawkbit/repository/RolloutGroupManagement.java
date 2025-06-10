@@ -53,7 +53,7 @@ public interface RolloutGroupManagement {
      * Retrieves a page of {@link RolloutGroup}s filtered by a given {@link Rollout} and an RSQL filter.
      *
      * @param rolloutId the rollout to filter the {@link RolloutGroup}s
-     * @param rsqlParam the specification to filter the result set based on attributes of the {@link RolloutGroup}
+     * @param rsql the specification to filter the result set based on attributes of the {@link RolloutGroup}
      * @param pageable the page request to sort and limit the result
      * @return a page of found {@link RolloutGroup}s
      * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
@@ -61,13 +61,13 @@ public interface RolloutGroupManagement {
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<RolloutGroup> findByRolloutAndRsql(long rolloutId, @NotNull String rsqlParam, @NotNull Pageable pageable);
+    Page<RolloutGroup> findByRolloutAndRsql(long rolloutId, @NotNull String rsql, @NotNull Pageable pageable);
 
     /**
      * Retrieves a page of {@link RolloutGroup}s filtered by a given {@link Rollout} and a rsql filter with detailed status.
      *
      * @param rolloutId the rollout to filter the {@link RolloutGroup}s
-     * @param rsqlParam the specification to filter the result set based on attributes of the {@link RolloutGroup}
+     * @param rsql the specification to filter the result set based on attributes of the {@link RolloutGroup}
      * @param pageable the page request to sort and limit the result
      * @return a page of found {@link RolloutGroup}s
      * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
@@ -75,7 +75,7 @@ public interface RolloutGroupManagement {
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<RolloutGroup> findByRolloutAndRsqlWithDetailedStatus(long rolloutId, @NotNull String rsqlParam, @NotNull Pageable pageable);
+    Page<RolloutGroup> findByRolloutAndRsqlWithDetailedStatus(long rolloutId, @NotNull String rsql, @NotNull Pageable pageable);
 
     /**
      * Retrieves a page of {@link RolloutGroup}s filtered by a given {@link Rollout}.
@@ -110,17 +110,16 @@ public interface RolloutGroupManagement {
     /**
      * Get targets of specified rollout group.
      *
-     * @param pageable the page request to sort and limit the result
      * @param rolloutGroupId rollout group
-     * @param rsqlParam the specification for filtering the targets of a rollout group
+     * @param rsql the specification for filtering the targets of a rollout group
+     * @param pageable the page request to sort and limit the result
      * @return Page<Target> list of targets of a rollout group
      * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
      *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    Page<Target> findTargetsOfRolloutGroupByRsql(@NotNull Pageable pageable, long rolloutGroupId,
-            @NotNull String rsqlParam);
+    Page<Target> findTargetsOfRolloutGroupByRsql(long rolloutGroupId, @NotNull String rsql, @NotNull Pageable pageable);
 
     /**
      * Get {@link RolloutGroup} by id.

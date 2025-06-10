@@ -459,7 +459,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         rolloutHandler.handleAll();
 
-        final Rollout rollout = rolloutManagement.findByRsql(PAGE, "name==rollout1", false).getContent().get(0);
+        final Rollout rollout = rolloutManagement.findByRsql("name==rollout1", false, PAGE).getContent().get(0);
 
         rolloutManagement.start(rollout.getId());
         rolloutHandler.handleAll();
@@ -766,7 +766,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         postRollout("rollout1", 5, dsA.getId(), "id==target*", 20, Action.ActionType.FORCED);
 
-        final List<Rollout> content = rolloutManagement.findAll(PAGE, false).getContent();
+        final List<Rollout> content = rolloutManagement.findAll(false, PAGE).getContent();
         assertThat(content).hasSizeGreaterThan(0).allSatisfy(rollout -> {
             assertThat(rolloutGroupManagement.findByRollout(rollout.getId(), PAGE))
                     .describedAs("Confirmation required flag depends on feature active.")
@@ -803,7 +803,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        final List<Rollout> content = rolloutManagement.findAll(PAGE, false).getContent();
+        final List<Rollout> content = rolloutManagement.findAll(false, PAGE).getContent();
         assertThat(content).hasSize(1).allSatisfy(rollout -> {
             final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getContent();
             assertThat(groups).hasSize(2).allMatch(group -> {
@@ -846,7 +846,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        final List<Rollout> content = rolloutManagement.findAll(PAGE, false).getContent();
+        final List<Rollout> content = rolloutManagement.findAll(false, PAGE).getContent();
         assertThat(content).hasSize(1).allSatisfy(rollout -> {
             final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(rollout.getId(), PAGE).getContent();
             assertThat(groups).hasSize(2).allMatch(group -> {
@@ -1552,7 +1552,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated());
 
-        final List<Rollout> rollouts = rolloutManagement.findAll(PAGE, false).getContent();
+        final List<Rollout> rollouts = rolloutManagement.findAll(false, PAGE).getContent();
         assertThat(rollouts).hasSize(2);
         assertThat(rollouts.get(0).getWeight()).get().isEqualTo(weight);
     }

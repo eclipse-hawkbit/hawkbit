@@ -241,7 +241,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
         assignDistributionSet(ds.getId(), controllerId);
 
-        final Action updateAction = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())
+        final Action updateAction = deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE)
                 .getContent().get(0);
         final String etagWithFirstUpdate = mvc
                 .perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId)
@@ -287,7 +287,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
         assignDistributionSet(ds2.getId(), controllerId);
 
-        final Action updateAction2 = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId()).getContent().get(0);
+        final Action updateAction2 = deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE).getContent().get(0);
 
         mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId)
                         .header("If-None-Match", etagAfterInstallation).accept(MediaType.APPLICATION_JSON)
@@ -398,7 +398,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)
                 .getContent().get(0);
         sendDeploymentActionFeedback(savedTarget, savedAction, "proceeding", null)
                 .andDo(MockMvcResultPrinter.print())
@@ -460,7 +460,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)
                 .getContent().get(0);
 
         sendDeploymentActionFeedback(savedTarget, savedAction, "scheduled", null, TARGET_SCHEDULED_INSTALLATION_MSG)
@@ -504,7 +504,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
 
         sendDeploymentActionFeedback(savedTarget, savedAction, "scheduled", null, TARGET_SCHEDULED_INSTALLATION_MSG)
                 .andDo(MockMvcResultPrinter.print())
@@ -548,7 +548,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)
                 .getContent().get(0);
 
         sendDeploymentActionFeedback(savedTarget, savedAction, "scheduled", null, TARGET_SCHEDULED_INSTALLATION_MSG)
@@ -636,7 +636,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(get(CONTROLLER_BASE, "default-tenant", "1911"))
                 .andExpect(status().isOk());
 
-        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
 
         mvc.perform(get(DEPLOYMENT_BASE, tenantAware.getCurrentTenant(), "1911", action.getId())
                         .accept(MediaType.APPLICATION_JSON))
@@ -658,7 +658,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         mvc.perform(get(CONTROLLER_BASE, "default-tenant", "1911"))
                 .andExpect(status().isOk());
 
-        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
 
         mvc.perform(get(DEPLOYMENT_BASE, tenantAware.getCurrentTenant(), "1911", action.getId())
                         .accept(MediaType.APPLICATION_JSON))
@@ -695,7 +695,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Step
     private void assertAttributesUpdateNotRequestedAfterFailedDeployment(Target target, final DistributionSet ds) throws Exception {
         target = getFirstAssignedTarget(assignDistributionSet(ds.getId(), target.getControllerId()));
-        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId()).getContent().get(0);
+        final Action action = deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE).getContent().get(0);
         sendDeploymentActionFeedback(target, action, "closed", "failure")
                 .andExpect(status().isOk());
         assertThatAttributesUpdateIsNotRequested(target.getControllerId());
@@ -704,7 +704,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Step
     private void assertAttributesUpdateRequestedAfterSuccessfulDeployment(Target target, final DistributionSet ds) throws Exception {
         target = getFirstAssignedTarget(assignDistributionSet(ds.getId(), target.getControllerId()));
-        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId()).getContent().get(0);
+        final Action action = deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE).getContent().get(0);
         sendDeploymentActionFeedback(target, action, "closed", null)
                 .andExpect(status().isOk());
         assertThatAttributesUpdateIsRequested(target.getControllerId());

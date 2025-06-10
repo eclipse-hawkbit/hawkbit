@@ -118,7 +118,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Slice<Target> findTargetsAll;
         final long countTargetsAll;
         if (rsqlParam != null) {
-            findTargetsAll = targetManagement.findByRsql(pageable, rsqlParam);
+            findTargetsAll = targetManagement.findByRsql(rsqlParam, pageable);
             countTargetsAll = targetManagement.countByRsql(rsqlParam);
         } else {
             findTargetsAll = targetManagement.findAll(pageable);
@@ -340,7 +340,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             return ResponseEntity.notFound().build();
         }
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeActionStatusSortParam(sortParam));
-        final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusByAction(pageable, action.getId());
+        final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusByAction(action.getId(), pageable);
 
         return ResponseEntity.ok(new PagedList<>(
                 MgmtTargetMapper.toActionStatusRestResponse(statusList.getContent(), deploymentManagement),

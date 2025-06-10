@@ -178,11 +178,11 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Page<Artifact> findBySoftwareModule(final Pageable pageReq, final long softwareModuleId) {
+    public Page<Artifact> findBySoftwareModule(final long softwareModuleId, final Pageable pageable) {
         assertSoftwareModuleExists(softwareModuleId);
 
         return localArtifactRepository
-                .findAll(ArtifactSpecifications.bySoftwareModuleId(softwareModuleId), pageReq)
+                .findAll(ArtifactSpecifications.bySoftwareModuleId(softwareModuleId), pageable)
                 .map(Artifact.class::cast);
     }
 

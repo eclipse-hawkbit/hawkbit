@@ -82,7 +82,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
                 nextBytes(ARTIFACT_SIZE), getOsModule(ds), "test1.signature", ARTIFACT_SIZE);
 
         final Target savedTarget = testdataFactory.createTarget(DdiConfirmationBaseTest.DEFAULT_CONTROLLER_ID);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).isEmpty();
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).isEmpty();
 
         final List<Target> targetsAssignedToDs = assignDistributionSet(
                 ds.getId(), savedTarget.getControllerId(), Action.ActionType.FORCED).getAssignedEntity().stream()
@@ -90,18 +90,18 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
                 .toList();
         implicitLock(ds);
 
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
 
-        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(1);
 
         assignDistributionSet(ds2, targetsAssignedToDs).getAssignedEntity();
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(2);
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(2);
 
-        final Action uaction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action uaction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
         assertThat(uaction.getDistributionSet()).isEqualTo(ds);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(2);
 
         // Run test
         final long current = System.currentTimeMillis();
@@ -129,7 +129,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Retrieved is reported
         final Iterable<ActionStatus> actionStatus = deploymentManagement
-                .findActionStatusByAction(PageRequest.of(0, 100, Sort.Direction.DESC, "id"), uaction.getId());
+                .findActionStatusByAction(uaction.getId(), PageRequest.of(0, 100, Sort.Direction.DESC, "id"));
         assertThat(actionStatus).hasSize(1)
                 .allMatch(status -> status.getStatus() == Action.Status.WAIT_FOR_CONFIRMATION);
     }
@@ -146,7 +146,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
 
         assignDistributionSet(distributionSet.getId(), target.getName());
 
-        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId()).getContent().get(0);
+        final Action action = deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE).getContent().get(0);
 
         // get confirmation base
         performGet(CONFIRMATION_BASE_ACTION, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR),
@@ -166,7 +166,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
 
         final String controllerId = savedTarget.getControllerId();
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, controllerId).getContent().get(0);
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(controllerId, PAGE).getContent().get(0);
 
         mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -190,7 +190,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
 
         final String controllerId = savedTarget.getControllerId();
 
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, controllerId).getContent().get(0);
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(controllerId, PAGE).getContent().get(0);
         mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -219,7 +219,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
 
         final String controllerId = savedTarget.getControllerId();
 
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, controllerId).getContent().get(0);
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(controllerId, PAGE).getContent().get(0);
 
         // disable confirmation flow
         disableConfirmationFlow();
@@ -268,7 +268,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
 
         String controllerId = savedTarget.getControllerId();
 
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, controllerId).getContent()
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(controllerId, PAGE).getContent()
                 .get(0);
 
         sendConfirmationFeedback(
@@ -286,7 +286,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
 
         final String controllerId = testdataFactory.createTarget("989").getControllerId();
         assignDistributionSet(testdataFactory.createDistributionSet("").getId(), controllerId);
-        final long actionId = deploymentManagement.findActiveActionsByTarget(PAGE, controllerId).getContent().get(0).getId();
+        final long actionId = deploymentManagement.findActiveActionsByTarget(controllerId, PAGE).getContent().get(0).getId();
 
         final String confirmationBaseActionLink = String.format(
                 "/%s/controller/v1/%s/confirmationBase/%d",
@@ -387,7 +387,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
         Target savedTarget = testdataFactory.createTarget("989");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
         String controllerId = savedTarget.getControllerId();
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, controllerId).getContent().get(0);
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(controllerId, PAGE).getContent().get(0);
 
         sendConfirmationFeedback(
                 savedTarget, savedAction, DdiConfirmationFeedback.Confirmation.DENIED, 10, "Action denied message.")
@@ -432,7 +432,7 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
 
         final String controllerId = savedTarget.getControllerId();
 
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, controllerId).getContent().get(0);
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(controllerId, PAGE).getContent().get(0);
         final String confirmedMessage = "Action confirmed message.";
         final Integer confirmedCode = 10;
         sendConfirmationFeedback(

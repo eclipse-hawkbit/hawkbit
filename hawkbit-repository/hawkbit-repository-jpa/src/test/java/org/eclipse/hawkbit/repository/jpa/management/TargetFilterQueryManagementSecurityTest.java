@@ -68,7 +68,7 @@ class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByNamePermissionsCheck() {
-        assertPermissions(() -> targetFilterQueryManagement.findByName(PAGE, "filterName"), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetFilterQueryManagement.findByName("filterName", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     @Test
@@ -80,26 +80,26 @@ class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByRsqlPermissionsCheck() {
-        assertPermissions(() -> targetFilterQueryManagement.findByRsql(PAGE, "name==id"), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetFilterQueryManagement.findByRsql("name==id", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByQueryPermissionsCheck() {
-        assertPermissions(() -> targetFilterQueryManagement.findByQuery(PAGE, "controllerId==id"), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetFilterQueryManagement.findByQuery("controllerId==id", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByAutoAssignDistributionSetIdPermissionsCheck() {
-        assertPermissions(() -> targetFilterQueryManagement.findByAutoAssignDistributionSetId(PAGE, 1L),
+        assertPermissions(() -> targetFilterQueryManagement.findByAutoAssignDistributionSetId(1L, PAGE),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByAutoAssignDSAndRsqlPermissionsCheck() {
-        assertPermissions(() -> targetFilterQueryManagement.findByAutoAssignDSAndRsql(PAGE, 1L, "rsqlParam"),
+        assertPermissions(() -> targetFilterQueryManagement.findByAutoAssignDSAndRsql(1L, "rsqlParam", PAGE),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
     }
 

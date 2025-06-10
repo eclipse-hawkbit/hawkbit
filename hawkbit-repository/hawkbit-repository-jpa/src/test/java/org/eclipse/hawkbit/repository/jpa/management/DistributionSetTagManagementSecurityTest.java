@@ -52,7 +52,7 @@ class DistributionSetTagManagementSecurityTest extends AbstractRepositoryManagem
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByDistributionSetPermissionsCheck() {
-        assertPermissions(() -> distributionSetTagManagement.findByDistributionSet(Pageable.unpaged(), 1L),
+        assertPermissions(() -> distributionSetTagManagement.findByDistributionSet(1L, Pageable.unpaged()),
                 List.of(SpPermission.READ_REPOSITORY));
     }
 

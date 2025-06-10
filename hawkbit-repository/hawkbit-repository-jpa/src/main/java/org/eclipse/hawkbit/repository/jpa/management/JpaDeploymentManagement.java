@@ -271,11 +271,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    public long countActionsByTarget(final String rsqlParam, final String controllerId) {
+    public long countActionsByTarget(final String rsql, final String controllerId) {
         assertTargetReadAllowed(controllerId);
 
         final List<Specification<JpaAction>> specList = Arrays.asList(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database),
+                RSQLUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database),
                 ActionSpecifications.byTargetControllerId(controllerId));
 
         return JpaManagementHelper.countBySpec(actionRepository, specList);
@@ -287,9 +287,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    public long countActions(final String rsqlParam) {
+    public long countActions(final String rsql) {
         final List<Specification<JpaAction>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database));
+                RSQLUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database));
         return JpaManagementHelper.countBySpec(actionRepository, specList);
     }
 
@@ -312,19 +312,18 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    public Slice<Action> findActions(final String rsqlParam, final Pageable pageable) {
+    public Slice<Action> findActions(final String rsql, final Pageable pageable) {
         final List<Specification<JpaAction>> specList = List.of(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database));
+                RSQLUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database));
         return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, specList, pageable);
     }
 
     @Override
-    public Page<Action> findActionsByTarget(final String rsqlParam, final String controllerId,
-            final Pageable pageable) {
+    public Page<Action> findActionsByTarget(final String rsql, final String controllerId, final Pageable pageable) {
         assertTargetReadAllowed(controllerId);
 
         final List<Specification<JpaAction>> specList = Arrays.asList(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database),
+                RSQLUtility.buildRsqlSpecification(rsql, ActionFields.class, virtualPropertyReplacer, database),
                 ActionSpecifications.byTargetControllerId(controllerId));
 
         return JpaManagementHelper.findAllWithCountBySpec(actionRepository, specList, pageable);
@@ -338,10 +337,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final long actionId) {
+    public Page<ActionStatus> findActionStatusByAction(final long actionId, final Pageable pageable) {
         assertActionExistsAndAccessible(actionId);
 
-        return actionStatusRepository.findByActionId(pageReq, actionId);
+        return actionStatusRepository.findByActionId(pageable, actionId);
     }
 
     @Override
@@ -355,7 +354,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     // permissions
     // and UI which is to be removed
     @Override
-    public Page<String> findMessagesByActionStatusId(final Pageable pageable, final long actionStatusId) {
+    public Page<String> findMessagesByActionStatusId(final long actionStatusId, final Pageable pageable) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
         final CriteriaQuery<String> msgQuery = cb.createQuery(String.class);
@@ -377,7 +376,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    public Page<Action> findActiveActionsByTarget(final Pageable pageable, final String controllerId) {
+    public Page<Action> findActiveActionsByTarget(final String controllerId, final Pageable pageable) {
         assertTargetReadAllowed(controllerId);
         return actionRepository
                 .findAll(ActionSpecifications.byTargetControllerIdAndActive(controllerId, true), pageable)
@@ -385,7 +384,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    public Page<Action> findInActiveActionsByTarget(final Pageable pageable, final String controllerId) {
+    public Page<Action> findInActiveActionsByTarget(final String controllerId, final Pageable pageable) {
         assertTargetReadAllowed(controllerId);
         return actionRepository
                 .findAll(ActionSpecifications.byTargetControllerIdAndActive(controllerId, false), pageable)

@@ -86,22 +86,22 @@ public interface TargetTypeManagement {
     Slice<TargetType> findAll(@NotNull Pageable pageable);
 
     /**
+     * @param rsql query param
      * @param pageable Page
-     * @param rsqlParam query param
      * @return Target type
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetType> findByRsql(@NotNull Pageable pageable, @NotEmpty String rsqlParam);
+    Page<TargetType> findByRsql(@NotEmpty String rsql, @NotNull Pageable pageable);
 
     /**
      * Retrieves {@link TargetType}s by filtering on the given parameters.
      *
-     * @param pageable page parameter
      * @param name has text of filters to be applied.
+     * @param pageable page parameter
      * @return the page of found {@link TargetType}
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<TargetType> findByName(@NotNull Pageable pageable, String name);
+    Slice<TargetType> findByName(String name, @NotNull Pageable pageable);
 
     /**
      * @param id Target type ID

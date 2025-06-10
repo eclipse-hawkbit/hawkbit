@@ -92,7 +92,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         testdataFactory.createArtifacts(softwareModuleId);
 
         assignDistributionSet(distributionSet.getId(), target.getName());
-        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId()).getContent().get(0);
+        final Action action = deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE).getContent().get(0);
 
         // get deployment base
         performGet(DEPLOYMENT_BASE, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR), status().isOk(),
@@ -153,18 +153,18 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .toList();
         implicitLock(ds);
 
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
 
-        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(1);
 
         assignDistributionSet(ds2, targetsAssignedToDs).getAssignedEntity();
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(2);
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(2);
 
-        final Action uaction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action uaction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
         assertThat(uaction.getDistributionSet()).isEqualTo(ds);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(2);
 
         // Run test
         final long current = System.currentTimeMillis();
@@ -187,7 +187,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Retrieved is reported
         final Iterable<ActionStatus> actionStatusMessages = deploymentManagement
-                .findActionStatusByAction(PageRequest.of(0, 100, Direction.DESC, "id"), uaction.getId());
+                .findActionStatusByAction(uaction.getId(), PageRequest.of(0, 100, Direction.DESC, "id"));
         assertThat(actionStatusMessages).hasSize(2);
         final ActionStatus actionStatusMessage = actionStatusMessages.iterator().next();
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
@@ -253,17 +253,17 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.SOFT)
                 .getAssignedEntity().stream().map(Action::getTarget).toList();
         implicitLock(ds);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
 
-        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(1);
         assignDistributionSet(ds2, saved).getAssignedEntity();
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(2);
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(2);
 
-        final Action uaction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action uaction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
         assertThat(uaction.getDistributionSet()).isEqualTo(ds);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(2);
 
         // Run test
         final long current = System.currentTimeMillis();
@@ -286,7 +286,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Retrieved is reported
         final List<ActionStatus> actionStatusMessages = deploymentManagement
-                .findActionStatusByAction(PageRequest.of(0, 100, Direction.DESC, "id"), uaction.getId()).getContent();
+                .findActionStatusByAction(uaction.getId(), PageRequest.of(0, 100, Direction.DESC, "id")).getContent();
         assertThat(actionStatusMessages).hasSize(2);
         final ActionStatus actionStatusMessage = actionStatusMessages.iterator().next();
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
@@ -308,17 +308,17 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(),
                 ActionType.TIMEFORCED).getAssignedEntity().stream().map(Action::getTarget).toList();
         implicitLock(ds);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
 
-        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(1);
         assignDistributionSet(ds2, saved).getAssignedEntity();
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(2);
         assertThat(countActionStatusAll()).isEqualTo(2);
 
-        final Action uaction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action uaction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
         assertThat(uaction.getDistributionSet()).isEqualTo(ds);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(2);
 
         // Run test
         final long current = System.currentTimeMillis();
@@ -344,7 +344,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Retrieved is reported
         final Iterable<ActionStatus> actionStatusMessages = deploymentManagement
-                .findActionStatusByAction(PageRequest.of(0, 100, Direction.DESC, "id"), uaction.getId()).getContent();
+                .findActionStatusByAction(uaction.getId(), PageRequest.of(0, 100, Direction.DESC, "id")).getContent();
         assertThat(actionStatusMessages).hasSize(2);
         final ActionStatus actionStatusMessage = actionStatusMessages.iterator().next();
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
@@ -372,17 +372,17 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .map(Action::getTarget)
                 .toList();
         implicitLock(ds);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
 
-        final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action action = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(1);
         assignDistributionSet(ds2, saved).getAssignedEntity();
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(2);
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(2);
 
-        final Action uaction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action uaction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
         assertThat(uaction.getDistributionSet()).isEqualTo(ds);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(2);
 
         // Run test
 
@@ -405,7 +405,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Retrieved is reported
         final List<ActionStatus> actionStatusMessages = deploymentManagement
-                .findActionStatusByAction(PageRequest.of(0, 100, Direction.DESC, "id"), uaction.getId()).getContent();
+                .findActionStatusByAction(uaction.getId(), PageRequest.of(0, 100, Direction.DESC, "id")).getContent();
         assertThat(actionStatusMessages).hasSize(2);
         final ActionStatus actionStatusMessage = actionStatusMessages.iterator().next();
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Status.RETRIEVED);
@@ -512,7 +512,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         implicitLock(ds3);
 
         findTargetAndAssertUpdateStatus(Optional.of(ds3), TargetUpdateStatus.PENDING, 3, Optional.empty());
-        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.UNKNOWN)).hasSize(2);
+        assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.UNKNOWN, PageRequest.of(0, 10))).hasSize(2);
 
         // action1 done
         postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId1, getJsonClosedDeploymentActionFeedback(), status().isOk());
@@ -557,15 +557,15 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         // redo
         ds = distributionSetManagement.getWithDetails(ds.getId()).get();
         assignDistributionSet(ds, Collections.singletonList(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get()));
-        final Action action2 = deploymentManagement.findActiveActionsByTarget(PAGE, DEFAULT_CONTROLLER_ID).getContent().get(0);
+        final Action action2 = deploymentManagement.findActiveActionsByTarget(DEFAULT_CONTROLLER_ID, PAGE).getContent().get(0);
         postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action2.getId(), getJsonClosedCancelActionFeedback(), status().isOk());
         findTargetAndAssertUpdateStatus(Optional.of(ds), TargetUpdateStatus.IN_SYNC, 0, Optional.of(ds));
         assertTargetCountByStatus(0, 0, 1);
-        assertThat(deploymentManagement.findInActiveActionsByTarget(PAGE, DEFAULT_CONTROLLER_ID)).hasSize(2);
+        assertThat(deploymentManagement.findInActiveActionsByTarget(DEFAULT_CONTROLLER_ID, PAGE)).hasSize(2);
         assertThat(countActionStatusAll()).isEqualTo(4);
-        assertThat(deploymentManagement.findActionStatusByAction(PAGE, action.getId()).getContent())
+        assertThat(deploymentManagement.findActionStatusByAction(action.getId(), PAGE).getContent())
                 .haveAtLeast(1, new ActionStatusCondition(Status.ERROR));
-        assertThat(deploymentManagement.findActionStatusByAction(PAGE, action2.getId()).getContent())
+        assertThat(deploymentManagement.findActionStatusByAction(action2.getId(), PAGE).getContent())
                 .haveAtLeast(1, new ActionStatusCondition(Status.FINISHED));
     }
 
@@ -605,8 +605,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertActionStatusCount(10, 7, 1, 1, 1);
         assertTargetCountByStatus(0, 0, 1);
 
-        assertThat(targetManagement.findByInstalledDistributionSet(PAGE, ds.getId())).hasSize(1);
-        assertThat(targetManagement.findByAssignedDistributionSet(PAGE, ds.getId())).hasSize(1);
+        assertThat(targetManagement.findByInstalledDistributionSet(ds.getId(), PAGE)).hasSize(1);
+        assertThat(targetManagement.findByAssignedDistributionSet(ds.getId(), PAGE)).hasSize(1);
     }
 
     @Test
@@ -626,7 +626,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assignDistributionSet(savedSet, Collections.singletonList(savedTarget)).getAssignedEntity().iterator().next();
         assignDistributionSet(savedSet2, Collections.singletonList(testdataFactory.createTarget("4713")));
 
-        final Action updateAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action updateAction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
 
         // action exists but is not assigned to this target
         postDeploymentFeedback("4713", updateAction.getId(), getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING,
@@ -740,7 +740,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         assertTargetCountByStatus(1, 0, 0);
 
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE)).hasSize(1);
         assertThat(countActionStatusAll()).isEqualTo(actionStatusCount);
         assertThat(findActionStatusAll(PAGE).getContent())
                 .haveAtLeast(minActionStatusCountInPage, new ActionStatusCondition(Status.RUNNING));
@@ -748,7 +748,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
     private Target createTargetAndAssertNoActiveActions() {
         final Target savedTarget = testdataFactory.createTarget(DdiDeploymentBaseTest.DEFAULT_CONTROLLER_ID);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).isEmpty();
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).isEmpty();
         assertThat(deploymentManagement.countActionsAll()).isZero();
         assertThat(countActionStatusAll()).isZero();
         return savedTarget;
@@ -767,15 +767,15 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
             final Optional<DistributionSet> installedDs) {
         final Target myT = targetManagement.getByControllerID(DdiDeploymentBaseTest.DEFAULT_CONTROLLER_ID).get();
         assertThat(myT.getUpdateStatus()).isEqualTo(updateStatus);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, myT.getControllerId())).hasSize(activeActions);
+        assertThat(deploymentManagement.findActiveActionsByTarget(myT.getControllerId(), PAGE)).hasSize(activeActions);
         assertThat(deploymentManagement.getAssignedDistributionSet(myT.getControllerId())).isEqualTo(ds);
         assertThat(deploymentManagement.getInstalledDistributionSet(myT.getControllerId())).isEqualTo(installedDs);
     }
 
     private void assertTargetCountByStatus(final int pending, final int error, final int inSync) {
-        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.PENDING)).hasSize(pending);
-        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.ERROR)).hasSize(error);
-        assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.IN_SYNC)).hasSize(inSync);
+        assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.PENDING, PageRequest.of(0, 10))).hasSize(pending);
+        assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.ERROR, PageRequest.of(0, 10))).hasSize(error);
+        assertThat(targetManagement.findByUpdateStatus(TargetUpdateStatus.IN_SYNC, PageRequest.of(0, 10))).hasSize(inSync);
     }
 
     private void assertActionStatusCount(final int total, final int running, final int warning, final int finished, final int canceled) {
@@ -789,7 +789,7 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     private void assertStatusAndActiveActionsCount(final TargetUpdateStatus status, final int activeActions) {
         final Target target = targetManagement.getByControllerID(DdiDeploymentBaseTest.DEFAULT_CONTROLLER_ID).get();
         assertThat(target.getUpdateStatus()).isEqualTo(status);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())).hasSize(activeActions);
+        assertThat(deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE)).hasSize(activeActions);
     }
 
     private Page<ActionStatus> findActionStatusAll(final Pageable pageable) {
