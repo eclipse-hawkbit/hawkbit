@@ -85,7 +85,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam,
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam,
             final String representationModeParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeRolloutSortParam(sortParam));
         final boolean isFullMode = parseRepresentationMode(representationModeParam) == MgmtRepresentationMode.FULL;
@@ -207,7 +207,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     @Override
     public ResponseEntity<PagedList<MgmtRolloutGroupResponseBody>> getRolloutGroups(
             final Long rolloutId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam,
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam,
             final String representationModeParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeRolloutSortParam(sortParam));
         final boolean isFullMode = parseRepresentationMode(representationModeParam) == MgmtRepresentationMode.FULL;
@@ -249,7 +249,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     @Override
     public ResponseEntity<PagedList<MgmtTarget>> getRolloutGroupTargets(
             final Long rolloutId, final Long groupId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         findRolloutOrThrowException(rolloutId);
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeRolloutSortParam(sortParam));
         final Page<Target> rolloutGroupTargets;

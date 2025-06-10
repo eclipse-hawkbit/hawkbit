@@ -50,11 +50,11 @@ public interface MgmtRolloutRestApi {
     /**
      * Handles the GET request of retrieving all rollouts.
      *
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @param pagingOffsetParam the offset of list of rollouts for pagination, might not be present in the rest request then default value will
      *         be applied
      * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
      * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @param representationModeParam the representation mode parameter specifying whether a compact or a full representation shall be returned
      * @return a list of all rollouts for a defined or default page request with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
@@ -82,7 +82,11 @@ public interface MgmtRolloutRestApi {
     @GetMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING,
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
-            @RequestParam(
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
+            @Schema(description = """
+                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
+                    available fields.""")
+            String rsqlParam, @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
@@ -99,11 +103,6 @@ public interface MgmtRolloutRestApi {
                     The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
                     in the result.""")
             String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
-            String rsqlParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT)
             String representationModeParam);
@@ -415,11 +414,11 @@ public interface MgmtRolloutRestApi {
     /**
      * Handles the GET request of retrieving all rollout groups referred to a rollout.
      *
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @param pagingOffsetParam the offset of list of rollout groups for pagination, might not be present in the rest request then default value
      *         will be applied
      * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
      * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @param representationModeParam the representation mode parameter specifying whether a compact or a full representation shall be returned
      * @return a list of all rollout groups referred to a rollout for a defined or default page request with status OK. The response is always
      *         paged. In any failure the JsonResponseExceptionHandler is handling the response.
@@ -450,7 +449,11 @@ public interface MgmtRolloutRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtRolloutGroupResponseBody>> getRolloutGroups(
             @PathVariable("rolloutId") Long rolloutId,
-            @RequestParam(
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
+            @Schema(description = """
+                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
+                    available fields.""")
+            String rsqlParam, @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
@@ -467,11 +470,6 @@ public interface MgmtRolloutRestApi {
                     The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
                     in the result.""")
             String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
-            String rsqlParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT)
             String representationModeParam);
@@ -516,11 +514,11 @@ public interface MgmtRolloutRestApi {
      *
      * @param rolloutId the ID of the rollout
      * @param groupId the ID of the rollout group
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @param pagingOffsetParam the offset of list of rollout groups for pagination, might not be present in the rest request then default value
      *         will be applied
      * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
      * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @return a paged list of targets related to a specific rollout and rollout group.
      */
     @Operation(summary = "Return all targets related to a specific rollout group",
@@ -551,7 +549,11 @@ public interface MgmtRolloutRestApi {
     ResponseEntity<PagedList<MgmtTarget>> getRolloutGroupTargets(
             @PathVariable("rolloutId") Long rolloutId,
             @PathVariable("groupId") Long groupId,
-            @RequestParam(
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
+            @Schema(description = """
+                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
+                    available fields.""")
+            String rsqlParam, @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
@@ -567,12 +569,7 @@ public interface MgmtRolloutRestApi {
                     consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
                     The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
                     in the result.""")
-            String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
-            String rsqlParam);
+            String sortParam);
 
     /**
      * Handles the POST request to force trigger processing next group of a rollout even success threshold isn't yet met

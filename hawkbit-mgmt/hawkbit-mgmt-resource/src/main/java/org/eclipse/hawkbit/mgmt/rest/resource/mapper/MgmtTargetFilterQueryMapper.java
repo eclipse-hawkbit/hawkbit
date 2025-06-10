@@ -73,9 +73,9 @@ public final class MgmtTargetFilterQueryMapper {
         if (isRepresentationFull && distributionSet != null) {
             targetRest.add(
                     linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSets(
-                            Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
-                            Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null,
-                            "name==" + distributionSet.getName() + ";version==" + distributionSet.getVersion())).withRel("DS").expand());
+                            "name==" + distributionSet.getName() + ";version==" + distributionSet.getVersion(), Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
+                            Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null
+                    )).withRel("DS").expand());
         }
 
         return targetRest;
