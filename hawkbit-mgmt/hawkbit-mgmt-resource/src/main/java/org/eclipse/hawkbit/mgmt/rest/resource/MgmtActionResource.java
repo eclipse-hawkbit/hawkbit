@@ -9,20 +9,21 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeActionSortParam;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtActionMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,10 +42,7 @@ public class MgmtActionResource implements MgmtActionRestApi {
     public ResponseEntity<PagedList<MgmtAction>> getActions(
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam,
             final String representationModeParam) {
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeActionSortParam(sortParam);
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeActionSortParam(sortParam));
 
         final Slice<Action> actions;
         final long totalActionCount;

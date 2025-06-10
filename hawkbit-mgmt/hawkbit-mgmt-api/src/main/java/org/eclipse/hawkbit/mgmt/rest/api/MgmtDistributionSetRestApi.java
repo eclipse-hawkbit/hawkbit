@@ -261,11 +261,11 @@ public interface MgmtDistributionSetRestApi {
      * Handles the GET request of retrieving assigned targets to a specific distribution set.
      *
      * @param distributionSetId the ID of the distribution set to retrieve the assigned targets
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @param pagingOffsetParam the offset of list of targets for pagination, might not be present in the rest request then default value will
      *         be applied
      * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
      * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @return status OK if get request is successful with the paged list of targets
      */
     @Operation(summary = "Return assigned targets to a specific distribution set", description = "Handles the GET " +
@@ -294,7 +294,11 @@ public interface MgmtDistributionSetRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
             @PathVariable("distributionSetId") Long distributionSetId,
-            @RequestParam(
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
+            @Schema(description = """
+                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
+                    available fields.""")
+            String rsqlParam, @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
@@ -310,22 +314,17 @@ public interface MgmtDistributionSetRestApi {
                     consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
                     The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
                     in the result.""")
-            String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
-            String rsqlParam);
+            String sortParam);
 
     /**
      * Handles the GET request of retrieving installed targets to a specific distribution set.
      *
      * @param distributionSetId the ID of the distribution set to retrieve the assigned targets
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @param pagingOffsetParam the offset of list of targets for pagination, might not be present in the rest request then default value will
      *         be applied
      * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
      * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @return status OK if get request is successful with the paged list of targets
      */
     @Operation(summary = "Return installed targets to a specific distribution set", description = "Handles the GET " +
@@ -354,7 +353,11 @@ public interface MgmtDistributionSetRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getInstalledTargets(
             @PathVariable("distributionSetId") Long distributionSetId,
-            @RequestParam(
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
+            @Schema(description = """
+                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
+                    available fields.""")
+            String rsqlParam, @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
@@ -370,22 +373,17 @@ public interface MgmtDistributionSetRestApi {
                     consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
                     The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
                     in the result.""")
-            String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
-            String rsqlParam);
+            String sortParam);
 
     /**
      * Handles the GET request to retrieve target filter queries that have the given distribution set as auto assign DS.
      *
      * @param distributionSetId the ID of the distribution set to retrieve the assigned targets
+     * @param rsqlParam the search name parameter in the request URL, syntax {@code q=myFilter}
      * @param pagingOffsetParam the offset of list of targets for pagination, might not be present in the rest request then default value will
      *         be applied
      * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
      * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
-     * @param rsqlParam the search name parameter in the request URL, syntax {@code q=myFilter}
      * @return status OK if get request is successful with the paged list of targets
      */
     @Operation(summary = "Return target filter queries that have the given distribution set as auto assign DS",
@@ -414,7 +412,11 @@ public interface MgmtDistributionSetRestApi {
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
             @PathVariable("distributionSetId") Long distributionSetId,
-            @RequestParam(
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
+            @Schema(description = """
+                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
+                    available fields.""")
+            String rsqlParam, @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
@@ -430,12 +432,7 @@ public interface MgmtDistributionSetRestApi {
                     consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
                     The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
                     in the result.""")
-            String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
-            String rsqlParam);
+            String sortParam);
 
     /**
      * Handles the POST request of assigning multiple targets to a single distribution set.

@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeTargetFilterQuerySortParam;
+
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -20,9 +22,10 @@ import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtDistributionSetMapper;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetFilterQueryMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
@@ -34,7 +37,6 @@ import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -72,13 +74,9 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
 
     @Override
     public ResponseEntity<PagedList<MgmtTargetFilterQuery>> getFilters(
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam,
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam,
             final String representationModeParam) {
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeTargetFilterQuerySortParam(sortParam);
-
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeTargetFilterQuerySortParam(sortParam));
         final Slice<TargetFilterQuery> findTargetFiltersAll;
         final long countTargetsAll;
         if (rsqlParam != null) {
@@ -98,22 +96,18 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
-    public ResponseEntity<MgmtTargetFilterQuery> createFilter(
-            final MgmtTargetFilterQueryRequestBody filter) {
-        final TargetFilterQuery createdTarget = filterManagement
-                .create(MgmtTargetFilterQueryMapper.fromRequest(entityFactory, filter));
+    public ResponseEntity<MgmtTargetFilterQuery> createFilter(final MgmtTargetFilterQueryRequestBody filter) {
+        final TargetFilterQuery createdTarget = filterManagement.create(MgmtTargetFilterQueryMapper.fromRequest(entityFactory, filter));
 
-        final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(createdTarget,
-                tenantConfigHelper.isConfirmationFlowEnabled(), false);
+        final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(
+                createdTarget, tenantConfigHelper.isConfirmationFlowEnabled(), false);
         MgmtTargetFilterQueryMapper.addLinks(response);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @Override
-    public ResponseEntity<MgmtTargetFilterQuery> updateFilter(
-            final Long filterId,
-            final MgmtTargetFilterQueryRequestBody targetFilterRest) {
+    public ResponseEntity<MgmtTargetFilterQuery> updateFilter(final Long filterId, final MgmtTargetFilterQueryRequestBody targetFilterRest) {
         log.debug("updating target filter query {}", filterId);
 
         final TargetFilterQuery updateFilter = filterManagement
@@ -153,7 +147,6 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     @Override
     public ResponseEntity<MgmtTargetFilterQuery> postAssignedDistributionSet(
             final Long filterId, final MgmtDistributionSetAutoAssignment autoAssignRequest) {
-
         final boolean confirmationRequired = autoAssignRequest.getConfirmationRequired() == null
                 ? tenantConfigHelper.isConfirmationFlowEnabled()
                 : autoAssignRequest.getConfirmationRequired();

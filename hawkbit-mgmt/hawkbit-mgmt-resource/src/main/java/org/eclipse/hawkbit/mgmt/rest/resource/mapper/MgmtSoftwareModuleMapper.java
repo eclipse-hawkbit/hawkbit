@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.rest.resource;
+package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -30,6 +30,8 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequ
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
+import org.eclipse.hawkbit.mgmt.rest.resource.MgmtDownloadArtifactResource;
+import org.eclipse.hawkbit.mgmt.rest.resource.MgmtSoftwareModuleResource;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
@@ -39,6 +41,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 
 /**
  * A mapper which maps repository model to RESTful model representation and back.
@@ -46,8 +49,8 @@ import org.springframework.hateoas.Link;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtSoftwareModuleMapper {
 
-    static List<SoftwareModuleMetadataCreate> fromRequestSwMetadata(final EntityFactory entityFactory,
-            final Long softwareModuleId, final Collection<MgmtSoftwareModuleMetadata> metadata) {
+    public static List<SoftwareModuleMetadataCreate> fromRequestSwMetadata(
+            final EntityFactory entityFactory, final Long softwareModuleId, final Collection<MgmtSoftwareModuleMetadata> metadata) {
         if (metadata == null) {
             return Collections.emptyList();
         }
@@ -59,8 +62,8 @@ public final class MgmtSoftwareModuleMapper {
                 .toList();
     }
 
-    static List<SoftwareModuleCreate> smFromRequest(final EntityFactory entityFactory,
-            final Collection<MgmtSoftwareModuleRequestBodyPost> smsRest) {
+    public static List<SoftwareModuleCreate> smFromRequest(
+            final EntityFactory entityFactory, final Collection<MgmtSoftwareModuleRequestBodyPost> smsRest) {
         if (smsRest == null) {
             return Collections.emptyList();
         }
@@ -68,7 +71,7 @@ public final class MgmtSoftwareModuleMapper {
         return smsRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).toList();
     }
 
-    static List<MgmtSoftwareModule> toResponse(final Collection<SoftwareModule> softwareModules) {
+    public static List<MgmtSoftwareModule> toResponse(final Collection<SoftwareModule> softwareModules) {
         if (softwareModules == null) {
             return Collections.emptyList();
         }
@@ -76,7 +79,7 @@ public final class MgmtSoftwareModuleMapper {
         return new ResponseList<>(softwareModules.stream().map(MgmtSoftwareModuleMapper::toResponse).toList());
     }
 
-    static List<MgmtSoftwareModuleMetadata> toResponseSwMetadata(final Collection<SoftwareModuleMetadata> metadata) {
+    public static List<MgmtSoftwareModuleMetadata> toResponseSwMetadata(final Collection<SoftwareModuleMetadata> metadata) {
         if (metadata == null) {
             return Collections.emptyList();
         }
@@ -84,7 +87,7 @@ public final class MgmtSoftwareModuleMapper {
         return metadata.stream().map(MgmtSoftwareModuleMapper::toResponseSwMetadata).toList();
     }
 
-    static MgmtSoftwareModuleMetadata toResponseSwMetadata(final SoftwareModuleMetadata metadata) {
+    public static MgmtSoftwareModuleMetadata toResponseSwMetadata(final SoftwareModuleMetadata metadata) {
         final MgmtSoftwareModuleMetadata metadataRest = new MgmtSoftwareModuleMetadata();
         metadataRest.setKey(metadata.getKey());
         metadataRest.setValue(metadata.getValue());
@@ -92,7 +95,7 @@ public final class MgmtSoftwareModuleMapper {
         return metadataRest;
     }
 
-    static MgmtSoftwareModule toResponse(final SoftwareModule softwareModule) {
+    public static MgmtSoftwareModule toResponse(final SoftwareModule softwareModule) {
         if (softwareModule == null) {
             return null;
         }
@@ -114,16 +117,16 @@ public final class MgmtSoftwareModuleMapper {
         return response;
     }
 
-    static void addLinks(final SoftwareModule softwareModule, final MgmtSoftwareModule response) {
+    public static void addLinks(final SoftwareModule softwareModule, final MgmtSoftwareModule response) {
         response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifacts(response.getId(), null, null))
                 .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_ARTIFACT).expand());
         response.add(linkTo(methodOn(MgmtSoftwareModuleTypeRestApi.class).getSoftwareModuleType(softwareModule.getType().getId()))
                 .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_TYPE).expand());
-        response.add(linkTo(methodOn(MgmtSoftwareModuleResource.class).getMetadata(response.getId()))
+        response.add(WebMvcLinkBuilder.linkTo(methodOn(MgmtSoftwareModuleResource.class).getMetadata(response.getId()))
                 .withRel("metadata").expand());
     }
 
-    static MgmtArtifact toResponse(final Artifact artifact) {
+    public static MgmtArtifact toResponse(final Artifact artifact) {
         final MgmtArtifact artifactRest = new MgmtArtifact();
         artifactRest.setId(artifact.getId());
         artifactRest.setSize(artifact.getSize());
@@ -140,13 +143,13 @@ public final class MgmtSoftwareModuleMapper {
         return artifactRest;
     }
 
-    static void addLinks(final Artifact artifact, final MgmtArtifact response) {
-        response.add(linkTo(methodOn(MgmtDownloadArtifactResource.class)
+    public static void addLinks(final Artifact artifact, final MgmtArtifact response) {
+        response.add(WebMvcLinkBuilder.linkTo(methodOn(MgmtDownloadArtifactResource.class)
                 .downloadArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("download")
                 .expand());
     }
 
-    static void addLinks(final Artifact artifact, final MgmtArtifact response,
+    public static void addLinks(final Artifact artifact, final MgmtArtifact response,
             final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement) {
         final List<ArtifactUrl> urls = artifactUrlHandler.getUrls(
                 new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),

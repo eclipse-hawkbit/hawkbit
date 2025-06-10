@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.rest.resource;
+package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE;
 import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE;
@@ -55,15 +55,15 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
  * A mapper which maps repository model to RESTful model representation and back.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-final class MgmtRolloutMapper {
+public final class MgmtRolloutMapper {
 
     private static final String NOT_SUPPORTED = " is not supported";
 
-    static List<MgmtRolloutResponseBody> toResponseRollout(final List<Rollout> rollouts) {
+    public static List<MgmtRolloutResponseBody> toResponseRollout(final List<Rollout> rollouts) {
         return toResponseRollout(rollouts, false);
     }
 
-    static List<MgmtRolloutResponseBody> toResponseRolloutWithDetails(final List<Rollout> rollouts) {
+    public static List<MgmtRolloutResponseBody> toResponseRolloutWithDetails(final List<Rollout> rollouts) {
         return toResponseRollout(rollouts, true);
     }
 
@@ -75,7 +75,7 @@ final class MgmtRolloutMapper {
         return rollouts.stream().map(rollout -> toResponseRollout(rollout, withDetails)).toList();
     }
 
-    static MgmtRolloutResponseBody toResponseRollout(final Rollout rollout, final boolean withDetails) {
+    public static MgmtRolloutResponseBody toResponseRollout(final Rollout rollout, final boolean withDetails) {
         final MgmtRolloutResponseBody body = new MgmtRolloutResponseBody();
         body.setCreatedAt(rollout.getCreatedAt());
         body.setCreatedBy(rollout.getCreatedBy());
@@ -125,8 +125,8 @@ final class MgmtRolloutMapper {
         return body;
     }
 
-    static RolloutCreate fromRequest(final EntityFactory entityFactory, final MgmtRolloutRestRequestBodyPost restRequest,
-            final DistributionSet distributionSet) {
+    public static RolloutCreate fromRequest(
+            final EntityFactory entityFactory, final MgmtRolloutRestRequestBodyPost restRequest, final DistributionSet distributionSet) {
         return entityFactory.rollout().create()
                 .name(restRequest.getName())
                 .description(restRequest.getDescription())
@@ -138,13 +138,14 @@ final class MgmtRolloutMapper {
                 .dynamic(restRequest.isDynamic());
     }
 
-    static RolloutUpdate fromRequest(final EntityFactory entityFactory, final MgmtRolloutRestRequestBodyPut restRequest, final long rolloutId) {
+    public static RolloutUpdate fromRequest(
+            final EntityFactory entityFactory, final MgmtRolloutRestRequestBodyPut restRequest, final long rolloutId) {
         return entityFactory.rollout().update(rolloutId)
                 .name(restRequest.getName())
                 .description(restRequest.getDescription());
     }
 
-    static RolloutCreate fromRetriedRollout(final EntityFactory entityFactory, final Rollout rollout) {
+    public static RolloutCreate fromRetriedRollout(final EntityFactory entityFactory, final Rollout rollout) {
         return entityFactory.rollout().create()
                 .name(rollout.getName().concat("_retry"))
                 .description(rollout.getDescription())
@@ -156,13 +157,13 @@ final class MgmtRolloutMapper {
                 .weight(null);
     }
 
-    static RolloutGroupCreate fromRequest(final EntityFactory entityFactory, final MgmtRolloutGroup restRequest) {
+    public static RolloutGroupCreate fromRequest(final EntityFactory entityFactory, final MgmtRolloutGroup restRequest) {
         return entityFactory.rolloutGroup().create().name(restRequest.getName())
                 .description(restRequest.getDescription()).targetFilterQuery(restRequest.getTargetFilterQuery())
                 .targetPercentage(restRequest.getTargetPercentage()).conditions(fromRequest(restRequest, false));
     }
 
-    static DynamicRolloutGroupTemplate fromRequest(final MgmtDynamicRolloutGroupTemplate restRequest) {
+    public static DynamicRolloutGroupTemplate fromRequest(final MgmtDynamicRolloutGroupTemplate restRequest) {
         if (restRequest == null) {
             return null;
         }
@@ -172,8 +173,7 @@ final class MgmtRolloutMapper {
                 .build();
     }
 
-    static RolloutGroupConditions fromRequest(final AbstractMgmtRolloutConditionsEntity restRequest,
-            final boolean withDefaults) {
+    public static RolloutGroupConditions fromRequest(final AbstractMgmtRolloutConditionsEntity restRequest, final boolean withDefaults) {
         final RolloutGroupConditionBuilder conditions = new RolloutGroupConditionBuilder();
 
         if (withDefaults) {
@@ -201,7 +201,7 @@ final class MgmtRolloutMapper {
         return conditions.build();
     }
 
-    static List<MgmtRolloutGroupResponseBody> toResponseRolloutGroup(
+    public static List<MgmtRolloutGroupResponseBody> toResponseRolloutGroup(
             final List<RolloutGroup> rollouts, final boolean confirmationFlowEnabled, final boolean withDetails) {
         if (rollouts == null) {
             return Collections.emptyList();
@@ -210,8 +210,8 @@ final class MgmtRolloutMapper {
         return rollouts.stream().map(group -> toResponseRolloutGroup(group, withDetails, confirmationFlowEnabled)).toList();
     }
 
-    static MgmtRolloutGroupResponseBody toResponseRolloutGroup(final RolloutGroup rolloutGroup,
-            final boolean withDetailedStatus, final boolean confirmationFlowEnabled) {
+    public static MgmtRolloutGroupResponseBody toResponseRolloutGroup(
+            final RolloutGroup rolloutGroup, final boolean withDetailedStatus, final boolean confirmationFlowEnabled) {
         final MgmtRolloutGroupResponseBody body = new MgmtRolloutGroupResponseBody();
         body.setCreatedAt(rolloutGroup.getCreatedAt());
         body.setCreatedBy(rolloutGroup.getCreatedBy());

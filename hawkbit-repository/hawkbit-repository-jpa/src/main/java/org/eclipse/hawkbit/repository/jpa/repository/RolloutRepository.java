@@ -29,8 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
  * The repository interface for the {@link Rollout} model.
  */
 @Transactional(readOnly = true)
-public interface RolloutRepository
-        extends BaseEntityRepository<JpaRollout> {
+public interface RolloutRepository extends BaseEntityRepository<JpaRollout> {
 
     /**
      * Retrieves all {@link Rollout} for given status.
@@ -38,8 +37,7 @@ public interface RolloutRepository
      * @param status the status of the rollouts to find
      * @return the list of {@link Rollout} for specific status
      */
-    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("SELECT sm.id FROM JpaRollout sm WHERE sm.status IN ?1")
+    @Query("SELECT sm.id FROM JpaRollout sm WHERE sm.status IN ?1 ORDER BY sm.id ASC")
     List<Long> findByStatusIn(Collection<RolloutStatus> status);
 
     /**
@@ -64,8 +62,7 @@ public interface RolloutRepository
     void deleteByTenant(@Param("tenant") String tenant);
 
     /**
-     * Retrieves all {@link Rollout}s for a specific {@link DistributionSet} in
-     * a given {@link RolloutStatus}.
+     * Retrieves all {@link Rollout}s for a specific {@link DistributionSet} in a given {@link RolloutStatus}.
      *
      * @param set the distribution set
      * @param status the status of the rollout

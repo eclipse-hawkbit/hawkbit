@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 Bosch.IO GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.rest.resource;
+package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -35,7 +35,7 @@ import org.eclipse.hawkbit.rest.json.model.ResponseList;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtTargetTypeMapper {
 
-    static List<TargetTypeCreate> targetFromRequest(
+    public static List<TargetTypeCreate> targetFromRequest(
             final EntityFactory entityFactory, final Collection<MgmtTargetTypeRequestBodyPost> targetTypesRest) {
         if (targetTypesRest == null) {
             return Collections.emptyList();
@@ -45,14 +45,14 @@ public final class MgmtTargetTypeMapper {
                 .toList();
     }
 
-    static List<MgmtTargetType> toListResponse(final List<TargetType> types) {
+    public static List<MgmtTargetType> toListResponse(final List<TargetType> types) {
         if (types == null) {
             return Collections.emptyList();
         }
         return new ResponseList<>(types.stream().map(MgmtTargetTypeMapper::toResponse).toList());
     }
 
-    static MgmtTargetType toResponse(final TargetType type) {
+    public static MgmtTargetType toResponse(final TargetType type) {
         final MgmtTargetType result = new MgmtTargetType();
 
         MgmtRestModelMapper.mapTypeToType(result, type);
@@ -62,7 +62,7 @@ public final class MgmtTargetTypeMapper {
         return result;
     }
 
-    static void addLinks(final MgmtTargetType result) {
+    public static void addLinks(final MgmtTargetType result) {
         result.add(linkTo(methodOn(MgmtTargetTypeRestApi.class).getCompatibleDistributionSets(result.getId()))
                 .withRel(MgmtRestConstants.TARGETTYPE_V1_DS_TYPES).expand());
     }

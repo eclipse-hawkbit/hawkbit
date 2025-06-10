@@ -9,6 +9,10 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeActionSortParam;
+import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeActionStatusSortParam;
+import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeTargetSortParam;
+
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,11 +47,14 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAutoConfirm;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAutoConfirmUpdate;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtDeploymentRequestMapper;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtDistributionSetMapper;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTagMapper;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -63,7 +70,6 @@ import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -107,12 +113,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtTarget>> getTargets(
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
-
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeTargetSortParam(sortParam));
         final Slice<Target> findTargetsAll;
         final long countTargetsAll;
         if (rsqlParam != null) {
@@ -130,11 +132,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<List<MgmtTarget>> createTargets(final List<MgmtTargetRequestBody> targets) {
         log.debug("creating {} targets", targets.size());
-        final Collection<Target> createdTargets = this.targetManagement
-                .create(MgmtTargetMapper.fromRequest(entityFactory, targets));
+        final Collection<Target> createdTargets = this.targetManagement.create(MgmtTargetMapper.fromRequest(entityFactory, targets));
         log.debug("{} targets created, return status {}", targets.size(), HttpStatus.CREATED);
-        return new ResponseEntity<>(MgmtTargetMapper.toResponse(createdTargets, tenantConfigHelper),
-                HttpStatus.CREATED);
+        return new ResponseEntity<>(MgmtTargetMapper.toResponse(createdTargets, tenantConfigHelper), HttpStatus.CREATED);
     }
 
     @Override
@@ -156,7 +156,6 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             updateTarget = this.targetManagement.update(entityFactory.target().update(targetId)
                     .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
                     .securityToken(targetRest.getSecurityToken()).requestAttributes(targetRest.getRequestAttributes()));
-
         } else {
             updateTarget = this.targetManagement.update(
                     entityFactory.target().update(targetId).name(targetRest.getName()).description(targetRest.getDescription())
@@ -209,15 +208,11 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtAction>> getActionHistory(
-            final String targetId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
+            final String targetId, final String rsqlParam,
+            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         findTargetWithExceptionIfNotFound(targetId);
 
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeActionSortParam(sortParam);
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeActionSortParam(sortParam));
         final Slice<Action> activeActions;
         final long totalActionCount;
         if (rsqlParam != null) {
@@ -264,8 +259,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         } else {
             this.deploymentManagement.cancelAction(actionId);
         }
-        // both functions will throw an exception, when action is in wrong
-        // state, which is mapped by MgmtResponseExceptionHandler.
+        // both functions will throw an exception, when action is in wrong state, which is mapped by MgmtResponseExceptionHandler.
 
         return ResponseEntity.noContent().build();
     }
@@ -273,7 +267,6 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     @AuditLog(entity = "Target", type = AuditLog.Type.UPDATE, description = "Update Target Action")
     public ResponseEntity<MgmtAction> updateAction(final String targetId, final Long actionId, final MgmtActionRequestBodyPut actionUpdate) {
-
         Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         if (!action.getTarget().getControllerId().equals(targetId)) {
@@ -292,8 +285,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     @AuditLog(entity = "Target", type = AuditLog.Type.UPDATE, description = "Cancel Target Action Confirmation")
-    public ResponseEntity<Void> updateActionConfirmation(final String targetId, final Long actionId,
-            final MgmtActionConfirmationRequestBodyPut actionConfirmation) {
+    public ResponseEntity<Void> updateActionConfirmation(
+            final String targetId, final Long actionId, final MgmtActionConfirmationRequestBodyPut actionConfirmation) {
         log.debug("updateActionConfirmation with data [targetId={}, actionId={}]: {}", targetId, actionId, actionConfirmation);
 
         return getValidatedAction(targetId, actionId)
@@ -346,13 +339,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             log.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), target.getId());
             return ResponseEntity.notFound().build();
         }
-
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeActionStatusSortParam(sortParam);
-
-        final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusByAction(
-                new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting), action.getId());
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeActionStatusSortParam(sortParam));
+        final Page<ActionStatus> statusList = this.deploymentManagement.findActionStatusByAction(pageable, action.getId());
 
         return ResponseEntity.ok(new PagedList<>(
                 MgmtTargetMapper.toActionStatusRestResponse(statusList.getContent(), deploymentManagement),
@@ -365,14 +353,14 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .map(ds -> {
                     final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(ds);
                     MgmtDistributionSetMapper.addLinks(ds, response);
-
                     return response;
                 }).orElse(null);
 
         if (distributionSetRest == null) {
             return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(distributionSetRest);
         }
-        return ResponseEntity.ok(distributionSetRest);
     }
 
     @Override

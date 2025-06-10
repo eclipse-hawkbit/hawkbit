@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.rest.resource;
+package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -30,9 +30,9 @@ import org.eclipse.hawkbit.rest.json.model.ResponseList;
  * A mapper which maps repository model to RESTful model representation and back.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-final class MgmtSoftwareModuleTypeMapper {
+public final class MgmtSoftwareModuleTypeMapper {
 
-    static List<SoftwareModuleTypeCreate> smFromRequest(final EntityFactory entityFactory,
+    public static List<SoftwareModuleTypeCreate> smFromRequest(final EntityFactory entityFactory,
             final Collection<MgmtSoftwareModuleTypeRequestBodyPost> smTypesRest) {
         if (smTypesRest == null) {
             return Collections.emptyList();
@@ -41,7 +41,7 @@ final class MgmtSoftwareModuleTypeMapper {
         return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).toList();
     }
 
-    static List<MgmtSoftwareModuleType> toTypesResponse(final Collection<SoftwareModuleType> types) {
+    public static List<MgmtSoftwareModuleType> toTypesResponse(final Collection<SoftwareModuleType> types) {
         if (types == null) {
             return Collections.emptyList();
         }
@@ -49,7 +49,7 @@ final class MgmtSoftwareModuleTypeMapper {
         return new ResponseList<>(types.stream().map(MgmtSoftwareModuleTypeMapper::toResponse).toList());
     }
 
-    static MgmtSoftwareModuleType toResponse(final SoftwareModuleType type) {
+    public static MgmtSoftwareModuleType toResponse(final SoftwareModuleType type) {
         final MgmtSoftwareModuleType result = new MgmtSoftwareModuleType();
 
         MgmtRestModelMapper.mapTypeToType(result, type);

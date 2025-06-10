@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.rest.resource;
+package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -48,12 +48,12 @@ public final class MgmtDistributionSetMapper {
      * @param sets to convert
      * @return converted list of {@link DistributionSet}s
      */
-    static List<DistributionSetCreate> dsFromRequest(
+    public static List<DistributionSetCreate> dsFromRequest(
             final Collection<MgmtDistributionSetRequestBodyPost> sets, final EntityFactory entityFactory) {
         return sets.stream().map(dsRest -> fromRequest(dsRest, entityFactory)).toList();
     }
 
-    static MgmtDistributionSet toResponse(final DistributionSet distributionSet) {
+    public static MgmtDistributionSet toResponse(final DistributionSet distributionSet) {
         if (distributionSet == null) {
             return null;
         }
@@ -81,7 +81,7 @@ public final class MgmtDistributionSetMapper {
         return response;
     }
 
-    static void addLinks(final DistributionSet distributionSet, final MgmtDistributionSet response) {
+    public static void addLinks(final DistributionSet distributionSet, final MgmtDistributionSet response) {
         response.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getAssignedSoftwareModules(response.getId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null))
@@ -94,7 +94,7 @@ public final class MgmtDistributionSetMapper {
                 .withRel("metadata").expand());
     }
 
-    static MgmtTargetAssignmentResponseBody toResponse(final DistributionSetAssignmentResult dsAssignmentResult) {
+    public static MgmtTargetAssignmentResponseBody toResponse(final DistributionSetAssignmentResult dsAssignmentResult) {
         final MgmtTargetAssignmentResponseBody result = new MgmtTargetAssignmentResponseBody();
         result.setAlreadyAssigned(dsAssignmentResult.getAlreadyAssigned());
         result.setAssignedActions(dsAssignmentResult.getAssignedEntity().stream()
@@ -102,8 +102,7 @@ public final class MgmtDistributionSetMapper {
         return result;
     }
 
-    static MgmtTargetAssignmentResponseBody toResponse(
-            final List<DistributionSetAssignmentResult> dsAssignmentResults) {
+    public static MgmtTargetAssignmentResponseBody toResponse(final List<DistributionSetAssignmentResult> dsAssignmentResults) {
         final MgmtTargetAssignmentResponseBody result = new MgmtTargetAssignmentResponseBody();
         final int alreadyAssigned = dsAssignmentResults.stream()
                 .mapToInt(DistributionSetAssignmentResult::getAlreadyAssigned).sum();
@@ -116,34 +115,32 @@ public final class MgmtDistributionSetMapper {
         return result;
     }
 
-    // TODO - to be made package visible when hawkbit-mgmt-rest-deprecated is removed
     public static List<MgmtDistributionSet> toResponseDistributionSets(final Collection<DistributionSet> sets) {
         if (sets == null) {
             return Collections.emptyList();
         }
 
-        return new ResponseList<>(
-                sets.stream().map(MgmtDistributionSetMapper::toResponse).toList());
+        return new ResponseList<>(sets.stream().map(MgmtDistributionSetMapper::toResponse).toList());
     }
 
-    static MgmtMetadata toResponseDsMetadata(final String key, String value) {
+    public static MgmtMetadata toResponseDsMetadata(final String key, String value) {
         final MgmtMetadata metadataRest = new MgmtMetadata();
         metadataRest.setKey(key);
         metadataRest.setValue(value);
         return metadataRest;
     }
 
-    static Map<String, String> fromRequestDsMetadata(final List<MgmtMetadata> metadata) {
+    public static Map<String, String> fromRequestDsMetadata(final List<MgmtMetadata> metadata) {
         return metadata == null
                 ? Collections.emptyMap()
                 : metadata.stream().collect(Collectors.toMap(MgmtMetadata::getKey, MgmtMetadata::getValue));
     }
 
-    static List<MgmtMetadata> toResponseDsMetadata(final Map<String, String> metadata) {
+    public static List<MgmtMetadata> toResponseDsMetadata(final Map<String, String> metadata) {
         return metadata.entrySet().stream().map(e -> toResponseDsMetadata(e.getKey(), e.getValue())).toList();
     }
 
-    static List<MgmtDistributionSet> toResponseFromDsList(final List<DistributionSet> sets) {
+    public static List<MgmtDistributionSet> toResponseFromDsList(final List<DistributionSet> sets) {
         if (sets == null) {
             return Collections.emptyList();
         }
@@ -157,8 +154,7 @@ public final class MgmtDistributionSetMapper {
      * @param dsRest to convert
      * @return converted {@link DistributionSet}
      */
-    private static DistributionSetCreate fromRequest(final MgmtDistributionSetRequestBodyPost dsRest,
-            final EntityFactory entityFactory) {
+    private static DistributionSetCreate fromRequest(final MgmtDistributionSetRequestBodyPost dsRest, final EntityFactory entityFactory) {
         final List<Long> modules = new ArrayList<>();
         if (dsRest.getOs() != null) {
             modules.add(dsRest.getOs().getId());

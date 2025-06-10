@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.audit.AuditLog;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValue;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValueRequest;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTenantManagementRestApi;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTenantManagementMapper;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;

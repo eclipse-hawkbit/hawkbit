@@ -52,11 +52,11 @@ public interface MgmtDistributionSetTypeRestApi {
     /**
      * Handles the GET request of retrieving all DistributionSetTypes.
      *
+     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @param pagingOffsetParam the offset of list of modules for pagination, might not be present in the rest request then default value will
      *         be applied
      * @param pagingLimitParam the limit of the paged request, might not be present in the rest request then default value will be applied
      * @param sortParam the sorting parameter in the request URL, syntax {@code field:direction, field:direction}
-     * @param rsqlParam the search parameter in the request URL, syntax {@code q=name==abc}
      * @return a list of all DistributionSetType for a defined or default page request with status OK. The response is always paged. In any
      *         failure the JsonResponseExceptionHandler is handling the response.
      */
@@ -83,7 +83,11 @@ public interface MgmtDistributionSetTypeRestApi {
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING,
             produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtDistributionSetType>> getDistributionSetTypes(
-            @RequestParam(
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
+            @Schema(description = """
+                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
+                    available fields.""")
+            String rsqlParam, @RequestParam(
                     value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
                     defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
             @Schema(description = "The paging offset (default is 0)")
@@ -99,12 +103,7 @@ public interface MgmtDistributionSetTypeRestApi {
                     consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
                     The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
                     in the result.""")
-            String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
-            @Schema(description = """
-                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
-                    available fields.""")
-            String rsqlParam);
+            String sortParam);
 
     /**
      * Handles the GET request of retrieving a single DistributionSetType within.

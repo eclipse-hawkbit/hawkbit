@@ -82,7 +82,6 @@ import org.eclipse.hawkbit.ui.simple.view.util.Filter;
 import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
 import org.eclipse.hawkbit.ui.simple.view.util.TableView;
 import org.eclipse.hawkbit.ui.simple.view.util.Utils;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 
@@ -113,7 +112,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     }
                 },
                 (query, filter) -> hawkbitClient.getTargetRestApi()
-                        .getTargets(query.getOffset(), query.getPageSize(), Constants.NAME_ASC, filter)
+                        .getTargets(filter, query.getOffset(), query.getPageSize(), Constants.NAME_ASC)
                         .getBody()
                         .getContent()
                         .stream(),
@@ -162,11 +161,11 @@ public class TargetView extends TableView<MgmtTarget, String> {
         public List<Component> components() {
             final List<Component> components = new LinkedList<>();
             components.add(controllerId);
-            type.setItems(hawkbitClient.getTargetTypeRestApi().getTargetTypes(0, 20, Constants.NAME_ASC, null).getBody().getContent());
+            type.setItems(hawkbitClient.getTargetTypeRestApi().getTargetTypes(null, 0, 20, Constants.NAME_ASC).getBody().getContent());
             if (!type.getValue().isEmpty()) {
                 components.add(type);
             }
-            tag.setItems(hawkbitClient.getTargetTagRestApi().getTargetTags(0, 20, Constants.NAME_ASC, null).getBody().getContent());
+            tag.setItems(hawkbitClient.getTargetTagRestApi().getTargetTags(null, 0, 20, Constants.NAME_ASC).getBody().getContent());
             if (!tag.isEmpty()) {
                 components.add(tag);
             }
@@ -231,7 +230,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
             return Optional
                     .ofNullable(
                             hawkbitClient.getTargetFilterQueryRestApi()
-                                    .getFilters(0, 30, null, null, null)
+                                    .getFilters(null, 0, 30, null, null)
                                     .getBody()
                                     .getContent())
                     .orElse(Collections.emptyList());
@@ -535,7 +534,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
             int offset = 0;
             do {
                 List<MgmtTag> page = Optional.ofNullable(
-                                hawkbitClient.getTargetTagRestApi().getTargetTags(offset, 50, Constants.NAME_ASC, null).getBody())
+                                hawkbitClient.getTargetTagRestApi().getTargetTags(null, offset, 50, Constants.NAME_ASC).getBody())
                         .map(PagedList::getContent)
                         .orElse(Collections.emptyList());
                 tags.addAll(page);
@@ -572,7 +571,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
 
         private List<ActionStatusEntry> fetchActions() {
-            return hawkbitClient.getTargetRestApi().getActionHistory(target.getControllerId(), 0, 30, null, null)
+            return hawkbitClient.getTargetRestApi().getActionHistory(target.getControllerId(), null, 0, 30, null)
                     .getBody()
                     .getContent()
                     .stream()
@@ -757,7 +756,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     "Type",
                     e -> {},
                     hawkbitClient.getTargetTypeRestApi()
-                            .getTargetTypes(0, 30, Constants.NAME_ASC, null)
+                            .getTargetTypes(null, 0, 30, Constants.NAME_ASC)
                             .getBody()
                             .getContent()
                             .toArray(new MgmtTargetType[0])

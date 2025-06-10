@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility.sanitizeTagSortParam;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -20,9 +22,10 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTagMapper;
+import org.eclipse.hawkbit.mgmt.rest.resource.mapper.MgmtTargetMapper;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -33,7 +36,6 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -62,12 +64,8 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtTag>> getTargetTags(
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeTagSortParam(sortParam);
-
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeTagSortParam(sortParam));
         final Page<TargetTag> findTargetsAll;
         if (rsqlParam == null) {
             findTargetsAll = this.tagManagement.findAll(pageable);
@@ -126,12 +124,8 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     @Override
     public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(
             final Long targetTagId,
-            final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
-
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+            final String rsqlParam, final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeTagSortParam(sortParam));
         final Page<Target> findTargetsAll;
         if (rsqlParam == null) {
             findTargetsAll = targetManagement.findByTag(pageable, targetTagId);
@@ -194,7 +188,6 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     private TargetTag findTargetTagById(final Long targetTagId) {
-        return tagManagement.get(targetTagId)
-                .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
+        return tagManagement.get(targetTagId).orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
     }
 }

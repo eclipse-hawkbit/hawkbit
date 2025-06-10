@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.mgmt.rest.resource;
+package org.eclipse.hawkbit.mgmt.rest.resource.mapper;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssignment;
@@ -28,17 +30,12 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.rest.json.model.ResponseList;
 
 /**
- * A mapper which maps repository model to RESTful model representation and
- * back.
+ * A mapper which maps repository model to RESTful model representation and back.
  */
-final class MgmtDistributionSetTypeMapper {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class MgmtDistributionSetTypeMapper {
 
-    // private constructor, utility class
-    private MgmtDistributionSetTypeMapper() {
-
-    }
-
-    static List<DistributionSetTypeCreate> smFromRequest(final EntityFactory entityFactory, final Collection<MgmtDistributionSetTypeRequestBodyPost> smTypesRest) {
+    public static List<DistributionSetTypeCreate> smFromRequest(final EntityFactory entityFactory, final Collection<MgmtDistributionSetTypeRequestBodyPost> smTypesRest) {
         if (smTypesRest == null) {
             return Collections.emptyList();
         }
@@ -46,14 +43,14 @@ final class MgmtDistributionSetTypeMapper {
         return smTypesRest.stream().map(smRest -> fromRequest(entityFactory, smRest)).toList();
     }
 
-    static List<MgmtDistributionSetType> toListResponse(final Collection<DistributionSetType> types) {
+    public static List<MgmtDistributionSetType> toListResponse(final Collection<DistributionSetType> types) {
         if (types == null) {
             return Collections.emptyList();
         }
         return new ResponseList<>(types.stream().map(MgmtDistributionSetTypeMapper::toResponse).toList());
     }
 
-    static MgmtDistributionSetType toResponse(final DistributionSetType type) {
+    public static MgmtDistributionSetType toResponse(final DistributionSetType type) {
         final MgmtDistributionSetType result = new MgmtDistributionSetType();
 
         MgmtRestModelMapper.mapTypeToType(result, type);
@@ -65,7 +62,7 @@ final class MgmtDistributionSetTypeMapper {
         return result;
     }
 
-    static void addLinks(final MgmtDistributionSetType result) {
+    public static void addLinks(final MgmtDistributionSetType result) {
 
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getMandatoryModules(result.getId()))
                 .withRel(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULES).expand());
