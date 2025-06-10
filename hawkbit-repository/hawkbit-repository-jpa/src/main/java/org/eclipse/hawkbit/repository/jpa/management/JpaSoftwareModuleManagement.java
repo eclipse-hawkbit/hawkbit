@@ -253,9 +253,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Slice<SoftwareModule> findAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleRepository, pageable, List.of(
+        return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleRepository, List.of(
                 SoftwareModuleSpecification.isNotDeleted(),
-                SoftwareModuleSpecification.fetchType()));
+                SoftwareModuleSpecification.fetchType()), pageable);
     }
 
     @Override
@@ -412,7 +412,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
         specList.add(SoftwareModuleSpecification.fetchType());
 
-        return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleRepository, specList, pageable);
     }
 
     @Override
@@ -436,10 +436,10 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
         return JpaManagementHelper.findAllWithoutCountBySpec(
                 softwareModuleRepository,
-                pageable,
                 List.of(
                         SoftwareModuleSpecification.equalType(typeId),
-                        SoftwareModuleSpecification.isNotDeleted()));
+                        SoftwareModuleSpecification.isNotDeleted()), pageable
+        );
     }
 
     @Override

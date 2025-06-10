@@ -40,22 +40,4 @@ public final class RolloutSpecification {
             return predicate;
         };
     }
-
-    /**
-     * Builds a {@link Specification} to search a rollout by name.
-     *
-     * @param searchText search string
-     * @param isDeleted <code>true</code> if deleted rollouts should be included in
-     *         the search. Otherwise <code>false</code>
-     * @return criteria specification with a query for name of a rollout
-     */
-    public static Specification<JpaRollout> likeName(final String searchText, final boolean isDeleted) {
-        return (rolloutRoot, query, criteriaBuilder) -> {
-            final String searchTextToLower = searchText.toLowerCase();
-            return criteriaBuilder.and(
-                    criteriaBuilder.like(criteriaBuilder.lower(rolloutRoot.get(AbstractJpaNamedEntity_.name)), searchTextToLower),
-                    criteriaBuilder.equal(rolloutRoot.get(JpaRollout_.deleted), isDeleted));
-        };
-    }
-
 }

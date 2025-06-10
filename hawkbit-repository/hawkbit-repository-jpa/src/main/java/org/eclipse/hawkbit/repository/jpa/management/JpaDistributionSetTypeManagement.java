@@ -191,8 +191,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     public Slice<DistributionSetType> findAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetTypeRepository, pageable, List.of(
-                DistributionSetTypeSpecification.isNotDeleted()));
+        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetTypeRepository, List.of(
+                DistributionSetTypeSpecification.isNotDeleted()), pageable);
     }
 
     @Override

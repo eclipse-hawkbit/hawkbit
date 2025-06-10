@@ -1097,31 +1097,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verify the count of filtered existing rollouts.")
-    void countRolloutsAllByFilters() {
-
-        final int amountTargetsForRollout = 6;
-        final int amountGroups = 2;
-        final String successCondition = "50";
-        final String errorCondition = "80";
-        for (int i = 1; i <= 5; i++) {
-            createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountGroups, successCondition,
-                    errorCondition, "Rollout" + i, "Rollout" + i);
-        }
-        for (int i = 1; i <= 5; i++) {
-            createTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountGroups, successCondition,
-                    errorCondition, "SomethingElse" + i, "SomethingElse" + i);
-        }
-
-        final Long count = rolloutManagement.countByFilters("Rollout%");
-        assertThat(count).isEqualTo(5L);
-
-    }
-
-    @Test
     @Description("Verify that the filtering and sorting ascending for rollout is working correctly.")
     void findRolloutByFilters() {
-
         final int amountTargetsForRollout = 6;
         final int amountGroups = 2;
         final String successCondition = "50";
@@ -1135,8 +1112,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                     errorCondition, "SomethingElse" + i, "SomethingElse" + i);
         }
 
-        final Slice<Rollout> rollout = rolloutManagement.findByFiltersWithDetailedStatus(
-                new OffsetBasedPageRequest(0, 100, Sort.by(Direction.ASC, "name")), "Rollout%", false);
+        final Slice<Rollout> rollout = rolloutManagement.findByRsqlWithDetailedStatus(
+                new OffsetBasedPageRequest(0, 100, Sort.by(Direction.ASC, "name")), "name==Rollout*", false);
         final List<Rollout> rolloutList = rollout.getContent();
         assertThat(rolloutList).hasSize(5);
         int i = 1;
@@ -1905,8 +1882,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(rolloutManagement.findByRsql(PAGE, "name==*", true).getContent()).hasSize(1);
         assertThat(rolloutManagement.findByRsql(PAGE, "name==*", false).getContent()).isEmpty();
         assertThat(rolloutManagement.count()).isZero();
-        assertThat(rolloutGroupManagement.findByRolloutWithDetailedStatus(createdRollout.getId(), PAGE).getContent())
-                .hasSize(amountGroups);
+        assertThat(rolloutGroupManagement.findByRolloutWithDetailedStatus(createdRollout.getId(), PAGE).getContent()).hasSize(amountGroups);
 
         // verify that all scheduled actions are deleted
         assertThat(actionRepository.findByRolloutIdAndStatus(PAGE, deletedRollout.getId(), Status.SCHEDULED)

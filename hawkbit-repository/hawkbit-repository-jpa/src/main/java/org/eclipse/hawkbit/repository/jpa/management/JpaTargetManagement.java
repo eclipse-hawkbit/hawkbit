@@ -343,7 +343,7 @@ public class JpaTargetManagement implements TargetManagement {
         }
 
         return JpaManagementHelper.findAllWithoutCountBySpec(
-                targetRepository, pageRequest, List.of(TargetSpecifications.hasNoActionInRolloutGroup(group)));
+                targetRepository, List.of(TargetSpecifications.hasNoActionInRolloutGroup(group)), pageRequest);
     }
 
     @Override
@@ -384,7 +384,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Slice<Target> findByFilters(final Pageable pageable, final FilterParams filterParams) {
         final List<Specification<JpaTarget>> specList = buildSpecificationList(filterParams);
-        return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, specList, pageable);
     }
 
     @Override
@@ -420,8 +420,9 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Slice<Target> findByRsql(final Pageable pageable, final String targetFilterQuery) {
         return JpaManagementHelper.findAllWithoutCountBySpec(
-                targetRepository, pageable,
-                List.of(RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database)));
+                targetRepository,
+                List.of(RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database)), pageable
+        );
     }
 
     @Override
@@ -430,9 +431,9 @@ public class JpaTargetManagement implements TargetManagement {
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
         return JpaManagementHelper.findAllWithoutCountBySpec(
-                targetRepository, pageable,
-                List.of(RSQLUtility.buildRsqlSpecification(
-                        targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer, database)));
+                targetRepository, List.of(RSQLUtility.buildRsqlSpecification(
+                        targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer, database)), pageable
+        );
     }
 
     @Override

@@ -308,14 +308,14 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Slice<Action> findActionsAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, pageable, null);
+        return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, null, pageable);
     }
 
     @Override
     public Slice<Action> findActions(final String rsqlParam, final Pageable pageable) {
         final List<Specification<JpaAction>> specList = List.of(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database));
-        return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, specList, pageable);
     }
 
     @Override

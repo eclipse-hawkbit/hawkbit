@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -32,7 +34,6 @@ import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtDynamicRolloutGroupT
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.DynamicRolloutGroupTemplate;
@@ -95,8 +96,8 @@ final class MgmtRolloutMapper {
 
         if (withDetails) {
             for (final TotalTargetCountStatus.Status status : TotalTargetCountStatus.Status.values()) {
-                body.addTotalTargetsPerStatus(status.name().toLowerCase(),
-                        rollout.getTotalTargetCountStatus().getTotalTargetCountByStatus(status));
+                body.addTotalTargetsPerStatus(
+                        status.name().toLowerCase(), rollout.getTotalTargetCountStatus().getTotalTargetCountByStatus(status));
             }
             body.setTotalGroups(rollout.getRolloutGroupsCreated());
             body.setStartAt(rollout.getStartAt());
@@ -107,20 +108,17 @@ final class MgmtRolloutMapper {
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).start(rollout.getId())).withRel("start").expand());
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).pause(rollout.getId())).withRel("pause").expand());
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).resume(rollout.getId())).withRel("resume").expand());
-            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).triggerNextGroup(rollout.getId()))
-                    .withRel("triggerNextGroup").expand());
-            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).approve(rollout.getId(), null)).withRel("approve")
-                    .expand());
+            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).triggerNextGroup(rollout.getId())).withRel("triggerNextGroup").expand());
+            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).approve(rollout.getId(), null)).withRel("approve").expand());
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).deny(rollout.getId(), null)).withRel("deny").expand());
-            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRolloutGroups(rollout.getId(),
-                    MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
-                    MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null, null)).withRel("groups")
-                    .expand());
+            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRolloutGroups(
+                    rollout.getId(),
+                    REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE, REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null, null))
+                    .withRel("groups").expand());
 
             final DistributionSet distributionSet = rollout.getDistributionSet();
             body.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(distributionSet.getId()))
-                    .withRel("distributionset").withName(distributionSet.getName() + ":" + distributionSet.getVersion())
-                    .expand());
+                    .withRel("distributionset").withName(distributionSet.getName() + ":" + distributionSet.getVersion()).expand());
         }
 
         body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId())).withSelfRel().expand());

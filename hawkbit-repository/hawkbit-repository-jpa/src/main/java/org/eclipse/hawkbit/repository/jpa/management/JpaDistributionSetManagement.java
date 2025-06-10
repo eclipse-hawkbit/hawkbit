@@ -275,8 +275,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Slice<DistributionSet> findAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, pageable, List.of(
-                DistributionSetSpecification.isNotDeleted()));
+        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, List.of(
+                DistributionSetSpecification.isNotDeleted()), pageable);
     }
 
     @Override
@@ -514,7 +514,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Slice<DistributionSet> findByCompleted(final Pageable pageReq, final Boolean complete) {
         final List<Specification<JpaDistributionSet>> specifications = buildSpecsByComplete(complete);
 
-        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, pageReq, specifications);
+        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, specifications, pageReq);
     }
 
     @Override
@@ -529,7 +529,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
                 distributionSetFilter);
 
-        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, specList, pageable);
     }
 
     @Override

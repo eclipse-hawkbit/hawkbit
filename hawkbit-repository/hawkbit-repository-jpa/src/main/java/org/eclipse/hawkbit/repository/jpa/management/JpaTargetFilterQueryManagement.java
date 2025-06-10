@@ -158,7 +158,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public Slice<TargetFilterQuery> findAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository, pageable, null);
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository, null, pageable);
     }
 
     @Override
@@ -177,8 +177,9 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             return findAll(pageable);
         }
 
-        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository, pageable,
-                Collections.singletonList(TargetFilterQuerySpecification.likeName(name)));
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository,
+                Collections.singletonList(TargetFilterQuerySpecification.likeName(name)), pageable
+        );
     }
 
     @Override
@@ -207,7 +208,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
                 ? Collections.singletonList(TargetFilterQuerySpecification.equalsQuery(query))
                 : Collections.emptyList();
 
-        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository, pageable, specList);
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository, specList, pageable);
     }
 
     @Override
@@ -215,8 +216,9 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final long setId) {
         final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
 
-        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository, pageable,
-                Collections.singletonList(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet)));
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository,
+                Collections.singletonList(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet)), pageable
+        );
     }
 
     @Override
@@ -236,8 +238,9 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public Slice<TargetFilterQuery> findWithAutoAssignDS(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository, pageable,
-                Collections.singletonList(TargetFilterQuerySpecification.withAutoAssignDS()));
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository,
+                Collections.singletonList(TargetFilterQuerySpecification.withAutoAssignDS()), pageable
+        );
     }
 
     @Override
