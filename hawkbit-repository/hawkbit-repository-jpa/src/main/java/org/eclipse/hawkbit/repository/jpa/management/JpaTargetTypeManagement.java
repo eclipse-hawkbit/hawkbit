@@ -153,8 +153,8 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     @Override
     public Slice<TargetType> findByName(final Pageable pageable, final String name) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(targetTypeRepository, pageable,
-                List.of(TargetTypeSpecification.likeName(name)));
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetTypeRepository, List.of(TargetTypeSpecification.likeName(name)), pageable
+        );
     }
 
     @Override

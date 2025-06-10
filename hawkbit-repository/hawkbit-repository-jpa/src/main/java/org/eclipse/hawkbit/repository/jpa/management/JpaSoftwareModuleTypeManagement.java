@@ -136,8 +136,9 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
 
     @Override
     public Slice<SoftwareModuleType> findAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleTypeRepository, pageable,
-                List.of(SoftwareModuleTypeSpecification.isNotDeleted()));
+        return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleTypeRepository,
+                List.of(SoftwareModuleTypeSpecification.isNotDeleted()), pageable
+        );
     }
 
     @Override

@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.mgmt.rest.resource.util.PagingUtility;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -48,7 +47,6 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -85,30 +83,23 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     public ResponseEntity<PagedList<MgmtRolloutResponseBody>> getRollouts(
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam,
             final String representationModeParam) {
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeRolloutSortParam(sortParam);
-
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sortParam);
         final boolean isFullMode = parseRepresentationMode(representationModeParam) == MgmtRepresentationMode.FULL;
 
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Page<Rollout> rollouts;
-        if (rsqlParam != null) {
-            rollouts = rolloutManagement.findByRsql(pageable, rsqlParam, false);
-        } else {
-            rollouts = rolloutManagement.findAll(pageable, false);
-        }
-
-        final long totalElements = rollouts.getTotalElements();
-
         final List<MgmtRolloutResponseBody> rest;
         if (isFullMode) {
-            rest = MgmtRolloutMapper.toResponseRolloutWithDetails(rolloutManagement.getRolloutWithStatusDetails(rollouts).getContent());
+            rollouts = rsqlParam == null
+                    ? rolloutManagement.findAllWithDetailedStatus(pageable, false)
+                    : rolloutManagement.findByRsqlWithDetailedStatus(pageable, rsqlParam, false);
+            rest = MgmtRolloutMapper.toResponseRolloutWithDetails(rollouts.getContent());
         } else {
+             rollouts = rsqlParam == null
+                    ? rolloutManagement.findAll(pageable, false)
+                    : rolloutManagement.findByRsql(pageable, rsqlParam, false);
             rest = MgmtRolloutMapper.toResponseRollout(rollouts.getContent());
         }
-
-        return ResponseEntity.ok(new PagedList<>(rest, totalElements));
+        return ResponseEntity.ok(new PagedList<>(rest, rollouts.getTotalElements()));
     }
 
     @Override
@@ -214,27 +205,21 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             final Long rolloutId,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam,
             final String representationModeParam) {
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeRolloutGroupSortParam(sortParam);
-
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sortParam);
         final boolean isFullMode = parseRepresentationMode(representationModeParam) == MgmtRepresentationMode.FULL;
 
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-
         final Page<RolloutGroup> rolloutGroups;
-        if (rsqlParam != null) {
-            if (isFullMode) {
-                rolloutGroups = this.rolloutGroupManagement.findByRolloutAndRsqlWithDetailedStatus(rolloutId, rsqlParam, pageable
-                );
-            } else {
-                rolloutGroups = this.rolloutGroupManagement.findByRolloutAndRsql(rolloutId, rsqlParam, pageable);
-            }
-        } else {
+        if (rsqlParam == null) {
             if (isFullMode) {
                 rolloutGroups = this.rolloutGroupManagement.findByRolloutWithDetailedStatus(rolloutId, pageable);
             } else {
                 rolloutGroups = this.rolloutGroupManagement.findByRollout(rolloutId, pageable);
+            }
+        } else {
+            if (isFullMode) {
+                rolloutGroups = this.rolloutGroupManagement.findByRolloutAndRsqlWithDetailedStatus(rolloutId, rsqlParam, pageable);
+            } else {
+                rolloutGroups = this.rolloutGroupManagement.findByRolloutAndRsql(rolloutId, rsqlParam, pageable);
             }
         }
 
@@ -249,7 +234,6 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         final RolloutGroup rolloutGroup = rolloutGroupManagement.getWithDetailedStatus(groupId)
                 .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutId));
-
         if (!Objects.equals(rolloutId, rolloutGroup.getRollout().getId())) {
             throw new EntityNotFoundException(RolloutGroup.class, groupId);
         }
@@ -263,19 +247,13 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             final Long rolloutId, final Long groupId,
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam, final String rsqlParam) {
         findRolloutOrThrowException(rolloutId);
-        final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
-        final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
-        final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
-
-        final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
+        final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sortParam);
 
         final Page<Target> rolloutGroupTargets;
-        if (rsqlParam != null) {
-            rolloutGroupTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(pageable, groupId,
-                    rsqlParam);
+        if (rsqlParam == null) {
+            rolloutGroupTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroup(groupId, pageable);
         } else {
-            final Page<Target> pageTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroup(groupId, pageable);
-            rolloutGroupTargets = pageTargets;
+            rolloutGroupTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(pageable, groupId, rsqlParam);
         }
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(rolloutGroupTargets.getContent(), tenantConfigHelper);
         return ResponseEntity.ok(new PagedList<>(rest, rolloutGroupTargets.getTotalElements()));
@@ -284,15 +262,14 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     @Override
     @AuditLog(entity = "Rollout", type = AuditLog.Type.UPDATE, description = "Trigger Next Rollout Group")
     public ResponseEntity<Void> triggerNextGroup(final Long rolloutId) {
-        this.rolloutManagement.triggerNextGroup(rolloutId);
+        rolloutManagement.triggerNextGroup(rolloutId);
         return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<MgmtRolloutResponseBody> retryRollout(final Long rolloutId) {
-        final Rollout rolloutForRetry = this.rolloutManagement.get(rolloutId)
+        final Rollout rolloutForRetry = rolloutManagement.get(rolloutId)
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
-
         if (rolloutForRetry.isDeleted()) {
             throw new EntityNotFoundException(Rollout.class, rolloutId);
         }

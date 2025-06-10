@@ -150,7 +150,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     @Override
     public Slice<DistributionSetTag> findAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetTagRepository, pageable, null);
+        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetTagRepository, null, pageable);
     }
 
     @Override

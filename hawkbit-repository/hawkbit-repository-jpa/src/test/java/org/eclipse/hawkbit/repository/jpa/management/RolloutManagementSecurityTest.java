@@ -111,12 +111,6 @@ class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void countByFiltersPermissionsCheck() {
-        assertPermissions(() -> rolloutManagement.countByFilters("searchFilter"), List.of(SpPermission.READ_ROLLOUT));
-    }
-
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void createPermissionsCheck() {
         assertPermissions(() -> rolloutManagement.create(entityFactory.rollout().create().distributionSetId(1L), 1, false,
                 new RolloutGroupConditionBuilder().withDefaults().build()), List.of(SpPermission.CREATE_ROLLOUT, SpPermission.READ_REPOSITORY));
@@ -150,26 +144,9 @@ class RolloutManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findByFiltersWithDetailedStatusPermissionsCheck() {
-        assertPermissions(() -> rolloutManagement.findByFiltersWithDetailedStatus(PAGE, "searchFilter", false),
-                List.of(SpPermission.READ_ROLLOUT));
-    }
-
-    @Test
-    @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void getRolloutWithStatusDetailsPermissionsCheck() {
-        final String rolloutName = "rollout-std";
-        final int amountGroups = 5; // static only
-        final String targetPrefix = "controller-rollout-std-";
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
-
-        testdataFactory.createTargets(targetPrefix, 0, amountGroups * 3);
-        final Rollout rollout = testdataFactory.createRolloutByVariables(rolloutName, rolloutName, amountGroups,
-                "controllerid==" + targetPrefix + "*", distributionSet, "60", "30", false, false);
-        assertPermissions(() -> {
-            rolloutManagement.getRolloutWithStatusDetails(new PageImpl<>(List.of(rollout)));
-            return null;
-        }, List.of(SpPermission.READ_ROLLOUT, SpPermission.READ_REPOSITORY));
+    void findByRsqlWithDetailedStatusPermissionsCheck() {
+        assertPermissions(() ->
+                rolloutManagement.findByRsqlWithDetailedStatus(PAGE, "name==*", false), List.of(SpPermission.READ_ROLLOUT));
     }
 
     @Test

@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository.jpa.management;
 import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.addSuccessAndErrorConditionsAndActions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -84,7 +83,6 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
@@ -104,12 +102,12 @@ import org.springframework.validation.annotation.Validated;
 @Transactional(readOnly = true)
 public class JpaRolloutManagement implements RolloutManagement {
 
-    private static final List<RolloutStatus> ACTIVE_ROLLOUTS = Arrays.asList(RolloutStatus.CREATING,
-            RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING,
-            RolloutStatus.STOPPING);
-    private static final List<RolloutStatus> ROLLOUT_STATUS_STOPPABLE = Arrays.asList(RolloutStatus.RUNNING,
-            RolloutStatus.CREATING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.STARTING,
-            RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.APPROVAL_DENIED);
+    private static final List<RolloutStatus> ACTIVE_ROLLOUTS = List.of(
+            RolloutStatus.CREATING, RolloutStatus.READY, RolloutStatus.STARTING, RolloutStatus.RUNNING,
+            RolloutStatus.STOPPING, RolloutStatus.DELETING);
+    private static final List<RolloutStatus> ROLLOUT_STATUS_STOPPABLE = List.of(
+            RolloutStatus.CREATING, RolloutStatus.READY, RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.STARTING, RolloutStatus.RUNNING,
+            RolloutStatus.PAUSED, RolloutStatus.APPROVAL_DENIED);
 
     private final RolloutRepository rolloutRepository;
     private final RolloutGroupRepository rolloutGroupRepository;
@@ -176,11 +174,6 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     public long count() {
         return rolloutRepository.count(RolloutSpecification.isDeleted(false, Sort.by(Direction.DESC, AbstractJpaBaseEntity_.ID)));
-    }
-
-    @Override
-    public long countByFilters(final String searchText) {
-        return rolloutRepository.count(RolloutSpecification.likeName(searchText, false));
     }
 
     @Override
@@ -273,28 +266,27 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Slice<Rollout> findAllWithDetailedStatus(final Pageable pageable, final boolean deleted) {
-        final Slice<Rollout> rollouts = JpaManagementHelper.convertPage(
+    public Page<Rollout> findAllWithDetailedStatus(final Pageable pageable, final boolean deleted) {
+        return appendStatusDetails(JpaManagementHelper.convertPage(
                 rolloutRepository.findAll(RolloutSpecification.isDeleted(deleted, pageable.getSort()), JpaRollout_.GRAPH_ROLLOUT_DS, pageable),
-                pageable);
-        return getRolloutWithStatusDetails(rollouts);
+                pageable));
     }
 
     @Override
-    public Page<Rollout> findByRsql(final Pageable pageable, final String rsqlParam, final boolean deleted) {
-        final List<Specification<JpaRollout>> specList = new ArrayList<>(2);
-        specList.add(RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
-        specList.add(RolloutSpecification.isDeleted(deleted, pageable.getSort()));
-        return JpaManagementHelper.convertPage(
-                rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(specList), JpaRollout_.GRAPH_ROLLOUT_DS, pageable), pageable);
+    public Page<Rollout> findByRsql(final Pageable pageable, final String rsql, final boolean deleted) {
+        final List<Specification<JpaRollout>> specList = List.of(
+                RSQLUtility.buildRsqlSpecification(rsql, RolloutFields.class, virtualPropertyReplacer, database),
+                RolloutSpecification.isDeleted(deleted, pageable.getSort()));
+        return JpaManagementHelper.convertPage(rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(specList), pageable), pageable);
     }
 
     @Override
-    public Slice<Rollout> findByFiltersWithDetailedStatus(final Pageable pageable, final String searchText,
-            final boolean deleted) {
-        final Slice<Rollout> findAll = JpaManagementHelper.findAllWithoutCountBySpec(rolloutRepository, pageable,
-                Collections.singletonList(RolloutSpecification.likeName(searchText, deleted)));
-        return getRolloutWithStatusDetails(findAll);
+    public Page<Rollout> findByRsqlWithDetailedStatus(final Pageable pageable, final String rsql, final boolean deleted) {
+        final List<Specification<JpaRollout>> specList = List.of(
+                RSQLUtility.buildRsqlSpecification(rsql, RolloutFields.class, virtualPropertyReplacer, database),
+                RolloutSpecification.isDeleted(deleted, pageable.getSort()));
+        return appendStatusDetails(JpaManagementHelper.convertPage(
+                rolloutRepository.findAll(JpaManagementHelper.combineWithAnd(specList), JpaRollout_.GRAPH_ROLLOUT_DS, pageable), pageable));
     }
 
     @Override
@@ -326,8 +318,8 @@ public class JpaRolloutManagement implements RolloutManagement {
             rolloutStatusCache.putRolloutStatus(rolloutId, rolloutStatusCountItems);
         }
 
-        final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(rolloutStatusCountItems,
-                rollout.get().getTotalTargets(), rollout.get().getActionType());
+        final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
+                rolloutStatusCountItems, rollout.get().getTotalTargets(), rollout.get().getActionType());
         ((JpaRollout) rollout.get()).setTotalTargetCountStatus(totalTargetCountStatus);
         return rollout;
     }
@@ -445,14 +437,9 @@ public class JpaRolloutManagement implements RolloutManagement {
         final JpaRollout jpaRollout = rolloutRepository.findById(rolloutId)
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
 
-        if (jpaRollout == null) {
-            throw new EntityNotFoundException(Rollout.class, rolloutId);
-        }
-
         if (RolloutStatus.DELETING == jpaRollout.getStatus()) {
             return;
         }
-
         jpaRollout.setStatus(RolloutStatus.DELETING);
         rolloutRepository.save(jpaRollout);
     }
@@ -496,8 +483,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         startNextRolloutGroupAction.exec(rollout, latestRunning);
     }
 
-    @Override
-    public Slice<Rollout> getRolloutWithStatusDetails(final Slice<Rollout> rollouts) {
+    private Page<Rollout> appendStatusDetails(final Page<Rollout> rollouts) {
         final List<Long> rolloutIds = rollouts.getContent().stream().map(Rollout::getId).toList();
         final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(rolloutIds);
 

@@ -38,7 +38,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -55,15 +54,6 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
     long count();
-
-    /**
-     * Count rollouts by given text in name or description.
-     *
-     * @param searchText name or description
-     * @return total count rollouts for specified filter text.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    long countByFilters(@NotEmpty String searchText);
 
     /**
      * Counts all {@link Rollout}s for a specific {@link DistributionSet} that
@@ -206,7 +196,7 @@ public interface RolloutManagement {
      *         statuses
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Slice<Rollout> findAllWithDetailedStatus(@NotNull Pageable pageable, boolean deleted);
+    Page<Rollout> findAllWithDetailedStatus(@NotNull Pageable pageable, boolean deleted);
 
     /**
      * Retrieves all rollouts found by the given specification.
@@ -232,7 +222,7 @@ public interface RolloutManagement {
      *         not exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Slice<Rollout> findByFiltersWithDetailedStatus(@NotNull Pageable pageable, @NotEmpty String searchText,
+    Page<Rollout> findByRsqlWithDetailedStatus(@NotNull Pageable pageable, @NotEmpty String searchText,
             boolean deleted);
 
     /**
@@ -406,12 +396,4 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
     void triggerNextGroup(long rolloutId);
-
-    /**
-     * Enrich the rollouts Slice with additional details
-     *
-     * @param rollouts the rollouts to be enriched.
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Slice<Rollout> getRolloutWithStatusDetails(final Slice<Rollout> rollouts);
 }

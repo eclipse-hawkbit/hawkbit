@@ -36,14 +36,13 @@ import org.springframework.util.ObjectUtils;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JpaManagementHelper {
 
-
     public static <T, J extends T> Optional<J> findOneBySpec(
             final JpaSpecificationExecutor<J> repository, final List<Specification<J>> specList) {
         return repository.findOne(combineWithAnd(specList));
     }
 
-    public static <T, J extends T> Page<T> findAllWithCountBySpec(final JpaSpecificationExecutor<J> repository,
-            final List<Specification<J>> specList, final Pageable pageable) {
+    public static <T, J extends T> Page<T> findAllWithCountBySpec(
+            final JpaSpecificationExecutor<J> repository, final List<Specification<J>> specList, final Pageable pageable) {
         if (CollectionUtils.isEmpty(specList)) {
             return convertPage(repository.findAll(Specification.where(null), pageable), pageable);
         }
@@ -62,21 +61,20 @@ public final class JpaManagementHelper {
         return specList.size() == 1 ? specList.get(0) : SpecificationsBuilder.combineWithAnd(specList);
     }
 
-    public static <T, J extends T> Slice<T> findAllWithoutCountBySpec(final NoCountSliceRepository<J> repository,
-            final Pageable pageable, final List<Specification<J>> specList) {
+    public static <T, J extends T> Slice<T> findAllWithoutCountBySpec(
+            final NoCountSliceRepository<J> repository, final List<Specification<J>> specList, final Pageable pageable) {
         if (CollectionUtils.isEmpty(specList)) {
-            return convertPage(repository.findAllWithoutCount(pageable), pageable);
+            return convertSlice(repository.findAllWithoutCount(pageable), pageable);
         }
 
-        return convertPage(repository.findAllWithoutCount(combineWithAnd(specList), pageable), pageable);
+        return convertSlice(repository.findAllWithoutCount(combineWithAnd(specList), pageable), pageable);
     }
 
-    public static <T, J extends T> Slice<T> convertPage(final Slice<J> jpaAll, final Pageable pageable) {
+    public static <T, J extends T> Slice<T> convertSlice(final Slice<J> jpaAll, final Pageable pageable) {
         return new PageImpl<>(Collections.unmodifiableList(jpaAll.getContent()), pageable, 0);
     }
 
-    public static <J> long countBySpec(final JpaSpecificationExecutor<J> repository,
-            final List<Specification<J>> specList) {
+    public static <J> long countBySpec(final JpaSpecificationExecutor<J> repository, final List<Specification<J>> specList) {
         if (CollectionUtils.isEmpty(specList)) {
             return repository.count(Specification.where(null));
         }
@@ -101,11 +99,9 @@ public final class JpaManagementHelper {
     public static String[] getFilterNameAndVersionEntries(final String filterString) {
         final int semicolonIndex = filterString.indexOf(':');
 
-        final String filterName = semicolonIndex != -1 ? filterString.substring(0, semicolonIndex)
-                : (filterString + "%");
+        final String filterName = semicolonIndex != -1 ? filterString.substring(0, semicolonIndex) : (filterString + "%");
         final String filterVersion = semicolonIndex != -1 ? (filterString.substring(semicolonIndex + 1) + "%") : "%";
 
         return new String[] { ObjectUtils.isEmpty(filterName) ? "%" : filterName, filterVersion };
     }
-
 }

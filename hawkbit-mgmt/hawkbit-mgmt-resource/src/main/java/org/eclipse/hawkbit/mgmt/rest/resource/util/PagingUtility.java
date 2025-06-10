@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetTypeFields;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutGroupFields;
 import org.eclipse.hawkbit.repository.SoftwareModuleFields;
@@ -24,6 +25,7 @@ import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.repository.TargetTypeFields;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
@@ -145,5 +147,12 @@ public final class PagingUtility {
             return Sort.by(Direction.ASC, RolloutGroupFields.ID.getJpaEntityFieldName());
         }
         return Sort.by(SortUtility.parse(RolloutGroupFields.class, sortParam));
+    }
+
+    public static Pageable toPageable(final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
+        final int sanitizedOffsetParam = sanitizeOffsetParam(pagingOffsetParam);
+        final int sanitizedLimitParam = sanitizePageLimitParam(pagingLimitParam);
+        final Sort sorting = sanitizeRolloutSortParam(sortParam);
+        return new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
     }
 }
