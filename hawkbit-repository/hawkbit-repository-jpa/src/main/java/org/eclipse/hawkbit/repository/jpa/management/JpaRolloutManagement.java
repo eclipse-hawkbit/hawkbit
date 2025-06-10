@@ -260,20 +260,20 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Page<Rollout> findAll(final Pageable pageable, final boolean deleted) {
+    public Page<Rollout> findAll(final boolean deleted, final Pageable pageable) {
         return JpaManagementHelper.convertPage(
                 rolloutRepository.findAll(RolloutSpecification.isDeleted(deleted, pageable.getSort()), pageable), pageable);
     }
 
     @Override
-    public Page<Rollout> findAllWithDetailedStatus(final Pageable pageable, final boolean deleted) {
+    public Page<Rollout> findAllWithDetailedStatus(final boolean deleted, final Pageable pageable) {
         return appendStatusDetails(JpaManagementHelper.convertPage(
                 rolloutRepository.findAll(RolloutSpecification.isDeleted(deleted, pageable.getSort()), JpaRollout_.GRAPH_ROLLOUT_DS, pageable),
                 pageable));
     }
 
     @Override
-    public Page<Rollout> findByRsql(final Pageable pageable, final String rsql, final boolean deleted) {
+    public Page<Rollout> findByRsql(final String rsql, final boolean deleted, final Pageable pageable) {
         final List<Specification<JpaRollout>> specList = List.of(
                 RSQLUtility.buildRsqlSpecification(rsql, RolloutFields.class, virtualPropertyReplacer, database),
                 RolloutSpecification.isDeleted(deleted, pageable.getSort()));
@@ -281,7 +281,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Page<Rollout> findByRsqlWithDetailedStatus(final Pageable pageable, final String rsql, final boolean deleted) {
+    public Page<Rollout> findByRsqlWithDetailedStatus(final String rsql, final boolean deleted, final Pageable pageable) {
         final List<Specification<JpaRollout>> specList = List.of(
                 RSQLUtility.buildRsqlSpecification(rsql, RolloutFields.class, virtualPropertyReplacer, database),
                 RolloutSpecification.isDeleted(deleted, pageable.getSort()));

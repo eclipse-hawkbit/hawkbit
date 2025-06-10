@@ -22,12 +22,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -49,9 +47,6 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
@@ -163,11 +158,11 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
 
-        final Tag createdOne = targetTagManagement.findByRsql(PAGE, "name==thetest1").getContent().get(0);
+        final Tag createdOne = targetTagManagement.findByRsql("name==thetest1", PAGE).getContent().get(0);
         assertThat(createdOne.getName()).isEqualTo(tagOne.getName());
         assertThat(createdOne.getDescription()).isEqualTo(tagOne.getDescription());
         assertThat(createdOne.getColour()).isEqualTo(tagOne.getColour());
-        final Tag createdTwo = targetTagManagement.findByRsql(PAGE, "name==thetest2").getContent().get(0);
+        final Tag createdTwo = targetTagManagement.findByRsql("name==thetest2", PAGE).getContent().get(0);
         assertThat(createdTwo.getName()).isEqualTo(tagTwo.getName());
         assertThat(createdTwo.getDescription()).isEqualTo(tagTwo.getDescription());
         assertThat(createdTwo.getColour()).isEqualTo(tagTwo.getColour());
@@ -196,7 +191,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
 
-        final Tag updated = targetTagManagement.findByRsql(PAGE, "name==updatedName").getContent().get(0);
+        final Tag updated = targetTagManagement.findByRsql("name==updatedName", PAGE).getContent().get(0);
         assertThat(updated.getName()).isEqualTo(update.getName());
         assertThat(updated.getDescription()).isEqualTo(update.getDescription());
         assertThat(updated.getColour()).isEqualTo(update.getColour());
@@ -303,7 +298,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
+        final List<Target> updated = targetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(Target::getControllerId).toList()).containsOnly(assigned.getControllerId());
     }
 
@@ -325,7 +320,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
+        final List<Target> updated = targetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(Target::getControllerId).toList())
                 .containsOnly(assigned0.getControllerId(), assigned1.getControllerId());
     }
@@ -366,7 +361,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                     Collections.sort(notFound);
                     assertThat(notFound).isEqualTo(missing);
                 });
-        assertThat(targetManagement.findByTag(PAGE, tag.getId()).getContent()).isEmpty();
+        assertThat(targetManagement.findByTag(tag.getId(), PAGE).getContent()).isEmpty();
     }
 
     @Test
@@ -407,7 +402,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                     Collections.sort(notFound);
                     assertThat(notFound).isEqualTo(missing);
                 });
-        assertThat(targetManagement.findByTag(PAGE, tag.getId()).getContent().stream().map(Target::getControllerId).sorted().toList())
+        assertThat(targetManagement.findByTag(tag.getId(), PAGE).getContent().stream().map(Target::getControllerId).sorted().toList())
                 .isEqualTo(targets.stream().sorted().toList());
     }
 
@@ -440,7 +435,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
-        assertThat(targetManagement.findByTag(PAGE, tag.getId()).getContent().stream().map(Target::getControllerId).sorted().toList())
+        assertThat(targetManagement.findByTag(tag.getId(), PAGE).getContent().stream().map(Target::getControllerId).sorted().toList())
                 .isEqualTo(targets.stream().sorted().toList());
     }
 
@@ -463,7 +458,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
+        final List<Target> updated = targetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(Target::getControllerId).toList())
                 .containsOnly(assigned.getControllerId());
     }
@@ -489,7 +484,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
+        final List<Target> updated = targetManagement.findByTag(tag.getId(), PAGE).getContent();
         assertThat(updated.stream().map(Target::getControllerId).toList())
                 .containsOnly(assigned.getControllerId());
     }
@@ -533,7 +528,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                     Collections.sort(notFound);
                     assertThat(notFound).isEqualTo(missing);
                 });
-        assertThat(targetManagement.findByTag(PAGE, tag.getId()).getContent().stream().map(Target::getControllerId).sorted().toList())
+        assertThat(targetManagement.findByTag(tag.getId(), PAGE).getContent().stream().map(Target::getControllerId).sorted().toList())
                 .isEqualTo(targets.stream().sorted().toList());
     }
 
@@ -577,7 +572,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                     Collections.sort(notFound);
                     assertThat(notFound).isEqualTo(missing);
                 });
-        assertThat(targetManagement.findByTag(PAGE, tag.getId()).getContent()).isEmpty();
+        assertThat(targetManagement.findByTag(tag.getId(), PAGE).getContent()).isEmpty();
     }
 
     @Test
@@ -611,6 +606,6 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
-        assertThat(targetManagement.findByTag(PAGE, tag.getId()).getContent()).isEmpty();
+        assertThat(targetManagement.findByTag(tag.getId(), PAGE).getContent()).isEmpty();
     }
 }

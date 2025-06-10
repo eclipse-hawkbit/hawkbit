@@ -311,7 +311,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
                 .andExpect(jsonPath("$.total", equalTo(knownTargetIds.length)));
 
-        assertThat(targetManagement.findByAssignedDistributionSet(PAGE, createdDs.getId()).getContent())
+        assertThat(targetManagement.findByAssignedDistributionSet(createdDs.getId(), PAGE).getContent())
                 .as("Five targets in repository have DS assigned").hasSize(5);
     }
 
@@ -398,7 +398,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                         .contentType(MediaType.APPLICATION_JSON).content(payload.toString()))
                 .andExpect(status().isForbidden());
 
-        assertThat(targetManagement.findByAssignedDistributionSet(PAGE, ds.getId()).getContent()).isEmpty();
+        assertThat(targetManagement.findByAssignedDistributionSet(ds.getId(), PAGE).getContent()).isEmpty();
     }
 
     @Test
@@ -451,10 +451,10 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
                 .andExpect(jsonPath("$.total", equalTo(targets.size())));
 
-        assertThat(targetManagement.findByAssignedDistributionSet(PAGE, createdDs.getId()).getContent())
+        assertThat(targetManagement.findByAssignedDistributionSet(createdDs.getId(), PAGE).getContent())
                 .as("Five targets in repository have DS assigned").hasSize(5);
 
-        assertThat(targetManagement.findByInstalledDistributionSet(PAGE, createdDs.getId()).getContent()).hasSize(4);
+        assertThat(targetManagement.findByInstalledDistributionSet(createdDs.getId(), PAGE).getContent()).hasSize(4);
     }
 
     @Test
@@ -789,7 +789,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @Description("Ensures that multiple DS requested are listed with expected payload.")
     void getDistributionSets() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
 
         DistributionSet set = testdataFactory.createDistributionSet("one");
         set = distributionSetManagement.update(entityFactory.distributionSet().update(set.getId())
@@ -798,7 +798,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
         // load also lazy stuff
         set = distributionSetManagement.getWithDetails(set.getId()).get();
 
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(1);
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).hasSize(1);
 
         // perform request
         mvc.perform(get("/rest/v1/distributionsets").accept(MediaType.APPLICATION_JSON))
@@ -864,7 +864,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Ensures that multipe DS posted to API are created in the repository.")
     void createDistributionSets() throws Exception {
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
         final SoftwareModule ah = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
         final SoftwareModule jvm = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_RT);
         final SoftwareModule os = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_OS);
@@ -907,7 +907,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .hasToString(String.valueOf(three.getId()));
 
         // check in database
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(3);
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).hasSize(3);
         assertThat(one.isRequiredMigrationStep()).isFalse();
         assertThat(two.isRequiredMigrationStep()).isFalse();
         assertThat(three.isRequiredMigrationStep()).isTrue();
@@ -921,11 +921,11 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @Description("Ensures that DS deletion request to API is reflected by the repository.")
     void deleteUnassignedistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(1);
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).hasSize(1);
 
         // perform request
         mvc.perform(delete("/rest/v1/distributionsets/{smId}", set.getId()))
@@ -933,7 +933,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andExpect(status().isOk());
 
         // check repository content
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
         assertThat(distributionSetManagement.count()).isZero();
     }
 
@@ -949,13 +949,13 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @Description("Ensures that assigned DS deletion request to API is reflected by the repository by means of deleted flag set.")
     void deleteAssignedDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         testdataFactory.createTarget("test");
         assignDistributionSet(set.getId(), "test");
 
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(1);
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).hasSize(1);
 
         mvc.perform(get("/rest/v1/distributionsets/{dsId}", set.getId()))
                 .andDo(MockMvcResultPrinter.print())
@@ -972,14 +972,14 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andExpect(jsonPath("$.deleted", equalTo(true)));
 
         // check repository content
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
     }
 
     @Test
     @Description("Ensures that DS property update request to API is reflected by the repository.")
     void updateDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         assertThat(distributionSetManagement.count()).isEqualTo(1);
@@ -1009,7 +1009,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     void updateRequiredMigrationStepFailsIfDistributionSetisInUse() throws Exception {
 
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         assignDistributionSet(set.getId(), testdataFactory.createTarget().getControllerId());
@@ -1310,7 +1310,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
                 .andExpect(jsonPath("$.alreadyAssigned", equalTo(1)))
                 .andExpect(jsonPath("$.total", equalTo(knownTargetIds.length)));
 
-        assertThat(targetManagement.findByAssignedDistributionSet(PAGE, createdDs.getId()).getContent())
+        assertThat(targetManagement.findByAssignedDistributionSet(createdDs.getId(), PAGE).getContent())
                 .as("Five targets in repository have DS assigned").hasSize(5);
     }
 
@@ -1604,7 +1604,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @Description("Tests the lock. It is verified that the distribution set can be marked as locked through update operation.")
     void lockDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         assertThat(distributionSetManagement.count()).isEqualTo(1);
@@ -1626,7 +1626,7 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     @Description("Tests the unlock.")
     void unlockDistributionSet() throws Exception {
         // prepare test data
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).isEmpty();
+        assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         assertThat(distributionSetManagement.count()).isEqualTo(1);

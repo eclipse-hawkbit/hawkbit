@@ -86,8 +86,9 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
             do {
                 final List<String> controllerIds = targetManagement
                         .findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(
-                                PageRequest.of(0, Constants.MAX_ENTRIES_IN_STATEMENT),
-                                targetFilterQuery.getAutoAssignDistributionSet().getId(), targetFilterQuery.getQuery())
+                                targetFilterQuery.getAutoAssignDistributionSet().getId(), targetFilterQuery.getQuery(),
+                                PageRequest.of(0, Constants.MAX_ENTRIES_IN_STATEMENT)
+                        )
                         .getContent().stream().map(Target::getControllerId).toList();
                 log.debug(
                         "Retrieved {} auto assign targets for tenant {} and target filter query id {}, starting with assignment",

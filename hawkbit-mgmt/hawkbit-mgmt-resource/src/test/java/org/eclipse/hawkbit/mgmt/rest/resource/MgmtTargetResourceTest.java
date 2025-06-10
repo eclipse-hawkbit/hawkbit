@@ -376,7 +376,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final PageRequest pageRequest = PageRequest.of(0, 1000, Direction.ASC, ActionFields.ID.getJpaEntityFieldName());
         final Action action = deploymentManagement.findActionsByTarget(knownTargetId, pageRequest).getContent().get(0);
 
-        final ActionStatus status = deploymentManagement.findActionStatusByAction(PAGE, action.getId()).getContent()
+        final ActionStatus status = deploymentManagement.findActionStatusByAction(action.getId(), PAGE).getContent()
                 .stream().sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId())).toList().get(0);
 
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
@@ -1337,7 +1337,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String knownTargetId = "targetId";
         final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
         // retrieve list in default descending order for actionstaus entries
-        final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(PAGE, action.getId())
+        final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(action.getId(), PAGE)
                 .getContent().stream().sorted((e1, e2) -> Long.compare(e2.getId(), e1.getId()))
                 .toList();
 
@@ -1365,7 +1365,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     void getActionsStatusSortedByReportedAt() throws Exception {
         final String knownTargetId = "targetId";
         final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
-        final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(PAGE, action.getId())
+        final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(action.getId(), PAGE)
                 .getContent().stream().sorted(Comparator.comparingLong(Identifiable::getId))
                 .toList();
 
@@ -1414,7 +1414,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String knownTargetId = "targetId";
 
         final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
-        final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(PAGE, action.getId())
+        final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(action.getId(), PAGE)
                 .getContent().stream().sorted((e1, e2) -> Long.compare(e1.getId(), e2.getId()))
                 .toList();
 
@@ -1668,7 +1668,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         implicitLock(set);
 
         final List<Action> findActiveActionsByTarget = deploymentManagement
-                .findActiveActionsByTarget(PAGE, target.getControllerId()).getContent();
+                .findActiveActionsByTarget(target.getControllerId(), PAGE).getContent();
         assertThat(findActiveActionsByTarget).hasSize(1);
         assertThat(findActiveActionsByTarget.get(0).getActionType()).isEqualTo(ActionType.TIMEFORCED);
         assertThat(findActiveActionsByTarget.get(0).getForcedTime()).isEqualTo(forceTime);

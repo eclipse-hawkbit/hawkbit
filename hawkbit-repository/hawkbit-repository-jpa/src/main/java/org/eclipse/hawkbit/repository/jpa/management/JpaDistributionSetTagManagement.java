@@ -154,9 +154,9 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     }
 
     @Override
-    public Page<DistributionSetTag> findByRsql(final String rsqlParam, final Pageable pageable) {
+    public Page<DistributionSetTag> findByRsql(final String rsql, final Pageable pageable) {
         final Specification<JpaDistributionSetTag> spec = RSQLUtility.buildRsqlSpecification(
-                rsqlParam, DistributionSetTagFields.class, virtualPropertyReplacer, database);
+                rsql, DistributionSetTagFields.class, virtualPropertyReplacer, database);
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, Collections.singletonList(spec), pageable);
     }
 
@@ -166,7 +166,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     }
 
     @Override
-    public Page<DistributionSetTag> findByDistributionSet(final Pageable pageable, final long distributionSetId) {
+    public Page<DistributionSetTag> findByDistributionSet(final long distributionSetId, final Pageable pageable) {
         if (!distributionSetRepository.existsById(distributionSetId)) {
             throw new EntityNotFoundException(DistributionSet.class, distributionSetId);
         }

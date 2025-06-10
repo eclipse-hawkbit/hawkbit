@@ -593,7 +593,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private List<SoftwareModuleMetadata> getSoftwareModuleMetadata(final SoftwareModule module) {
         return softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(
-                PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT), module.getId()).getContent();
+                module.getId(), PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT)).getContent();
     }
 
     private void sendBatchUpdateMessage(

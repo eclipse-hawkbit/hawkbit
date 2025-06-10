@@ -648,10 +648,10 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final Slice<Target> targets;
             if (!RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
                 targets = targetManagement.findByTargetFilterQueryAndNotInRolloutAndCompatibleAndUpdatable(
-                        pageRequest, readyGroups, targetFilter, rollout.getDistributionSet().getType());
+                        readyGroups, targetFilter, rollout.getDistributionSet().getType(), pageRequest);
             } else {
                 targets = targetManagement.findByFailedRolloutAndNotInRolloutGroups(
-                        pageRequest, readyGroups, RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()));
+                        RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()), readyGroups, pageRequest);
             }
 
             rolloutTargetGroupRepository.saveAll(targets.stream().map(target -> new RolloutTargetGroup(group, target)).toList());
@@ -772,10 +772,10 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         return DeploymentHelper.runInNewTransaction(txManager, "createActionsForRolloutDynamicGroup", status -> {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final Slice<Target> targets = targetManagement.findByTargetFilterQueryAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
-                    pageRequest,
-                    rollout.getId(), rollout.getWeight().orElse(1000), // Dynamic rollouts shall always have weight!
-                    rolloutGroupRepository.findByRolloutOrderByIdAsc(rollout).get(0).getId(),
-                    targetFilter, rollout.getDistributionSet().getType());
+                    rollout.getId(), rollout.getWeight().orElse(1000), rolloutGroupRepository.findByRolloutOrderByIdAsc(rollout).get(0).getId(),
+                    targetFilter, rollout.getDistributionSet().getType(), pageRequest
+                    // Dynamic rollouts shall always have weight!
+            );
 
             if (targets.getNumberOfElements() == 0) {
                 return 0;
@@ -835,7 +835,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private Long createActionsForTargetsInNewTransaction(final Rollout rollout, final RolloutGroup group) {
         return DeploymentHelper.runInNewTransaction(txManager, "createActionsForTargets", status -> {
             final Slice<Target> targets = targetManagement.findByInRolloutGroupWithoutAction(
-                    PageRequest.of(0, JpaRolloutExecutor.TRANSACTION_TARGETS), group.getId());
+                    group.getId(), PageRequest.of(0, JpaRolloutExecutor.TRANSACTION_TARGETS));
 
             if (targets.getNumberOfElements() > 0) {
                 final DistributionSet distributionSet = rollout.getDistributionSet();

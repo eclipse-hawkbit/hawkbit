@@ -138,13 +138,13 @@ public interface ControllerManagement {
     /**
      * Retrieves all the {@link ActionStatus} entries of the given {@link Action}.
      *
-     * @param pageReq pagination parameter
      * @param actionId to be filtered on
+     * @param pageable pagination parameter
      * @return the corresponding {@link Page} of {@link ActionStatus}
      * @throws EntityNotFoundException if action with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, long actionId);
+    Page<ActionStatus> findActionStatusByAction(long actionId, @NotNull Pageable pageable);
 
     /**
      * Register new target in the repository (plug-and-play) and in case it already exists updates {@link Target#getAddress()} and

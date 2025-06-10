@@ -191,6 +191,6 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
     }
 
     private Slice<DistributionSet> findDistributionSetForTenant(final String tenant) throws Exception {
-        return runAsTenant(tenant, () -> distributionSetManagement.findByCompleted(PAGE, true));
+        return runAsTenant(tenant, () -> distributionSetManagement.findByCompleted(true, PAGE));
     }
 }

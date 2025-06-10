@@ -452,7 +452,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Action is still finished after calling installedBase
         final Iterable<ActionStatus> actionStatusMessages = deploymentManagement
-                .findActionStatusByAction(PageRequest.of(0, 100, Sort.Direction.DESC, "id"), actionId);
+                .findActionStatusByAction(actionId, PageRequest.of(0, 100, Sort.Direction.DESC, "id"));
         assertThat(actionStatusMessages).hasSize(2);
         final ActionStatus actionStatusMessage = actionStatusMessages.iterator().next();
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Action.Status.FINISHED);
@@ -538,7 +538,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
 
         postDeploymentFeedback(savedTarget.getControllerId(), savedAction.getId(),
                 getJsonActionFeedback(DdiStatus.ExecutionStatus.SCHEDULED, DdiResult.FinalResult.NONE,
@@ -633,7 +633,7 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
 
     private Target createTargetAndAssertNoActiveActions() {
         final Target savedTarget = testdataFactory.createTarget(CONTROLLER_ID);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).isEmpty();
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).isEmpty();
         assertThat(deploymentManagement.countActionsAll()).isZero();
         assertThat(actionStatusRepository.count()).isZero();
         return savedTarget;

@@ -87,7 +87,7 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> targetFilterQueryManagement.delete(NOT_EXIST_IDL), "TargetFilterQuery");
 
         verifyThrownExceptionBy(
-                () -> targetFilterQueryManagement.findByAutoAssignDSAndRsql(PAGE, NOT_EXIST_IDL, "name==*"),
+                () -> targetFilterQueryManagement.findByAutoAssignDSAndRsql(NOT_EXIST_IDL, "name==*", PAGE),
                 "DistributionSet");
 
         verifyThrownExceptionBy(
@@ -145,7 +145,7 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
                 entityFactory.targetFilterQuery().create().name("someOtherFilter").query("name==PendingTargets002"));
 
         final List<TargetFilterQuery> results = targetFilterQueryManagement
-                .findByRsql(PageRequest.of(0, 10), "name==" + filterName).getContent();
+                .findByRsql("name==" + filterName, PageRequest.of(0, 10)).getContent();
         assertEquals(1, results.size(), "Search result should have 1 result");
         assertEquals(targetFilterQuery, results.get(0), "Retrieved newly created custom target filter");
     }
@@ -155,7 +155,7 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     void searchTargetFilterQueryInvalidField() {
         final PageRequest pageRequest = PageRequest.of(0, 10);
         Assertions.assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> targetFilterQueryManagement.findByRsql(pageRequest, "unknownField==testValue"));
+                .isThrownBy(() -> targetFilterQueryManagement.findByRsql("unknownField==testValue", pageRequest));
     }
 
     @Test
@@ -573,7 +573,7 @@ class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
     private void verifyFindByDistributionSetAndRsql(final DistributionSet distributionSet, final String rsql,
             final TargetFilterQuery... expectedFilterQueries) {
         final Page<TargetFilterQuery> tfqList = targetFilterQueryManagement
-                .findByAutoAssignDSAndRsql(PageRequest.of(0, 500), distributionSet.getId(), rsql);
+                .findByAutoAssignDSAndRsql(distributionSet.getId(), rsql, PageRequest.of(0, 500));
 
         assertThat(tfqList.getTotalElements()).isEqualTo(expectedFilterQueries.length);
         verifyExpectedFilterQueriesInList(tfqList, expectedFilterQueries);

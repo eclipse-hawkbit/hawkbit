@@ -109,9 +109,8 @@ class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest {
                 + TestdataFactory.DEFAULT_VERSION + ",notexist)", 1);
     }
 
-    private void assertRSQLQuery(final String rsqlParam, final long expectedFilterQueriesSize) {
-        final Page<TargetFilterQuery> findTargetFilterQueryPage = targetFilterQueryManagement.findByRsql(PAGE,
-                rsqlParam);
+    private void assertRSQLQuery(final String rsql, final long expectedFilterQueriesSize) {
+        final Page<TargetFilterQuery> findTargetFilterQueryPage = targetFilterQueryManagement.findByRsql(rsql, PAGE);
         assertThat(findTargetFilterQueryPage).isNotNull();
         assertThat(findTargetFilterQueryPage.getTotalElements()).isEqualTo(expectedFilterQueriesSize);
     }

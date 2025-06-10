@@ -206,7 +206,7 @@ public final class MgmtTargetMapper {
         return actionStatus.stream()
                 .map(status -> toResponse(status,
                         deploymentManagement.findMessagesByActionStatusId(
-                                        PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), status.getId())
+                                        status.getId(), PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT))
                                 .getContent()))
                 .toList();
     }

@@ -119,7 +119,7 @@ public interface RepositoryManagement<T, C, U> {
     /**
      * Retrieves all {@link BaseEntity}s with a given specification.
      *
-     * @param rsqlParam filter definition in RSQL syntax
+     * @param rsql filter definition in RSQL syntax
      * @param pageable pagination parameter
      * @return the found {@link BaseEntity}s
      * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the given
@@ -127,7 +127,7 @@ public interface RepositoryManagement<T, C, U> {
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<T> findByRsql(@NotNull String rsqlParam, @NotNull Pageable pageable);
+    Page<T> findByRsql(@NotNull String rsql, @NotNull Pageable pageable);
 
     /**
      * Verifies that {@link BaseEntity} with given ID exists in the repository.

@@ -77,13 +77,13 @@ public interface SoftwareModuleManagement extends RepositoryManagement<SoftwareM
     /**
      * Finds all meta-data by the given software module id where {@link SoftwareModuleMetadata#isTargetVisible()}.
      *
-     * @param pageable the page request to page the result
      * @param id the software module id to retrieve the meta-data from
+     * @param pageable the page request to page the result
      * @return a paged result of all meta-data entries for a given software module id
      * @throws EntityNotFoundException if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleIdAndTargetVisible(@NotNull Pageable pageable, long id);
+    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleIdAndTargetVisible(long id, @NotNull Pageable pageable);
 
     /**
      * Creates or updates a single software module meta-data entry.

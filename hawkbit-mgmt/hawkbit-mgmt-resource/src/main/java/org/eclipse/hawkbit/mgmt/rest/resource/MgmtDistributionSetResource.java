@@ -200,9 +200,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
         final Page<Target> targetsAssignedDS;
         if (rsqlParam != null) {
-            targetsAssignedDS = this.targetManagement.findByAssignedDistributionSetAndRsql(pageable, distributionSetId, rsqlParam);
+            targetsAssignedDS = this.targetManagement.findByAssignedDistributionSetAndRsql(distributionSetId, rsqlParam, pageable);
         } else {
-            targetsAssignedDS = this.targetManagement.findByAssignedDistributionSet(pageable, distributionSetId);
+            targetsAssignedDS = this.targetManagement.findByAssignedDistributionSet(distributionSetId, pageable);
         }
 
         return ResponseEntity.ok(new PagedList<>(
@@ -218,9 +218,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
         final Page<Target> targetsInstalledDS;
         if (rsqlParam != null) {
-            targetsInstalledDS = this.targetManagement.findByInstalledDistributionSetAndRsql(pageable, distributionSetId, rsqlParam);
+            targetsInstalledDS = this.targetManagement.findByInstalledDistributionSetAndRsql(distributionSetId, rsqlParam, pageable);
         } else {
-            targetsInstalledDS = this.targetManagement.findByInstalledDistributionSet(pageable, distributionSetId);
+            targetsInstalledDS = this.targetManagement.findByInstalledDistributionSet(distributionSetId, pageable);
         }
 
         return ResponseEntity.ok(new PagedList<>(
@@ -233,7 +233,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             final int pagingOffsetParam, final int pagingLimitParam, final String sortParam) {
         final Pageable pageable = PagingUtility.toPageable(pagingOffsetParam, pagingLimitParam, sanitizeDistributionSetSortParam(sortParam));
         final Page<TargetFilterQuery> targetFilterQueries = targetFilterQueryManagement
-                .findByAutoAssignDSAndRsql(pageable, distributionSetId, rsqlParam);
+                .findByAutoAssignDSAndRsql(distributionSetId, rsqlParam, pageable);
 
         return ResponseEntity.ok(new PagedList<>(
                 MgmtTargetFilterQueryMapper.toResponse(targetFilterQueries.getContent(), tenantConfigHelper.isConfirmationFlowEnabled(), false),

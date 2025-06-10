@@ -68,7 +68,7 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetTagUpdatedEvent.class, count = 0) })
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         verifyThrownExceptionBy(() -> distributionSetTagManagement.delete(NOT_EXIST_ID), "DistributionSetTag");
-        verifyThrownExceptionBy(() -> distributionSetTagManagement.findByDistributionSet(PAGE, NOT_EXIST_IDL),
+        verifyThrownExceptionBy(() -> distributionSetTagManagement.findByDistributionSet(NOT_EXIST_IDL, PAGE),
                 "DistributionSet");
         verifyThrownExceptionBy(() -> distributionSetTagManagement.update(entityFactory.tag().update(NOT_EXIST_IDL)),
                 "DistributionSetTag");

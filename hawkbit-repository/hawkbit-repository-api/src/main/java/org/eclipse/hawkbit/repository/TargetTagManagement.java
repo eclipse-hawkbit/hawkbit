@@ -87,15 +87,14 @@ public interface TargetTagManagement {
     /**
      * Retrieves all target tags based on the given specification.
      *
+     * @param rsql rsql query string
      * @param pageable pagination parameter
-     * @param rsqlParam rsql query string
      * @return the found {@link Target}s, never {@code null}
-     * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
-     *         given {@code fieldNameProvider}
+     * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetTag> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlParam);
+    Page<TargetTag> findByRsql(@NotNull String rsql, @NotNull Pageable pageable);
 
     /**
      * Find {@link TargetTag} based on given Name.

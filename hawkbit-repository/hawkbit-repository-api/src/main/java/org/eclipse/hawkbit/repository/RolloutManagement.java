@@ -180,50 +180,48 @@ public interface RolloutManagement {
     /**
      * Retrieves all rollouts.
      *
-     * @param pageable the page request to sort and limit the result
      * @param deleted flag if deleted rollouts should be included
+     * @param pageable the page request to sort and limit the result
      * @return a page of found rollouts
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAll(@NotNull Pageable pageable, boolean deleted);
+    Page<Rollout> findAll(boolean deleted, @NotNull Pageable pageable);
 
     /**
      * Get count of targets in different status in rollout.
      *
-     * @param pageable the page request to sort and limit the result
      * @param deleted flag if deleted rollouts should be included
+     * @param pageable the page request to sort and limit the result
      * @return a list of rollouts with details of targets count for different
      *         statuses
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAllWithDetailedStatus(@NotNull Pageable pageable, boolean deleted);
+    Page<Rollout> findAllWithDetailedStatus(boolean deleted, @NotNull Pageable pageable);
 
     /**
      * Retrieves all rollouts found by the given specification.
      *
-     * @param pageable the page request to sort and limit the result
-     * @param rsqlParam the specification to filter rollouts
+     * @param rsql the specification to filter rollouts
      * @param deleted flag if deleted rollouts should be included
+     * @param pageable the page request to sort and limit the result
      * @return a page of found rollouts
      * @throws RSQLParameterUnsupportedFieldException if a field in the RSQL string is used but not provided by the
      *         given {@code fieldNameProvider}
      * @throws RSQLParameterSyntaxException if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlParam, boolean deleted);
+    Page<Rollout> findByRsql(@NotNull String rsql, boolean deleted, @NotNull Pageable pageable);
 
     /**
      * Finds rollouts by given text in name or description.
      *
-     * @param pageable the page request to sort and limit the result
-     * @param searchText search text which matches name or description of rollout
+     * @param rsql search text which matches name or description of rollout
      * @param deleted flag if deleted rollouts should be included
-     * @return the founded rollout or {@code null} if rollout with given ID does
-     *         not exists
+     * @param pageable the page request to sort and limit the result
+     * @return the founded rollout or {@code null} if rollout with given ID does not exists
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findByRsqlWithDetailedStatus(@NotNull Pageable pageable, @NotEmpty String searchText,
-            boolean deleted);
+    Page<Rollout> findByRsqlWithDetailedStatus(@NotEmpty String rsql, boolean deleted, @NotNull Pageable pageable);
 
     /**
      * Find rollouts which are still active and needs to be handled.

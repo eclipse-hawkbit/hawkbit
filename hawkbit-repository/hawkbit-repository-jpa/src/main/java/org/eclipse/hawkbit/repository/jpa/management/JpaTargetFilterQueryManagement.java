@@ -172,7 +172,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Slice<TargetFilterQuery> findByName(final Pageable pageable, final String name) {
+    public Slice<TargetFilterQuery> findByName(final String name, final Pageable pageable) {
         if (ObjectUtils.isEmpty(name)) {
             return findAll(pageable);
         }
@@ -193,7 +193,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Page<TargetFilterQuery> findByRsql(final Pageable pageable, final String rsqlFilter) {
+    public Page<TargetFilterQuery> findByRsql(final String rsqlFilter, final Pageable pageable) {
         final List<Specification<JpaTargetFilterQuery>> specList = !ObjectUtils.isEmpty(rsqlFilter)
                 ? Collections.singletonList(RSQLUtility.buildRsqlSpecification(rsqlFilter,
                 TargetFilterQueryFields.class, virtualPropertyReplacer, database))
@@ -203,7 +203,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Slice<TargetFilterQuery> findByQuery(final Pageable pageable, final String query) {
+    public Slice<TargetFilterQuery> findByQuery(final String query, final Pageable pageable) {
         final List<Specification<JpaTargetFilterQuery>> specList = !ObjectUtils.isEmpty(query)
                 ? Collections.singletonList(TargetFilterQuerySpecification.equalsQuery(query))
                 : Collections.emptyList();
@@ -212,8 +212,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Slice<TargetFilterQuery> findByAutoAssignDistributionSetId(@NotNull final Pageable pageable,
-            final long setId) {
+    public Slice<TargetFilterQuery> findByAutoAssignDistributionSetId(final long setId, @NotNull final Pageable pageable) {
         final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
 
         return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository,
@@ -222,14 +221,13 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Page<TargetFilterQuery> findByAutoAssignDSAndRsql(final Pageable pageable, final long setId,
-            final String rsqlFilter) {
+    public Page<TargetFilterQuery> findByAutoAssignDSAndRsql(final long setId, final String rsql, final Pageable pageable) {
         final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
 
         final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>(2);
         specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
-        if (!ObjectUtils.isEmpty(rsqlFilter)) {
-            specList.add(RSQLUtility.buildRsqlSpecification(rsqlFilter, TargetFilterQueryFields.class,
+        if (!ObjectUtils.isEmpty(rsql)) {
+            specList.add(RSQLUtility.buildRsqlSpecification(rsql, TargetFilterQueryFields.class,
                     virtualPropertyReplacer, database));
         }
 

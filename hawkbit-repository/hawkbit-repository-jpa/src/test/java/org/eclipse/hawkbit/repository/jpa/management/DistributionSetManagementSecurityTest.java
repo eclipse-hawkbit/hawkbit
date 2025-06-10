@@ -158,7 +158,7 @@ class DistributionSetManagementSecurityTest
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByCompletedPermissionsCheck() {
-        assertPermissions(() -> distributionSetManagement.findByCompleted(PAGE, true), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> distributionSetManagement.findByCompleted(true, PAGE), List.of(SpPermission.READ_REPOSITORY));
     }
 
     @Test

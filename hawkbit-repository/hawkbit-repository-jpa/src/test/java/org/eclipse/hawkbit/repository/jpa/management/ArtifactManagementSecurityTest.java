@@ -81,7 +81,7 @@ class ArtifactManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ArtifactManagement#findBySoftwareModule() method")
     void findBySoftwareModulePermissionCheck() {
-        assertPermissions(() -> artifactManagement.findBySoftwareModule(PAGE, 1L), List.of(SpPermission.READ_REPOSITORY));
+        assertPermissions(() -> artifactManagement.findBySoftwareModule(1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
     }
 
     @Test

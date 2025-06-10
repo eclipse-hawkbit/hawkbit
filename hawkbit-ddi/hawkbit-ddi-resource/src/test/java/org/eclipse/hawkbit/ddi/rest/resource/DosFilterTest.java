@@ -163,9 +163,9 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
         final List<Target> toAssign = Collections.singletonList(target);
 
         assignDistributionSet(ds, toAssign);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE)).hasSize(1);
 
-        final Action uaction = deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId()).getContent().get(0);
+        final Action uaction = deploymentManagement.findActiveActionsByTarget(target.getControllerId(), PAGE).getContent().get(0);
 
         return uaction.getId();
     }

@@ -425,7 +425,7 @@ public abstract class AbstractIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet(distributionSet, isRequiredMigrationStep);
         Target savedTarget = testdataFactory.createTarget(controllerId);
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.FORCED));
-        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent().get(0);
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent().get(0);
 
         if (savedAction.getStatus() == Action.Status.WAIT_FOR_CONFIRMATION) {
             confirmationManagement.confirmAction(savedAction.getId(), null, null);

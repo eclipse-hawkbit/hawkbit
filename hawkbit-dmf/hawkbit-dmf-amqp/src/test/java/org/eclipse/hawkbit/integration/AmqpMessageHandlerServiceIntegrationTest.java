@@ -1146,12 +1146,12 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
             try {
                 SecurityContextSwitch.runAsPrivileged(() -> {
                     final List<ActionStatus> actionStatusList = deploymentManagement
-                            .findActionStatusByAction(PAGE, actionId).getContent();
+                            .findActionStatusByAction(actionId, PAGE).getContent();
 
                     // Check correlation ID
                     final List<String> messagesFromServer = actionStatusList.stream()
                             .flatMap(actionStatus -> deploymentManagement
-                                    .findMessagesByActionStatusId(PAGE, actionStatus.getId()).getContent().stream())
+                                    .findMessagesByActionStatusId(actionStatus.getId(), PAGE).getContent().stream())
                             .filter(Objects::nonNull)
                             .filter(message -> message
                                     .startsWith(RepositoryConstants.SERVER_MESSAGE_PREFIX + "DMF message"))
@@ -1184,7 +1184,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
             try {
                 SecurityContextSwitch.runAsPrivileged(() -> {
                     final List<ActionStatus> actionStatusList = deploymentManagement
-                            .findActionStatusByAction(PAGE, actionId).getContent();
+                            .findActionStatusByAction(actionId, PAGE).getContent();
                     assertThat(actionStatusList).hasSize(statusListCount);
 
                     final List<Status> status = actionStatusList.stream().map(ActionStatus::getStatus)

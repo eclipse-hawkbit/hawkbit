@@ -81,13 +81,13 @@ class TargetTypeManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByRsqlPermissionsCheck() {
-        assertPermissions(() -> targetTypeManagement.findByRsql(PAGE, "name==tag"), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetTypeManagement.findByRsql("name==tag", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
     void findByNamePermissionsCheck() {
-        assertPermissions(() -> targetTypeManagement.findByName(PAGE, "name"), List.of(SpPermission.READ_TARGET));
+        assertPermissions(() -> targetTypeManagement.findByName("name", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     @Test

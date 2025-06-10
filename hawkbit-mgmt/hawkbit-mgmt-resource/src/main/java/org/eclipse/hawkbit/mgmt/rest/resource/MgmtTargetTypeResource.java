@@ -58,7 +58,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
         final Slice<TargetType> findTargetTypesAll;
         long countTargetTypesAll;
         if (rsqlParam != null) {
-            findTargetTypesAll = targetTypeManagement.findByRsql(pageable, rsqlParam);
+            findTargetTypesAll = targetTypeManagement.findByRsql(rsqlParam, pageable);
             countTargetTypesAll = ((Page<TargetType>) findTargetTypesAll).getTotalElements();
         } else {
             findTargetTypesAll = targetTypeManagement.findAll(pageable);

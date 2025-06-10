@@ -113,8 +113,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
                 () -> targetManagement.assignTag(Collections.singletonList(target.getControllerId()), NOT_EXIST_IDL), "TargetTag");
         verifyThrownExceptionBy(() -> targetManagement.assignTag(Collections.singletonList(NOT_EXIST_ID), tag.getId()), "Target");
 
-        verifyThrownExceptionBy(() -> targetManagement.findByTag(PAGE, NOT_EXIST_IDL), "TargetTag");
-        verifyThrownExceptionBy(() -> targetManagement.findByRsqlAndTag(PAGE, "name==*", NOT_EXIST_IDL), "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.findByTag(NOT_EXIST_IDL, PAGE), "TargetTag");
+        verifyThrownExceptionBy(() -> targetManagement.findByRsqlAndTag("name==*", NOT_EXIST_IDL, PAGE), "TargetTag");
 
         verifyThrownExceptionBy(() -> targetManagement.countByAssignedDistributionSet(NOT_EXIST_IDL), "DistributionSet");
         verifyThrownExceptionBy(() -> targetManagement.countByInstalledDistributionSet(NOT_EXIST_IDL), "DistributionSet");
@@ -128,16 +128,16 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> targetManagement.delete(Collections.singletonList(NOT_EXIST_IDL)), "Target");
 
         verifyThrownExceptionBy(
-                () -> targetManagement.findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(PAGE, NOT_EXIST_IDL, "name==*"),
+                () -> targetManagement.findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(NOT_EXIST_IDL, "name==*", PAGE),
                 "DistributionSet");
-        verifyThrownExceptionBy(() -> targetManagement.findByInRolloutGroupWithoutAction(PAGE, NOT_EXIST_IDL), "RolloutGroup");
-        verifyThrownExceptionBy(() -> targetManagement.findByAssignedDistributionSet(PAGE, NOT_EXIST_IDL), "DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.findByInRolloutGroupWithoutAction(NOT_EXIST_IDL, PAGE), "RolloutGroup");
+        verifyThrownExceptionBy(() -> targetManagement.findByAssignedDistributionSet(NOT_EXIST_IDL, PAGE), "DistributionSet");
         verifyThrownExceptionBy(
-                () -> targetManagement.findByAssignedDistributionSetAndRsql(PAGE, NOT_EXIST_IDL, "name==*"), "DistributionSet");
+                () -> targetManagement.findByAssignedDistributionSetAndRsql(NOT_EXIST_IDL, "name==*", PAGE), "DistributionSet");
 
-        verifyThrownExceptionBy(() -> targetManagement.findByInstalledDistributionSet(PAGE, NOT_EXIST_IDL), "DistributionSet");
+        verifyThrownExceptionBy(() -> targetManagement.findByInstalledDistributionSet(NOT_EXIST_IDL, PAGE), "DistributionSet");
         verifyThrownExceptionBy(
-                () -> targetManagement.findByInstalledDistributionSetAndRsql(PAGE, NOT_EXIST_IDL, "name==*"), "DistributionSet");
+                () -> targetManagement.findByInstalledDistributionSetAndRsql(NOT_EXIST_IDL, "name==*", PAGE), "DistributionSet");
 
         verifyThrownExceptionBy(() -> targetManagement
                 .assignTag(Collections.singletonList(target.getControllerId()), Long.parseLong(NOT_EXIST_ID)), "TargetTag");
@@ -238,17 +238,17 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final TargetTag findTargetTag = targetTagManagement.getByName("Tag1").orElseThrow(IllegalStateException::new);
         assertThat(assignedTargets).as("Assigned targets are wrong")
-                .hasSize(targetManagement.findByTag(PAGE, targetTag.getId()).getNumberOfElements());
+                .hasSize(targetManagement.findByTag(targetTag.getId(), PAGE).getNumberOfElements());
 
         final Target unAssignTarget = targetManagement.unassignTag(List.of("targetId123"), findTargetTag.getId()).get(0);
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
         assertThat(getTargetTags(unAssignTarget.getControllerId())).as("Tag size is wrong")
                 .isEmpty();
         targetTagManagement.getByName("Tag1").orElseThrow(NoSuchElementException::new);
-        assertThat(targetManagement.findByTag(PAGE, targetTag.getId())).as("Assigned targets are wrong").hasSize(3);
-        assertThat(targetManagement.findByRsqlAndTag(PAGE, "controllerId==targetId123", targetTag.getId()))
+        assertThat(targetManagement.findByTag(targetTag.getId(), PAGE)).as("Assigned targets are wrong").hasSize(3);
+        assertThat(targetManagement.findByRsqlAndTag("controllerId==targetId123", targetTag.getId(), PAGE))
                 .as("Assigned targets are wrong").isEmpty();
-        assertThat(targetManagement.findByRsqlAndTag(PAGE, "controllerId==targetId1234", targetTag.getId()))
+        assertThat(targetManagement.findByRsqlAndTag("controllerId==targetId1234", targetTag.getId(), PAGE))
                 .as("Assigned targets are wrong").hasSize(1);
 
     }
@@ -657,7 +657,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final String[] tagNames = null;
         final List<Target> targetsListWithNoTag = targetManagement
-                .findByFilters(PAGE, new FilterParams(null, null, null, null, Boolean.TRUE, tagNames)).getContent();
+                .findByFilters(new FilterParams(null, null, null, null, Boolean.TRUE, tagNames), PAGE).getContent();
 
         assertThat(targetManagement.count()).as("Total targets").isEqualTo(50L);
         assertThat(targetsListWithNoTag).as("Targets with no tag").hasSize(25);
@@ -694,7 +694,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         testdataFactory.createTargets(25, "target-id-B", "first description");
 
-        final Slice<Target> foundTargets = targetManagement.findByRsql(PAGE, rsqlFilter);
+        final Slice<Target> foundTargets = targetManagement.findByRsql(rsqlFilter, PAGE);
         final long foundTargetsCount = targetManagement.countByRsql(rsqlFilter);
 
         assertThat(targetManagement.count()).as("Total targets").isEqualTo(50L);
@@ -1159,7 +1159,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final Slice<Target> matching =
                 targetManagement.findByTargetFilterQueryAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
-                        PAGE, rollout.getId(), 10, Long.MAX_VALUE, "controllerid==dyn_action_filter_*", distributionSet.getType());
+                        rollout.getId(), 10, Long.MAX_VALUE, "controllerid==dyn_action_filter_*", distributionSet.getType(), PAGE);
 
         assertThat(matching.getNumberOfElements()).isEqualTo(expected.size());
         assertThat(matching.stream()
@@ -1449,7 +1449,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void validateFoundTargetsByRsql(final String rsqlFilter, final String... controllerIds) {
-        final Slice<Target> foundTargetsByMetadataAndControllerId = targetManagement.findByRsql(PAGE, rsqlFilter);
+        final Slice<Target> foundTargetsByMetadataAndControllerId = targetManagement.findByRsql(rsqlFilter, PAGE);
         final long foundTargetsByMetadataAndControllerIdCount = targetManagement.countByRsql(rsqlFilter);
 
         assertThat(foundTargetsByMetadataAndControllerId.getNumberOfElements())

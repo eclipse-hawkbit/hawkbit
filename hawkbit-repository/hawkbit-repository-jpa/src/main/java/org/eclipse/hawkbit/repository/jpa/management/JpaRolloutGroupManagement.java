@@ -118,11 +118,11 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public Page<RolloutGroup> findByRolloutAndRsql(final long rolloutId, final String rsqlParam, final Pageable pageable) {
+    public Page<RolloutGroup> findByRolloutAndRsql(final long rolloutId, final String rsql, final Pageable pageable) {
         throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
 
         final List<Specification<JpaRolloutGroup>> specList = Arrays.asList(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutGroupFields.class, virtualPropertyReplacer,
+                RSQLUtility.buildRsqlSpecification(rsql, RolloutGroupFields.class, virtualPropertyReplacer,
                         database),
                 (root, query, cb) -> cb.equal(root.get(JpaRolloutGroup_.rollout).get(AbstractJpaBaseEntity_.id), rolloutId));
 
@@ -130,10 +130,10 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public Page<RolloutGroup> findByRolloutAndRsqlWithDetailedStatus(final long rolloutId, final String rsqlParam, final Pageable pageable) {
+    public Page<RolloutGroup> findByRolloutAndRsqlWithDetailedStatus(final long rolloutId, final String rsql, final Pageable pageable) {
         throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
 
-        final Page<RolloutGroup> rolloutGroups = findByRolloutAndRsql(rolloutId, rsqlParam, pageable);
+        final Page<RolloutGroup> rolloutGroups = findByRolloutAndRsql(rolloutId, rsql, pageable);
         final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(RolloutGroup::getId).toList();
         if (rolloutGroupIds.isEmpty()) {
             // groups might already have been deleted, so return empty list.
@@ -185,11 +185,11 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
-    public Page<Target> findTargetsOfRolloutGroupByRsql(final Pageable pageable, final long rolloutGroupId, final String rsqlParam) {
+    public Page<Target> findTargetsOfRolloutGroupByRsql(final long rolloutGroupId, final String rsql, final Pageable pageable) {
         throwExceptionIfRolloutGroupDoesNotExist(rolloutGroupId);
 
         final List<Specification<JpaTarget>> specList = Arrays.asList(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer, database),
+                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                 (root, query, cb) -> {
                     final ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = root.join(JpaTarget_.rolloutTargetGroup);
                     return cb.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup).get(AbstractJpaBaseEntity_.id), rolloutGroupId);

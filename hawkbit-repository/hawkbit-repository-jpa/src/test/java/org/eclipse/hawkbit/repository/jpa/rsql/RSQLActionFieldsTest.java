@@ -107,10 +107,10 @@ class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
         return newAction;
     }
 
-    private void assertRSQLQuery(final String rsqlParam, final long expectedEntities) {
-        final Slice<Action> findEntity = deploymentManagement.findActionsByTarget(rsqlParam, target.getControllerId(),
+    private void assertRSQLQuery(final String rsql, final long expectedEntities) {
+        final Slice<Action> findEntity = deploymentManagement.findActionsByTarget(rsql, target.getControllerId(),
                 PageRequest.of(0, 100));
-        final long countAllEntities = deploymentManagement.countActionsByTarget(rsqlParam, target.getControllerId());
+        final long countAllEntities = deploymentManagement.countActionsByTarget(rsql, target.getControllerId());
         assertThat(findEntity).isNotNull();
         assertThat(findEntity.getContent()).hasSize((int)expectedEntities);
         assertThat(countAllEntities).isEqualTo(expectedEntities);

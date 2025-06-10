@@ -173,13 +173,13 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         // Retrieved is reported
 
         List<Action> activeActionsByTarget = deploymentManagement
-                .findActiveActionsByTarget(PAGE, savedTarget.getControllerId()).getContent();
+                .findActiveActionsByTarget(savedTarget.getControllerId(), PAGE).getContent();
 
         assertThat(activeActionsByTarget).hasSize(1);
         assertThat(activeActionsByTarget.get(0).getStatus()).isEqualTo(Status.RUNNING);
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
-        activeActionsByTarget = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+        activeActionsByTarget = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)
                 .getContent();
 
         // the canceled action should still be active!
@@ -219,7 +219,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        activeActionsByTarget = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
+        activeActionsByTarget = deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)
                 .getContent();
         assertThat(activeActionsByTarget).isEmpty();
         final Action canceledAction = deploymentManagement.findAction(cancelAction.getId()).get();
@@ -279,7 +279,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
         assertThat(countActionStatusAll()).isEqualTo(2);
 
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                         + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant())
                         .content(getJsonProceedingCancelActionFeedback()).contentType(MediaType.APPLICATION_JSON)
@@ -287,7 +287,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
         assertThat(countActionStatusAll()).isEqualTo(3);
 
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
@@ -296,7 +296,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
         assertThat(countActionStatusAll()).isEqualTo(4);
 
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
@@ -306,10 +306,10 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
         assertThat(countActionStatusAll()).isEqualTo(5);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
 
         // cancellation canceled -> should remove the action from active
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                         + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant())
                         .content(getJsonCanceledCancelActionFeedback()).contentType(MediaType.APPLICATION_JSON)
@@ -317,13 +317,13 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
         assertThat(countActionStatusAll()).isEqualTo(6);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
 
         // cancellation rejected -> action still active until controller close
         // it
         // with finished or
         // error
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                         + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant())
                         .content(getJsonRejectedCancelActionFeedback()).contentType(MediaType.APPLICATION_JSON)
@@ -331,7 +331,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
         assertThat(countActionStatusAll()).isEqualTo(7);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
 
         // update closed -> should remove the action from active
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/deploymentBase/"
@@ -341,7 +341,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
         assertThat(countActionStatusAll()).isEqualTo(8);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).isEmpty();
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).isEmpty();
     }
 
     @Test
@@ -366,12 +366,12 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         assertThat(countActionStatusAll()).isEqualTo(3);
 
         // 3 update actions, 0 cancel actions
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(3);
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(3);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(3);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(3);
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
         final Action cancelAction2 = deploymentManagement.cancelAction(actionId2);
 
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(3);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(3);
         assertThat(deploymentManagement.countActionsByTarget(savedTarget.getControllerId())).isEqualTo(3);
         mvc.perform(get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                         + cancelAction.getId(), tenantAware.getCurrentTenant()).accept(MediaType.APPLICATION_JSON))
@@ -402,7 +402,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         assertThat(countActionStatusAll()).isEqualTo(7);
 
         // 1 update actions, 1 cancel actions
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(2);
         assertThat(deploymentManagement.countActionsByTarget(savedTarget.getControllerId())).isEqualTo(3);
         mvc.perform(get("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
                         + cancelAction2.getId(), tenantAware.getCurrentTenant()).accept(MediaType.APPLICATION_JSON))
@@ -442,12 +442,12 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         assertThat(countActionStatusAll()).isEqualTo(10);
 
         // 1 update actions, 0 cancel actions
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
 
         final Action cancelAction3 = deploymentManagement.cancelAction(actionId3);
 
         // action is in cancelling state
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).hasSize(1);
         assertThat(deploymentManagement.countActionsByTarget(savedTarget.getControllerId())).isEqualTo(3);
         assertThat(deploymentManagement.getAssignedDistributionSet(TestdataFactory.DEFAULT_CONTROLLER_ID).get())
                 .isEqualTo(ds3);
@@ -471,7 +471,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
         assertThat(countActionStatusAll()).isEqualTo(13);
 
         // final status
-        assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).isEmpty();
+        assertThat(deploymentManagement.findActiveActionsByTarget(savedTarget.getControllerId(), PAGE)).isEmpty();
         assertThat(deploymentManagement.countActionsByTarget(savedTarget.getControllerId())).isEqualTo(3);
     }
 

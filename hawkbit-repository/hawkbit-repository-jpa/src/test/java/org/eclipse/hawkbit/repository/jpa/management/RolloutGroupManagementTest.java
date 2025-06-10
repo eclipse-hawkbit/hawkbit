@@ -67,7 +67,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> rolloutGroupManagement.findByRolloutAndRsql(NOT_EXIST_IDL, "name==*", PAGE), "Rollout");
 
         verifyThrownExceptionBy(() -> rolloutGroupManagement.findTargetsOfRolloutGroup(NOT_EXIST_IDL, PAGE), "RolloutGroup");
-        verifyThrownExceptionBy(() -> rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(PAGE, NOT_EXIST_IDL, "name==*"), "RolloutGroup");
+        verifyThrownExceptionBy(() -> rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(NOT_EXIST_IDL, "name==*", PAGE), "RolloutGroup");
     }
 
     @Test

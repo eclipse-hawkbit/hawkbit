@@ -144,15 +144,15 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
-    public Page<TargetType> findByRsql(final Pageable pageable, final String rsqlParam) {
+    public Page<TargetType> findByRsql(final String rsql, final Pageable pageable) {
         return JpaManagementHelper.findAllWithCountBySpec(targetTypeRepository, List.of(
                 RSQLUtility.buildRsqlSpecification(
-                        rsqlParam, TargetTypeFields.class, virtualPropertyReplacer, database)), pageable
+                        rsql, TargetTypeFields.class, virtualPropertyReplacer, database)), pageable
         );
     }
 
     @Override
-    public Slice<TargetType> findByName(final Pageable pageable, final String name) {
+    public Slice<TargetType> findByName(final String name, final Pageable pageable) {
         return JpaManagementHelper.findAllWithoutCountBySpec(targetTypeRepository, List.of(TargetTypeSpecification.likeName(name)), pageable
         );
     }

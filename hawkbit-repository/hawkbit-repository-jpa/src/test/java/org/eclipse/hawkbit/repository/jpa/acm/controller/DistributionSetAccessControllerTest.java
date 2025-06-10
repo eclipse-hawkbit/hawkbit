@@ -78,7 +78,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
                 .toList()).containsOnly(permittedActionId);
 
         // verify distributionSetManagement#findByCompleted
-        assertThat(distributionSetManagement.findByCompleted(Pageable.unpaged(), true).get().map(Identifiable::getId)
+        assertThat(distributionSetManagement.findByCompleted(true, Pageable.unpaged()).get().map(Identifiable::getId)
                 .toList()).containsOnly(permittedActionId);
 
         // verify distributionSetManagement#findByDistributionSetFilter

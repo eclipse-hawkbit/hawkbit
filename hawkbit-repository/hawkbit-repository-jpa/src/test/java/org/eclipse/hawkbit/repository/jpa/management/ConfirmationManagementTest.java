@@ -107,7 +107,7 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(1)
                 .allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, actions.get(0).getId())).hasSize(1)
+        assertThat(controllerManagement.findActionStatusByAction(actions.get(0).getId(), PAGE)).hasSize(1)
                 .allMatch(status -> status.getStatus() == Status.WAIT_FOR_CONFIRMATION);
 
         final Action newAction = confirmationManagement.confirmAction(actions.get(0).getId(), null, null);
@@ -118,7 +118,7 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
         assertThat(newAction.getStatus()).isEqualTo(Status.RUNNING);
 
         // status entry RUNNING should be present in status history
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, newAction.getId())).hasSize(2)
+        assertThat(controllerManagement.findActionStatusByAction(newAction.getId(), PAGE)).hasSize(2)
                 .anyMatch(status -> status.getStatus() == Status.RUNNING);
     }
 
@@ -166,7 +166,7 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actions).hasSize(1).allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
         assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(1)
                 .allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, actions.get(0).getId())).hasSize(1)
+        assertThat(controllerManagement.findActionStatusByAction(actions.get(0).getId(), PAGE)).hasSize(1)
                 .allMatch(status -> status.getStatus() == Status.WAIT_FOR_CONFIRMATION);
 
         final Action newAction = confirmationManagement.denyAction(actions.get(0).getId(), null, null);
@@ -178,7 +178,7 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
         assertThat(newAction.getStatus()).isEqualTo(Status.WAIT_FOR_CONFIRMATION);
 
         // no status entry RUNNING should be present in status history
-        assertThat(controllerManagement.findActionStatusByAction(PAGE, newAction.getId())).hasSize(2)
+        assertThat(controllerManagement.findActionStatusByAction(newAction.getId(), PAGE)).hasSize(2)
                 .noneMatch(status -> status.getStatus() == Status.RUNNING);
     }
 

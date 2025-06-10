@@ -231,13 +231,13 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
     /**
      * Finds all {@link DistributionSet}s based on completeness.
      *
-     * @param pageable the pagination parameter
      * @param complete to <code>true</code> for returning only completed distribution sets or <code>false</code> for only incomplete ones nor
      *         <code>null</code> to return both.
+     * @param pageable the pagination parameter
      * @return all found {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Slice<DistributionSet> findByCompleted(@NotNull Pageable pageable, Boolean complete);
+    Slice<DistributionSet> findByCompleted(Boolean complete, @NotNull Pageable pageable);
 
     /**
      * Retrieves {@link DistributionSet}s by filtering on the given parameters.
@@ -266,14 +266,14 @@ public interface DistributionSetManagement extends RepositoryManagement<Distribu
     /**
      * Retrieves {@link DistributionSet}s by filtering on the given parameters.
      *
-     * @param rsqlParam rsql query string
+     * @param rsql rsql query string
      * @param tagId of the tag the DS are assigned to
      * @param pageable page parameter
      * @return the page of found {@link DistributionSet}
      * @throws EntityNotFoundException of distribution set tag with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSet> findByRsqlAndTag(@NotNull String rsqlParam, long tagId, @NotNull Pageable pageable);
+    Page<DistributionSet> findByRsqlAndTag(@NotNull String rsql, long tagId, @NotNull Pageable pageable);
 
     /**
      * Counts all {@link DistributionSet}s based on completeness.

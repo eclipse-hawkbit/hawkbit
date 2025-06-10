@@ -50,14 +50,14 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
                 .containsOnly(permittedTargetType.getId());
 
         // verify targetTypeManagement#findByRsql
-        assertThat(targetTypeManagement.findByRsql(Pageable.unpaged(), "name==*").get().map(Identifiable::getId).toList())
+        assertThat(targetTypeManagement.findByRsql("name==*", Pageable.unpaged()).get().map(Identifiable::getId).toList())
                 .containsOnly(permittedTargetType.getId());
 
         // verify targetTypeManagement#findByName
-        assertThat(targetTypeManagement.findByName(Pageable.unpaged(), permittedTargetType.getName()).getContent())
+        assertThat(targetTypeManagement.findByName(permittedTargetType.getName(), Pageable.unpaged()).getContent())
                 .hasSize(1).satisfies(results ->
                         assertThat(results.get(0).getId()).isEqualTo(permittedTargetType.getId()));
-        assertThat(targetTypeManagement.findByName(Pageable.unpaged(), hiddenTargetType.getName())).isEmpty();
+        assertThat(targetTypeManagement.findByName(hiddenTargetType.getName(), Pageable.unpaged())).isEmpty();
 
         // verify targetTypeManagement#count
         assertThat(targetTypeManagement.count()).isEqualTo(1);

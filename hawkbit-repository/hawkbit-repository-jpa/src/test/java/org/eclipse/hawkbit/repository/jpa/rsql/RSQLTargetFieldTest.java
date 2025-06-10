@@ -413,16 +413,16 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
                 .isThrownBy(() -> assertRSQLQuery("targettype.description==Description", 0));
     }
 
-    private void assertRSQLQuery(final String rsqlParam, final long expectedTargets) {
-        final Slice<Target> findTargetPage = targetManagement.findByRsql(PAGE, rsqlParam);
+    private void assertRSQLQuery(final String rsql, final long expectedTargets) {
+        final Slice<Target> findTargetPage = targetManagement.findByRsql(rsql, PAGE);
         assertThat(findTargetPage).isNotNull();
         assertThat(findTargetPage.getNumberOfElements()).isEqualTo(expectedTargets);
-        assertThat(targetManagement.countByRsql(rsqlParam)).isEqualTo(expectedTargets);
+        assertThat(targetManagement.countByRsql(rsql)).isEqualTo(expectedTargets);
     }
 
-    private void assertRSQLQueryThrowsException(final String rsqlParam) {
+    private void assertRSQLQueryThrowsException(final String rsql) {
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
                 .isThrownBy(() -> RSQLUtility.validateRsqlFor(
-                        rsqlParam, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager));
+                        rsql, TargetFields.class, JpaTarget.class, virtualPropertyReplacer, entityManager));
     }
 }

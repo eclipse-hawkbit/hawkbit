@@ -94,7 +94,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(() -> artifactManagement.delete(NOT_EXIST_IDL), "Artifact");
 
-        verifyThrownExceptionBy(() -> artifactManagement.findBySoftwareModule(PAGE, NOT_EXIST_IDL), "SoftwareModule");
+        verifyThrownExceptionBy(() -> artifactManagement.findBySoftwareModule(NOT_EXIST_IDL, PAGE), "SoftwareModule");
         assertThat(artifactManagement.getByFilename(NOT_EXIST_ID)).isEmpty();
 
         verifyThrownExceptionBy(() -> artifactManagement.getByFilenameAndSoftwareModule("xxx", NOT_EXIST_IDL), "SoftwareModule");
@@ -170,7 +170,7 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         for (int i = 0; i < maxArtifacts; ++i) {
             artifactIds.add(createArtifactForSoftwareModule("file" + i, smId, artifactSize).getId());
         }
-        assertThat(artifactManagement.findBySoftwareModule(PAGE, smId).getTotalElements()).isEqualTo(maxArtifacts);
+        assertThat(artifactManagement.findBySoftwareModule(smId, PAGE).getTotalElements()).isEqualTo(maxArtifacts);
 
         // create one mode to trigger the quota exceeded error
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
@@ -178,12 +178,12 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         // delete one of the artifacts
         artifactManagement.delete(artifactIds.get(0));
-        assertThat(artifactManagement.findBySoftwareModule(PAGE, smId).getTotalElements())
+        assertThat(artifactManagement.findBySoftwareModule(smId, PAGE).getTotalElements())
                 .isEqualTo(maxArtifacts - 1);
 
         // now we should be able to create an artifact again
         createArtifactForSoftwareModule("fileXYZ", smId, artifactSize);
-        assertThat(artifactManagement.findBySoftwareModule(PAGE, smId).getTotalElements()).isEqualTo(maxArtifacts);
+        assertThat(artifactManagement.findBySoftwareModule(smId, PAGE).getTotalElements()).isEqualTo(maxArtifacts);
     }
 
     @Test
@@ -410,12 +410,12 @@ class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Description("Searches an artifact through the relations of a software module.")
     void findArtifactBySoftwareModule() throws IOException {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        assertThat(artifactManagement.findBySoftwareModule(PAGE, sm.getId())).isEmpty();
+        assertThat(artifactManagement.findBySoftwareModule(sm.getId(), PAGE)).isEmpty();
 
         final int artifactSize = 5 * 1024;
         try (final InputStream input = new RandomGeneratedInputStream(artifactSize)) {
             createArtifactForSoftwareModule("file1", sm.getId(), artifactSize, input);
-            assertThat(artifactManagement.findBySoftwareModule(PAGE, sm.getId())).hasSize(1);
+            assertThat(artifactManagement.findBySoftwareModule(sm.getId(), PAGE)).hasSize(1);
         }
     }
 

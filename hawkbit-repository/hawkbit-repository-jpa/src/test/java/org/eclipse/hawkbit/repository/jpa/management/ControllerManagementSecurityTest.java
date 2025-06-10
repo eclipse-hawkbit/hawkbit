@@ -18,10 +18,8 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
@@ -87,7 +85,7 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests ControllerManagement#findActionStatusByAction() method")
     void findActionStatusByActionPermissionsCheck() {
-        assertPermissions(() -> controllerManagement.findActionStatusByAction(Pageable.unpaged(), 1L),
+        assertPermissions(() -> controllerManagement.findActionStatusByAction(1L, Pageable.unpaged()),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
 

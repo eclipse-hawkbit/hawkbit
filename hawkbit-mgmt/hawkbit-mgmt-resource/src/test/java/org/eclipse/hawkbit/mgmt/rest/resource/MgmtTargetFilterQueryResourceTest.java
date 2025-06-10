@@ -275,8 +275,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 + filterQuery.getId();
         final String distributionsetHrefPrefix = "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING;
 
-        final String dsQuery = "?offset=0&limit=50&q=name==" + set.getName() + ";" + "version==" + set.getVersion();
-
+        final String dsQuery = "?q=name==" + set.getName() + ";" + "version==" + set.getVersion() + "&offset=0&limit=50";
         mvc.perform(
                         post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
                                 .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
