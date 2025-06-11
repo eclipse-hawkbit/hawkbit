@@ -91,13 +91,12 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     /**
      * Action statuses that result in a terminated action
      */
-    private static final List<Status> DEFAULT_ACTION_TERMINATION_STATUSES = List.of(
-            Status.ERROR, Status.FINISHED, Status.CANCELED);
+    private static final List<Status> DEFAULT_ACTION_TERMINATION_STATUSES = List.of(Status.ERROR, Status.FINISHED, Status.CANCELED);
     /**
      * In case of DOWNLOAD_ONLY, actions can be finished with DOWNLOADED status.
      */
-    private static final List<Status> DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES = List.of(
-            Status.ERROR, Status.FINISHED, Status.CANCELED, Status.DOWNLOADED);
+    private static final List<Status> DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES =
+            List.of(Status.ERROR, Status.FINISHED, Status.CANCELED, Status.DOWNLOADED);
     private static final Comparator<RolloutGroup> DESC_COMP = Comparator.comparingLong(RolloutGroup::getId).reversed();
     private static final String TRANSACTION_ASSIGNING_TARGETS_TO_ROLLOUT_GROUP_FAILED = "Transaction assigning Targets to RolloutGroup failed";
 
@@ -647,7 +646,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                     rollout.getRolloutGroups(), RolloutGroupStatus.READY, group);
             final Slice<Target> targets;
             if (!RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
-                targets = targetManagement.findByTargetFilterQueryAndNotInRolloutAndCompatibleAndUpdatable(
+                targets = targetManagement.findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
                         readyGroups, targetFilter, rollout.getDistributionSet().getType(), pageRequest);
             } else {
                 targets = targetManagement.findByFailedRolloutAndNotInRolloutGroups(
@@ -688,8 +687,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             long targetsLeftToAdd = expectedInGroup - currentlyInGroup;
             final String groupTargetFilter = RolloutHelper.getGroupTargetFilter(
                     // don't use RolloutHelper.getTargetFilterQuery(rollout)
-                    // since it contains condition for device to be created
-                    // before the rollout
+                    // since it contains condition for device to be created before the rollout
                     rollout.getTargetFilterQuery(), group);
             long newActions = 0;
             do {
@@ -723,8 +721,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         return false;
     }
 
-    private void createDynamicGroup(final JpaRollout rollout, final JpaRolloutGroup lastGroup, final int groupCount,
-            final RolloutGroupStatus status) {
+    private void createDynamicGroup(
+            final JpaRollout rollout, final JpaRolloutGroup lastGroup, final int groupCount, final RolloutGroupStatus status) {
         try {
             RolloutHelper.verifyRolloutGroupAmount(groupCount + 1, quotaManagement);
         } catch (final AssignmentQuotaExceededException e) {
@@ -738,8 +736,9 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
         final JpaRolloutGroup group = new JpaRolloutGroup();
         final String lastGroupWithoutSuffix = "group-" + groupCount;
-        final String suffix = lastGroup.getName().startsWith(lastGroupWithoutSuffix) ? lastGroup.getName()
-                .substring(lastGroupWithoutSuffix.length()) : "";
+        final String suffix = lastGroup.getName().startsWith(lastGroupWithoutSuffix)
+                ? lastGroup.getName().substring(lastGroupWithoutSuffix.length())
+                : "";
         final String nameAndDesc = "group-" + (groupCount + 1) + suffix;
         group.setName(nameAndDesc);
         group.setDescription(nameAndDesc);
@@ -767,15 +766,12 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         ((JpaRolloutManagement) rolloutManagement).publishRolloutGroupCreatedEventAfterCommit(savedGroup, rollout);
     }
 
-    private int createActionsForDynamicGroupInNewTransaction(final JpaRollout rollout, final RolloutGroup group,
-            final String targetFilter, final long limit) {
+    private int createActionsForDynamicGroupInNewTransaction(
+            final JpaRollout rollout, final RolloutGroup group, final String targetFilter, final long limit) {
         return DeploymentHelper.runInNewTransaction(txManager, "createActionsForRolloutDynamicGroup", status -> {
-            final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
-            final Slice<Target> targets = targetManagement.findByTargetFilterQueryAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
-                    rollout.getId(), rollout.getWeight().orElse(1000), rolloutGroupRepository.findByRolloutOrderByIdAsc(rollout).get(0).getId(),
-                    targetFilter, rollout.getDistributionSet().getType(), pageRequest
-                    // Dynamic rollouts shall always have weight!
-            );
+            // Dynamic rollouts shall always have weight!
+            final Slice<Target> targets = targetManagement.findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
+                    rollout.getId(), targetFilter, rollout.getDistributionSet().getType(), PageRequest.of(0, Math.toIntExact(limit)));
 
             if (targets.getNumberOfElements() == 0) {
                 return 0;

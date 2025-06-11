@@ -245,38 +245,16 @@ public interface TargetManagement {
      * with the passed {@link DistributionSetType}.
      *
      * @param groups the list of {@link RolloutGroup}s
-     * @param targetFilterQuery filter definition in RSQL syntax
+     * @param rsql filter definition in RSQL syntax
      * @param distributionSetType type of the {@link DistributionSet} the targets must be compatible
      *         withs
      * @param pageable the pageable to enhance the query for paging and sorting
      * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    Slice<Target> findByTargetFilterQueryAndNotInRolloutAndCompatibleAndUpdatable(
-            @NotEmpty Collection<Long> groups, @NotNull String targetFilterQuery, @NotNull DistributionSetType distributionSetType,
+    Slice<Target> findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+            @NotEmpty Collection<Long> groups, @NotNull String rsql, @NotNull DistributionSetType distributionSetType,
             @NotNull Pageable pageable);
-
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    Slice<Target> findByTargetFilterQueryAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
-            final long rolloutId, final int weight, final long firstGroupId, @NotNull String targetFilterQuery,
-            @NotNull DistributionSetType distributionSetType, @NotNull Pageable pageable);
-
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    long countByActionsInRolloutGroup(final long rolloutGroupId);
-
-    /**
-     * Finds all targets with failed actions for specific Rollout and that are not
-     * assigned to one of the retried {@link RolloutGroup}s and are compatible with
-     * the passed {@link DistributionSetType}.
-     *
-     * @param rolloutId rolloutId of the rollout to be retried.
-     * @param groups the list of {@link RolloutGroup}s
-     * @param pageable the pageable to enhance the query for paging and sorting
-     * @return a page of the found {@link Target}s
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
-    Slice<Target> findByFailedRolloutAndNotInRolloutGroups(
-            @NotNull String rolloutId, @NotEmpty Collection<Long> groups, @NotNull Pageable pageable);
 
     /**
      * Counts all targets for all the given parameter {@link TargetFilterQuery} and
@@ -293,6 +271,20 @@ public interface TargetManagement {
             @NotNull String rsql, @NotEmpty Collection<Long> groups, @NotNull DistributionSetType distributionSetType);
 
     /**
+     * Finds all targets with failed actions for specific Rollout and that are not
+     * assigned to one of the retried {@link RolloutGroup}s and are compatible with
+     * the passed {@link DistributionSetType}.
+     *
+     * @param rolloutId rolloutId of the rollout to be retried.
+     * @param groups the list of {@link RolloutGroup}s
+     * @param pageable the pageable to enhance the query for paging and sorting
+     * @return a page of the found {@link Target}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    Slice<Target> findByFailedRolloutAndNotInRolloutGroups(
+            @NotNull String rolloutId, @NotEmpty Collection<Long> groups, @NotNull Pageable pageable);
+
+    /**
      * Counts all targets with failed actions for specific Rollout and that are not
      * assigned to one of the {@link RolloutGroup}s and are compatible with the
      * passed {@link DistributionSetType}.
@@ -303,6 +295,13 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     long countByFailedRolloutAndNotInRolloutGroups(@NotNull String rolloutId, @NotEmpty Collection<Long> groups);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    Slice<Target> findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
+            final long rolloutId, @NotNull String rsql, @NotNull DistributionSetType distributionSetType, @NotNull Pageable pageable);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
+    long countByActionsInRolloutGroup(final long rolloutGroupId);
 
     /**
      * Finds all targets of the provided {@link RolloutGroup} that have no Action
