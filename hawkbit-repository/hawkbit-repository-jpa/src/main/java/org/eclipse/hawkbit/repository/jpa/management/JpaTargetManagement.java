@@ -277,44 +277,16 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Slice<Target> findByTargetFilterQueryAndNotInRolloutAndCompatibleAndUpdatable(
-            final Collection<Long> groups, final String targetFilterQuery, final DistributionSetType dsType, final Pageable pageable) {
+    public Slice<Target> findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+            final Collection<Long> groups, final String rsql, final DistributionSetType dsType, final Pageable pageable) {
         return targetRepository
                 .findAllWithoutCount(AccessController.Operation.UPDATE,
                         combineWithAnd(List.of(
-                                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
+                                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
                                 TargetSpecifications.isNotInRolloutGroups(groups),
                                 TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()))),
                         pageable)
                 .map(Target.class::cast);
-    }
-
-    @Override
-    public Slice<Target> findByTargetFilterQueryAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
-            final long rolloutId, final int weight, final long firstGroupId, final String targetFilterQuery,
-            final DistributionSetType distributionSetType, final Pageable pageable) {
-        return targetRepository
-                .findAllWithoutCount(AccessController.Operation.UPDATE,
-                        combineWithAnd(List.of(
-                                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
-                                TargetSpecifications.hasNoOverridingActionsAndNotInRollout(weight, rolloutId),
-                                TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetType.getId()))),
-                        pageable)
-                .map(Target.class::cast);
-    }
-
-    @Override
-    public long countByActionsInRolloutGroup(final long rolloutGroupId) {
-        return targetRepository.count(TargetSpecifications.isInActionRolloutGroup(rolloutGroupId));
-    }
-
-    @Override
-    public Slice<Target> findByFailedRolloutAndNotInRolloutGroups(String rolloutId, Collection<Long> groups, Pageable pageable) {
-        final List<Specification<JpaTarget>> specList = List.of(
-                TargetSpecifications.failedActionsForRollout(rolloutId),
-                TargetSpecifications.isNotInRolloutGroups(groups));
-
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
     }
 
     @Override
@@ -328,11 +300,37 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
+    public Slice<Target> findByFailedRolloutAndNotInRolloutGroups(String rolloutId, Collection<Long> groups, Pageable pageable) {
+        final List<Specification<JpaTarget>> specList = List.of(
+                TargetSpecifications.failedActionsForRollout(rolloutId),
+                TargetSpecifications.isNotInRolloutGroups(groups));
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, specList, pageable);
+    }
+
+    @Override
     public long countByFailedRolloutAndNotInRolloutGroups(String rolloutId, Collection<Long> groups) {
         final List<Specification<JpaTarget>> specList = List.of(
                 TargetSpecifications.failedActionsForRollout(rolloutId),
                 TargetSpecifications.isNotInRolloutGroups(groups));
         return JpaManagementHelper.countBySpec(targetRepository, specList);
+    }
+
+    @Override
+    public Slice<Target> findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
+            final long rolloutId, final String rsql, final DistributionSetType distributionSetType, final Pageable pageable) {
+        return targetRepository
+                .findAllWithoutCount(AccessController.Operation.UPDATE,
+                        combineWithAnd(List.of(
+                                RSQLUtility.buildRsqlSpecification(rsql, TargetFields.class, virtualPropertyReplacer, database),
+                                TargetSpecifications.hasNoOverridingActionsAndNotInRollout(rolloutId),
+                                TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetType.getId()))),
+                        pageable)
+                .map(Target.class::cast);
+    }
+
+    @Override
+    public long countByActionsInRolloutGroup(final long rolloutGroupId) {
+        return targetRepository.count(TargetSpecifications.isInActionRolloutGroup(rolloutGroupId));
     }
 
     @Override

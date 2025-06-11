@@ -825,7 +825,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(changedLockRevisionTarget2.getLastModifiedAt()).isPositive();
 
         // verify updated meta data contains the updated value
-        assertThat(targetManagement.getMetadata(target.getControllerId()).get(knownKey)).isEqualTo(knownUpdateValue);
+        assertThat(targetManagement.getMetadata(target.getControllerId())).containsEntry(knownKey, knownUpdateValue);
     }
 
     @Test
@@ -1137,20 +1137,20 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         // old ro with equal weight - match
         expected.add(target);
         createAction(targets.get(target++), rolloutOlder, 10, Status.RUNNING, distributionSet);
-        // old ro with bigger weight, scheduled - doesn't match
+        // old ro with bigger weight, scheduled - match
+        expected.add(target);
         createAction(targets.get(target++), rolloutOlder, 11, Status.SCHEDULED, distributionSet);
-        // old ro with bigger weight, running - doesn't match
+        // old ro with bigger weight, running - match
+        expected.add(target);
         createAction(targets.get(target++), rolloutOlder, 11, Status.RUNNING, distributionSet);
-        // old ro with bigger weight, running match
+        // old ro with bigger weight, running - match
         expected.add(target);
         createAction(targets.get(target++), rolloutOlder, 11, Status.FINISHED, distributionSet);
         // same ro - doesn't match
         createAction(targets.get(target++), rollout, 10, Status.RUNNING, distributionSet);
-        // new ro with less weight - match
-        expected.add(target);
+        // new ro with less weight - doesn't match
         createAction(targets.get(target++), rolloutNewer, 0, Status.RUNNING, distributionSet);
-        // new ro with less weight - match
-        expected.add(target);
+        // new ro with less weight - doesn't match
         createAction(targets.get(target++), rolloutNewer, 5, Status.WARNING, distributionSet);
         // NEW ro with EQUAL weight - doesn't match
         createAction(targets.get(target++), rolloutNewer, 10, Status.RUNNING, distributionSet);
@@ -1158,8 +1158,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         createAction(targets.get(target), rolloutNewer, 20, Status.DOWNLOADED, distributionSet);
 
         final Slice<Target> matching =
-                targetManagement.findByTargetFilterQueryAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
-                        rollout.getId(), 10, Long.MAX_VALUE, "controllerid==dyn_action_filter_*", distributionSet.getType(), PAGE);
+                targetManagement.findByRsqlAndNoOverridingActionsAndNotInRolloutAndCompatibleAndUpdatable(
+                        rollout.getId(), "controllerid==dyn_action_filter_*", distributionSet.getType(), PAGE);
 
         assertThat(matching.getNumberOfElements()).isEqualTo(expected.size());
         assertThat(matching.stream()

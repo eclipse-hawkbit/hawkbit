@@ -147,9 +147,9 @@ class TargetManagementSecurityTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.")
-    void findByTargetFilterQueryAndNotInRolloutAndCompatibleAndUpdatablePermissionsCheck() {
+    void findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatablePermissionsCheck() {
         assertPermissions(
-                () -> targetManagement.findByTargetFilterQueryAndNotInRolloutAndCompatibleAndUpdatable(List.of(1L), "controllerId==id",
+                () -> targetManagement.findByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(List.of(1L), "controllerId==id",
                         entityFactory.distributionSetType().create().build(), PAGE
                 ), List.of(SpPermission.READ_TARGET, SpPermission.READ_ROLLOUT));
     }

@@ -173,8 +173,8 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> isOverdue(final long overdueTimestamp) {
-        return (targetRoot, query, cb) -> cb.lessThanOrEqualTo(targetRoot.get(JpaTarget_.lastTargetQuery),
-                overdueTimestamp);
+        return (targetRoot, query, cb) ->
+                cb.lessThanOrEqualTo(targetRoot.get(JpaTarget_.lastTargetQuery), overdueTimestamp);
     }
 
     /**
@@ -186,7 +186,8 @@ public final class TargetSpecifications {
     public static Specification<JpaTarget> likeControllerIdOrName(final String searchText) {
         return (targetRoot, query, cb) -> {
             final String searchTextToLower = searchText.toLowerCase();
-            return cb.or(cb.like(cb.lower(targetRoot.get(JpaTarget_.controllerId)), searchTextToLower),
+            return cb.or(
+                    cb.like(cb.lower(targetRoot.get(JpaTarget_.controllerId)), searchTextToLower),
                     cb.like(cb.lower(targetRoot.get(AbstractJpaNamedEntity_.name)), searchTextToLower));
         };
     }
@@ -251,8 +252,8 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasAssignedDistributionSet(final Long distributionSetId) {
-        return (targetRoot, query, cb) -> cb.equal(
-                targetRoot.get(JpaTarget_.assignedDistributionSet).get(AbstractJpaBaseEntity_.id), distributionSetId);
+        return (targetRoot, query, cb) ->
+                cb.equal(targetRoot.get(JpaTarget_.assignedDistributionSet).get(AbstractJpaBaseEntity_.id), distributionSetId);
     }
 
     /**
@@ -358,10 +359,8 @@ public final class TargetSpecifications {
      */
     public static Specification<JpaTarget> hasNoActionInRolloutGroup(final Long group) {
         return (targetRoot, query, cb) -> {
-            final ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = targetRoot
-                    .join(JpaTarget_.rolloutTargetGroup, JoinType.INNER);
-            rolloutTargetJoin.on(
-                    cb.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup).get(AbstractJpaBaseEntity_.id), group));
+            final ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = targetRoot.join(JpaTarget_.rolloutTargetGroup, JoinType.INNER);
+            rolloutTargetJoin.on(cb.equal(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup).get(AbstractJpaBaseEntity_.id), group));
 
             final ListJoin<JpaTarget, JpaAction> actionsJoin = targetRoot.join(JpaTarget_.actions, JoinType.LEFT);
             actionsJoin.on(cb.equal(actionsJoin.get(JpaAction_.rolloutGroup).get(AbstractJpaBaseEntity_.id), group));
@@ -388,7 +387,6 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasTag(final Long tagId) {
-
         return (targetRoot, query, cb) -> {
             final SetJoin<JpaTarget, JpaTargetTag> tags = targetRoot.join(JpaTarget_.tags, JoinType.LEFT);
             return cb.equal(tags.get(AbstractJpaBaseEntity_.id), tagId);
@@ -435,31 +433,14 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s that have:
-     * <ul>
-     *     <li>no active (non-finished) actions with greater weight in the older rollouts</li>
-     *     <li>or have actions in the current rollout</li>
-     *     <li>or have actions with great or equal weight in the newer rollouts</li>
-     * </ul>
+     * {@link Specification} for retrieving {@link Target}s that have no overriding actions - i.e. no actions from newer rollouts
      *
-     * @param weight the referent weight
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<JpaTarget> hasNoOverridingActionsAndNotInRollout(final int weight, final long rolloutId) {
+    public static Specification<JpaTarget> hasNoOverridingActionsAndNotInRollout(final long rolloutId) {
         return (targetRoot, query, cb) -> {
             final ListJoin<JpaTarget, JpaAction> actionsJoin = targetRoot.join(JpaTarget_.actions, JoinType.LEFT);
-            actionsJoin.on(
-                    cb.or(
-                            cb.and(
-                                    cb.and(
-                                            cb.lt(actionsJoin.get(JpaAction_.rollout).get(AbstractJpaBaseEntity_.id), rolloutId),
-                                            cb.gt(actionsJoin.get(JpaAction_.weight), weight)),
-                                    cb.or(
-                                            cb.equal(actionsJoin.get(JpaAction_.active), true),
-                                            cb.equal(actionsJoin.get(JpaAction_.status), Action.Status.SCHEDULED))),
-                            cb.and(
-                                    cb.ge(actionsJoin.get(JpaAction_.rollout).get(AbstractJpaBaseEntity_.id), rolloutId),
-                                    cb.ge(actionsJoin.get(JpaAction_.weight), weight))));
+            actionsJoin.on(cb.ge(actionsJoin.get(JpaAction_.rollout).get(AbstractJpaBaseEntity_.id), rolloutId));
             return cb.isNull(actionsJoin.get(AbstractJpaBaseEntity_.id));
         };
     }
