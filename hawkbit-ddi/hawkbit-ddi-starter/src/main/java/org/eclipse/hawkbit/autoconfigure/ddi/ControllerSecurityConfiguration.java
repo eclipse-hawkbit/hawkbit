@@ -97,11 +97,9 @@ class ControllerSecurityConfiguration {
             @Value("${hawkbit.server.security.cors.disable-for-ddi-api:false}") final boolean disableCorsForDdiApi) throws Exception {
         http
                 .securityMatcher(DDI_ANT_MATCHERS)
-                .csrf(AbstractHttpConfigurer::disable);
-
-        http
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())
                 .anonymous(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new AuthenticationFilters.SecurityHeaderAuthenticationFilter(
                         new SecurityHeaderAuthenticator(
                                 tenantConfigurationManagement, tenantAware,

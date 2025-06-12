@@ -22,19 +22,17 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.oauth2.client.OAuth2LoginConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @EnableWebSecurity
 @Configuration
-@EnableConfigurationProperties({ OidcClientProperties.class })
+@EnableConfigurationProperties(OidcClientProperties.class)
 public class SecurityConfiguration extends VaadinWebSecurity {
 
     private Customizer<OAuth2LoginConfigurer<HttpSecurity>> oAuth2LoginConfigurerCustomizer;
 
     @Autowired(required = false)
     public void setOAuth2LoginConfigurerCustomizer(
-            @Qualifier("hawkbitOAuth2ClientCustomizer") final Customizer<OAuth2LoginConfigurer<HttpSecurity>> oauth2LoginConfigurerCustomizer
-    ) {
+            @Qualifier("hawkbitOAuth2ClientCustomizer") final Customizer<OAuth2LoginConfigurer<HttpSecurity>> oauth2LoginConfigurerCustomizer) {
         this.oAuth2LoginConfigurerCustomizer = oauth2LoginConfigurerCustomizer;
     }
 
@@ -45,8 +43,7 @@ public class SecurityConfiguration extends VaadinWebSecurity {
 
     @Override
     protected void configure(final HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(
-                authorize -> authorize.requestMatchers(new AntPathRequestMatcher("/images/*.png")).permitAll());
+        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/images/*.png").permitAll());
 
         super.configure(http);
 
