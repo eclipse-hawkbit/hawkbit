@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -46,8 +47,8 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 @Configuration
 class ControllerDownloadSecurityConfiguration {
 
-    private static final String DDI_DL_ANT_MATCHER = DdiRestConstants.BASE_V1_REQUEST_MAPPING +
-            "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/*";
+    private static final String DDI_DL_ANT_MATCHER =
+            DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/*";
 
     private final ControllerManagement controllerManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
@@ -73,16 +74,15 @@ class ControllerDownloadSecurityConfiguration {
      * Filter to protect the hawkBit server DDI download interface against too many requests.
      *
      * @param securityProperties for filter configuration
-     * @return the spring filter registration bean for registering a denial of service protection filter in the filter chain
+     * @return the spring filter registration bean for registering a denial-of-service protection filter in the filter chain
      */
     @Bean
     @ConditionalOnProperty(prefix = "hawkbit.server.security.dos.filter", name = "enabled", matchIfMissing = true)
     public FilterRegistrationBean<DosFilter> dosFilterDDIDL(final HawkbitSecurityProperties securityProperties) {
-        final FilterRegistrationBean<DosFilter> filterRegBean = SecurityManagedConfiguration.dosFilter(List.of(DDI_DL_ANT_MATCHER),
-                securityProperties.getDos().getFilter(), securityProperties.getClients());
+        final FilterRegistrationBean<DosFilter> filterRegBean = SecurityManagedConfiguration.dosFilter(
+                List.of(DDI_DL_ANT_MATCHER), securityProperties.getDos().getFilter(), securityProperties.getClients());
         filterRegBean.setOrder(SecurityManagedConfiguration.DOS_FILTER_ORDER);
         filterRegBean.setName("dosDDiDlFilter");
-
         return filterRegBean;
     }
 
@@ -91,15 +91,9 @@ class ControllerDownloadSecurityConfiguration {
     protected SecurityFilterChain filterChainDDIDL(final HttpSecurity http) throws Exception {
         http
                 .securityMatcher(DDI_DL_ANT_MATCHER)
-                .csrf(AbstractHttpConfigurer::disable);
-
-        if (securityProperties.isRequireSsl()) {
-            http.requiresChannel(crmRegistry -> crmRegistry.anyRequest().requiresSecure());
-        }
-
-        http
                 .authorizeHttpRequests(amrmRegistry -> amrmRegistry.anyRequest().authenticated())
                 .anonymous(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(new AuthenticationFilters.SecurityHeaderAuthenticationFilter(
                         new SecurityHeaderAuthenticator(
                                 tenantConfigurationManagement, tenantAware, systemSecurityContext,
@@ -117,6 +111,10 @@ class ControllerDownloadSecurityConfiguration {
                 .exceptionHandling(configurer -> configurer.authenticationEntryPoint(
                         (request, response, authException) -> response.setStatus(HttpStatus.UNAUTHORIZED.value())))
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        if (securityProperties.isRequireSsl()) {
+            http.redirectToHttps(Customizer.withDefaults());
+        }
 
         MdcHandler.Filter.addMdcFilter(http);
 

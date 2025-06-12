@@ -122,9 +122,6 @@ public class MgmtSecurityConfiguration {
                                 .authenticated())
                 .anonymous(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
-                .requestCache(AbstractHttpConfigurer::disable)
-                .exceptionHandling(Customizer.withDefaults())
-                .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterAfter(
                         // Servlet filter to create metadata after successful authentication over RESTful.
                         (request, response, chain) -> {
@@ -134,7 +131,10 @@ public class MgmtSecurityConfiguration {
                             }
                             chain.doFilter(request, response);
                         },
-                        SessionManagementFilter.class);
+                        SessionManagementFilter.class)
+                .requestCache(AbstractHttpConfigurer::disable)
+                .exceptionHandling(Customizer.withDefaults())
+                .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         if (securityProperties.getCors().isEnabled()) {
             http.cors(configurer -> configurer.configurationSource(securityProperties.getCors().toCorsConfigurationSource()));
