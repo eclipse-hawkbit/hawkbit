@@ -417,18 +417,15 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    // @Title("Deleting targets of a rollout")
     @Description("Verifying that next group is started when targets of the group have been deleted.")
     void checkRunningRolloutsStartsNextGroupIfTargetsDeleted() {
-
         final int amountTargetsForRollout = 15;
         final int amountOtherTargets = 0;
         final int amountGroups = 3;
         final String successCondition = "100";
         final String errorCondition = "80";
-        final Rollout createdRollout = testdataFactory.createAndStartRollout(amountTargetsForRollout,
-                amountOtherTargets, amountGroups,
-                successCondition, errorCondition);
+        final Rollout createdRollout = testdataFactory.createAndStartRollout(
+                amountTargetsForRollout, amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         finishActionAndDeleteTargetsOfFirstRunningGroup(createdRollout);
         checkSecondGroupStatusIsRunning(createdRollout);
