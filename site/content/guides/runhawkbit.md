@@ -16,19 +16,21 @@ and no artifact storage.
 
 ## System Architecture
 
-This guide describes a target architecture that is more like one that you will expect in a production system.
+This guide describes a target architecture that you will probably expect in a production system.
 
 - hawkBit [Update Server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-monolith/hawkbit-update-server).
 - [MariaDB](https://mariadb.org) for the repository.
 - [RabbitMQ](https://www.rabbitmq.com) for DMF communication.
-- For testing and demonstration purposes we will also use:
-- [hawkBit Device Simulator](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-device-simulator).
-- [hawkBit Management API example client](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-example-mgmt-feign-client).
+
+For testing, demonstration or integrations purposes you could also use hawkBit SDK:
+- [hawkBit SDK Management API client](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-sdk/hawkbit-sdk-commons/src/main/java/org/eclipse/hawkbit/sdk/HawkbitClient.java).
+- [hawkBit SDK / Simulator Device](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-sdk/hawkbit-sdk-device).
+- [hawkBit SDK / Simulator for DMF integration](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-sdk/hawkbit-sdk-dmf)
+- [hawkBit SDK Demo Devices](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-sdk/hawkbit-sdk-demo)
 
 ## Prerequisites
 
 - You have a working [hawkBit core build](https://github.com/eclipse-hawkbit/hawkbit).
-- You have a working [hawkBit examples build](https://github.com/eclipse-hawkbit/hawkbit-examples).
 
 ## Adapt hawkBit Update Server and Device Simulator to your environment.
 
@@ -42,16 +44,11 @@ a [new profile](http://docs.spring.io/spring-boot/docs/current/reference/htmlsin
 
 ```properties
 spring.jpa.database=MYSQL
-spring.datasource.url=jdbc:mariadb://localhost:3306/YOUR_SCHEMA
-spring.datasource.username=YOUR_USER
-spring.datasource.password=YOUR_PWD
 spring.datasource.driverClassName=org.mariadb.jdbc.Driver
+spring.datasource.url=jdbc:mariadb://localhost:3306/<YOUR_SCHEMA>
+spring.datasource.username=<YOUR_USER>
+spring.datasource.password=<YOUR_PWD>
 ```
-
-Note: On Ubuntu 18.04 with MariaDB 10.1 installed from the default repository via apt install _COLLATE option_ of
-database have to be changed manually to "latin1".
-For recent versions of MariaDB running on Ubuntu this is not required (
-cf. [system variables](https://mariadb.com/kb/en/differences-in-mariadb-in-debian-and-ubuntu), [issue](https://github.com/eclipse-hawkbit/hawkbit/issues/963))
 
 ### Configure RabbitMQ connection settings for update server and device simulator (optional).
 
@@ -59,27 +56,22 @@ We provide already defaults that should work with a standard Rabbit installation
 the `application.properties` of the two services:
 
 ```properties
-spring.rabbitmq.username=guest
-spring.rabbitmq.password=guest
-spring.rabbitmq.virtualHost=/
 spring.rabbitmq.host=localhost
 spring.rabbitmq.port=5672
+spring.rabbitmq.virtualHost=/
+spring.rabbitmq.username=guest
+spring.rabbitmq.password=guest
 ```
 
-### Adapt hostname of example scenario [creation script](https://github.com/eclipse-hawkbit/hawkbit-examples/blob/master/hawkbit-example-mgmt-simulator/src/main/resources/application.properties)
+### Adapt hostnames of demo simulator
 
 Should only be necessary if your system does not run on localhost or uses a different port than the example app.
 
-Adapt `application.properties` in this case:
+Adapt `application.properties` or pass system / env variables for Spring properties:
 
 ```properties
-hawkbit.url=localhost:8080
-```
-
-or provide the parameter on command line:
-
-```properties
-hawkbit-example-mgmt-simulator-##VERSION##.jar --hawkbit.url=YOUR_HOST:PORT
+hawkbit.server.mgmtUrl=<MGMT server host:MGMT port>
+hawkbit.server.ddiUrl=<DDI server host:DDI port>
 ```
 
 ## Compile & Run
@@ -88,16 +80,12 @@ hawkbit-example-mgmt-simulator-##VERSION##.jar --hawkbit.url=YOUR_HOST:PORT
 
 see [update server](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-monolith/hawkbit-update-server)
 
-### Compile & Run example scenario [creation script](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-example-mgmt-simulator) (optional)
+Note: you have to log into update server (e.g. via UI) before starting device / device simulator. Then hawkBit creates the mandatory tenant metadata.
 
-This has to be done before the device simulator is started. hawkBit creates the mandatory tenant metadata with first
+### Compile & Run demo simulator (optional)
+
+see [demo simulator](https://github.com/eclipse-hawkbit/hawkbit/tree/master/hawkbit-sdk/hawkbit-sdk-demo)
+
 login into either Management API (which is done by this client).
 
-However, this is not done by _DMF_ which is in fact used by the device simulator, i.e. without calling _Management API_
-first hawkBit would drop all _DMF_ messages as the tenant is unknown.
-
-### Compile & Run device simulator (optional)
-
-see [device simulator](https://github.com/eclipse-hawkbit/hawkbit-examples/tree/master/hawkbit-device-simulator)
-
-# Enjoy hawkBit with a real database, artifact storage and all [interfaces](../../apis/) available
+## Enjoy hawkBit with a real database, artifact storage and all [interfaces](../../apis/) available

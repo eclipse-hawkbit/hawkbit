@@ -90,14 +90,14 @@ to hawkBit permissions.
     - Artifacts
     - DS tags
 
-- READ_TARGET_SECURITY_TOKEN
-    - Permission to read the target security token. The security token is security concerned and should be protected.
-
 - DOWNLOAD_REPOSITORY_ARTIFACT
     - Permission to download artifacts of a software module (Note: READ_REPOSITORY allows only to read the metadata).
 
-- TENANT_CONFIGURATION
-    - Permission to administrate the tenant settings.
+- READ_TARGET_SECURITY_TOKEN
+  - Permission to read the target security token. The security token is security concerned and should be protected.
+
+- READ_TENANT_CONFIGURATION/TENANT_CONFIGURATION
+    - Permission to read/administrate the tenant settings.
 
 - READ_/UPDATE_/CREATE_/DELETE_/HANDLE_/APPROVE_ROLLOUT for:
     - Managing rollouts and provision targets through a rollout.

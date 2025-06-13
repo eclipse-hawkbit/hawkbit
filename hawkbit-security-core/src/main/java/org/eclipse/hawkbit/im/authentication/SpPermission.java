@@ -84,12 +84,6 @@ public final class SpPermission {
     public static final String DELETE_REPOSITORY = "DELETE_REPOSITORY";
 
     /**
-     * Permission to administrate the system on a global, i.e. tenant
-     * independent scale. That includes the deletion of tenants.
-     */
-    public static final String SYSTEM_ADMIN = "SYSTEM_ADMIN";
-
-    /**
      * Permission to download repository artifacts of a software module.
      */
     public static final String DOWNLOAD_REPOSITORY_ARTIFACT = "DOWNLOAD_REPOSITORY_ARTIFACT";
@@ -141,6 +135,12 @@ public final class SpPermission {
      * Permission to approve or deny a rollout prior to starting.
      */
     public static final String APPROVE_ROLLOUT = "APPROVE_ROLLOUT";
+
+    /**
+     * Permission to administrate the system on a global, i.e. tenant
+     * independent scale. That includes the deletion of tenants.
+     */
+    public static final String SYSTEM_ADMIN = "SYSTEM_ADMIN";
 
     /**
      * Return all permission.
