@@ -43,14 +43,12 @@ public class DeviceApp {
     }
 
     @Bean
-    HawkbitClient hawkbitClient(
-            final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
+    HawkbitClient hawkbitClient(final HawkbitServer hawkBitServer, final Encoder encoder, final Decoder decoder, final Contract contract) {
         return new HawkbitClient(hawkBitServer, encoder, decoder, contract);
     }
 
     @Bean
-    DdiTenant ddiTenant(final Tenant defaultTenant,
-            final HawkbitClient hawkbitClient) {
+    DdiTenant ddiTenant(final Tenant defaultTenant, final HawkbitClient hawkbitClient) {
         return new DdiTenant(defaultTenant, hawkbitClient);
     }
 
@@ -71,14 +69,17 @@ public class DeviceApp {
         Shell(final DdiTenant ddiTenant, final AuthenticationSetupHelper mgmtApi, final Optional<UpdateHandler> updateHandler) {
             this.ddiTenant = ddiTenant;
             this.mgmtApi = mgmtApi;
-            String controllerId = System.getProperty("demo.controller.id");
-            String securityToken = System.getProperty("demo.controller.securityToken");
+            final String controllerId = System.getProperty("demo.controller.id");
+            final String securityToken = System.getProperty("demo.controller.securityToken");
 
-            this.device = this.ddiTenant.createController(Controller.builder()
+            this.device = this.ddiTenant.createController(
+                    Controller.builder()
                             .controllerId(controllerId)
-                            .securityToken(ObjectUtils.isEmpty(securityToken) ?
-                                    (ObjectUtils.isEmpty(ddiTenant.getTenant().getGatewayToken()) ? AuthenticationSetupHelper.randomToken() : securityToken) :
-                                    securityToken)
+                            .securityToken(ObjectUtils.isEmpty(securityToken)
+                                    ? (ObjectUtils.isEmpty(ddiTenant.getTenant().getGatewayToken())
+                                        ? AuthenticationSetupHelper.randomToken()
+                                        : securityToken)
+                                    : securityToken)
                             .build(),
                     updateHandler.orElse(null)).setOverridePollMillis(10_000);
         }

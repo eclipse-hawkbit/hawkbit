@@ -14,6 +14,8 @@ It supports two configurations:
 * monolith - hawkbit-update-server
 * micro-service - hawkbit-mgmt-server, hawkbit-ddi-server, hawkbit-dmf-server.
 
+For more hawkBit Docker related info see [Docker run info](https://github.com/eclipse-hawkbit/hawkbit/blob/master/docker/README.md) and [Docker build info](https://github.com/eclipse-hawkbit/hawkbit/blob/master/docker/build/README.md) 
+
 ### A: Run hawkBit Update Server (Monolith) as Docker Container
 
 Start the hawkBit Update Server as a single container
@@ -112,7 +114,7 @@ and (only if you want to use the DMF feature):
 $ java -jar ./hawkbit-dmf/hawkbit-dmf-server/target/hawkbit-dmf-server-0-SNAPSHOT.jar
 ```
 
-Note: you could starte the Simple UI by:
+Note: you could start the Simple UI by:
 ```sh
 $ java -jar ./hawkbit-simple-ui/target/hawkbit-simple-ui-0-SNAPSHOT.jar
 ```
@@ -133,3 +135,5 @@ hawkbit.security.user.hawkbit.roles=TENANT_ADMIN
 which should remove the default _admin/admin_ user and add a hawkbit user _hawkbit_ with password _isAwesome!_ and a role _TENANT_ADMIN_. 
 
 You could create multiple users with specified roles.
+
+For details how to configure docker compose based setup see the [Docker run info](https://github.com/eclipse-hawkbit/hawkbit/blob/master/docker/README.md) -> Configuration

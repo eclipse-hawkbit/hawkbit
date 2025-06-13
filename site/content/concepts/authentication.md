@@ -26,7 +26,7 @@ There is a 32 alphanumeric character security-token for each created target with
 to authenticate the target at hawkBit through the HTTP-Authorization header with the custom scheme _TargetToken_.
 
 ```
-GET /SPDEMO/controller/v1/0e945f95-9117-4500-9b0a-9c6d72fa6c07 HTTP/1.1
+GET /DEFAULT/controller/v1/0e945f95-9117-4500-9b0a-9c6d72fa6c07 HTTP/1.1
 Host: your.hawkBit.server
 Authorization: TargetToken bH7XXAprK1ChnLfKSdtlsp7NOlPnZAYY
 ```
@@ -35,14 +35,9 @@ The target security token is provided in [DMF API](../../apis/dmf_api/) as part 
 DMF clients to leverage the feature or can it be manually retrieved per target
 by [Management API](../../apis/management_api/) or in the [Management UI](../../ui) in the target details.
 
-Note: needs to be enabled in your hawkBit installation **and** in the tenant configuration. That allows both the
-operator as well as the individual customer (if run in a multi-tenant setup) to enable this access method.
-See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java)
-for system wide enablement.
-
-The additional activation for the individual tenant:
-
-![Enable Target Token](../../images/security/targetToken.png)
+Note: needs to be enabled in your hawkBit installation (See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java)
+for system-wide enablement) **and** in the tenant configuration (set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)#TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, _authentication.targettoken.enabled_ to true). That allows both the
+operator and the individual customer (if run in a multi-tenant setup) to enable this access method.
 
 #### Gateway Security Token Authentication
 
@@ -55,19 +50,14 @@ also handy during development or for testing purposes. However, we generally rec
 allows to act _in the name of_ any device.
 
 ```
-GET /SPDEMO/controller/v1/0e945f95-9117-4500-9b0a-9c6d72fa6c07 HTTP/1.1
+GET /DEVICE/controller/v1/0e945f95-9117-4500-9b0a-9c6d72fa6c07 HTTP/1.1
 Host: your.hawkBit.server
 Authorization: GatewayToken 3nkswAZhX81oDtktq0FF9Pn0Tc0UGXPW
 ```
 
-Note: needs to be enabled in your hawkBit installation **and** in the tenant configuration. That allows both the
-operator as well as the individual customer (if run in a multi-tenant setup) to enable this access method.
-See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java)
-for system wide enablement.
-
-The additional activation for the individual tenant:
-
-![Enable Gateway Token](../../images/security/gatewayToken.png)
+Note: needs to be enabled in your hawkBit installation (See [DdiSecurityProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-security-core/src/main/java/org/eclipse/hawkbit/security/DdiSecurityProperties.java)
+for system-wide enablement) **and** in the tenant configuration (set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)#TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, _authentication.gatewaytoken.enabled_ to true). That allows both the
+operator and the individual customer (if run in a multi-tenant setup) to enable this access method.
 
 ### Certificate Authentication by Reverse Proxy
 
@@ -86,17 +76,16 @@ fingerprint of the client certificate issuer(s) (as a comma separated list).
 To authenticate the request to hawBit the following condition shall be met:
 
 - the common name of the client certificate shall match the controller/client id
-- the SSL Issuer(s) hash of the presented client certificate shall be set for the tenant. For that, in Hawkbit's UI
-  section, under system configuration, you shall enable 'Allow targets to authenticate via a certificate by an reverse
-  proxy' and set the hash of the client certificate issuer(s) (as a comma separated list).
+- the TLS Issuer(s) hash of the presented client certificate shall be set for the tenant. 
 
-![Example Reverse Proxy Settings](../../images/security/exampleReverseProxySettings.png)
+For that you shall:
+- enable header authentication in the tenant configuration - set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)#TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED, _authentication.header.enabled_ to true. 
+- set / configure the issuer, for the tenant, in the tenant configuration - set [TenantConfigurationProperties](https://github.com/eclipse-hawkbit/hawkbit/blob/master/hawkbit-repository/hawkbit-repository-api/src/main/java/org/eclipse/hawkbit/tenancy/configuration/TenantConfigurationProperties.java)#AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME.AUTHENTICATION_MODE_HEADER_ENABLED, _aauthentication.header.authority_ to issuer hash.
 
-You can use the following command to get the issuer hash:
-
-```shell
-openssl x509 -in client_certificate.crt -issuer_hash -noout`
-```
+  You can use the following command to get the issuer hash
+  ```shell
+  openssl x509 -in client_certificate.crt -issuer_hash -noout`
+  ```
 
 Here is an example diagram that shows all the communication between the hawkBit, reverse proxy and client. For the sake
 of simplification we assume that there are not intermediate certificates and the certificate and key are as follows:
