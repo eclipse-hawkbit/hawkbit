@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  # enable running the workflow manually
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: 'Release version'
+        required: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    services:
+      rabbitmq:
+        image: rabbitmq:3-management-alpine
+        env:
+          RABBITMQ_DEFAULT_VHOST: /
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: guest
+        ports:
+          - 15672:15672
+          - 5672:5672
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK & Maven Central credentials
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: 'maven'
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Check file license headers
+        run: mvn license:check -Plicense --batch-mode
+#      - name: Check dependency licenses with dash tool
+#        run: mvn license-tool:license-check -Plicense --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test' --batch-mode
+      - name: Run tests & build javadoc
+        run: mvn clean install javadoc:jar -Dadditionalparam=-Xdoclint:none --batch-mode
+
+      - name: Deploy
+        run: mvn deploy -Ppublish -DskipTests -Drevision=${REVISION} -B --batch-mode
+        env:
+          REVISION: ${{ github.event.inputs.revision }}
+          MAVEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Tag release
+        run: |
+          git tag -a ${REVISION} -m "Release version ${REVISION}"
+          git push origin ${REVISION}
+        env:
+          REVISION: ${{ github.event.inputs.revision }}
