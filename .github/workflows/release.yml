@@ -54,12 +54,12 @@ jobs:
       #     mvn license-tool:license-check -DexcludeGroupIds=org.eclipse.hawkbit -Plicense -Ddash.iplab.token=${GITLAB_API_TOKEN} --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test'
       #   env:
       #     GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
-#
-#      - name: Run tests & build javadoc
-#        run: mvn clean verify javadoc:javadoc -Dadditionalparam=-Xdoclint:none --batch-mode
+
+      - name: Run build javadoc, verify (test) and installs artifacts
+        run: mvn clean install javadoc:jar -Dadditionalparam=-Xdoclint:none --batch-mode -DskipTests
 
       - name: Deploy
-        run: mvn clean deploy javadoc:javadoc javadoc:jar -Dadditionalparam=-Xdoclint:none -Ppublish -DskipTests -Drevision=${REVISION} -B --batch-mode
+        run: mvn deploy -Ppublish -DskipTests -Drevision=${REVISION} -B --batch-mode
         env:
           REVISION: ${{ github.event.inputs.revision }}
           MAVEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
