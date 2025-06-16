@@ -8,7 +8,7 @@ on:
     - cron: '0 4 * * *'
 
 jobs:
-  scan:
+  trivy-scan:
     runs-on: ubuntu-latest
 
     permissions:
