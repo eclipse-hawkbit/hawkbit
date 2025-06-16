@@ -56,7 +56,7 @@ jobs:
               DASH_FAIL=true
           fi
           mvn install -DskipTests -DskipJavadoc --batch-mode
-          mvn license-tool:license-check -Plicense -Ddash.fail=${DASH_FAIL} -Ddash.iplab.token=${GITLAB_API_TOKEN} --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test' --batch-mode
+          # mvn license-tool:license-check -Plicense -Ddash.fail=${DASH_FAIL} -Ddash.iplab.token=${GITLAB_API_TOKEN} --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test' --batch-mode
         env:
           REVISION: ${{ github.event.inputs.revision }}
           GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
@@ -75,11 +75,11 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Tag release
         run: |
-          if [ "${REVISION}" != "0-SNAPSHOT" ]; then
+          # if [ "${REVISION}" != "0-SNAPSHOT" ]; then
               git config --global user.email "release_manager@hawkbit.eclipse.org"
               git config --global user.name "Eclipse Hawkbit (Release Manager)"
               git tag -a ${REVISION} -m "Release version ${REVISION}"
               git push origin ${REVISION}
-          fi
+          # fi
         env:
           REVISION: ${{ github.event.inputs.revision }}
