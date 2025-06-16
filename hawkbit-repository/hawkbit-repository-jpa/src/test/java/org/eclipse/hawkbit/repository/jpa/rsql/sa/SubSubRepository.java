@@ -14,4 +14,4 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface SubRepository extends CrudRepository<Sub, Long>, JpaSpecificationExecutor<Sub> {}
+public interface SubSubRepository extends CrudRepository<SubSub, Long>, JpaSpecificationExecutor<SubSub> {}

@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsqllegacy;
 
+import static org.eclipse.hawkbit.repository.jpa.rsqllegacy.AbstractRSQLVisitor.OPERATORS;
 import static org.eclipse.hawkbit.repository.rsql.RsqlConfigHolder.RsqlToSpecBuilder.LEGACY_G1;
 
 import java.util.List;
@@ -44,20 +45,16 @@ public class SpecificationBuilderLegacy<A extends Enum<A> & RsqlQueryField, T> {
 
     public Specification<T> specification(final String rsql) {
         return (root, query, cb) -> {
-            final Node rootNode = parseRsql(rsql);
+            final RsqlConfigHolder rsqlConfigHolder = RsqlConfigHolder.getInstance();
+
+            final Node rootNode = parseRsql(rsql, rsqlConfigHolder);
             query.distinct(true);
 
+            final boolean ensureIgnoreCase = !rsqlConfigHolder.isCaseInsensitiveDB() && rsqlConfigHolder.isIgnoreCase();
             final RSQLVisitor<List<Predicate>, String> jpqQueryRSQLVisitor =
-                    RsqlConfigHolder.getInstance().getRsqlToSpecBuilder() == LEGACY_G1
-                            ? new JpaQueryRsqlVisitor<>(
-                            root, cb, rsqlQueryFieldType,
-                            virtualPropertyReplacer, database, query,
-                            !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance().isIgnoreCase())
-                            : new JpaQueryRsqlVisitorG2<>(
-                                    rsqlQueryFieldType, root, query, cb,
-                                    database, virtualPropertyReplacer,
-                                    !RsqlConfigHolder.getInstance().isCaseInsensitiveDB() && RsqlConfigHolder.getInstance()
-                                            .isIgnoreCase());
+                    rsqlConfigHolder.getRsqlToSpecBuilder() == LEGACY_G1
+                            ? new JpaQueryRsqlVisitor<>(root, cb, rsqlQueryFieldType, virtualPropertyReplacer, database, query, ensureIgnoreCase)
+                            : new JpaQueryRsqlVisitorG2<>(rsqlQueryFieldType, root, query, cb, database, virtualPropertyReplacer, ensureIgnoreCase);
             final List<Predicate> accept = rootNode.accept(jpqQueryRSQLVisitor);
 
             if (CollectionUtils.isEmpty(accept)) {
@@ -68,13 +65,10 @@ public class SpecificationBuilderLegacy<A extends Enum<A> & RsqlQueryField, T> {
         };
     }
 
-    private static Node parseRsql(final String rsql) {
+    private static Node parseRsql(final String rsql, final RsqlConfigHolder rsqlConfigHolder) {
         log.debug("Parsing rsql string {}", rsql);
         try {
-            return new RSQLParser(AbstractRSQLVisitor.OPERATORS).parse(
-                    RsqlConfigHolder.getInstance().isCaseInsensitiveDB() || RsqlConfigHolder.getInstance().isIgnoreCase()
-                            ? rsql.toLowerCase()
-                            : rsql);
+            return new RSQLParser(OPERATORS).parse(rsqlConfigHolder.isCaseInsensitiveDB() || rsqlConfigHolder.isIgnoreCase() ? rsql.toLowerCase() : rsql);
         } catch (final IllegalArgumentException e) {
             throw new RSQLParameterSyntaxException("RSQL filter must not be null", e);
         } catch (final RSQLParserException e) {

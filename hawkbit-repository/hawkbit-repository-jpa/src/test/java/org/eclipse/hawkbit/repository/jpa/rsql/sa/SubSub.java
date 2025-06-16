@@ -10,13 +10,9 @@
 package org.eclipse.hawkbit.repository.jpa.rsql.sa;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -24,7 +20,7 @@ import lombok.experimental.Accessors;
 @Entity
 @Data
 @Accessors(chain = true)
-class Sub {
+class SubSub {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +30,4 @@ class Sub {
     // basic
     private String strValue;
     private int intValue;
-    // entity
-    @ManyToOne
-    private SubSub subSub;
 }

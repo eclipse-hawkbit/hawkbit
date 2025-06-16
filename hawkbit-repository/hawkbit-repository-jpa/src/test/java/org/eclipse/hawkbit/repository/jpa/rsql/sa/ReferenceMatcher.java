@@ -107,9 +107,22 @@ class ReferenceMatcher {
                     if (split.length == 1) {
                         return compare(fieldValue, op, map(comparison.getValue(), fieldGetter.getReturnType()));
                     } else {
-                        final Method valueGetter = getGetter(fieldGetter.getReturnType(), split[1]);
-                        return compare(fieldValue == null ? null : valueGetter.invoke(fieldValue), op,
-                                map(comparison.getValue(), valueGetter.getReturnType()));
+                        if (split[1].contains(".")) {
+                            // nested field access
+                            final String[] nestedSplit = split[1].split("\\.", 2);
+                            final Method nestedFieldGetter = getGetter(fieldGetter.getReturnType(), nestedSplit[0]);
+                            nestedFieldGetter.setAccessible(true);
+                            final Method valueGetter = getGetter(nestedFieldGetter.getReturnType(), nestedSplit[1]);
+                            final Object nestedFieldValue = fieldValue == null ? null : nestedFieldGetter.invoke(fieldValue);
+                            return compare(
+                                    nestedFieldValue == null ? null : valueGetter.invoke(nestedFieldValue),
+                                    op,
+                                    map(comparison.getValue(), valueGetter.getReturnType()));
+                        } else {
+                            final Method valueGetter = getGetter(fieldGetter.getReturnType(), split[1]);
+                            return compare(fieldValue == null ? null : valueGetter.invoke(fieldValue), op,
+                                    map(comparison.getValue(), valueGetter.getReturnType()));
+                        }
                     }
                 }
             } catch (final NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
