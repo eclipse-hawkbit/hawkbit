@@ -1,6 +1,7 @@
 name: Mark & close stale issues
 
 on:
+  # enable running the workflow manually
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * *"

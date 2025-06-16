@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.Serial;
 import java.lang.reflect.Method;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;

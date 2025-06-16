@@ -1,11 +1,11 @@
 name: Vulnerability Scan
 
 on:
+  # enable running the workflow manually
+  workflow_dispatch:
   schedule:
     # run every night at 4:00 AM (UTC)
     - cron: '0 4 * * *'
-  # enable running the workflow manually
-  workflow_dispatch:
 
 jobs:
   scan:
