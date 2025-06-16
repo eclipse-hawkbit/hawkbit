@@ -6,7 +6,7 @@ on:
     inputs:
       revision:
         description: 'Release version'
-        required: true
+        default: '0-SNAPSHOT'
 
 jobs:
   release:
@@ -47,17 +47,27 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Check file license headers
-        run: mvn license:check -Plicense --batch-mode
+        run: mvn clean license:check -Plicense --batch-mode
       - name: Check dependency licenses with dash tool
-        run: mvn install -DskipTests license-tool:license-check -Plicense -Ddash.iplab.token=${GITLAB_API_TOKEN} --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test' --batch-mode
+        run: |
+          if [ "${REVISION}" = "0-SNAPSHOT" ]; then
+              DASH_FAIL=false
+          else
+              DASH_FAIL=true
+          fi
+          mvn install -DskipTests -DskipJavadoc --batch-mode
+          mvn license-tool:license-check -Plicense -Ddash.fail=${DASH_FAIL} -Ddash.iplab.token=${GITLAB_API_TOKEN} --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test' --batch-mode
         env:
+          REVISION: ${{ github.event.inputs.revision }}
           GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
-#
-#      - name: Run tests & build javadoc
-#        run: mvn clean verify javadoc:javadoc -Dadditionalparam=-Xdoclint:none --batch-mode
+
+      - name: Run build javadoc, verify (test)
+        run: mvn verify javadoc:jar -Dadditionalparam=-Xdoclint:none -Drevision=${REVISION} --batch-mode
+        env:
+          REVISION: ${{ github.event.inputs.revision }}
 
       - name: Deploy
-        run: mvn clean deploy javadoc:javadoc javadoc:jar -Dadditionalparam=-Xdoclint:none -Ppublish -DskipTests -Drevision=${REVISION} -B --batch-mode
+        run: mvn deploy -Ppublish -DskipTests -DskipJavadoc -Drevision=${REVISION} -B --batch-mode
         env:
           REVISION: ${{ github.event.inputs.revision }}
           MAVEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
@@ -65,7 +75,11 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Tag release
         run: |
-          git tag -a ${REVISION} -m "Release version ${REVISION}"
-          git push origin ${REVISION}
+          if [ "${REVISION}" != "0-SNAPSHOT" ]; then
+              git config --global user.email "release_manager@hawkbit.eclipse.org"
+              git config --global user.name "Eclipse Hawkbit (Release Manager)"
+              git tag -a ${REVISION} -m "Release version ${REVISION}"
+              git push origin ${REVISION}
+          fi
         env:
           REVISION: ${{ github.event.inputs.revision }}
