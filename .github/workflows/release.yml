@@ -56,10 +56,12 @@ jobs:
       #     GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
 
       - name: Run build javadoc, verify (test) and installs artifacts
-        run: mvn clean install javadoc:jar -Dadditionalparam=-Xdoclint:none --batch-mode -DskipTests
+        run: mvn clean install javadoc:jar -Dadditionalparam=-Xdoclint:none -DskipTests -Drevision=${REVISION} --batch-mode
+        env:
+          REVISION: ${{ github.event.inputs.revision }}
 
       - name: Deploy
-        run: mvn deploy -Ppublish -DskipTests -Drevision=${REVISION} -B --batch-mode
+        run: mvn install javadoc:jar -Dadditionalparam=-Xdoclint:none deploy -Ppublish -DskipTests -Drevision=${REVISION} -B --batch-mode
         env:
           REVISION: ${{ github.event.inputs.revision }}
           MAVEN_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
