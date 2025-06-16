@@ -78,11 +78,11 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Tag release
         run: |
-#          if [ "${REVISION}" != "0-SNAPSHOT" ]; then
-              git config --global user.email "release_manager@hawkbit.eclipse.org"
-              git config --global user.name "Eclipse Hawkbit (Release Manager)"
-              git tag -a ${REVISION} -m "Release version ${REVISION}"
-              git push origin ${REVISION}
-#          fi
+         if [ "${REVISION}" != "0-SNAPSHOT2" ]; then
+            git config --global user.email "release_manager@hawkbit.eclipse.org"
+            git config --global user.name "Eclipse Hawkbit (Release Manager)"
+            git tag -a ${REVISION} -m "Release version ${REVISION}"
+            git push origin ${REVISION}
+         fi
         env:
           REVISION: ${{ github.event.inputs.revision }}
