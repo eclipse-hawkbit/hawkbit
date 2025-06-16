@@ -47,7 +47,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Check file license headers
-        run: mvn license:check -Plicense --batch-mode
+        run: mvn clean license:check -Plicense --batch-mode
       - name: Check dependency licenses with dash tool
         run: |
           if [ "${REVISION}" = "0-SNAPSHOT" ]; then
@@ -55,14 +55,14 @@ jobs:
           else
               DASH_FAIL=true
           fi
-          mvn clean install -DskipTests -DskipJavadoc --batch-mode
+          mvn install -DskipTests -DskipJavadoc --batch-mode
           mvn license-tool:license-check -Plicense -Ddash.fail=${DASH_FAIL} -Ddash.iplab.token=${GITLAB_API_TOKEN} --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test' --batch-mode
         env:
           REVISION: ${{ github.event.inputs.revision }}
           GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
 
-      - name: Run build javadoc, verify (test) and installs artifacts
-        run: mvn clean install javadoc:jar -Dadditionalparam=-Xdoclint:none -DskipTests -Drevision=${REVISION} --batch-mode
+      - name: Run build javadoc, verify (test)
+        run: mvn verify javadoc:jar -Dadditionalparam=-Xdoclint:none -DskipTests -Drevision=${REVISION} --batch-mode
         env:
           REVISION: ${{ github.event.inputs.revision }}
 
@@ -75,11 +75,11 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Tag release
         run: |
-          # if [ "${REVISION}" != "0-SNAPSHOT" ]; then
+          if [ "${REVISION}" != "0-SNAPSHOT" ]; then
               git config --global user.email "release_manager@hawkbit.eclipse.org"
               git config --global user.name "Eclipse Hawkbit (Release Manager)"
               git tag -a ${REVISION} -m "Release version ${REVISION}"
               git push origin ${REVISION}
-          # fi
+          fi
         env:
           REVISION: ${{ github.event.inputs.revision }}
