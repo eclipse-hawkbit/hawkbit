@@ -30,7 +30,7 @@ jobs:
       - name: Create hawkBit container images
         run: |
           mvn clean install -DskipTests && \
-          cd docker/docker_build && \
+          cd docker/docker && \
           chmod +x build_dev.sh && \
           ./build_dev.sh && \
           cd ../../..
