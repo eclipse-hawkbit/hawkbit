@@ -79,8 +79,8 @@ jobs:
       - name: Tag release
         run: |
          if [ "${REVISION}" != "0-SNAPSHOT" ]; then
-            git config --global user.email "release_manager@hawkbit.eclipse.org"
-            git config --global user.name "Eclipse Hawkbit (Release Manager)"
+            git config --local user.name "github-actions[bot]"
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
             git tag -a ${REVISION} -m "Release version ${REVISION}"
             git push origin ${REVISION}
          fi
