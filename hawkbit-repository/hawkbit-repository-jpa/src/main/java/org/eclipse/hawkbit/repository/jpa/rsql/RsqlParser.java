@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.eclipse.hawkbit.repository.RsqlQueryField.SUB_ATTRIBUTE_SEPARATOR;
+import static org.eclipse.hawkbit.repository.RsqlQueryField.SUB_ATTRIBUTE_SPLIT_REGEX;
 import static org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison.Operator.EQ;
 import static org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison.Operator.GT;
 import static org.eclipse.hawkbit.repository.jpa.rsql.Node.Comparison.Operator.GTE;
@@ -94,6 +95,7 @@ public class RsqlParser {
         }
     }
 
+    @SuppressWarnings("java:S3776") // java:S3776 - group in single method for easier read of whole logic
     private static <T extends Enum<T> & RsqlQueryField> Key resolveKey(final String key, final Class<T> rsqlQueryFieldType) {
         final int firstSeparatorIndex = key.indexOf(SUB_ATTRIBUTE_SEPARATOR);
         final String enumName = (firstSeparatorIndex == -1 ? key : key.substring(0, firstSeparatorIndex)).toUpperCase();
@@ -126,18 +128,18 @@ public class RsqlParser {
                 }
             }
         } else { // field name with sub-attribute
-            final String subAttribute = key.substring(firstSeparatorIndex + 1);
-
             if (enumValue.isMap()) {
                 // map, the part after the enum name is the key of the map
-                attribute = enumValue.getJpaEntityFieldName() + SUB_ATTRIBUTE_SEPARATOR + subAttribute;
+                attribute = enumValue.getJpaEntityFieldName() + SUB_ATTRIBUTE_SEPARATOR + key.substring(firstSeparatorIndex + 1);
             } else if (enumValue.getSubEntityAttributes().isEmpty()) {
                 // simple type without sub-attributes, so the sub-attribute is not allowed
                 throw new RSQLParameterUnsupportedFieldException("Sub-attributes not supported for simple field " + enumValue);
             } else {
+                final String[] subAttribute = key.substring(firstSeparatorIndex + 1).split(SUB_ATTRIBUTE_SPLIT_REGEX, 2);
                 attribute = enumValue.getJpaEntityFieldName() + SUB_ATTRIBUTE_SEPARATOR + enumValue.getSubEntityAttributes().stream()
-                        .filter(attr -> attr.equalsIgnoreCase(subAttribute)) // case normalized
+                        .filter(attr -> attr.equalsIgnoreCase(subAttribute[0])) // case normalized
                         .findFirst()
+                        .map(attr -> subAttribute.length == 1 ? attr : attr + key.substring(firstSeparatorIndex + 1 + attr.length()))
                         .orElseThrow(() -> new RSQLParameterUnsupportedFieldException(
                                 String.format(
                                         "The given search field {%s} has unsupported sub-attributes. Supported sub-attributes are %s",
@@ -174,6 +176,7 @@ public class RsqlParser {
                     .orElseThrow();
         }
 
+        @SuppressWarnings("java:S3776") // java:S3776 - group in single method for easier read of whole logic
         @Override
         public Node visit(final ComparisonNode node, final String param) {
             final String nodeSelector = node.getSelector();

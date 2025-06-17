@@ -88,6 +88,16 @@ class SpecificationBuilderLegacyTest extends SpecificationBuilderTest {
         runWithRsqlToSpecBuilder(super::pluralSubMapAttribute, LEGACY_G2);
     }
 
+    @Test
+    void singularEntitySubSubAttributeG1() {
+        runWithRsqlToSpecBuilder(super::singularEntitySubSubAttribute, LEGACY_G1);
+    }
+    @Override
+    @Test
+    void singularEntitySubSubAttribute() {
+        runWithRsqlToSpecBuilder(super::singularEntitySubSubAttribute, LEGACY_G2);
+    }
+
     @Override
     protected Specification<Root> getSpecification(final String rsql) {
         return builder.specification(rsql);
@@ -98,7 +108,7 @@ class SpecificationBuilderLegacyTest extends SpecificationBuilderTest {
 
         INTVALUE("intValue"),
         STRVALUE("strValue"),
-        SUBENTITY("subEntity", "strValue", "intValue"),
+        SUBENTITY("subEntity", "strValue", "intValue", "subSub"),
         SUBSET("subSet", "strValue", "intValue"),
         SUBMAP("subMap");
 

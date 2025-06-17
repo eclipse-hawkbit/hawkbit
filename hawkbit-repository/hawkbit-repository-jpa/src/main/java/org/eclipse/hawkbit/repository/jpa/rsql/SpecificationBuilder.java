@@ -31,6 +31,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.MapJoin;
 import jakarta.persistence.criteria.Path;
@@ -170,13 +171,13 @@ public class SpecificationBuilder<T> {
                 } else {
                     if (op == LIKE && LIKE_WILDCARD_STR.equals(comparison.getValue())) {
                         // optimized (?) has non-null/empty attribute - do or with on instead of subquery
-                        return cb.and(cb.isNotNull(pathResolver.getPath(attribute).get(split[1])));
+                        return cb.and(cb.isNotNull(deepGetPath(pathResolver.getPath(attribute), split[1])));
                     }
-                    return compare(comparison, pathResolver.getPath(attribute).get(split[1]));
+                    return compare(comparison, deepGetPath(pathResolver.getPath(attribute), split[1]));
                 }
             } else { // singular attribute (BASIC and EMBEDDABLE) or plural (ListAttribute of entities)
                 final Path<?> attributePath = pathResolver.getPath(attribute);
-                return compare(comparison, split.length > 1 ? attributePath.get(split[1]) : attributePath);
+                return compare(comparison, split.length > 1 ? deepGetPath(attributePath, split[1]) : attributePath);
             }
         }
 
@@ -212,7 +213,7 @@ public class SpecificationBuilder<T> {
             final Root<? extends T> subqueryRoot = subquery.from(javaType);
             final Path<?> joinPath = subAttributeName == null // if null it is a map
                     ? ((MapJoin<?, ?, ?>) subqueryRoot.join(pluralAttribute.getName(), JoinType.LEFT)).value()
-                    : subqueryRoot.join(pluralAttribute.getName(), JoinType.LEFT).get(subAttributeName);
+                    : deepGetPath(subqueryRoot.join(pluralAttribute.getName(), JoinType.LEFT), subAttributeName);
             final Path<String> fieldPath = joinPath instanceof MapJoin<?, ?, ?> mapJoin
                     ? (Path<String>) mapJoin.value()
                     : stringPath(joinPath);
@@ -317,6 +318,22 @@ public class SpecificationBuilder<T> {
                                         .map(String::toLowerCase)
                                         .toList()),
                         e);
+            }
+        }
+
+        private static Path<?> deepGetPath(final Path<?> path, final String subAttributeName) {
+            return deepGetPath(path, subAttributeName.split("\\."), 0);
+        }
+        private static Path<?> deepGetPath(final Path<?> path, final String[] subAttributeNameSplit, int startIndex) {
+            final String subAttributeName = subAttributeNameSplit[startIndex++];
+            if (startIndex == subAttributeNameSplit.length) {
+                return path.get(subAttributeName);
+            } else { // else its a deeper path so request left join
+                if (path instanceof Join<?,?> join) {
+                    return deepGetPath(join.join(subAttributeName, JoinType.LEFT), subAttributeNameSplit, startIndex);
+                } else {
+                    throw new RSQLParameterSyntaxException("Unexpected sub attribute " + subAttributeName);
+                }
             }
         }
 
