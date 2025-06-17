@@ -119,7 +119,7 @@
         <dash.skip>false</dash.skip>
         <dash.fail>true</dash.fail>
         <dash.projectId>iot.hawkbit</dash.projectId>
-        <dash.summary>${project.build.directory}/.3rd-party/DEPENDENCIES</dash.summary>
+        <dash.summary>.3rd-party/DEPENDENCIES</dash.summary>
         <!-- To automatically create IP Team review requests for identified content call with -Ddash.iplab.token=<token> (do not share your access token) -->
         <dash.review.summary>${project.build.directory}/.3rd-party/DEPENDENCIES_REVIEW</dash.review.summary>
         <excludeGroupIds>org.eclipse,org.junit</excludeGroupIds>

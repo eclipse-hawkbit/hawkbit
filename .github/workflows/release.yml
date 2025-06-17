@@ -60,6 +60,28 @@ jobs:
           fi
           mvn install -DskipTests -DskipJavadoc --batch-mode
           mvn license-tool:license-check -Plicense -Ddash.fail=${DASH_FAIL} -Ddash.iplab.token=${GITLAB_API_TOKEN} --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test' --batch-mode
+          CHANGED_FILES_COUNT=$(git status --short | wc -l)
+          CHANGED_FILES_COUNT=${CHANGED_FILES_COUNT//[[:space:]]/}
+          echo "Number of changed files: ${CHANGED_FILES_COUNT}"
+          if [ "$CHANGED_FILES_COUNT" -eq 1 ]; then
+              DEPENDENCY_FILE=".3rd-party/DEPENDENCIES"
+              DEPENDENCIES_MODIFIED=$(git status --short | grep ".3rd-party/DEPENDENCIES")
+              # Check if the file is modified
+              if [[ -n "$DEPENDENCIES_MODIFIED" ]]; then
+                  echo "${DEPENDENCY_FILE} changed - commit it"
+                  git config --local user.name "github-actions[bot]"
+                  git config --local user.email "github-actions[bot]@users.noreply.github.com"
+                  git add ${DEPENDENCY_FILE} && git commit -m "[Release] Automated commit of ${DEPENDENCY_FILE} changes" && git push
+              else
+                  echo "Unexpected changes:"
+                  git status --short
+                  exit 1
+              fi
+          else
+              echo "More than one file has changed:"
+              git status --short
+              exit 1
+          fi
         env:
           REVISION: ${{ github.event.inputs.revision }}
           GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
@@ -79,10 +101,10 @@ jobs:
       - name: Tag release
         run: |
          if [ "${REVISION}" != "0-SNAPSHOT" ]; then
-            git config --global user.email "release_manager@hawkbit.eclipse.org"
-            git config --global user.name "Eclipse Hawkbit (Release Manager)"
-            git tag -a ${REVISION} -m "Release version ${REVISION}"
-            git push origin ${REVISION}
+             git config --local user.name "github-actions[bot]"
+             git config --local user.email "github-actions[bot]@users.noreply.github.com"
+             git tag -a ${REVISION} -m "Release version ${REVISION}"
+             git push origin ${REVISION}
          fi
         env:
           REVISION: ${{ github.event.inputs.revision }}

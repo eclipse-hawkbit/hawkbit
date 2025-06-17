@@ -3,10 +3,16 @@ name: License Scan
 on:
   # enable running the workflow manually
   workflow_dispatch:
+  schedule:
+    # run every night at 2:00 AM (UTC)
+    - cron: '0 2 * * *'
 
 jobs:
   license-scan:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +37,28 @@ jobs:
       - name: Check dependency licenses with dash tool
         run: |
           mvn clean install -DskipTests -DskipJavadoc --batch-mode
-          mvn license-tool:license-check -DexcludeGroupIds=org.eclipse.hawkbit -Plicense -Ddash.iplab.token=${GITLAB_API_TOKEN} --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test'
+          mvn license-tool:license-check -DexcludeGroupIds=org.eclipse.hawkbit -Ddash.fail=false -Plicense -Ddash.iplab.token=${GITLAB_API_TOKEN} --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test'
+          CHANGED_FILES_COUNT=$(git status --short | wc -l)
+          CHANGED_FILES_COUNT=${CHANGED_FILES_COUNT//[[:space:]]/}
+          echo "Number of changed files: ${CHANGED_FILES_COUNT}"
+          if [ "$CHANGED_FILES_COUNT" -eq 1 ]; then
+              DEPENDENCY_FILE=".3rd-party/DEPENDENCIES"
+              DEPENDENCIES_MODIFIED=$(git status --short | grep ".3rd-party/DEPENDENCIES")
+              # Check if the file is modified
+              if [[ -n "$DEPENDENCIES_MODIFIED" ]]; then
+                  echo "${DEPENDENCY_FILE} changed - commit it"
+                  git config --local user.name "github-actions[bot]"
+                  git config --local user.email "github-actions[bot]@users.noreply.github.com"
+                  git add ${DEPENDENCY_FILE} && git commit -m "[Release] Automated commit of ${DEPENDENCY_FILE} changes" && git push
+              else
+                  echo "Unexpected changes:"
+                  git status --short
+                  exit 1
+              fi
+          else
+              echo "More than one file has changed:"
+              git status --short
+              exit 1
+          fi
         env:
           GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
