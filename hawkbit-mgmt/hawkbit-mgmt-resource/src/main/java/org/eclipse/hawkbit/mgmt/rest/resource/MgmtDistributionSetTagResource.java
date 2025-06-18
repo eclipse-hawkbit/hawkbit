@@ -29,8 +29,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -148,13 +146,6 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         final List<DistributionSet> assignedDs = this.distributionSetManagement.assignTag(distributionSetIds, distributionSetTagId);
         log.debug("Assigned DistributionSet {}", assignedDs.size());
         return ResponseEntity.ok().build();
-    }
-
-    private static final Logger LOGGER = LoggerFactory.getLogger("DEPRECATED_USAGE");
-    @Override
-    public ResponseEntity<Void> assignDistributionSetsPut(final Long distributionsetTagId, final List<Long> distributionsetIds) {
-        LOGGER.debug("[DEPRECATED] Deprecated usage of assignDistributionSetsPut. Use assignDistributionSets (POST) instead.");
-        return assignDistributionSets(distributionsetTagId, distributionsetIds);
     }
 
     @Override

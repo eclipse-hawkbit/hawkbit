@@ -322,14 +322,26 @@ public interface MgmtTargetTagRestApi {
             @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
                     "and the client has to wait another second.")
     })
-    @PutMapping(
+    @PostMapping(
             value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING,
             consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> assignTargets(
             @PathVariable("targetTagId") Long targetTagId,
-            @RequestParam(value = "onNotFoundPolicy", required = false, defaultValue = "FAIL") OnNotFoundPolicy onNotFoundPolicy,
             @Schema(description = "List of controller ids to be assigned", example = "[\"controllerId1\", \"controllerId2\"]")
-            @RequestBody List<String> controllerIds);
+            @RequestBody List<String> controllerIds,
+            @RequestParam(value = "onNotFoundPolicy", required = false, defaultValue = "FAIL") OnNotFoundPolicy onNotFoundPolicy);
+
+    /**
+     * @deprecated since 0.9.0, use {@link #assignTargets(Long, List, OnNotFoundPolicy)} (POST) instead.
+     */
+    @Deprecated(forRemoval = true, since = "0.9.0")
+    @PutMapping(
+            value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING,
+            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<Void> assignTargetsPut(
+            @PathVariable("targetTagId") Long targetTagId,
+            @RequestBody List<String> controllerIds,
+            @RequestParam(value = "onNotFoundPolicy", required = false, defaultValue = "FAIL") OnNotFoundPolicy onNotFoundPolicy);
 
     /**
      * Handles the DELETE request to unassign one target from the given tag id.

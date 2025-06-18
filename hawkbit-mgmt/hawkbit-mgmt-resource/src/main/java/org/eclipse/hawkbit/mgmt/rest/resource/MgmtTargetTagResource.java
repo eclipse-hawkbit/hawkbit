@@ -34,6 +34,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -146,7 +148,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
     @Override
     public ResponseEntity<Void> assignTargets(
-            final Long targetTagId, final OnNotFoundPolicy onNotFoundPolicy, final List<String> controllerIds) {
+            final Long targetTagId, final List<String> controllerIds, final OnNotFoundPolicy onNotFoundPolicy) {
         log.debug("Assign {} targets for target tag {}", controllerIds.size(), targetTagId);
         if (onNotFoundPolicy == OnNotFoundPolicy.FAIL) {
             this.targetManagement.assignTag(controllerIds, targetTagId);
@@ -159,6 +161,13 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
             }
         }
         return ResponseEntity.ok().build();
+    }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("DEPRECATED_USAGE");
+    @Override
+    public ResponseEntity<Void> assignTargetsPut(final Long targetTagId, final List<String> controllerIds, final OnNotFoundPolicy onNotFoundPolicy) {
+        LOGGER.debug("[DEPRECATED] Deprecated usage of assignTargetsPut. Use assignTargetsPut (POST) instead.");
+        return assignTargets(targetTagId, controllerIds, onNotFoundPolicy);
     }
 
     @Override

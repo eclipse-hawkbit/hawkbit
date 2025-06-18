@@ -429,7 +429,7 @@ class MgmtDistributionSetTagResourceTest extends AbstractManagementApiIntegratio
         withMissing.addAll(missing);
 
         mvc.perform(
-                        put(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+                        post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                                 .content(JsonBuilder.toArray(withMissing))
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
