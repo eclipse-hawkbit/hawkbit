@@ -314,7 +314,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final Target assigned0 = targets.get(0);
         final Target assigned1 = targets.get(1);
 
-        mvc.perform(put(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+        mvc.perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .content(JsonBuilder.toArray(Arrays.asList(assigned0.getControllerId(), assigned1.getControllerId())))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -347,7 +347,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final List<String> withMissing = new ArrayList<>(targets);
         withMissing.addAll(missing);
 
-        mvc.perform(put(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+        mvc.perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .content(JsonBuilder.toArray(withMissing))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
@@ -387,7 +387,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final List<String> withMissing = new ArrayList<>(targets);
         withMissing.addAll(missing);
 
-        mvc.perform(put(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+        mvc.perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .param("onNotFoundPolicy", MgmtTargetTagRestApi.OnNotFoundPolicy.ON_WHAT_FOUND_AND_FAIL.name())
                         .content(JsonBuilder.toArray(withMissing))
                         .contentType(MediaType.APPLICATION_JSON))
@@ -429,7 +429,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
         final List<String> withMissing = new ArrayList<>(targets);
         withMissing.addAll(missing);
 
-        mvc.perform(put(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
+        mvc.perform(post(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + tag.getId() + "/assigned")
                         .param("onNotFoundPolicy", MgmtTargetTagRestApi.OnNotFoundPolicy.ON_WHAT_FOUND_AND_SUCCESS.name())
                         .content(JsonBuilder.toArray(withMissing))
                         .contentType(MediaType.APPLICATION_JSON))

@@ -392,17 +392,6 @@ public interface MgmtDistributionSetTagRestApi {
             @RequestBody List<Long> distributionsetIds);
 
     /**
-     * @deprecated since 0.8.0, use {@link #assignDistributionSet(Long, Long)} (POST) instead.
-     */
-    @Deprecated(forRemoval = true, since = "0.8.0")
-    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING,
-            consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE },
-            produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<Void> assignDistributionSetsPut(
-            @PathVariable("distributionsetTagId") Long distributionsetTagId,
-            @RequestBody List<Long> distributionsetIds);
-
-    /**
      * Handles the DELETE request to unassign one distribution set from the given tag id.
      *
      * @param distributionsetTagId the ID of the distribution set tag
