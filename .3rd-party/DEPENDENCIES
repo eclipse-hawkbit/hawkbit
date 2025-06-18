@@ -42,19 +42,19 @@ maven/mavencentral/com.vaadin/flow-client/24.7.6, Apache-2.0, approved, #21993
 maven/mavencentral/com.vaadin/flow-data/24.7.6, Apache-2.0, approved, #21977
 maven/mavencentral/com.vaadin/flow-dnd/24.7.6, Apache-2.0, approved, #21974
 maven/mavencentral/com.vaadin/flow-html-components/24.7.6, Apache-2.0, approved, #21982
-maven/mavencentral/com.vaadin/flow-lit-template/24.7.6, , restricted, clearlydefined
+maven/mavencentral/com.vaadin/flow-lit-template/24.7.6, Apache-2.0, approved, #22011
 maven/mavencentral/com.vaadin/flow-push/24.7.6, Apache-2.0, approved, #21948
 maven/mavencentral/com.vaadin/flow-react/24.7.6, Apache-2.0, approved, #21995
 maven/mavencentral/com.vaadin/flow-server/24.7.6, Apache-2.0 AND (Apache-2.0 AND LicenseRef-scancode-proprietary-license) AND MIT, restricted, #21969
 maven/mavencentral/com.vaadin/hilla-endpoint/24.7.5, Apache-2.0, approved, #21994
 maven/mavencentral/com.vaadin/hilla-engine-core/24.7.5, Apache-2.0, approved, #21991
 maven/mavencentral/com.vaadin/hilla-engine-runtime/24.7.5, Apache-2.0, approved, #21961
-maven/mavencentral/com.vaadin/hilla-parser-jvm-core/24.7.5, , restricted, clearlydefined
+maven/mavencentral/com.vaadin/hilla-parser-jvm-core/24.7.5, Apache-2.0, approved, #22010
 maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-backbone/24.7.5, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-model/24.7.5, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-nonnull/24.7.5, Apache-2.0, approved, #21996
 maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-subtypes/24.7.5, Apache-2.0, approved, #21973
-maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-transfertypes/24.7.5, , restricted, clearlydefined
+maven/mavencentral/com.vaadin/hilla-parser-jvm-plugin-transfertypes/24.7.5, Apache-2.0, approved, #22008
 maven/mavencentral/com.vaadin/hilla-parser-jvm-utils/24.7.5, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.vaadin/hilla-runtime-plugin-transfertypes/24.7.5, Apache-2.0, approved, #21975
 maven/mavencentral/com.vaadin/hilla/24.7.5, Apache-2.0, approved, #21947
@@ -88,19 +88,19 @@ maven/mavencentral/com.vaadin/vaadin-menu-bar-flow/24.7.6, Apache-2.0, approved,
 maven/mavencentral/com.vaadin/vaadin-messages-flow/24.7.6, Apache-2.0, approved, #21999
 maven/mavencentral/com.vaadin/vaadin-notification-flow/24.7.6, Apache-2.0, approved, #21965
 maven/mavencentral/com.vaadin/vaadin-ordered-layout-flow/24.7.6, Apache-2.0, approved, #22006
-maven/mavencentral/com.vaadin/vaadin-popover-flow/24.7.6, , restricted, clearlydefined
+maven/mavencentral/com.vaadin/vaadin-popover-flow/24.7.6, Apache-2.0, approved, #22012
 maven/mavencentral/com.vaadin/vaadin-progress-bar-flow/24.7.6, Apache-2.0, approved, #21978
 maven/mavencentral/com.vaadin/vaadin-radio-button-flow/24.7.6, Apache-2.0, approved, #21967
-maven/mavencentral/com.vaadin/vaadin-renderer-flow/24.7.6, , restricted, clearlydefined
+maven/mavencentral/com.vaadin/vaadin-renderer-flow/24.7.6, Apache-2.0, approved, #22009
 maven/mavencentral/com.vaadin/vaadin-select-flow/24.7.6, Apache-2.0, approved, #21956
 maven/mavencentral/com.vaadin/vaadin-side-nav-flow/24.7.6, Apache-2.0, approved, #21960
-maven/mavencentral/com.vaadin/vaadin-split-layout-flow/24.7.6, Apache-2.0, approved, #22000
+maven/mavencentral/com.vaadin/vaadin-split-layout-flow/24.7.6, Apache-2.0, approved, #22020
 maven/mavencentral/com.vaadin/vaadin-spring-boot-starter/24.7.6, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.vaadin/vaadin-spring/24.7.6, Apache-2.0, approved, #22005
 maven/mavencentral/com.vaadin/vaadin-tabs-flow/24.7.6, Apache-2.0, approved, #21958
 maven/mavencentral/com.vaadin/vaadin-text-field-flow/24.7.6, Apache-2.0, approved, #21986
 maven/mavencentral/com.vaadin/vaadin-time-picker-flow/24.7.6, Apache-2.0, approved, clearlydefined
-maven/mavencentral/com.vaadin/vaadin-upload-flow/24.7.6, , restricted, clearlydefined
+maven/mavencentral/com.vaadin/vaadin-upload-flow/24.7.6, Apache-2.0, approved, #22007
 maven/mavencentral/com.vaadin/vaadin-virtual-list-flow/24.7.6, Apache-2.0, approved, #21984
 maven/mavencentral/com.zaxxer/HikariCP/6.3.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/commons-codec/commons-codec/1.18.0, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #19214
