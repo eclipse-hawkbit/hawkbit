@@ -42,6 +42,7 @@
 
     <properties>
         <revision>0-SNAPSHOT</revision>
+
         <java.version>17</java.version>
         <!-- java.version is used to build the hawkbit in general, however, some artifacts which could be used
         as libraries in other projects might be compiled with a different, lower, java version. -->
@@ -403,7 +404,7 @@
                             <configuration>
                                 <rules>
                                     <requireMavenVersion>
-                                        <version>3.9</version>
+                                        <version>3.8.6</version>
                                     </requireMavenVersion>
                                     <requireJavaVersion>
                                         <version>17</version>
