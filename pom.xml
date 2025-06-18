@@ -53,12 +53,13 @@
         <spring.cloud.version>2025.0.0</spring.cloud.version>
         <springdoc-openapi.version>2.8.9</springdoc-openapi.version>
         <spring.plugin.core.version>3.0.0</spring.plugin.core.version>
+
         <!-- Spring boot version overrides (should be reviewed with every Spring boot upgrade) - START -->
         <!-- Newer versions needed than defined in the Spring boot -->
+
         <!-- Spring boot version overrides - END -->
 
         <!-- Eclipselink - START -->
-        <!-- 4.0.4 doesn't work because of https://github.com/eclipse-ee4j/eclipselink/issues/2219 -->
         <eclipselink.version>4.0.6</eclipselink.version>
         <eclipselink.maven.plugin.version>3.0.2</eclipselink.maven.plugin.version>
         <!-- Eclipselink - END -->
@@ -94,6 +95,13 @@
         <maven.gpg.plugin.version>3.2.7</maven.gpg.plugin.version>
         <!-- Maven Plugin versions - END -->
 
+        <!-- Test - START -->
+        <surefire.forkcount>1</surefire.forkcount>
+        <surefire.jvm.args/>
+        <failsafe.forkcount>1</failsafe.forkcount>
+        <failsafe.jvm.args>-Xmx1024m</failsafe.jvm.args>
+        <!-- Test - END -->
+
         <!-- Sonar - START -->
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.branch.name>LOCAL_SCAN</sonar.branch.name>
@@ -102,12 +110,16 @@
         <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
         <sonar.links.ci>https://github.com/eclipse-hawkbit/hawkbit/actions</sonar.links.ci>
         <sonar.exclusions>
-            **/target/generated-sources/apt/**,**/src/test/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**
+            **/target/generated-sources/apt/**,
+            **/src/test/**,
+            **/src/main/java/org/eclipse/hawkbit/repository/test/**
         </sonar.exclusions>
         <sonar.coverage.exclusions>
-            **/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**
+            **/target/generated-sources/apt/**,
+            **/src/test/**,
+            **/src/main/java/org/eclipse/hawkbit/repository/test/**,
+            **/src/main/java/org/eclipse/hawkbit/ui/**
         </sonar.coverage.exclusions>
-        <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
         <sonar.coverage.jacoco.xmlReportPaths>
             ${project.basedir}/../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml,
             ${project.basedir}/../../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml
@@ -123,11 +135,6 @@
         <dash.review.summary>${project.build.directory}/.3rd-party/DEPENDENCIES_REVIEW</dash.review.summary>
         <excludeGroupIds>org.eclipse,org.junit</excludeGroupIds>
         <!-- Dash tool integration - END -->
-
-        <!-- Test - START -->
-        <surefire.forkcount>1</surefire.forkcount>
-        <test.jvm.args/>
-        <!-- Test - END -->
     </properties>
 
     <developers>
@@ -519,7 +526,7 @@
                         <useSystemClassLoader>false</useSystemClassLoader>
                         <reuseForks>true</reuseForks>
                         <forkCount>${surefire.forkcount}</forkCount>
-                        <argLine>${jacoco.agent.ut.arg} ${test.jvm.args}</argLine>
+                        <argLine>${surefire.jvm.args}</argLine>
                         <properties>
                             <property>
                                 <name>listener</name>
@@ -542,8 +549,8 @@
                     <version>${maven.failsafe.plugin.version}</version>
                     <configuration>
                         <reuseForks>false</reuseForks>
-                        <forkCount>${surefire.forkcount}</forkCount>
-                        <argLine>-Xmx1024m ${jacoco.agent.ut.arg}</argLine>
+                        <forkCount>${failsafe.forkcount}</forkCount>
+                        <argLine>${failsafe.jvm.args}</argLine>
                         <properties>
                             <property>
                                 <name>listener</name>
@@ -585,6 +592,22 @@
                             <configuration>
                                 <propertyName>jacoco.agent.it.arg</propertyName>
                             </configuration>
+                        </execution>
+                        <!-- "prepare-agent" is executed in parent pom -->
+                        <execution>
+                            <id>report-ut</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                        <!-- "prepare-agent-integration" is executed in parent pom -->
+                        <execution>
+                            <id>report-it</id>
+                            <phase>post-integration-test</phase>
+                            <goals>
+                                <goal>report-integration</goal>
+                            </goals>
                         </execution>
                     </executions>
                 </plugin>
