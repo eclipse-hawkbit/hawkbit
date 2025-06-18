@@ -274,6 +274,8 @@
                                         <onlyWhenRelease>false</onlyWhenRelease>
                                         <excludes>
                                             <exclude>org.eclipse.hawkbit:*</exclude>
+                                            <!-- if used in child poms with different groupId -->
+                                            <exclude>${project.groupId}:*</exclude>
                                         </excludes>
                                     </requireReleaseDeps>
                                 </rules>
