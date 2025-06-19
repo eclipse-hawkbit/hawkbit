@@ -20,8 +20,12 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>${project.build.directory}/allure-results</directory>
-            <outputDirectory>/</outputDirectory>
+            <directory>${project.basedir}/../target/surefire-reports</directory>
+            <outputDirectory>/surefire-reports</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/../target/jacoco-aggregate</directory>
+            <outputDirectory>/jacoco-aggregate</outputDirectory>
         </fileSet>
     </fileSets>
 </assembly>

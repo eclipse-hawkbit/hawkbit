@@ -21,6 +21,7 @@
     <artifactId>hawkbit-test-report</artifactId>
     <name>hawkBit :: Test Report</name>
 
+    <!-- enumerate all modules that should be included in the jacoco test report since it aggregates only direct dependencies -->
     <dependencies>
         <dependency>
             <groupId>org.eclipse.hawkbit</groupId>
@@ -104,63 +105,28 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>aggregate-reports</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>report-aggregate</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/jacoco-aggregate</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
-
     <profiles>
         <profile>
             <id>generateTestReport</id>
             <build>
                 <plugins>
                     <plugin>
-                        <artifactId>maven-resources-plugin</artifactId>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>copy-resources</id>
+                                <id>aggregate-reports</id>
                                 <phase>verify</phase>
                                 <goals>
-                                    <goal>copy-resources</goal>
+                                    <goal>report-aggregate</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>${basedir}/target/allure-results</outputDirectory>
-                                    <resources>
-                                        <resource>
-                                            <directory>${basedir}/..</directory>
-                                            <filtering>false</filtering>
-                                            <includes>
-                                                <include>**/target/allure-results/*.json</include>
-                                            </includes>
-                                        </resource>
-                                        <resource>
-                                            <directory>${basedir}</directory>
-                                            <filtering>false</filtering>
-                                            <includes>
-                                                <include>placeholder.txt</include>
-                                            </includes>
-                                        </resource>
-                                    </resources>
+                                    <outputDirectory>${project.basedir}/../target/jacoco-aggregate</outputDirectory>
                                 </configuration>
                             </execution>
                         </executions>
                     </plugin>
+
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
