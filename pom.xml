@@ -526,7 +526,7 @@
                         <useSystemClassLoader>false</useSystemClassLoader>
                         <reuseForks>true</reuseForks>
                         <forkCount>${surefire.forkcount}</forkCount>
-                        <argLine>${surefire.jvm.args}</argLine>
+                        <argLine>${jacoco.agent.args} ${surefire.jvm.args}</argLine>
                         <properties>
                             <property>
                                 <name>listener</name>
@@ -550,7 +550,7 @@
                     <configuration>
                         <reuseForks>false</reuseForks>
                         <forkCount>${failsafe.forkcount}</forkCount>
-                        <argLine>${failsafe.jvm.args}</argLine>
+                        <argLine>${jacoco.agent.integration.args} ${failsafe.jvm.args}</argLine>
                         <properties>
                             <property>
                                 <name>listener</name>
@@ -580,7 +580,7 @@
                                 <goal>prepare-agent</goal>
                             </goals>
                             <configuration>
-                                <propertyName>jacocoAgentArgs</propertyName>
+                                <propertyName>jacoco.agent.args</propertyName>
                             </configuration>
                         </execution>
                         <execution>
@@ -590,7 +590,7 @@
                                 <goal>prepare-agent-integration</goal>
                             </goals>
                             <configuration>
-                                <propertyName>jacocoAgentIntegrationArgs</propertyName>
+                                <propertyName>jacoco.agent.integration.args</propertyName>
                             </configuration>
                         </execution>
                         <execution>
