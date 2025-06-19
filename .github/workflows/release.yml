@@ -103,8 +103,9 @@ jobs:
          if [ "${REVISION}" != "0-SNAPSHOT" ]; then
              git config --local user.name "github-actions[bot]"
              git config --local user.email "github-actions[bot]@users.noreply.github.com"
-             git tag -a ${REVISION} -m "Release version ${REVISION}"
-             git push origin ${REVISION}
+             git tag -a ${REVISION} -m "Release version ${REVISION}" && git push origin ${REVISION}
+             git config --local --unset user.name
+             git config --local --unset user.email
          fi
         env:
           REVISION: ${{ github.event.inputs.revision }}
