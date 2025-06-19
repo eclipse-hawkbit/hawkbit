@@ -106,7 +106,6 @@
 
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -118,12 +117,11 @@
                             <goal>report-aggregate</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${jacoco.outputDir}/jacoco-aggregate</outputDirectory>
+                            <outputDirectory>${project.build.directory}/jacoco-aggregate</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 
