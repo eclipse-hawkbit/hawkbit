@@ -72,8 +72,6 @@ jobs:
                   git config --local user.name "github-actions[bot]"
                   git config --local user.email "github-actions[bot]@users.noreply.github.com"
                   git add ${DEPENDENCY_FILE} && git commit -m "[Release] Automated commit of ${DEPENDENCY_FILE} changes" && git push
-                  git config --local --unset user.name
-                  git config --local --unset user.email
               else
                   echo "Unexpected changes:"
                   git status --short
@@ -102,12 +100,10 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Tag release
         run: |
-         if [ "${REVISION}" != "0-SNAPSHOT" ]; then
-             git config --local user.name "github-actions[bot]"
-             git config --local user.email "github-actions[bot]@users.noreply.github.com"
-             git tag -a ${REVISION} -m "Release version ${REVISION}" && git push origin ${REVISION}
-             git config --local --unset user.name
-             git config --local --unset user.email
-         fi
+          if [ "${REVISION}" != "0-SNAPSHOT" ]; then
+              git config --local user.name "github-actions[bot]"
+              git config --local user.email "github-actions[bot]@users.noreply.github.com"
+              git tag -a ${REVISION} -m "Release version ${REVISION}" && git push origin ${REVISION}
+          fi
         env:
           REVISION: ${{ github.event.inputs.revision }}
