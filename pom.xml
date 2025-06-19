@@ -91,7 +91,7 @@
 
         <license.tool.plugin.version>1.1.0</license.tool.plugin.version>
         <license.maven.plugin.version>5.0.0</license.maven.plugin.version>
-        <central.publishing.maven.plugin.version>0.7.0</central.publishing.maven.plugin.version>
+        <central.publishing.maven.plugin.version>0.8.0</central.publishing.maven.plugin.version>
         <maven.gpg.plugin.version>3.2.7</maven.gpg.plugin.version>
         <!-- Maven Plugin versions - END -->
 
@@ -580,7 +580,7 @@
                                 <goal>prepare-agent</goal>
                             </goals>
                             <configuration>
-                                <propertyName>jacoco.agent.ut.arg</propertyName>
+                                <propertyName>jacocoAgentArgs</propertyName>
                             </configuration>
                         </execution>
                         <execution>
@@ -590,10 +590,9 @@
                                 <goal>prepare-agent-integration</goal>
                             </goals>
                             <configuration>
-                                <propertyName>jacoco.agent.it.arg</propertyName>
+                                <propertyName>jacocoAgentIntegrationArgs</propertyName>
                             </configuration>
                         </execution>
-                        <!-- "prepare-agent" is executed in parent pom -->
                         <execution>
                             <id>report-ut</id>
                             <phase>prepare-package</phase>
@@ -601,7 +600,6 @@
                                 <goal>report</goal>
                             </goals>
                         </execution>
-                        <!-- "prepare-agent-integration" is executed in parent pom -->
                         <execution>
                             <id>report-it</id>
                             <phase>post-integration-test</phase>
