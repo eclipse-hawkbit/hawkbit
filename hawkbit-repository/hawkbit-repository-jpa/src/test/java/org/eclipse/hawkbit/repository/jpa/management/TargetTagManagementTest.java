@@ -54,7 +54,8 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that tagging of set containing missing DS throws meaningful and correct exception.
      */
-    @Test    void failOnMissingDs() {
+    @Test
+    void failOnMissingDs() {
         final Collection<String> group = testdataFactory.createTargets(5).stream()
                 .map(Target::getControllerId)
                 .toList();
@@ -111,7 +112,8 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that a tag with with invalid properties cannot be created or updated
      */
-    @Test    void createAndUpdateTagWithInvalidFields() {
+    @Test
+    void createAndUpdateTagWithInvalidFields() {
         final TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
         createAndUpdateTagWithInvalidDescription(tag);
         createAndUpdateTagWithInvalidColour(tag);
@@ -121,7 +123,8 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies assign/unassign.
      */
-    @Test    void assignAndUnassignTargetTags() {
+    @Test
+    void assignAndUnassignTargetTags() {
         final List<Target> groupA = testdataFactory.createTargets(20);
         final List<Target> groupB = testdataFactory.createTargets(20, "groupb", "groupb");
 
@@ -159,7 +162,8 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that all tags are retrieved through repository.
      */
-    @Test    void findAllTargetTags() {
+    @Test
+    void findAllTargetTags() {
         final List<JpaTargetTag> tags = createTargetsWithTags();
 
         assertThat(targetTagRepository.findAll()).isEqualTo(targetTagRepository.findAll()).isEqualTo(tags)
@@ -169,7 +173,8 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that a created tag is persisted in the repository as defined.
      */
-    @Test    void createTargetTag() {
+    @Test
+    void createTargetTag() {
         final Tag tag = targetTagManagement
                 .create(entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
 
@@ -182,7 +187,8 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that a deleted tag is removed from the repository as defined.
      */
-    @Test    void deleteTargetTags() {
+    @Test
+    void deleteTargetTags() {
         // create test data
         final Iterable<JpaTargetTag> tags = createTargetsWithTags();
         final TargetTag toDelete = tags.iterator().next();
@@ -206,7 +212,8 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the name update of a target tag.
      */
-    @Test    void updateTargetTag() {
+    @Test
+    void updateTargetTag() {
         final List<JpaTargetTag> tags = createTargetsWithTags();
 
         // change data
@@ -227,7 +234,8 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that a tag cannot be created if one exists already with that name (expects EntityAlreadyExistsException).
      */
-    @Test    void failedDuplicateTargetTagNameException() {
+    @Test
+    void failedDuplicateTargetTagNameException() {
         final TagCreate tagCreate = entityFactory.tag().create().name("A");
         targetTagManagement.create(tagCreate);
         assertThatExceptionOfType(EntityAlreadyExistsException.class).isThrownBy(() -> targetTagManagement.create(tagCreate));
@@ -236,7 +244,8 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that a tag cannot be updated to a name that already exists on another tag (expects EntityAlreadyExistsException).
      */
-    @Test    void failedDuplicateTargetTagNameExceptionAfterUpdate() {
+    @Test
+    void failedDuplicateTargetTagNameExceptionAfterUpdate() {
         targetTagManagement.create(entityFactory.tag().create().name("A"));
         final TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("B"));
 

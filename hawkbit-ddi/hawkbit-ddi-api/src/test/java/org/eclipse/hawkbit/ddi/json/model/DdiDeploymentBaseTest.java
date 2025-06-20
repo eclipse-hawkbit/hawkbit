@@ -37,7 +37,8 @@ class DdiDeploymentBaseTest {
     /**
      * Verify the correct serialization and deserialization of the model
      */
-    @Test    void shouldSerializeAndDeserializeObject() throws IOException {
+    @Test
+    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final String id = "1234";
         final DdiDeployment ddiDeployment = new DdiDeployment(FORCED, ATTEMPT, Collections.emptyList(), AVAILABLE);
@@ -59,7 +60,8 @@ class DdiDeploymentBaseTest {
     /**
      * Verify the correct deserialization of a model with a additional unknown property
      */
-    @Test    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    @Test
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiDeploymentBase = "{\"id\":\"1234\",\"deployment\":{\"download\":\"forced\"," +
                 "\"update\":\"attempt\",\"maintenanceWindow\":\"available\",\"chunks\":[]}," +
@@ -76,7 +78,8 @@ class DdiDeploymentBaseTest {
     /**
      * Verify that deserialization fails for known properties with a wrong datatype
      */
-    @Test    void shouldFailForObjectWithWrongDataTypes() {
+    @Test
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiDeploymentBase = "{\"id\":[\"1234\"],\"deployment\":{\"download\":\"forced\"," +
                 "\"update\":\"attempt\",\"maintenanceWindow\":\"available\",\"chunks\":[]}," +

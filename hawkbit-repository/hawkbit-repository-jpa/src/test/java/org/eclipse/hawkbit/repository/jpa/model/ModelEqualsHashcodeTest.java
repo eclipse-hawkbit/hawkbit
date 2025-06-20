@@ -24,7 +24,8 @@ class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that different objects even with identical primary key, version and tenant return different hash codes.
      */
-    @Test    void differentEntitiesReturnDifferentHashCodes() {
+    @Test
+    void differentEntitiesReturnDifferentHashCodes() {
         assertThat(new JpaAction().hashCode()).as("action should have different hashcode than action status")
                 .isNotEqualTo(new JpaActionStatus().hashCode());
         assertThat(new JpaDistributionSet().hashCode())
@@ -41,7 +42,8 @@ class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that different object even with identical primary key, version and tenant are not equal.
      */
-    @Test    void differentEntitiesAreNotEqual() {
+    @Test
+    void differentEntitiesAreNotEqual() {
         assertThat(new JpaAction().equals(new JpaActionStatus())).as("action equals action status").isFalse();
         assertThat(new JpaDistributionSet().equals(new JpaSoftwareModule()))
                 .as("Distribution set equals software module").isFalse();
@@ -54,7 +56,8 @@ class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that updated entities are not equal.
      */
-    @Test    void changedEntitiesAreNotEqual() {
+    @Test
+    void changedEntitiesAreNotEqual() {
         final SoftwareModuleType type = softwareModuleTypeManagement
                 .create(entityFactory.softwareModuleType().create().key("test").name("test"));
         assertThat(type).as("persited entity is not equal to regular object")
@@ -68,7 +71,8 @@ class ModelEqualsHashcodeTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that no proxy of the entity manager has an influence on the equals or hashcode result.
      */
-    @Test    void managedEntityIsEqualToUnamangedObjectWithSameKey() {
+    @Test
+    void managedEntityIsEqualToUnamangedObjectWithSameKey() {
         final SoftwareModuleType type = softwareModuleTypeManagement.create(
                 entityFactory.softwareModuleType().create().key("test").name("test").description("test"));
 

@@ -27,7 +27,8 @@ class RegexCharTest {
     /**
      * Verifies every RegexChar can be used to exclusively find the desired characters in a String.
      */
-    @Test    void allRegexCharsOnlyFindExpectedChars() {
+    @Test
+    void allRegexCharsOnlyFindExpectedChars() {
         for (final RegexChar character : RegexChar.values()) {
             switch (character) {
                 case DIGITS:
@@ -52,7 +53,8 @@ class RegexCharTest {
     /**
      * Verifies that combinations of RegexChars can be used to find the desired characters in a String.
      */
-    @Test    void combinedRegexCharsFindExpectedChars() {
+    @Test
+    void combinedRegexCharsFindExpectedChars() {
         final RegexCharacterCollection greaterAndLessThan = new RegexCharacterCollection(RegexChar.GREATER_THAN,
                 RegexChar.LESS_THAN);
         final RegexCharacterCollection equalsAndQuestionMark = new RegexCharacterCollection(RegexChar.EQUALS_SYMBOL,

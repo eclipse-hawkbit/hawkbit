@@ -58,7 +58,8 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     /**
      * Verify that config data can be uploaded as CBOR
      */
-    @Test    void putConfigDataAsCbor() throws Exception {
+    @Test
+    void putConfigDataAsCbor() throws Exception {
         testdataFactory.createTarget(TARGET1_ID);
 
         final Map<String, String> attributes = new HashMap<>();
@@ -209,7 +210,8 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     /**
      * Verifies that invalid config data attributes are handled correctly.
      */
-    @Test    void putConfigDataWithInvalidAttributes() throws Exception {
+    @Test
+    void putConfigDataWithInvalidAttributes() throws Exception {
         // create a target
         testdataFactory.createTarget(TARGET2_ID);
         putAndVerifyConfigDataWithKeyTooLong();
@@ -219,7 +221,8 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
     /**
      * Verify that config data (device attributes) can be updated by the controller using different update modes (merge, replace, remove).
      */
-    @Test    void putConfigDataWithDifferentUpdateModes() throws Exception {
+    @Test
+    void putConfigDataWithDifferentUpdateModes() throws Exception {
         // create a target
         testdataFactory.createTarget(TARGET1_ID);
 

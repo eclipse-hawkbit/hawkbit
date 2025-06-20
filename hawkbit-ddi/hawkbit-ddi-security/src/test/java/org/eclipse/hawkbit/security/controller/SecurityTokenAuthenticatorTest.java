@@ -68,7 +68,8 @@ class SecurityTokenAuthenticatorTest {
     /**
      * Tests successful authentication with gateway token
      */
-    @Test    void testWithSecToken() {
+    @Test
+    void testWithSecToken() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SECURITY_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
@@ -87,7 +88,8 @@ class SecurityTokenAuthenticatorTest {
     /**
      * Tests that if gateway token doesn't match, the authentication fails
      */
-    @Test    void testWithBadSecToken() {
+    @Test
+    void testWithBadSecToken() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(UNKNOWN_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))
@@ -99,14 +101,16 @@ class SecurityTokenAuthenticatorTest {
     /**
      * Tests that if gateway token miss, the authentication fails
      */
-    @Test    void testWithoutSecToken() {
+    @Test
+    void testWithoutSecToken() {
         assertThat(authenticator.authenticate(new ControllerSecurityToken("DEFAULT", CONTROLLER_ID))).isNull();
     }
 
     /**
      * Tests that if disabled, the authentication fails
      */
-    @Test    void testWithSecTokenButDisabled() {
+    @Test
+    void testWithSecTokenButDisabled() {
         final ControllerSecurityToken securityToken = prepareSecurityToken(SECURITY_TOKEN);
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, Boolean.class))

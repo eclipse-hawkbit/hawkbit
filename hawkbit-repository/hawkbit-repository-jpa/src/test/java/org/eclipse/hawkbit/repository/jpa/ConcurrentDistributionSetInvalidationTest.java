@@ -54,7 +54,8 @@ class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTe
     /**
      * Verify that a large rollout causes a timeout when trying to invalidate a distribution set
      */
-    @Test    void verifyInvalidateDistributionSetWithLargeRolloutThrowsException() {
+    @Test
+    void verifyInvalidateDistributionSetWithLargeRolloutThrowsException() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final Rollout rollout = createRollout(distributionSet);
         final String tenant = tenantAware.getCurrentTenant();

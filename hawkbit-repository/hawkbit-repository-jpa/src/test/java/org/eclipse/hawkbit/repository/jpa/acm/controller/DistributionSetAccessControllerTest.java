@@ -47,7 +47,8 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
     /**
      * Verifies read access rules for distribution sets
      */
-    @Test    void verifyDistributionSetReadOperations() {
+    @Test
+    void verifyDistributionSetReadOperations() {
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);
@@ -119,7 +120,8 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
     /**
      * Verifies read access rules for distribution sets
      */
-    @Test    void verifyDistributionSetUpdates() {
+    @Test
+    void verifyDistributionSetUpdates() {
         // permit all operations first to prepare test setup
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);

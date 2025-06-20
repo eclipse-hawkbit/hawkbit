@@ -111,7 +111,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Dynamic group doesn't override newer static group assignments
      */
-    @Test    void dynamicGroupDoesntOverrideItsOrNewerStaticGroups() {
+    @Test
+    void dynamicGroupDoesntOverrideItsOrNewerStaticGroups() {
         final int amountGroups = 1; // static only
         final String targetPrefix = "controller-dynamic-rollout-";
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds");
@@ -176,7 +177,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that a running action with distribution-set (A) is not canceled by a rollout which tries to also assign a distribution-set (A)
      */
-    @Test    void rolloutShouldNotCancelRunningActionWithTheSameDistributionSet() {
+    @Test
+    void rolloutShouldNotCancelRunningActionWithTheSameDistributionSet() {
         // manually assign distribution set to target
         final String knownControllerId = "controller12345";
         final DistributionSet knownDistributionSet = testdataFactory.createDistributionSet();
@@ -242,7 +244,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that a running action is auto canceled by a rollout which assigns another distribution-set.
      */
-    @Test    void rolloutAssignsNewDistributionSetAndAutoCloseActiveActions() {
+    @Test
+    void rolloutAssignsNewDistributionSetAndAutoCloseActiveActions() {
         tenantConfigurationManagement
                 .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
 
@@ -328,7 +331,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifying that the rollout is created correctly, executing the filter and split up the targets in the correct group size.
      */
-    @Test    void creatingRolloutIsCorrectPersisted() {
+    @Test
+    void creatingRolloutIsCorrectPersisted() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
@@ -348,7 +352,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifying that when the rollout is started the actions for all targets in the rollout is created and the state of the first group is running as well as the corresponding actions
      */
-    @Test    void startRolloutSetFirstGroupAndActionsInRunningStateAndOthersInScheduleState() {
+    @Test
+    void startRolloutSetFirstGroupAndActionsInRunningStateAndOthersInScheduleState() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
@@ -385,7 +390,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifying that a finish condition of a group is hit the next group of the rollout is also started
      */
-    @Test    void checkRunningRolloutsDoesNotStartNextGroupIfFinishConditionIsNotHit() {
+    @Test
+    void checkRunningRolloutsDoesNotStartNextGroupIfFinishConditionIsNotHit() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
@@ -428,7 +434,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifying that next group is started when targets of the group have been deleted.
      */
-    @Test    void checkRunningRolloutsStartsNextGroupIfTargetsDeleted() {
+    @Test
+    void checkRunningRolloutsStartsNextGroupIfTargetsDeleted() {
         final int amountTargetsForRollout = 15;
         final int amountOtherTargets = 0;
         final int amountGroups = 3;
@@ -449,7 +456,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifying that the error handling action of a group is executed to pause the current rollout
      */
-    @Test    void checkErrorHitOfGroupCallsErrorActionToPauseTheRollout() {
+    @Test
+    void checkErrorHitOfGroupCallsErrorActionToPauseTheRollout() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
@@ -494,7 +502,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifying a paused rollout in case of error action hit can be resumed again
      */
-    @Test    void errorActionPausesRolloutAndRolloutGetsResumedStartsNextScheduledGroup() {
+    @Test
+    void errorActionPausesRolloutAndRolloutGetsResumedStartsNextScheduledGroup() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
@@ -547,7 +556,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifying that the rollout is starting group after group and gets finished at the end
      */
-    @Test    void rolloutStartsGroupAfterGroupAndGetsFinished() {
+    @Test
+    void rolloutStartsGroupAfterGroupAndGetsFinished() {
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 15;
         final int amountGroups = 5;
@@ -586,7 +596,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that the targets have the right status during the rollout.
      */
-    @Test    void countCorrectStatusForEachTargetDuringRollout() {
+    @Test
+    void countCorrectStatusForEachTargetDuringRollout() {
 
         final int amountTargetsForRollout = 8;
         final int amountOtherTargets = 15;
@@ -651,7 +662,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that the targets have the right status during a download_only rollout.
      */
-    @Test    void countCorrectStatusForEachTargetDuringDownloadOnlyRollout() {
+    @Test
+    void countCorrectStatusForEachTargetDuringDownloadOnlyRollout() {
 
         final int amountTargetsForRollout = 8;
         final int amountOtherTargets = 15;
@@ -720,7 +732,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that the targets have the right status during the rollout when an error emerges.
      */
-    @Test    void countCorrectStatusForEachTargetDuringRolloutWithError() {
+    @Test
+    void countCorrectStatusForEachTargetDuringRolloutWithError() {
 
         final int amountTargetsForRollout = 8;
         final int amountOtherTargets = 15;
@@ -759,7 +772,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that the targets have the right status during the rollout when receiving the status of rollout groups.
      */
-    @Test    void countCorrectStatusForEachTargetGroupDuringRollout() {
+    @Test
+    void countCorrectStatusForEachTargetGroupDuringRollout() {
 
         final int amountTargetsForRollout = 9;
         final int amountOtherTargets = 15;
@@ -802,7 +816,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that target actions of rollout get canceled when a manuel distribution sets assignment is done.
      */
-    @Test    void targetsOfRolloutGetsManuelDsAssignment() {
+    @Test
+    void targetsOfRolloutGetsManuelDsAssignment() {
 
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 0;
@@ -847,7 +862,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that target actions of a rollout get cancelled when another rollout with same targets gets started.
      */
-    @Test    void targetsOfRolloutGetDistributionSetAssignmentByOtherRollout() {
+    @Test
+    void targetsOfRolloutGetDistributionSetAssignmentByOtherRollout() {
 
         final int amountTargetsForRollout = 15;
         final int amountOtherTargets = 5;
@@ -890,7 +906,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that error status of DistributionSet installation during rollout can get rerun with second rollout so that all targets have some DistributionSet installed at the end.
      */
-    @Test    void startSecondRolloutAfterFirstRolloutEndsWithErrors() {
+    @Test
+    void startSecondRolloutAfterFirstRolloutEndsWithErrors() {
 
         final int amountTargetsForRollout = 15;
         final int amountOtherTargets = 0;
@@ -950,7 +967,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that the rollout moves to the next group when the success condition was achieved and the error condition was not exceeded.
      */
-    @Test    void successConditionAchievedAndErrorConditionNotExceeded() {
+    @Test
+    void successConditionAchievedAndErrorConditionNotExceeded() {
 
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 0;
@@ -977,7 +995,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that the rollout does not move to the next group when the success condition was not achieved.
      */
-    @Test    void successConditionNotAchieved() {
+    @Test
+    void successConditionNotAchieved() {
 
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 0;
@@ -1004,7 +1023,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that the rollout pauses when the error condition was exceeded.
      */
-    @Test    void errorConditionExceeded() {
+    @Test
+    void errorConditionExceeded() {
 
         final int amountTargetsForRollout = 10;
         final int amountOtherTargets = 0;
@@ -1027,7 +1047,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that all rollouts are return with expected target statuses.
      */
-    @Test    void findAllRolloutsWithDetailedStatus() {
+    @Test
+    void findAllRolloutsWithDetailedStatus() {
 
         final int amountTargetsForRollout = 12;
         final int amountGroups = 2;
@@ -1104,7 +1125,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify the count of existing rollouts.
      */
-    @Test    void rightCountForAllRollouts() {
+    @Test
+    void rightCountForAllRollouts() {
 
         final int amountTargetsForRollout = 6;
         final int amountGroups = 2;
@@ -1121,7 +1143,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that the filtering and sorting ascending for rollout is working correctly.
      */
-    @Test    void findRolloutByFilters() {
+    @Test
+    void findRolloutByFilters() {
         final int amountTargetsForRollout = 6;
         final int amountGroups = 2;
         final String successCondition = "50";
@@ -1149,7 +1172,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that the expected rollout is found by name.
      */
-    @Test    void findRolloutByName() {
+    @Test
+    void findRolloutByName() {
 
         final int amountTargetsForRollout = 12;
         final int amountGroups = 2;
@@ -1167,7 +1191,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that the percent count is acting like aspected when targets move to the status finished or error.
      */
-    @Test    void getFinishedPercentForRunningGroup() {
+    @Test
+    void getFinishedPercentForRunningGroup() {
 
         final int amountTargetsForRollout = 10;
         final int amountGroups = 2;
@@ -1214,7 +1239,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that the expected targets are returned for the rollout groups.
      */
-    @Test    void findRolloutGroupTargetsWithRsqlParam() {
+    @Test
+    void findRolloutGroupTargetsWithRsqlParam() {
 
         final int amountTargetsForRollout = 15;
         final int amountGroups = 3;
@@ -1266,7 +1292,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify the creation of a Rollout without targets throws an Exception.
      */
-    @Test    void createRolloutNotMatchingTargets() {
+    @Test
+    void createRolloutNotMatchingTargets() {
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
@@ -1284,7 +1311,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify the creation of a Rollout with the same name throws an Exception.
      */
-    @Test    void createDuplicateRollout() {
+    @Test
+    void createDuplicateRollout() {
         final int amountGroups = 5;
         final int amountTargetsForRollout = 10;
         final String successCondition = "50";
@@ -1306,7 +1334,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify the creation and the start of a Rollout with more groups than targets.
      */
-    @Test    void createAndStartRolloutWithEmptyGroups() {
+    @Test
+    void createAndStartRolloutWithEmptyGroups() {
         final int amountTargetsForRollout = 3;
         final int amountGroups = 5;
         final String successCondition = "50";
@@ -1352,7 +1381,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify the creation and the start of a rollout.
      */
-    @Test    void createAndStartRollout() {
+    @Test
+    void createAndStartRollout() {
 
         final int amountTargetsForRollout = 50;
         final int amountGroups = 5;
@@ -1391,7 +1421,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify the creation and the start of a rollout.
      */
-    @Test    void createScheduledRollout() throws Exception {
+    @Test
+    void createScheduledRollout() throws Exception {
         final String rolloutName = "scheduledRolloutTest";
         testdataFactory.createTargets(50, rolloutName + "-", rolloutName);
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
@@ -1451,7 +1482,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that a rollout cannot be created if the 'max targets per rollout group' quota is violated.
      */
-    @Test    void createRolloutFailsIfQuotaGroupQuotaIsViolated() {
+    @Test
+    void createRolloutFailsIfQuotaGroupQuotaIsViolated() {
 
         final int maxTargets = quotaManagement.getMaxTargetsPerRolloutGroup();
 
@@ -1479,7 +1511,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that a rollout cannot be created based on group definitions if the 'max targets per rollout group' quota is violated for one of the groups.
      */
-    @Test    void createRolloutWithGroupDefinitionsFailsIfQuotaGroupQuotaIsViolated() {
+    @Test
+    void createRolloutWithGroupDefinitionsFailsIfQuotaGroupQuotaIsViolated() {
         final int maxTargets = quotaManagement.getMaxTargetsPerRolloutGroup();
 
         final int amountTargetsForRollout = maxTargets * 2 + 2;
@@ -1526,7 +1559,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify the update of a rollout
      */
-    @Test    void updateRollout() {
+    @Test
+    void updateRollout() {
         final int amountTargetsForRollout = 50;
         final int amountGroups = 5;
         final String successCondition = "50";
@@ -1555,7 +1589,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify the creation of a rollout with a groups definition.
      */
-    @Test    void createRolloutWithGroupDefinition() throws Exception {
+    @Test
+    void createRolloutWithGroupDefinition() throws Exception {
         final String rolloutName = "rolloutTest3";
 
         final int amountTargetsInGroup1 = 10;
@@ -1616,7 +1651,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify rollout execution with advanced group definition and confirmation flow active.
      */
-    @Test    void createRolloutWithGroupDefinitionAndConfirmationFlowActive() {
+    @Test
+    void createRolloutWithGroupDefinitionAndConfirmationFlowActive() {
         final String rolloutName = "rolloutTest4";
 
         final int amountTargetsInGroup1 = 10;
@@ -1693,7 +1729,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify rollout creation fails if group definition does not address all targets
      */
-    @Test    void createRolloutWithGroupsNotMatchingTargets() {
+    @Test
+    void createRolloutWithGroupsNotMatchingTargets() {
         final String rolloutName = "rolloutTest4";
         final int amountTargetsForRollout = 500;
         final int percentTargetsInGroup1 = 20;
@@ -1715,7 +1752,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify rollout creation fails if group definition specifies illegal target percentage
      */
-    @Test    void createRolloutWithIllegalPercentage() {
+    @Test
+    void createRolloutWithIllegalPercentage() {
         final String rolloutName = "rolloutTest6";
         final int amountTargetsForRollout = 10;
         final int percentTargetsInGroup1 = 101;
@@ -1737,7 +1775,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify rollout creation fails if the 'max rollout groups per rollout' quota is violated.
      */
-    @Test    void createRolloutWithIllegalAmountOfGroups() {
+    @Test
+    void createRolloutWithIllegalAmountOfGroups() {
         final String rolloutName = "rolloutTest5";
         final int targets = 10;
         final int maxGroups = quotaManagement.getMaxRolloutGroupsPerRollout();
@@ -1753,7 +1792,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify the start of a Rollout does not work during creation phase.
      */
-    @Test    void createAndStartRolloutDuringCreationFails() {
+    @Test
+    void createAndStartRolloutDuringCreationFails() {
         final int amountTargetsForRollout = 3;
         final int amountGroups = 5;
         final String successCondition = "50";
@@ -1813,7 +1853,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Approving a rollout leads to transition to READY state.
      */
-    @Test    void approvedRolloutTransitionsToReadyState() {
+    @Test
+    void approvedRolloutTransitionsToReadyState() {
         approvalStrategy.setApprovalNeeded(true);
         final String successCondition = "50";
         final String errorCondition = "80";
@@ -1829,7 +1870,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Denying approval for a rollout leads to transition to APPROVAL_DENIED state.
      */
-    @Test    void deniedRolloutTransitionsToApprovalDeniedState() {
+    @Test
+    void deniedRolloutTransitionsToApprovalDeniedState() {
         approvalStrategy.setApprovalNeeded(true);
         final String successCondition = "50";
         final String errorCondition = "80";
@@ -1942,7 +1984,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that returned result considers provided sort parameter.
      */
-    @Test    void findAllRolloutsConsidersSorting() {
+    @Test
+    void findAllRolloutsConsidersSorting() {
         final String randomString = randomString(5);
         final DistributionSet testDs = testdataFactory.createDistributionSet(randomString + "-testDs");
         testdataFactory.createTargets(10, randomString + "-testTarget-");
@@ -1982,7 +2025,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Creating a rollout without weight value when multi assignment in enabled.
      */
-    @Test    void weightNotRequiredInMultiAssignmentMode() {
+    @Test
+    void weightNotRequiredInMultiAssignmentMode() {
         enableMultiAssignments();
         final Rollout rollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 2, "50",
                 "80",
@@ -1993,7 +2037,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Creating a rollout with a weight causes an error when multi assignment in disabled.
      */
-    @Test    void weightAllowedWhenMultiAssignmentModeNotEnabled() {
+    @Test
+    void weightAllowedWhenMultiAssignmentModeNotEnabled() {
         assertThat(
                 testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(
                         10, 10, 2, "50", "80", ActionType.FORCED, 66))
@@ -2003,7 +2048,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Weight is validated and saved to the Rollout.
      */
-    @Test    void weightValidatedAndSaved() {
+    @Test
+    void weightValidatedAndSaved() {
         final String targetPrefix = UUID.randomUUID().toString();
         testdataFactory.createTargets(4, targetPrefix);
         enableMultiAssignments();
@@ -2032,7 +2078,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * A Rollout with weight creates actions with weights
      */
-    @Test    void actionsWithWeightAreCreated() {
+    @Test
+    void actionsWithWeightAreCreated() {
         final int amountOfTargets = 5;
         final int weight = 99;
         enableMultiAssignments();
@@ -2050,7 +2097,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Rollout can be created without weight in single assignment and be started in multi assignment
      */
-    @Test    void createInSingleStartInMultiassignMode() {
+    @Test
+    void createInSingleStartInMultiassignMode() {
         final int amountOfTargets = 5;
         final Long rolloutId = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(amountOfTargets, 2,
                 amountOfTargets,
@@ -2067,7 +2115,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that an exception is thrown when trying to create a rollout with an invalidated distribution set.
      */
-    @Test    void createRolloutWithInvalidDistributionSet() {
+    @Test
+    void createRolloutWithInvalidDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
 
         assertThatExceptionOfType(InvalidDistributionSetException.class)
@@ -2079,7 +2128,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that an exception is thrown when trying to create a rollout with an incomplete distribution set.
      */
-    @Test    void createRolloutWithIncompleteDistributionSet() {
+    @Test
+    void createRolloutWithIncompleteDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createIncompleteDistributionSet();
 
         assertThatExceptionOfType(IncompleteDistributionSetException.class)
@@ -2091,7 +2141,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify the that only compatible targets are part of a Rollout.
      */
-    @Test    void createAndStartRolloutWithTargetTypes() {
+    @Test
+    void createAndStartRolloutWithTargetTypes() {
         final String rolloutName = "rolloutTestCompatibility";
 
         final DistributionSet testDs = testdataFactory.createDistributionSet("test-ds");
@@ -2135,7 +2186,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifying that next group is started on manual trigger next group.
      */
-    @Test    void checkRunningRolloutsManualTriggerNextGroup() {
+    @Test
+    void checkRunningRolloutsManualTriggerNextGroup() {
         final int amountTargetsForRollout = 15;
         final int amountOtherTargets = 0;
         final int amountGroups = 3;
@@ -2178,7 +2230,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the rollout status mapping.
      */
-    @Test    void testRolloutStatusConvert() {
+    @Test
+    void testRolloutStatusConvert() {
         final long id = testdataFactory.createAndStartRollout(1, 0, 1, "100", "80").getId();
         for (final RolloutStatus status : RolloutStatus.values()) {
             final JpaRollout rollout = ((JpaRollout) rolloutManagement.get(id).orElseThrow());
@@ -2191,7 +2244,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the rollout action type mapping.
      */
-    @Test    void testActionTypeConvert() {
+    @Test
+    void testActionTypeConvert() {
         final long id = testdataFactory.createAndStartRollout(1, 0, 1, "100", "80").getId();
         for (final ActionType actionType : ActionType.values()) {
             final JpaRollout rollout = ((JpaRollout) rolloutManagement.get(id).orElseThrow());
@@ -2204,7 +2258,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Trigger next rollout group if rollout is in wrong state
      */
-    @Test    void triggeringNextGroupRolloutWrongState() {
+    @Test
+    void triggeringNextGroupRolloutWrongState() {
 
         final int amountTargetsForRollout = 15;
         final int amountOtherTargets = 0;

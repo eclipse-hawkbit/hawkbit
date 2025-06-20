@@ -97,7 +97,8 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that a DistributionSet with invalid properties cannot be created or updated
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class, count = 0) })
@@ -112,7 +113,8 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the successful module update of unused distribution set type which is in fact allowed.
      */
-    @Test    void updateUnassignedDistributionSetTypeModules() {
+    @Test
+    void updateUnassignedDistributionSetTypeModules() {
         final DistributionSetType updatableType = distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
         assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
@@ -138,7 +140,8 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that the quota for software module types per distribution set type is enforced as expected.
      */
-    @Test    void quotaMaxSoftwareModuleTypes() {
+    @Test
+    void quotaMaxSoftwareModuleTypes() {
         final int quota = quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType();
         // create software module types
         final List<Long> moduleTypeIds = new ArrayList<>();
@@ -186,7 +189,8 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the successfull update of used distribution set type meta data which is in fact allowed.
      */
-    @Test    void updateAssignedDistributionSetTypeMetaData() {
+    @Test
+    void updateAssignedDistributionSetTypeMetaData() {
         final DistributionSetType nonUpdatableType = createDistributionSetTypeUsedByDs();
 
         distributionSetTypeManagement.update(
@@ -200,7 +204,8 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the unsuccessful update of used distribution set type (module addition).
      */
-    @Test    void addModuleToAssignedDistributionSetTypeFails() {
+    @Test
+    void addModuleToAssignedDistributionSetTypeFails() {
         final Long nonUpdatableTypeId = createDistributionSetTypeUsedByDs().getId();
         final Set<Long> osTypeId = Set.of(osType.getId());
         assertThatThrownBy(() -> distributionSetTypeManagement
@@ -211,7 +216,8 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the unsuccessful update of used distribution set type (module removal).
      */
-    @Test    void removeModuleToAssignedDistributionSetTypeFails() {
+    @Test
+    void removeModuleToAssignedDistributionSetTypeFails() {
         DistributionSetType nonUpdatableType = distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("updatableType").name("to be deleted"));
         assertThat(distributionSetTypeManagement.findByKey("updatableType").get().getMandatoryModuleTypes()).isEmpty();
@@ -229,7 +235,8 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the successfull deletion of unused (hard delete) distribution set types.
      */
-    @Test    void deleteUnassignedDistributionSetType() {
+    @Test
+    void deleteUnassignedDistributionSetType() {
         final JpaDistributionSetType hardDelete = (JpaDistributionSetType) distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("delete").name("to be deleted"));
 
@@ -242,7 +249,8 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the successfull deletion of used (soft delete) distribution set types.
      */
-    @Test    void deleteAssignedDistributionSetType() {
+    @Test
+    void deleteAssignedDistributionSetType() {
         final int existing = (int) distributionSetTypeManagement.count();
         final JpaDistributionSetType toBeDeleted = (JpaDistributionSetType) distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("softdeleted").name("to be deleted"));
@@ -263,7 +271,8 @@ class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that when no SoftwareModules are assigned to a Distribution then the DistributionSet is not complete.
      */
-    @Test    void shouldFailWhenDistributionSetHasNoSoftwareModulesAssigned() {
+    @Test
+    void shouldFailWhenDistributionSetHasNoSoftwareModulesAssigned() {
 
         final JpaDistributionSetType jpaDistributionSetType = (JpaDistributionSetType) distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("newType").name("new Type"));

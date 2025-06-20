@@ -364,7 +364,8 @@ class RSQLUtilityTest {
     /**
      * Tests the resolution of overdue_ts placeholder in context of a RSQL expression.
      */
-    @Test    void correctRsqlWithOverdueMacro() {
+    @Test
+    void correctRsqlWithOverdueMacro() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String overdueProp = "overdue_ts";
         final String overduePropPlaceholder = "${" + overdueProp + "}";
@@ -387,7 +388,8 @@ class RSQLUtilityTest {
     /**
      * Tests RSQL expression with an unknown placeholder.
      */
-    @Test    void correctRsqlWithUnknownMacro() {
+    @Test
+    void correctRsqlWithUnknownMacro() {
         reset0(baseSoftwareModuleRootMock, criteriaQueryMock, criteriaBuilderMock);
         final String overdueProp = "unknown";
         final String overduePropPlaceholder = "${" + overdueProp + "}";

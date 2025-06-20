@@ -47,7 +47,8 @@ class BusProtoStuffMessageConverterTest {
     /**
      * Verifies that the TargetCreatedEvent can be successfully serialized and deserialized
      */
-    @Test    void successfullySerializeAndDeserializeEvent() {
+    @Test
+    void successfullySerializeAndDeserializeEvent() {
         final TargetCreatedEvent targetCreatedEvent = new TargetCreatedEvent(targetMock, "1");
         // serialize
         final Object serializedEvent = underTest.convertToInternal(targetCreatedEvent,
@@ -65,7 +66,8 @@ class BusProtoStuffMessageConverterTest {
     /**
      * Verifies that a MessageConversationException is thrown on missing event-type information encoding
      */
-    @Test    void missingEventTypeMappingThrowsMessageConversationException() {
+    @Test
+    void missingEventTypeMappingThrowsMessageConversationException() {
         final DummyRemoteEntityEvent dummyEvent = new DummyRemoteEntityEvent(targetMock, "applicationId");
         final MessageHeaders messageHeaders = new MessageHeaders(new HashMap<>());
 

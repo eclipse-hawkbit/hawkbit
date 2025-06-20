@@ -32,7 +32,8 @@ class DdiProgressTest {
     /**
      * Verify the correct serialization and deserialization of the model
      */
-    @Test    void shouldSerializeAndDeserializeObject() throws IOException {
+    @Test
+    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final DdiProgress ddiProgress = new DdiProgress(30, 100);
 
@@ -47,7 +48,8 @@ class DdiProgressTest {
     /**
      * Verify the correct deserialization of a model with a additional unknown property
      */
-    @Test    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    @Test
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiProgress = "{\"cnt\":30,\"of\":100,\"unknownProperty\":\"test\"}";
 
@@ -60,7 +62,8 @@ class DdiProgressTest {
     /**
      * Verify that deserialization fails for known properties with a wrong datatype
      */
-    @Test    void shouldFailForObjectWithWrongDataTypes() {
+    @Test
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiProgress = "{\"cnt\":[30],\"of\":100}";
 

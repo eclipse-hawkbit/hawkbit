@@ -37,7 +37,8 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that findTenants returns all tenants and not only restricted to the tenant which currently is logged in
      */
-    @Test    void findTenantsReturnsAllTenantsNotOnlyWhichLoggedIn() throws Exception {
+    @Test
+    void findTenantsReturnsAllTenantsNotOnlyWhichLoggedIn() throws Exception {
         assertThat(systemManagement.findTenants(PAGE).getContent()).hasSize(1);
 
         createTestTenantsForSystemStatistics(2, 0, 0, 0);
@@ -48,7 +49,8 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that getSystemUsageStatisticsWithTenants returns the usage of all tenants and not only the first 1000 (max page size).
      */
-    @Test    void systemUsageReportCollectsStatisticsOfManyTenants() throws Exception {
+    @Test
+    void systemUsageReportCollectsStatisticsOfManyTenants() throws Exception {
         // Prepare tenants
         createTestTenantsForSystemStatistics(1050, 0, 0, 0);
 
@@ -59,7 +61,8 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Checks that the system report calculates correctly the artifact size of all tenants in the system. It ignores deleted software modules with their artifacts.
      */
-    @Test    void systemUsageReportCollectsArtifactsOfAllTenants() throws Exception {
+    @Test
+    void systemUsageReportCollectsArtifactsOfAllTenants() throws Exception {
         // Prepare tenants
         createTestTenantsForSystemStatistics(2, 1234, 0, 0);
 
@@ -84,7 +87,8 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Checks that the system report calculates correctly the targets size of all tenants in the system
      */
-    @Test    void systemUsageReportCollectsTargetsOfAllTenants() throws Exception {
+    @Test
+    void systemUsageReportCollectsTargetsOfAllTenants() throws Exception {
         // Prepare tenants
         createTestTenantsForSystemStatistics(2, 0, 100, 0);
 
@@ -105,7 +109,8 @@ class SystemManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Checks that the system report calculates correctly the actions size of all tenants in the system
      */
-    @Test    void systemUsageReportCollectsActionsOfAllTenants() throws Exception {
+    @Test
+    void systemUsageReportCollectsActionsOfAllTenants() throws Exception {
         // Prepare tenants
         createTestTenantsForSystemStatistics(2, 0, 20, 2);
 

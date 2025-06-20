@@ -118,7 +118,8 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     /**
      * Verifies that download and install event with 3 software modules and no artifacts works
      */
-    @Test    void testSendDownloadRequestWithSoftwareModulesAndNoArtifacts() {
+    @Test
+    void testSendDownloadRequestWithSoftwareModulesAndNoArtifacts() {
         final DistributionSet createDistributionSet = testdataFactory
                 .createDistributionSet(UUID.randomUUID().toString());
         testdataFactory.addSoftwareModuleMetadata(createDistributionSet);
@@ -158,7 +159,8 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     /**
      * Verifies that download and install event with software modules and artifacts works
      */
-    @Test    void testSendDownloadRequest() {
+    @Test
+    void testSendDownloadRequest() {
         DistributionSet dsA = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         SoftwareModule module = dsA.getModules().iterator().next();
         final List<AbstractDbArtifact> receivedList = new ArrayList<>();
@@ -210,7 +212,8 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     /**
      * Verifies that sending update controller attributes event works.
      */
-    @Test    void sendUpdateAttributesRequest() {
+    @Test
+    void sendUpdateAttributesRequest() {
         final String amqpUri = "amqp://anyhost";
         final TargetAttributesRequestedEvent targetAttributesRequestedEvent = new TargetAttributesRequestedEvent(TENANT,
                 1L, CONTROLLER_ID, amqpUri, Target.class, serviceMatcher.getBusId());
@@ -224,7 +227,8 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     /**
      * Verifies that send cancel event works
      */
-    @Test    void testSendCancelRequest() {
+    @Test
+    void testSendCancelRequest() {
         final Action action = mock(Action.class);
         when(action.getId()).thenReturn(1L);
         when(action.getTenant()).thenReturn(TENANT);
@@ -241,7 +245,8 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     /**
      * Verifies that sending a delete message when receiving a delete event works.
      */
-    @Test    void sendDeleteRequest() {
+    @Test
+    void sendDeleteRequest() {
 
         // setup
         final String amqpUri = "amqp://anyhost";
@@ -259,7 +264,8 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     /**
      * Verifies that a delete message is not send if the address is not an amqp address.
      */
-    @Test    void sendDeleteRequestWithNoAmqpAddress() {
+    @Test
+    void sendDeleteRequestWithNoAmqpAddress() {
 
         // setup
         final String noAmqpUri = "http://anyhost";
@@ -276,7 +282,8 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     /**
      * Verifies that a delete message is not send if the address is null.
      */
-    @Test    void sendDeleteRequestWithNullAddress() {
+    @Test
+    void sendDeleteRequestWithNullAddress() {
 
         // setup
         final String noAmqpUri = null;

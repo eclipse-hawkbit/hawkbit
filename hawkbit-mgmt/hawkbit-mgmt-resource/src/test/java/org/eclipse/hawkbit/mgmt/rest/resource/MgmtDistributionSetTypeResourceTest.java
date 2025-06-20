@@ -406,7 +406,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
     /**
      * Handles the GET request of retrieving all distribution set types within SP based on parameter.
      */
-    @Test    void getDistributionSetTypesWithParameter() throws Exception {
+    @Test
+    void getDistributionSetTypesWithParameter() throws Exception {
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                         + "?limit=10&sort=name:ASC&offset=0&q=name==a"))
                 .andDo(MockMvcResultPrinter.print())
@@ -434,7 +435,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
     /**
      * Ensures that DS type deletion request to API on an entity that does not exist results in NOT_FOUND.
      */
-    @Test    void deleteDistributionSetTypeThatDoesNotExistLeadsToNotFound() throws Exception {
+    @Test
+    void deleteDistributionSetTypeThatDoesNotExistLeadsToNotFound() throws Exception {
         mvc.perform(delete("/rest/v1/distributionsettypes/1234"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
@@ -476,7 +478,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
     /**
      * Checks the correct behaviour of /rest/v1/distributionsettypes/{ID} PUT requests.
      */
-    @Test    void updateDistributionSetTypeColourDescriptionAndNameUntouched() throws Exception {
+    @Test
+    void updateDistributionSetTypeColourDescriptionAndNameUntouched() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
                 .create().key("test123").name("TestName123").description("Desc123").colour("col"));
 
@@ -498,7 +501,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
     /**
      * Handles the PUT request for a single distribution set type within SP.
      */
-    @Test    void updateDistributionSetTypeDescriptionAndColor() throws Exception {
+    @Test
+    void updateDistributionSetTypeDescriptionAndColor() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement.update(entityFactory.distributionSetType()
                 .update(testdataFactory.createDistributionSet().getType().getId()).description("Desc1234"));
         final String body = new JSONObject()
@@ -515,7 +519,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
     /**
      * Tests the update of the deletion flag. It is verfied that the distribution set type can't be marked as deleted through update operation.
      */
-    @Test    void updateDistributionSetTypeDeletedFlag() throws Exception {
+    @Test
+    void updateDistributionSetTypeDeletedFlag() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("test123").name("TestName123").colour("col"));
 
@@ -532,7 +537,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
     /**
      * Checks the correct behaviour of /rest/v1/distributionsettypes GET requests with paging.
      */
-    @Test    void getDistributionSetTypesWithoutAddtionalRequestParameters() throws Exception {
+    @Test
+    void getDistributionSetTypesWithoutAddtionalRequestParameters() throws Exception {
 
         // 4 types overall (3 hawkbit tenant default, 1 test default
         final int types = 4;
@@ -547,7 +553,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
     /**
      * Checks the correct behaviour of /rest/v1/distributionsettypes GET requests with paging.
      */
-    @Test    void getDistributionSetTypesWithPagingLimitRequestParameter() throws Exception {
+    @Test
+    void getDistributionSetTypesWithPagingLimitRequestParameter() throws Exception {
 
         final int types = DEFAULT_DS_TYPES;
         final int limitSize = 1;
@@ -563,7 +570,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
     /**
      * Checks the correct behaviour of /rest/v1/distributionsettypes GET requests with paging.
      */
-    @Test    void getDistributionSetTypesWithPagingLimitAndOffsetRequestParameter() throws Exception {
+    @Test
+    void getDistributionSetTypesWithPagingLimitAndOffsetRequestParameter() throws Exception {
         final int types = DEFAULT_DS_TYPES;
         final int offsetParam = 2;
         final int expectedSize = types - offsetParam;
@@ -580,7 +588,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
     /**
      * Ensures that the server is behaving as expected on invalid requests (wrong media type, wrong ID etc.).
      */
-    @Test    void invalidRequestsOnDistributionSetTypesResource() throws Exception {
+    @Test
+    void invalidRequestsOnDistributionSetTypesResource() throws Exception {
         final SoftwareModuleType testSmType = softwareModuleTypeManagement
                 .create(entityFactory.softwareModuleType().create().key("test123").name("TestName123"));
 
@@ -694,7 +703,8 @@ class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIntegrati
     /**
      * Search erquest of software module types.
      */
-    @Test    void searchDistributionSetTypeRsql() throws Exception {
+    @Test
+    void searchDistributionSetTypeRsql() throws Exception {
         distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("test123").name("TestName123"));
         distributionSetTypeManagement

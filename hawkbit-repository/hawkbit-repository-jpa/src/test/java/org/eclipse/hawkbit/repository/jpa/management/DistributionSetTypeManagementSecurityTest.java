@@ -45,21 +45,24 @@ class DistributionSetTypeManagementSecurityTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getByKeyPermissionsCheck() {
+    @Test
+    void getByKeyPermissionsCheck() {
         assertPermissions(() -> distributionSetTypeManagement.findByKey("key"), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getByNamePermissionsCheck() {
+    @Test
+    void getByNamePermissionsCheck() {
         assertPermissions(() -> distributionSetTypeManagement.findByName("name"), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void assignOptionalSoftwareModuleTypesPermissionsCheck() {
+    @Test
+    void assignOptionalSoftwareModuleTypesPermissionsCheck() {
         assertPermissions(() -> distributionSetTypeManagement.assignOptionalSoftwareModuleTypes(1L, List.of(1L)),
                 List.of(SpPermission.UPDATE_REPOSITORY));
     }
@@ -67,7 +70,8 @@ class DistributionSetTypeManagementSecurityTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void assignMandatorySoftwareModuleTypesPermissionsCheck() {
+    @Test
+    void assignMandatorySoftwareModuleTypesPermissionsCheck() {
         assertPermissions(() -> distributionSetTypeManagement.assignMandatorySoftwareModuleTypes(1L, List.of(1L)),
                 List.of(SpPermission.UPDATE_REPOSITORY));
     }
@@ -75,7 +79,8 @@ class DistributionSetTypeManagementSecurityTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void unassignSoftwareModuleTypePermissionsCheck() {
+    @Test
+    void unassignSoftwareModuleTypePermissionsCheck() {
         assertPermissions(() -> distributionSetTypeManagement.unassignSoftwareModuleType(1L, 1L), List.of(SpPermission.UPDATE_REPOSITORY));
     }
 }

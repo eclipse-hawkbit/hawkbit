@@ -70,7 +70,8 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     /**
      * Tests non allowed requests on the artifact ressource, e.g. invalid URI, wrong if-match, wrong command.
      */
-    @Test    void invalidRequestsOnArtifactResource() throws Exception {
+    @Test
+    void invalidRequestsOnArtifactResource() throws Exception {
         // create target
         final Target target = testdataFactory.createTarget();
         final List<Target> targets = Collections.singletonList(target);
@@ -207,7 +208,8 @@ class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     /**
      * Tests valid MD5SUm file downloads through the artifact resource by identifying the artifact by ID.
      */
-    @Test    void downloadMd5sumThroughControllerApi() throws Exception {
+    @Test
+    void downloadMd5sumThroughControllerApi() throws Exception {
         // create target
         final Target target = testdataFactory.createTarget();
 

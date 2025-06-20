@@ -77,7 +77,8 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensure that the installed base resource is available as CBOR
      */
-    @Test    void installedBaseResourceCbor() throws Exception {
+    @Test
+    void installedBaseResourceCbor() throws Exception {
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
@@ -100,7 +101,8 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensure that assigned version is self assigned version
      */
-    @Test    void installedVersion() throws Exception {
+    @Test
+    void installedVersion() throws Exception {
         final Target target = createTargetAndAssertNoActiveActions();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
@@ -116,7 +118,8 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensure that installedVersion is version self assigned
      */
-    @Test    void installedVersionNotExist() throws Exception {
+    @Test
+    void installedVersionNotExist() throws Exception {
         final Target target = createTargetAndAssertNoActiveActions();
         final String dsName = "unknown";
         final String dsVersion = "1.0.0";
@@ -130,7 +133,8 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test several deployments to a controller. Checks that action is represented as installedBase after installation.
      */
-    @Test    void deploymentSeveralActionsInInstalledBase() throws Exception {
+    @Test
+    void deploymentSeveralActionsInInstalledBase() throws Exception {
         // Prepare test data
         final Target target = createTargetAndAssertNoActiveActions();
 
@@ -199,7 +203,8 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test several deployments of same ds to a controller. Checks that cancelled action in history is not linked as installedBase.
      */
-    @Test    void deploymentActionsOfSameDsWithCancelledActionInHistory() throws Exception {
+    @Test
+    void deploymentActionsOfSameDsWithCancelledActionInHistory() throws Exception {
         // Prepare test data
         final Target target = createTargetAndAssertNoActiveActions();
 
@@ -256,7 +261,8 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test several deployments of same ds to a controller. Checks that latest cancelled action does not override actual installed ds.
      */
-    @Test    void deploymentActionsOfSameDsWithCancelledAction() throws Exception {
+    @Test
+    void deploymentActionsOfSameDsWithCancelledAction() throws Exception {
         // Prepare test data
         final Target target = createTargetAndAssertNoActiveActions();
 
@@ -314,7 +320,8 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test several deployments of same ds to a controller. Checks that latest running action does not override actual installed ds.
      */
-    @Test    void deploymentActionsOfSameDsWithRunningAction() throws Exception {
+    @Test
+    void deploymentActionsOfSameDsWithRunningAction() throws Exception {
         // Prepare test data
         final Target target = createTargetAndAssertNoActiveActions();
 
@@ -368,7 +375,8 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test open deployment to a controller. Checks that installedBase returns 404 for a pending action.
      */
-    @Test    void installedBaseReturns404ForPendingAction() throws Exception {
+    @Test
+    void installedBaseReturns404ForPendingAction() throws Exception {
         // Prepare test data
         final Target target = createTargetAndAssertNoActiveActions();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -392,7 +400,8 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that artifacts are found, after the action was already closed.
      */
-    @Test    void artifactsOfInstalledActionExist() throws Exception {
+    @Test
+    void artifactsOfInstalledActionExist() throws Exception {
         final Target target = createTargetAndAssertNoActiveActions();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
@@ -470,7 +479,8 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test download-only deployment to a controller. Checks that download-only is not represented as installedBase.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -547,7 +557,8 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test to verify that only a specific count of messages are returned based on the input actionHistory for getControllerInstalledAction endpoint.
      */
-    @Test    void testActionHistoryCount() throws Exception {
+    @Test
+    void testActionHistoryCount() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
@@ -599,7 +610,8 @@ class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test various invalid access attempts to the installed resource und the expected behaviour of the server.
      */
-    @Test    void badInstalledAction() throws Exception {
+    @Test
+    void badInstalledAction() throws Exception {
         final Target target = testdataFactory.createTarget(CONTROLLER_ID);
 
         // not allowed methods

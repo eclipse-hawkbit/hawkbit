@@ -52,7 +52,8 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that management get access reacts as specified on calls for non existing entities by means of Optional not present.
      */
-    @Test    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @Test
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void nonExistingEntityAccessReturnsNotPresent() {
         assertThat(distributionSetTagManagement.findByName(NOT_EXIST_ID)).isNotPresent();
         assertThat(distributionSetTagManagement.get(NOT_EXIST_IDL)).isNotPresent();
@@ -77,7 +78,8 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Full DS tag lifecycle tested. Create tags, assign them to sets and delete the tags.
      */
-    @Test    void createAndAssignAndDeleteDistributionSetTags() {
+    @Test
+    void createAndAssignAndDeleteDistributionSetTags() {
         final Collection<DistributionSet> dsAs = testdataFactory.createDistributionSets("DS-A", 20);
         final Collection<DistributionSet> dsBs = testdataFactory.createDistributionSets("DS-B", 10);
         final Collection<DistributionSet> dsCs = testdataFactory.createDistributionSets("DS-C", 25);
@@ -140,7 +142,8 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies assign/unassign.
      */
-    @Test    void assignAndUnassignDistributionSetTags() {
+    @Test
+    void assignAndUnassignDistributionSetTags() {
         final Collection<DistributionSet> groupA = testdataFactory.createDistributionSets(20);
         final Collection<DistributionSet> groupB = testdataFactory.createDistributionSets("unassigned", 20);
 
@@ -181,7 +184,8 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that tagging of set containing missing DS throws meaningful and correct exception.
      */
-    @Test    void failOnMissingDs() {
+    @Test
+    void failOnMissingDs() {
         final Collection<Long> group = testdataFactory.createDistributionSets(5).stream().map(DistributionSet::getId).toList();
         final DistributionSetTag tag = distributionSetTagManagement.create(entityFactory.tag().create().name("tag1").description("tagdesc1"));
         final List<Long> missing = new ArrayList<>();
@@ -210,7 +214,8 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that a created tag is persisted in the repository as defined.
      */
-    @Test    void createDistributionSetTag() {
+    @Test
+    void createDistributionSetTag() {
         final Tag tag = distributionSetTagManagement
                 .create(entityFactory.tag().create().name("kai1").description("kai2").colour("colour"));
 
@@ -225,7 +230,8 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that a deleted tag is removed from the repository as defined.
      */
-    @Test    void deleteDistributionSetTag() {
+    @Test
+    void deleteDistributionSetTag() {
         // create test data
         final Iterable<DistributionSetTag> tags = createDsSetsWithTags();
         final DistributionSetTag toDelete = tags.iterator().next();
@@ -253,7 +259,8 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).
      */
-    @Test    void failedDuplicateDsTagNameException() {
+    @Test
+    void failedDuplicateDsTagNameException() {
         final TagCreate tag = entityFactory.tag().create().name("A");
         distributionSetTagManagement.create(tag);
 
@@ -264,7 +271,8 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that a tag cannot be updated to a name that already exists on another tag (ecpects EntityAlreadyExistsException).
      */
-    @Test    void failedDuplicateDsTagNameExceptionAfterUpdate() {
+    @Test
+    void failedDuplicateDsTagNameExceptionAfterUpdate() {
         distributionSetTagManagement.create(entityFactory.tag().create().name("A"));
         final DistributionSetTag tag = distributionSetTagManagement.create(entityFactory.tag().create().name("B"));
 
@@ -276,7 +284,8 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the name update of a target tag.
      */
-    @Test    void updateDistributionSetTag() {
+    @Test
+    void updateDistributionSetTag() {
         // create test data
         final List<DistributionSetTag> tags = createDsSetsWithTags();
         // change data
@@ -293,7 +302,8 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that all tags are retrieved through repository.
      */
-    @Test    void findDistributionSetTagsAll() {
+    @Test
+    void findDistributionSetTagsAll() {
         final List<DistributionSetTag> tags = createDsSetsWithTags();
 
         // test
@@ -305,7 +315,8 @@ class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that a created tags are persisted in the repository as defined.
      */
-    @Test    void createDistributionSetTags() {
+    @Test
+    void createDistributionSetTags() {
         final List<DistributionSetTag> tags = createDsSetsWithTags();
         assertThat(distributionSetTagRepository.findAll()).as("Wrong size of tags created").hasSize(tags.size());
     }

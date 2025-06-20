@@ -35,7 +35,8 @@ class HawkBitEclipseLinkJpaDialectTest {
     /**
      * Use Case: PersistenceException that can be mapped by EclipseLinkJpaDialect into corresponding DataAccessException.
      */
-    @Test    void jpaOptimisticLockExceptionIsConcurrencyFailureException() {
+    @Test
+    void jpaOptimisticLockExceptionIsConcurrencyFailureException() {
         assertThat(hawkBitEclipseLinkJpaDialectUnderTest.translateExceptionIfPossible(mock(OptimisticLockException.class)))
                 .isInstanceOf(ConcurrencyFailureException.class);
     }

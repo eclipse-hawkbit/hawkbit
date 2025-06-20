@@ -35,21 +35,24 @@ class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that the pre persist is called after a entity creation.
      */
-    @Test    void prePersistIsCalledWhenPersistingATarget() {
+    @Test
+    void prePersistIsCalledWhenPersistingATarget() {
         executePersistAndAssertCallbackResult(new PrePersistEntityListener());
     }
 
     /**
      * Verifies that the post persist is called after a entity creation.
      */
-    @Test    void postPersistIsCalledWhenPersistingATarget() {
+    @Test
+    void postPersistIsCalledWhenPersistingATarget() {
         executePersistAndAssertCallbackResult(new PostPersistEntityListener());
     }
 
     /**
      * Verifies that the post load is called after a entity is loaded.
      */
-    @Test    void postLoadIsCalledWhenLoadATarget() {
+    @Test
+    void postLoadIsCalledWhenLoadATarget() {
         final PostLoadEntityListener postLoadEntityListener = new PostLoadEntityListener();
         EntityInterceptorHolder.getInstance().getEntityInterceptors().add(postLoadEntityListener);
 
@@ -63,28 +66,32 @@ class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that the pre update is called after a entity update.
      */
-    @Test    void preUpdateIsCalledWhenUpdateATarget() {
+    @Test
+    void preUpdateIsCalledWhenUpdateATarget() {
         executeUpdateAndAssertCallbackResult(new PreUpdateEntityListener());
     }
 
     /**
      * Verifies that the post update is called after a entity update.
      */
-    @Test    void postUpdateIsCalledWhenUpdateATarget() {
+    @Test
+    void postUpdateIsCalledWhenUpdateATarget() {
         executeUpdateAndAssertCallbackResult(new PostUpdateEntityListener());
     }
 
     /**
      * Verifies that the pre remove is called after a entity deletion.
      */
-    @Test    void preRemoveIsCalledWhenDeletingATarget() {
+    @Test
+    void preRemoveIsCalledWhenDeletingATarget() {
         executeDeleteAndAssertCallbackResult(new PreRemoveEntityListener());
     }
 
     /**
      * Verifies that the post remove is called after a entity deletion.
      */
-    @Test    void postRemoveIsCalledWhenDeletingATarget() {
+    @Test
+    void postRemoveIsCalledWhenDeletingATarget() {
         executeDeleteAndAssertCallbackResult(new PostRemoveEntityListener());
     }
 

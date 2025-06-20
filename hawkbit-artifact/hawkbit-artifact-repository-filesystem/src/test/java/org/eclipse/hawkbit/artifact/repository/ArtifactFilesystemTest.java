@@ -29,7 +29,8 @@ class ArtifactFilesystemTest {
     /**
      * Verifies that an exception is thrown on opening an InputStream when file does not exists
      */
-    @Test    void getInputStreamOfNonExistingFileThrowsException() {
+    @Test
+    void getInputStreamOfNonExistingFileThrowsException() {
         final File file = new File("fileWhichTotalDoesNotExists");
         final ArtifactFilesystem underTest = new ArtifactFilesystem(
                 file, "fileWhichTotalDoesNotExists",
@@ -42,7 +43,8 @@ class ArtifactFilesystemTest {
     /**
      * Verifies that an InputStream can be opened if file exists
      */
-    @Test    void getInputStreamOfExistingFile() throws IOException {
+    @Test
+    void getInputStreamOfExistingFile() throws IOException {
         final ArtifactFilesystem underTest = new ArtifactFilesystem(
                 AbstractArtifactRepository.createTempFile(false), ArtifactFilesystemTest.class.getSimpleName(),
                 new DbArtifactHash("1", "2", "3"), 0L, null);

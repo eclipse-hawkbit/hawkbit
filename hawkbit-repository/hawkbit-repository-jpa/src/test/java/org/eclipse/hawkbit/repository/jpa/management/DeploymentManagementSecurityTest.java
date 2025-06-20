@@ -29,7 +29,8 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void assignDistributionSetsPermissionsCheck() {
+    @Test
+    void assignDistributionSetsPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.assignDistributionSets(
                         List.of(new DeploymentRequest("controllerId", 1L, Action.ActionType.SOFT, 1L, 1, "maintenanceSchedule",
                                 "maintenanceWindowDuration", "maintenanceWindowTimeZone", true))),
@@ -39,7 +40,8 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void assignDistributionSetsWithInitiatedByPermissionsCheck() {
+    @Test
+    void assignDistributionSetsWithInitiatedByPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.assignDistributionSets("initiator",
                         List.of(new DeploymentRequest("controllerId", 1L, Action.ActionType.SOFT, 1L, 1, "maintenanceSchedule",
                                 "maintenanceWindowDuration", "maintenanceWindowTimeZone", true)), "message"),
@@ -49,14 +51,16 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void offlineAssignedDistributionSetsPermissionsCheck() {
+    @Test
+    void offlineAssignedDistributionSetsPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.offlineAssignedDistributionSets(List.of()), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void offlineAssignedDistributionSetsWithInitiatedByPermissionsCheck() {
+    @Test
+    void offlineAssignedDistributionSetsWithInitiatedByPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.offlineAssignedDistributionSets(List.of(), "initiator"),
                 List.of(SpPermission.READ_REPOSITORY, SpPermission.UPDATE_TARGET));
     }
@@ -64,42 +68,48 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void cancelActionPermissionsCheck() {
+    @Test
+    void cancelActionPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.cancelAction(1L), List.of(SpPermission.UPDATE_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void countActionsByTargetWithFilterPermissionsCheck() {
+    @Test
+    void countActionsByTargetWithFilterPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.countActionsByTarget("rsqlParam", "controllerId"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void countActionsByTargetPermissionsCheck() {
+    @Test
+    void countActionsByTargetPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.countActionsByTarget("controllerId"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void countActionsAllPermissionsCheck() {
+    @Test
+    void countActionsAllPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.countActionsAll(), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void countActionsPermissionsCheck() {
+    @Test
+    void countActionsPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.countActions("id==1"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findActionPermissionsCheck() {
+    @Test
+    void findActionPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.findAction(1L), List.of(SpPermission.READ_TARGET));
     }
 
@@ -111,14 +121,16 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findActionsPermissionsCheck() {
+    @Test
+    void findActionsPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.findActions("id==1", Pageable.unpaged()), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findActionsByTargetPermissionsCheck() {
+    @Test
+    void findActionsByTargetPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.findActionsByTarget("rsql==param", "controllerId", Pageable.unpaged()),
                 List.of(SpPermission.READ_TARGET));
     }
@@ -126,7 +138,8 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findActionsByTargetWithControllerIdPermissionsCheck() {
+    @Test
+    void findActionsByTargetWithControllerIdPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.findActionsByTarget("controllerId", Pageable.unpaged()),
                 List.of(SpPermission.READ_TARGET));
     }
@@ -134,35 +147,40 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findActionStatusByActionPermissionsCheck() {
+    @Test
+    void findActionStatusByActionPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.findActionStatusByAction(1L, Pageable.unpaged()), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void countActionStatusByActionPermissionsCheck() {
+    @Test
+    void countActionStatusByActionPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.countActionStatusByAction(1L), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findMessagesByActionStatusIdPermissionsCheck() {
+    @Test
+    void findMessagesByActionStatusIdPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.findMessagesByActionStatusId(1L, PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findActionWithDetailsPermissionsCheck() {
+    @Test
+    void findActionWithDetailsPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.findActionWithDetails(1L), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findActiveActionsByTargetPermissionsCheck() {
+    @Test
+    void findActiveActionsByTargetPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.findActiveActionsByTarget("controllerId", Pageable.unpaged()),
                 List.of(SpPermission.READ_TARGET));
     }
@@ -170,7 +188,8 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findInActiveActionsByTargetPermissionsCheck() {
+    @Test
+    void findInActiveActionsByTargetPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.findInActiveActionsByTarget("controllerId", Pageable.unpaged()),
                 List.of(SpPermission.READ_TARGET));
     }
@@ -178,28 +197,32 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findActiveActionsWithHighestWeightPermissionsCheck() {
+    @Test
+    void findActiveActionsWithHighestWeightPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.findActiveActionsWithHighestWeight("controllerId", 1), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void forceQuitActionPermissionsCheck() {
+    @Test
+    void forceQuitActionPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.forceQuitAction(1L), List.of(SpPermission.UPDATE_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void forceTargetActionPermissionsCheck() {
+    @Test
+    void forceTargetActionPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.forceTargetAction(1L), List.of(SpPermission.UPDATE_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void cancelInactiveScheduledActionsForTargetsPermissionsCheck() {
+    @Test
+    void cancelInactiveScheduledActionsForTargetsPermissionsCheck() {
         assertPermissions(() -> {
             deploymentManagement.cancelInactiveScheduledActionsForTargets(List.of(1L));
             return null;
@@ -209,7 +232,8 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void startScheduledActionsByRolloutGroupParentPermissionsCheck() {
+    @Test
+    void startScheduledActionsByRolloutGroupParentPermissionsCheck() {
         assertPermissions(() -> {
             deploymentManagement.startScheduledActionsByRolloutGroupParent(1L, 1L, 1L);
             return null;
@@ -219,7 +243,8 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void startScheduledActionsPermissionsCheck() {
+    @Test
+    void startScheduledActionsPermissionsCheck() {
         assertPermissions(() -> {
             deploymentManagement.startScheduledActions(List.of());
             return null;
@@ -229,21 +254,24 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getAssignedDistributionSetPermissionsCheck() {
+    @Test
+    void getAssignedDistributionSetPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.getAssignedDistributionSet("controllerId"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getInstalledDistributionSetPermissionsCheck() {
+    @Test
+    void getInstalledDistributionSetPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.getInstalledDistributionSet("controllerId"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void deleteActionsByStatusAndLastModifiedBeforePermissionsCheck() {
+    @Test
+    void deleteActionsByStatusAndLastModifiedBeforePermissionsCheck() {
         assertPermissions(() -> deploymentManagement.deleteActionsByStatusAndLastModifiedBefore(Set.of(Action.Status.CANCELED), 1L),
                 List.of(SpPermission.SpringEvalExpressions.SYSTEM_ROLE));
     }
@@ -251,14 +279,16 @@ class DeploymentManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void hasPendingCancellationsPermissionsCheck() {
+    @Test
+    void hasPendingCancellationsPermissionsCheck() {
         assertPermissions(() -> deploymentManagement.hasPendingCancellations(1L), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void cancelActionsForDistributionSetPermissionsCheck() {
+    @Test
+    void cancelActionsForDistributionSetPermissionsCheck() {
         assertPermissions(() -> {
             deploymentManagement.cancelActionsForDistributionSet(DistributionSetInvalidation.CancelationType.FORCE,
                     entityFactory.distributionSet().create().build());

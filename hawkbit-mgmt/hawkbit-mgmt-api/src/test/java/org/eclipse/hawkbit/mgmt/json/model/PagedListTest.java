@@ -26,7 +26,8 @@ class PagedListTest {
     /**
      * Ensures that a null payload entity throws an exception.
      */
-    @Test    void createListWithNullContentThrowsException() {
+    @Test
+    void createListWithNullContentThrowsException() {
         assertThatThrownBy(() -> new PagedList<>(null, 0))
                 .isInstanceOf(NullPointerException.class);
     }
@@ -34,7 +35,8 @@ class PagedListTest {
     /**
      * Create list with payload and verify content.
      */
-    @Test    void createListWithContent() {
+    @Test
+    void createListWithContent() {
         final long knownTotal = 2;
         final List<String> knownContentList = new ArrayList<>();
         knownContentList.add("content1");
@@ -46,7 +48,8 @@ class PagedListTest {
     /**
      * Create list with payload and verify size values.
      */
-    @Test    void createListWithSmallerTotalThanContentSizeIsOk() {
+    @Test
+    void createListWithSmallerTotalThanContentSizeIsOk() {
         final long knownTotal = 0;
         final List<String> knownContentList = new ArrayList<>();
         knownContentList.add("content1");

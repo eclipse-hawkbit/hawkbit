@@ -47,7 +47,8 @@ class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
     /**
      * Test filter rollout group by  id
      */
-    @Test    void testFilterByParameterId() {
+    @Test
+    void testFilterByParameterId() {
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==" + rolloutGroupId, 1);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "!=" + rolloutGroupId, 3);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==" + -1, 0);
@@ -65,7 +66,8 @@ class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
     /**
      * Test filter rollout group by name
      */
-    @Test    void testFilterByParameterName() {
+    @Test
+    void testFilterByParameterName() {
         assertRSQLQuery(RolloutGroupFields.NAME.name() + "==group-1", 1);
         assertRSQLQuery(RolloutGroupFields.NAME.name() + "!=group-1", 3);
         assertRSQLQuery(RolloutGroupFields.NAME.name() + "==*", 4);
@@ -77,7 +79,8 @@ class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
     /**
      * Test filter rollout group by description
      */
-    @Test    void testFilterByParameterDescription() {
+    @Test
+    void testFilterByParameterDescription() {
         assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "==group-1", 1);
         assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "!=group-1", 3);
         assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "==group*", 4);

@@ -37,7 +37,8 @@ class ActionTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that timeforced moded switch from soft to forces after defined timeframe.
      */
-    @Test    void timeForcedHitNewHasCodeIsGenerated() {
+    @Test
+    void timeForcedHitNewHasCodeIsGenerated() {
         // current time + 1 seconds
         final long sleepTime = 1000;
         final long timeForceTimeAt = System.currentTimeMillis() + sleepTime;
@@ -53,7 +54,8 @@ class ActionTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the action type mapping.
      */
-    @Test    void testActionTypeConvert() {
+    @Test
+    void testActionTypeConvert() {
         final long id = createAction().getId();
         for (final ActionType actionType : ActionType.values()) {
             final JpaAction action = actionRepository.findById(id).orElseThrow(() -> new IllegalStateException("Action not found"));
@@ -67,7 +69,8 @@ class ActionTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the status mapping.
      */
-    @Test    void testStatusConvert() {
+    @Test
+    void testStatusConvert() {
         final long id = createAction().getId();
         for (final Status status : Status.values()) {
             final JpaAction action = actionRepository.findById(id).orElseThrow(() -> new IllegalStateException("Action not found"));
@@ -81,7 +84,8 @@ class ActionTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the action status status mapping.
      */
-    @Test    void testActionsStatusStatusConvert() {
+    @Test
+    void testActionsStatusStatusConvert() {
         for (final Status status : Status.values()) {
             final long id = createAction().getId();
             controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(id).status(status));

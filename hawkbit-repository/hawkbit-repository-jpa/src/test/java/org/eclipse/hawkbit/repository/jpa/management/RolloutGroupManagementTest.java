@@ -76,7 +76,8 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the rollout group status mapping.
      */
-    @Test    void testRolloutGroupStatusConvert() {
+    @Test
+    void testRolloutGroupStatusConvert() {
         final long id = rolloutGroupRepository.findByRolloutId(
                         testdataFactory.createAndStartRollout(1, 0, 1, "100", "80").getId(), PAGE).getContent()
                 .get(0).getId();

@@ -83,7 +83,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that management get access react as specified on calls for non existing entities by means of Optional not present.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
     void nonExistingEntityAccessReturnsNotPresent() {
@@ -168,7 +169,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that a DistributionSet with invalid properties cannot be created or updated
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = DistributionSetUpdatedEvent.class) })
@@ -183,7 +185,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that it is not possible to create a DS that already exists (unique constraint is on name,version for DS).
      */
-    @Test    void createDuplicateDistributionSetsFailsWithException() {
+    @Test
+    void createDuplicateDistributionSetsFailsWithException() {
         testdataFactory.createDistributionSet("a");
 
         assertThatThrownBy(() -> testdataFactory.createDistributionSet("a"))
@@ -193,7 +196,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that a DS is of default type if not specified explicitly at creation time.
      */
-    @Test    void createDistributionSetWithImplicitType() {
+    @Test
+    void createDistributionSetWithImplicitType() {
         final DistributionSet set = distributionSetManagement
                 .create(entityFactory.distributionSet().create().name("newtypesoft").version("1"));
 
@@ -206,7 +210,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that a DS cannot be created if another DS with same name and version exists.
      */
-    @Test    void createDistributionSetWithDuplicateNameAndVersionFails() {
+    @Test
+    void createDistributionSetWithDuplicateNameAndVersionFails() {
         final DistributionSetCreate distributionSetCreate = entityFactory.distributionSet().create().name("newtypesoft").version("1");
         distributionSetManagement.create(distributionSetCreate);
 
@@ -216,7 +221,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that multiple DS are of default type if not specified explicitly at creation time.
      */
-    @Test    void createMultipleDistributionSetsWithImplicitType() {
+    @Test
+    void createMultipleDistributionSetsWithImplicitType() {
         final List<DistributionSetCreate> creates = new ArrayList<>(10);
         for (int i = 0; i < 10; i++) {
             creates.add(entityFactory.distributionSet().create().name("newtypesoft" + i).version("1" + i));
@@ -236,7 +242,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Checks that metadata for a distribution set can be created.
      */
-    @Test    void createMetadata() {
+    @Test
+    void createMetadata() {
         final String knownKey = "dsMetaKnownKey";
         final String knownValue = "dsMetaKnownValue";
 
@@ -248,7 +255,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies the enforcement of the metadata quota per distribution set.
      */
-    @Test    void createMetadataUntilQuotaIsExceeded() {
+    @Test
+    void createMetadataUntilQuotaIsExceeded() {
 
         // add meta data one by one
         final DistributionSet ds1 = testdataFactory.createDistributionSet("ds1");
@@ -293,7 +301,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that distribution sets can assigned and unassigned to a  distribution set tag.
      */
-    @Test    void assignAndUnassignDistributionSetToTag() {
+    @Test
+    void assignAndUnassignDistributionSetToTag() {
         final List<Long> assignDS = new ArrayList<>(4);
         for (int i = 0; i < 4; i++) {
             assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
@@ -330,7 +339,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that updates concerning the internal software structure of a DS are not possible if the DS is already assigned.
      */
-    @Test    void updateDistributionSetForbiddenWithIllegalUpdate() {
+    @Test
+    void updateDistributionSetForbiddenWithIllegalUpdate() {
         // prepare data
         final Target target = testdataFactory.createTarget();
 
@@ -360,7 +370,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that it is not possible to add a software module that is not defined of the DS's type.
      */
-    @Test    void updateDistributionSetUnsupportedModuleFails() {
+    @Test
+    void updateDistributionSetUnsupportedModuleFails() {
         final Long setId = distributionSetManagement.create(
                 entityFactory.distributionSet().create()
                         .type(distributionSetTypeManagement.create(
@@ -382,7 +393,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Legal updates of a DS, e.g. name or description and module addition, removal while still unassigned.
      */
-    @Test    void updateDistributionSet() {
+    @Test
+    void updateDistributionSet() {
         // prepare data
         DistributionSet ds = testdataFactory.createDistributionSet("");
         final SoftwareModule os = testdataFactory.createSoftwareModuleOs();
@@ -412,7 +424,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that an exception is thrown when trying to update an invalid distribution set
      */
-    @Test    void updateInvalidDistributionSet() {
+    @Test
+    void updateInvalidDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
 
         final DistributionSetUpdate update = entityFactory.distributionSet().update(distributionSet.getId()).name("new_name");
@@ -423,7 +436,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies the enforcement of the software module quota per distribution set.
      */
-    @Test    void assignSoftwareModulesUntilQuotaIsExceeded() {
+    @Test
+    void assignSoftwareModulesUntilQuotaIsExceeded() {
 
         // create some software modules
         final int maxModules = quotaManagement.getMaxSoftwareModulesPerDistributionSet();
@@ -467,7 +481,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that an exception is thrown when trying to assign software modules to an invalidated distribution set.
      */
-    @Test    void verifyAssignSoftwareModulesToInvalidDistributionSet() {
+    @Test
+    void verifyAssignSoftwareModulesToInvalidDistributionSet() {
         final Long distributionSetId = testdataFactory.createAndInvalidateDistributionSet().getId();
         final List<Long> softwareModuleIds = List.of(testdataFactory.createSoftwareModuleOs().getId());
 
@@ -479,7 +494,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that an exception is thrown when trying to unassign a software module from an invalidated distribution set.
      */
-    @Test    void verifyUnassignSoftwareModulesToInvalidDistributionSet() {
+    @Test
+    void verifyUnassignSoftwareModulesToInvalidDistributionSet() {
         final Long distributionSetId = testdataFactory.createDistributionSet().getId();
         final Long softwareModuleId = testdataFactory.createSoftwareModuleOs().getId();
         distributionSetManagement.assignSoftwareModules(distributionSetId, singletonList(softwareModuleId));
@@ -529,7 +545,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * searches for distribution sets based on the various filter options, e.g. name, version, desc., tags.
      */
-    @Test    void searchDistributionSetsOnFilters() {
+    @Test
+    void searchDistributionSetsOnFilters() {
         DistributionSetTag dsTagA = distributionSetTagManagement
                 .create(entityFactory.tag().create().name("DistributionSetTag-A"));
         final DistributionSetTag dsTagB = distributionSetTagManagement
@@ -595,7 +612,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Simple DS load without the related data that should be loaded lazy.
      */
-    @Test    void findDistributionSetsWithoutLazy() {
+    @Test
+    void findDistributionSetsWithoutLazy() {
         testdataFactory.createDistributionSets(20);
 
         assertThat(distributionSetManagement.findByCompleted(true, PAGE)).hasSize(20);
@@ -604,7 +622,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Locks a DS.
      */
-    @Test    void lockDistributionSet() {
+    @Test
+    void lockDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
         assertThat(
                 distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked).orElse(true))
@@ -622,7 +641,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Locked a DS could be hard deleted.
      */
-    @Test    void deleteUnassignedLockedDistributionSet() {
+    @Test
+    void deleteUnassignedLockedDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
         distributionSetManagement.lock(distributionSet.getId());
         assertThat(
@@ -637,7 +657,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Locked an assigned DS could be soft deleted.
      */
-    @Test    void deleteAssignedLockedDistributionSet() {
+    @Test
+    void deleteAssignedLockedDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
         distributionSetManagement.lock(distributionSet.getId());
         assertThat(
@@ -655,7 +676,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Unlocks a DS.
      */
-    @Test    void unlockDistributionSet() {
+    @Test
+    void unlockDistributionSet() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
         distributionSetManagement.lock(distributionSet.getId());
         assertThat(
@@ -676,7 +698,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Software modules of a locked DS can't be modified. Expected behaviour is to throw an exception and to do not modify them.
      */
-    @Test    void lockDistributionSetApplied() {
+    @Test
+    void lockDistributionSetApplied() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
         final int softwareModuleCount = distributionSet.getModules().size();
         assertThat(softwareModuleCount).isNotZero();
@@ -706,7 +729,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Test implicit locks for a DS and skip tags.
      */
-    @Test    void isImplicitLockApplicableForDistributionSet() {
+    @Test
+    void isImplicitLockApplicableForDistributionSet() {
         final JpaDistributionSetManagement distributionSetManagement = (JpaDistributionSetManagement) this.distributionSetManagement;
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-non-skip");
         // assert that implicit lock is applicable for non skip tags
@@ -734,7 +758,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Locks an incomplete DS. Expected behaviour is to throw an exception and to do not lock it.
      */
-    @Test    void lockIncompleteDistributionSetFails() {
+    @Test
+    void lockIncompleteDistributionSetFails() {
         final long incompleteDistributionSetId = testdataFactory.createIncompleteDistributionSet().getId();
         assertThatExceptionOfType(IncompleteDistributionSetException.class)
                 .as("Locking an incomplete distribution set should throw an exception")
@@ -747,7 +772,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Deletes a DS that is no in use. Expected behaviour is a hard delete on the database.
      */
-    @Test    void deleteUnassignedDistributionSet() {
+    @Test
+    void deleteUnassignedDistributionSet() {
         final DistributionSet ds1 = testdataFactory.createDistributionSet("ds-1");
         testdataFactory.createDistributionSet("ds-2");
 
@@ -762,7 +788,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Deletes an invalid distribution set
      */
-    @Test    void deleteInvalidDistributionSet() {
+    @Test
+    void deleteInvalidDistributionSet() {
         final DistributionSet set = testdataFactory.createAndInvalidateDistributionSet();
         assertThat(distributionSetRepository.findById(set.getId())).isNotEmpty();
         distributionSetManagement.delete(set.getId());
@@ -772,7 +799,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Deletes an incomplete distribution set
      */
-    @Test    void deleteIncompleteDistributionSet() {
+    @Test
+    void deleteIncompleteDistributionSet() {
         final DistributionSet set = testdataFactory.createIncompleteDistributionSet();
         assertThat(distributionSetRepository.findById(set.getId())).isNotEmpty();
         distributionSetManagement.delete(set.getId());
@@ -782,7 +810,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Queries and loads the metadata related to a given distribution set.
      */
-    @Test    void getMetadata() {
+    @Test
+    void getMetadata() {
         // create a DS
         final DistributionSet ds1 = testdataFactory.createDistributionSet("testDs1");
         final DistributionSet ds2 = testdataFactory.createDistributionSet("testDs2");
@@ -832,7 +861,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that the find all by ids contains the entities which are looking for
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = DistributionSetCreatedEvent.class, count = 12),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 36) })
     void verifyFindDistributionSetAllById() {
@@ -855,7 +885,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that an exception is thrown when trying to get an invalid distribution set
      */
-    @Test    void verifyGetValid() {
+    @Test
+    void verifyGetValid() {
         final Long distributionSetId = testdataFactory.createAndInvalidateDistributionSet().getId();
 
         assertThatExceptionOfType(InvalidDistributionSetException.class)
@@ -869,7 +900,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that an exception is thrown when trying to get an incomplete distribution set
      */
-    @Test    void verifyGetValidAndComplete() {
+    @Test
+    void verifyGetValidAndComplete() {
         final Long distributionSetId = testdataFactory.createIncompleteDistributionSet().getId();
         assertThatExceptionOfType(IncompleteDistributionSetException.class)
                 .as("Incomplete distributionSet should throw an exception")
@@ -879,7 +911,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that an exception is thrown when trying to create or update metadata for an invalid distribution set.
      */
-    @Test    void createMetadataForInvalidDistributionSet() {
+    @Test
+    void createMetadataForInvalidDistributionSet() {
         final String knownKey1 = "myKnownKey1";
         final String knownKey2 = "myKnownKey2";
         final String knownValue = "myKnownValue";
@@ -905,7 +938,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Get the Rollouts count by status statistics for a specific Distribution Set
      */
-    @Test    void getRolloutsCountStatisticsForDistributionSet() {
+    @Test
+    void getRolloutsCountStatisticsForDistributionSet() {
         DistributionSet ds1 = testdataFactory.createDistributionSet("DS1");
         DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
         DistributionSet ds3 = testdataFactory.createDistributionSet("DS3");
@@ -935,7 +969,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Get the Rollouts count by status statistics for a specific Distribution Set
      */
-    @Test    void getActionsCountStatisticsForDistributionSet() {
+    @Test
+    void getActionsCountStatisticsForDistributionSet() {
         final DistributionSet ds = testdataFactory.createDistributionSet("DS");
         final DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
         testdataFactory.createTargets("targets", 4);
@@ -955,7 +990,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Get the Rollouts count by status statistics for a specific Distribution Set
      */
-    @Test    void getAutoAssignmentsCountStatisticsForDistributionSet() {
+    @Test
+    void getAutoAssignmentsCountStatisticsForDistributionSet() {
         DistributionSet ds = testdataFactory.createDistributionSet("DS");
         DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
         testdataFactory.createTargets("targets", 4);

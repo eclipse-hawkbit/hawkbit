@@ -31,7 +31,8 @@ class JsonIgnorePropertiesAnnotationTest {
     /**
      * This test verifies that all model classes within the 'org.eclipse.hawkbit.ddi.json.model' package are annotated with '@JsonIgnoreProperties(ignoreUnknown = true)'
      */
-    @Test    void shouldCheckAnnotationsForAllModelClasses() {
+    @Test
+    void shouldCheckAnnotationsForAllModelClasses() {
         final String packageName = getClass().getPackage().getName();
         try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {
             final List<? extends Class<?>> matchingClasses = scanResult.getAllClasses()

@@ -25,7 +25,8 @@ class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void createPermissionsCheck() {
+    @Test
+    void createPermissionsCheck() {
         assertPermissions(
                 () -> targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("name").query("controllerId==id")),
                 List.of(SpPermission.CREATE_TARGET));
@@ -34,7 +35,8 @@ class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void deletePermissionsCheck() {
+    @Test
+    void deletePermissionsCheck() {
         assertPermissions(() -> {
             targetFilterQueryManagement.delete(1L);
             return null;
@@ -44,7 +46,8 @@ class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void verifyTargetFilterQuerySyntaxPermissionsCheck() {
+    @Test
+    void verifyTargetFilterQuerySyntaxPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.verifyTargetFilterQuerySyntax("controllerId==id"),
                 List.of(SpPermission.READ_TARGET));
     }
@@ -52,56 +55,64 @@ class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findAllPermissionsCheck() {
+    @Test
+    void findAllPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findAll(PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void countPermissionsCheck() {
+    @Test
+    void countPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.count(), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void countByAutoAssignDistributionSetIdPermissionsCheck() {
+    @Test
+    void countByAutoAssignDistributionSetIdPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.countByAutoAssignDistributionSetId(1L), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByNamePermissionsCheck() {
+    @Test
+    void findByNamePermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findByName("filterName", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void countByNamePermissionsCheck() {
+    @Test
+    void countByNamePermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.countByName("filterName"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByRsqlPermissionsCheck() {
+    @Test
+    void findByRsqlPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findByRsql("name==id", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByQueryPermissionsCheck() {
+    @Test
+    void findByQueryPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findByQuery("controllerId==id", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByAutoAssignDistributionSetIdPermissionsCheck() {
+    @Test
+    void findByAutoAssignDistributionSetIdPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findByAutoAssignDistributionSetId(1L, PAGE),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
     }
@@ -109,7 +120,8 @@ class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByAutoAssignDSAndRsqlPermissionsCheck() {
+    @Test
+    void findByAutoAssignDSAndRsqlPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findByAutoAssignDSAndRsql(1L, "rsqlParam", PAGE),
                 List.of(SpPermission.READ_TARGET, SpPermission.READ_REPOSITORY));
     }
@@ -117,28 +129,32 @@ class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findWithAutoAssignDSPermissionsCheck() {
+    @Test
+    void findWithAutoAssignDSPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.findWithAutoAssignDS(PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getTargetFilterQueryByIdPermissionsCheck() {
+    @Test
+    void getTargetFilterQueryByIdPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.get(1L), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getTargetFilterQueryByNamePermissionsCheck() {
+    @Test
+    void getTargetFilterQueryByNamePermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.getByName("filterName"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void updatePermissionsCheck() {
+    @Test
+    void updatePermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.update(entityFactory.targetFilterQuery().update(1L)),
                 List.of(SpPermission.UPDATE_TARGET));
     }
@@ -146,7 +162,8 @@ class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void updateAutoAssignDSPermissionsCheck() {
+    @Test
+    void updateAutoAssignDSPermissionsCheck() {
         assertPermissions(() -> targetFilterQueryManagement.updateAutoAssignDS(new AutoAssignDistributionSetUpdate(1L).weight(1)),
                 List.of(SpPermission.UPDATE_TARGET));
     }
@@ -154,7 +171,8 @@ class TargetFilterQueryManagementSecurityTest extends AbstractJpaIntegrationTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void cancelAutoAssignmentForDistributionSetPermissionsCheck() {
+    @Test
+    void cancelAutoAssignmentForDistributionSetPermissionsCheck() {
         assertPermissions(() -> {
             targetFilterQueryManagement.cancelAutoAssignmentForDistributionSet(1L);
             return null;

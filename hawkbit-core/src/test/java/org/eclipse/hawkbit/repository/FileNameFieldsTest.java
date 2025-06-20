@@ -23,7 +23,8 @@ class FileNameFieldsTest {
     /**
      * Verifies that fields classes are correctly implemented
      */
-    @Test    @SuppressWarnings("unchecked")
+    @Test
+    @SuppressWarnings("unchecked")
     void repositoryManagementMethodsArePreAuthorizedAnnotated() {
         final String packageName = getClass().getPackage().getName();
         try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {

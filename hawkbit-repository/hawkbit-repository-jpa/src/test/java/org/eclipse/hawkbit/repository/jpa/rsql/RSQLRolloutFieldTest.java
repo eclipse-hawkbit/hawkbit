@@ -41,7 +41,8 @@ class RSQLRolloutFieldTest extends AbstractJpaIntegrationTest {
     /**
      * Test filter rollout by distrbution set type id
      */
-    @Test    void testFilterByDsType() {
+    @Test
+    void testFilterByDsType() {
         assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type.id" + "==" + rollout.getDistributionSet().getType().getId() + 1, 0);
         assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type.id" + "!=" + rollout.getDistributionSet().getType().getId() + 1, 1);
         assertRSQLQuery(RolloutFields.DISTRIBUTIONSET.name() + ".type.id" + "==" + rollout.getDistributionSet().getType().getId(), 1);

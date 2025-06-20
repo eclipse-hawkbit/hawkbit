@@ -71,7 +71,8 @@ class TotalTargetCountStatusTest {
     /**
      * DownloadOnly actions should be displayed as FINISHED when they have ActionStatus.DOWNLOADED
      */
-    @Test    void shouldCorrectlyMapActionStatusesInDownloadOnlyCase() {
+    @Test
+    void shouldCorrectlyMapActionStatusesInDownloadOnlyCase() {
         TotalTargetCountStatus status = new TotalTargetCountStatus(targetCountActionStatuses, 55L,
                 Action.ActionType.DOWNLOAD_ONLY);
         assertThat(status.getTotalTargetCountByStatus(TotalTargetCountStatus.Status.SCHEDULED)).isEqualTo(1L);

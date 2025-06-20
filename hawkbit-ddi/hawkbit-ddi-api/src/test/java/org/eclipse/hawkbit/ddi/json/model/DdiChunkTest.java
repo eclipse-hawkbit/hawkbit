@@ -34,7 +34,8 @@ class DdiChunkTest {
     /**
      * Verify the correct serialization and deserialization of the model
      */
-    @Test    void shouldSerializeAndDeserializeObject() throws IOException {
+    @Test
+    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final String part = "1234";
         final String version = "1.0";
@@ -55,7 +56,8 @@ class DdiChunkTest {
     /**
      * Verify the correct deserialization of a model with a additional unknown property
      */
-    @Test    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    @Test
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiChunk = "{\"part\":\"1234\",\"version\":\"1.0\",\"name\":\"Dummy-Artifact\",\"artifacts\":[],\"unknownProperty\":\"test\"}";
 
@@ -70,7 +72,8 @@ class DdiChunkTest {
     /**
      * Verify that deserialization fails for known properties with a wrong datatype
      */
-    @Test    void shouldFailForObjectWithWrongDataTypes() {
+    @Test
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiChunk = "{\"part\":[\"1234\"],\"version\":\"1.0\",\"name\":\"Dummy-Artifact\",\"artifacts\":[]}";
 

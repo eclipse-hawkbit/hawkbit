@@ -30,7 +30,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#cancelActionStatus() method
      */
-    @Test    void addCancelActionStatusPermissionsCheck() {
+    @Test
+    void addCancelActionStatusPermissionsCheck() {
         assertPermissions(() -> controllerManagement.addCancelActionStatus(entityFactory.actionStatus().create(0L)),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -38,14 +39,16 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#getSoftwareModule() method
      */
-    @Test    void getSoftwareModulePermissionsCheck() {
+    @Test
+    void getSoftwareModulePermissionsCheck() {
         assertPermissions(() -> controllerManagement.getSoftwareModule(1L), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
 
     /**
      * Tests ControllerManagement#findTargetVisibleMetaDataBySoftwareModuleId() method
      */
-    @Test    void findTargetVisibleMetaDataBySoftwareModuleIdPermissionsCheck() {
+    @Test
+    void findTargetVisibleMetaDataBySoftwareModuleIdPermissionsCheck() {
         assertPermissions(() -> controllerManagement.findTargetVisibleMetaDataBySoftwareModuleId(List.of(1L)),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -53,7 +56,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#addInformationalActionStatus() method
      */
-    @Test    void addInformationalActionStatusPermissionsCheck() {
+    @Test
+    void addInformationalActionStatusPermissionsCheck() {
         assertPermissions(() -> controllerManagement.addInformationalActionStatus(entityFactory.actionStatus().create(0L)),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -61,7 +65,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#addUpdateActionStatus() method
      */
-    @Test    void addUpdateActionStatusPermissionsCheck() {
+    @Test
+    void addUpdateActionStatusPermissionsCheck() {
         assertPermissions(() -> controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(0L)),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -69,7 +74,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#findActiveActionWithHighestWeight() method
      */
-    @Test    void findActiveActionWithHighestWeightPermissionsCheck() {
+    @Test
+    void findActiveActionWithHighestWeightPermissionsCheck() {
         assertPermissions(() -> controllerManagement.findActiveActionWithHighestWeight("controllerId"),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -77,7 +83,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#findActiveActionsWithHighestWeight() method
      */
-    @Test    void findActiveActionsWithHighestWeightPermissionsCheck() {
+    @Test
+    void findActiveActionsWithHighestWeightPermissionsCheck() {
         assertPermissions(() -> controllerManagement.findActiveActionsWithHighestWeight("controllerId", 1),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -85,14 +92,16 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#findActionWithDetails() method
      */
-    @Test    void findActionWithDetailsPermissionsCheck() {
+    @Test
+    void findActionWithDetailsPermissionsCheck() {
         assertPermissions(() -> controllerManagement.findActionWithDetails(1L), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
 
     /**
      * Tests ControllerManagement#findActionStatusByAction() method
      */
-    @Test    void findActionStatusByActionPermissionsCheck() {
+    @Test
+    void findActionStatusByActionPermissionsCheck() {
         assertPermissions(() -> controllerManagement.findActionStatusByAction(1L, Pageable.unpaged()),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -100,7 +109,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#findOrRegisterTargetIfItDoesNotExist() method
      */
-    @Test    void findOrRegisterTargetIfItDoesNotExistPermissionsCheck() {
+    @Test
+    void findOrRegisterTargetIfItDoesNotExistPermissionsCheck() {
         assertPermissions(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("controllerId", URI.create("someaddress")),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -108,7 +118,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#findOrRegisterTargetIfItDoesNotExist() method
      */
-    @Test    void findOrRegisterTargetIfItDoesNotExistWithDetailsPermissionsCheck() {
+    @Test
+    void findOrRegisterTargetIfItDoesNotExistWithDetailsPermissionsCheck() {
         assertPermissions(
                 () -> controllerManagement.findOrRegisterTargetIfItDoesNotExist("controllerId", URI.create("someaddress"), "name", "type"),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
@@ -117,7 +128,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#getActionForDownloadByTargetAndSoftwareModule() method
      */
-    @Test    void getActionForDownloadByTargetAndSoftwareModulePermissionsCheck() {
+    @Test
+    void getActionForDownloadByTargetAndSoftwareModulePermissionsCheck() {
         assertPermissions(() -> controllerManagement.getActionForDownloadByTargetAndSoftwareModule("controllerId", 1L),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -125,21 +137,24 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#getPollingTime() method
      */
-    @Test    void getPollingTimePermissionsCheck() {
+    @Test
+    void getPollingTimePermissionsCheck() {
         assertPermissions(() -> controllerManagement.getPollingTime(), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
 
     /**
      * Tests ControllerManagement#getMinPollingTime() method
      */
-    @Test    void getMinPollingTimePermissionsCheck() {
+    @Test
+    void getMinPollingTimePermissionsCheck() {
         assertPermissions(() -> controllerManagement.getMinPollingTime(), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
 
     /**
      * Tests ControllerManagement#getMaxPollingTime() method
      */
-    @Test    void getMaintenanceWindowPollCountPermissionsCheck() {
+    @Test
+    void getMaintenanceWindowPollCountPermissionsCheck() {
         assertPermissions(() -> controllerManagement.getMaintenanceWindowPollCount(),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -147,7 +162,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#getPollingTimeForAction() method
      */
-    @Test    void getPollingTimeForActionPermissionsCheck() {
+    @Test
+    void getPollingTimeForActionPermissionsCheck() {
         final JpaAction action = new JpaAction();
         action.setId(1L);
         assertPermissions(() -> {
@@ -163,7 +179,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#hasTargetArtifactAssigned() method
      */
-    @Test    void hasTargetArtifactAssignedPermissionsCheck() {
+    @Test
+    void hasTargetArtifactAssignedPermissionsCheck() {
         assertPermissions(() -> controllerManagement.hasTargetArtifactAssigned("controllerId", "sha1Hash"),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -171,7 +188,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#hasTargetArtifactAssigned() method
      */
-    @Test    void hasTargetArtifactAssignedByIdPermissionsCheck() {
+    @Test
+    void hasTargetArtifactAssignedByIdPermissionsCheck() {
         assertPermissions(() -> controllerManagement.hasTargetArtifactAssigned(1L, "sha1Hash"),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -179,7 +197,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#updateControllerAttributes() method
      */
-    @Test    void updateControllerAttributesPermissionsCheck() {
+    @Test
+    void updateControllerAttributesPermissionsCheck() {
         assertPermissions(() -> controllerManagement.updateControllerAttributes("controllerId", Map.of(), null),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -187,7 +206,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#getByControllerId() method
      */
-    @Test    void getByControllerIdPermissionsCheck() {
+    @Test
+    void getByControllerIdPermissionsCheck() {
         assertPermissions(() -> controllerManagement.getByControllerId("controllerId"),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
         assertPermissions(() -> controllerManagement.getByControllerId("controllerId"),
@@ -197,7 +217,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#get() method
      */
-    @Test    void getPermissionsCheck() {
+    @Test
+    void getPermissionsCheck() {
         assertPermissions(() -> controllerManagement.get(1L), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
         assertPermissions(() -> controllerManagement.get(1L), List.of(SpPermission.SpringEvalExpressions.SYSTEM_ROLE));
     }
@@ -205,7 +226,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#getActionHistoryMessages() method
      */
-    @Test    void getActionHistoryMessagesPermissionsCheck() {
+    @Test
+    void getActionHistoryMessagesPermissionsCheck() {
         assertPermissions(() -> controllerManagement.getActionHistoryMessages(1L, 1),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -213,7 +235,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#cancelAction() method
      */
-    @Test    void cancelActionPermissionsCheck() {
+    @Test
+    void cancelActionPermissionsCheck() {
         final JpaAction action = new JpaAction();
         action.setId(1L);
         assertPermissions(() -> {
@@ -229,7 +252,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#updateActionExternalRef() method
      */
-    @Test    void updateActionExternalRefPermissionsCheck() {
+    @Test
+    void updateActionExternalRefPermissionsCheck() {
         assertPermissions(() -> {
             controllerManagement.updateActionExternalRef(1L, "externalRef");
             return null;
@@ -239,7 +263,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#getActionByExternalRef() method
      */
-    @Test    void getActionByExternalRefPermissionsCheck() {
+    @Test
+    void getActionByExternalRefPermissionsCheck() {
         assertPermissions(() -> controllerManagement.getActionByExternalRef("externalRef"),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }
@@ -247,7 +272,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#deleteExistingTarget() method
      */
-    @Test    void deleteExistingTargetPermissionsCheck() {
+    @Test
+    void deleteExistingTargetPermissionsCheck() {
         assertPermissions(() -> {
             controllerManagement.deleteExistingTarget("controllerId");
             return null;
@@ -257,7 +283,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#getInstalledActionByTarget() method
      */
-    @Test    void getInstalledActionByTargetPermissionsCheck() {
+    @Test
+    void getInstalledActionByTargetPermissionsCheck() {
         final Target target = testdataFactory.createTarget();
         assertPermissions(
                 () -> controllerManagement.getInstalledActionByTarget(target),
@@ -267,7 +294,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#activateAutoConfirmation() method
      */
-    @Test    void activateAutoConfirmationPermissionsCheck() {
+    @Test
+    void activateAutoConfirmationPermissionsCheck() {
         assertPermissions(
                 () -> controllerManagement.activateAutoConfirmation("controllerId", "initiator", "remark"),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
@@ -276,7 +304,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#deactivateAutoConfirmation() method
      */
-    @Test    void deactivateAutoConfirmationPermissionsCheck() {
+    @Test
+    void deactivateAutoConfirmationPermissionsCheck() {
         assertPermissions(() -> {
             controllerManagement.deactivateAutoConfirmation("controllerId");
             return null;
@@ -286,7 +315,8 @@ class ControllerManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ControllerManagement#updateOfflineAssignedVersion() method
      */
-    @Test    void updateOfflineAssignedVersionPermissionsCheck() {
+    @Test
+    void updateOfflineAssignedVersionPermissionsCheck() {
         assertPermissions(() -> controllerManagement.updateOfflineAssignedVersion("controllerId", "distributionName", "version"),
                 List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE));
     }

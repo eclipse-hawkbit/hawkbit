@@ -97,7 +97,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that target attribute update fails if quota hits.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2) })
     void updateTargetAttributesFailsIfTooManyEntries() throws Exception {
@@ -137,7 +138,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Checks if invalid values of attribute-key and attribute-value are handled correctly
      */
-    @Test    void updateTargetAttributesFailsForInvalidAttributes() {
+    @Test
+    void updateTargetAttributesFailsForInvalidAttributes() {
         final String controllerId = "targetId123";
         testdataFactory.createTarget(controllerId);
 
@@ -168,7 +170,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Controller providing status entries fails if providing more than permitted by quota.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -194,7 +197,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Test to verify the storage and retrieval of action history.
      */
-    @Test    void findMessagesByActionStatusId() {
+    @Test
+    void findMessagesByActionStatusId() {
         final DistributionSet testDs = testdataFactory.createDistributionSet("1");
         final List<Target> testTarget = testdataFactory.createTargets(1);
 
@@ -220,7 +224,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that the quota specifying the maximum number of status entries per action is enforced.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
@@ -259,7 +264,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that the quota specifying the maximum number of messages per action status is enforced.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -290,7 +296,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that a DOWNLOAD_ONLY action is not marked complete when the controller reports DOWNLOAD
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -380,7 +387,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Controller confirms successful update with FINISHED status.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -408,7 +416,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Controller confirmation fails with invalid messages.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -471,7 +480,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Update server rejects cancellation feedback if action is not in CANCELING state.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -497,7 +507,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Controller confirms action cancellation with FINISHED status.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -529,7 +540,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Controller confirms action cancellation with FINISHED status.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -670,7 +682,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Register a controller which does not exist
      */
-    @Test    @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
+    @Test
+    @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
@@ -686,7 +699,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Register a controller with name which does not exist and update its name
      */
-    @Test    @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
+    @Test
+    @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2),
@@ -704,7 +718,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Register a controller which does not exist with existing target type and update its target type to another existing one
      */
-    @Test    @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
+    @Test
+    @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
     @ExpectEvents({
             @Expect(type = TargetTypeCreatedEvent.class, count = 2),
             @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -728,7 +743,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Register a controller which does not exist with existing target type and update its target type to non existing one
      */
-    @Test    @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
+    @Test
+    @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
     @ExpectEvents({
             @Expect(type = TargetTypeCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -748,7 +764,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Register a controller which does not exist with existing target type and unassign its target type
      */
-    @Test    @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
+    @Test
+    @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
     @ExpectEvents({
             @Expect(type = TargetTypeCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -769,7 +786,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Register a controller which does not exist without target type and update its target type to existing one
      */
-    @Test    @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
+    @Test
+    @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
     @ExpectEvents({
             @Expect(type = TargetTypeCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -792,7 +810,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Register a controller which does not exist with non existing target type and update its target type to existing one
      */
-    @Test    @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
+    @Test
+    @WithUser(principal = "controller", authorities = { CONTROLLER_ROLE })
     @ExpectEvents({
             @Expect(type = TargetTypeCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -815,7 +834,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tries to register a target with an invalid controller id
      */
-    @Test    void findOrRegisterTargetIfItDoesNotExistThrowsExceptionForInvalidControllerIdParam() {
+    @Test
+    void findOrRegisterTargetIfItDoesNotExistThrowsExceptionForInvalidControllerIdParam() {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("register target with null as controllerId should fail")
                 .isThrownBy(() -> controllerManagement.findOrRegisterTargetIfItDoesNotExist(null, LOCALHOST));
@@ -890,7 +910,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Register a controller which does not exist, then update the controller twice, first time by providing a name property and second time without a new name
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 3),
             @Expect(type = TargetUpdatedEvent.class, count = 1) })
@@ -961,7 +982,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that targetVisible metadata is returned from repository
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6) })
@@ -979,7 +1001,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that controller registration does not result in a TargetPollEvent if feature is disabled
      */
-    @Test    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
+    @Test
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1) })
     @SuppressWarnings("java:S2699")
         // java:S2699 - test tests the fired events, no need for assert
     void targetPollEventNotSendIfDisabled() {
@@ -991,7 +1014,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Controller tries to finish an update process after it has been finished by an error action status.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -1033,7 +1057,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Controller tries to finish an update process after it has been finished by an FINISHED action status.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -1127,7 +1152,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that target attribute update is reflected by the repository.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 3) })
     void updateTargetAttributes() throws Exception {
@@ -1154,7 +1180,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that target attributes can be updated using different update modes.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 4) })
     void updateTargetAttributesWithDifferentUpdateModes() {
@@ -1177,7 +1204,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that a DOWNLOAD_ONLY action is marked complete once the controller reports DOWNLOADED
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -1204,7 +1232,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that a controller can report a FINISHED event for a DOWNLOAD_ONLY non-active action.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -1232,7 +1261,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that multiple DOWNLOADED events for a DOWNLOAD_ONLY action are handled.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -1289,7 +1319,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that quota is enforced for UpdateActionStatus events for DOWNLOAD_ONLY assignments.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -1337,7 +1368,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that quota is enforced for UpdateActionStatus events for FORCED assignments.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -1384,7 +1416,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that the attaching externalRef to an action is properly stored
      */
-    @Test    void updatedExternalRefOnActionIsReallyUpdated() {
+    @Test
+    void updatedExternalRefOnActionIsReallyUpdated() {
         final List<String> allExternalRef = new ArrayList<>();
         final List<Long> allActionId = new ArrayList<>();
         final int numberOfActions = 3;
@@ -1416,7 +1449,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that getting a single action using externalRef works
      */
-    @Test    void getActionUsingSingleExternalRef() {
+    @Test
+    void getActionUsingSingleExternalRef() {
 
         final String knownControllerId = "controllerId";
         final String knownExternalRef = "externalRefId";
@@ -1440,7 +1474,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that assigning version form target works
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1),
@@ -1473,7 +1508,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that a null externalRef cannot be assigned to an action
      */
-    @Test    void externalRefCannotBeNull() {
+    @Test
+    void externalRefCannotBeNull() {
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("No ConstraintViolationException thrown when a null externalRef was set on an action")
                 .isThrownBy(() -> controllerManagement.updateActionExternalRef(1L, null));
@@ -1573,7 +1609,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Actions are exposed according to thier weight in multi assignment mode.
      */
-    @Test    void actionsAreExposedAccordingToTheirWeight() {
+    @Test
+    void actionsAreExposedAccordingToTheirWeight() {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final Long actionWeightNull = assignDistributionSet(ds.getId(), targetId).getAssignedEntity().get(0).getId();
@@ -1607,7 +1644,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Delete a target on requested target deletion from client side
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TargetDeletedEvent.class, count = 1) })
@@ -1624,7 +1662,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Delete a target with a non existing thingId
      */
-    @Test    @ExpectEvents({ @Expect(type = TargetDeletedEvent.class, count = 0) })
+    @Test
+    @ExpectEvents({ @Expect(type = TargetDeletedEvent.class, count = 0) })
     void deleteTargetWithInvalidThingId() {
         assertThatExceptionOfType(EntityNotFoundException.class)
                 .as("No EntityNotFoundException thrown when deleting a non-existing target")
@@ -1635,7 +1674,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Delete a target after it has been deleted already
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TargetDeletedEvent.class, count = 1) })
@@ -1656,7 +1696,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * When action status code is provided in feedback it is also stored in the action field lastActionStatusCode
      */
-    @Test    void lastActionStatusCodeIsSet() {
+    @Test
+    void lastActionStatusCodeIsSet() {
         final Long actionId = createTargetAndAssignDs();
 
         addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING, 10);

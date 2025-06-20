@@ -62,7 +62,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that a paged result list of target tags reflects the content on the repository side.
      */
-    @Test    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
+    @Test
+    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
     public void getTargetTags() throws Exception {
         final List<TargetTag> tags = testdataFactory.createTargetTags(2, "");
         final TargetTag assigned = tags.get(0);
@@ -85,7 +86,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Handles the GET request of retrieving all targets tags within SP based by parameter
      */
-    @Test    public void getTargetTagsWithParameters() throws Exception {
+    @Test
+     void getTargetTagsWithParameters() throws Exception {
         testdataFactory.createTargetTags(2, "");
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "?limit=10&sort=name:ASC&offset=0&q=name==targetTag"))
                 .andExpect(status().isOk())
@@ -95,7 +97,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that a page result when listing tags reflects on the content in the repository when filtered by 2 fields - one tag field and one target field
      */
-    @Test    public void getTargetTagsFilteredByColor() throws Exception {
+    @Test
+     void getTargetTagsFilteredByColor() throws Exception {
         final String controllerId1 = "controllerTestId1";
         final String controllerId2 = "controllerTestId2";
         testdataFactory.createTarget(controllerId1);
@@ -126,7 +129,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that a single result of a target tag reflects the content on the repository side.
      */
-    @Test    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
+    @Test
+    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
     public void getTargetTag() throws Exception {
         final List<TargetTag> tags = testdataFactory.createTargetTags(2, "");
         final TargetTag assigned = tags.get(0);
@@ -146,7 +150,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that created target tags are stored in the repository as send to the API.
      */
-    @Test    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
+    @Test
+    @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
     public void createTargetTags() throws Exception {
         final Tag tagOne = entityFactory.tag().create().colour("testcol1").description("its a test1").name("thetest1")
                 .build();
@@ -177,7 +182,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that an updated target tag is stored in the repository as send to the API.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetTagUpdatedEvent.class, count = 1) })
     public void updateTargetTag() throws Exception {
@@ -207,7 +213,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that the delete call is reflected by the repository.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetTagDeletedEvent.class, count = 1) })
     public void deleteTargetTag() throws Exception {
@@ -224,7 +231,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Ensures that assigned targets to tag in repository are listed with proper paging results.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 5), 
             @Expect(type = TargetUpdatedEvent.class, count = 5) })
@@ -245,7 +253,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Ensures that assigned DS to tag in repository are listed with proper paging results with paging limit parameter.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 5), 
             @Expect(type = TargetUpdatedEvent.class, count = 5) })
@@ -268,7 +277,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Ensures that assigned targets to tag in repository are listed with proper paging results with paging limit and offset parameter.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 5), 
             @Expect(type = TargetUpdatedEvent.class, count = 5) })
@@ -294,7 +304,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that tag assignments done through tag API command are correctly stored in the repository.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1) })
@@ -314,7 +325,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 2) })
@@ -338,7 +350,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2) })
     public void assignTargetsNotFound() throws Exception {
@@ -378,7 +391,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 2) })
@@ -421,7 +435,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 2) })
@@ -455,7 +470,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that tag unassignments done through tag API command are correctly stored in the repository.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 3) })
@@ -480,7 +496,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that tag unassignments (multi targets) done through tag API command are correctly stored in the repository.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 3),
             @Expect(type = TargetUpdatedEvent.class, count = 5) })
@@ -507,7 +524,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 2) })
@@ -551,7 +569,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 4) })
@@ -595,7 +614,8 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     /**
      * Verifies that tag assignments (multi targets) done through tag API command are correctly stored in the repository.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetTagCreatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 4) })

@@ -87,7 +87,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * This test verifies the call of all Software Modules that are assigned to a Distribution Set through the RESTful API.
      */
-    @Test    void getSoftwareModules() throws Exception {
+    @Test
+    void getSoftwareModules() throws Exception {
         // Create DistributionSet with three software modules
         final DistributionSet set = testdataFactory.createDistributionSet("SMTest");
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + set.getId() + "/assignedSM"))
@@ -99,7 +100,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Handles the GET request of retrieving assigned software modules of a single distribution set within SP with given page size and offset including sorting by version descending and filter down to all sets which name starts with 'one'.
      */
-    @Test    void getSoftwareModulesWithParameters() throws Exception {
+    @Test
+    void getSoftwareModulesWithParameters() throws Exception {
         final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
 
         // post assignment
@@ -114,7 +116,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * This test verifies the deletion of a assigned Software Module of a Distribution Set can not be achieved when that Distribution Set has been assigned or installed to a target.
      */
-    @Test    void deleteFailureWhenDistributionSetInUse() throws Exception {
+    @Test
+    void deleteFailureWhenDistributionSetInUse() throws Exception {
         // create DisSet
         final DistributionSet disSet = testdataFactory.createDistributionSetWithNoSoftwareModules("Eris", "560a");
         final List<Long> smIDs = new ArrayList<>();
@@ -159,7 +162,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * This test verifies that the assignment of a Software Module to a Distribution Set can not be achieved when that Distribution Set has been assigned or installed to a target.
      */
-    @Test    void assignmentFailureWhenAssigningToUsedDistributionSet() throws Exception {
+    @Test
+    void assignmentFailureWhenAssigningToUsedDistributionSet() throws Exception {
         // create DisSet
         final DistributionSet disSet = testdataFactory.createDistributionSetWithNoSoftwareModules("Mars", "686,980");
         final List<Long> smIDs = new ArrayList<>();
@@ -203,7 +207,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * This test verifies the assignment of Software Modules to a Distribution Set through the RESTful API.
      */
-    @Test    void assignSoftwareModuleToDistributionSet() throws Exception {
+    @Test
+    void assignSoftwareModuleToDistributionSet() throws Exception {
         // create DisSet
         final DistributionSet disSet = testdataFactory.createDistributionSetWithNoSoftwareModules("Jupiter", "398,88");
         // Test if size is 0
@@ -275,7 +280,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * This test verifies the removal of Software Modules of a Distribution Set through the RESTful API.
      */
-    @Test    void unassignSoftwareModuleFromDistributionSet() throws Exception {
+    @Test
+    void unassignSoftwareModuleFromDistributionSet() throws Exception {
         // Create DistributionSet with three software modules
         final DistributionSet set = testdataFactory.createDistributionSet("Venus");
         int amountOfSM = set.getModules().size();
@@ -299,7 +305,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that multi target assignment through API is reflected by the repository.
      */
-    @Test    void assignMultipleTargetsToDistributionSet() throws Exception {
+    @Test
+    void assignMultipleTargetsToDistributionSet() throws Exception {
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
 
         // prepare targets
@@ -323,7 +330,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that targets can be assigned even if the specified controller IDs are in different case (e.g. 'TARGET1' instead of 'target1'.
      */
-    @Test    void assignTargetsToDistributionSetIgnoreCase() throws Exception {
+    @Test
+    void assignTargetsToDistributionSetIgnoreCase() throws Exception {
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
 
         // prepare targets
@@ -347,7 +355,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Trying to create a DS from already marked as deleted type - should get as response 400 Bad Request
      */
-    @Test    void createDsFromAlreadyMarkedAsDeletedType() throws Exception {
+    @Test
+    void createDsFromAlreadyMarkedAsDeletedType() throws Exception {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("exampleKey");
         final DistributionSetType type = testdataFactory.findOrCreateDistributionSetType(
                 "testKey", "testType", Collections.singletonList(softwareModule.getType()),
@@ -388,7 +397,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that multi target assignment is protected by our getMaxTargetDistributionSetAssignmentsPerManualAssignment quota.
      */
-    @Test    void assignMultipleTargetsToDistributionSetUntilQuotaIsExceeded() throws Exception {
+    @Test
+    void assignMultipleTargetsToDistributionSetUntilQuotaIsExceeded() throws Exception {
         final int maxActions = quotaManagement.getMaxTargetDistributionSetAssignmentsPerManualAssignment();
         final List<Target> targets = testdataFactory.createTargets(maxActions + 1);
         final DistributionSet ds = testdataFactory.createDistributionSet();
@@ -412,7 +422,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that the 'max actions per target' quota is enforced if the distribution set assignment of a target is changed permanently
      */
-    @Test    void changeDistributionSetAssignmentForTargetUntilQuotaIsExceeded() throws Exception {
+    @Test
+    void changeDistributionSetAssignmentForTargetUntilQuotaIsExceeded() throws Exception {
 
         // create one target
         final Target testTarget = testdataFactory.createTarget("trg1");
@@ -439,7 +450,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that offline reported multi target assignment through API is reflected by the repository.
      */
-    @Test    void offlineAssignmentOfMultipleTargetsToDistributionSet() throws Exception {
+    @Test
+    void offlineAssignmentOfMultipleTargetsToDistributionSet() throws Exception {
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         final List<Target> targets = testdataFactory.createTargets(5);
         final JSONArray list = new JSONArray();
@@ -470,7 +482,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Assigns multiple targets to distribution set with only maintenance schedule.
      */
-    @Test    void assignMultipleTargetsToDistributionSetWithMaintenanceWindowStartOnly() throws Exception {
+    @Test
+    void assignMultipleTargetsToDistributionSetWithMaintenanceWindowStartOnly() throws Exception {
         // prepare distribution set
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         // prepare targets
@@ -488,7 +501,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Assigns multiple targets to distribution set with only maintenance window duration.
      */
-    @Test    void assignMultipleTargetsToDistributionSetWithMaintenanceWindowEndOnly() throws Exception {
+    @Test
+    void assignMultipleTargetsToDistributionSetWithMaintenanceWindowEndOnly() throws Exception {
         // prepare distribution set
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         // prepare targets
@@ -506,7 +520,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Assigns multiple targets to distribution set with valid maintenance window.
      */
-    @Test    void assignMultipleTargetsToDistributionSetWithValidMaintenanceWindow() throws Exception {
+    @Test
+    void assignMultipleTargetsToDistributionSetWithValidMaintenanceWindow() throws Exception {
         // prepare distribution set
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         // prepare targets
@@ -525,7 +540,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Assigns multiple targets to distribution set with last maintenance window scheduled before current time.
      */
-    @Test    void assignMultipleTargetsToDistributionSetWithMaintenanceWindowEndTimeBeforeStartTime() throws Exception {
+    @Test
+    void assignMultipleTargetsToDistributionSetWithMaintenanceWindowEndTimeBeforeStartTime() throws Exception {
         // prepare distribution set
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         // prepare targets
@@ -544,7 +560,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Assigns multiple targets to distribution set with and without maintenance window.
      */
-    @Test    void assignMultipleTargetsToDistributionSetWithAndWithoutMaintenanceWindow() throws Exception {
+    @Test
+    void assignMultipleTargetsToDistributionSetWithAndWithoutMaintenanceWindow() throws Exception {
         // prepare distribution set
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         // prepare targets
@@ -572,7 +589,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Assigning distribution set to the list of targets with a non-existing one leads to successful assignment of valid targets, while not found targets are silently ignored.
      */
-    @Test    void assignNotExistingTargetToDistributionSet() throws Exception {
+    @Test
+    void assignNotExistingTargetToDistributionSet() throws Exception {
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
 
         final String[] knownTargetIds = new String[] { "1", "2", "3" };
@@ -593,7 +611,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that assigned targets of DS are returned as reflected by the repository.
      */
-    @Test    void getAssignedTargetsOfDistributionSet() throws Exception {
+    @Test
+    void getAssignedTargetsOfDistributionSet() throws Exception {
         // prepare distribution set
         final String knownTargetId = "knownTargetId1";
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
@@ -609,7 +628,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Handles the GET request for retrieving assigned targets of a single distribution set with a defined page size and offset, sorted by name in descending order and filtered down to all targets which controllerID starts with 'target'.
      */
-    @Test    void getAssignedTargetsOfDistributionSetWithParameters() throws Exception {
+    @Test
+    void getAssignedTargetsOfDistributionSetWithParameters() throws Exception {
         final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
 
         assignDistributionSet(set, testdataFactory.createTargets(5, "targetMisc", "Test targets for query"))
@@ -627,7 +647,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that assigned targets of DS are returned as persisted in the repository.
      */
-    @Test    void getAssignedTargetsOfDistributionSetIsEmpty() throws Exception {
+    @Test
+    void getAssignedTargetsOfDistributionSetIsEmpty() throws Exception {
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         mvc.perform(get(
                         MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets"))
@@ -639,7 +660,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that installed targets of DS are returned as persisted in the repository.
      */
-    @Test    void getInstalledTargetsOfDistributionSet() throws Exception {
+    @Test
+    void getInstalledTargetsOfDistributionSet() throws Exception {
         // prepare distribution set
         final String knownTargetId = "knownTargetId1";
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
@@ -663,7 +685,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Handles the GET request for retrieving installed targets of a single distribution set with a defined page size and offset, sortet by name in descending order and filtered down to all targets which controllerID starts with 'target'.
      */
-    @Test    void getInstalledTargetsOfDistributionSetWithParameters() throws Exception {
+    @Test
+    void getInstalledTargetsOfDistributionSetWithParameters() throws Exception {
         final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
 
         final List<Target> targets = assignDistributionSet(set,
@@ -682,7 +705,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that target filters with auto assign DS are returned as persisted in the repository.
      */
-    @Test    void getAutoAssignTargetFiltersOfDistributionSet() throws Exception {
+    @Test
+    void getAutoAssignTargetFiltersOfDistributionSet() throws Exception {
         // prepare distribution set
         final String knownFilterName = "a";
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
@@ -704,7 +728,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Handles the GET request for retrieving assigned target filter queries of a single distribution set with a defined page size and offset, sorted by name in descending order and filtered down to all targets with a name that ends with '1'.
      */
-    @Test    void ggetAutoAssignTargetFiltersOfDistributionSetWithParameters() throws Exception {
+    @Test
+    void ggetAutoAssignTargetFiltersOfDistributionSetWithParameters() throws Exception {
         final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
         targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("filter1").query("name==a")
                 .autoAssignDistributionSet(set));
@@ -721,7 +746,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that an error is returned when the query is invalid.
      */
-    @Test    void getAutoAssignTargetFiltersOfDSWithInvalidFilter() throws Exception {
+    @Test
+    void getAutoAssignTargetFiltersOfDSWithInvalidFilter() throws Exception {
         // prepare distribution set
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         final String invalidQuery = "unknownField=le=42";
@@ -734,7 +760,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that target filters with auto assign DS are returned according to the query.
      */
-    @Test    void getMultipleAutoAssignTargetFiltersOfDistributionSet() throws Exception {
+    @Test
+    void getMultipleAutoAssignTargetFiltersOfDistributionSet() throws Exception {
         final String filterNamePrefix = "filter-";
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         final String query = "name==" + filterNamePrefix + "*";
@@ -752,7 +779,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that no target filters are returned according to the non matching query.
      */
-    @Test    void getEmptyAutoAssignTargetFiltersOfDistributionSet() throws Exception {
+    @Test
+    void getEmptyAutoAssignTargetFiltersOfDistributionSet() throws Exception {
         final String filterNamePrefix = "filter-";
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         final String query = "name==doesNotExist";
@@ -768,7 +796,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that DS in repository are listed with proper paging properties.
      */
-    @Test    void getDistributionSetsWithoutAdditionalRequestParameters() throws Exception {
+    @Test
+    void getDistributionSetsWithoutAdditionalRequestParameters() throws Exception {
         final int sets = 5;
         createDistributionSetsAlphabetical(sets);
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING))
@@ -782,7 +811,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that DS in repository are listed with proper paging results with paging limit parameter.
      */
-    @Test    void getDistributionSetsWithPagingLimitRequestParameter() throws Exception {
+    @Test
+    void getDistributionSetsWithPagingLimitRequestParameter() throws Exception {
         final int sets = 5;
         final int limitSize = 1;
         createDistributionSetsAlphabetical(sets);
@@ -798,7 +828,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that DS in repository are listed with proper paging results with paging limit and offset parameter.
      */
-    @Test    void getDistributionSetsWithPagingLimitAndOffsetRequestParameter() throws Exception {
+    @Test
+    void getDistributionSetsWithPagingLimitAndOffsetRequestParameter() throws Exception {
         final int sets = 5;
         final int offsetParam = 2;
         final int expectedSize = sets - offsetParam;
@@ -955,7 +986,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that DS deletion request to API is reflected by the repository.
      */
-    @Test    void deleteUnassignedistributionSet() throws Exception {
+    @Test
+    void deleteUnassignedistributionSet() throws Exception {
         // prepare test data
         assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
 
@@ -976,7 +1008,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that DS deletion request to API on an entity that does not exist results in NOT_FOUND.
      */
-    @Test    void deleteDistributionSetThatDoesNotExistLeadsToNotFound() throws Exception {
+    @Test
+    void deleteDistributionSetThatDoesNotExistLeadsToNotFound() throws Exception {
         mvc.perform(delete("/rest/v1/distributionsets/1234"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
@@ -985,7 +1018,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that assigned DS deletion request to API is reflected by the repository by means of deleted flag set.
      */
-    @Test    void deleteAssignedDistributionSet() throws Exception {
+    @Test
+    void deleteAssignedDistributionSet() throws Exception {
         // prepare test data
         assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
 
@@ -1016,7 +1050,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that DS property update request to API is reflected by the repository.
      */
-    @Test    void updateDistributionSet() throws Exception {
+    @Test
+    void updateDistributionSet() throws Exception {
         // prepare test data
         assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
 
@@ -1046,7 +1081,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that DS property update on requiredMigrationStep fails if DS is assigned to a target.
      */
-    @Test    void updateRequiredMigrationStepFailsIfDistributionSetisInUse() throws Exception {
+    @Test
+    void updateRequiredMigrationStepFailsIfDistributionSetisInUse() throws Exception {
 
         // prepare test data
         assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
@@ -1072,7 +1108,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that the server reacts properly to invalid requests (URI, Media Type, Methods) with correct reponses.
      */
-    @Test    void invalidRequestsOnDistributionSetsResource() throws Exception {
+    @Test
+    void invalidRequestsOnDistributionSetsResource() throws Exception {
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         final List<DistributionSet> sets = new ArrayList<>();
@@ -1134,7 +1171,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that the metadata creation through API is reflected by the repository.
      */
-    @Test    void createMetadata() throws Exception {
+    @Test
+    void createMetadata() throws Exception {
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
 
         final String knownKey1 = "known.key.1.1";
@@ -1177,7 +1215,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that a metadata update through API is reflected by the repository.
      */
-    @Test    void updateMetadata() throws Exception {
+    @Test
+    void updateMetadata() throws Exception {
         // prepare and create metadata for update
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
@@ -1199,7 +1238,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that a metadata entry deletion through API is reflected by the repository.
      */
-    @Test    void deleteMetadata() throws Exception {
+    @Test
+    void deleteMetadata() throws Exception {
         // prepare and create metadata for deletion
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
@@ -1222,7 +1262,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that DS metadata deletion request to API on an entity that does not exist results in NOT_FOUND.
      */
-    @Test    void deleteMetadataThatDoesNotExistLeadsToNotFound() throws Exception {
+    @Test
+    void deleteMetadataThatDoesNotExistLeadsToNotFound() throws Exception {
         // prepare and create metadata for deletion
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
@@ -1243,7 +1284,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that a metadata entry selection through API reflects the repository content.
      */
-    @Test    void getMetadataKey() throws Exception {
+    @Test
+    void getMetadataKey() throws Exception {
         // prepare and create metadata
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
@@ -1260,7 +1302,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Get a paged list of meta data for a distribution set with standard page size.
      */
-    @Test    void getMetadata() throws Exception {
+    @Test
+    void getMetadata() throws Exception {
         final int totalMetadata = 4;
         final String knownKeyPrefix = "knownKey";
         final String knownValuePrefix = "knownValue";
@@ -1278,7 +1321,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that a DS search with query parameters returns the expected result.
      */
-    @Test    void searchDistributionSetRsql() throws Exception {
+    @Test
+    void searchDistributionSetRsql() throws Exception {
         final String dsSuffix = "test";
         final int amount = 10;
         testdataFactory.createDistributionSets(dsSuffix, amount);
@@ -1300,7 +1344,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that a DS search with complete==true parameter returns only DS that are actually completely filled with mandatory modules.
      */
-    @Test    void filterDistributionSetComplete() throws Exception {
+    @Test
+    void filterDistributionSetComplete() throws Exception {
         final int amount = 10;
         testdataFactory.createDistributionSets(amount);
         distributionSetManagement
@@ -1318,7 +1363,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Ensures that a DS assigned target search with controllerId==1 parameter returns only the target with the given ID.
      */
-    @Test    void searchDistributionSetAssignedTargetsRsql() throws Exception {
+    @Test
+    void searchDistributionSetAssignedTargetsRsql() throws Exception {
         // prepare distribution set
         final Set<DistributionSet> createDistributionSetsAlphabetical = createDistributionSetsAlphabetical(1);
         final DistributionSet createdDs = createDistributionSetsAlphabetical.iterator().next();
@@ -1405,7 +1451,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * A request for assigning a target multiple times results in a Bad Request when multiassignment is disabled.
      */
-    @Test    void multiAssignmentRequestNotAllowedIfDisabled() throws Exception {
+    @Test
+    void multiAssignmentRequestNotAllowedIfDisabled() throws Exception {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
@@ -1422,7 +1469,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Identical assignments in a single request are removed when multiassignment is disabled.
      */
-    @Test    void identicalAssignmentInRequestAreRemovedIfMultiassignmentsDisabled() throws Exception {
+    @Test
+    void identicalAssignmentInRequestAreRemovedIfMultiassignmentsDisabled() throws Exception {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
@@ -1440,7 +1488,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Assigning targets multiple times to a DS in one request works in multiassignment mode.
      */
-    @Test    void multiAssignment() throws Exception {
+    @Test
+    void multiAssignment() throws Exception {
         final List<String> targetIds = testdataFactory.createTargets(2).stream().map(Target::getControllerId)
                 .toList();
         final Long dsId = testdataFactory.createDistributionSet().getId();
@@ -1462,7 +1511,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * An assignment request containing a weight is only accepted when weight is valide and multi assignment is on.
      */
-    @Test    void weightValidation() throws Exception {
+    @Test
+    void weightValidation() throws Exception {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
         final int weight = 78;
@@ -1494,7 +1544,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Request to get the count of all Rollouts by status for specific Distribution set
      */
-    @Test    void statisticsForRolloutsCountByStatus() throws Exception {
+    @Test
+    void statisticsForRolloutsCountByStatus() throws Exception {
         testdataFactory.createTargets("targets", 4);
         DistributionSet ds1 = testdataFactory.createDistributionSet("DS1");
         DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
@@ -1528,7 +1579,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Request to get the count of all Actions by status for specific Distribution set
      */
-    @Test    void statisticsForActionsCountByStatus() throws Exception {
+    @Test
+    void statisticsForActionsCountByStatus() throws Exception {
         testdataFactory.createTargets("targets", 4);
 
         DistributionSet ds1 = testdataFactory.createDistributionSet("DS1");
@@ -1560,7 +1612,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Request to get the count of all Auto Assignments for specific Distribution set
      */
-    @Test    void statisticsForAutoAssignmentsCount() throws Exception {
+    @Test
+    void statisticsForAutoAssignmentsCount() throws Exception {
         testdataFactory.createTargets("targets", 4);
         DistributionSet ds1 = testdataFactory.createDistributionSet("DS1");
         DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
@@ -1593,7 +1646,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Request to get full Statistics for specific Distribution set
      */
-    @Test    void statisticsForDistributionSet() throws Exception {
+    @Test
+    void statisticsForDistributionSet() throws Exception {
         testdataFactory.createTargets("targets", 4);
         testdataFactory.createTargets("autoAssignments", 4);
         DistributionSet ds1 = testdataFactory.createDistributionSet("DS1");
@@ -1630,7 +1684,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Verify invalidation of distribution sets that removes distribution sets from auto assignments, stops rollouts and cancels assignments
      */
-    @Test    void invalidateDistributionSet() throws Exception {
+    @Test
+    void invalidateDistributionSet() throws Exception {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final List<Target> targets = testdataFactory.createTargets(5, "invalidateDistributionSet");
         assignDistributionSet(distributionSet, targets);
@@ -1665,7 +1720,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Tests the lock. It is verified that the distribution set can be marked as locked through update operation.
      */
-    @Test    void lockDistributionSet() throws Exception {
+    @Test
+    void lockDistributionSet() throws Exception {
         // prepare test data
         assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
 
@@ -1688,7 +1744,8 @@ class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTe
     /**
      * Tests the unlock.
      */
-    @Test    void unlockDistributionSet() throws Exception {
+    @Test
+    void unlockDistributionSet() throws Exception {
         // prepare test data
         assertThat(distributionSetManagement.findByCompleted(true, PAGE)).isEmpty();
 

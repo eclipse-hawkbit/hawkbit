@@ -40,7 +40,8 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that targets with given target type are returned from repository.
      */
-    @Test    void findTargetByTargetType() {
+    @Test
+    void findTargetByTargetType() {
         final TargetType testType = testdataFactory.createTargetType("testType",
                 Collections.singletonList(standardDsType));
         final List<Target> unassigned = testdataFactory.createTargets(9, "unassigned");
@@ -190,7 +191,8 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that targets with given assigned DS are returned from repository.
      */
-    @Test    void findTargetByAssignedDistributionSet() {
+    @Test
+    void findTargetByAssignedDistributionSet() {
         final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
         testdataFactory.createTargets(10, "unassigned", "unassigned");
         List<Target> assignedtargets = testdataFactory.createTargets(10, "assigned", "assigned");
@@ -209,7 +211,8 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that targets without given assigned DS are returned from repository.
      */
-    @Test    void findTargetWithoutAssignedDistributionSet() {
+    @Test
+    void findTargetWithoutAssignedDistributionSet() {
         final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
         final TargetFilterQuery tfq = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("tfq").query("name==*"));
@@ -228,7 +231,8 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that targets with given installed DS are returned from repository.
      */
-    @Test    void findTargetByInstalledDistributionSet() {
+    @Test
+    void findTargetByInstalledDistributionSet() {
         final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
         final DistributionSet installedSet = testdataFactory.createDistributionSet("another");
         testdataFactory.createTargets(10, "unassigned", "unassigned");
@@ -251,7 +255,8 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that all compatible targets are returned from repository.
      */
-    @Test    void shouldFindAllTargetsCompatibleWithDS() {
+    @Test
+    void shouldFindAllTargetsCompatibleWithDS() {
         final DistributionSet testDs = testdataFactory.createDistributionSet();
         final TargetType targetType = testdataFactory.createTargetType("testType",
                 Collections.singletonList(testDs.getType()));
@@ -271,7 +276,8 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that incompatible targets are not returned from repository.
      */
-    @Test    void shouldNotFindTargetsIncompatibleWithDS() {
+    @Test
+    void shouldNotFindTargetsIncompatibleWithDS() {
         final DistributionSetType dsType = testdataFactory.findOrCreateDistributionSetType("test-ds-type",
                 "test-ds-type");
         final DistributionSet testDs = createDistSetWithType(dsType);

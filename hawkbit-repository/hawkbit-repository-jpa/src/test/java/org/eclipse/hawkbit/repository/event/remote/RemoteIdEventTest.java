@@ -37,21 +37,24 @@ class RemoteIdEventTest extends AbstractRemoteEventTest {
     /**
      * Verifies that the ds id is correct reloaded
      */
-    @Test    void testDistributionSetDeletedEvent() {
+    @Test
+    void testDistributionSetDeletedEvent() {
         assertAndCreateRemoteEvent(DistributionSetDeletedEvent.class);
     }
 
     /**
      * Verifies that the ds tag id is correct reloaded
      */
-    @Test    void testDistributionSetTagDeletedEvent() {
+    @Test
+    void testDistributionSetTagDeletedEvent() {
         assertAndCreateRemoteEvent(DistributionSetTagDeletedEvent.class);
     }
 
     /**
      * Verifies that the target id is correct reloaded
      */
-    @Test    void testTargetDeletedEvent() {
+    @Test
+    void testTargetDeletedEvent() {
         final TargetDeletedEvent deletedEvent = new TargetDeletedEvent(TENANT, ENTITY_ID, CONTROLLER_ID, ADDRESS,
                 ENTITY_CLASS, NODE);
         assertEntity(deletedEvent);
@@ -60,21 +63,24 @@ class RemoteIdEventTest extends AbstractRemoteEventTest {
     /**
      * Verifies that the target tag id is correct reloaded
      */
-    @Test    void testTargetTagDeletedEvent() {
+    @Test
+    void testTargetTagDeletedEvent() {
         assertAndCreateRemoteEvent(TargetTagDeletedEvent.class);
     }
 
     /**
      * Verifies that the software module id is correct reloaded
      */
-    @Test    void testSoftwareModuleDeletedEvent() {
+    @Test
+    void testSoftwareModuleDeletedEvent() {
         assertAndCreateRemoteEvent(SoftwareModuleDeletedEvent.class);
     }
 
     /**
      * Verifies that the rollout id is correct reloaded
      */
-    @Test    void testRolloutDeletedEvent() {
+    @Test
+    void testRolloutDeletedEvent() {
         assertAndCreateRemoteEvent(RolloutDeletedEvent.class);
     }
 

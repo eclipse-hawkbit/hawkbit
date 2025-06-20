@@ -87,7 +87,8 @@ class MgmtBasicAuthResourceTest {
     /**
      * Test of userinfo api with basic auth validation
      */
-    @Test    @WithUser(principal = TEST_USER, authorities = {"READ", "WRITE", "DELETE"})
+    @Test
+    @WithUser(principal = TEST_USER, authorities = {"READ", "WRITE", "DELETE"})
     void validateBasicAuthWithUserDetails() throws Exception {
         withSecurityMock().perform(get(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING))
                 .andDo(MockMvcResultPrinter.print())
@@ -103,7 +104,8 @@ class MgmtBasicAuthResourceTest {
     /**
      * Test of userinfo api with invalid basic auth fails
      */
-    @Test    void validateBasicAuthFailsWithInvalidCredentials() throws Exception {
+    @Test
+    void validateBasicAuthFailsWithInvalidCredentials() throws Exception {
         defaultMock.perform(get(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING)
                         .header(HttpHeaders.AUTHORIZATION, getBasicAuth("wrongUser", "wrongSecret")))
                 .andDo(MockMvcResultPrinter.print())

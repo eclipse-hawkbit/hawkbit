@@ -33,7 +33,8 @@ class DdiResultTest {
     /**
      * Verify the correct serialization and deserialization of the model
      */
-    @Test    void shouldSerializeAndDeserializeObject() throws IOException {
+    @Test
+    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final DdiProgress ddiProgress = new DdiProgress(30, 100);
         final DdiResult ddiResult = new DdiResult(NONE, ddiProgress);
@@ -50,7 +51,8 @@ class DdiResultTest {
     /**
      * Verify the correct deserialization of a model with a additional unknown property
      */
-    @Test    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    @Test
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiResult = "{\"finished\":\"none\",\"progress\":{\"cnt\":30,\"of\":100},\"unknownProperty\":\"test\"}";
 
@@ -64,7 +66,8 @@ class DdiResultTest {
     /**
      * Verify that deserialization fails for known properties with a wrong datatype
      */
-    @Test    void shouldFailForObjectWithWrongDataTypes() {
+    @Test
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiResult = "{\"finished\":[\"none\"],\"progress\":{\"cnt\":30,\"of\":100}}";
 

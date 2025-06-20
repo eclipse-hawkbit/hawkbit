@@ -49,7 +49,8 @@ class IpUtilTest {
     /**
      * Tests create uri from request
      */
-    @Test    void getRemoteAddrFromRequestIfForwardedHeaderNotPresent() {
+    @Test
+    void getRemoteAddrFromRequestIfForwardedHeaderNotPresent() {
         final URI knownRemoteClientIP = IpUtil.createHttpUri("127.0.0.1");
         when(requestMock.getRemoteAddr()).thenReturn(knownRemoteClientIP.getHost());
 
@@ -65,7 +66,8 @@ class IpUtilTest {
     /**
      * Tests create uri from request with masked IP when IP tracking is disabled
      */
-    @Test    void maskRemoteAddrIfDisabled() {
+    @Test
+    void maskRemoteAddrIfDisabled() {
         final URI knownRemoteClientIP = IpUtil.createHttpUri("***");
         when(securityPropertyMock.getClients()).thenReturn(clientMock);
         when(clientMock.getRemoteIpHeader()).thenReturn(KNOWN_REQUEST_HEADER);
@@ -82,7 +84,8 @@ class IpUtilTest {
     /**
      * Tests create uri from x forward header
      */
-    @Test    void getRemoteAddrFromXForwardedForHeader() {
+    @Test
+    void getRemoteAddrFromXForwardedForHeader() {
         final URI knownRemoteClientIP = IpUtil.createHttpUri("10.99.99.1");
         when(requestMock.getHeader(X_FORWARDED_FOR)).thenReturn(knownRemoteClientIP.getHost());
 
@@ -97,7 +100,8 @@ class IpUtilTest {
     /**
      * Tests client uri from request
      */
-    @Test    void testCreateClientHttpUri() {
+    @Test
+    void testCreateClientHttpUri() {
         checkHostInfoResolution("0:0:0:0:0:0:0:1", "[0:0:0:0:0:0:0:1]", true);
         checkHostInfoResolution("127.0.0.1", "127.0.0.1", true);
         checkHostInfoResolution("127.0.0.1:93493", "127.0.0.1", true);
@@ -111,7 +115,8 @@ class IpUtilTest {
     /**
      * Tests client uri from request
      */
-    @Test    void testResolveClientIpFromHeader() {
+    @Test
+    void testResolveClientIpFromHeader() {
         checkHostInfoResolution("0:0:0:0:0:0:0:1", "[0:0:0:0:0:0:0:1]", false);
         checkHostInfoResolution("127.0.0.1", "127.0.0.1", false);
         checkHostInfoResolution("127.0.0.1:93493", "127.0.0.1", false);
@@ -122,7 +127,8 @@ class IpUtilTest {
     /**
      * Tests create http uri ipv4 and ipv6
      */
-    @Test    void testCreateHttpUri() {
+    @Test
+    void testCreateHttpUri() {
         final String ipv4 = "10.99.99.1";
         URI httpUri = IpUtil.createHttpUri(ipv4);
         assertHttpUri(ipv4, httpUri);
@@ -139,7 +145,8 @@ class IpUtilTest {
     /**
      * Tests create amqp uri ipv4 and ipv6
      */
-    @Test    void testCreateAmqpUri() {
+    @Test
+    void testCreateAmqpUri() {
         final String ipv4 = "10.99.99.1";
         URI amqpUri = IpUtil.createAmqpUri(ipv4, "path");
         assertAmqpUri(ipv4, amqpUri);
@@ -167,7 +174,8 @@ class IpUtilTest {
     /**
      * Tests create invalid uri
      */
-    @Test    void testCreateInvalidUri() {
+    @Test
+    void testCreateInvalidUri() {
 
         final String host = "10.99.99.1";
         final URI testUri = IpUtil.createUri("test", host);

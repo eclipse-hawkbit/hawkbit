@@ -22,7 +22,8 @@ class Base62UtilTest {
     /**
      * Convert Base10 numbers to Base62 ASCII strings.
      */
-    @Test    void fromBase10() {
+    @Test
+    void fromBase10() {
         assertThat(Base62Util.fromBase10(0L)).isEqualTo("0");
         assertThat(Base62Util.fromBase10(11L)).isEqualTo("B");
         assertThat(Base62Util.fromBase10(36L)).isEqualTo("a");
@@ -32,7 +33,8 @@ class Base62UtilTest {
     /**
      * Convert Base62 ASCII strings to Base10 numbers.
      */
-    @Test    void toBase10() {
+    @Test
+    void toBase10() {
         assertThat(Base62Util.toBase10("0")).isZero();
         assertThat(Base62Util.toBase10("B")).isEqualTo(11);
         assertThat(Base62Util.toBase10("a")).isEqualTo(36L);

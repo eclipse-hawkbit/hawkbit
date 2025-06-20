@@ -62,7 +62,8 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that a running action is auto canceled by a AutoAssignment which assigns another distribution-set.
      */
-    @Test    void autoAssignDistributionSetAndAutoCloseOldActions() {
+    @Test
+    void autoAssignDistributionSetAndAutoCloseOldActions() {
 
         tenantConfigurationManagement
                 .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
@@ -107,7 +108,8 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     /**
      * Test auto assignment of a DS to filtered targets
      */
-    @Test    void checkAutoAssign() {
+    @Test
+    void checkAutoAssign() {
         // will be auto assigned
         final DistributionSet setA = testdataFactory.createDistributionSet("dsA");
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
@@ -160,7 +162,8 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     /**
      * Test auto assignment of a DS for a specific device
      */
-    @Test    void checkAutoAssignmentForDevice() {
+    @Test
+    void checkAutoAssignmentForDevice() {
 
         final DistributionSet toAssignDs = testdataFactory.createDistributionSet();
 
@@ -244,7 +247,8 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     /**
      * Test auto assignment of an incomplete DS to filtered targets, that causes failures
      */
-    @Test    void checkAutoAssignWithFailures() {
+    @Test
+    void checkAutoAssignWithFailures() {
 
         // incomplete distribution set that will be assigned
         final DistributionSet setF = distributionSetManagement.create(entityFactory.distributionSet().create()
@@ -294,7 +298,8 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     /**
      * Test auto assignment of a distribution set with FORCED, SOFT and DOWNLOAD_ONLY action types
      */
-    @Test    void checkAutoAssignWithDifferentActionTypes() {
+    @Test
+    void checkAutoAssignWithDifferentActionTypes() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final String targetDsAIdPref = "A";
         final String targetDsBIdPref = "B";
@@ -324,7 +329,8 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     /**
      * An auto assignment target filter with weight creates actions with weights
      */
-    @Test    void actionsWithWeightAreCreated() {
+    @Test
+    void actionsWithWeightAreCreated() {
         final int amountOfTargets = 5;
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final int weight = 32;
@@ -344,7 +350,8 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     /**
      * An auto assignment target filter without weight still works after multi assignment is enabled
      */
-    @Test    void filterWithoutWeightWorksInMultiAssignmentMode() {
+    @Test
+    void filterWithoutWeightWorksInMultiAssignmentMode() {
         final int amountOfTargets = 5;
         final DistributionSet ds = testdataFactory.createDistributionSet();
         targetFilterQueryManagement.create(
@@ -363,7 +370,8 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies an auto assignment only creates actions for compatible targets
      */
-    @Test    void checkAutoAssignmentWithIncompatibleTargets() {
+    @Test
+    void checkAutoAssignmentWithIncompatibleTargets() {
         final int TARGET_COUNT = 5;
 
         final DistributionSet testDs = testdataFactory.createDistributionSet();

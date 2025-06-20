@@ -40,7 +40,8 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that running actions are not cleaned up.
      */
-    @Test    void runningActionsAreNotCleanedUp() {
+    @Test
+    void runningActionsAreNotCleanedUp() {
         // cleanup config for this test case
         setupCleanupConfiguration(true, 0, Action.Status.CANCELED, Action.Status.ERROR);
 
@@ -64,7 +65,8 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that nothing is cleaned up if the cleanup is disabled.
      */
-    @Test    void cleanupDisabled() {
+    @Test
+    void cleanupDisabled() {
         // cleanup config for this test case
         setupCleanupConfiguration(false, 0, Action.Status.CANCELED);
 
@@ -90,7 +92,8 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that canceled and failed actions are cleaned up.
      */
-    @Test    void canceledAndFailedActionsAreCleanedUp() {
+    @Test
+    void canceledAndFailedActionsAreCleanedUp() {
         // cleanup config for this test case
         setupCleanupConfiguration(true, 0, Action.Status.CANCELED, Action.Status.ERROR);
 
@@ -122,7 +125,8 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that canceled actions are cleaned up.
      */
-    @Test    void canceledActionsAreCleanedUp() {
+    @Test
+    void canceledActionsAreCleanedUp() {
         // cleanup config for this test case
         setupCleanupConfiguration(true, 0, Action.Status.CANCELED);
 
@@ -155,7 +159,8 @@ class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that canceled and failed actions are cleaned up once they expired.
      */
-    @Test    @SuppressWarnings("squid:S2925")
+    @Test
+    @SuppressWarnings("squid:S2925")
     void canceledAndFailedActionsAreCleanedUpWhenExpired() throws InterruptedException {
         // cleanup config for this test case
         setupCleanupConfiguration(true, 500, Action.Status.CANCELED, Action.Status.ERROR);

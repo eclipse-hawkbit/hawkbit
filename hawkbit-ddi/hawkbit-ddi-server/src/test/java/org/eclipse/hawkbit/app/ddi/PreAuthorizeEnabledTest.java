@@ -28,7 +28,8 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
     /**
      * Tests whether request fail if a role is forbidden for the user
      */
-    @Test    @WithUser(authorities = { SpPermission.READ_TARGET }, autoCreateTenant = false)
+    @Test
+    @WithUser(authorities = { SpPermission.READ_TARGET }, autoCreateTenant = false)
     void failIfNoRole() throws Exception {
         mvc.perform(get("/DEFAULT/controller/v1/controllerId"))
                 .andExpect(result -> assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value()));
@@ -37,7 +38,8 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
     /**
      * Tests whether request succeed if a role is granted for the user
      */
-    @Test    @WithUser(authorities = { SpPermission.SpringEvalExpressions.CONTROLLER_ROLE }, autoCreateTenant = false)
+    @Test
+    @WithUser(authorities = { SpPermission.SpringEvalExpressions.CONTROLLER_ROLE }, autoCreateTenant = false)
     void successIfHasRole() throws Exception {
         mvc.perform(get("/DEFAULT/controller/v1/controllerId"))
                 .andExpect(result -> assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value()));

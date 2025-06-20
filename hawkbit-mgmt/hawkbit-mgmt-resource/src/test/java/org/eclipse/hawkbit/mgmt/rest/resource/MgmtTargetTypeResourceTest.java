@@ -503,7 +503,8 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Ensures that the server is behaving as expected on invalid requests (wrong media type, wrong ID etc.).
      */
-    @Test    void invalidRequestsOnTargetTypesResource() throws Exception {
+    @Test
+    void invalidRequestsOnTargetTypesResource() throws Exception {
         String typeName = "TestTypeInvalidReq";
         final TargetType testType = createTestTargetTypeInDB(typeName, Collections.singletonList(standardDsType));
 
@@ -604,7 +605,8 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Search request of target types.
      */
-    @Test    void searchTargetTypeRsql() throws Exception {
+    @Test
+    void searchTargetTypeRsql() throws Exception {
         targetTypeManagement.create(entityFactory.targetType().create().name("TestName123"));
         targetTypeManagement.create(entityFactory.targetType().create().name("TestName1234"));
 

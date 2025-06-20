@@ -37,7 +37,8 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
     /**
      * Verifies read access rules for target types
      */
-    @Test    void verifyTargetTypeReadOperations() {
+    @Test
+    void verifyTargetTypeReadOperations() {
         permitAllOperations(AccessController.Operation.CREATE);
         final TargetType permittedTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type1"));
         final TargetType hiddenTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type2"));
@@ -99,7 +100,8 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
     /**
      * Verifies delete access rules for target types
      */
-    @Test    void verifyTargetTypeDeleteOperations() {
+    @Test
+    void verifyTargetTypeDeleteOperations() {
         permitAllOperations(AccessController.Operation.CREATE);
         final TargetType manageableTargetType = targetTypeManagement.create(entityFactory.targetType().create().name("type1"));
 
@@ -123,7 +125,8 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
     /**
      * Verifies update operation for target types
      */
-    @Test    void verifyTargetTypeUpdateOperations() {
+    @Test
+    void verifyTargetTypeUpdateOperations() {
         permitAllOperations(AccessController.Operation.CREATE);
         final TargetType manageableTargetType = targetTypeManagement
                 .create(entityFactory.targetType().create().name("type1"));
@@ -151,7 +154,8 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
     /**
      * Verifies create operation blocked by controller
      */
-    @Test    void verifyTargetTypeCreationBlockedByAccessController() {
+    @Test
+    void verifyTargetTypeCreationBlockedByAccessController() {
         defineAccess(AccessController.Operation.CREATE); // allows for none
         // verify targetTypeManagement#create for any type
         final TargetTypeCreate targetTypeCreate = entityFactory.targetType().create().name("type1");

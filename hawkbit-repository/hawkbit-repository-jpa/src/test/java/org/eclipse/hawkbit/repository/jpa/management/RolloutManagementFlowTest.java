@@ -47,7 +47,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies a simple rollout flow
      */
-    @Test    void rolloutFlow() {
+    @Test
+    void rolloutFlow() {
         final String rolloutName = "rollout-std";
         final int amountGroups = 5; // static only
         final String targetPrefix = "controller-rollout-std-";
@@ -88,7 +89,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies a simple dynamic rollout flow
      */
-    @Test    void dynamicRolloutFlow() {
+    @Test
+    void dynamicRolloutFlow() {
         final String rolloutName = "dynamic-rollout-std";
         final int amountGroups = 2; // static only
         final String targetPrefix = "controller-dynamic-rollout-std-";
@@ -203,7 +205,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies a simple dynamic rollout flow with a dynamic group template
      */
-    @Test    void dynamicRolloutTemplateFlow() {
+    @Test
+    void dynamicRolloutTemplateFlow() {
         final String rolloutName = "dynamic-template-rollout-std";
         final int amountGroups = 3; // static only
         final String targetPrefix = "controller-template-dynamic-rollout-std-";
@@ -302,7 +305,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies a simple pure (no static groups) dynamic rollout flow with a dynamic group template
      */
-    @Test    void dynamicRolloutPureFlow() {
+    @Test
+    void dynamicRolloutPureFlow() {
         final String rolloutName = "pure-dynamic-rollout-std";
         final String targetPrefix = "controller-pure-dynamic-rollout-std-";
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsFor" + rolloutName);
@@ -384,7 +388,8 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies a simple rollout flow
      */
-    @Test    void rollout0ThresholdFlow() {
+    @Test
+    void rollout0ThresholdFlow() {
         final String rolloutName = "rollout-std-0threshold";
         final int amountGroups = 5; // static only
         final String targetPrefix = "controller-rollout-std-0threshold-";

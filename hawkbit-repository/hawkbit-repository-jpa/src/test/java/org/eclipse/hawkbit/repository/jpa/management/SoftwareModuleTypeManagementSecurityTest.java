@@ -45,14 +45,16 @@ class SoftwareModuleTypeManagementSecurityTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getByKeyPermissionsCheck() {
+    @Test
+    void getByKeyPermissionsCheck() {
         assertPermissions(() -> softwareModuleTypeManagement.findByKey("key"), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getByNamePermissionsCheck() {
+    @Test
+    void getByNamePermissionsCheck() {
         assertPermissions(() -> softwareModuleTypeManagement.findByName("name"), List.of(SpPermission.READ_REPOSITORY));
     }
 

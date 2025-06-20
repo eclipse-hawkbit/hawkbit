@@ -56,7 +56,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     /**
      * The response of a POST request shall contain charset=utf-8
      */
-    @Test    public void postDistributionSet_ContentTypeJsonUtf8_woAccept() throws Exception {
+    @Test
+     void postDistributionSet_ContentTypeJsonUtf8_woAccept() throws Exception {
         final MvcResult result = mvc.perform(
                         post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(
                                         Collections.singletonList(ds)))
@@ -72,7 +73,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     /**
      * The response of a POST request shall contain charset=utf-8
      */
-    @Test    public void postDistributionSet_ContentTypeJsonUtf8_wAcceptJson() throws Exception {
+    @Test
+     void postDistributionSet_ContentTypeJsonUtf8_wAcceptJson() throws Exception {
         final MvcResult result = mvc.perform(
                         post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(
                                         Collections.singletonList(ds)))
@@ -88,7 +90,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     /**
      * The response of a POST request shall contain charset=utf-8
      */
-    @Test    public void postDistributionSet_ContentTypeJsonUtf8_wAcceptJsonUtf8() throws Exception {
+    @Test
+     void postDistributionSet_ContentTypeJsonUtf8_wAcceptJsonUtf8() throws Exception {
         final MvcResult result = mvc.perform(
                         post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(
                                         Collections.singletonList(ds)))
@@ -104,7 +107,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     /**
      * The response of a POST request shall contain charset=utf-8
      */
-    @Test    public void postDistributionSet_ContentTypeJsonUtf8_wAcceptHalJson() throws Exception {
+    @Test
+     void postDistributionSet_ContentTypeJsonUtf8_wAcceptHalJson() throws Exception {
         final MvcResult result = mvc.perform(
                         post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(
                                         Collections.singletonList(ds)))
@@ -120,7 +124,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     /**
      * The response of a POST request shall contain charset=utf-8
      */
-    @Test    public void postDistributionSet_ContentTypeJson_woAccept() throws Exception {
+    @Test
+     void postDistributionSet_ContentTypeJson_woAccept() throws Exception {
         final MvcResult result = mvc.perform(
                         post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(
                                         Collections.singletonList(ds)))
@@ -136,7 +141,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     /**
      * The response of a POST request shall contain charset=utf-8
      */
-    @Test    public void postDistributionSet_ContentTypeJson_wAcceptJson() throws Exception {
+    @Test
+     void postDistributionSet_ContentTypeJson_wAcceptJson() throws Exception {
         final MvcResult result = mvc.perform(
                         post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).content(JsonBuilder.distributionSets(
                                         Collections.singletonList(ds)))
@@ -152,7 +158,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     /**
      * The response of a POST request shall contain charset=utf-8
      */
-    @Test    public void postDistributionSet_ContentTypeJson_wAcceptJsonUtf8() throws Exception {
+    @Test
+     void postDistributionSet_ContentTypeJson_wAcceptJsonUtf8() throws Exception {
         final MvcResult result = mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING)
                         .content(JsonBuilder.distributionSets(Collections.singletonList(ds))).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON_UTF8))
@@ -167,7 +174,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     /**
      * The response of a POST request shall contain charset=utf-8
      */
-    @Test    public void postDistributionSet_ContentTypeJson_wAcceptHalJson() throws Exception {
+    @Test
+     void postDistributionSet_ContentTypeJson_wAcceptHalJson() throws Exception {
         final MvcResult result = mvc.perform(post(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING)
                         .content(JsonBuilder.distributionSets(Collections.singletonList(ds))).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaTypes.HAL_JSON))
@@ -182,7 +190,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     /**
      * The response of a GET request shall contain charset=utf-8
      */
-    @Test    public void getDistributionSet_woAccept() throws Exception {
+    @Test
+     void getDistributionSet_woAccept() throws Exception {
         final MvcResult result = mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -194,7 +203,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     /**
      * The response of a GET request shall contain charset=utf-8
      */
-    @Test    public void getDistributionSet_wAcceptJson() throws Exception {
+    @Test
+     void getDistributionSet_wAcceptJson() throws Exception {
         final MvcResult result = mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -206,7 +216,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     /**
      * The response of a GET request shall contain charset=utf-8
      */
-    @Test    public void getDistributionSet_wAcceptJsonUtf8() throws Exception {
+    @Test
+     void getDistributionSet_wAcceptJsonUtf8() throws Exception {
         final MvcResult result = mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).accept(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -218,7 +229,8 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     /**
      * The response of a GET request shall contain charset=utf-8
      */
-    @Test    public void getDistributionSet_wAcceptHalJson() throws Exception {
+    @Test
+     void getDistributionSet_wAcceptHalJson() throws Exception {
         final MvcResult result = mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING).accept(MediaTypes.HAL_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())

@@ -23,14 +23,16 @@ class SoftwareModuleEventTest extends AbstractRemoteEntityEventTest<SoftwareModu
     /**
      * Verifies that the software module entity reloading by remote created event works
      */
-    @Test    void testTargetCreatedEvent() {
+    @Test
+    void testTargetCreatedEvent() {
         assertAndCreateRemoteEvent(SoftwareModuleCreatedEvent.class);
     }
 
     /**
      * Verifies that the software module entity reloading by remote updated event works
      */
-    @Test    void testTargetUpdatedEvent() {
+    @Test
+    void testTargetUpdatedEvent() {
         assertAndCreateRemoteEvent(SoftwareModuleUpdatedEvent.class);
     }
 

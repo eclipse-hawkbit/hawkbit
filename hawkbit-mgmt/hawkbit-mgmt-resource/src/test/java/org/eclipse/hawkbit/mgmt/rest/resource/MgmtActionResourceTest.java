@@ -64,21 +64,24 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Handles the GET request of retrieving a specific action.
      */
-    @Test    public void getAction() throws Exception {
+    @Test
+     void getAction() throws Exception {
         getAction(false);
     }
 
     /**
      * Handles the GET request of retrieving a specific action with external reference.
      */
-    @Test    public void getActionExtRef() throws Exception {
+    @Test
+     void getActionExtRef() throws Exception {
         getAction(true);
     }
 
     /**
      * Verifies that actions can be filtered based on action status.
      */
-    @Test    void filterActionsByStatus() throws Exception {
+    @Test
+    void filterActionsByStatus() throws Exception {
 
         // prepare test
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
@@ -116,7 +119,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Verifies that actions can be filtered based on the detailed action status.
      */
-    @Test    void filterActionsByDetailStatus() throws Exception {
+    @Test
+    void filterActionsByDetailStatus() throws Exception {
         // prepare test
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         assignDistributionSet(dsA, Collections.singletonList(testdataFactory.createTarget("knownTargetId")));
@@ -154,7 +158,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Verifies that actions can be filtered based on extRef.
      */
-    @Test    void filterActionsByExternalRef() throws Exception {
+    @Test
+    void filterActionsByExternalRef() throws Exception {
         // prepare test
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
@@ -198,7 +203,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Verifies that actions can be filtered based on the action status code that was reported last.
      */
-    @Test    void filterActionsByLastStatusCode() throws Exception {
+    @Test
+    void filterActionsByLastStatusCode() throws Exception {
         // assign a distribution set to three targets
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
         final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(dsA,
@@ -234,7 +240,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Verifies that actions can be filtered based on distribution set fields.
      */
-    @Test    void filterActionsByDistributionSet() throws Exception {
+    @Test
+    void filterActionsByDistributionSet() throws Exception {
         // prepare test
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         assignDistributionSet(ds, Collections.singletonList(testdataFactory.createTarget("knownTargetId")));
@@ -280,7 +287,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Verifies that actions can be filtered based on rollout fields.
      */
-    @Test    void filterActionsByRollout() throws Exception {
+    @Test
+    void filterActionsByRollout() throws Exception {
         // prepare test
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final Target target0 = testdataFactory.createTarget("t0");
@@ -322,7 +330,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Verifies that actions can be filtered based on target fields.
      */
-    @Test    void filterActionsByTargetProperties() throws Exception {
+    @Test
+    void filterActionsByTargetProperties() throws Exception {
         // prepare test
         final Target target = testdataFactory.createTarget("knownTargetId", "knownTargetName", "http://0.0.0.0");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -337,21 +346,24 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Verifies that all available actions are returned if the complete collection is requested.
      */
-    @Test    void getActions() throws Exception {
+    @Test
+    void getActions() throws Exception {
         getActions(false);
     }
 
     /**
      * Verifies that all available actions (whit ext refs) are returned if the complete collection is requested.
      */
-    @Test    void getActionsExtRef() throws Exception {
+    @Test
+    void getActionsExtRef() throws Exception {
         getActions(true);
     }
 
     /**
      * Verifies that a full representation of all actions is returned if the collection is requested for representation mode 'full'.
      */
-    @Test    void getActionsFullRepresentation() throws Exception {
+    @Test
+    void getActionsFullRepresentation() throws Exception {
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
 
@@ -394,7 +406,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Verifies that the get request for actions returns an empty collection if no assignments have been done yet.
      */
-    @Test    void getActionsWithEmptyResult() throws Exception {
+    @Test
+    void getActionsWithEmptyResult() throws Exception {
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -406,7 +419,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Verifies paging is respected as expected.
      */
-    @Test    void getMultipleActionsWithPagingLimitRequestParameter() throws Exception {
+    @Test
+    void getMultipleActionsWithPagingLimitRequestParameter() throws Exception {
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
 
@@ -458,7 +472,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Verifies that the actions resource is read-only.
      */
-    @Test    void invalidRequestsOnActionResource() throws Exception {
+    @Test
+    void invalidRequestsOnActionResource() throws Exception {
         final String knownTargetId = "targetId";
 
         generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
@@ -478,7 +493,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Verifies that the correct action is returned
      */
-    @Test    void shouldRetrieveCorrectActionById() throws Exception {
+    @Test
+    void shouldRetrieveCorrectActionById() throws Exception {
         final String knownTargetId = "targetId";
 
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
@@ -493,7 +509,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     /**
      * Verifies that NOT_FOUND is returned when there is no such action.
      */
-    @Test    void requestActionThatDoesNotExistsLeadsToNotFound() throws Exception {
+    @Test
+    void requestActionThatDoesNotExistsLeadsToNotFound() throws Exception {
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/" + 101))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
