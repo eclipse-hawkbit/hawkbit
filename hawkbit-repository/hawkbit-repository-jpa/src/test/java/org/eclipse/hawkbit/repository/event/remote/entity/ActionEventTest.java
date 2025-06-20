@@ -30,14 +30,16 @@ class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
     /**
      * Verifies that the action entity reloading by remote created works
      */
-    @Test    void testActionCreatedEvent() {
+    @Test
+    void testActionCreatedEvent() {
         assertAndCreateRemoteEvent(ActionCreatedEvent.class);
     }
 
     /**
      * Verifies that the action entity reloading by remote updated works
      */
-    @Test    void testActionUpdatedEvent() {
+    @Test
+    void testActionUpdatedEvent() {
         assertAndCreateRemoteEvent(ActionUpdatedEvent.class);
     }
 

@@ -24,14 +24,16 @@ class ConfirmationManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ConfirmationManagement#findActiveActionsWaitingConfirmation() method
      */
-    @Test    void findActiveActionsWaitingConfirmationPermissionsCheck() {
+    @Test
+    void findActiveActionsWaitingConfirmationPermissionsCheck() {
         assertPermissions(() -> confirmationManagement.findActiveActionsWaitingConfirmation("controllerId"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ConfirmationManagement#activateAutoConfirmation() method
      */
-    @Test    void activateAutoConfirmationPermissionsCheck() {
+    @Test
+    void activateAutoConfirmationPermissionsCheck() {
         assertPermissions(() -> confirmationManagement.activateAutoConfirmation("controllerId", "initiator", "remark"),
                 List.of(SpPermission.READ_REPOSITORY, SpPermission.UPDATE_TARGET));
     }
@@ -39,7 +41,8 @@ class ConfirmationManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ConfirmationManagement#getStatus() method
      */
-    @Test    void getStatusPermissionsCheck() {
+    @Test
+    void getStatusPermissionsCheck() {
         assertPermissions(() -> confirmationManagement.getStatus("controllerId"), List.of(SpPermission.READ_TARGET),
                 List.of(SpPermission.CREATE_TARGET));
         assertPermissions(() -> confirmationManagement.getStatus("controllerId"), List.of(SpPermission.SpringEvalExpressions.CONTROLLER_ROLE), List.of(SpPermission.CREATE_TARGET));
@@ -48,7 +51,8 @@ class ConfirmationManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ConfirmationManagement#confirmAction() method
      */
-    @Test    void confirmActionPermissionsCheck() {
+    @Test
+    void confirmActionPermissionsCheck() {
         assertPermissions(() -> confirmationManagement.confirmAction(1L, null, null),
                 List.of(SpPermission.READ_REPOSITORY, SpPermission.UPDATE_TARGET));
     }
@@ -56,7 +60,8 @@ class ConfirmationManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ConfirmationManagement#denyAction() method
      */
-    @Test    void denyActionPermissionsCheck() {
+    @Test
+    void denyActionPermissionsCheck() {
         assertPermissions(() -> confirmationManagement.denyAction(1L, null, null),
                 List.of(SpPermission.READ_REPOSITORY, SpPermission.UPDATE_TARGET));
     }
@@ -64,7 +69,8 @@ class ConfirmationManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ConfirmationManagement#deactivateAutoConfirmation() method
      */
-    @Test    void deactivateAutoConfirmationPermissionsCheck() {
+    @Test
+    void deactivateAutoConfirmationPermissionsCheck() {
         assertPermissions(() -> {
             confirmationManagement.deactivateAutoConfirmation("controllerId");
             return null;

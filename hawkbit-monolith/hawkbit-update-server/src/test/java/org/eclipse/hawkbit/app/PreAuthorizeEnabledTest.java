@@ -30,7 +30,8 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
     /**
      * Tests whether request fail if a role is forbidden for the user
      */
-    @Test    @WithUser(authorities = { SpPermission.READ_TARGET }, autoCreateTenant = false)
+    @Test
+    @WithUser(authorities = { SpPermission.READ_TARGET }, autoCreateTenant = false)
     void failIfNoRole() throws Exception {
         mvc.perform(get("/rest/v1/distributionsets"))
                 .andExpect(result -> assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value()));
@@ -39,7 +40,8 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
     /**
      * Tests whether request succeed if a role is granted for the user
      */
-    @Test    @WithUser(authorities = { SpPermission.READ_REPOSITORY }, autoCreateTenant = false)
+    @Test
+    @WithUser(authorities = { SpPermission.READ_REPOSITORY }, autoCreateTenant = false)
     void successIfHasRole() throws Exception {
         mvc.perform(get("/rest/v1/distributionsets"))
                 .andExpect(result -> assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value()));
@@ -48,7 +50,8 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
     /**
      * Tests whether request succeed if a role is granted for the user
      */
-    @Test    @WithUser(authorities = { SpRole.TENANT_ADMIN }, autoCreateTenant = false)
+    @Test
+    @WithUser(authorities = { SpRole.TENANT_ADMIN }, autoCreateTenant = false)
     void successIfHasTenantAdminRole() throws Exception {
         mvc.perform(get("/rest/v1/distributionsets"))
                 .andExpect(result -> assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value()));
@@ -57,7 +60,8 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
     /**
      * Tests whether read tenant config request fail if a tenant config (or read read) is not granted for the user
      */
-    @Test    @WithUser(authorities = { SpPermission.READ_TARGET }, autoCreateTenant = false)
+    @Test
+    @WithUser(authorities = { SpPermission.READ_TARGET }, autoCreateTenant = false)
     void onlyDSIfNoTenantConfig() throws Exception {
         mvc.perform(get("/rest/v1/system/configs"))
                 .andExpect(result -> {
@@ -71,7 +75,8 @@ class PreAuthorizeEnabledTest extends AbstractSecurityTest {
     /**
      * Tests whether read tenant config request succeed if a tenant config (not read explicitly) is granted for the user
      */
-    @Test    @WithUser(authorities = { SpPermission.TENANT_CONFIGURATION }, autoCreateTenant = false)
+    @Test
+    @WithUser(authorities = { SpPermission.TENANT_CONFIGURATION }, autoCreateTenant = false)
     void successIfHasTenantConfig() throws Exception {
         mvc.perform(get("/rest/v1/system/configs"))
                 .andExpect(result -> assertThat(result.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value()));

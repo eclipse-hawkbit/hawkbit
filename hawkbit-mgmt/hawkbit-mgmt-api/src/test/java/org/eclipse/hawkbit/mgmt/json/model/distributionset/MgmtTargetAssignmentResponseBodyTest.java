@@ -33,7 +33,8 @@ class MgmtTargetAssignmentResponseBodyTest {
     /**
      * Tests that the ActionIds are serialized correctly in MgmtTargetAssignmentResponseBody
      */
-    @Test    void testActionIdsSerialization() throws IOException {
+    @Test
+    void testActionIdsSerialization() throws IOException {
         final MgmtTargetAssignmentResponseBody responseBody = generateResponseBody();
         final ObjectMapper objectMapper = new ObjectMapper();
         final String responseBodyAsString = objectMapper.writeValueAsString(responseBody);

@@ -30,7 +30,8 @@ class URLPlaceholderTest {
     /**
      * Same object should be equal
      */
-    @Test    // Exception squid:S5785 - JUnit assertTrue/assertFalse should be simplified to the corresponding dedicated assertion
+    @Test
+    // Exception squid:S5785 - JUnit assertTrue/assertFalse should be simplified to the corresponding dedicated assertion
     // Need to test the equals method and need to bypass magic logic in utility classes
     @SuppressWarnings({ "squid:S5838" })
     void sameObjectShouldBeEqual() {
@@ -41,7 +42,8 @@ class URLPlaceholderTest {
     /**
      * Different object should not be equal
      */
-    @Test    @SuppressWarnings({ "squid:S5838" })
+    @Test
+    @SuppressWarnings({ "squid:S5838" })
     void differentObjectShouldNotBeEqual() {
         final URLPlaceholder.SoftwareData softwareData2 = new URLPlaceholder.SoftwareData(2L, "file.txt", 123L, "someHash123");
         final URLPlaceholder placeholder2 = new URLPlaceholder("SuperCorp", 123L, "Super-2", 2L, softwareData2);
@@ -57,7 +59,8 @@ class URLPlaceholderTest {
     /**
      * Different objects with same properties should be equal
      */
-    @Test    void differentObjectsWithSamePropertiesShouldBeEqual() {
+    @Test
+    void differentObjectsWithSamePropertiesShouldBeEqual() {
         final URLPlaceholder placeholderWithSameProperties = new URLPlaceholder(placeholder.getTenant(), placeholder.getTenantId(),
                 placeholder.getControllerId(), placeholder.getTargetId(), softwareData);
         assertThat(placeholder).isEqualTo(placeholderWithSameProperties);
@@ -67,7 +70,8 @@ class URLPlaceholderTest {
     /**
      * Should not equal null
      */
-    @Test    // Exception squid:S5785 - JUnit assertTrue/assertFalse should be simplified to
+    @Test
+    // Exception squid:S5785 - JUnit assertTrue/assertFalse should be simplified to
     // the corresponding dedicated assertion
     // Need to test the equals method and need to bypass magic logic in utility
     // classes
@@ -80,7 +84,8 @@ class URLPlaceholderTest {
     /**
      * HashCode should not change
      */
-    @Test    void hashCodeShouldNotChange() {
+    @Test
+    void hashCodeShouldNotChange() {
         final URLPlaceholder placeholderWithSameProperties = new URLPlaceholder(placeholder.getTenant(), placeholder.getTenantId(),
                 placeholder.getControllerId(), placeholder.getTargetId(), softwareData);
         assertThat(placeholder).hasSameHashCodeAs(placeholder).hasSameHashCodeAs(placeholderWithSameProperties);

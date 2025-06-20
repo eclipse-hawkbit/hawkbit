@@ -45,14 +45,16 @@ class DistributionSetTagManagementSecurityTest extends AbstractRepositoryManagem
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getByNameWitPermissionWorks() {
+    @Test
+    void getByNameWitPermissionWorks() {
         assertPermissions(() -> distributionSetTagManagement.findByName("tagName"), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByDistributionSetPermissionsCheck() {
+    @Test
+    void findByDistributionSetPermissionsCheck() {
         assertPermissions(() -> distributionSetTagManagement.findByDistributionSet(1L, Pageable.unpaged()),
                 List.of(SpPermission.READ_REPOSITORY));
     }
@@ -60,7 +62,8 @@ class DistributionSetTagManagementSecurityTest extends AbstractRepositoryManagem
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void deleteDistributionSetTagPermissionsCheck() {
+    @Test
+    void deleteDistributionSetTagPermissionsCheck() {
         assertPermissions(() -> {
             distributionSetTagManagement.delete("tagName");
             return null;

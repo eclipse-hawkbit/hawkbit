@@ -33,7 +33,8 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
     /**
      * Verifies that a testMultiActionAssignEvent can be properly serialized and deserialized
      */
-    @Test    void testMultiActionAssignEvent() {
+    @Test
+    void testMultiActionAssignEvent() {
         final List<String> controllerIds = List.of("id0", "id1", "id2", "id3", "id4loooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnnnnng");
         final List<Action> actions = controllerIds.stream().map(this::createAction).toList();
 
@@ -52,7 +53,8 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
     /**
      * Verifies that a MultiActionCancelEvent can be properly serialized and deserialized
      */
-    @Test    void testMultiActionCancelEvent() {
+    @Test
+    void testMultiActionCancelEvent() {
         final List<String> controllerIds = List.of("id0", "id1", "id2", "id3", "id4loooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnnnnng");
         final List<Action> actions = controllerIds.stream().map(this::createAction).toList();
 
@@ -71,7 +73,8 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
     /**
      * Verifies that a DownloadProgressEvent can be properly serialized and deserialized
      */
-    @Test    void reloadDownloadProgressByRemoteEvent() {
+    @Test
+    void reloadDownloadProgressByRemoteEvent() {
         final DownloadProgressEvent downloadProgressEvent = new DownloadProgressEvent(TENANT_DEFAULT, 1L, 3L,
                 APPLICATION_ID_DEFAULT);
 
@@ -85,7 +88,8 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
     /**
      * Verifies that a TargetAssignDistributionSetEvent can be properly serialized and deserialized
      */
-    @Test    void testTargetAssignDistributionSetEvent() {
+    @Test
+    void testTargetAssignDistributionSetEvent() {
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
@@ -113,7 +117,8 @@ class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
     /**
      * Verifies that a TargetAssignDistributionSetEvent can be properly serialized and deserialized
      */
-    @Test    void testCancelTargetAssignmentEvent() {
+    @Test
+    void testCancelTargetAssignmentEvent() {
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 

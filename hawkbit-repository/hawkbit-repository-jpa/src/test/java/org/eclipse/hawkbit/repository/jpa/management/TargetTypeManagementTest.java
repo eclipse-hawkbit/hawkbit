@@ -65,7 +65,8 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verify that a target type with invalid properties cannot be created or updated
      */
-    @Test    void createAndUpdateTargetTypeWithInvalidFields() {
+    @Test
+    void createAndUpdateTargetTypeWithInvalidFields() {
         final TargetType targetType = targetTypeManagement
                 .create(entityFactory.targetType().create()
                         .name("targettype1").description("targettypedes1")
@@ -103,7 +104,8 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the successful assignment of compatible distribution set types to a target type
      */
-    @Test    void assignCompatibleDistributionSetTypesToTargetType() {
+    @Test
+    void assignCompatibleDistributionSetTypesToTargetType() {
         final TargetType targetType = targetTypeManagement
                 .create(entityFactory.targetType().create()
                         .name("targettype1").description("targettypedes1")
@@ -119,7 +121,8 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the successful removal of compatible distribution set types to a target type
      */
-    @Test    void unassignCompatibleDistributionSetTypesToTargetType() {
+    @Test
+    void unassignCompatibleDistributionSetTypesToTargetType() {
         final TargetType targetType = targetTypeManagement
                 .create(entityFactory.targetType().create()
                         .name("targettype1").description("targettypedes1")
@@ -138,7 +141,8 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that all types are retrieved through repository.
      */
-    @Test    void findAllTargetTypes() {
+    @Test
+    void findAllTargetTypes() {
         testdataFactory.createTargetTypes("targettype", 10);
         assertThat(targetTypeRepository.findAll()).as("Target type size").hasSize(10);
     }
@@ -146,7 +150,8 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that a created target type is persisted in the repository as defined.
      */
-    @Test    void createTargetType() {
+    @Test
+    void createTargetType() {
         final String name = "targettype1";
         final String key = "targettype1.key";
         targetTypeManagement
@@ -177,7 +182,8 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that a deleted target type is removed from the repository as defined.
      */
-    @Test    void deleteTargetType() {
+    @Test
+    void deleteTargetType() {
         // create test data
         final TargetType targetType = targetTypeManagement
                 .create(entityFactory.targetType().create().name("targettype11").description("targettypedes11"));
@@ -191,7 +197,8 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the name update of a target type.
      */
-    @Test    void updateTargetType() {
+    @Test
+    void updateTargetType() {
         final TargetType targetType = targetTypeManagement
                 .create(entityFactory.targetType().create().name("targettype111").description("targettypedes111"));
         assertThat(findByName("targettype111").get().getDescription()).as("type found")
@@ -203,7 +210,8 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that a target type cannot be created if one exists already with that name (expects EntityAlreadyExistsException).
      */
-    @Test    void failedDuplicateTargetTypeNameException() {
+    @Test
+    void failedDuplicateTargetTypeNameException() {
         final TargetTypeCreate targetTypeCreate = entityFactory.targetType().create().name("targettype123");
         targetTypeManagement.create(targetTypeCreate);
         assertThrows(EntityAlreadyExistsException.class, () -> targetTypeManagement.create(targetTypeCreate));
@@ -212,7 +220,8 @@ class TargetTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that a target type cannot be updated to a name that already exists (expects EntityAlreadyExistsException).
      */
-    @Test    void failedDuplicateTargetTypeNameExceptionAfterUpdate() {
+    @Test
+    void failedDuplicateTargetTypeNameExceptionAfterUpdate() {
         targetTypeManagement.create(entityFactory.targetType().create().name("targettype1234"));
         TargetType targetType = targetTypeManagement.create(entityFactory.targetType().create().name("targettype12345"));
         assertThrows(EntityAlreadyExistsException.class,

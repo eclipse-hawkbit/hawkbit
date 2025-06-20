@@ -32,7 +32,8 @@ class DdiArtifactHashTest {
     /**
      * Verify the correct serialization and deserialization of the model
      */
-    @Test    void shouldSerializeAndDeserializeObject() throws IOException {
+    @Test
+    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final String sha1Hash = "11111";
         final String md5Hash = "22222";
@@ -51,7 +52,8 @@ class DdiArtifactHashTest {
     /**
      * Verify the correct deserialization of a model with a additional unknown property
      */
-    @Test    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    @Test
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiArtifact = "{\"sha1\": \"123\", \"md5\": \"456\",  \"sha256\": \"789\", \"unknownProperty\": \"test\"}";
 
@@ -65,7 +67,8 @@ class DdiArtifactHashTest {
     /**
      * Verify that deserialization fails for known properties with a wrong datatype
      */
-    @Test    void shouldFailForObjectWithWrongDataTypes() {
+    @Test
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiArtifact = "{\"sha1\": [123], \"md5\": 456, \"sha256\": \"789\"";
 

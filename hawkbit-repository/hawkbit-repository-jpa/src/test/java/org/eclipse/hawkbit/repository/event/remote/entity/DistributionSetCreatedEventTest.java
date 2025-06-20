@@ -23,7 +23,8 @@ class DistributionSetCreatedEventTest extends AbstractRemoteEntityEventTest<Dist
     /**
      * Verifies that the distribution set entity reloading by remote created event works
      */
-    @Test    void testDistributionSetCreatedEvent() {
+    @Test
+    void testDistributionSetCreatedEvent() {
         assertAndCreateRemoteEvent(DistributionSetCreatedEvent.class);
     }
 

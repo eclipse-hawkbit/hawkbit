@@ -35,7 +35,8 @@ class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
     /**
      * Verifies that repository methods are @PreAuthorize annotated
      */
-    @Test    void repositoryManagementMethodsArePreAuthorizedAnnotated() {
+    @Test
+    void repositoryManagementMethodsArePreAuthorizedAnnotated() {
         final String packageName = getClass().getPackage().getName();
         try (final ScanResult scanResult = new ClassGraph().acceptPackages(packageName).scan()) {
             final List<? extends Class<?>> matchingClasses = scanResult.getAllClasses()

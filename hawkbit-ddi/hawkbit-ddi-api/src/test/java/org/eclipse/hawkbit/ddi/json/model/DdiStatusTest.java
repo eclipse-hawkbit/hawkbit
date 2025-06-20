@@ -57,7 +57,8 @@ class DdiStatusTest {
     /**
      * Verify the correct deserialization of a model with a additional unknown property
      */
-    @Test    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    @Test
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\"," +
                 "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[],\"unknownProperty\":\"test\"}";
@@ -74,7 +75,8 @@ class DdiStatusTest {
     /**
      * Verify the correct deserialization of a model with a provided code (optional)
      */
-    @Test    void shouldDeserializeObjectWithOptionalCode() throws IOException {
+    @Test
+    void shouldDeserializeObjectWithOptionalCode() throws IOException {
         // Setup
         final String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\"," +
                 "\"progress\":{\"cnt\":30,\"of\":100}},\"code\": 12,\"details\":[]}";
@@ -91,7 +93,8 @@ class DdiStatusTest {
     /**
      * Verify that deserialization fails for known properties with a wrong datatype
      */
-    @Test    void shouldFailForObjectWithWrongDataTypes() {
+    @Test
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiStatus = "{\"execution\":[\"proceeding\"],\"result\":{\"finished\":\"none\"," +
                 "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[]}";

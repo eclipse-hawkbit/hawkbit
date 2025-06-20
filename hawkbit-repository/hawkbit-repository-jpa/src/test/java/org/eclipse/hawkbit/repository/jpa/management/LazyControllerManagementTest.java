@@ -39,7 +39,8 @@ class LazyControllerManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that lazy target poll update is executed as specified.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 2) })
     void lazyFindOrRegisterTargetIfItDoesNotExist() throws InterruptedException {

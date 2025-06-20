@@ -26,21 +26,24 @@ class TargetTagManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void countPermissionsCheck() {
+    @Test
+    void countPermissionsCheck() {
         assertPermissions(() -> targetTagManagement.count(), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void createPermissionsCheck() {
+    @Test
+    void createPermissionsCheck() {
         assertPermissions(() -> targetTagManagement.create(entityFactory.tag().create().name("name")), List.of(SpPermission.CREATE_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void createCollectionPermissionsCheck() {
+    @Test
+    void createCollectionPermissionsCheck() {
         assertPermissions(() -> targetTagManagement.create(List.of(entityFactory.tag().create().name("name"))),
                 List.of(SpPermission.CREATE_TARGET));
     }
@@ -48,7 +51,8 @@ class TargetTagManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void deletePermissionsCheck() {
+    @Test
+    void deletePermissionsCheck() {
         assertPermissions(() -> {
             targetTagManagement.delete("tag");
             return null;
@@ -58,42 +62,48 @@ class TargetTagManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findAllPermissionsCheck() {
+    @Test
+    void findAllPermissionsCheck() {
         assertPermissions(() -> targetTagManagement.findAll(PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByRsqlPermissionsCheck() {
+    @Test
+    void findByRsqlPermissionsCheck() {
         assertPermissions(() -> targetTagManagement.findByRsql("name==tag", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getByNamePermissionsCheck() {
+    @Test
+    void getByNamePermissionsCheck() {
         assertPermissions(() -> targetTagManagement.getByName("tag"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getPermissionsCheck() {
+    @Test
+    void getPermissionsCheck() {
         assertPermissions(() -> targetTagManagement.get(1L), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getCollectionPermissionsCheck() {
+    @Test
+    void getCollectionPermissionsCheck() {
         assertPermissions(() -> targetTagManagement.get(List.of(1L)), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void updatePermissionsCheck() {
+    @Test
+    void updatePermissionsCheck() {
         assertPermissions(() -> targetTagManagement.update(entityFactory.tag().update(1L)), List.of(SpPermission.UPDATE_TARGET));
     }
 }

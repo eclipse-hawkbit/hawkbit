@@ -23,14 +23,16 @@ class TargetTagEventTest extends AbstractRemoteEntityEventTest<TargetTag> {
     /**
      * Verifies that the target tag entity reloading by remote created event works
      */
-    @Test    void testTargetTagCreatedEvent() {
+    @Test
+    void testTargetTagCreatedEvent() {
         assertAndCreateRemoteEvent(TargetTagCreatedEvent.class);
     }
 
     /**
      * Verifies that the target tag entity reloading by remote updated event works
      */
-    @Test    void testTargetTagUpdateEventt() {
+    @Test
+    void testTargetTagUpdateEventt() {
         assertAndCreateRemoteEvent(TargetTagUpdatedEvent.class);
     }
 

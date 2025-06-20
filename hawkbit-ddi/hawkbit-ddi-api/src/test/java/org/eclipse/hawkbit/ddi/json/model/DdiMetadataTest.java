@@ -32,7 +32,8 @@ class DdiMetadataTest {
     /**
      * Verify the correct serialization and deserialization of the model
      */
-    @Test    void shouldSerializeAndDeserializeObject() throws IOException {
+    @Test
+    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final String key = "testKey";
         final String value = "testValue";
@@ -49,7 +50,8 @@ class DdiMetadataTest {
     /**
      * Verify the correct deserialization of a model with a additional unknown property
      */
-    @Test    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    @Test
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiMetadata = "{\"key\":\"testKey\",\"value\":\"testValue\",\"unknownProperty\":\"test\"}";
 
@@ -62,7 +64,8 @@ class DdiMetadataTest {
     /**
      * Verify that deserialization fails for known properties with a wrong datatype
      */
-    @Test    void shouldFailForObjectWithWrongDataTypes() {
+    @Test
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiMetadata = "{\"key\":[\"testKey\"],\"value\":\"testValue\"}";
 

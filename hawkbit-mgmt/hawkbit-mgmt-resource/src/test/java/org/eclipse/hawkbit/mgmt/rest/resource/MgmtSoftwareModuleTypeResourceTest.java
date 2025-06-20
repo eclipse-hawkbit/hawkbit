@@ -274,7 +274,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     /**
      * Ensures that module type deletion request to API on an entity that does not exist results in NOT_FOUND.
      */
-    @Test    public void deleteSoftwareModuleTypeThatDoesNotExistLeadsToNotFound() throws Exception {
+    @Test
+     void deleteSoftwareModuleTypeThatDoesNotExistLeadsToNotFound() throws Exception {
         mvc.perform(delete("/rest/v1/softwaremoduletypes/1234"))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
@@ -312,7 +313,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     /**
      * Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} PUT requests.
      */
-    @Test    public void updateSoftwareModuleTypeColourDescriptionAndNameUntouched() throws Exception {
+    @Test
+     void updateSoftwareModuleTypeColourDescriptionAndNameUntouched() throws Exception {
         final SoftwareModuleType testType = createTestType();
 
         final String body = new JSONObject().put("id", testType.getId()).put("description", "foobardesc")
@@ -333,7 +335,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     /**
      * Tests the update of the deletion flag. It is verfied that the software module type can't be marked as deleted through update operation.
      */
-    @Test    public void updateSoftwareModuleTypeDeletedFlag() throws Exception {
+    @Test
+     void updateSoftwareModuleTypeDeletedFlag() throws Exception {
         SoftwareModuleType testType = createTestType();
 
         final String body = new JSONObject().put("id", testType.getId()).put("deleted", true).toString();
@@ -354,7 +357,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     /**
      * Checks the correct behaviour of /rest/v1/softwaremoduletypes GET requests with paging.
      */
-    @Test    public void getSoftwareModuleTypesWithoutAddtionalRequestParameters() throws Exception {
+    @Test
+     void getSoftwareModuleTypesWithoutAddtionalRequestParameters() throws Exception {
         final int types = 3;
         mvc.perform(get(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING))
                 .andDo(MockMvcResultPrinter.print())
@@ -367,7 +371,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     /**
      * Checks the correct behaviour of /rest/v1/softwaremoduletypes GET requests with paging.
      */
-    @Test    public void getSoftwareModuleTypesWithPagingLimitRequestParameter() throws Exception {
+    @Test
+     void getSoftwareModuleTypesWithPagingLimitRequestParameter() throws Exception {
         final int types = 3;
         final int limitSize = 1;
         mvc.perform(get(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING)
@@ -382,7 +387,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     /**
      * Checks the correct behaviour of /rest/v1/softwaremoduletypes GET requests with paging.
      */
-    @Test    public void getSoftwareModuleTypesWithPagingLimitAndOffsetRequestParameter() throws Exception {
+    @Test
+     void getSoftwareModuleTypesWithPagingLimitAndOffsetRequestParameter() throws Exception {
         final int types = 3;
         final int offsetParam = 2;
         final int expectedSize = types - offsetParam;
@@ -399,7 +405,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     /**
      * Ensures that the server is behaving as expected on invalid requests (wrong media type, wrong ID etc.).
      */
-    @Test    public void invalidRequestsOnSoftwaremoduleTypesResource() throws Exception {
+    @Test
+     void invalidRequestsOnSoftwaremoduleTypesResource() throws Exception {
         final SoftwareModuleType testType = createTestType();
 
         final List<SoftwareModuleType> types = Collections.singletonList(testType);
@@ -460,7 +467,8 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
     /**
      * Search erquest of software module types.
      */
-    @Test    public void searchSoftwareModuleTypeRsql() throws Exception {
+    @Test
+     void searchSoftwareModuleTypeRsql() throws Exception {
         softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create().key("test123")
                 .name("TestName123").description("Desc123").maxAssignments(5));
         softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create().key("test1234")

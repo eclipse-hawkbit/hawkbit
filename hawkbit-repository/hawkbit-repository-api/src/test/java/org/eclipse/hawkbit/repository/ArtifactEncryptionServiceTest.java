@@ -27,7 +27,8 @@ class ArtifactEncryptionServiceTest {
     /**
      * Verify that no artifact encryption support is given
      */
-    @Test    void verifyNoArtifactEncryptionSupport() {
+    @Test
+    void verifyNoArtifactEncryptionSupport() {
         final ArtifactEncryptionService artifactEncryptionService = ArtifactEncryptionService.getInstance();
 
         assertThat(artifactEncryptionService.isEncryptionSupported()).isFalse();

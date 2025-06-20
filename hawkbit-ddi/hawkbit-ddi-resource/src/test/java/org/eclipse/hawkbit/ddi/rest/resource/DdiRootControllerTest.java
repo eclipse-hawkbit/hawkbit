@@ -85,7 +85,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensure that the root poll resource is available as CBOR
      */
-    @Test    void rootPollResourceCbor() throws Exception {
+    @Test
+    void rootPollResourceCbor() throws Exception {
         mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), 4711).accept(DdiRestConstants.MEDIA_TYPE_CBOR))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(content().contentType(DdiRestConstants.MEDIA_TYPE_CBOR))
@@ -95,7 +96,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that the API returns JSON when no Accept header is specified by the client.
      */
-    @Test    void apiReturnsJSONByDefault() throws Exception {
+    @Test
+    void apiReturnsJSONByDefault() throws Exception {
         final MvcResult result = mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), 4711))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
@@ -109,7 +111,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that target poll request does not change audit data on the entity.
      */
-    @Test    @WithUser(principal = "knownPrincipal", authorities = { SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET, SpPermission.CREATE_TARGET })
+    @Test
+    @WithUser(principal = "knownPrincipal", authorities = { SpPermission.READ_TARGET, SpPermission.UPDATE_TARGET, SpPermission.CREATE_TARGET })
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1),
@@ -142,7 +145,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that server returns a not found response in case of empty controller ID.
      */
-    @Test    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @Test
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void rootRsWithoutId() throws Exception {
         mvc.perform(get("/controller/v1/"))
                 .andDo(MockMvcResultPrinter.print())
@@ -152,7 +156,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that the system creates a new target in plug and play manner, i.e. target is authenticated but does not exist yet.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void rootRsPlugAndPlay() throws Exception {
@@ -188,7 +193,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that tenant specific polling time, which is saved in the db, is delivered to the controller.
      */
-    @Test    @WithUser(principal = "knownpricipal", allSpPermissions = false)
+    @Test
+    @WithUser(principal = "knownpricipal", allSpPermissions = false)
     @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1),
@@ -213,7 +219,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that etag check results in not modified response if provided etag by client is identical to entity in repository.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 6),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
@@ -342,7 +349,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that the source IP address of the polling target is correctly stored in repository
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void rootRsPlugAndPlayIpAddress() throws Exception {
@@ -371,7 +379,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that the source IP address of the polling target is not stored in repository if disabled
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void rootRsIpAddressNotStoredIfDisabled() throws Exception {
@@ -393,7 +402,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Controller trys to finish an update process after it has been finished by an error action status.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -425,7 +435,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Controller sends attribute update request after device successfully closed software update.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -456,7 +467,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test to verify that only a specific count of messages are returned based on the input actionHistory for getControllerDeploymentActionFeedback endpoint.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -501,7 +513,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test to verify that a zero input value of actionHistory results in no action history appended for getControllerDeploymentActionFeedback endpoint.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -546,7 +559,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test to verify that entire action history is returned if the input value for actionHistory is -1, for getControllerDeploymentActionFeedback endpoint.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -591,7 +605,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test the polling time based on different maintenance window start and end time.
      */
-    @Test    void sleepTimeResponseForDifferentMaintenanceWindowParameters() throws Exception {
+    @Test
+    void sleepTimeResponseForDifferentMaintenanceWindowParameters() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("tenantadmin", TENANT_CONFIGURATION),
@@ -642,7 +657,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test download and update values before maintenance window start time.
      */
-    @Test    void downloadAndUpdateStatusBeforeMaintenanceWindowStartTime() throws Exception {
+    @Test
+    void downloadAndUpdateStatusBeforeMaintenanceWindowStartTime() throws Exception {
         Target savedTarget = testdataFactory.createTarget("1911");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         savedTarget = getFirstAssignedTarget(assignDistributionSetWithMaintenanceWindow(ds.getId(),
@@ -665,7 +681,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test download and update values after maintenance window start time.
      */
-    @Test    void downloadAndUpdateStatusDuringMaintenanceWindow() throws Exception {
+    @Test
+    void downloadAndUpdateStatusDuringMaintenanceWindow() throws Exception {
         Target savedTarget = testdataFactory.createTarget("1911");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         savedTarget = getFirstAssignedTarget(assignDistributionSetWithMaintenanceWindow(ds.getId(),
@@ -688,7 +705,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * Assign multiple DS in multi-assignment mode. The earliest active Action is exposed to the controller.
      */
-    @Test    void earliestActionIsExposedToControllerInMultiAssignMode() throws Exception {
+    @Test
+    void earliestActionIsExposedToControllerInMultiAssignMode() throws Exception {
         enableMultiAssignments();
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds1 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
@@ -704,7 +722,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     /**
      * The system should not create a new target because of a too long controller id.
      */
-    @Test    void rootRsWithInvalidControllerId() throws Exception {
+    @Test
+    void rootRsWithInvalidControllerId() throws Exception {
         final String invalidControllerId = randomString(Target.CONTROLLER_ID_MAX_SIZE + 1);
         mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), invalidControllerId))
                 .andExpect(status().isBadRequest());

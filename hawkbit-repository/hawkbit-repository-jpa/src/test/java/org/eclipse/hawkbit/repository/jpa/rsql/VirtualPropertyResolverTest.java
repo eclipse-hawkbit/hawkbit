@@ -63,7 +63,8 @@ class VirtualPropertyResolverTest {
     /**
      * Tests VirtualPropertyResolver with a placeholder unknown to VirtualPropertyResolver.
      */
-    @Test    void handleUnknownPlaceholder() {
+    @Test
+    void handleUnknownPlaceholder() {
         final String placeholder = "${unknown}";
         final String testString = "lhs=lt=" + placeholder;
 
@@ -74,7 +75,8 @@ class VirtualPropertyResolverTest {
     /**
      * Tests escape mechanism for placeholders (syntax is $${SOME_PLACEHOLDER}).
      */
-    @Test    void handleEscapedPlaceholder() {
+    @Test
+    void handleEscapedPlaceholder() {
         final String placeholder = "${OVERDUE_TS}";
         final String escapedPlaceholder = StringSubstitutor.DEFAULT_ESCAPE + placeholder;
         final String testString = "lhs=lt=" + escapedPlaceholder;

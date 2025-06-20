@@ -51,7 +51,8 @@ class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
     /**
      * Test filter action by id
      */
-    @Test    void testFilterByParameterId() {
+    @Test
+    void testFilterByParameterId() {
         assertRSQLQuery(ActionFields.ID.name() + "==" + action.getId(), 1);
         assertRSQLQuery(ActionFields.ID.name() + "!=" + action.getId(), 10);
         assertRSQLQuery(ActionFields.ID.name() + "==" + -1, 0);
@@ -69,7 +70,8 @@ class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
     /**
      * Test action by status
      */
-    @Test    void testFilterByParameterStatus() {
+    @Test
+    void testFilterByParameterStatus() {
         assertRSQLQuery(ActionFields.STATUS.name() + "==pending", 5);
         assertRSQLQuery(ActionFields.STATUS.name() + "!=pending", 6);
         assertRSQLQuery(ActionFields.STATUS.name() + "=in=(pending)", 5);
@@ -84,7 +86,8 @@ class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
     /**
      * Test action by status
      */
-    @Test    void testFilterByParameterExtRef() {
+    @Test
+    void testFilterByParameterExtRef() {
         assertRSQLQuery(ActionFields.EXTERNALREF.name() + "==extRef", 5);
         assertRSQLQuery(ActionFields.EXTERNALREF.name() + "!=extRef", 6);
         assertRSQLQuery(ActionFields.EXTERNALREF.name() + "==extRef*", 10);

@@ -33,7 +33,8 @@ class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<RolloutGroup> 
     /**
      * Verifies that the rollout group entity reloading by remote created event works
      */
-    @Test    void testRolloutGroupCreatedEvent() {
+    @Test
+    void testRolloutGroupCreatedEvent() {
         final RolloutGroupCreatedEvent createdEvent = (RolloutGroupCreatedEvent) assertAndCreateRemoteEvent(
                 RolloutGroupCreatedEvent.class);
         assertThat(createdEvent.getRolloutId()).isNotNull();
@@ -42,7 +43,8 @@ class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<RolloutGroup> 
     /**
      * Verifies that the rollout group entity reloading by remote updated event works
      */
-    @Test    void testRolloutGroupUpdatedEvent() {
+    @Test
+    void testRolloutGroupUpdatedEvent() {
         assertAndCreateRemoteEvent(RolloutGroupUpdatedEvent.class);
     }
 

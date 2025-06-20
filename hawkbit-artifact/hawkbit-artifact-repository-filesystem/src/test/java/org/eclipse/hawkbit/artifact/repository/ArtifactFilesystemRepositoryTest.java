@@ -59,7 +59,8 @@ class ArtifactFilesystemRepositoryTest {
     /**
      * Verifies that an artifact can be successfully stored in the file-system repository
      */
-    @Test    void storeSuccessfully() throws IOException {
+    @Test
+    void storeSuccessfully() throws IOException {
         final byte[] fileContent = randomBytes();
         final AbstractDbArtifact artifact = storeRandomArtifact(fileContent);
 
@@ -71,7 +72,8 @@ class ArtifactFilesystemRepositoryTest {
     /**
      * Verifies that an artifact can be successfully stored in the file-system repository
      */
-    @Test    void getStoredArtifactBasedOnSHA1Hash() throws IOException {
+    @Test
+    void getStoredArtifactBasedOnSHA1Hash() throws IOException {
         final byte[] fileContent = randomBytes();
         final AbstractDbArtifact artifact = storeRandomArtifact(fileContent);
 
@@ -81,7 +83,8 @@ class ArtifactFilesystemRepositoryTest {
     /**
      * Verifies that an artifact can be deleted in the file-system repository
      */
-    @Test    void deleteStoredArtifactBySHA1Hash() throws IOException {
+    @Test
+    void deleteStoredArtifactBySHA1Hash() throws IOException {
         final AbstractDbArtifact artifact = storeRandomArtifact(randomBytes());
         artifactFilesystemRepository.deleteBySha1(TENANT, artifact.getHashes().getSha1());
 
@@ -91,7 +94,8 @@ class ArtifactFilesystemRepositoryTest {
     /**
      * Verifies that all artifacts of a tenant can be deleted in the file-system repository
      */
-    @Test    void deleteStoredArtifactOfTenant() throws IOException {
+    @Test
+    void deleteStoredArtifactOfTenant() throws IOException {
         final AbstractDbArtifact artifact = storeRandomArtifact(randomBytes());
         artifactFilesystemRepository.deleteByTenant(TENANT);
 
@@ -101,7 +105,8 @@ class ArtifactFilesystemRepositoryTest {
     /**
      * Verifies that an artifact which does not exists is deleted quietly in the file-system repository
      */
-    @Test    void deleteArtifactWhichDoesNotExistsBySHA1HashWithoutException() throws IOException {
+    @Test
+    void deleteArtifactWhichDoesNotExistsBySHA1HashWithoutException() throws IOException {
         try {
             artifactFilesystemRepository.deleteBySha1(TENANT, "sha1HashWhichDoesNotExists");
         } catch (final Exception e) {

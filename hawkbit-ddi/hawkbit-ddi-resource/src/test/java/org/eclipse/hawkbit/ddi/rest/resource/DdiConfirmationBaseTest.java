@@ -70,7 +70,8 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Forced deployment to a controller. Checks if the confirmation resource response payload for a given deployment is as expected.
      */
-    @Test    void verifyConfirmationReferencesInControllerBase(@Autowired ActionStatusRepository actionStatusRepository) throws Exception {
+    @Test
+    void verifyConfirmationReferencesInControllerBase(@Autowired ActionStatusRepository actionStatusRepository) throws Exception {
         enableConfirmationFlow();
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
@@ -135,7 +136,8 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensure that the deployment resource is available as CBOR
      */
-    @Test    void confirmationResourceCbor() throws Exception {
+    @Test
+    void confirmationResourceCbor() throws Exception {
         enableConfirmationFlow();
         final Target target = testdataFactory.createTarget();
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("");
@@ -160,7 +162,8 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensure that the confirmation endpoint is not available.
      */
-    @Test    void confirmationEndpointNotExposed() throws Exception {
+    @Test
+    void confirmationEndpointNotExposed() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("988");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
@@ -182,7 +185,8 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensure that the deploymentBase endpoint is not available for action ins WFC state.
      */
-    @Test    void deploymentEndpointNotAccessibleForActionsWFC() throws Exception {
+    @Test
+    void deploymentEndpointNotAccessibleForActionsWFC() throws Exception {
         enableConfirmationFlow();
 
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -212,7 +216,8 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensure that the confirmation endpoints are still available after deactivating the confirmation flow.
      */
-    @Test    void verifyConfirmationBaseEndpointsArePresentAfterDisablingConfirmationFlow() throws Exception {
+    @Test
+    void verifyConfirmationBaseEndpointsArePresentAfterDisablingConfirmationFlow() throws Exception {
         enableConfirmationFlow();
 
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -249,7 +254,8 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Controller sends a confirmed action state.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -285,7 +291,8 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Confirmation base provides right values if auto-confirm not active.
      */
-    @Test    void getConfirmationBaseProvidesAutoConfirmStatusNotActive() throws Exception {
+    @Test
+    void getConfirmationBaseProvidesAutoConfirmStatusNotActive() throws Exception {
         enableConfirmationFlow();
 
         final String controllerId = testdataFactory.createTarget("989").getControllerId();
@@ -362,7 +369,8 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Verify auto-confirm deactivation is handled correctly.
      */
-    @Test    void deactivateAutoConfirmation() throws Exception {
+    @Test
+    void deactivateAutoConfirmation() throws Exception {
         final String controllerId = testdataFactory.createTarget("988").getControllerId();
 
         confirmationManagement.activateAutoConfirmation(controllerId, null, null);
@@ -377,7 +385,8 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Controller sends a denied action state.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -423,7 +432,8 @@ class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test to verify that only a specific count of messages are returned based on the input actionHistory for getControllerDeploymentActionFeedback endpoint.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),

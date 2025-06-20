@@ -51,7 +51,8 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
     /**
      * Verifies read access rules for targets
      */
-    @Test    void verifyTargetReadOperations() {
+    @Test
+    void verifyTargetReadOperations() {
         permitAllOperations(AccessController.Operation.CREATE);
 
         final Target permittedTarget = targetManagement
@@ -206,7 +207,8 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
     /**
      * Verifies rules for target assignment
      */
-    @Test    void verifyTargetAssignment() {
+    @Test
+    void verifyTargetAssignment() {
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);
@@ -253,7 +255,8 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
     /**
      * Verifies rules for target assignment
      */
-    @Test    void verifyTargetAssignmentOnNonUpdatableTarget() {
+    @Test
+    void verifyTargetAssignmentOnNonUpdatableTarget() {
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);
@@ -294,7 +297,8 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
     /**
      * Verifies only manageable targets are part of the rollout
      */
-    @Test    void verifyRolloutTargetScope() {
+    @Test
+    void verifyRolloutTargetScope() {
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);
@@ -336,7 +340,8 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
     /**
      * Verifies only manageable targets are part of an auto assignment.
      */
-    @Test    void verifyAutoAssignmentTargetScope() {
+    @Test
+    void verifyAutoAssignmentTargetScope() {
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);

@@ -62,7 +62,8 @@ class PropertyBasedArtifactUrlHandlerTest {
     /**
      * Tests the generation of http download url.
      */
-    @Test    void urlGenerationWithDefaultConfiguration() {
+    @Test
+    void urlGenerationWithDefaultConfiguration() {
         properties.getProtocols().put("download-http", new UrlProtocol());
 
         final List<ArtifactUrl> ddiUrls = urlHandlerUnderTest.getUrls(placeHolder, ApiType.DDI);
@@ -77,7 +78,8 @@ class PropertyBasedArtifactUrlHandlerTest {
     /**
      * Tests the generation of custom download url with a CoAP example that supports DMF only.
      */
-    @Test    void urlGenerationWithCustomConfiguration() {
+    @Test
+    void urlGenerationWithCustomConfiguration() {
         final UrlProtocol proto = new UrlProtocol();
         proto.setIp("127.0.0.1");
         proto.setPort(5683);
@@ -97,7 +99,8 @@ class PropertyBasedArtifactUrlHandlerTest {
     /**
      * Tests the generation of custom download url using Base62 references with a CoAP example that supports DMF only.
      */
-    @Test    void urlGenerationWithCustomShortConfiguration() {
+    @Test
+    void urlGenerationWithCustomShortConfiguration() {
         final UrlProtocol proto = new UrlProtocol();
         proto.setIp("127.0.0.1");
         proto.setPort(5683);
@@ -117,7 +120,8 @@ class PropertyBasedArtifactUrlHandlerTest {
     /**
      * Verifies that the full qualified host of the statically defined hostname is replaced with the host of the request.
      */
-    @Test    void urlGenerationWithHostFromRequest() throws URISyntaxException {
+    @Test
+    void urlGenerationWithHostFromRequest() throws URISyntaxException {
         final String testHost = "ddi.host.com";
 
         final UrlProtocol proto = new UrlProtocol();
@@ -138,7 +142,8 @@ class PropertyBasedArtifactUrlHandlerTest {
     /**
      * Verifies that the protocol of the statically defined hostname is replaced with the protocol of the request.
      */
-    @Test    void urlGenerationWithProtocolFromRequest() throws URISyntaxException {
+    @Test
+    void urlGenerationWithProtocolFromRequest() throws URISyntaxException {
         final String testHost = "ddi.host.com";
 
         final UrlProtocol proto = new UrlProtocol();
@@ -154,7 +159,8 @@ class PropertyBasedArtifactUrlHandlerTest {
     /**
      * Verifies that the port of the statically defined hostname is replaced with the port of the request.
      */
-    @Test    void urlGenerationWithPortFromRequest() throws URISyntaxException {
+    @Test
+    void urlGenerationWithPortFromRequest() throws URISyntaxException {
         final UrlProtocol proto = new UrlProtocol();
         proto.setRef("{protocol}://{hostname}:{portRequest}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}");
 
@@ -176,7 +182,8 @@ class PropertyBasedArtifactUrlHandlerTest {
     /**
      * Verifies that if default protocol port in request is used then url is returned without port
      */
-    @Test    void urlGenerationWithPortFromRequestForHttps() throws URISyntaxException {
+    @Test
+    void urlGenerationWithPortFromRequestForHttps() throws URISyntaxException {
         final String protocol = "https";
         final UrlProtocol proto = new UrlProtocol();
         proto.setRef("{protocolRequest}://{hostnameRequest}:{portRequest}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}");
@@ -195,7 +202,8 @@ class PropertyBasedArtifactUrlHandlerTest {
     /**
      * Verifies that the domain of the statically defined hostname is replaced with the domain of the request.
      */
-    @Test    void urlGenerationWithDomainFromRequest() throws URISyntaxException {
+    @Test
+    void urlGenerationWithDomainFromRequest() throws URISyntaxException {
         final UrlProtocol proto = new UrlProtocol();
         proto.setHostname("host.bumlux.net");
         proto.setRef("{protocol}://{domainRequest}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}");

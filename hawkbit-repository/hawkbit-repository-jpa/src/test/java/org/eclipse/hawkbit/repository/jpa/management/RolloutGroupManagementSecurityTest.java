@@ -24,49 +24,56 @@ class RolloutGroupManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getPermissionsCheck() {
+    @Test
+    void getPermissionsCheck() {
         assertPermissions(() -> rolloutGroupManagement.get(1L), List.of(SpPermission.READ_ROLLOUT));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getWithDetailedStatusPermissionsCheck() {
+    @Test
+    void getWithDetailedStatusPermissionsCheck() {
         assertPermissions(() -> rolloutGroupManagement.getWithDetailedStatus(1L), List.of(SpPermission.READ_ROLLOUT));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void countByRolloutPermissionsCheck() {
+    @Test
+    void countByRolloutPermissionsCheck() {
         assertPermissions(() -> rolloutGroupManagement.countByRollout(1L), List.of(SpPermission.READ_ROLLOUT));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void countTargetsOfRolloutsGroupPermissionsCheck() {
+    @Test
+    void countTargetsOfRolloutsGroupPermissionsCheck() {
         assertPermissions(() -> rolloutGroupManagement.countTargetsOfRolloutsGroup(1L), List.of(SpPermission.READ_ROLLOUT));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByRolloutPermissionsCheck() {
+    @Test
+    void findByRolloutPermissionsCheck() {
         assertPermissions(() -> rolloutGroupManagement.findByRollout(1L, PAGE), List.of(SpPermission.READ_ROLLOUT));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByRolloutAndRsqlPermissionsCheck() {
+    @Test
+    void findByRolloutAndRsqlPermissionsCheck() {
         assertPermissions(() -> rolloutGroupManagement.findByRolloutAndRsql(1L, "name==*", PAGE), List.of(SpPermission.READ_ROLLOUT));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findTargetsOfRolloutGroupPermissionsCheck() {
+    @Test
+    void findTargetsOfRolloutGroupPermissionsCheck() {
         assertPermissions(() -> rolloutGroupManagement.findTargetsOfRolloutGroup(1L, PAGE),
                 List.of(SpPermission.READ_ROLLOUT, SpPermission.READ_TARGET));
     }
@@ -74,7 +81,8 @@ class RolloutGroupManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findTargetsOfRolloutGroupByRsqlPermissionsCheck() {
+    @Test
+    void findTargetsOfRolloutGroupByRsqlPermissionsCheck() {
         assertPermissions(() -> rolloutGroupManagement.findTargetsOfRolloutGroupByRsql(1L, "name==*", PAGE),
                 List.of(SpPermission.READ_ROLLOUT, SpPermission.READ_TARGET));
     }
@@ -82,7 +90,8 @@ class RolloutGroupManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByRolloutAndRsqlWithDetailedStatusPermissionsCheck() {
+    @Test
+    void findByRolloutAndRsqlWithDetailedStatusPermissionsCheck() {
         assertPermissions(() -> rolloutGroupManagement.findByRolloutAndRsqlWithDetailedStatus(1L, "name==*", PAGE),
                 List.of(SpPermission.READ_ROLLOUT));
     }
@@ -90,7 +99,8 @@ class RolloutGroupManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByRolloutWithDetailedStatusPermissionsCheck() {
+    @Test
+    void findByRolloutWithDetailedStatusPermissionsCheck() {
         assertPermissions(() -> rolloutGroupManagement.findByRolloutWithDetailedStatus(1L, PAGE), List.of(SpPermission.READ_ROLLOUT));
     }
 }

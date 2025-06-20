@@ -42,7 +42,8 @@ class AutoCleanupSchedulerTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that all cleanup handlers are executed regardless if one of them throws an error
      */
-    @Test    void executeHandlerChain() {
+    @Test
+    void executeHandlerChain() {
 
         new AutoCleanupScheduler(systemManagement, systemSecurityContext, lockRegistry, Arrays.asList(
                 new SuccessfulCleanup(), new SuccessfulCleanup(), new FailingCleanup(), new SuccessfulCleanup())).run();

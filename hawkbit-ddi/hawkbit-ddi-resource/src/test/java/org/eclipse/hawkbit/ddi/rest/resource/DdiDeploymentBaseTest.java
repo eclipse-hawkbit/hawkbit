@@ -83,7 +83,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensure that the deployment resource is available as CBOR
      */
-    @Test    void deploymentResourceCbor() throws Exception {
+    @Test
+    void deploymentResourceCbor() throws Exception {
         final Target target = testdataFactory.createTarget();
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("");
 
@@ -111,7 +112,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that artifacts are not found, when software module does not exists.
      */
-    @Test    void artifactsNotFound() throws Exception {
+    @Test
+    void artifactsNotFound() throws Exception {
         final Target target = testdataFactory.createTarget();
         performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isNotFound(), tenantAware.getCurrentTenant(),
                 target.getControllerId(), "1");
@@ -120,7 +122,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that artifacts are found, when software module exists.
      */
-    @Test    void artifactsExists() throws Exception {
+    @Test
+    void artifactsExists() throws Exception {
         final Target target = testdataFactory.createTarget();
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("");
 
@@ -140,7 +143,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Forced deployment to a controller. Checks if the resource response payload for a given deployment is as expected.
      */
-    @Test    void deploymentForceAction() throws Exception {
+    @Test
+    void deploymentForceAction() throws Exception {
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
@@ -198,7 +202,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Checks that the deploymentBase URL changes when the action is switched from soft to forced in TIMEFORCED case.
      */
-    @Test    void changeEtagIfActionSwitchesFromSoftToForced() throws Exception {
+    @Test
+    void changeEtagIfActionSwitchesFromSoftToForced() throws Exception {
         // Prepare test data
         final Target target = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
@@ -235,7 +240,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Attempt/soft deployment to a controller. Checks if the resource response payload for a given deployment is as expected.
      */
-    @Test    void deploymentAttemptAction() throws Exception {
+    @Test
+    void deploymentAttemptAction() throws Exception {
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
@@ -299,7 +305,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Attempt/soft deployment to a controller including automated switch to hard. Checks if the resource response payload for a given deployment is as expected.
      */
-    @Test    void deploymentAutoForceAction() throws Exception {
+    @Test
+    void deploymentAutoForceAction() throws Exception {
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
@@ -358,7 +365,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test download-only (forced + skip) deployment to a controller. Checks if the resource response payload for a given deployment is as expected.
      */
-    @Test    void deploymentDownloadOnlyAction() throws Exception {
+    @Test
+    void deploymentDownloadOnlyAction() throws Exception {
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
@@ -420,7 +428,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Test various invalid access attempts to the deployment resource und the expected behaviour of the server.
      */
-    @Test    void badDeploymentAction() throws Exception {
+    @Test
+    void badDeploymentAction() throws Exception {
         final Target target = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
 
         // not allowed methods
@@ -507,7 +516,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Multiple uploads of deployment status feedback to the server.
      */
-    @Test    void multipleDeploymentActionFeedback() throws Exception {
+    @Test
+    void multipleDeploymentActionFeedback() throws Exception {
         testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
         testdataFactory.createTarget("4713");
         testdataFactory.createTarget("4714");
@@ -548,7 +558,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Verifies that an update action is correctly set to error if the controller provides error feedback.
      */
-    @Test    void rootRsSingleDeploymentActionWithErrorFeedback() throws Exception {
+    @Test
+    void rootRsSingleDeploymentActionWithErrorFeedback() throws Exception {
         DistributionSet ds = testdataFactory.createDistributionSet("");
         final Target savedTarget = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
 
@@ -585,7 +596,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Verifies that the controller can provided as much feedback entries as necessary as long as it is in the configured limits.
      */
-    @Test    void rootRsSingleDeploymentActionFeedback() throws Exception {
+    @Test
+    void rootRsSingleDeploymentActionFeedback() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         final Long actionId = getFirstAssignedActionId(
                 assignDistributionSet(ds,
@@ -626,7 +638,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Various forbidden request attempts on the feedback resource. Ensures correct answering behaviour as expected to these kind of errors.
      */
-    @Test    void badDeploymentActionFeedback() throws Exception {
+    @Test
+    void badDeploymentActionFeedback() throws Exception {
         final DistributionSet savedSet = testdataFactory.createDistributionSet("");
         final DistributionSet savedSet2 = testdataFactory.createDistributionSet("1");
 
@@ -665,7 +678,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that an invalid id in feedback body returns a bad request.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -687,7 +701,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that a missing feedback result in feedback body returns a bad request.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -713,7 +728,8 @@ class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that a missing finished result in feedback body returns a bad request.
      */
-    @Test    @ExpectEvents({
+    @Test
+    @ExpectEvents({
             @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),

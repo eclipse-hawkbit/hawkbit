@@ -34,7 +34,8 @@ class DdiConfigDataTest {
     /**
      * Verify the correct serialization and deserialization of the model
      */
-    @Test    void shouldSerializeAndDeserializeObject() throws IOException {
+    @Test
+    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final Map<String, String> data = new HashMap<>();
         data.put("test", "data");
@@ -50,7 +51,8 @@ class DdiConfigDataTest {
     /**
      * Verify the correct deserialization of a model with an additional unknown property
      */
-    @Test    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    @Test
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiConfigData = "{\"data\":{\"test\":\"data\"},\"mode\":\"replace\",\"unknownProperty\":\"test\"}";
 
@@ -62,7 +64,8 @@ class DdiConfigDataTest {
     /**
      * Verify that deserialization fails for known properties with a wrong datatype
      */
-    @Test    void shouldFailForObjectWithWrongDataTypes() {
+    @Test
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiConfigData = "{\"data\":{\"test\":\"data\"},\"mode\":[\"replace\"],\"unknownProperty\":\"test\"}";
 
@@ -74,7 +77,8 @@ class DdiConfigDataTest {
     /**
      * Verify the correct deserialization of a model with removed unused status property
      */
-    @Test    void shouldDeserializeObjectWithStatusProperty() throws IOException {
+    @Test
+    void shouldDeserializeObjectWithStatusProperty() throws IOException {
         // We formerly falsely required a 'status' property object when using the
         // configData endpoint. It was removed as a requirement from code and
         // documentation, as it was unused. This test ensures we still behave correctly

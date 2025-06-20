@@ -29,7 +29,8 @@ class AllowedHostNamesTest extends AbstractSecurityTest {
     /**
      * Tests whether a RequestRejectedException is thrown when not allowed host is used
      */
-    @Test    void allowedHostNameWithNotAllowedHost() throws Exception {
+    @Test
+    void allowedHostNameWithNotAllowedHost() throws Exception {
         mvc.perform(get("/").header(HttpHeaders.HOST, "www.google.com"))
                 .andExpect(status().isBadRequest());
     }
@@ -37,7 +38,8 @@ class AllowedHostNamesTest extends AbstractSecurityTest {
     /**
      * Tests whether request is redirected when allowed host is used
      */
-    @Test    void allowedHostNameWithAllowedHost() throws Exception {
+    @Test
+    void allowedHostNameWithAllowedHost() throws Exception {
         mvc.perform(get("/").header(HttpHeaders.HOST, "localhost"))
                 .andExpect(status().is3xxRedirection());
     }
@@ -45,7 +47,8 @@ class AllowedHostNamesTest extends AbstractSecurityTest {
     /**
      * Tests whether request without allowed host name and with ignored path end up with a client error
      */
-    @Test    void notAllowedHostnameWithIgnoredPath() throws Exception {
+    @Test
+    void notAllowedHostnameWithIgnoredPath() throws Exception {
         mvc.perform(get("/index.html").header(HttpHeaders.HOST, "www.google.com"))
                 .andExpect(status().is4xxClientError());
     }

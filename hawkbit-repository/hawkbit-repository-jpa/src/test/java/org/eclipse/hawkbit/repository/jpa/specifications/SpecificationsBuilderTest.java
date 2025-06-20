@@ -39,7 +39,8 @@ class SpecificationsBuilderTest {
     /**
      * Test the combination of specs on an empty list which returns null
      */
-    @Test    void combineWithAndEmptyList() {
+    @Test
+    void combineWithAndEmptyList() {
         final List<Specification<Object>> specList = Collections.emptyList();
         assertThat(SpecificationsBuilder.combineWithAnd(specList)).isNull();
     }
@@ -47,7 +48,8 @@ class SpecificationsBuilderTest {
     /**
      * Test the combination of specs on an immutable list with one entry
      */
-    @Test    void combineWithAndSingleImmutableList() {
+    @Test
+    void combineWithAndSingleImmutableList() {
         final Specification<Object> spec = (root, query, cb) -> cb.equal(root.get("field1"), "testValue");
         final List<Specification<Object>> specList = Collections.singletonList(spec);
         final Specification<Object> specifications = SpecificationsBuilder.combineWithAnd(specList);
@@ -72,7 +74,8 @@ class SpecificationsBuilderTest {
     /**
      * Test the combination of specs on a list with multiple entries
      */
-    @Test    void combineWithAndList() {
+    @Test
+    void combineWithAndList() {
         final Specification<Object> spec1 = (root, query, cb) -> cb.equal(root.get("field1"), "testValue1");
         final Specification<Object> spec2 = (root, query, cb) -> cb.equal(root.get("field2"), "testValue2");
 

@@ -32,7 +32,8 @@ class DdiArtifactTest {
     /**
      * Verify the correct serialization and deserialization of the model
      */
-    @Test    void shouldSerializeAndDeserializeObject() throws IOException {
+    @Test
+    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final String filename = "testfile.txt";
         final DdiArtifactHash hashes = new DdiArtifactHash("123", "456", "789");
@@ -54,7 +55,8 @@ class DdiArtifactTest {
     /**
      * Verify the correct deserialization of a model with a additional unknown property
      */
-    @Test    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    @Test
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiArtifact = "{\"filename\":\"test.file\",\"hashes\":{\"sha1\":\"123\",\"md5\":\"456\",\"sha256\":\"789\"},\"size\":111,\"links\":[],\"unknownProperty\": \"test\"}";
 
@@ -70,7 +72,8 @@ class DdiArtifactTest {
     /**
      * Verify that deserialization fails for known properties with a wrong datatype
      */
-    @Test    void shouldFailForObjectWithWrongDataTypes() {
+    @Test
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiArtifact = "{\"filename\": [\"test.file\"],\"hashes\":{\"sha1\":\"123\",\"md5\":\"456\",\"sha256\":\"789\"},\"size\":111,\"links\":[]}";
 

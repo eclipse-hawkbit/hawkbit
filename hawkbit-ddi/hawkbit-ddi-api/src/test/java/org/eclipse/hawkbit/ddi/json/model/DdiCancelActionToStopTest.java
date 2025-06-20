@@ -32,7 +32,8 @@ class DdiCancelActionToStopTest {
     /**
      * Verify the correct serialization and deserialization of the model
      */
-    @Test    void shouldSerializeAndDeserializeObject() throws IOException {
+    @Test
+    void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final String stopId = "1234";
         final DdiCancelActionToStop ddiCancelActionToStop = new DdiCancelActionToStop(stopId);
@@ -48,7 +49,8 @@ class DdiCancelActionToStopTest {
     /**
      * Verify the correct deserialization of a model with a additional unknown property
      */
-    @Test    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
+    @Test
+    void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
         final String serializedDdiCancelActionToStop = "{\"stopId\":\"12345\",\"unknownProperty\":\"test\"}";
 
@@ -61,7 +63,8 @@ class DdiCancelActionToStopTest {
     /**
      * Verify that deserialization fails for known properties with a wrong datatype
      */
-    @Test    void shouldFailForObjectWithWrongDataTypes() {
+    @Test
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiCancelActionToStop = "{\"stopId\": [\"12345\"]}";
 

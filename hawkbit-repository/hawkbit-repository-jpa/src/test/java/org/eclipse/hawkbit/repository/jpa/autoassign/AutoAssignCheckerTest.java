@@ -68,7 +68,8 @@ class AutoAssignCheckerTest {
     /**
      * Single device check triggers update for matching auto assignment filter.
      */
-    @Test    void checkForDevice() {
+    @Test
+    void checkForDevice() {
         mockRunningAsNonSystem();
         final String target = getRandomString();
         final long ds = getRandomLong();

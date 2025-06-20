@@ -30,7 +30,8 @@ class RequestExceptionStrategyTest {
     /**
      * Verifies that default handler is used if no handlers are defined for the specific exception.
      */
-    @Test    void verifyDefaultFatal() {
+    @Test
+    void verifyDefaultFatal() {
         assertThat(requeueExceptionStrategy.isFatal(new MessageConversionException("t"))).as("Non Fatal error").isTrue();
         assertThat(requeueExceptionStrategy.isFatal(new Throwable(new MessageConversionException("t")))).as("Non Fatal error").isTrue();
     }
@@ -38,7 +39,8 @@ class RequestExceptionStrategyTest {
     /**
      * Verifies additional fatal exception types are fatal.
      */
-    @Test    void verifyAdditionalFatal() {
+    @Test
+    void verifyAdditionalFatal() {
         assertThat(requeueExceptionStrategy.isFatal(new IllegalArgumentException())).isTrue();
         assertThat(requeueExceptionStrategy.isFatal(new IndexOutOfBoundsException())).isTrue();
     }
@@ -46,7 +48,8 @@ class RequestExceptionStrategyTest {
     /**
      * Verifies additional fatal exception types are fatal.
      */
-    @Test    void verifyAdditionalWrappedFatal() {
+    @Test
+    void verifyAdditionalWrappedFatal() {
         assertThat(requeueExceptionStrategy.isFatal(new Throwable(new IllegalArgumentException()))).isTrue();
         assertThat(requeueExceptionStrategy.isFatal(new Throwable(new IndexOutOfBoundsException()))).isTrue();
     }
@@ -54,7 +57,8 @@ class RequestExceptionStrategyTest {
     /**
      * Verifies that default handler is used if no handlers are defined for the specific exception.
      */
-    @Test    void verifyNonFatal() {
+    @Test
+    void verifyNonFatal() {
         assertThat(requeueExceptionStrategy.isFatal(new NullPointerException())).isFalse();
         assertThat(requeueExceptionStrategy.isFatal(new Throwable(new NullPointerException()))).isFalse();
     }

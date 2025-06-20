@@ -25,7 +25,8 @@ class ExceptionInfoTest {
     /**
      * Ensures that setters and getters match on teh payload.
      */
-    @Test    void setterAndGetterOnExceptionInfo() {
+    @Test
+    void setterAndGetterOnExceptionInfo() {
         final String knownExceptionClass = "hawkbit.test.exception.Class";
         final String knownErrorCode = "hawkbit.error.code.Known";
         final String knownMessage = "a known message";

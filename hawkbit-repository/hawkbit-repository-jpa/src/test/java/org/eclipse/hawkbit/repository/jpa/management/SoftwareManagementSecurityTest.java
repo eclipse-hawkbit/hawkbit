@@ -44,7 +44,8 @@ class SoftwareManagementSecurityTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void createMetaDataPermissionsCheck() {
+    @Test
+    void createMetaDataPermissionsCheck() {
         assertPermissions(
                 () -> softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().create(1L).key("key").value("value")),
                 List.of(SpPermission.UPDATE_REPOSITORY));
@@ -58,7 +59,8 @@ class SoftwareManagementSecurityTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void deleteMetaDataPermissionsCheck() {
+    @Test
+    void deleteMetaDataPermissionsCheck() {
         assertPermissions(() -> {
             softwareModuleManagement.deleteMetadata(1L, "key");
             return null;
@@ -68,21 +70,24 @@ class SoftwareManagementSecurityTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByAssignedToPermissionsCheck() {
+    @Test
+    void findByAssignedToPermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.findByAssignedTo(1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void countByAssignedToPermissionsCheck() {
+    @Test
+    void countByAssignedToPermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.countByAssignedTo(1L), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByTextAndTypePermissionsCheck() {
+    @Test
+    void findByTextAndTypePermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.findByTextAndType("text", 1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
     }
 
@@ -95,21 +100,24 @@ class SoftwareManagementSecurityTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getMetaDataBySoftwareModuleIdPermissionsCheck() {
+    @Test
+    void getMetaDataBySoftwareModuleIdPermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.getMetadata(1L, "key"), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findMetaDataBySoftwareModuleIdPermissionsCheck() {
+    @Test
+    void findMetaDataBySoftwareModuleIdPermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.getMetadata(1L), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findMetaDataBySoftwareModuleIdAndTargetVisiblePermissionsCheck() {
+    @Test
+    void findMetaDataBySoftwareModuleIdAndTargetVisiblePermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdAndTargetVisible(1L, PAGE),
                 List.of(SpPermission.READ_REPOSITORY));
     }
@@ -117,14 +125,16 @@ class SoftwareManagementSecurityTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByTypePermissionsCheck() {
+    @Test
+    void findByTypePermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.findByType(1L, PAGE), List.of(SpPermission.READ_REPOSITORY));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void lockPermissionsCheck() {
+    @Test
+    void lockPermissionsCheck() {
         assertPermissions(() -> {
             softwareModuleManagement.lock(1L);
             return null;
@@ -134,7 +144,8 @@ class SoftwareManagementSecurityTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void unlockPermissionsCheck() {
+    @Test
+    void unlockPermissionsCheck() {
         assertPermissions(() -> {
             softwareModuleManagement.unlock(1L);
             return null;
@@ -144,7 +155,8 @@ class SoftwareManagementSecurityTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void updateMetaDataPermissionsCheck() {
+    @Test
+    void updateMetaDataPermissionsCheck() {
         assertPermissions(
                 () -> softwareModuleManagement.updateMetadata(entityFactory.softwareModuleMetadata().update(1L, "key").value("value")),
                 List.of(SpPermission.UPDATE_REPOSITORY));
@@ -153,7 +165,8 @@ class SoftwareManagementSecurityTest
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findMetaDataBySoftwareModuleIdsAndTargetVisiblePermissionsCheck() {
+    @Test
+    void findMetaDataBySoftwareModuleIdsAndTargetVisiblePermissionsCheck() {
         assertPermissions(() -> softwareModuleManagement.findMetaDataBySoftwareModuleIdsAndTargetVisible(List.of(1L)),
                 List.of(SpPermission.READ_REPOSITORY));
     }

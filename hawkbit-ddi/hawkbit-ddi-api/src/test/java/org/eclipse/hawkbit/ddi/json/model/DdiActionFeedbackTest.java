@@ -34,7 +34,8 @@ class DdiActionFeedbackTest {
     /**
      * Verify the correct serialization and deserialization of the model with minimal payload
      */
-    @Test    void shouldSerializeAndDeserializeObjectWithoutOptionalValues() throws IOException {
+    @Test
+    void shouldSerializeAndDeserializeObjectWithoutOptionalValues() throws IOException {
         // Setup
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null, null, Collections.emptyList());
         final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(ddiStatus);
@@ -50,7 +51,8 @@ class DdiActionFeedbackTest {
     /**
      * Verify the correct serialization and deserialization of the model with all values provided
      */
-    @Test    void shouldSerializeAndDeserializeObjectWithOptionalValues() throws IOException {
+    @Test
+    void shouldSerializeAndDeserializeObjectWithOptionalValues() throws IOException {
         // Setup
         final Long timestamp = System.currentTimeMillis();
         final DdiResult ddiResult = new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(10, 10));
@@ -68,7 +70,8 @@ class DdiActionFeedbackTest {
     /**
      * Verify that deserialization fails for known properties with a wrong datatype
      */
-    @Test    void shouldFailForObjectWithWrongDataTypes() {
+    @Test
+    void shouldFailForObjectWithWrongDataTypes() {
         // Setup
         final String serializedDdiActionFeedback = """
             {
@@ -87,7 +90,8 @@ class DdiActionFeedbackTest {
     /**
      * Verify that deserialization works if optional fields are not parsed
      */
-    @Test    void shouldConvertItWithoutOptionalFieldTimestamp() throws JsonProcessingException {
+    @Test
+    void shouldConvertItWithoutOptionalFieldTimestamp() throws JsonProcessingException {
         // Setup
         final String serializedDdiActionFeedback = """
             {

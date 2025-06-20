@@ -145,7 +145,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests not allowed content-type in message
      */
-    @Test    void wrongContentType() {
+    @Test
+    void wrongContentType() {
         final MessageProperties messageProperties = new MessageProperties();
         messageProperties.setContentType("xml");
         final Message message = new Message(new byte[0], messageProperties);
@@ -159,7 +160,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests the creation of a target/thing by calling the same method that incoming RabbitMQ messages would access.
      */
-    @Test    void createThing() {
+    @Test
+    void createThing() {
         final String knownThingId = "1";
 
         processThingCreatedMessage(knownThingId, null);
@@ -171,7 +173,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests the creation of a target/thing with specified name by calling the same method that incoming RabbitMQ messages would access.
      */
-    @Test    void createThingWithName() {
+    @Test
+    void createThingWithName() {
         final String knownThingId = "2";
         final String knownThingName = "NonDefaultTargetName";
 
@@ -187,7 +190,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests the creation of a target/thing with specified type name by calling the same method that incoming RabbitMQ messages would access.
      */
-    @Test    void createThingWithType() {
+    @Test
+    void createThingWithType() {
         final String knownThingId = "2";
         final String knownThingTypeName = "TargetTypeName";
 
@@ -203,7 +207,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests not allowed body in message
      */
-    @Test    void createThingWithWrongBody() {
+    @Test
+    void createThingWithWrongBody() {
         final Message message = createMessage("Not allowed Body".getBytes(), getThingCreatedMessageProperties("3"));
         final String type = MessageType.THING_CREATED.name();
         assertThatExceptionOfType(MessageConversionException.class)
@@ -214,7 +219,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests the creation of a target/thing with specified attributes by calling the same method that incoming RabbitMQ messages would access.
      */
-    @Test    void createThingWithAttributes() {
+    @Test
+    void createThingWithAttributes() {
         final String knownThingId = "4";
 
         final DmfAttributeUpdate attributeUpdate = dmfAttributeUpdate();
@@ -231,7 +237,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests the creation of a target/thing with specified name and attributes by calling the same method that incoming RabbitMQ messages would access.
      */
-    @Test    void createThingWithNameAndAttributes() {
+    @Test
+    void createThingWithNameAndAttributes() {
         final String knownThingId = "5";
         final String knownThingName = "NonDefaultTargetName";
 
@@ -250,7 +257,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests the target attribute update by calling the same method that incoming RabbitMQ messages would access.
      */
-    @Test    void updateAttributes() {
+    @Test
+    void updateAttributes() {
         final String knownThingId = "1";
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
@@ -271,7 +279,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Verifies that the update mode is retrieved from the UPDATE_ATTRIBUTES message and passed to the controller management.
      */
-    @Test    void attributeUpdateModes() {
+    @Test
+    void attributeUpdateModes() {
         final String knownThingId = "1";
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
@@ -322,7 +331,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests the creation of a thing without a 'reply to' header in message.
      */
-    @Test    void createThingWithoutReplyTo() {
+    @Test
+    void createThingWithoutReplyTo() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED, null);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, "1");
         final Message message = createMessage("", messageProperties);
@@ -335,7 +345,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests the creation of a target/thing without a thingID by calling the same method that incoming RabbitMQ messages would access.
      */
-    @Test    void createThingWithoutID() {
+    @Test
+    void createThingWithoutID() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
         final Message message = createMessage(new byte[0], messageProperties);
         final String type = MessageType.THING_CREATED.name();
@@ -347,7 +358,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests the call of the same method that incoming RabbitMQ messages would access with an unknown message type.
      */
-    @Test    void unknownMessageType() {
+    @Test
+    void unknownMessageType() {
         final String type = "bumlux";
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_CREATED);
         messageProperties.setHeader(MessageHeaderKey.THING_ID, "");
@@ -361,7 +373,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests a invalid message without event topic
      */
-    @Test    void invalidEventTopic() {
+    @Test
+    void invalidEventTopic() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         final Message message = new Message(new byte[0], messageProperties);
 
@@ -384,7 +397,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests the update of an action of a target without a exist action id
      */
-    @Test    void updateActionStatusWithoutActionId() {
+    @Test
+    void updateActionStatusWithoutActionId() {
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.empty());
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
@@ -399,7 +413,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests the update of an action of a target without a exist action id
      */
-    @Test    void updateActionStatusWithoutExistActionId() {
+    @Test
+    void updateActionStatusWithoutExistActionId() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.empty());
@@ -416,7 +431,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests that messages which cause quota violations are not re-added to message queue so they would block other communication.
      */
-    @Test    void quotaExceeded() {
+    @Test
+    void quotaExceeded() {
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
         messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
 
@@ -442,7 +458,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Test next update is provided on finished action
      */
-    @Test    void lookupNextUpdateActionAfterFinished() throws IllegalAccessException {
+    @Test
+    void lookupNextUpdateActionAfterFinished() throws IllegalAccessException {
 
         // Mock
         final Action action = createActionWithTarget(22L);
@@ -480,7 +497,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Test feedback code is persisted in messages when provided with DmfActionUpdateStatus
      */
-    @Test    void feedBackCodeIsPersistedInMessages() throws IllegalAccessException {
+    @Test
+    void feedBackCodeIsPersistedInMessages() throws IllegalAccessException {
         // Mock
         final Action action = createActionWithTarget(22L);
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
@@ -515,7 +533,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests the deletion of a target/thing, requested by the target itself.
      */
-    @Test    void deleteThing() {
+    @Test
+    void deleteThing() {
         // prepare valid message
         final String knownThingId = "1";
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_REMOVED);
@@ -532,7 +551,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests the deletion of a target/thing with missing thingId
      */
-    @Test    void deleteThingWithoutThingId() {
+    @Test
+    void deleteThingWithoutThingId() {
         // prepare invalid message
         final MessageProperties messageProperties = createMessageProperties(MessageType.THING_REMOVED);
         final Message message = createMessage(new byte[0], messageProperties);
@@ -546,7 +566,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests activating auto-confirmation on a target.
      */
-    @Test    void setAutoConfirmationStateActive() {
+    @Test
+    void setAutoConfirmationStateActive() {
         final String knownThingId = "1";
         final String initiator = "iAmTheInitiator";
         final String remark = "remarkForTesting";
@@ -573,7 +594,8 @@ class AmqpMessageHandlerServiceTest {
     /**
      * Tests deactivating auto-confirmation on a target.
      */
-    @Test    void setAutoConfirmationStateDeactivated() {
+    @Test
+    void setAutoConfirmationStateDeactivated() {
         final String knownThingId = "1";
 
         final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);

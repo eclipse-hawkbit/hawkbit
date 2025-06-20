@@ -63,7 +63,8 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Calling update without changing fields results in no recorded change in the repository including unchanged audit fields.
      */
-    @Test    void updateNothingResultsInUnchangedRepositoryForType() {
+    @Test
+    void updateNothingResultsInUnchangedRepositoryForType() {
         final SoftwareModuleType created = softwareModuleTypeManagement
                 .create(entityFactory.softwareModuleType().create().key("test-key").name("test-name"));
 
@@ -78,7 +79,8 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Calling update for changed fields results in change in the repository.
      */
-    @Test    void updateSoftwareModuleTypeFieldsToNewValue() {
+    @Test
+    void updateSoftwareModuleTypeFieldsToNewValue() {
         final SoftwareModuleType created = softwareModuleTypeManagement
                 .create(entityFactory.softwareModuleType().create().key("test-key").name("test-name"));
 
@@ -94,7 +96,8 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Create Software Module Types call fails when called for existing entities.
      */
-    @Test    void createModuleTypesCallFailsForExistingTypes() {
+    @Test
+    void createModuleTypesCallFailsForExistingTypes() {
         final List<SoftwareModuleTypeCreate> created = Arrays.asList(
                 entityFactory.softwareModuleType().create().key("test-key").name("test-name"),
                 entityFactory.softwareModuleType().create().key("test-key2").name("test-name2"));
@@ -107,7 +110,8 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Tests the successfull deletion of software module types. Both unused (hard delete) and used ones (soft delete).
      */
-    @Test    void deleteAssignedAndUnassignedSoftwareModuleTypes() {
+    @Test
+    void deleteAssignedAndUnassignedSoftwareModuleTypes() {
         assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType, runtimeType, appType);
 
         SoftwareModuleType type = softwareModuleTypeManagement
@@ -144,7 +148,8 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Checks that software module typeis found based on given name.
      */
-    @Test    void findSoftwareModuleTypeByName() {
+    @Test
+    void findSoftwareModuleTypeByName() {
         testdataFactory.createSoftwareModuleOs();
         final SoftwareModuleType found = softwareModuleTypeManagement
                 .create(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
@@ -157,7 +162,8 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that it is not possible to create a type that alrady exists.
      */
-    @Test    void createSoftwareModuleTypeFailsWithExistingEntity() {
+    @Test
+    void createSoftwareModuleTypeFailsWithExistingEntity() {
         final SoftwareModuleTypeCreate create = entityFactory.softwareModuleType().create().key("thetype").name("thename");
         softwareModuleTypeManagement.create(create);
         assertThatExceptionOfType(EntityAlreadyExistsException.class)
@@ -169,7 +175,8 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that it is not possible to create a list of types where one already exists.
      */
-    @Test    void createSoftwareModuleTypesFailsWithExistingEntity() {
+    @Test
+    void createSoftwareModuleTypesFailsWithExistingEntity() {
         softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create().key("thetype").name("thename"));
         final List<SoftwareModuleTypeCreate> creates = List.of(
                 entityFactory.softwareModuleType().create().key("thetype").name("thename"),
@@ -182,7 +189,8 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that the creation of a softwareModuleType is failing because of invalid max assignment
      */
-    @Test    void createSoftwareModuleTypesFailsWithInvalidMaxAssignment() {
+    @Test
+    void createSoftwareModuleTypesFailsWithInvalidMaxAssignment() {
         final SoftwareModuleTypeCreate create = entityFactory.softwareModuleType().create().key("type").name("name").maxAssignments(0);
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("should not have worked as max assignment is invalid. Should be greater than 0")
@@ -192,7 +200,8 @@ class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies that multiple types are created as requested.
      */
-    @Test    void createMultipleSoftwareModuleTypes() {
+    @Test
+    void createMultipleSoftwareModuleTypes() {
         final List<SoftwareModuleType> created = softwareModuleTypeManagement
                 .create(Arrays.asList(entityFactory.softwareModuleType().create().key("thetype").name("thename"),
                         entityFactory.softwareModuleType().create().key("thetype2").name("thename2")));

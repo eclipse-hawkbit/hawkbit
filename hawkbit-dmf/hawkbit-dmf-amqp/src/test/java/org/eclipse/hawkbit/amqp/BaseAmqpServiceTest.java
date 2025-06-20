@@ -51,7 +51,8 @@ class BaseAmqpServiceTest {
     /**
      * Verify that the message conversion works
      */
-    @Test    void convertMessageTest() {
+    @Test
+    void convertMessageTest() {
         final DmfActionUpdateStatus actionUpdateStatus = createActionStatus();
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
 
@@ -63,7 +64,8 @@ class BaseAmqpServiceTest {
     /**
      * Tests invalid null message content
      */
-    @Test    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @Test
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void convertMessageWithNullContent() {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .as("Expected IllegalArgumentException for invalid (null) JSON")
@@ -73,7 +75,8 @@ class BaseAmqpServiceTest {
     /**
      * Tests invalid empty message content
      */
-    @Test    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @Test
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void updateActionStatusWithEmptyContent() {
         final Message message = createMessage("".getBytes());
         assertThatExceptionOfType(MessageConversionException.class)
@@ -84,7 +87,8 @@ class BaseAmqpServiceTest {
     /**
      * Tests invalid json message content
      */
-    @Test    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
+    @Test
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     void updateActionStatusWithInvalidJsonContent() {
         final Message message = createMessage("Invalid Json".getBytes());
         when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());

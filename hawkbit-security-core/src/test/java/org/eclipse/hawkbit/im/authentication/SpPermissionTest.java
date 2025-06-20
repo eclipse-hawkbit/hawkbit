@@ -29,7 +29,8 @@ final class SpPermissionTest {
     /**
      * Try to double check if all permissions works as expected
      */
-    @Test    void shouldReturnAllPermissions() {
+    @Test
+    void shouldReturnAllPermissions() {
         List<String> expected = new LinkedList<>();
         ReflectionUtils.doWithFields(SpPermission.class, f -> {
             if (ReflectionUtils.isPublicStaticFinal(f) && String.class.equals(f.getType())) {

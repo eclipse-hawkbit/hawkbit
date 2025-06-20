@@ -23,7 +23,8 @@ class DistributionSetUpdatedEventTest extends AbstractRemoteEntityEventTest<Dist
     /**
      * Verifies that the distribution set entity reloading by remote updated event works
      */
-    @Test    void testDistributionSetUpdateEvent() {
+    @Test
+    void testDistributionSetUpdateEvent() {
         assertAndCreateRemoteEvent(DistributionSetUpdatedEvent.class);
     }
 

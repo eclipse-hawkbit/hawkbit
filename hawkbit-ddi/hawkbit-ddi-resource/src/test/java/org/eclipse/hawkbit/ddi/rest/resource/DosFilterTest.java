@@ -51,7 +51,8 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that clients that are on the blacklist are forbidden
      */
-    @Test    void blackListedClientIsForbidden() throws Exception {
+    @Test
+    void blackListedClientIsForbidden() throws Exception {
         mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                         .header(X_FORWARDED_FOR, "192.168.0.4 , 10.0.0.1 "))
                 .andExpect(status().isForbidden());
@@ -60,7 +61,8 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that a READ DoS attempt is blocked 
      */
-    @Test    void getFloodingAttackThatIsPrevented() throws Exception {
+    @Test
+    void getFloodingAttackThatIsPrevented() throws Exception {
         int requests = 0;
         MvcResult result;
         do {
@@ -80,7 +82,8 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that an assumed READ DoS attempt is not blocked as the client (with IPv4 address) is on a whitelist
      */
-    @Test    void unacceptableGetLoadButOnWhitelistIPv4() throws Exception {
+    @Test
+    void unacceptableGetLoadButOnWhitelistIPv4() throws Exception {
         for (int i = 0; i < 100; i++) {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                             .header(X_FORWARDED_FOR, "127.0.0.1"))
@@ -91,7 +94,8 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that an assumed READ DoS attempt is not blocked as the client (with IPv6 address) is on a whitelist
      */
-    @Test    void unacceptableGetLoadButOnWhitelistIPv6() throws Exception {
+    @Test
+    void unacceptableGetLoadButOnWhitelistIPv6() throws Exception {
         for (int i = 0; i < 100; i++) {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                             .header(X_FORWARDED_FOR, "0:0:0:0:0:0:0:1"))
@@ -102,7 +106,8 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that a relatively high number of READ requests is allowed if it is below the DoS detection threshold
      */
-    @Test    // No idea how to get rid of the Thread.sleep here
+    @Test
+    // No idea how to get rid of the Thread.sleep here
     @SuppressWarnings("squid:S2925")
     void acceptableGetLoad() throws Exception {
         for (int x = 0; x < 3; x++) {
@@ -119,7 +124,8 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that a WRITE DoS attempt is blocked 
      */
-    @Test    void putPostFloddingAttackThatisPrevented() throws Exception {
+    @Test
+    void putPostFloddingAttackThatisPrevented() throws Exception {
         final Long actionId = prepareDeploymentBase();
         final String feedback = getJsonProceedingDeploymentActionFeedback();
 
@@ -143,7 +149,8 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     /**
      * Ensures that a relatively high number of WRITE requests is allowed if it is below the DoS detection threshold
      */
-    @Test    // No idea how to get rid of the Thread.sleep here
+    @Test
+    // No idea how to get rid of the Thread.sleep here
     @SuppressWarnings("squid:S2925")
     void acceptablePutPostLoad() throws Exception {
         final Long actionId = prepareDeploymentBase();

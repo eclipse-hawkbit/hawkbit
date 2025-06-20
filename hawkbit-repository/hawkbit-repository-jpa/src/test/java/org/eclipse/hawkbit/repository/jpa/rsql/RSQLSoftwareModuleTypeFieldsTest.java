@@ -29,7 +29,8 @@ class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest {
     /**
      * Test filter software module test type by id
      */
-    @Test    void testFilterByParameterId() {
+    @Test
+    void testFilterByParameterId() {
         assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "==" + osType.getId(), 1);
         assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "!=" + osType.getId(), 2);
         assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "==" + -1, 0);
@@ -47,7 +48,8 @@ class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest {
     /**
      * Test filter software module test type by name
      */
-    @Test    void testFilterByParameterName() {
+    @Test
+    void testFilterByParameterName() {
         assertRSQLQuery(SoftwareModuleTypeFields.NAME.name() + "==" + Constants.SMT_DEFAULT_OS_NAME, 1);
         assertRSQLQuery(SoftwareModuleTypeFields.NAME.name() + "!=" + Constants.SMT_DEFAULT_OS_NAME, 2);
     }
@@ -55,7 +57,8 @@ class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest {
     /**
      * Test filter software module test type by description
      */
-    @Test    void testFilterByParameterDescription() {
+    @Test
+    void testFilterByParameterDescription() {
         assertRSQLQuery(SoftwareModuleTypeFields.DESCRIPTION.name() + "==''", 0);
         assertRSQLQuery(SoftwareModuleTypeFields.DESCRIPTION.name() + "!=''", 3);
         assertRSQLQuery(SoftwareModuleTypeFields.DESCRIPTION.name() + "==Updated*", 3);
@@ -66,7 +69,8 @@ class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest {
     /**
      * Test filter software module test type by key
      */
-    @Test    void testFilterByParameterKey() {
+    @Test
+    void testFilterByParameterKey() {
         assertRSQLQuery(SoftwareModuleTypeFields.KEY.name() + "==os", 1);
         assertRSQLQuery(SoftwareModuleTypeFields.KEY.name() + "!=os", 2);
         assertRSQLQuery(SoftwareModuleTypeFields.KEY.name() + "=in=(os)", 1);
@@ -76,7 +80,8 @@ class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest {
     /**
      * Test filter software module test type by max
      */
-    @Test    void testFilterByMaxAssignment() {
+    @Test
+    void testFilterByMaxAssignment() {
         assertRSQLQuery(SoftwareModuleTypeFields.MAXASSIGNMENTS.name() + "==1", 2);
         assertRSQLQuery(SoftwareModuleTypeFields.MAXASSIGNMENTS.name() + "!=1", 1);
     }

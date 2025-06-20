@@ -28,7 +28,8 @@ class MaintenanceScheduleHelperTest {
     /**
      * Verifies that the Cron object is returned for valid cron expression
      */
-    @Test    void getCronFromExpressionValid() {
+    @Test
+    void getCronFromExpressionValid() {
         final String validCron = "0 0 0 ? * 6"; // at 00:00 every Saturday
         assertThat(MaintenanceScheduleHelper.getCronFromExpression(validCron)).isNotNull().isInstanceOf(Cron.class);
     }
@@ -36,7 +37,8 @@ class MaintenanceScheduleHelperTest {
     /**
      * Verifies that the Duration object is returned for valid duration format (hh:mm or hh:mm:ss)
      */
-    @Test    void convertToISODurationValid() {
+    @Test
+    void convertToISODurationValid() {
         final String duration = "00:10";
         assertThat(MaintenanceScheduleHelper.convertToISODuration(duration)).isNotNull().isInstanceOf(Duration.class);
     }
@@ -44,7 +46,8 @@ class MaintenanceScheduleHelperTest {
     /**
      * Verifies that the InvalidMaintenanceScheduleException is thrown for invalid duration format
      */
-    @Test    void validateDurationInvalid() {
+    @Test
+    void validateDurationInvalid() {
         final String duration = "10";
         assertThatThrownBy(() -> MaintenanceScheduleHelper.validateDuration(duration))
                 .isInstanceOf(InvalidMaintenanceScheduleException.class).hasMessage("Provided duration is not valid")
@@ -54,7 +57,8 @@ class MaintenanceScheduleHelperTest {
     /**
      * Verifies that the InvalidMaintenanceScheduleException is thrown for invalid cron expression
      */
-    @Test    void validateCronScheduleInvalid() {
+    @Test
+    void validateCronScheduleInvalid() {
         final String invalidCron = "0 0 0 * * 6";
         assertThatThrownBy(() -> MaintenanceScheduleHelper.validateCronSchedule(invalidCron))
                 .isInstanceOf(InvalidMaintenanceScheduleException.class)
@@ -64,7 +68,8 @@ class MaintenanceScheduleHelperTest {
     /**
      * Verifies that there is a maintenance window available for correct schedule, duration and timezone
      */
-    @Test    void getNextMaintenanceWindowValid() {
+    @Test
+    void getNextMaintenanceWindowValid() {
         final ZonedDateTime currentTime = ZonedDateTime.now();
         final String cronSchedule = String.format("0 %d %d %d %d ? %d", currentTime.getMinute(), currentTime.getHour(),
                 currentTime.getDayOfMonth(), currentTime.getMonthValue(), currentTime.getYear());
@@ -76,7 +81,8 @@ class MaintenanceScheduleHelperTest {
     /**
      * Verifies the maintenance schedule when only one required field is present
      */
-    @Test    void validateMaintenanceScheduleAtLeastOneNotEmpty() {
+    @Test
+    void validateMaintenanceScheduleAtLeastOneNotEmpty() {
         final String duration = "00:10";
         assertThatThrownBy(() -> MaintenanceScheduleHelper.validateMaintenanceSchedule(null, duration, null))
                 .isInstanceOf(InvalidMaintenanceScheduleException.class)
@@ -86,7 +92,8 @@ class MaintenanceScheduleHelperTest {
     /**
      * Verifies that there is no valid maintenance window available, scheduled before current time
      */
-    @Test    void validateMaintenanceScheduleBeforeCurrentTime() {
+    @Test
+    void validateMaintenanceScheduleBeforeCurrentTime() {
         ZonedDateTime currentTime = ZonedDateTime.now();
         currentTime = currentTime.plusMinutes(-30);
         final String cronSchedule = String.format("0 %d %d %d %d ? %d", currentTime.getMinute(), currentTime.getHour(),

@@ -53,7 +53,8 @@ class ContextAwareTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies acm context is persisted when creating Rollout
      */
-    @Test    void verifyAcmContextIsPersistedInCreatedRollout() {
+    @Test
+    void verifyAcmContextIsPersistedInCreatedRollout() {
         final SecurityContext securityContext = SecurityContextHolder.getContext();
         assertThat(securityContext).isNotNull();
 
@@ -66,7 +67,8 @@ class ContextAwareTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies acm context is reused when handling a rollout
      */
-    @Test    void verifyContextIsReusedWhenHandlingRollout() {
+    @Test
+    void verifyContextIsReusedWhenHandlingRollout() {
         final SecurityContext securityContext = SecurityContextHolder.getContext();
         assertThat(securityContext).isNotNull();
 
@@ -78,7 +80,8 @@ class ContextAwareTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies acm context is persisted when activating auto assignment
      */
-    @Test    void verifyContextIsPersistedInActiveAutoAssignment() {
+    @Test
+    void verifyContextIsPersistedInActiveAutoAssignment() {
         final SecurityContext securityContext = SecurityContextHolder.getContext();
         assertThat(securityContext).isNotNull();
 
@@ -91,7 +94,8 @@ class ContextAwareTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies acm context is used when performing auto assign check on all target
      */
-    @Test    void verifyContextIsReusedWhenCheckingForAutoAssignmentAllTargets() {
+    @Test
+    void verifyContextIsReusedWhenCheckingForAutoAssignmentAllTargets() {
         final SecurityContext securityContext = SecurityContextHolder.getContext();
         assertThat(securityContext).isNotNull();
 
@@ -103,7 +107,8 @@ class ContextAwareTest extends AbstractJpaIntegrationTest {
     /**
      * Verifies acm context is used when performing auto assign check on single target
      */
-    @Test    void verifyContextIsReusedWhenCheckingForAutoAssignmentSingleTarget() {
+    @Test
+    void verifyContextIsReusedWhenCheckingForAutoAssignmentSingleTarget() {
         final SecurityContext securityContext = SecurityContextHolder.getContext();
         assertThat(securityContext).isNotNull();
 

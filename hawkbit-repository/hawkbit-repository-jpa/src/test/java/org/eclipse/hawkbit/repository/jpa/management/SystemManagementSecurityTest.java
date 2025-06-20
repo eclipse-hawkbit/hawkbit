@@ -26,14 +26,16 @@ class SystemManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findTenantsPermissionWorks() {
+    @Test
+    void findTenantsPermissionWorks() {
         assertPermissions(() -> systemManagement.findTenants(PAGE), List.of(SpPermission.SYSTEM_ADMIN));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void deleteTenantPermissionsCheck() {
+    @Test
+    void deleteTenantPermissionsCheck() {
         assertPermissions(() -> {
             systemManagement.deleteTenant("tenant");
             return null;
@@ -43,7 +45,8 @@ class SystemManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void forEachTenantTenantPermissionsCheck() {
+    @Test
+    void forEachTenantTenantPermissionsCheck() {
         assertPermissions(() -> {
             systemManagement.forEachTenant(log::info);
             return null;
@@ -53,21 +56,24 @@ class SystemManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getSystemUsageStatisticsWithTenantsPermissionsCheck() {
+    @Test
+    void getSystemUsageStatisticsWithTenantsPermissionsCheck() {
         assertPermissions(() -> systemManagement.getSystemUsageStatisticsWithTenants(), List.of(SpPermission.SYSTEM_ADMIN));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getSystemUsageStatisticsPermissionsCheck() {
+    @Test
+    void getSystemUsageStatisticsPermissionsCheck() {
         assertPermissions(() -> systemManagement.getSystemUsageStatistics(), List.of(SpPermission.SYSTEM_ADMIN));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getTenantMetadataPermissionsCheck() {
+    @Test
+    void getTenantMetadataPermissionsCheck() {
         assertPermissions(() -> systemManagement.getTenantMetadata(), List.of(SpPermission.READ_REPOSITORY), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> systemManagement.getTenantMetadata(), List.of(SpPermission.READ_TARGET), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> systemManagement.getTenantMetadata(), List.of(SpPermission.READ_TENANT_CONFIGURATION), List.of(SpPermission.CREATE_REPOSITORY));
@@ -77,7 +83,8 @@ class SystemManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getTenantMetadataWithoutDetailsPermissionsCheck() {
+    @Test
+    void getTenantMetadataWithoutDetailsPermissionsCheck() {
         assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpPermission.READ_REPOSITORY), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpPermission.READ_TARGET), List.of(SpPermission.CREATE_REPOSITORY));
         assertPermissions(() -> systemManagement.getTenantMetadataWithoutDetails(), List.of(SpPermission.READ_TENANT_CONFIGURATION), List.of(SpPermission.CREATE_REPOSITORY));
@@ -87,21 +94,24 @@ class SystemManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getTenantMetadataByTenantPermissionsCheck() {
+    @Test
+    void getTenantMetadataByTenantPermissionsCheck() {
         assertPermissions(() -> systemManagement.getTenantMetadata(1L), List.of(SpPermission.SpringEvalExpressions.SYSTEM_ROLE));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void createTenantMetadataPermissionsCheck() {
+    @Test
+    void createTenantMetadataPermissionsCheck() {
         assertPermissions(() -> systemManagement.createTenantMetadata("tenant"), List.of(SpPermission.SpringEvalExpressions.SYSTEM_ROLE));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void updateTenantMetadataPermissionsCheck() {
+    @Test
+    void updateTenantMetadataPermissionsCheck() {
         assertPermissions(() -> systemManagement.updateTenantMetadata(1L), List.of(SpPermission.TENANT_CONFIGURATION));
     }
 }

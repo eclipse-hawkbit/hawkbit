@@ -27,35 +27,40 @@ class TargetTypeManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getByKeyPermissionsCheck() {
+    @Test
+    void getByKeyPermissionsCheck() {
         assertPermissions(() -> targetTypeManagement.getByKey("key"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getByNamePermissionsCheck() {
+    @Test
+    void getByNamePermissionsCheck() {
         assertPermissions(() -> targetTypeManagement.getByName("name"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void countPermissionsCheck() {
+    @Test
+    void countPermissionsCheck() {
         assertPermissions(() -> targetTypeManagement.count(), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void countByNamePermissionsCheck() {
+    @Test
+    void countByNamePermissionsCheck() {
         assertPermissions(() -> targetTypeManagement.countByName("name"), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void createPermissionsCheck() {
+    @Test
+    void createPermissionsCheck() {
         assertPermissions(() -> targetTypeManagement.create(entityFactory.targetType().create().name("name")),
                 List.of(SpPermission.CREATE_TARGET));
     }
@@ -63,7 +68,8 @@ class TargetTypeManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void createCollectionPermissionsCheck() {
+    @Test
+    void createCollectionPermissionsCheck() {
         assertPermissions(() -> targetTypeManagement.create(List.of(entityFactory.targetType().create().name("name"))),
                 List.of(SpPermission.CREATE_TARGET));
     }
@@ -71,7 +77,8 @@ class TargetTypeManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void deletePermissionsCheck() {
+    @Test
+    void deletePermissionsCheck() {
         assertPermissions(() -> {
             targetTypeManagement.delete(1L);
             return null;
@@ -81,49 +88,56 @@ class TargetTypeManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findAllPermissionsCheck() {
+    @Test
+    void findAllPermissionsCheck() {
         assertPermissions(() -> targetTypeManagement.findAll(PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByRsqlPermissionsCheck() {
+    @Test
+    void findByRsqlPermissionsCheck() {
         assertPermissions(() -> targetTypeManagement.findByRsql("name==tag", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void findByNamePermissionsCheck() {
+    @Test
+    void findByNamePermissionsCheck() {
         assertPermissions(() -> targetTypeManagement.findByName("name", PAGE), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getPermissionsCheck() {
+    @Test
+    void getPermissionsCheck() {
         assertPermissions(() -> targetTypeManagement.get(1L), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void getCollectionPermissionsCheck() {
+    @Test
+    void getCollectionPermissionsCheck() {
         assertPermissions(() -> targetTypeManagement.get(List.of(1L)), List.of(SpPermission.READ_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void updatePermissionsCheck() {
+    @Test
+    void updatePermissionsCheck() {
         assertPermissions(() -> targetTypeManagement.update(entityFactory.targetType().update(1L)), List.of(SpPermission.UPDATE_TARGET));
     }
 
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    void assignCompatibleDistributionSetTypesPermissionsCheck() {
+    @Test
+    void assignCompatibleDistributionSetTypesPermissionsCheck() {
         assertPermissions(() -> targetTypeManagement.assignCompatibleDistributionSetTypes(1L, List.of(1L)),
                 List.of(SpPermission.UPDATE_TARGET, SpPermission.READ_REPOSITORY));
     }
@@ -131,7 +145,8 @@ class TargetTypeManagementSecurityTest extends AbstractJpaIntegrationTest {
     /**
      * Tests ManagementAPI PreAuthorized method with correct and insufficient permissions.
      */
-    @Test    @WithUser(principal = "user", authorities = { SpPermission.UPDATE_TARGET, SpPermission.READ_REPOSITORY })
+    @Test
+    @WithUser(principal = "user", authorities = { SpPermission.UPDATE_TARGET, SpPermission.READ_REPOSITORY })
     void unassignDistributionSetTypePermissionsCheck() {
         assertPermissions(() -> targetTypeManagement.unassignDistributionSetType(1L, 1L),
                 List.of(SpPermission.UPDATE_TARGET, SpPermission.READ_REPOSITORY));

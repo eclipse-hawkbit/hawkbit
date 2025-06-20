@@ -41,7 +41,8 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that multiple targets with same controller-ID can be created for different tenants.
      */
-    @Test    void createMultipleTargetsWithSameIdForDifferentTenant() throws Exception {
+    @Test
+    void createMultipleTargetsWithSameIdForDifferentTenant() throws Exception {
         // known controller ID for overall tenants same
         final String knownControllerId = "controllerId";
 
@@ -65,7 +66,8 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that targets created by a tenant are not visible by another tenant.
      */
-    @Test    @WithUser(tenantId = "mytenant", allSpPermissions = true)
+    @Test
+    @WithUser(tenantId = "mytenant", allSpPermissions = true)
     void queryTargetFromDifferentTenantIsNotVisible() throws Exception {
         // create target for another tenant
         final String anotherTenant = "anotherTenant";
@@ -86,7 +88,8 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that tenant with proper permissions can read and delete other tenants.
      */
-    @Test    @WithUser(tenantId = "mytenant", allSpPermissions = true)
+    @Test
+    @WithUser(tenantId = "mytenant", allSpPermissions = true)
     void deleteAnotherTenantPossible() throws Exception {
         // create target for another tenant
         final String anotherTenant = "anotherTenant";
@@ -103,7 +106,8 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that tenant metadata is retrieved for the current tenant.
      */
-    @Test    @WithUser(tenantId = "mytenant", autoCreateTenant = false, allSpPermissions = true)
+    @Test
+    @WithUser(tenantId = "mytenant", autoCreateTenant = false, allSpPermissions = true)
     void getTenanatMetdata() throws Exception {
 
         // logged in tenant mytenant - check if tenant default data is
@@ -124,7 +128,8 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that targets created from a different tenant cannot be deleted from other tenants
      */
-    @Test    @WithUser(tenantId = "mytenant", allSpPermissions = true)
+    @Test
+    @WithUser(tenantId = "mytenant", allSpPermissions = true)
     void deleteTargetFromOtherTenantIsNotPossible() throws Exception {
         // create target for another tenant
         final String anotherTenant = "anotherTenant";
@@ -151,7 +156,8 @@ class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
     /**
      * Ensures that multiple distribution sets with same name and version can be created for different tenants.
      */
-    @Test    void createMultipleDistributionSetsWithSameNameForDifferentTenants() throws Exception {
+    @Test
+    void createMultipleDistributionSetsWithSameNameForDifferentTenants() throws Exception {
 
         // known tenant names
         final String tenant = "aTenant";
